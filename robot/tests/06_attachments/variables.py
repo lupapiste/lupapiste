@@ -85,6 +85,11 @@ PDF_TESTFILE_DESCRIPTION = "attachment-pdf-foo"
 PDF_TESTFILE_NAME = 'robotframework-testfile-06_attachments.pdf'
 PDF_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), PDF_TESTFILE_NAME)
 
+XML_TESTFILE_NAME = 'robotframework-testfile-06_attachments.xml'
+XML_TESTFILE_CONTENT = '<?xml version="1.0" encoding="UTF-8"?><test>foo</test>'
+XML_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), XML_TESTFILE_NAME)
+
 createFile(TXT_TESTFILE_PATH, TXT_TESTFILE_CONTENT)
 createFile(PNG_TESTFILE_PATH, PNG_TESTFILE_CONTENT)
 createFile(PDF_TESTFILE_PATH, PDF_TESTFILE_CONTENT)
+createFile(XML_TESTFILE_PATH, XML_TESTFILE_CONTENT)

@@ -189,8 +189,12 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma" "hakijan-asiamies"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
-(def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija" "hakijan-asiamies"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
+(def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
+(def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
+
+(def- optional-rakval-schemas #{"hakijan-asiamies"})
+
+(def- optional-mini-rakval-schemas #{"paasuunnittelija" "hakijan-asiamies"})
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 
@@ -199,6 +203,8 @@
 (def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
 (def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
+
+(def- optional-ymparistolupa-schemas #{"ymp-maksaja"})
 
 (def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
@@ -340,6 +346,7 @@
                                   :permit-type permit/YI
                                   :applicant-doc-schema applicant-doc-schema-name-ilmoittaja
                                   :required ["ymp-ilm-kesto"]
+                                  :optional optional-ymparistolupa-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -378,6 +385,7 @@
                                                                       :permit-type permit/YM
                                                                       :applicant-doc-schema applicant-doc-schema-name-hakija
                                                                       :required ["kiinteisto"]
+                                                                      :optional optional-ymparistolupa-schemas
                                                                       :attachments []
                                                                       :add-operation-allowed false
                                                                       :min-outgoing-link-permits 0
@@ -444,6 +452,7 @@
                                                [["huoneistot" "0" "huoneistonumero"] "000"]
                                                [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -455,6 +464,7 @@
                                                [["huoneistot" "0" "huoneistonumero"] "000"]
                                                [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -466,6 +476,7 @@
                                                [["huoneistot" "0" "huoneistonumero"] "000"]
                                                [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -475,6 +486,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["kaytto" "kayttotarkoitus"] usages/vapaa-ajan-asuinrakennus]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -484,6 +496,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["kaytto" "kayttotarkoitus"] usages/talousrakennus]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -502,6 +515,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -512,6 +526,7 @@
                                  :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
                                                [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -521,6 +536,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -529,6 +545,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -537,6 +554,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -545,6 +563,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -553,6 +572,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -561,6 +581,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -579,6 +600,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/perustusten-korjaus]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -588,6 +610,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_muutos_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -597,6 +620,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_muutos_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -606,6 +630,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -615,6 +640,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -624,6 +650,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -633,6 +660,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -642,6 +670,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -651,6 +680,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -660,6 +690,7 @@
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -669,6 +700,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -677,6 +709,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -685,6 +718,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -693,6 +727,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -701,6 +736,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -709,6 +745,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -717,6 +754,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments kaupunkikuva_toimenpide_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -726,6 +764,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
+                                 :optional optional-rakval-schemas
                                  :attachments [:muut [:selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta
                                                       :selvitys_purettavasta_rakennusmateriaalista_ja_hyvaksikaytosta]]
                                  :add-operation-allowed true
@@ -736,7 +775,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -745,7 +784,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -754,7 +793,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -763,7 +802,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -772,7 +811,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -781,7 +820,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -790,7 +829,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -799,7 +838,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -816,7 +855,8 @@
                                  :max-outgoing-link-permits 1
                                  :max-incoming-link-permits 0
                                  :allowed-link-permit-types #{permit/R permit/P}
-                                 :asianhallinta false}
+                                 :asianhallinta false
+                                 :hidden true}
    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R-TJ
@@ -862,7 +902,7 @@
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required mini-rakval-schemas
-                                 :optional #{"paasuunnittelija"}
+                                 :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
@@ -1039,6 +1079,7 @@
    (sc/optional-key :allowed-link-permit-types) #{sc/Str}
 
    :asianhallinta sc/Bool
+   (sc/optional-key :hidden) sc/Bool
    })
 
 ;; Validate operations
@@ -1110,6 +1151,7 @@
 
 (def operation-names-by-permit-type
   (->> operations
+       (remove (comp :hidden val))
        (group-by (comp :permit-type val))
        (map (juxt (comp keyword key) (comp keys val)))
        (into {})))

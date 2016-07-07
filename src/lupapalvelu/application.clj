@@ -71,7 +71,7 @@
   (when (> (required-link-permits application) (count-link-permits application))
     (fail :error.permit-must-have-link-permit)))
 
-(defn authorized-to-remove-link-permit [{user :user} application]
+(defn authorized-to-remove-link-permit [{user :user application :application}]
   (when (and (not (usr/authority? user))
              (>= (required-link-permits application) (count-link-permits application)))
     unauthorized))
@@ -79,23 +79,23 @@
 (defn validate-only-authority-before-verdict-given
   "Validator: Restrict applicant access before the application verdict
   is given. To be used in commands' :pre-checks vector"
-  [{user :user} {state :state}]
-  (when-not (or (states/post-verdict-states (keyword state))
+  [{user :user app :application}]
+  (when-not (or (states/post-verdict-states (keyword (:state app)))
                 (usr/authority? user))
     unauthorized))
 
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
-  [{user :user} {state :state}]
-  (when (and (= :draft (keyword state)) (usr/authority? user))
+  [{user :user application :application}]
+  (when (and (= :draft (keyword (:state application))) (usr/authority? user))
     unauthorized))
 
-(defn validate-has-subtypes [_ application]
+(defn validate-has-subtypes [{application :application}]
   (when (empty? (resolve-valid-subtypes application))
     (fail :error.permit-has-no-subtypes)))
 
-(defn pre-check-permit-subtype [{data :data} application]
+(defn pre-check-permit-subtype [{data :data application :application}]
   (when-let [subtype (:permitSubtype data)]
     (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
       (fail :error.permit-has-no-such-subtype))))
@@ -264,10 +264,10 @@
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
-                            (filter #(or (get-in % [:metadata :operation-specific]) (not (att-type/contains? existing-types %)))))
-        ops            (map #(when (get-in % [:metadata :operation-specific]) operation) types)
+                            (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
+        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :group-type group)) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
+    (map (partial att/make-attachment created target true false false applicationState) groups types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -283,8 +283,8 @@
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
-        default-schema-datas (util/assoc-when {}
-                                              op-schema-name (:schema-data op-info))
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
+                                                   op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema]
                {:pre [(:info schema)]}
@@ -500,7 +500,7 @@
 
 (defn valid-new-state
   "Pre-check for change-application-state command."
-  [{{new-state :state} :data} application]
+  [{{new-state :state} :data application :application}]
   (when-not (or (nil? new-state)
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))

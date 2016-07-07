@@ -4,7 +4,7 @@
             [noir.request :as request]
             [noir.response :as resp]
             [noir.core :refer [defpage]]
-            [slingshot.slingshot :refer [throw+]]
+            [slingshot.slingshot :refer [throw+ try+]]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.util :refer [future*]]
@@ -605,37 +605,39 @@
 
 (defquery add-user-attachment-allowed
   {:description "Dummy command for UI logic: returns falsey if current user is not allowed to add \"user attachments\"."
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (add-user-attachment-allowed? (:user command))
                     unauthorized))]
    :user-roles #{:anonymous}})
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename size]}] :files attachmentType :attachmentType}
-  (let [user              (usr/current-user (request/ring-request))
-        filename          (mime/sanitize-filename filename)
-        attachment-type   (att-type/parse-attachment-type attachmentType)
-        attachment-id     (mongo/create-id)
-        content-type      (mime/mime-type filename)
-        file-info         {:attachment-type  attachment-type
-                           :attachment-id    attachment-id
-                           :file-name        filename
-                           :content-type     content-type
-                           :size             size
-                           :created          (now)}]
+  (try+
+    (let [user              (usr/current-user (request/ring-request))
+          filename          (mime/sanitize-filename filename)
+          attachment-type   (att-type/parse-attachment-type attachmentType)
+          attachment-id     (mongo/create-id)
+          content-type      (mime/mime-type filename)
+          file-info         {:attachment-type  attachment-type
+                             :attachment-id    attachment-id
+                             :file-name        filename
+                             :content-type     content-type
+                             :size             size
+                             :created          (now)}]
 
-    (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
+      (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
-    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
-    (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
+      (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
+      (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
+      (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
-    (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
-    (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-
-    (->> (assoc file-info :ok true)
-      (resp/json)
-      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
-      (resp/status 200))))
+      (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
+      (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
+      (resp/json (assoc file-info :ok true)))
+    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (resp/json (fail text)))
+    (catch Exception e
+      (error e "exception while uploading user attachment" (class e) (str e))
+      (resp/json (fail :error.unknown)))))
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
@@ -666,7 +668,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     (states/all-application-states-but states/terminal-states)
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
                     unauthorized))]}
   [{application :application user :user}]
@@ -707,30 +709,29 @@
 (defquery enable-foreman-search
   {:user-roles #{:authority}
    :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
-   :pre-checks [(fn [command application]
-                  (let [org-ids (usr/organization-ids (:user command))]
+   :pre-checks [(fn [{:keys [user application]}]
+                  (let [org-ids (usr/organization-ids user)]
                     (if-not application
                       (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                         unauthorized)
-                      unauthorized))
-                  )]}
+                      unauthorized)))]}
   [_])
 
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [command {:keys [organization]}]
+   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
                   (let [org-set (if organization
                                   #{organization}
-                                  (usr/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
+                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
 
 (defn calendars-enabled-api-pre-check
-  [rolez command {:keys [organization]}]
+  [rolez {user :user {:keys [organization]} :application}]
   (let [org-set (if organization
                   #{organization}
-                  (usr/organization-ids-by-roles (:user command) rolez))]
+                  (usr/organization-ids-by-roles user rolez))]
     (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
       unauthorized)))
 

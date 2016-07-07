@@ -449,35 +449,30 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked] :as data}
+  {:keys [applicationId attachmentId attachmentType group operationId text upload typeSelector targetId targetType locked] :as data}
   (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s" data upload attachmentType operationId typeSelector locked)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
-        operation (if-not (clojure.string/blank? operationId)
-                    {:id operationId}
-                    nil)
-        upload-data (assoc upload
-                      :id applicationId
-                      :attachmentId attachmentId
-                      :target target
-                      :locked (java.lang.Boolean/parseBoolean locked)
-                      :text text
-                      :op operation)
         attachment-type (att-type/parse-attachment-type attachmentType)
-        upload-data (if attachment-type
-                      (assoc upload-data :attachmentType attachment-type)
-                      upload-data)
+        upload-data (-> upload
+                        (assoc :id applicationId
+                               :attachmentId attachmentId
+                               :target target
+                               :locked (java.lang.Boolean/parseBoolean locked)
+                               :text text
+                               :group (util/assoc-when-pred group ss/not-blank? :id operationId))
+                        (util/assoc-when :attachmentType attachment-type))
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/lp-static/html/upload-ok.html")
       (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.115.html"
-                                        (-> (:params request)
-                                          (dissoc :upload)
-                                          (dissoc ring.middleware.anti-forgery/token-key)
-                                          (assoc  :errorMessage (:text result)))))))))
+                                           (-> (:params request)
+                                               (dissoc :upload)
+                                               (dissoc ring.middleware.anti-forgery/token-key)
+                                               (assoc  :errorMessage (:text result)))))))))
 
 (defn tempfile-cleanup
   "Middleware for cleaning up tempfile after each request.

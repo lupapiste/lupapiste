@@ -7,19 +7,19 @@
 
 (facts create-doc-validator
   ; type is "YA" and at least one doc is "party" -> fail
-  (create-doc-validator nil {:permitType "YA"
-                             :documents [{:schema-info {:type "festivity"}}
-                                         {:schema-info {:type "party"}}
-                                         {:schema-info {:type "celebration"}}]}) => {:ok false, :text "error.create-doc-not-allowed"}
+  (create-doc-validator {:application {:permitType "YA"
+                                       :documents [{:schema-info {:type "festivity"}}
+                                                   {:schema-info {:type "party"}}
+                                                   {:schema-info {:type "celebration"}}]}}) => {:ok false, :text "error.create-doc-not-allowed"}
   ; none of the docs are "party"
-  (create-doc-validator nil {:permitType "YA"
-                             :documents [{:schema-info {:type "festivity"}}
-                                         {:schema-info {:type "celebration"}}]}) => nil
+  (create-doc-validator {:application {:permitType "YA"
+                                       :documents [{:schema-info {:type "festivity"}}
+                                                   {:schema-info {:type "celebration"}}]}}) => nil
   ; type is not "YA"
-  (create-doc-validator nil {:permitType "R"
-                             :documents [{:schema-info {:type "festivity"}}
-                                         {:schema-info {:type "party"}}
-                                         {:schema-info {:type "celebration"}}]}) => nil)
+  (create-doc-validator {:application {:permitType "R"
+                                       :documents [{:schema-info {:type "festivity"}}
+                                                   {:schema-info {:type "party"}}
+                                                   {:schema-info {:type "celebration"}}]}}) => nil)
 
 (facts "deny-remove-of-last-document"
   (deny-remove-of-last-document nil nil) => falsey

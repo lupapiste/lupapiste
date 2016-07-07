@@ -211,8 +211,8 @@
 ;; historical tests, dragons be here...
 ;;
 
-(defn upload-user-attachment [apikey attachment-type expect-to-succeed]
-  (let [filename    "dev-resources/test-attachment.txt"
+(defn upload-user-attachment [apikey attachment-type expect-to-succeed & [filename]]
+  (let [filename    (or filename "dev-resources/test-attachment.txt")
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/user-attachment")
         resp        (http-post uri
@@ -225,7 +225,6 @@
         resp => http200?
         body => ok?)
       (facts "should fail"
-        (:status resp) =not=> 200
         body => fail?))
     body))
 
@@ -270,6 +269,12 @@
 
     (command pena "remove-user-attachment" :attachment-id attachment-id) => ok?
     (:attachments (query pena "user-attachments")) => empty?))
+
+(facts* "upload errors"
+  (fact "illegal attachment type"
+    (upload-user-attachment pena "foo" false) => (partial expected-failure? :error.illegal-attachment-type))
+  (fact "illegal mime"
+    (upload-user-attachment pena "osapuolet.tutkintotodistus" false  "dev-resources/krysp/verdict-r.xml") => (partial expected-failure? :error.file-upload.illegal-file-type)))
 
 ;;
 ;; ==============================================================================

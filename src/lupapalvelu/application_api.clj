@@ -97,7 +97,9 @@
         repeating-party-schemas (app/filter-party-docs schema-version original-schema-names true)
         current-schema-name-set (->> documents (filter app/party-document?) (map (comp name :name :schema-info)) set)
         missing-schema-names    (remove current-schema-name-set original-party-schemas)]
-    (ok :partyDocumentNames (conj (concat missing-schema-names repeating-party-schemas) (op/get-applicant-doc-schema-name application)))))
+    (ok :partyDocumentNames (-> (concat missing-schema-names repeating-party-schemas)
+                                (conj (op/get-applicant-doc-schema-name application))
+                                distinct))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -235,7 +237,7 @@
     (or
       (foreman/validate-application application)
       (app/validate-link-permits application)
-      (when-not (company/cannot-submit command application) (fail :company.user.cannot.submit))
+      (when-not (company/cannot-submit command) (fail :company.user.cannot.submit))
       (do-submit command application created))))
 
 (defcommand refresh-ktj
@@ -354,7 +356,7 @@
         (error "KTJ data was not updated:" (.getMessage e))))
     (ok :id (:id created-application))))
 
-(defn- add-operation-allowed? [_ application]
+(defn- add-operation-allowed? [{application :application}]
   (let [op (-> application :primaryOperation :name keyword)
         permit-subtype (keyword (:permitSubtype application))]
     (when-not (and (or (nil? op) (:add-operation-allowed (op/operations op)))
@@ -372,7 +374,8 @@
   (let [op (app/make-op operation created)
         new-docs (app/make-documents nil created op application)
         organization (org/get-organization organization)
-        new-attachments (app/make-attachments created op organization app-state tos-function :existing-attachments-types (set (map :type attachments)))]
+        existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
+        new-attachments (app/make-attachments created op organization app-state tos-function :existing-attachments-types existing-attachment-types)]
     (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
                                         :attachments {$each new-attachments}}
@@ -422,9 +425,9 @@
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
 
-(defn authority-if-post-verdict-state [{user :user} {state :state}]
+(defn authority-if-post-verdict-state [{user :user app :application}]
   (when-not (or (usr/authority? user)
-                (states/pre-verdict-states (keyword state)))
+                (states/pre-verdict-states (keyword (:state app))))
     (fail :error.unauthorized)))
 
 (defcommand change-location
@@ -483,7 +486,7 @@
            :parameters  [:id]
            :user-roles  #{:applicant :authority}
            :states      states/pre-sent-application-states
-           :pre-checks  [(fn [_ application]
+           :pre-checks  [(fn [{application :application}]
                            (when-not (app/validate-link-permits application)
                              (fail :error.link-permit-not-required)))]})
 
@@ -521,7 +524,7 @@
         final-results (map #(select-keys % [:id :text]) organized-results)]
     (ok :app-links final-results)))
 
-(defn- validate-linking [command app]
+(defn- validate-linking [{app :application :as command}]
   (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
         {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
         max-outgoing-link-permits (op/get-primary-operation-metadata app :max-outgoing-link-permits)
@@ -634,7 +637,7 @@
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 
-(defn- validate-not-jatkolupa-app [_ application]
+(defn- validate-not-jatkolupa-app [{:keys [application]}]
   (when (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
@@ -675,7 +678,7 @@
     (ok :id (:id continuation-app))))
 
 
-(defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
+(defn- validate-new-applications-enabled [{{:keys [permitType municipality] :as application} :application}]
   (when application
     (let [scope (org/resolve-organization-scope municipality permitType)]
       (when-not (:new-application-enabled scope)
@@ -701,7 +704,7 @@
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
-(defn- validate-organization-backend-urls [_ {org-id :organization}]
+(defn- validate-organization-backend-urls [{{org-id :organization} :application}]
   (when org-id
     (let [org (org/get-organization org-id)]
       (if-let [conf (:vendor-backend-redirect org)]
@@ -721,7 +724,7 @@
       (util/select-values [:vendor-backend-url-for-backend-id
                            :vendor-backend-url-for-lp-id])))
 
-(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+(defn- correct-urls-configured [{{:keys [verdicts organization] :as application} :application}]
   (when application
     (let [vendor-backend-id          (get-vendor-backend-id verdicts)
           [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)

@@ -477,5 +477,7 @@
 "error.action-allowed-only-for-authority" "sv" "Funktionen får endast användas av myndighetsanvändare."
 "error.not-allowed-to-remove-document" "fi" "Dokumentin poisto ei ole sallittu."
 "error.not-allowed-to-remove-document" "sv" "Radering av dokument är ej tillåtet."
-"error.illegal-attachment-operation" "fi" "Toimenpiteen tallentaminen epäonnistui"
+"error.illegal-attachment-operation" "fi" "Virheellinen toimenpide"
 "error.illegal-attachment-operation" "sv" ""
+"error.illegal-attachment-group-type" "fi" "Virheellinen ryhmittelytyyppi"
+"error.illegal-attachment-group-type" "sv" ""

@@ -20,7 +20,7 @@
                 (= (:id company) requested-company))
     unauthorized))
 
-(defn validate-user-is-admin-or-company-admin [{user :user} _]
+(defn validate-user-is-admin-or-company-admin [{user :user}]
   (when-not (or (= (:role user) "admin")
                 (= (get-in user [:company :role]) "admin"))
     unauthorized))
@@ -77,7 +77,7 @@
   [_]
   (c/delete-user! user-id))
 
-(defn- user-limit-not-exceeded [command _]
+(defn- user-limit-not-exceeded [command]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
         company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))

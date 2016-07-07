@@ -6,13 +6,13 @@
 
 (fact "validators"
   (fact "is-not"
-    ((validate-permit-type-is-not YA) irrelevant {:permitType "YA"}) => (contains {:ok false :text "error.invalid-permit-type"})
-    ((validate-permit-type-is-not R)  irrelevant {:permitType "YA"}) => nil
-    ((validate-permit-type-is-not YA) irrelevant nil)                => (contains {:ok false :text "error.invalid-application-parameter"}))
+    ((validate-permit-type-is-not YA) {:application {:permitType "YA"}}) => (contains {:ok false :text "error.invalid-permit-type"})
+    ((validate-permit-type-is-not R)  {:application {:permitType "YA"}}) => nil
+    ((validate-permit-type-is-not YA) nil)                               => (contains {:ok false :text "error.invalid-application-parameter"}))
   (fact "is"
-    ((validate-permit-type-is R)  irrelevant {:permitType "YA"}) => (contains {:ok false :text "error.invalid-permit-type"})
-    ((validate-permit-type-is YA) irrelevant {:permitType "YA"}) => nil
-    ((validate-permit-type-is YA) irrelevant nil)                => (contains {:ok false :text "error.invalid-application-parameter"})))
+    ((validate-permit-type-is R)  {:application {:permitType "YA"}}) => (contains {:ok false :text "error.invalid-permit-type"})
+    ((validate-permit-type-is YA) {:application {:permitType "YA"}}) => nil
+    ((validate-permit-type-is YA) nil)                               => (contains {:ok false :text "error.invalid-application-parameter"})))
 
 (fact "permit-type"
   (permit-type {:permitType "R"}) => "R"

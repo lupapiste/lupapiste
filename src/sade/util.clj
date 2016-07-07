@@ -341,9 +341,14 @@
 (defn boolean? [x] (instance? Boolean x))
 
 (defn assoc-when
-  "Assocs entries with not-empty-or-nil values into m."
+  "Assocs entries with falsey values into m."
   [m & kvs]
-  (apply merge m (filter (fn-> val not-empty-or-nil?) (apply hash-map kvs))))
+  (apply merge m (filter val (apply hash-map kvs))))
+
+(defn assoc-when-pred
+  "Assocs entries into m when pred returns truthy for value."
+  [m pred & kvs]
+  (apply merge m (filter (comp pred val) (apply hash-map kvs))))
 
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))

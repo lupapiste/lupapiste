@@ -69,8 +69,8 @@ Add post verdict attachment
 
   Open tab  attachments
   Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
 
   Page should not contain  Siirrä liitteet taustajärjestelmään
 
@@ -111,5 +111,3 @@ Permit properties should be visible in dialog
   :FOR  ${property}  IN  @{PERMIT_PROPERTIES}
   \  Element should contain  xpath=//div[@id='modal-dialog-content-component']//p[@class='dialog-desc']  ${property}
   Confirm notification dialog
-
-

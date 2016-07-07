@@ -362,7 +362,7 @@
   {:parameters [date]
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial number-parameters [:date])]
-   :pre-checks [(fn [{:keys [user]} _]
+   :pre-checks [(fn [{:keys [user]}]
                   (when-not (o/some-organization-has-archive-enabled? [(user/authority-admins-organization-id user)])
                     unauthorized))]}
   [{user :user}]

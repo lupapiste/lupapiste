@@ -20,7 +20,7 @@
             [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
-(defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data} {tasks :tasks}]
+(defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data {:keys [tasks]} :application}]
   (when (and (not (ss/blank? foreman-app-id))
              (->> (filter (comp #{:task-vaadittu-tyonjohtaja} keyword :name :schema-info) tasks)
                   (remove (comp #{task-id} :id))

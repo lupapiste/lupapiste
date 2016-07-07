@@ -36,7 +36,7 @@ Mikko can't approve application
 Mikko adds an attachment
   Open tab  attachments
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
 
 Mikko decides to submit application
   Submit application

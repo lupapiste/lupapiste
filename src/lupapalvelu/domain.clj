@@ -146,7 +146,7 @@
 (defn validate-owner-or-write-access
   "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
-  [command application]
+  [{:keys [application] :as command}]
   (when-not (or
               (owner-or-write-access? application (-> command :user :id))
               (company-access? application (-> command :user :company :id)))
@@ -156,7 +156,7 @@
 ;; assignee
 ;;
 
-(defn assigned? [{authority :authority :as application}]
+(defn assigned? [{authority :authority}]
   {:pre [(map? authority)]}
   (-> authority :id nil? not))
 

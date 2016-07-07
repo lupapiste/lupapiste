@@ -314,13 +314,20 @@
 (defn query-organization-map-server
   [org-id params headers]
   (when-let [m (-> org-id get-organization :map-layers :server)]
-    (let [{:keys [url username password crypto-iv]} m]
-      (http/get url
-                (merge {:query-params params}
-                       (when-not (ss/blank? crypto-iv)
-                         {:basic-auth [username (decode-credentials password crypto-iv)]})
-                       {:headers (select-keys headers [:accept :accept-encoding])
-                        :as :stream})))))
+    (let [{:keys [url username password crypto-iv]} m
+          base-request {:query-params params
+                        :throw-exceptions false
+                        :headers (select-keys headers [:accept :accept-encoding])
+                        :as :stream}
+          request (if-not (ss/blank? crypto-iv)
+                    (assoc base-request :basic-auth [username (decode-credentials password crypto-iv)])
+                    base-request)
+          response (http/get url request)]
+      (if (= 200 (:status response))
+        response
+        (do
+          (debug "organization" org-id "wms server" url "returned" (:status response))
+          response)))))
 
 (defn organization-map-layers-data [org-id]
   (when-let [{:keys [server layers]} (-> org-id get-organization :map-layers)]

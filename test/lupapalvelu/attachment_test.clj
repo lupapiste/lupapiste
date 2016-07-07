@@ -238,7 +238,7 @@
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
-                                                           :archivabilityError (apply sc/enum archivability-errors)
+                                                           :archivabilityError (apply sc/enum nil archivability-errors)
                                                            :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
                                                 :content-type sc/Str
@@ -248,19 +248,19 @@
                                                 :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment options)]
-                  (and (not (nil? (get-in version [:version :minor])))
-                       (not (nil? (get-in version [:version :major])))
-                       (= (:fileId version)         file-id)
-                       (= (:originalFileId version) file-id)
-                       (= (:created version) (:now options))
-                       (= (:user version) (:user options))
-                       (= (:filename version) (:filename options))
-                       (= (:contentType version) (:content-type options))
-                       (= (:size version) (:size options))
-                       (= (:stamped version) (:stamped options))
-                       (= (:archivable version) (:archivable options))
-                       (= (:archivabilityError version) (:archivabilityError options))
-                       (= (:missing-fonts version) (:missing-fonts options))))))
+                  (is (not (nil? (get-in version [:version :minor]))))
+                  (is (not (nil? (get-in version [:version :major]))))
+                  (is (= (:fileId version)         file-id))
+                  (is (= (:originalFileId version) file-id))
+                  (is (= (:created version) (:now options)))
+                  (is (= (:user version) (:user options)))
+                  (is (= (:filename version) (:filename options)))
+                  (is (= (:contentType version) (:content-type options)))
+                  (is (= (:size version) (:size options)))
+                  (is (or (not (:stamped options)) (:stamped version)))
+                  (is (or (not (:archivable options)) (:archivable version)))
+                  (is (= (:archivabilityError version) (:archivabilityError options)))
+                  (is (= (:missing-fonts version) (:missing-fonts options))))))
 
 (defspec make-version-update-existing 20
   (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))
@@ -419,45 +419,60 @@
              att2 (assoc (ssg/generate Attachment) :ramLink (:id att1))
              att3 (assoc (ssg/generate Attachment) :ramLink (:id att2))]
          (fact "ram-status-ok"
-               (ram-status-ok {:data {:attachmentId (:id att1)}}
-                              {:attachments [att1 att2]}) => nil?
-               (ram-status-ok {:data {:attachmentId (:id att2)}}
-                              {:attachments [att1 (dissoc att2 :state)]}) => (contains (ram-fail :error.ram-not-approved))
-               (ram-status-ok {:data {:attachmentId (:id att2)}}
-                              {:attachments [att1 (assoc att2 :state :ok)]}) => nil?)
+               (ram-status-ok {:data {:attachmentId (:id att1)}
+                               :application {:attachments [att1 att2]}}
+                              ) => nil?
+               (ram-status-ok {:data {:attachmentId (:id att2)}
+                               :application {:attachments [att1 (dissoc att2 :state)]}}
+                              ) => (contains (ram-fail :error.ram-not-approved))
+               (ram-status-ok {:data {:attachmentId (:id att2)}
+                               :application {:attachments [att1 (assoc att2 :state :ok)]}}
+                              ) => nil?)
 
          (fact "ram-status-not-ok"
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}}
-                                  {:attachments [att1 att2]}) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}}
-                                  {:attachments [(assoc att1 :state :ok) att2]}) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}}
-                                  {:attachments [att1 (dissoc att2 :state)]}) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}}
-                                  {:attachments [att1 (assoc att2 :state :ok)]}) => (contains (ram-fail :error.ram-approved)))
+               (ram-status-not-ok {:data {:attachmentId (:id att1)}
+                                   :application {:attachments [att1 att2]}}
+                                  ) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att1)}
+                                   :application {:attachments [(assoc att1 :state :ok) att2]}}
+                                  ) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att2)}
+                                   :application {:attachments [att1 (dissoc att2 :state)]}}
+                                  ) => nil?
+               (ram-status-not-ok {:data {:attachmentId (:id att2)}
+                                   :application {:attachments [att1 (assoc att2 :state :ok)]}}
+                                  ) => (contains (ram-fail :error.ram-approved)))
 
          (fact "ram-not-root-attachment"
                (ram-not-root-attachment {:user {:role :authority}
-                                         :data {:attachmentId (:id att1)}}
-                                        {:attachments [att1]}) => nil?
+                                         :data {:attachmentId (:id att1)}
+                                         :application {:attachments [att1]}}
+                                        ) => nil?
                (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att1)}}
-                                         {:attachments [att1]}) => nil?
+                                          :data {:attachmentId (:id att1)}
+                                          :application {:attachments [att1]}}
+                                         ) => nil?
                (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}}
-                                         {:attachments [att1]}) => nil?
+                                          :data {:attachmentId (:id att2)}
+                                          :application {:attachments [att1]}}
+                                         ) => nil?
                (ram-not-root-attachment {:user {:role :authority}
-                                         :data {:attachmentId (:id att2)}}
-                                        {:attachments [att1]}) => nil?
+                                         :data {:attachmentId (:id att2)}
+                                         :application {:attachments [att1]}}
+                                        ) => nil?
                (ram-not-root-attachment  {:user {:role :authority}
-                                          :data {:attachmentId (:id att1)}}
-                                         {:attachments [att1 att2]}) => nil?
+                                          :data {:attachmentId (:id att1)}
+                                          :application {:attachments [att1 att2]}}
+                                         ) => nil?
                (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att1)}}
-                                         {:attachments [att1 att2]})=> (ram-fail :error.ram-cannot-delete-root)
+                                          :data {:attachmentId (:id att1)}
+                                          :application {:attachments [att1 att2]}}
+                                         )=> (ram-fail :error.ram-cannot-delete-root)
                (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}}
-                                         {:attachments [att1 att2]})= nil?
+                                          :data {:attachmentId (:id att2)}
+                                          :application {:attachments [att1 att2]}}
+                                         )= nil?
                (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}}
-                                         {:attachments [att1 att2 att3]}))))
+                                          :data {:attachmentId (:id att2)}
+                                          :application {:attachments [att1 att2 att3]}}
+                                         ))))

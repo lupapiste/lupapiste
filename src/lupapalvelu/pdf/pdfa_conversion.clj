@@ -109,20 +109,22 @@
                 (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))
 
-(defn- get-pdf-page-count [input-file]
+(defn- get-pdf-page-count [input-file-path]
   (try
-    (with-open [reader (PdfReader. ^String input-file)]
+    (with-open [reader (PdfReader. ^String input-file-path)]
       (.getNumberOfPages reader))
     (catch Exception e
       (error "Error occurred when trying to read page count from PDF file" e)
       0)))
 
-(defn- store-converted-page-count [result count]
+(defn- store-converted-page-count [{:keys [already-valid-pdfa? pdfa? output-file]} original-file-path]
   (let [db-key (cond
-                 (:already-valid-pdfa? result) :copied-pages
-                 (:pdfa? result) :converted-pages
-                 :else :invalid-pages)]
-    (statistics/store-pdf-conversion-page-count db-key count)))
+                 already-valid-pdfa? :copied-pages
+                 pdfa? :converted-pages
+                 :else :invalid-pages)
+        file-path (if output-file (.getCanonicalPath output-file) original-file-path)]
+    (->> (get-pdf-page-count file-path)
+         (statistics/store-pdf-conversion-page-count db-key))))
 
 (defn- analyze-and-convert-to-pdf-a [pdf-file {:keys [target-file-path] :as opts}]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
@@ -136,8 +138,7 @@
                         (.getCanonicalPath pdf-file))
             pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
             conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (->> (get-pdf-page-count pdf-a-file-path)
-             (store-converted-page-count conversion-result))
+        (store-converted-page-count conversion-result file-path)
         (if (:pdfa? conversion-result)
           (if (pos? (-> conversion-result :output-file .length))
             (info "Converted to PDF/A " pdf-a-file-path)
@@ -166,16 +167,19 @@
   (analyze-and-convert-to-pdf-a pdf-file opts))
 
 (defn file-is-valid-pdfa? [pdf-file]
-  (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
-        file-path (if (instance? InputStream pdf-file)
-                    (do (io/copy pdf-file temp-file)
-                        (.getCanonicalPath temp-file))
-                    (.getCanonicalPath pdf-file))
-        output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
-        {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
-    (io/delete-file temp-file :silently)
-    (io/delete-file output-file :silently)
-    (= exit 0)))
+  (if (and (pdf2pdf-executable) (pdf2pdf-key))
+    (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
+          file-path (if (instance? InputStream pdf-file)
+                      (do (io/copy pdf-file temp-file)
+                          (.getCanonicalPath temp-file))
+                      (.getCanonicalPath pdf-file))
+          output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
+          {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
+      (io/delete-file temp-file :silently)
+      (io/delete-file output-file :silently)
+      (= exit 0))
+    (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
+        false)))
 
 (defn pdf-a-required? [organization-id]
   (organization/some-organization-has-archive-enabled? #{organization-id}))

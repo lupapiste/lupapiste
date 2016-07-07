@@ -5,7 +5,9 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]
+            [sade.strings :as s]))
 
 (apply-remote-minimal)
 
@@ -137,7 +139,7 @@
       (-> application :comments count) => 0)
 
     (fact "Has a verdict comment and an attachment comment"
-      (-> app-with-verdict :comments count) => 2
+      (-> app-with-verdict :comments count) => 3
       (-> app-with-verdict :comments first :target :type) => "attachment"
       (-> app-with-verdict :comments last :target :type) => "verdict")
 
@@ -147,8 +149,27 @@
        (:subject email) => "Lupapiste: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
        email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
 
-    (fact "There is one more attachments, see krysp/dev/verdict.xml"
-      (-> app-with-verdict :attachments count) => (inc attachment-count))
+    (fact "There are two new attachments, see krysp/dev/verdict.xml"
+      (-> app-with-verdict :attachments count) => (+ attachment-count 2))
+
+    (when (and (env/feature? :libreoffice) (not (s/blank? (env/value :libreoffice :host))))
+      (facts "RTF attachment gets converted to PDF with the original file stored as well"
+        (let [{:keys [latestVersion] :as attachment} (->> (:attachments app-with-verdict)
+                                                          (filter (fn [{:keys [latestVersion]}] (= (:filename latestVersion) "sample-rtf-verdict.pdf")))
+                                                          (first))]
+          (fact "attachment exists"
+            attachment => truthy)
+
+          (fact "latest version file is a PDF"
+            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:fileId latestVersion))]
+              (get headers "Content-Type") => "application/pdf"
+              (.contains body "PDF") => true)
+
+          (fact "original file exists and is a RTF"
+            (:originalFileId latestVersion) => truthy
+            (let [{:keys [headers body]} (raw sonja "download-attachment" :attachment-id (:originalFileId latestVersion))]
+              (get headers "Content-Type") => "application/rtf"
+              (.contains body "\\rtf1\\ansi") => true))))))
 
     (fact "Lupaehdot, see krysp/dev/verdict.xml"
       (-> application :tasks count) => 0
@@ -328,8 +349,13 @@
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         app-id (:id application)
         op1    (:primaryOperation application)
-        doc-count (count (:documents application))]
-    doc-count => 10
+        doc-count (count (:documents application))
+        expected-docs ["uusiRakennus" "hankkeen-kuvaus-rakennuslupa"
+                       "paatoksen-toimitus-rakval" "rakennuspaikka"
+                       "rakennusjatesuunnitelma"
+                       "hakija-r" "maksaja" "paasuunnittelija" "suunnittelija"]]
+
+    (map (comp :name :schema-info ) (:documents application)) => (contains expected-docs :in-any-order)
 
     (override-krysp-xml sipoo "753-R" :R [{:selector [:rakval:rakennuksenTiedot :rakval:rakennustunnus :rakval:muuTunnustieto :rakval:MuuTunnus :yht:tunnus] :value (:id op1)}])
 
@@ -347,7 +373,7 @@
         (get-in op-document [:data :valtakunnallinenNumero :value]) => "123456001M")
 
       (fact "Rakennusjateselvitys is a new document"
-        (count new-docs) => 11
+        (count new-docs) => (inc doc-count)
         (-> (last new-docs)
             :schema-info
             :name) => "rakennusjateselvitys")))

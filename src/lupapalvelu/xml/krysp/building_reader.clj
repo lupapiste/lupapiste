@@ -145,7 +145,7 @@
          (dissoc :buildingId :muutostyolaji :perusparannuskytkin)
          (util/dissoc-in [:huoneistot :0 :muutostapa]))
        (polished
-         (util/assoc-when
+         (util/assoc-when-pred
            {:muutostyolaji                          ...notimplemented...
             :valtakunnallinenNumero                 (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
             ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
@@ -184,6 +184,7 @@
             :varusteet                              (-> (cr/all-of rakennus :varusteet)
                                                         (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
                                                         (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
+           util/not-empty-or-nil?
 
            :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
            :huoneistot (->> (select rakennus [:valmisHuoneisto])

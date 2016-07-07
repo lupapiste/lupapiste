@@ -407,7 +407,7 @@
                            (->function)
                            (cr/cleanup)
                            (filter seq))]
-        (util/assoc-when verdict-model :paatokset verdicts)))
+        (util/assoc-when-pred verdict-model util/not-empty-or-nil? :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)))
 
 ;; Outliers (KT) do not have kuntalupatunnus

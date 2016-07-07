@@ -67,16 +67,14 @@
       transfer
       (assoc transfer :attachments (map :id attachments)))))
 
-(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
+(defn- do-approve [application created id lang do-rest-fn user]
   (let [organization (organization/get-organization (:organization application))]
     (if (organization/krysp-integration? organization (permit/permit-type application))
       (or
         (application/validate-link-permits application)
         (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-              sent-file-ids   (if jatkoaika-app?
-                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                                (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
+              sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
+                                (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
               attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
           (do-rest-fn attachments-updates)))
       ;; Integration details not defined for the organization -> let the approve command pass
@@ -123,10 +121,10 @@
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application created id lang jatkoaika-app? do-update user)))
+    (do-approve application created id lang do-update user)))
 
 (defn- application-already-exported [type]
-  (fn [_ application]
+  (fn [{application :application}]
     (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
       (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
             filtered-transfers (filter (comp export-ops keyword :type) (:transfers application))]
@@ -260,7 +258,7 @@
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
-(defn- has-asianhallinta-operation [_ {:keys [primaryOperation]}]
+(defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
 
@@ -345,7 +343,7 @@
    :parameters [id]
    :user-roles #{:authority}
    :states     states/all-states
-   :pre-checks [(fn [{{ip :client-ip} :web user :user} {:keys [organization]}]
+   :pre-checks [(fn [{{ip :client-ip} :web user :user {:keys [organization]} :application}]
                   (if organization
                     (when-not (autologin/allowed-ip? ip organization)
                       (fail :error.ip-not-allowed))

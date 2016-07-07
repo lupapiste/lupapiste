@@ -118,7 +118,7 @@
    :notified true
    :user-roles #{:applicant :authority}
    :states states/all-application-states-but-draft-or-terminal
-   :pre-checks [(fn [{user :user} {options :options}]
+   :pre-checks [(fn [{user :user {:keys [options]} :application}]
                   (when (and (:municipalityHearsNeighbors options) (not (user/authority? user)))
                     (fail :error.unauthorized)))]}
   [{:keys [user created] :as command}]

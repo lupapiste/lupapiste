@@ -1586,6 +1586,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         v);
     var updateCommand = getUpdateCommand();
 
+    function createHandler(logger) {
+      return function (e) {
+        logger(e);
+        callback(updateCommand, "err", e.results);
+      };
+    }
+
     ajax
       .command(updateCommand, { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
       // Server returns empty array (all ok), or array containing an array with three
@@ -1594,8 +1601,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
         callback(updateCommand, status, e.results);
       })
-      .error(function (e) { error(e); callback(updateCommand, "err", e.results); })
-      .fail(function (e) { error(e); callback(updateCommand, "err", e.results); })
+      .onError("error.document-not-found", createHandler(debug))
+      .onError("document-would-be-in-error-after-update", createHandler(debug))
+      .error(createHandler(error))
+      .fail(createHandler(error))
       .call();
   }
 

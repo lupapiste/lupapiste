@@ -41,7 +41,7 @@
       (fact "can-proceed?"
         (can-proceed? app next) => true)
       (fact "validator"
-        (validate-state-transition next {} app) => nil))))
+        (validate-state-transition next {:application app}) => nil))))
 
 (facts "default states are valid"
   (doseq [state (keys states/default-application-state-graph)]
@@ -49,11 +49,11 @@
       (valid-state? {:permitType "R", :infoRequest false} state) => true)))
 
 (facts "validate-state-transition"
-  (validate-state-transition :info ..anything.. {:infoRequest true :state "answered"}) => nil
-  (validate-state-transition :info ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false})
-  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "answered"}) => (contains {:ok false})
-  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "canceled"}) => (contains {:ok false})
-  (validate-state-transition :canceled ..anything.. {:infoRequest true :state "info"}) => nil)
+  (validate-state-transition :info  {:application {:infoRequest true :state "answered"}}) => nil
+  (validate-state-transition :info {:application {:infoRequest true :state "canceled"}}) => (contains {:ok false})
+  (validate-state-transition :canceled {:application {:infoRequest true :state "answered"}}) => (contains {:ok false})
+  (validate-state-transition :canceled {:application {:infoRequest true :state "canceled"}}) => (contains {:ok false})
+  (validate-state-transition :canceled {:application {:infoRequest true :state "info"}}) => nil)
 
 (facts "state-seq"
   (application-state-seq {:permitType "R"}) => [:draft :open :submitted :sent :verdictGiven :constructionStarted :inUse :closed]

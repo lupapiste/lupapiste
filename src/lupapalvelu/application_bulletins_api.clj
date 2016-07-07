@@ -122,13 +122,11 @@
          bulletin   (bulletins/get-bulletin bulletin-id projection)]
      (if-not (and (= (:bulletinState bulletin) "proclaimed")
                   (bulletins/bulletin-date-in-period? :proclamationStartsAt :proclamationEndsAt (-> bulletin :versions last)))
-       (fail :error.bulletin-not-in-commentable-state))))
-  ([command _]
-    (bulletin-can-be-commented command)))
+       (fail :error.bulletin-not-in-commentable-state)))))
 
 (def delivery-address-fields #{:firstName :lastName :street :zip :city})
 
-(defn- user-is-vetuma-authenticated [_ _]
+(defn- user-is-vetuma-authenticated [_]
   (when (empty? (vetuma/vetuma-session))
     (fail :error.user-not-vetuma-authenticated)))
 
