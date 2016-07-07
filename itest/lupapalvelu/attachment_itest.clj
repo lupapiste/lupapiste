@@ -20,8 +20,8 @@
             op-id (-> application :primaryOperation :id)]
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
-        (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+        (fact "pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
+          (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
