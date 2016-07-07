@@ -192,7 +192,7 @@
          :usagePriceCode (get usage-price-codes price-class)))))
 
 (defn- operation-mapper [application op]
-  (util/assoc-when (resolve-price-class application op)
+  (util/assoc-when-pred (resolve-price-class application op) util/not-empty-or-nil?
     :displayNameFi (i18n/localize "fi" "operations" (:name op))
     :displayNameSv (i18n/localize "sv" "operations" (:name op))
     :submitted     (when (= "aiemmalla-luvalla-hakeminen" (:name op)) (:created application))))

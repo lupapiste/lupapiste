@@ -22,6 +22,8 @@
                           :fetch-validation-errors
                           :add-comment
                           :comments
+                          :attachments
+                          :attachment-groups
                           :attachment-types
                           :attachment-operations
                           :view-attachment

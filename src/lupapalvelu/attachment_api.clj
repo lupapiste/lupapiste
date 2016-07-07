@@ -6,7 +6,7 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.core :refer [ok fail fail! now def-]]
             [sade.strings :as ss]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -106,6 +106,28 @@
     (let [operation-ids (map :id (a/get-operations application))]
       (when (not-any? (partial = op-id) operation-ids)
         (fail :error.illegal-attachment-operation)))))
+
+;;
+;; Attachments
+;;
+
+(defquery attachments
+  {:description "Get all attachments in application filtered by user visibility"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments} :application}]
+  (ok :attachments (map #(assoc % :group (attachment/attachment-grouping %)) attachments)))
+
+(defquery attachment-groups
+  {:description "Get all attachment groups for application"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{application :application}]
+  (ok :groups (attachment/attachment-groups-for-application application)))
 
 ;;
 ;; Types
@@ -397,7 +419,7 @@
       :else (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true)))))
 
 (defcommand upload-attachment
-  {:parameters [id attachmentId attachmentType op filename tempfile size]
+  {:parameters [id attachmentId attachmentType group filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
@@ -430,7 +452,7 @@
               :content tempfile
               :attachment-id attachmentId
               :attachment-type attachmentType
-              :op op
+              :group group
               :comment-text text
               :target target
               :locked locked
@@ -579,7 +601,11 @@
                 attachment-not-readOnly
                 validate-operation-in-application]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-data! command attachmentId meta created)
+  (let [data (merge meta
+                    (when (:group meta)
+                      {:op (not-empty (select-keys (:group meta) [:id :name]))
+                       :group (get-in meta [:group :group-type])}))]
+    (attachment/update-attachment-data! command attachmentId data created))
   (ok))
 
 (defcommand set-attachment-not-needed

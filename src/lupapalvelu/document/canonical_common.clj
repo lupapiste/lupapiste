@@ -259,8 +259,9 @@
 (defn lupatunnus [{:keys [id submitted] :as application}]
   {:pre [id]}
   {:LupaTunnus
-   (util/assoc-when
+   (util/assoc-when-pred
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
+     util/not-empty-or-nil?
      :saapumisPvm (util/to-xml-date submitted)
      :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
@@ -360,7 +361,7 @@
                            (get-simple-yritys yritys)
                            yhteystiedot-canonical
                            {:vainsahkoinenAsiointiKytkin (-> yhteyshenkilo :kytkimet :vainsahkoinenAsiointiKytkin true?)})]
-    (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
+    (util/assoc-when-pred yritys-canonical util/not-empty-or-nil? :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type subtype]
@@ -474,7 +475,7 @@
 
 (defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
-    {:Sijaistus (util/assoc-when {}
+    {:Sijaistus (util/assoc-when-pred {} util/not-empty-or-nil?
                   :sijaistettavaHlo (ss/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                   :sijaistettavaRooli sijaistettavaRooli
                   :alkamisPvm (when-not (ss/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
@@ -582,14 +583,14 @@
 
 (defn address->osoitetieto [{katu :street postinumero :zip postitoimipaikannimi :city :as address}]
   (when-not (util/empty-or-nil? katu)
-    (util/assoc-when {}
+    (util/assoc-when-pred {} util/not-empty-or-nil?
                      :osoitenimi {:teksti katu}
                      :postinumero postinumero
                      :postitoimipaikannimi postitoimipaikannimi)))
 
 (defn get-neighbor [{status :status property-id :propertyId :as neighbor}]
   (let [{state :state vetuma :vetuma message :message} (last status)
-        neighbor (util/assoc-when {}
+        neighbor (util/assoc-when-pred {} util/not-empty-or-nil?
                                   :henkilo (str (:firstName vetuma) " " (:lastName vetuma))
                                   :osoite (address->osoitetieto vetuma)
                                   :kiinteistotunnus property-id
@@ -689,12 +690,12 @@
                           empty-tag)}})
 
 (defn get-henkilo [henkilo]
-  (let [nimi   (util/assoc-when {}
+  (let [nimi   (util/assoc-when-pred {} util/not-empty-or-nil?
                                 :etunimi (-> henkilo :henkilotiedot :etunimi)
                                 :sukunimi (-> henkilo :henkilotiedot :sukunimi))
         osoite (get-simple-osoite (:osoite henkilo))]
     (not-empty
-      (util/assoc-when {}
+      (util/assoc-when-pred {} util/not-empty-or-nil?
                   :nimi nimi
                   :osoite osoite
                   :sahkopostiosoite (-> henkilo :yhteystiedot :email)
@@ -710,7 +711,7 @@
           yhteyshenkilon-nimi (ss/trim (str etunimi " " sukunimi))
           osoite (get-simple-osoite (:osoite yritys))]
       (not-empty
-        (util/assoc-when {}
+        (util/assoc-when-pred {} util/not-empty-or-nil?
           :yTunnus (:liikeJaYhteisoTunnus yritys)
           :yrityksenNimi (:yritysnimi yritys)
           :yhteyshenkilonNimi (when-not (ss/blank? yhteyshenkilon-nimi) yhteyshenkilon-nimi)
@@ -721,7 +722,7 @@
       (let [{:keys [henkilotiedot yhteystiedot]} henkilo
             osoite (get-simple-osoite (:osoite henkilo))]
         (not-empty
-          (util/assoc-when {}
+          (util/assoc-when-pred {} util/not-empty-or-nil?
             :henkilotunnus (:hetu henkilotiedot)
             :sukunimi (:sukunimi henkilotiedot)
             :etunimi (:etunimi henkilotiedot)
@@ -734,7 +735,7 @@
   (merge
     (get-yhteystiedot unwrapped-party-doc)
     (not-empty
-      (util/assoc-when {}
+      (util/assoc-when-pred {} util/not-empty-or-nil?
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
         :verkkolaskutustieto (get-verkkolaskutus unwrapped-party-doc)))))
 
@@ -742,7 +743,7 @@
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
 (defn- get-basic-drawing-info [drawing]  ;; krysp Yhteiset 2.1.5+
-  (util/assoc-when {}
+  (util/assoc-when-pred {} util/not-empty-or-nil?
     :nimi (:name drawing)
     :kuvaus (:desc drawing)
     :korkeusTaiSyvyys (:height drawing)

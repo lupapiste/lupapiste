@@ -215,9 +215,15 @@
 
 (facts assoc-when
   (assoc-when {} :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
-  => {:a :a, :e [:e], :f {:f :f}}
-  (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
+  => {:a :a, :c [], :d {}, :e [:e], :f {:f :f}}
+  (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c, :d false)
   => {:a :a, :b :b, :c :c})
+
+(facts assoc-when-pred
+  (assoc-when-pred {} not-empty-or-nil? :a :a, :b nil, :c [], :d {}, :e [:e], :f {:f :f})
+  => {:a :a, :e [:e], :f {:f :f}}
+  (assoc-when-pred {:a nil :b :b} not-empty-or-nil? :a :a, :b nil, :c :c, :d false)
+  => {:a :a, :b :b, :c :c, :d false})
 
 (facts "comparing history item difficulties"
   (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
