@@ -35,7 +35,7 @@
                                                    ;attachmentType op filename tempfile size
                                                    :data   {:attachmentType {:type-group "paapiirustus"
                                                                              :type-id    "asemapiirros"}
-                                                            :group          {:group-type "asvadfas"}
+                                                            :group          {:group-type "parties"}
                                                             :size           500
                                                             :filename       "foobar.pdf"
                                                             :tempfile       ""}})]
