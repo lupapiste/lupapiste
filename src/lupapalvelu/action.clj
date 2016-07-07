@@ -16,7 +16,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as org]))
 
 ;;
 ;; construct command, query and raw
@@ -351,7 +352,9 @@
     (or
       (some #(% command) validators)
       (let [application (get-application command)
-            command (assoc command :application application)]
+            ^{:doc "Organization as delay"} organization (when application
+                                                           (delay (org/get-organization (:organization application))))
+            command (assoc command :application application :organization organization)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
