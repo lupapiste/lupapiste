@@ -63,17 +63,6 @@ LUPAPISTE.SutiDisplayModel = function() {
 
 
   self.products = self.disposedComputed( function() {
-    var prods = [];
-    if( !self.note()) {
-      prods = _.map( self.suti().products, function( p ) {
-        var expired = (moment.isMoment( p.expirydate) && p.expirydate.isBefore( moment()));
-        return _.merge( {},
-                        p,
-                        {expired: expired,
-                         state: "suti.display-" + (expired ? "expired" : "valid")
-                        } );
-      });
-    }
-    return prods;
+    return self.note() ? [] : self.suti().products;
   });
 };

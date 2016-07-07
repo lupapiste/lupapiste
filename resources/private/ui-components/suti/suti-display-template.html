@@ -67,7 +67,7 @@
                 <tbody data-bind="foreach: $parent.products">
                   <tr>
                     <td data-bind="text: name"></td>
-                    <td data-bind="ltext: state,
+                    <td data-bind="ltext: 'suti.display-' + (expired ?  'expired' : 'valid'),
                                    css: {'suti-display--error': expired}"></td>
                     <td data-bind="momentDate: expirydate,
                                    css: {'suti-display--error': expired}"></td>

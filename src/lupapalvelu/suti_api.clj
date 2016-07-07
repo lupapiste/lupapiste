@@ -26,7 +26,7 @@
    :user-roles #{:authorityAdmin}
    :feature :suti-integration}
   [{user :user}]
-  (suti/toggle-operation (suti/admin-org user) operationId flag))
+  (suti/toggle-operation (suti/admin-org user) (ss/trim operationId) flag))
 
 (defcommand section-toggle-operation
   {:description "Toggles operation either requiring section or not."
@@ -35,7 +35,7 @@
                       (partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-section-operation (suti/admin-org user) operationId flag))
+  (suti/toggle-section-operation (suti/admin-org user) (ss/trim operationId) flag))
 
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."
@@ -54,11 +54,11 @@
 (defcommand suti-www
   {:description "Public Suti URL. Not to be confused with the Suti backend."
    :parameters [www]
-   :input-validators [(partial action/string-parameters [:www])]
+   :input-validators [(partial action/validate-optional-url :www)]
    :user-roles #{:authorityAdmin}
    :feature :suti-integration}
   [{user :user}]
-  (suti/set-www (suti/admin-org user) www))
+  (suti/set-www (suti/admin-org user) (ss/trim www)))
 
 (defquery suti-application-data
   {:description "Fetches the Suti results for the given application."

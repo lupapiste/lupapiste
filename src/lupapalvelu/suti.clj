@@ -7,8 +7,7 @@
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.user :as usr])
-  (:import org.joda.time.DateTimeZone))
+            [lupapalvelu.user :as usr]))
 
 (defn admin-org [admin]
   (-> admin
@@ -46,15 +45,13 @@
 
 (defn- clean-timestamp
   "Suti returns expirydate and downloaded fields as a strings
-  '\\/Date(1495806556450)\\/'. Included Unix timestamp is in the local
-  time, so it is also converted to UTC. Returns Unix timestamp (ms
-  from epoc) or nil."
+  '\\/Date(1495806556450)\\/' (when filled). Included timestamp is in
+  UTC. Returns the timestamp as long (ms from epoch) or nil."
   [field]
   (try
-    (when-let [ts (some->> field
-                           (re-find #"\d+")
-                           Long/parseLong)]
-      (.convertLocalToUTC (DateTimeZone/getDefault) ts true))
+    (some->> field
+             (re-find #"\d+")
+             Long/parseLong)
     (catch Exception _)))
 
 (defn- clean-suti-dates
@@ -90,7 +87,7 @@
                                                     (:name primaryOperation)))
         products                    (when (and (ss/not-blank? suti-id) suti-enabled (ss/not-blank? url))
                                       (fetch-suti-products (append-to-url url suti-id) server))]
-    {:enabled enabled
+    {:enabled suti-enabled
      :www (when (every? ss/not-blank? [www suti-id])
             (ss/replace www "$$" suti-id))
      :products products
