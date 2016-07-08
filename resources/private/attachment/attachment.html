@@ -95,7 +95,7 @@
                   <!--       data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span> -->
                 </button>
               </div>
-              <div class="attachment-file-versions-content" data-bind="slider: showAttachmentVersionHistory">
+              <div class="attachment-file-versions-content" data-bind="if: showAttachmentVersionHistory">
                 <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
                 <table class="table">
                   <thead>
