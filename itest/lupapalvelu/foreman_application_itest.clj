@@ -102,7 +102,7 @@
                   (:foremanRole application-after-update) => "erityisalojen ty\u00F6njohtaja"))
 
           (fact "Can't submit foreman app because subtype is not selected"
-            (get (query apikey :submit-errors :id foreman-application-id) :errors) => (just [(fail :error.foreman.type-not-selected)])
+            (get (query apikey :application-submittable :id foreman-application-id) :errors) => (just [(fail :error.foreman.type-not-selected)])
             (command apikey :submit-application :id foreman-application-id) => (partial expected-failure? :error.foreman.type-not-selected))
 
           (fact "Update subtype to 'tyonjohtaja-ilmoitus'"

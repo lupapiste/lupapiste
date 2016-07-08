@@ -229,8 +229,9 @@
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit)))))
 
-(defquery submit-errors
-  {:parameters [id]
+(defquery application-submittable
+  {:description "Query for frontend, to display possible errors regarding application submit"
+   :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
    :states           #{:draft :open}}
