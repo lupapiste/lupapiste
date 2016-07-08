@@ -78,10 +78,10 @@
                     <td data-bind="ltext: 'suti.display-' + (expired ?  'expired' : 'valid'),
                                    css: {'suti-display--error': expired},
                                    attr: {'data-test-id': 'suti-display-state-' + $index()}"></td>
-                    <td data-bind="momentDate: expirydate,
+                    <td data-bind="dateString: expirydate,
                                    css: {'suti-display--error': expired},
                                    attr: {'data-test-id': 'suti-display-expirydate-' + $index()}"></td>
-                    <td data-bind="momentDate: downloaded,
+                    <td data-bind="dateString: downloaded,
                                    attr: {'data-test-id': 'suti-display-downloaded-' + $index()}"></td>
                   </tr>
                 </tbody>

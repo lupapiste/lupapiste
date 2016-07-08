@@ -320,13 +320,6 @@
     }
   };
 
-  ko.bindingHandlers.momentDate = {
-    update: function(element, valueAccessor) {
-      var m = ko.utils.unwrapObservable(valueAccessor());
-      $(element).text( moment.isMoment( m ) ? m.format( "D.M.YYYY") : "");
-    }
-  };
-
   ko.bindingHandlers.datepicker = {
     init: function(element, valueAccessor, allBindingsAccessor) {
       //initialize datepicker with some optional options
