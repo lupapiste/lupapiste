@@ -264,6 +264,7 @@ LUPAPISTE.ApplicationModel = function() {
 
 
   self.reload = function() {
+    self.submitErrors([]);
     repository.load(self.id());
   };
 
@@ -649,8 +650,6 @@ LUPAPISTE.ApplicationModel = function() {
         })
         .processing(self.processing)
         .call();
-
-      fetchApplicationSubmittable();
     }
     self.open(target.tab);
     if (target.id) {
@@ -706,11 +705,13 @@ LUPAPISTE.ApplicationModel = function() {
   }
 
   function fetchApplicationSubmittable() {
-    ajax
-      .query("application-submittable", {id: self.id.peek()})
-      .success(_.noop)
-      .onError("error.cannot-submit-application", cannotSubmitResponse)
-      .call();
+    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+      ajax
+        .query("application-submittable", {id: self.id.peek()})
+        .success(function() { self.submitErrors([]); })
+        .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .call();
+    }
   }
 
   self.toggleHelp = function(param) {
