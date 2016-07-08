@@ -1306,6 +1306,10 @@ Test id input is
   [Arguments]  ${id}  ${text}
   Wait until  Value should be  jquery=[data-test-id=${id}]  ${text}
 
+Test id text is
+  [Arguments]  ${id}  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
+
 Javascript? helper
   [Arguments]  ${expression}
   ${result}=  Execute JavaScript  return ${expression};
@@ -1319,15 +1323,18 @@ Click label
   [Arguments]  ${for}
   Click element  jquery=label[for=${for}]
 
-
 Checkbox wrapper selected
   [Arguments]  ${id}
-  Javascript?  $("input#${id}:checked").length
+  Javascript?  $("input#${id}:checked").length === 1
 
 Checkbox wrapper not selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 0
 
+Checkbox wrapper disabled
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:disabled").length === 1
+  
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
