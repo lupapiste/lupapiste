@@ -342,7 +342,7 @@ var attachment = (function() {
     model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
       // Update attachment group-type + operation when new group is selected
       if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
-          util.getIn(group, ["group-type"]) !== util.getIn(model, ["group"])) {
+          util.getIn(group, ["group-type"]) !== util.getIn(model, ["groupType"])) {
 
         group = _.pick(group, ["id", "name", "group-type"]);
         saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});

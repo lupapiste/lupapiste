@@ -616,10 +616,7 @@
                 attachment-not-readOnly
                 validate-operation-in-application]}
   [{:keys [created] :as command}]
-  (let [data (merge meta
-                    (when (:group meta)
-                      {:op (not-empty (select-keys (:group meta) [:id :name]))
-                       :group-type (get-in meta [:group :group-type])}))]
+  (let [data (attachment/meta->attachment-data meta)]
     (attachment/update-attachment-data! command attachmentId data created))
   (ok))
 
