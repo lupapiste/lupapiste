@@ -522,7 +522,7 @@
    :user-roles #{:authority}
    :states     (conj states/post-submitted-states :submitted)
    :description "Stamps all attachments of given application"}
-  [{application :application {transparency :transparency} :data :as command}]
+  [{application :application org :organization {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond
                            (number? timestamp) (long timestamp)
                            (ss/blank? timestamp) (:created command)
@@ -530,9 +530,7 @@
         stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)
         org             (if-not (ss/blank? organization)
                           organization
-                          (->> (:organization application)
-                               (organization/get-organization)
-                               (organization/get-organization-name)))
+                          (organization/get-organization-name @org))
         job             (stamping/make-stamp-job
                          (attachment/get-attachments-infos application files)
                          {:application application

@@ -79,9 +79,8 @@
 
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application task user lang]
+  [application organization task user lang]
   (let [permit-type   (permit/permit-type application)
-        organization  (organization/get-organization (:organization application))
         krysp-fn      (permit/get-review-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)

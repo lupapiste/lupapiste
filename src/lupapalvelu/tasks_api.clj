@@ -184,7 +184,7 @@
                  (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
-  [{application :application user :user created :created :as command}]
+  [{application :application user :user created :created organization :organization :as command}]
   (validate-required-review-fields! command application)
   (validate-review-kind command application)
   (let [task (util/find-by-id taskId (:tasks application))
@@ -195,7 +195,7 @@
         all-attachments (:attachments application)
         command (assoc command :application application)
 
-        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application @organization task user lang)
         review-attachments (if-not sent-file-ids
                              (->> (:attachments application)
                                   (filter #(= {:type "task" :id taskId} (:target %)) )
