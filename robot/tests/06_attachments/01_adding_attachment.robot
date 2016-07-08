@@ -54,8 +54,8 @@ Mikko deletes attachment version
 Mikko deletes also the attachment template
   Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
   Scroll to test id  back-to-application-from-attachment
-  Click element  jquery=[data-test-id=back-to-application-from-attachment]
-  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Click by test id  back-to-application-from-attachment
+  Click by test id  delete-muut.muu
   Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
