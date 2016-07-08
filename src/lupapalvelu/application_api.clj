@@ -220,6 +220,13 @@
                             emails (get-in organization [:notifications :submit-notification-emails])]
                         (map (fn [e] {:email e, :role "authority"}) emails)))))
 
+(defn submit-validation-errors [{:keys [application] :as command}]
+  (remove nil? (conj []
+                     (foreman/validate-application application)
+                     (app/validate-link-permits application)
+                     (when-not (company/cannot-submit command)
+                       (fail :company.user.cannot.submit)))))
+
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -232,12 +239,10 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application created] :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (or
-      (foreman/validate-application application)
-      (app/validate-link-permits application)
-      (when-not (company/cannot-submit command) (fail :company.user.cannot.submit))
+  [{:keys [application organization created] :as command}]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (first errors)
       (do-submit command application created))))
 
 (defcommand refresh-ktj
