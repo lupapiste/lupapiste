@@ -824,6 +824,10 @@ Submit application
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
+Submit application errors count is
+  [Arguments]  ${count}
+  Wait until  Xpath Should Match X Times  //div[@data-test-id='submit-errors-container']//div[contains(@class,'info-line')]  ${count}
+
 Approve application ok
   Click enabled by test id  approve-application
   Confirm ok dialog
