@@ -211,7 +211,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   // update invites when id changes
-  self.id.subscribe(_.flow(self.updateInvites, fetchApplicationSubmittable));
+  self.id.subscribe(self.updateInvites);
 
   self.hasInvites = ko.computed(function() {
     return self.invites().length !== 0;
@@ -698,6 +698,7 @@ LUPAPISTE.ApplicationModel = function() {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
+    fetchApplicationSubmittable();
   };
 
   function cannotSubmitResponse(data) {
