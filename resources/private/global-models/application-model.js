@@ -94,6 +94,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.organizationMeta = ko.observable();
   self.neighbors = ko.observable([]);
   self.submittable = ko.observable(true);
+  self.submitErrors = ko.observableArray();
 
   self.organization = ko.observable([]);
 
@@ -210,7 +211,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   // update invites when id changes
-  self.id.subscribe(self.updateInvites);
+  self.id.subscribe(_.flow(self.updateInvites, fetchApplicationSubmittable));
 
   self.hasInvites = ko.computed(function() {
     return self.invites().length !== 0;
@@ -249,16 +250,16 @@ LUPAPISTE.ApplicationModel = function() {
   // Required attachments
 
   self.missingRequiredAttachments = ko.observable([]);
-  self.hasMissingRequiredAttachments = ko.computed(function() {
+  self.hasMissingRequiredAttachments = ko.pureComputed(function() {
     return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
   });
 
-  self.missingSomeInfo = ko.computed(function() {
+  self.missingSomeInfo = ko.pureComputed(function() {
     return self.hasFieldWarnings() || self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
   });
 
-  self.submitButtonEnabled = ko.computed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable();
+  self.submitButtonEnabled = ko.pureComputed(function() {
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable() && _.isEmpty(self.submitErrors());
   });
 
 
@@ -313,18 +314,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
               .success(self.reload)
-              .onError("error.foreman.type-not-selected", function() {
-                hub.send("show-dialog", {ltitle: "error.dialog.title",
-                                         size: "medium",
-                                         component: "ok-dialog",
-                                         componentParams: {ltext: "error.foreman.type-not-selected"}});
-              })
-              .onError("error.foreman.notice-not-submittable", function() {
-                hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
-                                         size: "medium",
-                                         component: "ok-dialog",
-                                         componentParams: {ltext: "foreman.dialog.notice-submit-warning.text"}});
-              })
+              .onError("error.cannot-submit-application", cannotSubmitResponse)
               .processing(self.processing)
               .call();
             hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
@@ -653,12 +643,14 @@ LUPAPISTE.ApplicationModel = function() {
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
-        .query("fetch-validation-errors", {id: self.id()})
+        .query("fetch-validation-errors", {id: self.id.peek()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
         })
         .processing(self.processing)
         .call();
+
+      fetchApplicationSubmittable();
     }
     self.open(target.tab);
     if (target.id) {
@@ -707,6 +699,18 @@ LUPAPISTE.ApplicationModel = function() {
     self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
+
+  function cannotSubmitResponse(data) {
+    self.submitErrors(_.map(data.errors, "text"));
+  }
+
+  function fetchApplicationSubmittable() {
+    ajax
+      .query("application-submittable", {id: self.id.peek()})
+      .success(_.noop)
+      .onError("error.cannot-submit-application", cannotSubmitResponse)
+      .call();
+  }
 
   self.toggleHelp = function(param) {
     self[param](!self[param]());

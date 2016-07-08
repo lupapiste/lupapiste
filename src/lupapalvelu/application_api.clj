@@ -255,9 +255,8 @@
   [{:keys [application organization created] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
-      (first errors)
+      (fail :error.cannot-submit-application :errors errors)
       (do-submit command application created))))
-
 
 
 (defcommand refresh-ktj
