@@ -186,6 +186,8 @@
   [{:keys [created user] :as command}]
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
 
+;; Submit
+
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
                           [(when-not (:opened application) (app/history-entry :open created (:user command)))
@@ -227,6 +229,16 @@
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit)))))
 
+(defquery submit-errors
+  {:parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:applicant :authority}
+   :states           #{:draft :open}}
+  [command]
+  (if-some [errors (seq (submit-validation-errors command))]
+    (fail :error.cannot-submit-application :errors errors)
+    (ok)))
+
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -244,6 +256,8 @@
     (if-some [errors (seq (submit-validation-errors command))]
       (first errors)
       (do-submit command application created))))
+
+
 
 (defcommand refresh-ktj
   {:parameters [:id]
