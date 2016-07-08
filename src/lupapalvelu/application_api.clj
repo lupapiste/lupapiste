@@ -236,9 +236,10 @@
    :user-roles       #{:applicant :authority}
    :states           #{:draft :open}}
   [command]
-  (if-some [errors (seq (submit-validation-errors command))]
-    (fail :error.cannot-submit-application :errors errors)
-    (ok)))
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
+      (ok))))
 
 (defcommand submit-application
   {:parameters       [id]
