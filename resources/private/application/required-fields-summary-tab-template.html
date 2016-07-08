@@ -16,12 +16,12 @@
               <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
           </div>
 
-          <div data-bind="visible: submitErrors().length > 0" data-test-id="submit-errors-container">
+          <div data-bind="visible: submitErrors().length > 0 && $root.authorization.ok('submit-application')" data-test-id="submit-errors-container">
             <h2 data-bind="ltext: 'application.not-submittable'"></h2>
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">
                   <i class="lupicon-circle-attention"></i>
-                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index}"></span>
+                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index, 'data-submit-error': $data}"></span>
               </div>
             </div>
           </div>

@@ -37,20 +37,21 @@
   (f/notice? (assoc foreman-app :permitSubtype "tyonjohtaja-hakemus")) => false)
 
 (facts "validate if notice is submittable"
-  (validate-notice-submittable nil) => nil
-  (validate-notice-submittable {}) => nil
+  (validate-notice-submittable nil irrelevant) => nil
+  (validate-notice-submittable {} irrelevant) => nil
   (fact "Only foreman notice apps are validated"
-    (validate-notice-submittable (assoc foreman-app :permitSubtype "hakemus")) => nil)
-  (fact "Link permit must exist for validate to run"
-    (validate-notice-submittable (dissoc foreman-app :linkPermitData)) => nil)
+    (validate-notice-submittable (assoc foreman-app :permitSubtype "hakemus") irrelevant) => nil)
+  (fact "Link permit must be procided for validate to run"
+    (validate-notice-submittable foreman-app nil) => nil)
   (fact "Validator returns nil if state is post-verdict state"
-    (validate-notice-submittable foreman-app) => nil
-    (provided
-      (mongo/select-one :applications {:_id "LP-123"} {:state 1}) => {:state "verdictGiven"}))
+    (validate-notice-submittable foreman-app {:state "verdictGiven"}) => nil)
   (fact "Validator returns fail! when state is post-verdict state"
-    (validate-notice-submittable foreman-app) => (partial expected-failure? :error.foreman.notice-not-submittable)
-    (provided
-     (mongo/select-one :applications {:_id "LP-123"} {:state 1}) => {:state "sent"})))
+    (validate-notice-submittable foreman-app {:state "sent"}) => (partial expected-failure? :error.foreman.notice-not-submittable)))
+
+(facts "Foreman submittable"
+  (f/validate-foreman-submittable {:state :draft} nil) => nil
+  (f/validate-foreman-submittable {:state :draft} {:state :open}) => (partial expected-failure? :error.not-submittable.foreman-link)
+  (f/validate-foreman-submittable {:state :draft} {:state :submitted}) => nil)
 
 (def tj-data-schema               (dds/doc-data-schema "tyonjohtaja-v2"))
 (def hankkeen-kuv-min-data-schema (dds/doc-data-schema "hankkeen-kuvaus-minimum"))
