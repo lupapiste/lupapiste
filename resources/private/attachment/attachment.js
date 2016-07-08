@@ -470,19 +470,6 @@ var attachment = (function() {
     var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
 
-    ajax
-      .query("attachment-groups", {id: applicationId})
-      .success(function(resp) {
-        var currentGroup = _.pickBy({"group-type": attachment.group,
-                                     "id": util.getIn(attachment, ["op", "id"])},
-                                    _.isString);
-        model.selectableGroups(resp.groups);
-        if (!_.isEmpty(currentGroup)) {
-          model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
-        }
-      })
-      .call();
-
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
     model.signatures(attachment.signatures || []);
@@ -506,6 +493,19 @@ var attachment = (function() {
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
     model.isRamAttachment( Boolean( attachment.ramLink));
+
+    ajax
+      .query("attachment-groups", {id: applicationId})
+      .success(function(resp) {
+        var currentGroup = _.pickBy({"group-type": attachment.group,
+                                     "id": util.getIn(attachment, ["op", "id"])},
+                                    _.isString);
+        model.selectableGroups(resp.groups);
+        if (!_.isEmpty(currentGroup)) {
+          model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
+        }
+      })
+      .call();
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
