@@ -91,7 +91,7 @@ LUPAPISTE.SutiService = function() {
   // waiting: observable
   self.fetchApplicationData = function( application, options ) {
     ajax.query( "suti-application-data", {id: application.id()})
-      .pending( _.get( options, "waiting", _.noop) )
+      .pending(_.get( options, "waiting", _.noop))
       .success( function( res ) {
         if( _.isArray( res.data.products )) {
           res.data.products = _.map( res.data.products, function( p ) {
@@ -120,17 +120,13 @@ LUPAPISTE.SutiService = function() {
 
   // Options (all are optional)
   // waiting: observable
-  // refresh: (boolean) fetch application data after update (default false).
-  // Note: waiting is used only when refresh is true.
   self.updateApplication = function( application, data, options ) {
     options = options || {};
     ajax.command( "suti-update-application", {id: application.id(),
                                               suti: data })
-      .pending( options.refresh ? options.waiting : _.noop )
+      .pending( _.get( options, "waiting", _.noop ))
       .success( function() {
-        if( options.refresh ) {
-          self.fetchApplicationData( application, options );
-        }
+        self.fetchApplicationData( application, options );
       })
       .call();
   };

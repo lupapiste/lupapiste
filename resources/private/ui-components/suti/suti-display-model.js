@@ -11,7 +11,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.suti = service.sutiDetails;
   self.waiting = ko.observable();
 
-  function sutiComputed( key, refresh ) {
+  function sutiComputed( key ) {
     return self.disposedComputed( {
       read: function() {
         return _.get( self.suti(), ["suti", key]);
@@ -21,16 +21,16 @@ LUPAPISTE.SutiDisplayModel = function() {
         if( app.id() ) {
           service.updateApplication( app,
                                      _.set( {}, key, value),
-                                     {refresh: refresh,
+                                     {refresh: true,
                                       waiting: self.waiting});
         }
       }
     });
   }
 
-  self.sutiId = sutiComputed( "id", true );
+  self.sutiId = sutiComputed( "id");
 
-  self.sutiAdded = sutiComputed( "added" );
+  self.sutiAdded = sutiComputed( "added");
 
   self.disposedComputed( function() {
     var app = lupapisteApp.models.application;
@@ -47,14 +47,18 @@ LUPAPISTE.SutiDisplayModel = function() {
     var prods = self.suti().products;
     var msg = false;
     var error = false;
-    if( _.trim( self.sutiId())) {
-      if( _.isString( prods ) ) {
-        msg = prods;
-        error = true;
-      }
-      else {
-        if( _.isEmpty( prods )) {
-          msg = "suti.display-empty";
+    if( self.sutiAdded() ) {
+      msg = "suti.display-added-note";
+    } else {
+      if( _.trim( self.sutiId())) {
+        if( _.isString( prods ) ) {
+          msg = prods;
+          error = true;
+        }
+        else {
+          if( _.isEmpty( prods )) {
+            msg = "suti.display-empty";
+          }
         }
       }
     }
@@ -64,5 +68,14 @@ LUPAPISTE.SutiDisplayModel = function() {
 
   self.products = self.disposedComputed( function() {
     return self.note() ? [] : self.suti().products;
+  });
+
+  self.enabled = self.disposedPureComputed( function() {
+    var user = lupapisteApp.models.applicationAuthModel.ok( "suti-update-application");
+    var idEnabled = user && !self.sutiAdded();
+    return { id: idEnabled,
+             link: idEnabled && self.suti().www,
+             added: user
+           };
   });
 };

@@ -19,10 +19,12 @@
                 <div class="button-input">
                   <input type="text"
                          id="suti-display-id"
-                         data-bind="value: $parent.sutiId"><button class="primary"
-                                                                   data-bind="enable: $parent.suti().www,
-                                                                              click: $parent.sutiLink,
-                                                                              css: {waiting: $parent.waiting}">
+                         data-test-id="suti-display-id"
+                         data-bind="value: $parent.sutiId,
+                                    enable: $parent.enabled().id"><button class="primary"
+                                                                          data-bind="enable: $parent.enabled().link,
+                                                                                     click: $parent.sutiLink,
+                                                                                     css: {waiting: $parent.waiting}">
                     <i class="wait spin lupicon-refresh"></i>
                     <i class="lupicon-external-link"></i>
                   </button>
@@ -35,7 +37,9 @@
                 <div class="checkbox-wrapper">
                   <input type="checkbox"
                          id="suti-display-added"
-                         data-bind="checked: $parent.sutiAdded">
+                         data-test-id="suti-display-added"
+                         data-bind="checked: $parent.sutiAdded,
+                                    enable: $parent.enabled().added">
                   <label class="checkbox-label"
                          for="suti-display-added"
                          data-bind="ltext: 'suti.display-added'"></label>
@@ -66,12 +70,16 @@
                 </thead>
                 <tbody data-bind="foreach: $parent.products">
                   <tr>
-                    <td data-bind="text: name"></td>
+                    <td data-bind="text: name,
+                                   attr: {'data-test-id': 'suti-name-' + $index()}"></td>
                     <td data-bind="ltext: 'suti.display-' + (expired ?  'expired' : 'valid'),
-                                   css: {'suti-display--error': expired}"></td>
+                                   css: {'suti-display--error': expired},
+                                   attr: {'data-test-id': 'suti-state-' + $index()}"></td>
                     <td data-bind="momentDate: expirydate,
-                                   css: {'suti-display--error': expired}"></td>
-                    <td data-bind="momentDate: downloaded"></td>
+                                   css: {'suti-display--error': expired},
+                                   attr: {'data-test-id': 'suti-expirydate-' + $index()}"></td>
+                    <td data-bind="momentDate: downloaded,
+                                   attr: {'data-test-id': 'suti-downloaded-' + $index()}"></td>
                   </tr>
                 </tbody>
               </table>

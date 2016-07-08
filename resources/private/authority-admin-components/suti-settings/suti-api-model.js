@@ -17,6 +17,7 @@ LUPAPISTE.SutiApiModel = function(params) {
     header: "auth-admin.suti-api-settings.header",
     urlLabel: "auth-admin.suti-api-settings.urlLabel",
     saveLabel: "save",
+    prefix: "suti",
     // define mandatory keys, but the default ajax error handling is used
     error: null,
     errorMessageTerm: null

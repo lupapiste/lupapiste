@@ -18,15 +18,18 @@
              (command sipoo :suti-www :www "") => ok?
              (command sipoo :suti-www :www "  http://example.com/$$/suti  ") => ok?)
        (fact "Set bad server details"
-             (command sipoo :update-suti-server-details :url "bu hao" :username "" :password "") => (contains {:text "error.invalid.url"}))
+             (command sipoo :update-suti-server-details :url "bu hao" :username "" :password "")
+             => (contains {:text "error.invalid.url"}))
        (fact "Set good server details"
              (command sipoo :update-suti-server-details :url "" :username "" :password "") => ok?
-             (command sipoo :update-suti-server-details :url "   https://suti.org/   " :username "sutiuser" :password "sutipassword") => ok?)
+             (command sipoo :update-suti-server-details :url "   https://suti.org/   "
+                      :username "sutiuser" :password "sutipassword") => ok?)
        (fact "Filled configuration"
-             (query sipoo :suti-admin-details) =>  {:ok true
-                                                    :suti {:server {:url "https://suti.org/" :username "sutiuser"}
-                                                           :enabled true
-                                                           :www "http://example.com/$$/suti"}})
+             (query sipoo :suti-admin-details)
+             =>  {:ok true
+                  :suti {:server {:url "https://suti.org/" :username "sutiuser"}
+                         :enabled true
+                         :www "http://example.com/$$/suti"}})
        (facts "Add operations"
               (command sipoo :suti-toggle-operation :operationId "foo" :flag true) => ok?
               (command sipoo :suti-toggle-operation :operationId "bar" :flag true) => ok?
@@ -46,7 +49,8 @@
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
          (fact "Toggle operation, but disable Suti for the organization"
                (command sipoo :suti-toggle-operation :operationId "kerrostalo-rivitalo" :flag true) => ok?
-               (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti/" :username "suti" :password "wrong") => ok?
+               (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti/"
+                        :username "suti" :password "wrong") => ok?
                (command sipoo :suti-toggle-enabled :flag false) => ok?)
          (fact "No Suti for application, since Suti disablled"
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
@@ -100,15 +104,13 @@
                                              {:name "Three" :expired false :expirydate nil :downloaded nil}]
                                   :www "http://example.com/good/suti"
                                   :suti {:id "good"}}))
-         (fact "Suti added property"
-               (command pena :suti-update-application :id application-id :suti {:id "  good  "}) => ok?
+         (fact "Suti added property -> no products"
+               (command pena :suti-update-application :id application-id :suti {:added true}) => ok?
                (query pena :suti-application-data :id application-id)
                => (data-contains {:enabled true
-                                  :products [{:name "One" :expired false :expirydate nil :downloaded nil}
-                                             {:name "Two" :expired true :expirydate 1467710527123 :downloaded 1467364927456}
-                                             {:name "Three" :expired false :expirydate nil :downloaded nil}]
+                                  :products nil
                                   :www "http://example.com/good/suti"
-                                  :suti {:id "good"}}))
+                                  :suti {:id "good", :added true}}))
          (fact "Authority has the needed access rights, too"
                (command sonja :suti-update-application :id application-id :suti {:id "hii"}) => ok?
                (query sonja :suti-application-data :id application-id) => ok?)))
