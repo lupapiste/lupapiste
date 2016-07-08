@@ -87,8 +87,8 @@
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-group-type [group]
-  (when-let [group-type (keyword (:group-type group))]
-    (when (sc/check (apply sc/enum attachment/attachment-groups) group-type)
+  (when-let [group-type (keyword (:groupType group))]
+    (when-not (attachment/attachment-groups group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]

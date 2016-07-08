@@ -125,7 +125,7 @@
               op-id (:id primaryOperation)]
 
           (fact "Pena can change operation"
-            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:group-type :operation :id op-id}}) => ok?)
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :id op-id}}) => ok?)
           (fact "Pena can change contents"
             (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
           (fact "Pena can change size"
@@ -337,10 +337,10 @@
       (count groups) => 3)
 
     (fact "Three different kind of groups"
-      (map :group-type groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+      (map :groupType groups) => (just ["building-site" "parties" "operation"] :in-any-order))
 
-    (fact "Operation group-type has operation specific info fields"
-      (keys (util/find-first (comp #{"operation"} :group-type) groups)) => (contains [:group-type :id :name :description] :in-any-order :gaps-ok))
+    (fact "Operation groupType has operation specific info fields"
+      (keys (util/find-first (comp #{"operation"} :groupType) groups)) => (contains [:groupType :id :name :description] :in-any-order :gaps-ok))
 
     (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
 
