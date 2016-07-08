@@ -138,7 +138,7 @@
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states}
+   :states states/all-states}
   [{application :application}]
   (ok :groups (attachment/attachment-groups-for-application application)))
 
