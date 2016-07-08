@@ -3,6 +3,7 @@
             [sade.strings :as ss]
             [monger.operators :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
             [lupapalvelu.user :as usr]
@@ -65,6 +66,7 @@
    :parameters [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
    :states states/all-application-states
    :feature :suti-integration}
   [{application :application}]

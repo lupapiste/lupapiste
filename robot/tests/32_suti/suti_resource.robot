@@ -66,3 +66,13 @@ Check default products
   Check row  0  One  Voimassa  ${EMPTY}  ${EMPTY}
   Check row  1  Two  Vanhentunut  5.7.2016  1.7.2016
   Check row  2  Three  Voimassa  ${EMPTY}  ${EMPTY}
+
+Readonly Suti
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Test id disabled  suti-display-id
+  Test id input is  suti-display-id  1234
+  Test id disabled  suti-display-link
+  Checkbox wrapper disabled  suti-display-added 
+  Check default products  
+

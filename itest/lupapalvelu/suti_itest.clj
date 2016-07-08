@@ -45,6 +45,8 @@
 
 (facts "Suti and application"
        (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+         (fact "Submit application"
+               (command pena :submit-application :id application-id))
          (fact "No Suti since the primary operation is not suti-toggled"
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
          (fact "Toggle operation, but disable Suti for the organization"
@@ -113,4 +115,12 @@
                                   :suti {:id "good", :added true}}))
          (fact "Authority has the needed access rights, too"
                (command sonja :suti-update-application :id application-id :suti {:id "hii"}) => ok?
-               (query sonja :suti-application-data :id application-id) => ok?)))
+               (query sonja :suti-application-data :id application-id) => ok?)
+         (fact "Authority invites statement giver"
+               (command sonja :request-for-statement :id application-id
+                        :functionCode nil
+                        :selectedPersons [{:email (email-for-key mikko)
+                                           :name "Mikko"
+                                           :text "Ni hao!"}]) => ok?)
+         (fact "Statement giver can access Suti data"
+               (query mikko :suti-application-data :id application-id) => ok?)))

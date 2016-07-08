@@ -4,6 +4,7 @@ Documentation   Suti settings
 Resource       ../../common_resource.robot
 Resource       suti_resource.robot
 Resource       ../29_guests/guest_resource.robot
+Resource       ../13_statements/statement_resource.robot
 Default Tags   suti
 
 *** Variables ***
@@ -164,27 +165,41 @@ Selection added checkbox clears products
   Test id disabled  suti-display-link
   No such test id  suti-display-products
 
-Clearing checkbox shows products again
-  Click label  suti-display-added
-  Check default products
-
 Pena invites Mikko as guest
   Open tab  parties
   Invite application guest  mikko@example.com  See my Suti!
+
+Pena submits application
+  Submit application
+  [Teardown]  Logout
+
+Sonja logs in and edits Suti
+  Sonja logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Wait test id visible  suti-display
+  Click label  suti-display-added
+  Check default products
+
+Sonja invites Teppo as statement giver
+  Open tab  statement
+  Scroll and click test id  add-statement
+  Invite 'manual' statement giver  1  Laoban  Teppo  teppo@example.com  ${EMPTY}
   [Teardown]  Logout
       
 Mikko logs in, sees Suti but cannot edit
   Mikko logs in
-  Open application  ${appname}  ${propertyid}
-  Open tab  attachments
-  Test id disabled  suti-display-id
-  Test id input is  suti-display-id  1234
-  Test id disabled  suti-display-link
-  Checkbox wrapper disabled  suti-display-added 
-  Check default products  
+  Readonly Suti
+  [Teardown]  Logout
+
+Teppo logs in, sees Suti but cannot edit
+  Teppo logs in
+  Readonly Suti
   [Teardown]  Logout  
 
-
+No frontend errors
+  There are no frontend errors
+  
   
 
 
