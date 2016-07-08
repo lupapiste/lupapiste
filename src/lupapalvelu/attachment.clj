@@ -484,6 +484,12 @@
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
+(defn meta->attachment-data [{group :group :as meta}]
+  (merge (select-keys meta [:contents :size :scale])
+         (when (:group meta)
+           {:op (not-empty (select-keys (:group meta) [:id :name]))
+            :group-type (get-in meta [:group :group-type])})))
+
 (defn update-attachment-data! [command attachmentId data now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}

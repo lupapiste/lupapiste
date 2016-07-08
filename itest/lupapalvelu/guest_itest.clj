@@ -6,7 +6,8 @@
             [lupapalvelu.itest-util :as itest]
             [lupapalvelu.user :as usr]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.guest :as guest]))
+            [lupapalvelu.guest :as guest]
+            [lupapalvelu.organization :as org]))
 
 (def local-db-name (str "test_guest_itest_" (sade/now)))
 
@@ -68,10 +69,11 @@
         (guest/valid-guest-role {:data {:role "bad"}}) => itest/fail?)
   (facts "Application guests and guest authorities"
          (let [app (itest/create-and-submit-local-application itest/pena :property itest/sipoo-property-id :address "Gongti beilu 88")
-               cmd (fn [username & [data]] {:user (usr/get-user {:username username})
-                                            :application (domain/get-application-no-access-checking (:id app))
-                                            :created (sade/now)
-                                            :data (assoc data :id (:id app))})
+               cmd (fn [username & [data]] {:user         (usr/get-user {:username username})
+                                            :application  (domain/get-application-no-access-checking (:id app))
+                                            :organization (delay (org/get-organization (:organization app)))
+                                            :created      (sade/now)
+                                            :data         (assoc data :id (:id app))})
                auth-cmd (fn [username & [data]]
                           (let [{:keys [user] :as cmd} (cmd username data)]
                             (assoc cmd :user (usr/with-org-auth user))))

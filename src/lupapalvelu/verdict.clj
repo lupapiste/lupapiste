@@ -36,7 +36,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.organization :as org])
   (:import [java.net URL]))
 
 (notifications/defemail :application-verdict
@@ -394,14 +395,14 @@
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
 
-(defn do-check-for-verdict [{:keys [application] :as command}]
+(defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml (normalize-special-verdict application app-xml)
-          organization (organization/get-organization (:organization application))
           validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          organization (if organization @organization (org/get-organization (:organization application)))
           validation-errors (validator-fn app-xml organization)]
       (if-not validation-errors
         (save-verdicts-from-xml command app-xml)

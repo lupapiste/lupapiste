@@ -125,7 +125,7 @@
               op-id (:id primaryOperation)]
 
           (fact "Pena can change operation"
-            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id op-id}}) => ok?)
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:group-type :operation :id op-id}}) => ok?)
           (fact "Pena can change contents"
             (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
           (fact "Pena can change size"

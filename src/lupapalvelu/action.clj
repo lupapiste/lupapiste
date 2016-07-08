@@ -16,7 +16,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as org]))
 
 ;;
 ;; construct command, query and raw
@@ -356,7 +357,9 @@
     (or
       (some #(% command) validators)
       (let [application (get-application command)
-            command (assoc command :application application)]
+            ^{:doc "Organization as delay"} organization (when application
+                                                           (delay (org/get-organization (:organization application))))
+            command (assoc command :application application :organization organization)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -426,7 +429,7 @@
    (sc/optional-key :description) sc/Str
    ; Documents that the action will be sending (email) notifications.
    (sc/optional-key :notified)    sc/Bool
-   ; Prechecks take two parameters: the command and the application.
+   ; Prechecks one parameter: the command, which has :application associated.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
    (sc/optional-key :pre-checks)  [(sc/cond-pre util/Fn sc/Symbol)]

@@ -33,8 +33,8 @@
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:tags])]
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority}}
-  [{{:keys [organization]} :application :as command}]
-  (let [org-tag-ids (map :id (:tags (org/get-organization organization)))]
+  [{organization :organization :as command}]
+  (let [org-tag-ids (map :id (:tags @organization))]
     (if (every? (set org-tag-ids) tags)
       (update-application command {$set {:tags tags}})
       (fail :error.unknown-tags))))
