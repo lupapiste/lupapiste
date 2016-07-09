@@ -33,8 +33,7 @@ Mikko adds txt attachment without comment
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
-  Confirm yes no dialog
+  Wait Until  Delete Muu liite
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds txt attachment without comment again
@@ -52,11 +51,8 @@ Mikko deletes attachment version
   Wait until  Element should not be visible  show-attachment-versions
 
 Mikko deletes also the attachment template
-  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
-  Scroll to test id  back-to-application-from-attachment
   Click by test id  back-to-application-from-attachment
-  Click by test id  delete-muut.muu
-  Confirm yes no dialog
+  Wait Until  Delete Muu liite
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds again txt attachment with comment
@@ -224,8 +220,7 @@ Sonja sees that new attachment template is visible in attachments list
 
 Sonja deletes the newly created attachment template
   [Tags]  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
-  Confirm yes no dialog
+  Wait Until  Delete Muu liite
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type="muut.muu"]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
@@ -345,3 +340,8 @@ Sign all attachments
   Click enabled by test id  do-sign-attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
+
+Delete Muu liite
+  Scroll to  [data-test-icon='delete-muut.muu']
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Confirm yes no dialog
