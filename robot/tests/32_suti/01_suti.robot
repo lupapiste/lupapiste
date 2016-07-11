@@ -36,9 +36,9 @@ Set public www address
 
 Reload page
   Reload Page
-  
+
 Url and username are set
-  Scroll to test id  suti-send  
+  Scroll to test id  suti-send
   Test id input is  suti-username  sutiuser
   Test id input is  suti-url  http://localhost:8000/dev/suti
 
@@ -50,7 +50,7 @@ Suti is still enabled
 
 Suti www address is set
   Test id input is  suti-www  http://example.com/$$/suti
-  
+
 Disable Suti
   Toggle Suti
   Checkbox wrapper not selected  suti-enabled
@@ -114,7 +114,7 @@ Pena can now see Suti
   Wait test id visible  suti-display
 
 Rollup includes property id
-    Element should contain  jquery=div.suti-display button.rollup-button span  ${propertyid}
+  Element should contain  jquery=div.suti-display button.rollup-button span  ${propertyid}
 
 Fields and note are empty
   Test id input is  suti-display-id  ${EMPTY}
@@ -123,6 +123,10 @@ Fields and note are empty
   No such test id  suti-display-note
   No such test id  suti-display-products
 
+Application can't be submitted
+  Open tab  requiredFieldSummary
+  Wait until  Submit application error should be  suti.id-missing
+
 # Development (mockup) Suti server (/dev/suti) treats suti-ids semantically:
 # empty: no products
 # bad: 501
@@ -130,13 +134,14 @@ Fields and note are empty
 # all the other ids return products. See web.clj for details.
 
 No products
+  Open tab  attachments
   Suti id and note  empty  Ei lähtötietoja.
 
 Backend error
   Suti id and note  bad  Tietojen haku ei onnistunut.  True
 
 Incorrect authorization credentials
-  Clear Suti id  
+  Clear Suti id
   Suti id and note  auth  Tietojen haku ei onnistunut.
   [Teardown]  Logout
 
@@ -150,7 +155,7 @@ Pena can now see auth products
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
   Wait test id visible  suti-display
-  Check row  0  Four  Vanhentunut  7.7.2016  27.6.2016  
+  Check row  0  Four  Vanhentunut  7.7.2016  27.6.2016
   Check row  1  Five  Vanhentunut  9.7.2016  ${EMPTY}
   Check row  2  Six  Voimassa  ${EMPTY}  ${EMPTY}
 
@@ -158,12 +163,23 @@ Default products
   Set Suti id  1234
   Check default products
 
+Application could be submitted as Suti ID is set
+  Open tab  requiredFieldSummary
+  Wait test id hidden  submit-errors-container
+  Test id enabled  application-submit-btn
+
 Selection added checkbox clears products
+  Open tab  attachments
   Click label  suti-display-added
   Test id text is  suti-display-note  Lisää suunnittelun lähtötiedot Suunnitelmat ja liitteet -välilehdelle käsin.
   Test id disabled  suti-display-id
   Test id disabled  suti-display-link
   No such test id  suti-display-products
+
+Application can be submitted if 'added' flag is set
+  Open tab  requiredFieldSummary
+  Wait test id hidden  submit-errors-container
+  Test id enabled  application-submit-btn
 
 Pena invites Mikko as guest
   Open tab  parties
@@ -186,7 +202,7 @@ Sonja invites Teppo as statement giver
   Scroll and click test id  add-statement
   Invite 'manual' statement giver  1  Laoban  Teppo  teppo@example.com  ${EMPTY}
   [Teardown]  Logout
-      
+
 Mikko logs in, sees Suti but cannot edit
   Mikko logs in
   Readonly Suti
@@ -195,20 +211,13 @@ Mikko logs in, sees Suti but cannot edit
 Teppo logs in, sees Suti but cannot edit
   Teppo logs in
   Readonly Suti
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Luukas logs in, sees Suti but cannot edit
   Teppo logs in
   Readonly Suti
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 No frontend errors
   There are no frontend errors
-  
-  
-
-
-
-
-
 

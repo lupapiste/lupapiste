@@ -30,7 +30,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.suti :as suti]))
 
 ;; Notifications
 
@@ -227,7 +228,9 @@
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
                      (when-not (company/cannot-submit command)
-                       (fail :company.user.cannot.submit)))))
+                       (fail :company.user.cannot.submit))
+                     (when (env/feature? :suti)
+                       (suti/suti-submit-validation command)))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"

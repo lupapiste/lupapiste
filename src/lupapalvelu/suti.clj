@@ -3,6 +3,7 @@
             [cheshire.core :as json]
             [swiss.arrows :refer :all]
             [taoensso.timbre :refer [debugf]]
+            [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
@@ -94,3 +95,13 @@
             (ss/replace www "$$" suti-id))
      :products products
      :suti suti}))
+
+(defn suti-submit-validation
+  "Can be used as pre-check. Validates if application can be submitted from suti point of view.
+  Validates only if suti is enabled for organization.
+  Returs nil when suti 'added' flag is true or suti-id is set. Else suti-id needs to be set."
+  [{:keys [application organization]}]
+  (let [{:keys [enabled suti]} (application-data application @organization)]
+    (when enabled
+      (when-not (or (:added suti) (not (ss/blank? (:id suti))))
+        (fail :suti.id-missing)))))

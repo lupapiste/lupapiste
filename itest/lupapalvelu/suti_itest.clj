@@ -49,8 +49,8 @@
 
 (facts "Suti and application"
        (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
-         (fact "Submit application"
-               (command pena :submit-application :id application-id))
+         (fact "Submit application possible before suti"
+           (query pena :application-submittable :id application-id) => ok?)
          (fact "No Suti since the primary operation is not suti-toggled"
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
          (fact "Toggle operation, but disable Suti for the organization"
@@ -60,6 +60,8 @@
                (command sipoo :suti-toggle-enabled :flag false) => ok?)
          (fact "No Suti for application, since Suti disabled"
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
+         (fact "Submit application possible as suti is disabled"
+           (query pena :application-submittable :id application-id) => ok?)
          (fact "Enable Suti"
                (command sipoo :suti-toggle-enabled :flag true) => ok?)
          (fact "Application Suti data is empty"
@@ -67,6 +69,9 @@
                                                                                          :products nil
                                                                                          :www nil
                                                                                          :suti {:id nil :added false}}))
+         (fact "Submit application not possible if suti-id is not set"
+           (query pena :application-submittable :id application-id) => (partial expected-failure? :suti.id-missing))
+
          ;; Development (mockup) Suti server (/dev/suti) treats suti-ids semantically:
          ;; empty: no products
          ;; bad: 501
@@ -116,6 +121,13 @@
                                                                                          :products nil
                                                                                          :www nil
                                                                                          :suti {:id "" :added false}}))
+
+         (fact "Submit application not possible if suti-id is not set"
+           (query pena :application-submittable :id application-id) => (partial expected-failure? :suti.id-missing))
+         (fact "Submit application possible if 'added' property is true"
+           (command pena :suti-update-added :id application-id :added true)
+           (query pena :application-submittable :id application-id) => ok?)
+
          (fact "Suti added property -> no products"
                (command pena :suti-update-id :id application-id :sutiId "foobar") => ok?
                (command pena :suti-update-added :id application-id :added true) => ok?
@@ -124,6 +136,13 @@
                                   :products nil
                                   :www "http://example.com/foobar/suti"
                                   :suti {:id "foobar" :added true}}))
+
+         (fact "Submit is possible, if suti-id is set"
+           (command pena :suti-update-added :id application-id :added false) => ok?
+           (command pena :suti-update-id :id application-id :sutiId "54321") => ok?
+           (query pena :application-submittable :id application-id) => ok?
+           (command pena :submit-application :id application-id) => ok?)
+
          (fact "Authority has the needed access rights, too"
                (command sonja :suti-update-id :id application-id :sutiId "12345") => ok?
                (query sonja :suti-application-data :id application-id) => ok?)
