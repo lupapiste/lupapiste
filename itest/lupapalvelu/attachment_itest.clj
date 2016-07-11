@@ -717,6 +717,14 @@
                            :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
                   => (partial expected-failure? :error.ram-cannot-delete-root))))
     (let [ram-id (:id (latest-attachment))]
+      (facts "Latest attachment has RAM link"
+             (let [{[a b] :ram-links} (query pena :ram-linked-attachments :id application-id :attachmentId ram-id)]
+              (fact "Base attachment has no link" (:ram-link a) => nil)
+              (fact "RAM attachment links to base attachment" (:ramLink b) => (:id a))))
+      (fact "Authority can query RAM links"
+            (query sonja :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
+      (fact "Reader authority can query RAM links"
+            (query luukas :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
       (fact "Sonja approves RAM attachment"
             (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
       (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]

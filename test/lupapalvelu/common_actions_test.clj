@@ -94,8 +94,8 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                           :get-building-info-from-wfs
-                           :pdfa-casefile :suti-application-data
+                           :get-building-info-from-wfs :tasks-tab-visible
+                           :pdfa-casefile :suti-application-data :ram-linked-attachments :attachment-groups
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]
