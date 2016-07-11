@@ -11,12 +11,12 @@ Mikko creates application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Duram Duram${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Create application with state   ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
 
 Mikko adds txt attachment without comment
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
+  Application state should be  submitted
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko opens attachment details
@@ -27,10 +27,6 @@ Mikko opens attachment details
 Add RAM button not visible in the draft state
   No such test id  add-ram-attachment
   No such test id  ram-links-table
-  [Teardown]  Go back
-
-Mikko submits application
-  Submit application
   [Teardown]  Logout
 
 Sonja logs in and gives verdict
@@ -182,5 +178,3 @@ Delete allowed
   Run keyword if  ${click}  Wait Until  Click button  id=show-attachment-versions
   Wait test id visible  delete-attachment
   Run keyword if  ${click}  Wait test id visible  delete-version
-
-

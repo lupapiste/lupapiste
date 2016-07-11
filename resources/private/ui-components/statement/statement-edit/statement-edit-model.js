@@ -85,7 +85,9 @@ LUPAPISTE.StatementEditModel = function(params) {
   });
 
   self.dispose = function() {
-    initApplicationSubscription && initApplicationSubscription.dispose();
+    if (initApplicationSubscription)  {
+      initApplicationSubscription.dispose();
+    }
     initSubscription.dispose();
     textSubscription.dispose();
     statusSubscription.dispose();
