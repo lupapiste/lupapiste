@@ -103,5 +103,5 @@
   [{:keys [application organization]}]
   (let [{:keys [enabled suti]} (application-data application @organization)]
     (when enabled
-      (when-not (or (:added suti) (not (ss/blank? (:id suti))))
+      (when-not (or (:added suti) (ss/not-blank? (:id suti)))
         (fail :suti.id-missing)))))
