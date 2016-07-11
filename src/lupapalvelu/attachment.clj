@@ -706,11 +706,14 @@
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file! application)
                                 :file-id))]
-    (->> (cond-> options
-                 original-file-id (assoc :original-file-id original-file-id))
-         (upload-file! application)
-         (merge options {:now (:created options) :stamped (get options :stamped false)})
-         (set-attachment-version! application (get-or-create-attachment! application options)))))
+    (try
+      (->> (cond-> options
+                   original-file-id (assoc :original-file-id original-file-id))
+           (upload-file! application)
+           (merge options {:now (:created options) :stamped (get options :stamped false)})
+           (set-attachment-version! application (get-or-create-attachment! application options)))
+      (finally
+        (io/delete-file temp-file :silently)))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
