@@ -7,37 +7,32 @@ LUPAPISTE.SutiApiModel = function(params) {
     return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
   });
 
-  function emptyServerConf() {
-    return {url: "", username: "", password: ""};
-  }
   var visibleKeys = ["url", "username"];
 
   self.serverParams = {
     channel: {},
-    server: ko.observable(emptyServerConf()),
+    server: ko.observable({}),
     readOnly: self.readOnly,
     waiting: ko.observable(false),
     header: "auth-admin.suti-api-settings.header",
     urlLabel: "auth-admin.suti-api-settings.urlLabel",
     saveLabel: "save",
+    prefix: "suti",
     // define mandatory keys, but the default ajax error handling is used
     error: null,
     errorMessageTerm: null
   };
 
-  self.disposedComputed(function(){
-    var server = util.getIn(params, ["organization", "suti", "server"]);
-    self.serverParams.server(_.assign(emptyServerConf(), _.pick(server, visibleKeys)));
-  });
+  // Service
+  var service = lupapisteApp.services.sutiService;
 
   self.serverParams.channel.send = function(e) {
-    ajax.command("update-suti-server-details", e)
-      .processing(self.serverParams.waiting)
-      .success(function(resp){
-        self.serverParams.server(_.assign(emptyServerConf(), _.pick(e, visibleKeys)));
-        util.showSavedIndicator(resp);
-      })
-      .call();
+    service.configureServer( e, self.serverParams.waiting );
   };
+
+  self.disposedComputed( function() {
+    self.serverParams.server( _.merge( self.serverParams.server(),
+                                       service.sutiDetails().server) );
+  });
 
 };

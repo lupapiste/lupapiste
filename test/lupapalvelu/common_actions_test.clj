@@ -54,7 +54,8 @@
                           :application-guests
                           :statement-attachment-allowed
                           :ram-linked-attachments
-                          :latest-attachment-version}
+                          :latest-attachment-version
+                          :suti-application-data}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)

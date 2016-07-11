@@ -605,6 +605,8 @@
                         <div data-bind="component: {name: 'export-attachments'}"></div>
                         <!-- /ko -->
 
+                        <suti-display></suti-display>
+                        
                         <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
                             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
                             <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>

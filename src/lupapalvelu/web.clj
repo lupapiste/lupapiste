@@ -699,7 +699,7 @@
         (resp/status 200 "OK")
         (resp/status 400 "FAIL"))))
 
-  ;; send ascii over the wire with wrong encofing (case: Vetuma)
+  ;; send ascii over the wire with wrong encoding (case: Vetuma)
   ;; direct:    http --form POST http://localhost:8080/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   ;; via nginx: http --form POST http://localhost/dev/ascii Content-Type:'application/x-www-form-urlencoded' < dev-resources/input.ascii.txt
   (defpage [:post "/dev/ascii"] {:keys [a]}
@@ -740,4 +740,18 @@
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
 
+  (defpage [:get "/dev/suti/:id"] {:keys [id]}
+    (case (keyword id)
+      :bad   (resp/status 501 "Bad Suti request.")
+      :empty (json/generate-string {})
+      :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
+              (if (and (= username "suti") (= password "secret"))
+                (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                                                     {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
+                                                     {:name "Six" :expired false :expirydate nil :downloaded nil}]})
+                (resp/status 401 "Unauthorized")))
+      (json/generate-string {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
+                                           {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
+                                            :downloaded "\\/Date(1467364927456)\\/"}
+                                           {:name "Three" :expired false :expirydate nil :downloaded nil}]})))
   )

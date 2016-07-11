@@ -17,4 +17,5 @@
   lupapisteApp.services.ramService = new LUPAPISTE.RamService();
   lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
   lupapisteApp.services.attachmentsService = new LUPAPISTE.AttachmentsService();
+  lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
 })();

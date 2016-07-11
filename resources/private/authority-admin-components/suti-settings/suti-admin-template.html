@@ -1,0 +1,31 @@
+<script class="ko-template" type="text/jx-query-tmpl"
+        id="suti-admin-template">
+  <div data-bind="feature: 'suti'"
+       class="suti-admin-container">
+  <h2 data-bind="ltext: 'suti.admin.title'"></h2>
+  <div class="checkbox-wrapper">
+    <input type="checkbox" id="suti-enabled"
+           data-bind="checked: enabled">
+    <label class="checkbox-label" for="suti-enabled"
+           data-bind="ltext: 'suti.enabled'"></label>
+  </div>
+  <table class="suti-admin-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'auth-admin.parameter'"></th>
+        <th data-bind="ltext: 'auth-admin.value'"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-bind="ltext: 'suti.admin.www'"></td>
+        <td><input type="url"
+                   data-bind="value: www"
+                   data-test-id="suti-www"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <suti-api></suti-api>
+</div>
+</script>
