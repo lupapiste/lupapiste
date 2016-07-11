@@ -2356,6 +2356,18 @@
   {:apply-when (pos? (mongo/count :organizations {:selected-operations "tyonjohtajan-nimeaminen"}))}
   (mongo/update :organizations {} {$pull {:selected-operations "tyonjohtajan-nimeaminen"}} :multi true))
 
+(defmigration rakennuspaikka-to-toiminnan-sijainti-ilman-ilmoitusta
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "rakennuspaikka" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "toiminnan-sijainti-ilman-ilmoitusta")
+        doc))
+    {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
