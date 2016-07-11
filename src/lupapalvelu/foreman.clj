@@ -268,10 +268,6 @@
          (update foreman-app :auth conj))
     foreman-app))
 
-(defn create-foreman-application-with-docs [command linked-application foreman-role]
-  (-> (new-foreman-application command)
-      (update-foreman-docs linked-application foreman-role)))
-
 (defn- invite-company! [foreman-app {user :user} auth]
   (let [company-id (get-in auth [:invite :user :id])
         token-id   (company/company-invitation-token user company-id (:id foreman-app))]
