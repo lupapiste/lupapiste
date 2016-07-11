@@ -11,7 +11,7 @@
 
 (defn- task-by-type [task-type task] (= (str "task-" task-type) (-> task :schema-info :name)))
 
-(let [application (create-and-submit-application pena :municilapity sonja-muni)
+(let [application (create-and-submit-application pena :propertyId sipoo-property-id)
       application-id (:id application)
       resp (command sonja :check-for-verdict :id application-id)
       application (query-application pena application-id)
@@ -38,6 +38,13 @@
     (-> tasks first :assignee :id) => pena-id
     (-> tasks first :assignee :firstName) => "Pena"
     (-> tasks first :assignee :lastName) => "Panaani")
+
+    (fact "Applicant can see Tasks tab"
+          (query pena :tasks-tab-visible :id application-id) => ok?)
+    (fact "Authority can see Tasks tab"
+          (query sonja :tasks-tab-visible :id application-id) => ok?)
+    (fact "Reader authority can see Tasks tab"
+          (query luukas :tasks-tab-visible :id application-id) => ok?)
 
   (facts "katselmukset"
     (count katselmukset) => 3

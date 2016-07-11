@@ -136,6 +136,7 @@
   {:description "Get all attachment groups for application"
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
@@ -180,6 +181,7 @@
   {:parameters [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{{attachments :attachments} :application}]
