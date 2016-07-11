@@ -7,8 +7,6 @@ LUPAPISTE.SutiApiModel = function(params) {
     return !lupapisteApp.models.globalAuthModel.ok( "update-user-organization");
   });
 
-  var visibleKeys = ["url", "username"];
-
   self.serverParams = {
     channel: {},
     server: ko.observable({}),
