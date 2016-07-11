@@ -93,7 +93,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.applicantPhone = ko.observable();
   self.organizationMeta = ko.observable();
   self.neighbors = ko.observable([]);
-  self.submittable = ko.observable(true);
   self.submitErrors = ko.observableArray();
 
   self.organization = ko.observable([]);
@@ -259,7 +258,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonEnabled = ko.pureComputed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable() && _.isEmpty(self.submitErrors());
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
   });
 
 
