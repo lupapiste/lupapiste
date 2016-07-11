@@ -87,11 +87,10 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
-  // Options (all are optional)
-  // waiting: observable
-  self.fetchApplicationData = function( application, options ) {
+  // waiting is an optional observable.
+  self.fetchApplicationData = function( application, waiting ) {
     ajax.query( "suti-application-data", {id: application.id()})
-      .pending(_.get( options, "waiting", _.noop))
+      .pending( waiting || _.noop)
       .success( function( res ) {
         if( _.isArray( res.data.products )) {
           res.data.products = _.map( res.data.products, function( p ) {
@@ -118,16 +117,19 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
-  // Options (all are optional)
-  // waiting: observable
-  self.updateApplication = function( application, data, options ) {
-    options = options || {};
-    ajax.command( "suti-update-application", {id: application.id(),
-                                              suti: data })
-      .pending( _.get( options, "waiting", _.noop ))
-      .success( function() {
-        self.fetchApplicationData( application, options );
-      })
-      .call();
+  var keyParameters = { id: "sutiId", added: "added"};
+
+  // waiting is an optional observable.
+  self.updateApplication = function( application, key, value, waiting ) {
+    var param = keyParameters[key];
+    if( param ) {
+      ajax.command( "suti-update-" + key,
+                    _.set( {id: application.id()}, param, value ))
+        .pending( waiting || _.noop )
+        .success( function() {
+          self.fetchApplicationData( application, waiting );
+        })
+        .call();
+    }
   };
 };

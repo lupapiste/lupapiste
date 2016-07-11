@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
@@ -1175,7 +1176,19 @@
                                   (or (empty? selected-operations) (selected-operations node))
                                   (= (name permit-type) (permit-type-of-operation node))))]
     (sort-operation-tree
-      (operations-filtered filtering-fn true))))
+     (operations-filtered filtering-fn true))))
+
+(defn visible-operation
+  "Input validator for operation id. Operation must exist and be visible.
+   param: Parameter key for the operation id.
+   command: Action command."
+  [param command]
+  (if-let [operation (some-> (get-in command [:data param])
+                             ss/trim
+                             get-operation-metadata)]
+    (when (:hidden operation)
+      (fail :error.operations.hidden))
+    (fail :error.operations.not-found)))
 
 (comment
   ; operations (keys) with asianhallinta enabled

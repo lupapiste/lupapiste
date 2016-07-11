@@ -295,6 +295,8 @@
 "error.old-ie" "sv" "Lupapiste stöder ej den server du använder, vi rekommenderar att du använder en nyare server (t.ex. Mozilla Firefox, Google Chrome, Apple Safari, Internet Explorer 11)."
 "error.operations.asianhallinta-disabled" "fi" "Valittua toimenpidettä ei voida siirtää asianhallintajärjestelmään"
 "error.operations.asianhallinta-disabled" "sv" "Den valda åtgärden kan inte flyttas till ärendehanteringssystemet"
+"error.operations.hidden" "fi" "Toimenpide ei ole käytettävissä."
+"error.operations.not-found" "fi" "Tuntematon toimenpide."
 "error.organization.duplicate-scope" "fi" "Kunnalle on jo määritelty kyseinen lupatyyppi"
 "error.organization.duplicate-scope" "sv" "Ifrågavarande tillståndstyp har redan definierats för kommunen"
 "error.organization.scope-not-found" "fi" "Konfiguraatio puuttuu"

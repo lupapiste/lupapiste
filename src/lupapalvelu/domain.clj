@@ -342,6 +342,7 @@
    :state                    ""
    :statements               []
    :submitted                nil ; timestamp
+   :suti                     {:id nil :added false}
    :tasks                    []
    :title                    ""
    :transfers                []

@@ -19,10 +19,7 @@ LUPAPISTE.SutiDisplayModel = function() {
       write: function( value ) {
         var app = lupapisteApp.models.application;
         if( app.id() ) {
-          service.updateApplication( app,
-                                     _.set( {}, key, value),
-                                     {refresh: true,
-                                      waiting: self.waiting});
+          service.updateApplication( app, key, value, self.waiting);
         }
       }
     });
@@ -35,7 +32,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.disposedComputed( function() {
     var app = lupapisteApp.models.application;
     if( app.id() ) {
-      service.fetchApplicationData( app, {waiting: self.waiting} );
+      service.fetchApplicationData( app, self.waiting );
     }
   });
 
@@ -71,7 +68,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   });
 
   self.enabled = self.disposedPureComputed( function() {
-    var user = lupapisteApp.models.applicationAuthModel.ok( "suti-update-application");
+    var user = lupapisteApp.models.applicationAuthModel.ok( "suti-update-id");
     var idEnabled = user && !self.sutiAdded();
     return { id: idEnabled,
              link: idEnabled && self.suti().www,

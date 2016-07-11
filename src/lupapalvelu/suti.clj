@@ -73,8 +73,7 @@
              (json/parse-string true)
              :productlist
              (map clean-suti-dates <>))
-    (catch Exception e
-      (debugf "Suti fetch failed (%s): %s" url (.getMessage e))
+    (catch Exception _
       "suti.products-error")))
 
 (defn application-data [{:keys [suti organization primaryOperation]}]

@@ -30,14 +30,18 @@
                   :suti {:server {:url "https://suti.org/" :username "sutiuser"}
                          :enabled true
                          :www "http://example.com/$$/suti"}})
-       (facts "Add operations"
-              (command sipoo :suti-toggle-operation :operationId "foo" :flag true) => ok?
-              (command sipoo :suti-toggle-operation :operationId "bar" :flag true) => ok?
-              (query sipoo :suti-operations) => (contains {:operations ["foo" "bar"]}))
+       (facts "Bad operations"
+              (command sipoo :suti-toggle-operation :operationId "ronaldos-moth" :flag true)
+              => (contains {:text "error.operations.not-found"})
+              (command sipoo :suti-toggle-operation :operationId "tyonjohtajan-nimeaminen" :flag false)
+              =>  (contains {:text "error.operations.hidden"}))
+       (facts "Add good operations"
+              (command sipoo :suti-toggle-operation :operationId "  kaivuu  " :flag true) => ok?
+              (command sipoo :suti-toggle-operation :operationId " purkaminen  " :flag true) => ok?
+              (query sipoo :suti-operations) => (contains {:operations ["kaivuu" "purkaminen"]}))
        (facts "Remove operation"
-              (command sipoo :suti-toggle-operation :operationId "foo" :flag false) => ok?
-              (command sipoo :suti-toggle-operation :operationId "noop" :flag false) => ok?
-              (query sipoo :suti-operations) => (contains {:operations ["bar"]})))
+              (command sipoo :suti-toggle-operation :operationId "  kaivuu  " :flag false) => ok?
+              (query sipoo :suti-operations) => (contains {:operations ["purkaminen"]})))
 
 (defn data-contains [check]
   (fn [{data :data}]
@@ -54,7 +58,7 @@
                (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti/"
                         :username "suti" :password "wrong") => ok?
                (command sipoo :suti-toggle-enabled :flag false) => ok?)
-         (fact "No Suti for application, since Suti disablled"
+         (fact "No Suti for application, since Suti disabled"
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled false}))
          (fact "Enable Suti"
                (command sipoo :suti-toggle-enabled :flag true) => ok?)
@@ -62,59 +66,66 @@
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled true
                                                                                          :products nil
                                                                                          :www nil
-                                                                                         :suti nil}))
+                                                                                         :suti {:id nil :added false}}))
          ;; Development (mockup) Suti server (/dev/suti) treats suti-ids semantically:
          ;; empty: no products
          ;; bad: 501
          ;; auth: requires username (suti) and password (secret)
          ;; all the other ids return products. See web.clj for details.
          (fact "Use empty as suti-id"
-               (command pena :suti-update-application :id application-id :suti {:id " empty  "}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId " empty  ") => ok?
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled true
                                                                                          :products nil
                                                                                          :www "http://example.com/empty/suti"
-                                                                                         :suti {:id "empty"}}))
+                                                                                         :suti {:id "empty" :added false}}))
          (fact "Use bad as suti-id, products contains an error ltext"
-               (command pena :suti-update-application :id application-id :suti {:id "  bad   "}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId "  bad   ") => ok?
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled true
                                                                                          :products "suti.products-error"
                                                                                          :www "http://example.com/bad/suti"
-                                                                                         :suti {:id "bad"}}))
+                                                                                         :suti {:id "bad" :added false}}))
          (fact "Use auth as suti-id with wrong credentials"
-               (command pena :suti-update-application :id application-id :suti {:id "  auth  "}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId "  auth  ") => ok?
                (query pena :suti-application-data :id application-id) => (data-contains {:enabled true
                                                                                          :products "suti.products-error"
                                                                                          :www "http://example.com/auth/suti"
-                                                                                         :suti {:id "auth"}}))
+                                                                                         :suti {:id "auth" :added false}}))
          (fact "Use auth as suti-id with correct credentials"
                (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti/"
                         :username "suti" :password "secret") => ok?
-               (command pena :suti-update-application :id application-id :suti {:id "auth"}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId "auth") => ok?
                (query pena :suti-application-data :id application-id)
                => (data-contains {:enabled true
                                   :products [{:name "Four" :expired true :expirydate 1467883327899 :downloaded 1467019327022}
                                              {:name "Five" :expired true :expirydate 1468056127124 :downloaded nil}
                                              {:name "Six" :expired false :expirydate nil :downloaded nil}]
                                   :www "http://example.com/auth/suti"
-                                  :suti {:id "auth"}}))
+                                  :suti {:id "auth" :added false}}))
          (fact "Finally, default good results"
-               (command pena :suti-update-application :id application-id :suti {:id "  good  "}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId "  good  ") => ok?
                (query pena :suti-application-data :id application-id)
                => (data-contains {:enabled true
                                   :products [{:name "One" :expired false :expirydate nil :downloaded nil}
                                              {:name "Two" :expired true :expirydate 1467710527123 :downloaded 1467364927456}
                                              {:name "Three" :expired false :expirydate nil :downloaded nil}]
                                   :www "http://example.com/good/suti"
-                                  :suti {:id "good"}}))
+                                  :suti {:id "good" :added false}}))
+         (fact "Suti-id can be empty"
+               (command pena :suti-update-id :id application-id :sutiId "") => ok?
+               (query pena :suti-application-data :id application-id) => (data-contains {:enabled true
+                                                                                         :products nil
+                                                                                         :www nil
+                                                                                         :suti {:id "" :added false}}))
          (fact "Suti added property -> no products"
-               (command pena :suti-update-application :id application-id :suti {:added true}) => ok?
+               (command pena :suti-update-id :id application-id :sutiId "foobar") => ok?
+               (command pena :suti-update-added :id application-id :added true) => ok?
                (query pena :suti-application-data :id application-id)
                => (data-contains {:enabled true
                                   :products nil
-                                  :www "http://example.com/good/suti"
-                                  :suti {:id "good", :added true}}))
+                                  :www "http://example.com/foobar/suti"
+                                  :suti {:id "foobar" :added true}}))
          (fact "Authority has the needed access rights, too"
-               (command sonja :suti-update-application :id application-id :suti {:id "hii"}) => ok?
+               (command sonja :suti-update-id :id application-id :sutiId "12345") => ok?
                (query sonja :suti-application-data :id application-id) => ok?)
          (fact "Authority invites statement giver"
                (command sonja :request-for-statement :id application-id

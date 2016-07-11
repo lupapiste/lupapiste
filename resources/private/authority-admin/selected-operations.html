@@ -14,7 +14,7 @@
                 <th data-bind="ltext: 'verdict.pykala'"></th>
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <th data-bind="ltext: 'suti.column',
-                               feature: 'suti-integration'"></th>
+                               feature: 'suti'"></th>
                 <!-- /ko -->
               </tr>
             </thead>
@@ -32,7 +32,7 @@
                   </div>
                 </td>
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
-                <td data-bind="feature: 'suti-integration'">
+                <td data-bind="feature: 'suti'">
                   <div class="checkbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'suti-' + id},
