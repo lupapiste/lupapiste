@@ -197,6 +197,11 @@ Teppo logs in, sees Suti but cannot edit
   Readonly Suti
   [Teardown]  Logout  
 
+Luukas logs in, sees Suti but cannot edit
+  Teppo logs in
+  Readonly Suti
+  [Teardown]  Logout  
+
 No frontend errors
   There are no frontend errors
   

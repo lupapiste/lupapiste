@@ -127,6 +127,8 @@
          (fact "Authority has the needed access rights, too"
                (command sonja :suti-update-id :id application-id :sutiId "12345") => ok?
                (query sonja :suti-application-data :id application-id) => ok?)
+         (fact "Reader authority"
+               (query luukas :suti-application-data :id application-id) => ok?)
          (fact "Authority invites statement giver"
                (command sonja :request-for-statement :id application-id
                         :functionCode nil

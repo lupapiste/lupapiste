@@ -67,6 +67,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority :applicant}
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :states states/all-application-states
    :feature :suti}
   [{application :application}]

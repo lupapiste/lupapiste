@@ -71,7 +71,8 @@
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
-                              :toggle-guest-subscription :application-guests :decline-invitation}]
+                               :toggle-guest-subscription :application-guests :decline-invitation
+                               :suti-update-id :suti-update-added}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -94,7 +95,7 @@
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs
-                           :pdfa-casefile
+                           :pdfa-casefile :suti-application-data
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]
