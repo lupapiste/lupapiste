@@ -76,9 +76,9 @@
     (catch Exception _
       "suti.products-error")))
 
-(defn application-data [{:keys [suti organization primaryOperation]}]
+(defn application-data [{:keys [suti primaryOperation]} organization]
   (let [{:keys [enabled www
-                server operations]} (:suti (org/get-organization organization))
+                server operations]} (:suti organization)
         url                         (:url server)
         {suti-id :id added :added}  suti
         suti-enabled                (and enabled

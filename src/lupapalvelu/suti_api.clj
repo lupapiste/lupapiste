@@ -70,8 +70,8 @@
    :org-authz-roles auth/reader-org-authz-roles
    :states states/all-application-states
    :feature :suti}
-  [{application :application}]
-  (ok :data (suti/application-data application)))
+  [{application :application organization :organization}]
+  (ok :data (suti/application-data application @organization)))
 
 (defcommand suti-update-id
   {:description "Mechanism for updating Suti id property."
