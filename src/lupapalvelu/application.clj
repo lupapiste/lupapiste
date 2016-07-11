@@ -243,7 +243,7 @@
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
                             (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
-        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :group-type group)) types)
+        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :groupType group)) types)
         metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
     (map (partial att/make-attachment created target true false false applicationState) groups types metadatas)))
 

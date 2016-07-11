@@ -32,6 +32,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
@@ -449,7 +450,7 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType group operationId text upload typeSelector targetId targetType locked] :as data}
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked] :as data}
   (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s" data upload attachmentType operationId typeSelector locked)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
@@ -457,18 +458,22 @@
                    {:type targetType}
                    {:type targetType :id targetId}))
         attachment-type (att-type/parse-attachment-type attachmentType)
+        group (cond
+                (ss/blank? operationId) nil
+                (att/attachment-groups (keyword operationId)) {:groupType operationId}
+                :else {:id operationId})
         upload-data (-> upload
                         (assoc :id applicationId
                                :attachmentId attachmentId
                                :target target
                                :locked (java.lang.Boolean/parseBoolean locked)
                                :text text
-                               :group (util/assoc-when-pred group ss/not-blank? :id operationId))
+                               :group group)
                         (util/assoc-when :attachmentType attachment-type))
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/lp-static/html/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.115.html"
+      (resp/redirect (str (hiccup.util/url "/lp-static/html/upload-1.127.html"
                                            (-> (:params request)
                                                (dissoc :upload)
                                                (dissoc ring.middleware.anti-forgery/token-key)

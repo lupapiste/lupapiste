@@ -202,7 +202,7 @@
 
 (def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
-(def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
+(def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka-ilman-ilmoitusta"])
 
 (def- optional-ymparistolupa-schemas #{"ymp-maksaja"})
 

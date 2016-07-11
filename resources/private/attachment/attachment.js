@@ -242,10 +242,10 @@ var attachment = (function() {
     },
 
     getGroupOptionsText: function(item) {
-      if (item["group-type"] === "operation") {
+      if (item.groupType === "operation") {
         return item.description ? loc([item.name, "_group_label"]) + " - " + item.description : loc([item.name, "_group_label"]);
-      } else if (item["group-type"]) {
-        return loc([item["group-type"], "_group_label"]);
+      } else if (item.groupType) {
+        return loc([item.groupType, "_group_label"]);
       }
     },
 
@@ -340,15 +340,15 @@ var attachment = (function() {
     }
 
     model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
-      // Update attachment group-type + operation when new group is selected
+      // Update attachment group type + operation when new group is selected
       if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
-          util.getIn(group, ["group-type"]) !== util.getIn(model, ["groupType"])) {
+          util.getIn(group, ["groupType"]) !== util.getIn(model, ["groupType"])) {
 
-        group = _.pick(group, ["id", "name", "group-type"]);
+        group = _.pick(group, ["id", "name", "groupType"]);
         saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
 
-        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "group-type") : null);
-        model.groupType(util.getIn(group, ["group-type"]));
+        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "groupType") : null);
+        model.groupType(util.getIn(group, ["groupType"]));
       }
     }));
 
@@ -478,7 +478,7 @@ var attachment = (function() {
     model.filename(attachment.filename);
     model.type(attachment.type);
     model.operation(attachment.op);
-    model.groupType(attachment["group-type"]);
+    model.groupType(attachment.groupType);
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
@@ -497,8 +497,8 @@ var attachment = (function() {
     ajax
       .query("attachment-groups", {id: applicationId})
       .success(function(resp) {
-        var currentGroup = _.pickBy({"group-type": attachment.group,
-                                     "id": util.getIn(attachment, ["op", "id"])},
+        var currentGroup = _.pickBy({groupType: attachment.groupType,
+                                     id: util.getIn(attachment, ["op", "id"])},
                                     _.isString);
         model.selectableGroups(resp.groups);
         if (!_.isEmpty(currentGroup)) {

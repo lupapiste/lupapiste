@@ -87,8 +87,8 @@
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-group-type [group]
-  (when-let [group-type (keyword (:group-type group))]
-    (when (sc/check (apply sc/enum attachment/attachment-groups) group-type)
+  (when-let [group-type (keyword (:groupType group))]
+    (when-not (attachment/attachment-groups group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]
@@ -114,11 +114,10 @@
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
-(defn- validate-operation-in-application [{{meta :meta} :data application :application}]
-  (when-let [op-id (get-in meta [:op :id])]
-    (let [operation-ids (map :id (a/get-operations application))]
-      (when (not-any? (partial = op-id) operation-ids)
-        (fail :error.illegal-attachment-operation)))))
+(defn- validate-operation-in-application [{data :data application :application}]
+  (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
+    (when-not (util/find-by-id op-id (a/get-operations application))
+      (fail :error.illegal-attachment-operation))))
 
 ;;
 ;; Attachments
@@ -138,7 +137,7 @@
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states}
+   :states states/all-states}
   [{application :application}]
   (ok :groups (attachment/attachment-groups-for-application application)))
 
@@ -441,6 +440,7 @@
                 validate-attachment-type
                 a/validate-authority-in-drafts
                 attachment-id-is-present-in-application-or-not-set
+                validate-operation-in-application
                 attachment-not-readOnly]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])

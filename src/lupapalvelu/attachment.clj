@@ -126,7 +126,7 @@
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
-   (sc/optional-key :autoConversion)    (sc/maybe sc/Bool)})
+   (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)})
 
 (defschema Type
   "Attachment type"
@@ -154,7 +154,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :group-type)         (apply sc/enum attachment-groups)
+   (sc/optional-key :groupType)          (apply sc/enum attachment-groups)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -183,14 +183,14 @@
 
 (defn attachment-groups-for-application [{primary-op :primaryOperation secondary-ops :secondaryOperations}]
   (let [operations (->> (cons primary-op secondary-ops)
-                        (map (partial merge {:group-type :operation})))]
+                        (map (partial merge {:groupType :operation})))]
     (->> (remove #{:operation} attachment-groups)
-         (map (partial assoc {} :group-type))
+         (map (partial assoc {} :groupType))
          (apply conj operations))))
 
-(defn attachment-grouping [{group-type :group-type operation :op :as attachment}]
+(defn attachment-grouping [{group-type :groupType operation :op :as attachment}]
   (let [group-type (or group-type (when operation :operation))] ;; Group not set for old attachments.
-    {:by-ref  (merge {:group-type group-type}
+    {:by-ref  (merge {:groupType group-type}
                      (when (= :operation group-type) operation))
      :by-type (att-type/group-by-type attachment)}))
 
@@ -238,7 +238,7 @@
            :versions []
            :auth []
            :contents contents}
-          (:group-type group) (assoc :group-type (:group-type group))
+          (:groupType group) (assoc :groupType (:groupType group))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
@@ -488,7 +488,7 @@
   (merge (select-keys meta [:contents :size :scale])
          (when (:group meta)
            {:op (not-empty (select-keys (:group meta) [:id :name]))
-            :group-type (get-in meta [:group :group-type])})))
+            :groupType (get-in meta [:group :groupType])})))
 
 (defn update-attachment-data! [command attachmentId data now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (update-application command
@@ -728,11 +728,14 @@
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file! application)
                                 :file-id))]
-    (->> (cond-> options
-                 original-file-id (assoc :original-file-id original-file-id))
-         (upload-file! application)
-         (merge options {:now (:created options) :stamped (get options :stamped false)})
-         (set-attachment-version! application (get-or-create-attachment! application options)))))
+    (try
+      (->> (cond-> options
+                   original-file-id (assoc :original-file-id original-file-id))
+           (upload-file! application)
+           (merge options {:now (:created options) :stamped (get options :stamped false)})
+           (set-attachment-version! application (get-or-create-attachment! application options)))
+      (finally
+        (io/delete-file temp-file :silently)))))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]

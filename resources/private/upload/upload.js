@@ -13,7 +13,6 @@ LUPAPISTE.Upload = {
   targetId: ko.observable(),
   locked: ko.observable(),
   selectableGroups: ko.observableArray(),
-  selectedGroup: ko.observable(),
   helpVisible: ko.observable(false),
   archiveEnabled: ko.observable(false)
 };
@@ -24,7 +23,7 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentId(options.attachmentId);
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
-  LUPAPISTE.Upload.selectableGroups([{"group-type": options.group, "id": options.operationId}]);
+  LUPAPISTE.Upload.selectableGroups([{groupType: options.group, id: options.operationId}]);
   LUPAPISTE.Upload.operationId(options.operationId);
   LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
@@ -59,7 +58,13 @@ LUPAPISTE.Upload.loadGroups = function(applicationId) {
       .query("attachment-groups", {id: applicationId})
       .success(function(data) {
         if (data.groups) {
-          LUPAPISTE.Upload.selectableGroups(data.groups);
+          LUPAPISTE.Upload.selectableGroups(_.map(data.groups, function(g) {
+            // group type is uploaded as operationId
+            if (!g.id) {
+              g.id = g.groupType;
+            }
+            return g;
+          }));
           LUPAPISTE.Upload.operationId.valueHasMutated();
         }
       })
@@ -69,10 +74,10 @@ LUPAPISTE.Upload.loadGroups = function(applicationId) {
 
 LUPAPISTE.Upload.getGroupOptionsText = function(item) {
   "use strict";
-  if (item["group-type"] === "operation") {
+  if (item.groupType === "operation") {
     return item.description ? loc([item.name, "_group_label"]) + " - " + item.description : loc([item.name, "_group_label"]);
-  } else if (item["group-type"]) {
-    return loc([item["group-type"], "_group_label"]);
+  } else if (item.groupType) {
+    return loc([item.groupType, "_group_label"]);
   }
 };
 
@@ -94,7 +99,6 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       attachmentType: pageutil.getURLParameter("attachmentType"),
       typeSelector: JSON.parse(pageutil.getURLParameter("typeSelector") || false),
       opSelector: JSON.parse(pageutil.getURLParameter("opSelector") || false),
-      group: pageutil.getURLParameter("group-type"),
       operationId: pageutil.getURLParameter("operationId"),
       errorMessage: pageutil.getURLParameter("errorMessage"),
       target: {type: pageutil.getURLParameter("targetType"),

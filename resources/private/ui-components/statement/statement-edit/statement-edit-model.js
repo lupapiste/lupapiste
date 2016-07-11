@@ -77,16 +77,17 @@ LUPAPISTE.StatementEditModel = function(params) {
 
   if (applicationId()) {
     initStatementStatuses(applicationId());
-  } else {
-    applicationId.subscribe(function(appId) {
-      if (appId && _.isEmpty(self.statuses())) {
-        self.statuses.push("");
-        initStatementStatuses(appId);
-      }
-    });
   }
+  var initApplicationSubscription = applicationId.subscribe(function(appId) {
+    if (appId) {
+      initStatementStatuses(appId);
+    }
+  });
 
   self.dispose = function() {
+    if (initApplicationSubscription)  {
+      initApplicationSubscription.dispose();
+    }
     initSubscription.dispose();
     textSubscription.dispose();
     statusSubscription.dispose();
