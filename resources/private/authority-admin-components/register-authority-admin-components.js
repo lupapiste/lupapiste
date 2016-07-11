@@ -3,6 +3,7 @@ jQuery(document).ready(function() {
 
   var components = [{name: "server-settings"},
                     {name: "suti-api"},
+                    {name: "suti-admin"},
                     {name: "municipality-maps"},
                     {name: "municipality-maps-layers"},
                     {name: "municipality-maps-map"}];

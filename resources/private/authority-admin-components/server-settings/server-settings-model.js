@@ -11,6 +11,8 @@
  * - header: localization term
  * - urlLabel: localization term
  * - saveLabel: localization term
+ * - prefix: prefix for data-test-ids: prefix-url, prefix-username,
+ *   prefix-password, prefix-send
  */
 LUPAPISTE.ServerSettingsModel = function(params) {
   "use strict";
@@ -31,6 +33,7 @@ LUPAPISTE.ServerSettingsModel = function(params) {
   self.header = params.header;
   self.urlLabel = params.urlLabel;
   self.saveLabel = params.saveLabel;
+  self.prefix = params.prefix;
 
   self.disposedComputed( function() {
     var server = params.server();

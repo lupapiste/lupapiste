@@ -11,19 +11,29 @@
       <tr>
         <td data-bind="ltext: urlLabel"></td>
         <td class="serversettings--wide">
-          <input type="url" data-bind="value: url, disable: readOnly" data-test-id="server-details-url">
+          <input type="url"
+                 data-bind="value: url, 
+                            disable: readOnly,
+                            attr: {'data-test-id': prefix + '-url'}">
         </td>
       </tr>
       <tr>
         <td data-bind="ltext: 'auth-admin.server.username'"></td>
         <td class="serversettings--wide">
-          <input type="text" data-bind="value: username, disable: readOnly" data-test-id="server-details-username">
+          <input type="text"
+                 data-bind="value: username, 
+                            disable: readOnly,
+                            attr: {'data-test-id': prefix + '-username'}">
         </td>
       </tr>
       <tr>
         <td data-bind="ltext: 'auth-admin.server.password'"></td>
         <td class="serversettings--wide">
-          <input data-bind="value: password, disable: readOnly, attr: {placeholder:passwordPlaceholder}" type="password" data-test-id="server-details-password">
+          <input data-bind="value: password, 
+                            disable:readOnly, 
+                            attr: {placeholder:passwordPlaceholder,
+                            'data-test-id': prefix + '-password'}"
+                 type="password">
         </td>
       </tr>
     </tbody>
@@ -34,8 +44,8 @@
   <button class="positive"
     data-bind="click: updateServerDetails,
                css: {waiting: waiting},
-               disable: readOnly"
-    data-test-id="server-details-send">
+               disable: readOnly,
+               attr: {'data-test-id': prefix + '-send'}">
     <i class="wait spin lupicon-refresh"></i>
     <span data-bind="ltext: saveLabel"></span>
   </button>

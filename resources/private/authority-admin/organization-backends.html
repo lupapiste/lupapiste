@@ -164,10 +164,8 @@
 
       <section data-bind="component: {name: 'municipality-maps'}"></section>
 
-      <div data-bind="if: features.enabled('suti')"><div class="feature">
-        <section data-bind="component: {name: 'suti-api', params: {organization:organization} }"></section>
-      </div></div>
-
+      <suti-admin></suti-admin>
+      
       </div>
 
       <!-- DIALOGS -->

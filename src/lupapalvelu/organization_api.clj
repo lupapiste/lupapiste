@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-optional-url] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -90,11 +90,6 @@
     {}
     (map :permitType scope)))
 
-;; Validators
-(defn validate-optional-url [param command]
-  (let [url (ss/trim (get-in command [:data param]))]
-    (when-not (ss/blank? url)
-      (action/validate-url url))))
 
 ;;
 ;; Actions

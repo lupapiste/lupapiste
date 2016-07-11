@@ -54,7 +54,8 @@
                           :application-guests
                           :statement-attachment-allowed
                           :ram-linked-attachments
-                          :latest-attachment-version}
+                          :latest-attachment-version
+                          :suti-application-data}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
@@ -70,7 +71,8 @@
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
-                              :toggle-guest-subscription :application-guests :decline-invitation}]
+                               :toggle-guest-subscription :application-guests :decline-invitation
+                               :suti-update-id :suti-update-added}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -93,7 +95,7 @@
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs
-                           :pdfa-casefile
+                           :pdfa-casefile :suti-application-data
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]

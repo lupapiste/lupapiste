@@ -311,4 +311,34 @@ div.attachments-table-container {
       margin-left: 1px;
       magint-right: 1px;
     }
-  }}
+  }
+}
+
+table.suti-admin-table {
+  margin-top: $marginM;
+  td:nth-child(even) {
+    width: 50%;
+    input {
+      width: 90%;
+    }
+  }
+}
+
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
+}
+
+.suti-display {
+  margin-bottom: $marginM;
+  .rollup-button {
+    span {
+      text-transform: uppercase;
+    }
+  }
+  .form-grid, .checkbox-wrapper {
+    border: none;
+  }
+  .suti-display--error {
+    color: $negative;
+  }
+}

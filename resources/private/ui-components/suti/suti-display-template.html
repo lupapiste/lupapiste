@@ -1,0 +1,97 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="suti-display-template">
+  <div class="suti-display"
+       data-test-id="suti-display"
+       data-bind="if: showSuti,
+                  visible: showSuti,
+                  feature: 'suti'">
+    <rollup params="open: open">
+      <rollup-button params="open: $parent.open,
+                             css: {secondary: true},
+                             text: $parent.suti().title">
+      </rollup-button>
+      <div class="rollup__open attachments-accordion-content">
+        <div class="form-grid">
+          <div class="row">
+            <div class="col-2">
+              <div class="col--vertical">
+                <label for="suti-display-id"
+                       data-bind="ltext: 'suti.display-id'"></label>
+                <div class="button-input">
+                  <input type="text"
+                         id="suti-display-id"
+                         data-test-id="suti-display-id"
+                         data-bind="value: $parent.sutiId,
+                                    enable: $parent.enabled().id"><button class="primary"
+                                                                          data-bind="enable: $parent.enabled().link,
+                                                                                     click: $parent.sutiLink,
+                                                                                     css: {waiting: $parent.waiting}"
+                                                                          data-test-id="suti-display-link">
+                    <i class="wait spin lupicon-refresh"></i>
+                    <i class="lupicon-external-link"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-2">
+              <div class="col--vertical">
+                <label>&nbsp;</label>
+                <div class="checkbox-wrapper">
+                  <input type="checkbox"
+                         id="suti-display-added"
+                         data-bind="checked: $parent.sutiAdded,
+                                    enable: $parent.enabled().added">
+                  <label class="checkbox-label"
+                         for="suti-display-added"
+                         data-bind="ltext: 'suti.display-added'"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row"
+               data-bind="visible: $parent.note,
+                          if: $parent.note">
+            <div class="col-4">
+              <span data-bind="ltext: $parent.note().text,
+                               css: {'suti-display--error': $parent.note().error}"
+                    data-test-id="suti-display-note">
+              </span>
+            </div>
+          </div>
+          <!-- ko if: _.size( $parent.products() ) -->
+          <div class="row"
+               data-test-id="suti-display-products">
+            <div class="col-4">
+              <table class="suti-display-table">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.attachmentType'"></th>
+                    <th data-bind="ltext: 'application.attachmentState'"></th>
+                    <th data-bind="ltext: 'suti.display-valid'"></th>
+                    <th data-bind="ltext: 'suti.display-downloaded'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: $parent.products">
+                  <tr>
+                    <td data-bind="text: name,
+                                   attr: {'data-test-id': 'suti-display-name-' + $index()}"></td>
+                    <td data-bind="ltext: 'suti.display-' + (expired ?  'expired' : 'valid'),
+                                   css: {'suti-display--error': expired},
+                                   attr: {'data-test-id': 'suti-display-state-' + $index()}"></td>
+                    <td data-bind="dateString: expirydate,
+                                   css: {'suti-display--error': expired},
+                                   attr: {'data-test-id': 'suti-display-expirydate-' + $index()}"></td>
+                    <td data-bind="dateString: downloaded,
+                                   attr: {'data-test-id': 'suti-display-downloaded-' + $index()}"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <!-- /ko -->
+        </div>
+      </div>
+    </rollup>
+  </div>  
+</script>
+

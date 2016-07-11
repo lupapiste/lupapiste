@@ -56,6 +56,11 @@
   (when-not (v/http-url? url)
     (fail :error.invalid.url)))
 
+(defn validate-optional-url [param command]
+  (let [url (ss/trim (get-in command [:data param]))]
+    (when-not (ss/blank? url)
+      (validate-url url))))
+
 ;; Notificator
 
 (defn notify [notification]

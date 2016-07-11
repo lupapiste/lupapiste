@@ -51,6 +51,8 @@ LUPAPISTE.OrganizationModel = function () {
   self.suti = ko.observable();
   self.useAttachmentLinksIntegration = ko.observable(false);
 
+  self.sectionOperations = ko.observableArray();
+
   self.load = function() { ajax.query("organization-by-user").success(self.init).call(); };
 
   ko.computed(function() {
@@ -250,9 +252,25 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.permitTypes(_(organization.scope).map("permitType").uniq().value());
 
-    self.suti(organization.suti);
-
     self.initialized = true;
+  };
+
+
+
+  self.isSectionOperation = function ( $data )  {
+    return self.sectionOperations.indexOf( $data.id ) >= 0;
+  };
+
+  self.toggleSectionOperation = function( $data ) {
+    var flag = !self.isSectionOperation( $data );
+    if( flag ) {
+      self.sectionOperations.push( $data.id );
+    } else {
+      self.sectionOperations.remove( $data.id );
+    }
+    ajax.command( "section-toggle-operation", {operationId: $data.id,
+                                               flag: flag })
+      .call();
   };
 
   self.editLink = function(indexFn) {
