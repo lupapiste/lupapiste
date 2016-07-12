@@ -16,7 +16,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.i18n :as i18n]))
 
 ;;
 ;; User schema
@@ -89,7 +90,8 @@
            (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
-           (sc/optional-key :foremanFilters)      [SearchFilter]})
+           (sc/optional-key :foremanFilters)      [SearchFilter]
+           (sc/optional-key :language)            (apply sc/enum i18n/languages)})
 
 (def RegisterUser {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
