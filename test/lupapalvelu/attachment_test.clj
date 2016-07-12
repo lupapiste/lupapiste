@@ -234,7 +234,7 @@
       (public-attachment? only-julkisuusluokka) => true)))
 
 
-(defspec make-version-new-attachment 20
+(defspec make-version-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
@@ -262,7 +262,7 @@
                   (is (= (:archivabilityError version) (:archivabilityError options)))
                   (is (= (:missing-fonts version) (:missing-fonts options))))))
 
-(defspec make-version-update-existing 20
+(defspec make-version-update-existing {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))
                                                                               (assoc :latestVersion (assoc ver :originalFileId (first fids))))
                                                                           (assoc opt :file-id (last fids) :original-file-id (first fids))])
@@ -284,7 +284,7 @@
                        (= (:contentType version) (:content-type options))
                        (= (:size version) (:size options))))))
 
-(defspec build-version-updates-new-attachment 20
+(defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [application    (ssg/generator {:state sc/Keyword})
                  attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
@@ -305,7 +305,7 @@
                        (= (get-in updates [$set :attachments.$.latestVersion] version-model))
                        (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
 
-(defspec build-version-updates-update-existing-version 20
+(defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
   (prop/for-all [application    (ssg/generator {:state sc/Keyword})
                  [attachment version-model] (gen/fmap (fn [[att fids]]
                                                         (let [ver (assoc (get-in att [:versions 1]) :originalFileId (first fids))]
