@@ -98,7 +98,7 @@
 
 (defn suti-submit-validation
   "Can be used as pre-check. Validates if application can be submitted from suti point of view.
-  Validates only if suti is enabled for organization.
+  Validates only if suti is enabled for organization and for primary operation.
   Returs nil when suti 'added' flag is true or suti-id is set. Else suti-id needs to be set."
   [{:keys [application organization]}]
   (let [{:keys [enabled suti]} (application-data application @organization)]
