@@ -10,8 +10,10 @@
             <!-- ko foreach: organization.selectedOperations -->
             <thead>
               <tr>
-                <th data-bind="ltext: permitType"></th>
-                <th data-bind="ltext: 'section.column'"></th>
+                <th data-bind="ltext: permitType"
+                    class="sot--full-width"></th>
+                <th data-bind="ltext: 'section.column',
+                               feature: 'section'"></th>
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <th data-bind="ltext: 'suti.column',
                                feature: 'suti'"></th>
@@ -21,7 +23,8 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
-                <td>
+                <td data-bind="feature: 'section'"
+                    class="sot--center">
                   <div class="sectionbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'section-' + id},
@@ -32,7 +35,8 @@
                   </div>
                 </td>
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
-                <td data-bind="feature: 'suti'">
+                <td data-bind="feature: 'suti'"
+                    class="sot--center">
                   <div class="checkbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'suti-' + id},

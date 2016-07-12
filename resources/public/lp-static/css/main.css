@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1468303891762');
+@import url('main-blessed1.css?z=1468320875869');
 
 /* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after {
@@ -4558,9 +4558,18 @@ table.admin-settings td.value .save-indicator {
 }
 
 /* line 102, ../../../private/common-html/sass/views/_authority_admin.scss */
+table.selected-operations-table th.sot--full-width {
+  width: 100%;
+}
+/* line 105, ../../../private/common-html/sass/views/_authority_admin.scss */
 table.selected-operations-table div.checkbox-wrapper, table.selected-operations-table div.sectionbox-wrapper {
   text-align: center;
   border: none;
+  display: inline-block;
+}
+/* line 110, ../../../private/common-html/sass/views/_authority_admin.scss */
+table.selected-operations-table td.sot--center {
+  text-align: center;
 }
 
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */

@@ -99,8 +99,15 @@ table.admin-settings {
 }
 
 table.selected-operations-table {
+  th.sot--full-width {
+    width: 100%;
+  }
   div.checkbox-wrapper, div.sectionbox-wrapper {
     text-align: center;
     border: none;
-  } 
+    display: inline-block;
+  }
+  td.sot--center {
+    text-align: center;
+  }
 }
