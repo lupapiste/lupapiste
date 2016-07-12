@@ -31,7 +31,7 @@ LUPAPISTE.SutiDisplayModel = function() {
 
   self.disposedComputed( function() {
     var app = lupapisteApp.models.application;
-    if( app.id() ) {
+    if( app.id() && app.state() ) {
       service.fetchApplicationData( app, self.waiting );
     }
   });

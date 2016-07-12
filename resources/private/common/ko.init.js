@@ -200,11 +200,17 @@
     update: _.partial(localized, "html")
   };
 
+  function localizedAttribute( attribute, element, valueAccessor ) {
+    var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+    $(element).attr( attribute, loc( value ));
+  }
+
   ko.bindingHandlers.lplaceholder = {
-    update: function( element, valueAccessor) {
-      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
-      $(element).attr( "placeholder", loc( value ));
-    }
+    update: _.partial( localizedAttribute, "placeholder" )
+  };
+
+  ko.bindingHandlers.ltitle = {
+    update: _.partial( localizedAttribute, "title" )
   };
 
   ko.bindingHandlers.fullName = {
