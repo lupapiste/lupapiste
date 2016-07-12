@@ -8,7 +8,8 @@
             [sade.strings :as ss]
             [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as op]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.states :as states]))
 
 (defn admin-org [admin]
   (-> admin
@@ -77,14 +78,23 @@
     (catch Exception _
       "suti.products-error")))
 
-(defn application-data [{:keys [suti primaryOperation]} organization]
+(defn application-data [{:keys [suti primaryOperation state]} organization]
   (let [{:keys [enabled www
                 server operations]} (:suti organization)
         url                         (:url server)
         {suti-id :id added :added}  suti
+        ;; Suti is enabled/required for an application when
+        ;; 1. Organisation has Suti enabled.
+        ;; 2. Application's primary operation has Suti requirement
+        ;; 3. The application is not a legacy application: it has not
+        ;;    already reached the sent state without Suti information.
         suti-enabled                (and enabled
                                          (contains? (set operations)
-                                                    (:name primaryOperation)))
+                                                    (:name primaryOperation))
+                                         (not (and (ss/blank? suti-id)
+                                                   (not added)
+                                                   (contains? (conj states/post-verdict-states :sent)
+                                                              (keyword state)))))
         products                    (when (and (ss/not-blank? suti-id)
                                                (not added)
                                                suti-enabled

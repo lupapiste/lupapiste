@@ -1331,6 +1331,7 @@ Javascript?
 
 Click label
   [Arguments]  ${for}
+  Scroll to  label[for=${for}]
   Click element  jquery=label[for=${for}]
 
 Checkbox wrapper selected

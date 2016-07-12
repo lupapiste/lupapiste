@@ -26,7 +26,6 @@ Toggle Suti
 Toggle Suti operation
   [Arguments]  ${operation}
   Go to page  operations
-  Scroll to  label[for=suti-${operation}]
   Click label  suti-${operation}  
 
 Set Suti id
