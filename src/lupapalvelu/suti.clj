@@ -78,33 +78,49 @@
     (catch Exception _
       "suti.products-error")))
 
-(defn application-data [{:keys [suti primaryOperation state]} organization]
+(defn- suti-enabled?
+  "Suti is enabled/required for an application when
+    1. Organisation has Suti enabled.
+    2. Application's primary operation has Suti requirement
+    3. The application is not a legacy application: it has not
+       already reached the sent state without Suti information."
+  [{:keys [suti primaryOperation state]} organization]
+  (let [{:keys [enabled operations]} (:suti organization)
+        {suti-id :id added :added}   suti]
+    (and enabled
+         (contains? (set operations)
+                    (:name primaryOperation))
+         (not (and (ss/blank? suti-id)
+                   (not added)
+                   (contains? (conj states/post-verdict-states :sent)
+                              (keyword state)))))))
+
+(defn application-data [{:keys [suti primaryOperation state] :as application}
+                        organization]
+  (let [{:keys [enabled www
+                operations]}       (:suti organization)
+        {suti-id :id added :added} suti
+        suti-enabled               (suti-enabled? application organization)]
+    {:enabled suti-enabled
+     :www (when (every? ss/not-blank? [www suti-id])
+            (ss/replace www "$$" suti-id))
+     :suti suti}))
+
+(defn application-products
+  "In addition to products the suti-id is returned as well just in case."
+  [{:keys [suti primaryOperation state] :as application}
+                            organization]
   (let [{:keys [enabled www
                 server operations]} (:suti organization)
         url                         (:url server)
         {suti-id :id added :added}  suti
-        ;; Suti is enabled/required for an application when
-        ;; 1. Organisation has Suti enabled.
-        ;; 2. Application's primary operation has Suti requirement
-        ;; 3. The application is not a legacy application: it has not
-        ;;    already reached the sent state without Suti information.
-        suti-enabled                (and enabled
-                                         (contains? (set operations)
-                                                    (:name primaryOperation))
-                                         (not (and (ss/blank? suti-id)
-                                                   (not added)
-                                                   (contains? (conj states/post-verdict-states :sent)
-                                                              (keyword state)))))
-        products                    (when (and (ss/not-blank? suti-id)
-                                               (not added)
-                                               suti-enabled
-                                               (ss/not-blank? url))
-                                      (fetch-suti-products (append-to-url url suti-id) server))]
-    {:enabled suti-enabled
-     :www (when (every? ss/not-blank? [www suti-id])
-            (ss/replace www "$$" suti-id))
-     :products products
-     :suti suti}))
+        suti-enabled                (suti-enabled? application organization)]
+    {:id suti-id
+     :products (when (and (ss/not-blank? suti-id)
+                          (not added)
+                          suti-enabled
+                          (ss/not-blank? url))
+                 (fetch-suti-products (append-to-url url suti-id) server))}))
 
 (defn suti-submit-validation
   "Can be used as pre-check. Validates if application can be submitted from suti point of view.

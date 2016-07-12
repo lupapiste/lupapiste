@@ -6,6 +6,7 @@
 "suti.admin.www" "fi" "Palvelun osoite (URL). Merkitse hankenumeron paikka osoitteessa merkeillä <b>$$</b>."
 "suti.admin.www.placeholder" "fi" "Esim. https://www.osoite.fi/hanke/$$" 
 "suti.products-error" "fi" "Tietojen haku ei onnistunut."
+"suti.products-wait" "fi" "Tietoja haetaan..."
 "suti.display-title" "fi" "Suunnittelun lähtötiedot (kiinteistö {0})"
 "suti.display-id" "fi" "Hankenumero"
 "suti.display-link" "fi" "Siirry tarkastelemaan hankkeeseen liittyviä Suunnittelun lähtötietoja."

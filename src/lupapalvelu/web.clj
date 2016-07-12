@@ -740,18 +740,28 @@
                false)]
       (resp/json {:ok true :data (swap! env/proxy-off (constantly (not on)))})))
 
+  ;; Development (mockup) Suti server (/dev/suti) treats suti-ids semantically.
+  ;; Id parameter is of format id[:seconds], where some ids have special meaning:
+  ;;   empty: no products
+  ;;   bad: 501
+  ;;   auth: requires username (suti) and password (secret)
+  ;;   all the other ids return products.
+  ;; The optional seconds part causes the corresponding delay when serving the response.
   (defpage [:get "/dev/suti/:id"] {:keys [id]}
-    (case (keyword id)
-      :bad   (resp/status 501 "Bad Suti request.")
-      :empty (json/generate-string {})
-      :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
-              (if (and (= username "suti") (= password "secret"))
-                (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
-                                                     {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
-                                                     {:name "Six" :expired false :expirydate nil :downloaded nil}]})
-                (resp/status 401 "Unauthorized")))
-      (json/generate-string {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
-                                           {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
-                                            :downloaded "\\/Date(1467364927456)\\/"}
-                                           {:name "Three" :expired false :expirydate nil :downloaded nil}]})))
+    (let [[_ sub-id seconds] (re-find  #"(.*):(\d+)$" id)]
+      (when seconds
+        (Thread/sleep (* 1000 (Integer/parseInt seconds))))
+      (case (keyword (or sub-id id))
+       :bad   (resp/status 501 "Bad Suti request.")
+       :empty (json/generate-string {})
+       :auth (let [[username password] (http/decode-basic-auth (request/ring-request))]
+               (if (and (= username "suti") (= password "secret"))
+                 (json/generate-string {:productlist [{:name "Four" :expired true :expirydate "\\/Date(1467883327899)\\/" :downloaded "\\/Date(1467019327022)\\/" }
+                                                      {:name "Five" :expired true :expirydate "\\/Date(1468056127124)\\/" :downloaded nil}
+                                                      {:name "Six" :expired false :expirydate nil :downloaded nil}]})
+                 (resp/status 401 "Unauthorized")))
+       (json/generate-string {:productlist [{:name "One" :expired false :expirydate nil :downloaded nil}
+                                            {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
+                                             :downloaded "\\/Date(1467364927456)\\/"}
+                                            {:name "Three" :expired false :expirydate nil :downloaded nil}]}))))
   )
