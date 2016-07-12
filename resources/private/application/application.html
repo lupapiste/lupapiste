@@ -1271,11 +1271,13 @@
                     <!-- /ko -->
 
                     <!-- Calendars tab -->
+                    <!-- ko if: selectedTabName() === 'calendar' -->
                     <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
                       <div>
                         <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
                       </div>
                     </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div id="boxes">
