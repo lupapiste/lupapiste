@@ -200,6 +200,13 @@
     update: _.partial(localized, "html")
   };
 
+  ko.bindingHandlers.lplaceholder = {
+    update: function( element, valueAccessor) {
+      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+      $(element).attr( "placeholder", loc( value ));
+    }
+  };
+
   ko.bindingHandlers.fullName = {
     // The originally bound object should be a regular object and
     // contain firstName and lastName observables as properties.
