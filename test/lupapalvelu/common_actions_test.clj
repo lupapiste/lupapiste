@@ -55,7 +55,8 @@
                           :statement-attachment-allowed
                           :ram-linked-attachments
                           :latest-attachment-version
-                          :suti-application-data}
+                          :suti-application-data
+                          :suti-application-products}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
@@ -95,7 +96,8 @@
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs :tasks-tab-visible
-                           :pdfa-casefile :suti-application-data :ram-linked-attachments :attachment-groups
+                           :pdfa-casefile :suti-application-data :suti-application-products
+                           :ram-linked-attachments :attachment-groups
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]
