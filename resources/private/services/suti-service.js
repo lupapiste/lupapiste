@@ -87,22 +87,39 @@ LUPAPISTE.SutiService = function() {
       .call();
   };
 
+  function fetchApplicationProducts( application, waiting ) {
+    ajax.query( "suti-application-products", {id: application.id()})
+      .pending( waiting || _.noop)
+      .success( function( res ) {
+        var result = []
+        var data = res.data || {};
+        if( data.id && data.id === _.get( suti(), "suti.id" )) {
+          if( _.isArray( data.products )) {
+            data.products = _.map( data.products, function( p ) {
+              // If exist, expirydate and downloaded are in UTC timestamps (ms)
+              return _.assignWith( p,
+                                   {expirydate: true, downloaded: true},
+                                   function( v ) {
+                                     return v ? moment( v ) : v;
+                                   });
+
+            });
+          }
+          // products: array of Suti products OR error ltext.
+          result = _.get( data, "products", []);
+        }
+        suti( _.merge( suti(), {products: result}));
+      })
+      .call();
+  }
+
   // waiting is an optional observable.
   self.fetchApplicationData = function( application, waiting ) {
+    // Application Suti object is outdated from now on
+    delete application.suti;
     ajax.query( "suti-application-data", {id: application.id()})
       .pending( waiting || _.noop)
       .success( function( res ) {
-        if( _.isArray( res.data.products )) {
-          res.data.products = _.map( res.data.products, function( p ) {
-            // If exist, expirydate and downloaded are in UTC timestamps (ms)
-            return _.assignWith( p,
-                                 {expirydate: true, downloaded: true},
-                                 function( v ) {
-                                   return v ? moment( v ) : v;
-                                 });
-
-          });
-        }
         // Fully formed application Suti data properties:
         // enabled: true, if this application requires suti
         // www: public url in the Suti system
@@ -110,9 +127,9 @@ LUPAPISTE.SutiService = function() {
         // title: Title to be shown on Suti rollup button (see suti-display)
         // suti: application Suti details (id and added).
         suti( _.merge( res.data,
-                       {title: loc( "suti.display-title",
-                                    util.prop.toHumanFormat( application.propertyId()))},
-                       _.clone( ko.unwrap( _.get )( application, "suti", {}))));
+                       {products: "suti.products-wait"}));
+        // We fetch the products separately so the UI has time to render.
+        fetchApplicationProducts( application, waiting );
       })
       .call();
   };

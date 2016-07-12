@@ -73,6 +73,18 @@
   [{application :application organization :organization}]
   (ok :data (suti/application-data application @organization)))
 
+(defquery suti-application-products
+  {:description "Fetches the Suti backend products for the given application."
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
+   :states states/all-application-states
+   :feature :suti}
+  [{application :application organization :organization}]
+  (ok :data (suti/application-products application @organization)))
+
 (defcommand suti-update-id
   {:description "Mechanism for updating Suti id property."
    :parameters [id sutiId]

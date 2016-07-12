@@ -10,6 +10,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.open = ko.observable( true );
   self.suti = service.sutiDetails;
   self.waiting = ko.observable();
+  self.sutiTitle = ko.observable();
 
   function sutiComputed( key ) {
     return self.disposedComputed( {
@@ -31,7 +32,9 @@ LUPAPISTE.SutiDisplayModel = function() {
 
   self.disposedComputed( function() {
     var app = lupapisteApp.models.application;
-    if( app.id() && app.state() ) {
+    if( app.id() && app.state()) {
+      self.sutiTitle( loc( "suti.display-title",
+                           util.prop.toHumanFormat( app.propertyId())));
       service.fetchApplicationData( app, self.waiting );
     }
   });
@@ -43,23 +46,17 @@ LUPAPISTE.SutiDisplayModel = function() {
   self.note = self.disposedComputed( function() {
     var prods = self.suti().products;
     var msg = false;
-    var error = false;
     if( self.sutiAdded() ) {
       msg = "suti.display-added-note";
     } else {
-      if( _.trim( self.sutiId())) {
-        if( _.isString( prods ) ) {
-          msg = prods;
-          error = true;
-        }
-        else {
-          if( _.isEmpty( prods )) {
-            msg = "suti.display-empty";
-          }
-        }
+      if( _.isString( prods ) ) {
+        msg = prods;
+      }
+      if( _.trim( self.sutiId()) && _.isEmpty( prods )) {
+        msg = "suti.display-empty";
       }
     }
-    return msg && {text: msg, error: error};
+    return msg && {text: msg, error: /error/.test( msg )};
   });
 
 
