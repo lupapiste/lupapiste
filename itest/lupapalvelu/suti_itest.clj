@@ -156,3 +156,18 @@
                                            :text "Ni hao!"}]) => ok?)
          (fact "Statement giver can access Suti data"
                (query mikko :suti-application-data :id application-id) => ok?)))
+
+(facts "Suti and legacy applications"
+       (let [{application-id :id} (create-and-send-application sonja :operation "pientalo" :propertyId sipoo-property-id)
+             {app-suti-id :id} (create-and-send-application sonja :operation "pientalo" :propertyId sipoo-property-id)
+             {app-suti-added :id} (create-and-send-application sonja :operation "pientalo" :propertyId sipoo-property-id)]
+         (fact "Require Suti for pientalo"
+               (command sipoo :suti-toggle-operation :operationId "pientalo" :flag true) => ok?)
+         (fact "Legacy application without Suti info"
+               (query sonja :suti-application-data :id application-id) => (data-contains {:enabled false}))
+         (fact "Legacy application with suti-id (so not very legacy)"
+               (command sonja :suti-update-id :id app-suti-id :sutiId "suti id") => ok?
+               (query sonja :suti-application-data :id app-suti-id) => (data-contains {:enabled true}))
+         (fact "Legacy application with suti-added (so not very legacy)"
+               (command sonja :suti-update-added :id app-suti-added :added true) => ok?
+               (query sonja :suti-application-data :id app-suti-added) => (data-contains {:enabled true}))))
