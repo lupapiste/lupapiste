@@ -59,7 +59,7 @@ $app-gray-darkest: $gray187;
       }
       @content;
     }
-} 
+}
 
 /*Summary styles*/
 .application_summary {
@@ -824,7 +824,7 @@ $app-gray-darkest: $gray187;
   margin: $marginL 0 $marginS;
 }
 
-.requiredField-line {
+.info-line {
   display: table-row;
   span, a {
     display: table-cell;
@@ -837,6 +837,11 @@ $app-gray-darkest: $gray187;
   }
   .lupicon-circle-attention {
     color: $red;
+  }
+  &.warning {
+    .lupicon-circle-attention {
+      color: $orange-dark;
+    }
   }
 }
 

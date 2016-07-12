@@ -595,3 +595,5 @@
 "application.integration-messages.error" "sv" ""
 "application.integration-messages.loading" "fi" "Ladataan siirtotiedostolistaa..."
 "application.integration-messages.loading" "sv" ""
+"application.not-submittable" "fi" "Hakemusta ei voi jättää"
+"application.not-submittable" "sv" "Ansökan kan inte lämnas"

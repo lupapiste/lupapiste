@@ -13,3 +13,5 @@
 "suti.display-expired" "sv" "Fåråldrad"
 "suti.display-valid" "fi" "Voimassa"
 "suti.display-valid" "sv" "Giltig"
+"suti.id-missing" "fi" "Suunnittelun lähtötiedot puuttuvat. Ole hyvä ja syötä hankenumerosi Suunnitelmat ja liitteet -välilehdellä."
+"suti.id-missing" "sv" ""

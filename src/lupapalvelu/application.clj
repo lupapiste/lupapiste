@@ -100,24 +100,8 @@
     (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
       (fail :error.permit-has-no-such-subtype))))
 
-(defn submitted? [{:keys [submitted state primaryOperation]}]
-  (or
-    (not (nil? submitted))
-    (and
-      (= "aiemmalla-luvalla-hakeminen" (:name primaryOperation))
-      (states/post-submitted-states state))))
-
-(defn- link-permit-submitted? [link-id]
-  (submitted? (domain/get-application-no-access-checking link-id)))
-
-; Foreman
-(defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complementNeeded})
-                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
-                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
-    (if (nil? result)
-      true
-      result)))
+(defn submitted? [{:keys [state]}]
+  ((conj states/post-submitted-states :submitted) (keyword state)))
 
 ;;
 ;; Helpers
@@ -222,11 +206,6 @@
 ;; Application query post process
 ;;
 
-(defn- process-foreman-v2 [application]
-  (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
-    (assoc application :submittable (foreman-submittable? application))
-    application))
-
 (def merge-operation-skeleton (partial merge domain/operation-skeleton))
 
 (defn ensure-operations
@@ -252,7 +231,6 @@
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
-       process-foreman-v2
        (process-documents-and-tasks user)
        location->object))
 

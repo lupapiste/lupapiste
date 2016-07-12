@@ -247,6 +247,7 @@
 
 (defchecker expected-failure? [expected-text e]
   (cond
+    (sequential? (:errors e)) (some (partial = (keyword expected-text)) (map (comp keyword :text) (:errors e)))
     (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
     (captured-throwable? e) (= (some-> e throwable .getData :text name) (name expected-text))
     :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))

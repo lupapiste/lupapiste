@@ -30,7 +30,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.suti :as suti]))
 
 ;; Notifications
 
@@ -186,6 +187,8 @@
   [{:keys [created user] :as command}]
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
 
+;; Submit
+
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
                           [(when-not (:opened application) (app/history-entry :open created (:user command)))
@@ -220,6 +223,27 @@
                             emails (get-in organization [:notifications :submit-notification-emails])]
                         (map (fn [e] {:email e, :role "authority"}) emails)))))
 
+(defn submit-validation-errors [{:keys [application] :as command}]
+  (remove nil? (conj []
+                     (foreman/validate-application application)
+                     (app/validate-link-permits application)
+                     (when-not (company/cannot-submit command)
+                       (fail :company.user.cannot.submit))
+                     (when (env/feature? :suti)
+                       (suti/suti-submit-validation command)))))
+
+(defquery application-submittable
+  {:description "Query for frontend, to display possible errors regarding application submit"
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:applicant :authority}
+   :states           #{:draft :open}}
+  [command]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
+      (ok))))
+
 (defcommand submit-application
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
@@ -232,13 +256,12 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application created] :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (or
-      (foreman/validate-application application)
-      (app/validate-link-permits application)
-      (when-not (company/cannot-submit command) (fail :company.user.cannot.submit))
+  [{:keys [application organization created] :as command}]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
       (do-submit command application created))))
+
 
 (defcommand refresh-ktj
   {:parameters [:id]

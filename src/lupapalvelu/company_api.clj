@@ -155,11 +155,3 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
-
-(defquery company-user-cannot-submit
-  {:description "Negative pseudo query that succeeds only if the
-  current user is a company member but does not have submit rights."
-   :parameters [:id]
-   :user-roles #{:applicant}
-   :pre-checks [c/cannot-submit]}
-  [_])
