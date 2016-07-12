@@ -104,6 +104,8 @@
 "attachment.delete.header" "sv" "Radera bilaga"
 "attachment.delete.message" "fi" "Poistamalla liitteen poistuvat myös kaikki sen versiot. Oletko aivan varma?"
 "attachment.delete.message" "sv" "Genom att radera bilagan raderas också alla dess versioner. Är du helt säker?"
+"attachment.delete.message.no-versions" "fi" "Liitteelle ei ole lisätty versioita. Haluatko poistaa liitteen?"
+"attachment.delete.message.no-versions" "sv" ""
 "attachment.delete.version.header" "fi" "Poista liitetiedosto"
 "attachment.delete.version.header" "sv" "Ta bort bilagan"
 "attachment.delete.version.message" "fi" "Tiedoston versio poistuu pysyvästi. Oletko varma?"
