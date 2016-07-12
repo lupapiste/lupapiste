@@ -124,10 +124,11 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
+      var versions = model.versions();
       hub.send("show-dialog", {ltitle: "attachment.delete.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {ltext: "attachment.delete.message",
+                               componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                  yesFn: deleteAttachmentFromServer}});
     },
 
