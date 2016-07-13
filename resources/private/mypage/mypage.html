@@ -90,6 +90,18 @@
                                                    lLabel: 'userinfo.city',
                                                    required: true}}"></div>
             </div>
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'select-field',
+                              params: {value: language,
+                              options: loc.getSupportedLanguages(),
+                              optionsText: loc,
+                              disable: disable,
+                              id: 'language',
+                              lLabel: 'userinfo.language',
+                              required: false}}">
+              </div>
+            </div>
 
             <div class="row">
               <div class="col-3"

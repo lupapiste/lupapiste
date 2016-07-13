@@ -176,7 +176,7 @@
 ;; General changes:
 ;;
 
-(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone :language
                                  :architect :degree :graduatingYear :fise :fiseKelpoisuus
                                  :companyName :companyId :allowDirectMarketing])
 
