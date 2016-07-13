@@ -2355,18 +2355,26 @@
 (defmigration remove-old-foreman-operation-from-organization-selected-operations
   {:apply-when (pos? (mongo/count :organizations {:selected-operations "tyonjohtajan-nimeaminen"}))}
   (mongo/update :organizations {} {$pull {:selected-operations "tyonjohtajan-nimeaminen"}} :multi true))
+ 
+; schema change results: changed document title and no more hankkeestaIlmoitettu element inside document
+; current hankkeestaIlmoitettu data is still maintained in applications, but not visible
+(defn- change-rakennuspaikka-to-toiminnan-sijainti [doc]
+  (if (= "rakennuspaikka" (get-in doc [:schema-info :name]))
+    (assoc-in doc [:schema-info :name] "toiminnan-sijainti")
+  doc))
 
-(defmigration rakennuspaikka-to-toiminnan-sijainti-ilman-ilmoitusta
+(defmigration rakennuspaikka-to-toiminnan-sijainti
   {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
                    (pos? (mongo/count :submitted-applications {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]})))}
-  (update-applications-array
-    :documents
-    (fn [{schema-info :schema-info :as doc}]
-      (if (= "rakennuspaikka" (:name schema-info))
-        (assoc-in doc [:schema-info :name] "toiminnan-sijainti-ilman-ilmoitusta")
-        doc))
-    {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
+  (update-applications-array :documents
+                             change-rakennuspaikka-to-toiminnan-sijainti
+                             {$and [{:permitType "YL"} {:documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
+(defmigration rakennuspaikka-to-toiminnan-sijainti-bulletins
+  {:apply-when (pos? (mongo/count :application-bulletins {$and [{:versions.permitType "YL"} {:versions.documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))}
+  (update-bulletin-versions :documents
+                            change-rakennuspaikka-to-toiminnan-sijainti
+                            {$and [{:versions.permitType "YL"} {:versions.documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
 ;;
 ;; ****** NOTE! ******
