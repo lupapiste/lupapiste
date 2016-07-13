@@ -32,5 +32,5 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     bulletin.edit(!bulletin.edit());
   };
 
-  self.bulletinUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]);
+  self.bulletinUrl = ko.pureComputed(function() { return "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]); });
 };
