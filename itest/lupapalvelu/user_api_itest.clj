@@ -207,6 +207,21 @@
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
+(facts "Implicit user language"
+       (defn lang-check [lang note]
+         (fn [{{:keys [language indicatorNote]} :user}]
+           (fact "language and note" [language indicatorNote] => [lang note])))
+
+       (fact "Bad language"
+             (query teppo :user :lang "cn") => fail?)
+       (fact "Set language to UI language"
+             (query teppo :user :lang "sv") => (lang-check "sv" "user.language.note"))
+       (fact "Subsequent user queries do not contain indicator note"
+             (query teppo :user :lang "sv") => (lang-check "sv" nil)
+             (query teppo :user :lang "fi") => (lang-check "sv" nil)
+             (query teppo :user :lang nil) => (lang-check "sv" nil)
+             (query teppo :user) => (lang-check "sv" nil)))
+
 ;;
 ;; historical tests, dragons be here...
 ;;

@@ -622,9 +622,11 @@
 
 (defn update-user-language
   "Sets user's language if given and missing. Returns user that is
-  augmented with indicatorNote if the language has been set."
+  augmented with indicatorNote and language if the language has been set."
   [{:keys [id language] :as user} ui-lang]
   (if (and (not language) (not (sc/check supported-language ui-lang)) )
     (do (mongo/update :users {:_id id} {$set {:language ui-lang}})
-        (assoc user :indicatorNote :user.language.note))
+        (assoc user
+               :indicatorNote :user.language.note
+               :language ui-lang))
     user))

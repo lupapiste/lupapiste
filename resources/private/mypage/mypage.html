@@ -13,13 +13,9 @@
       <h1 data-bind="ltext: 'mypage.title'"></h1>
       <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
 
-      <div data-test-id="mypage-personal-info-accordion"
-           data-bind="component: {name: 'accordion', params: {ltitle: 'mypage.personalInfo',
-                                                              accordionContentTemplate: 'mypage-personal-info-template',
-                                                              accordionContentTemplateData: $data}}"></div>
+      <h3 data-bind="ltext: 'mypage.personalInfo'"></h3>
 
-      <script type="text/x-jquery-tmpl" id="mypage-personal-info-template">
-        <form>
+<form>
           <div class="form-grid">
             <div class="row">
               <div class="col-1"
@@ -220,17 +216,12 @@
           </div>
 
         </form>
-      </script>
+
     </div>
 
     <!-- TODO: componentize mypage -->
     <div id="pw-form" class="accordion-container">
-      <div data-test-id="mypage-change-password-accordion"
-           data-bind="component: {name: 'accordion', params: {ltitle: 'userinfo.changePassword',
-                                                              accordionContentTemplate: 'mypage-change-password',
-                                                              accordionContentTemplateData: $data}}"></div>
-      <script type="text/x-jquery-tmpl" id="mypage-change-password">
-        <div>
+      <h3 data-bind="ltext: 'userinfo.changePassword'"></h3>
           <form>
             <div class="form-grid">
               <div class="row">
@@ -270,13 +261,12 @@
               </div>
             </div>
           </form>
-        </div>
-      </script>
     </div>
 
     <div id="mypage-change-email"  class="accordion-container">
       <div data-test-id="mypage-change-email-accordion"
-           data-bind="component: {name: 'change-email', params: {ltitle: 'userinfo.change-email', data: $data.userinfo, authorization: $data.authorization}}"></div>
+           data-bind="component: {name: 'change-email', 
+                      params: {data: $data.userinfo, authorization: $data.authorization}}"></div>
     </div>
 
     <div id="mypage-company" class="accordion-container">
