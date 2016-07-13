@@ -90,7 +90,7 @@
     (and enabled
          (contains? (set operations)
                     (:name primaryOperation))
-         (not (and (ss/blank? suti-id)
+         (not (and (nil? suti-id)  ;; "" means id given.
                    (not added)
                    (contains? (conj states/post-verdict-states :sent)
                               (keyword state)))))))

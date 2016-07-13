@@ -183,6 +183,9 @@
          (fact "Legacy application with suti-id (so not very legacy)"
                (command sonja :suti-update-id :id app-suti-id :sutiId "suti id") => ok?
                (query sonja :suti-application-data :id app-suti-id) => (data-contains {:enabled true}))
+         (fact "Legacy application with empty suti-id (not nil)"
+               (command sonja :suti-update-id :id app-suti-id :sutiId "") => ok?
+               (query sonja :suti-application-data :id app-suti-id) => (data-contains {:enabled true}))
          (fact "Legacy application with suti-added (so not very legacy)"
                (command sonja :suti-update-added :id app-suti-added :added true) => ok?
                (query sonja :suti-application-data :id app-suti-added) => (data-contains {:enabled true}))))
