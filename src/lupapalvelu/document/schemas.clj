@@ -1688,7 +1688,7 @@
            :type :location}
     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hankkeestaIlmoitettu")}
 
-   {:info {:name "toiminnan-sijainti-ilman-ilmoitusta"
+   {:info {:name "toiminnan-sijainti"
            :approvable true
            :i18name "rakennuspaikka"
            :order 2
