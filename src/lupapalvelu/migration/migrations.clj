@@ -2357,10 +2357,11 @@
   (mongo/update :organizations {} {$pull {:selected-operations "tyonjohtajan-nimeaminen"}} :multi true))
  
 ; schema change results: changed document title and no more hankkeestaIlmoitettu element inside document
-; current hankkeestaIlmoitettu data is still maintained in applications, but not visible
 (defn- change-rakennuspaikka-to-toiminnan-sijainti [doc]
   (if (= "rakennuspaikka" (get-in doc [:schema-info :name]))
-    (assoc-in doc [:schema-info :name] "toiminnan-sijainti")
+    (-> doc
+      (assoc-in [:schema-info :name] "toiminnan-sijainti")
+      (update :data dissoc :hankkeestaIlmoitettu))
   doc))
 
 (defmigration rakennuspaikka-to-toiminnan-sijainti
