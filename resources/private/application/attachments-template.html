@@ -105,18 +105,17 @@
                                        title: loc('view-file')},
                                 click: _.constant(true),
                                 text: latestVersion.filename,
-                                clickBubble: false"></a>
-                  (<i data-bind="size: latestVersion.size"></i>)<br/>
+                                clickBubble: false"></a><br/>
 
               <a href="#"
                      data-bind="attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
                                        title: loc('download-file')},
                                 click: _.constant(true),
                                 clickBubble: false">
-                <span data-bind="ltext: 'download-file'"></span>
                 <i class="lupicon-download btn-small"></i>
+                <span data-bind="ltext: 'download-file'"></span>
               </a>
-
+              (<i data-bind="size: latestVersion.size"></i>)
                 </span>
                 <!-- ko if: !$data.latestVersion -->
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
