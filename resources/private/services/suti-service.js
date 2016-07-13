@@ -91,7 +91,7 @@ LUPAPISTE.SutiService = function() {
     ajax.query( "suti-application-products", {id: application.id()})
       .pending( waiting || _.noop)
       .success( function( res ) {
-        var result = []
+        var result = [];
         var data = res.data || {};
         if( data.id && data.id === _.get( suti(), "suti.id" )) {
           if( _.isArray( data.products )) {
