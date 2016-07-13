@@ -31,7 +31,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]))
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.i18n :as i18n]))
 ;;
 ;; local api
 ;;
@@ -641,7 +642,7 @@
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt]
    :optional-parameters [org lang]
-   :input-validators [o/valid-feed-format o/valid-org o/valid-language]
+   :input-validators [o/valid-feed-format o/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
   ((memo/ttl o/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)

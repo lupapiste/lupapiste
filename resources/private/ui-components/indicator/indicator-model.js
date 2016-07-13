@@ -7,6 +7,8 @@ LUPAPISTE.IndicatorModel = function() {
   // keep indicator on screen
   self.sticky = ko.observable(false);
 
+  // Message is lhtml.
+  var html   = ko.observable( false );
   var message = ko.observable("");
   var timerId;
 
@@ -15,24 +17,14 @@ LUPAPISTE.IndicatorModel = function() {
   });
 
   self.iconStyle = ko.pureComputed(function() {
-    if (self.indicatorStyle() === "positive") {
-      return "lupicon-circle-check";
-    }
-    else if (self.indicatorStyle() === "negative") {
-      return "lupicon-circle-attention";
-    }
+    return _.get( {positive: "lupicon-circle-check",
+                   negative: "lupicon-circle-attention",
+                   primary: "lupicon-circle-info"},
+                  self.indicatorStyle());
   });
 
   self.indicatorMessage = ko.pureComputed(function() {
-    if (message()) {
-      return message();
-    }
-    else if (self.indicatorStyle() === "positive") {
-      return "form.saved";
-    }
-    else if (self.indicatorStyle() === "negative") {
-      return "form.err";
-    }
+    return html() ? message() : _.escape( message());
   });
 
   self.showIndicator.subscribe(function(val) {
@@ -54,9 +46,12 @@ LUPAPISTE.IndicatorModel = function() {
   };
 
   hub.subscribe("indicator", function(e) {
-    message(e.message);
+    var defaultMessages = {negative: "form.err",
+                           positive: "form.saved"};
+    message(loc( e.message  || defaultMessages[e.style] ));
     self.indicatorStyle(e.style);
     self.sticky(!!e.sticky);
+    html( e.html);
     self.showIndicator(true);
   });
 };

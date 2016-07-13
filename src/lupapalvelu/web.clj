@@ -366,13 +366,13 @@
       ; Actually kill the session
       (merge (logout!) (redirect-after-logout lang)))))
 
-;; Login via saparate URL outside anti-csrf
+;; Login via separate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
   (let [request (request/ring-request)
         response (if username
                    (execute-command "login" params request) ; Handles form POST (Nessus)
                    (execute-command "login" (from-json request) request))]
-    (select-keys response [:ok :text :session :applicationpage])))
+    (select-keys response [:ok :text :session :applicationpage :lang])))
 
 ;; Reset password via saparate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []

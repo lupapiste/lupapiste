@@ -43,6 +43,8 @@
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]}})
 
+(def supported-language (apply sc/enum (map name i18n/languages)))
+
 (def User {:id                                    sc/Str
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
@@ -91,7 +93,7 @@
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
-           (sc/optional-key :language)            (apply sc/enum i18n/languages)})
+           (sc/optional-key :language)            supported-language})
 
 (def RegisterUser {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
@@ -381,6 +383,8 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
+
+
 ;;
 ;; ==============================================================================
 ;; Create user:
@@ -609,3 +613,18 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
+
+;;
+;; ==============================================================================
+;; User manipulation
+;; ==============================================================================
+;;
+
+(defn update-user-language
+  "Sets user's language if given and missing. Returns user that is
+  augmented with indicatorNote if the language has been set."
+  [{:keys [id language] :as user} ui-lang]
+  (if (and (not language) (not (sc/check supported-language ui-lang)) )
+    (do (mongo/update :users {:_id id} {$set {:language ui-lang}})
+        (assoc user :indicatorNote :user.language.note))
+    user))

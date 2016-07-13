@@ -2546,3 +2546,5 @@
 "authorityAdmin.attachmentLinks.guide" "sv" ""
 "authorityAdmin.attachmentLinks.label" "fi" "Välitä tiedostot taustajärjestelmään HTTPS-linkkeinä"
 "authorityAdmin.attachmentLinks.label" "sv" ""
+"user.language" "fi" "Asiointikieli"
+"user.language.note" "fi" "Käytät Lupapistettä tällä hetkellä suomen kielellä. Siitä syystä olemme asettaneet asiointikieleksesi suomen. Voit vaihtaa tämän valinnan <a href='#!/mypage'>Omissa tiedoissasi</a>."

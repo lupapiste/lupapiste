@@ -59,6 +59,13 @@
 
 (def languages (-> (get-localizations) keys set))
 
+(defn valid-language
+  "Input validator for lang parameter. Accepts also empty lang."
+  [{{:keys [lang]} :data}]
+  (when-not (or (ss/blank? lang)
+                (->> lang ss/lower-case keyword (contains? (set languages))))
+    (fail :error.unsupported-language)))
+
 (defn get-terms
   "Return localization terms for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1468320875869');
+@import url('main-blessed1.css?z=1468414935552');
 
 /* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after {
@@ -2096,48 +2096,63 @@ div.search i {
 #indicator .indicator-bar {
   display: none;
   position: fixed;
-  height: 50px;
   width: 100%;
   z-index: 2001;
   color: #fff;
   font-size: 18px;
   box-sizing: border-box;
 }
-/* line 13, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 12, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-box {
   max-width: 1280px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
+  padding-right: 6px;
   padding-top: 12px;
+  padding-bottom: 12px;
 }
-/* line 21, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 24, ../../../private/common-html/sass/partials/_indicator.scss */
+#indicator a {
+  color: white;
+  font-weight: bold;
+}
+/* line 29, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-bar.positive {
   background-color: #2ca92c;
 }
-/* line 25, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 33, ../../../private/common-html/sass/partials/_indicator.scss */
+#indicator .indicator-bar.primary {
+  background-color: #f39129;
+}
+/* line 37, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-bar.negative {
   background-color: #df3215;
 }
-/* line 29, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 41, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-info {
-  float: left;
+  vertical-align: top;
+  display: table-cell;
   margin-right: 24px;
 }
-/* line 34, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 47, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-message {
-  float: left;
+  vertical-align: top;
+  display: table-cell;
+  width: 100%;
+  padding-left: 6px;
+  padding-right: 6px;
 }
-/* line 38, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 57, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-close {
-  float: right;
+  vertical-align: top;
+  display: table-cell;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 64, ../../../private/common-html/sass/partials/_indicator.scss */
 .admin #indicator .indicator-bar, .authority-admin #indicator .indicator-bar {
   z-index: 2003;
   margin-top: -38px;
-  height: 52px;
 }
 
 /* line 2, ../../../private/common-html/sass/partials/_indicator-icon.scss */
