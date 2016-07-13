@@ -100,12 +100,16 @@
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
-   (sc/optional-key :suti) {:server Server}
+   (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
+                            (sc/optional-key :enabled) sc/Bool
+                            (sc/optional-key :server) Server
+                            (sc/optional-key :operations) [sc/Str]}
    (sc/optional-key :tags) [Tag]
    (sc/optional-key :validate-verdict-given-date) sc/Bool
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
-   (sc/optional-key :use-attachment-links-integration) sc/Bool})
+   (sc/optional-key :use-attachment-links-integration) sc/Bool
+   (sc/optional-key :section-operations) [sc/Str]})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
