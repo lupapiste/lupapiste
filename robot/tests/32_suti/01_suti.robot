@@ -179,7 +179,7 @@ Selection added checkbox clears products
 Application can be submitted if 'added' flag is set
   Open tab  requiredFieldSummary
   Wait test id hidden  submit-errors-container
-  Test id enabled  application-submit-btn
+  Wait until  Test id enabled  application-submit-btn
 
 Pena invites Mikko as guest
   Open tab  parties
