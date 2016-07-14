@@ -642,7 +642,7 @@
    :hystrix/command-key "Create preview"
    :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
    :hystrix/fallback-fn  (constantly nil)}
-  [file-id filename content-type content application-id & [db-name]]
+  [file-id filename content-type application-id & [db-name]]
   (when (preview/converter content-type)
     (mongo/with-db (or db-name mongo/default-db-name)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" (preview/placeholder-image) :application application-id)
@@ -690,19 +690,23 @@
     (libreoffice-client/convert-to-pdfa filename content)
     {:filename filename :content content}))
 
-(defn- upload-file!
-  "Converts file to PDF/A, if required by attachment type,  uploads the file to MongoDB
-   and creates a preview image. Content can be a file or input-stream.
+(defn- preview-image!
+  "Creates a preview image in own thread pool. Returns the given opts."
+  [application-id {:keys [file-id filename content-type] :as opts}]
+  (.submit preview-threadpool #(create-preview! file-id filename content-type application-id mongo/*db-name*))
+  opts)
+
+(defn- upload-file
+  "Converts file to PDF/A, if required by attachment type,  uploads the file to MongoDB.
+   Content can be a file or input-stream.
    Returns attachment options."
   [{application-id :id :as application} options]
   {:pre [(map? application)]}
-  (let [db-name mongo/*db-name* ; pass db-name to threadpool context
-        file-id (mongo/create-id)
+  (let [file-id (mongo/create-id)
         {:keys [filename content archivabilityError archivable]} (pre-process-attachment options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
-    (.submit preview-threadpool #(create-preview! file-id sanitized-filename content-type content application-id db-name))
     (cond-> {:file-id file-id
              :original-file-id (or (:original-file-id options) file-id)
              :filename sanitized-filename
@@ -726,12 +730,14 @@
         original-file-id (when (and (:keep-original-file? options)
                                     (libreoffice-conversion-required? options))
                            (->> (assoc options :skip-pdfa-conversion true)
-                                (upload-file! application)
+                                (upload-file application)
+                                (preview-image! (:id application))
                                 :file-id))]
     (try
       (->> (cond-> options
                    original-file-id (assoc :original-file-id original-file-id))
-           (upload-file! application)
+           (upload-file application)
+           (preview-image! (:id application))
            (merge options {:now (:created options) :stamped (get options :stamped false)})
            (set-attachment-version! application (get-or-create-attachment! application options)))
       (finally
