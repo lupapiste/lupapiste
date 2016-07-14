@@ -30,3 +30,12 @@
       (let [desc (localize lang allowed-mime)]
         desc => ss/not-blank?
         desc =not=> (contains "???")))))
+
+(facts "Valid languages"
+       (fact "Supported language FI" (valid-language {:data {:lang "FI"}})
+             => nil)
+       (fact "Supported language sV" (valid-language {:data {:lang "sV"}})
+             => nil)
+       (fact "Empty language is valid" (valid-language {:data {}}))
+       (fact "Unsupported language CN" (valid-language {:data {:lang "CN"}})
+             => {:ok false, :text "error.unsupported-language"}))

@@ -31,7 +31,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            ))
+            [lupapalvelu.i18n :as i18n]))
 
 ;;
 ;; ==============================================================================
@@ -46,10 +46,12 @@
       (dissoc full-user :private :personId))))
 
 (defquery user
-  {:user-roles auth/all-authenticated-user-roles}
+  {:optional-parameters [lang]
+   :input-validators [i18n/valid-language]
+   :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user full-user)
+    (ok :user (usr/update-user-language full-user lang))
     (fail)))
 
 (defquery users
@@ -174,7 +176,7 @@
 ;; General changes:
 ;;
 
-(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone :language
                                  :architect :degree :graduatingYear :fise :fiseKelpoisuus
                                  :companyName :companyId :allowDirectMarketing])
 
@@ -482,7 +484,9 @@
         (if-let [application-page (usr/applicationpage-for (:role user))]
           (ssess/merge-to-session
             command
-            (ok :user (-> user usr/with-org-auth usr/non-private) :applicationpage application-page)
+            (ok :user (-> user usr/with-org-auth usr/non-private)
+                :applicationpage application-page
+                :lang (:language user))
             {:user (usr/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
@@ -520,6 +524,7 @@
 
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
+   :optional-parameters [language]
    :user-roles       #{:anonymous}
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
@@ -532,7 +537,7 @@
                       nil
                       (merge
                         (set/rename-keys vetuma-data {:userid :personId})
-                        (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
+                        (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
                         (when (:architect data)
                           (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
                         {:email email :role "applicant" :enabled false}))]

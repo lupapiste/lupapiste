@@ -459,10 +459,6 @@
   (when-not (->> cmd :data :fmt ss/lower-case keyword (contains? #{:rss :json}) )
     (fail :error.invalid-feed-format)))
 
-(defn valid-language [{{:keys [lang]} :data}]
-  (when-not (or (ss/blank? lang) (->> lang ss/lower-case keyword (contains? (set i18n/supported-langs)) ))
-    (fail :error.unsupported-language)))
-
 (defn valid-ip-addresses [ips]
   (when-let [error (sc/check [ssc/IpAddress] ips)]
     (fail :error.invalid-ip :desc (str error))))

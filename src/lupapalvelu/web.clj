@@ -310,9 +310,10 @@
   ([]     (landing-page default-lang (user/current-user (request/ring-request))))
   ([lang] (landing-page lang         (user/current-user (request/ring-request))) )
   ([lang user]
-    (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
-     (redirect lang application-page)
-     (redirect-to-frontpage lang))))
+   (let [lang (get user :language lang)]
+     (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
+       (redirect lang application-page)
+       (redirect-to-frontpage lang)))))
 
 (defn- ->hashbang [s]
   (let [hash (cond
@@ -366,15 +367,15 @@
       ; Actually kill the session
       (merge (logout!) (redirect-after-logout lang)))))
 
-;; Login via saparate URL outside anti-csrf
+;; Login via separate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
   (let [request (request/ring-request)
         response (if username
                    (execute-command "login" params request) ; Handles form POST (Nessus)
                    (execute-command "login" (from-json request) request))]
-    (select-keys response [:ok :text :session :applicationpage])))
+    (select-keys response [:ok :text :session :applicationpage :lang])))
 
-;; Reset password via saparate URL outside anti-csrf
+;; Reset password via separate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
   (let [request (request/ring-request)]
     (execute-command "reset-password" (from-json request) request)))

@@ -16,7 +16,8 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [lupapalvelu.i18n :as i18n]))
 
 ;;
 ;; User schema
@@ -41,6 +42,8 @@
               (sc/optional-key :operations)    [sc/Str]
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]}})
+
+(def supported-language (apply sc/enum (map name i18n/languages)))
 
 (def User {:id                                    sc/Str
            :firstName                             (ssc/max-length-string 255)
@@ -89,7 +92,8 @@
            (sc/optional-key :defaultFilter)       {(sc/optional-key :id) (sc/maybe sc/Str)
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
-           (sc/optional-key :foremanFilters)      [SearchFilter]})
+           (sc/optional-key :foremanFilters)      [SearchFilter]
+           (sc/optional-key :language)            supported-language})
 
 (def RegisterUser {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
@@ -104,7 +108,8 @@
                    :allowDirectMarketing             sc/Bool
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
-                   :password                         (ssc/max-length-string 255)})
+                   :password                         (ssc/max-length-string 255)
+                   (sc/optional-key :language)       supported-language})
 ;;
 ;; ==============================================================================
 ;; Utils:
@@ -379,6 +384,8 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
+
+
 ;;
 ;; ==============================================================================
 ;; Create user:
@@ -437,7 +444,7 @@
   (let [email (canonize-email (:email user-data))]
     (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :orgAuthz
+                    :phone :city :street :zip :enabled :orgAuthz :language
                     :allowDirectMarketing :architect :company
                     :graduatingYear :degree :fise :fiseKelpoisuus])
       (merge {:firstName "" :lastName "" :username email} <>)
@@ -607,3 +614,20 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
+
+;;
+;; ==============================================================================
+;; User manipulation
+;; ==============================================================================
+;;
+
+(defn update-user-language
+  "Sets user's language if given and missing. Returns user that is
+  augmented with indicatorNote and language if the language has been set."
+  [{:keys [id language] :as user} ui-lang]
+  (if (and (not language) (not (sc/check supported-language ui-lang)) )
+    (do (mongo/update :users {:_id id} {$set {:language ui-lang}})
+        (assoc user
+               :indicatorNote :user.language.note
+               :language ui-lang))
+    user))

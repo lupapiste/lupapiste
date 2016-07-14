@@ -25,6 +25,9 @@
         .success(function(res) {
           model.clear().saved(true);
           util.showSavedIndicator(res);
+          if( params.language && params.language !== loc.getCurrentLanguage()) {
+            hub.send( "change-lang", {lang: params.language});
+          }
         })
         .error(function(res) {
           model.error(res.text).clear().saved(false);
@@ -50,6 +53,7 @@
     self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
     self.phone = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.role = ko.observable();
+    self.language = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
@@ -125,6 +129,7 @@
         .firstName(u.firstName)
         .lastName(u.lastName)
         .username(u.username)
+        .language(u.language)
         .email(u.email)
         .street(u.street)
         .city(u.city)
@@ -163,7 +168,7 @@
     self.save = makeSaveFn("update-user",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
-         "architect",
+         "language", "architect",
          "degree", "graduatingYear", "fise", "fiseKelpoisuus",
          "companyName", "companyId",
          "allowDirectMarketing"]);

@@ -746,13 +746,7 @@
         => nil)
       (fact "Invalid organization 888-X" (local-org-api/valid-org {:data {:org "888-X"}})
         => {:ok false, :text "error.organization-not-found"})
-      (fact "Supported language FI" (local-org-api/valid-language {:data {:lang "FI"}})
-        => nil)
-      (fact "Supported language sV" (local-org-api/valid-language {:data {:lang "sV"}})
-        => nil)
-      (fact "Empty language is valid" (local-org-api/valid-language {:data {}}))
-      (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
-        => {:ok false, :text "error.unsupported-language"}))))
+      )))
 
 
 

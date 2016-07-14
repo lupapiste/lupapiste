@@ -120,7 +120,7 @@ var LUPAPISTE = LUPAPISTE || {};
       var path = self.currentHash.split("/");
 
       if (!self.allowAnonymous && self.session === undefined) {
-        ajax.query("user")
+        ajax.query("user", {lang: loc.getCurrentLanguage()})
           .success(function (e) {
             if (e.user) {
               self.session = true;

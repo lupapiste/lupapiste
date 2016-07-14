@@ -40,7 +40,9 @@
       .processing(processing)
       .pending(pending)
       .success(function(e) {
-        var baseUrl = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
+        var baseUrl = "/app/"
+              + ( e.lang || loc.getCurrentLanguage())
+              + "/" + e.applicationpage;
         // get the server-stored hashbang or redirect URL to redirect to right page (see web.clj for details)
         ajax.query("redirect-after-login")
           .success(function(e) {
