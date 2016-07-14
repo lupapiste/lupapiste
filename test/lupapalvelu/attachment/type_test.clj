@@ -8,7 +8,8 @@
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
             [schema.core :as sc]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg])
+  (:refer-clojure :exclude [contains?]))
 
 (testable-privates lupapalvelu.attachment.type attachment-types-by-operation)
 
