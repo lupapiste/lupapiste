@@ -1357,6 +1357,11 @@ Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
 
+Test id select is
+  [Arguments]  ${id}  ${value}
+  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+  
+
 # Frontend error log
 
 There are no frontend errors
