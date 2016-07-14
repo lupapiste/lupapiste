@@ -8,7 +8,7 @@ Resource       ../13_statements/statement_resource.robot
 Default Tags   suti
 
 *** Variables ***
-${suti-url}  http://localhost:8000/dev/suti
+${suti-url}  ${SERVER}/dev/suti
 
 *** Test Cases ***
 
@@ -40,7 +40,7 @@ Reload page
 Url and username are set
   Scroll to test id  suti-send
   Test id input is  suti-username  sutiuser
-  Test id input is  suti-url  http://localhost:8000/dev/suti
+  Test id input is  suti-url  ${suti-url}
 
 Password is not echoed
   Test id input is  suti-password  ${EMPTY}
@@ -166,7 +166,7 @@ Default products
 Application could be submitted as Suti ID is set
   Open tab  requiredFieldSummary
   Wait test id hidden  submit-errors-container
-  Test id enabled  application-submit-btn
+  Wait until  Test id enabled  application-submit-btn
 
 Selection added checkbox clears products
   Open tab  attachments
