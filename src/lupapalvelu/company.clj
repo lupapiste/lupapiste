@@ -270,6 +270,7 @@
                             :username    (:email user)
                             :firstName   (:firstName user)
                             :lastName    (:lastName user)
+                            :language    (:language user)
                             :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
                             :personId    (:personId user)
                             :password    password
