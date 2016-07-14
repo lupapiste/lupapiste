@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Suti settings
+Suite Setup     Apply minimal fixture now
 Resource       ../../common_resource.robot
 Resource       suti_resource.robot
 Resource       ../29_guests/guest_resource.robot
