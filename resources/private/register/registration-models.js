@@ -8,7 +8,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
   var self = this;
 
-  self.keys = ks || ["stamp", "email",
+  self.keys = ks || ["stamp", "email", "language",
                      "street", "city", "zip", "phone", "password",
                      "allowDirectMarketing", "rakentajafi",
                      "architect", "degree", "graduatingYear", "fise", "fiseKelpoisuus"];
@@ -26,6 +26,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       city: "",
       zip: "",
       phone: "",
+      language: loc.getCurrentLanguage(),
       email: "",
       password: "",
       degree: "",

@@ -524,6 +524,7 @@
 
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
+   :optional-parameters [language]
    :user-roles       #{:anonymous}
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
@@ -536,7 +537,7 @@
                       nil
                       (merge
                         (set/rename-keys vetuma-data {:userid :personId})
-                        (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
+                        (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
                         (when (:architect data)
                           (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
                         {:email email :role "applicant" :enabled false}))]

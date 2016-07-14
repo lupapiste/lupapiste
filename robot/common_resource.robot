@@ -34,7 +34,7 @@ Browser
   [Arguments]
   ${timestamp}=  Get Time  epoch
   Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
-  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # Setting cookies on login page fails on IE8, perhaps because of
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there

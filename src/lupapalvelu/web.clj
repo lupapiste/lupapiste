@@ -310,9 +310,10 @@
   ([]     (landing-page default-lang (user/current-user (request/ring-request))))
   ([lang] (landing-page lang         (user/current-user (request/ring-request))) )
   ([lang user]
-    (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
-     (redirect lang application-page)
-     (redirect-to-frontpage lang))))
+   (let [lang (get user :language lang)]
+     (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
+       (redirect lang application-page)
+       (redirect-to-frontpage lang)))))
 
 (defn- ->hashbang [s]
   (let [hash (cond
@@ -374,7 +375,7 @@
                    (execute-command "login" (from-json request) request))]
     (select-keys response [:ok :text :session :applicationpage :lang])))
 
-;; Reset password via saparate URL outside anti-csrf
+;; Reset password via separate URL outside anti-csrf
 (defjson [:post "/api/reset-password"] []
   (let [request (request/ring-request)]
     (execute-command "reset-password" (from-json request) request)))

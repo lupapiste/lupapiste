@@ -108,7 +108,8 @@
                    :allowDirectMarketing             sc/Bool
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
-                   :password                         (ssc/max-length-string 255)})
+                   :password                         (ssc/max-length-string 255)
+                   (sc/optional-key :language)       supported-language})
 ;;
 ;; ==============================================================================
 ;; Utils:
@@ -443,7 +444,7 @@
   (let [email (canonize-email (:email user-data))]
     (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :orgAuthz
+                    :phone :city :street :zip :enabled :orgAuthz :language
                     :allowDirectMarketing :architect :company
                     :graduatingYear :degree :fise :fiseKelpoisuus])
       (merge {:firstName "" :lastName "" :username email} <>)

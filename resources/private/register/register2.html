@@ -38,6 +38,13 @@
             <label class="form-label tip" data-bind="ltext: 'userinfo.phone'">Puhelinnumero</label>
             <input class="form-input text " data-test-id="register-phone" data-bind="value: phone" type="text" />
           </div>
+          <div class="form-entry">
+            <label class="form-label" data-bind="ltext: 'userinfo.language'">Puhelinnumero</label>
+            <select class="form-input combobox "
+                    data-test-id="register-language" data-bind="value: language,
+                                                               options: loc.getSupportedLanguages(),
+                                                               optionsText: loc"></select>
+          </div>
           <div class="clear"></div>
         </div>
         <div class="form-group">

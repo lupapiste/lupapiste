@@ -1,15 +1,22 @@
+// Bar indicator that is shown below the header.
+// Indicator is triggered with hub.send( 'indicator', params),
+// where params are: [optional]
+// style: indicator style. Can be positive, negative or primary.
+// [message]: ltext or lhtml to be shown. Negative (form.err) and
+// positive (form.saved) have default ltexts.
+// [html]: If true then the message is interpreted as lhtml (default false)
+// [sticky]: Usually indicator fades out after timeout. If sticky is true
+// then the indicator is visible until closed by the user.
 LUPAPISTE.IndicatorModel = function() {
   "use strict";
   var self = this;
 
   self.showIndicator = ko.observable(false).extend({notify: "always"});
   self.indicatorStyle = ko.observable("neutral");
+  self.indicatorMessage = ko.observable();
   // keep indicator on screen
   self.sticky = ko.observable(false);
 
-  // Message is lhtml.
-  var html   = ko.observable( false );
-  var message = ko.observable("");
   var timerId;
 
   self.showCloseButton = ko.pureComputed(function() {
@@ -21,10 +28,6 @@ LUPAPISTE.IndicatorModel = function() {
                    negative: "lupicon-circle-attention",
                    primary: "lupicon-circle-info"},
                   self.indicatorStyle());
-  });
-
-  self.indicatorMessage = ko.pureComputed(function() {
-    return html() ? message() : _.escape( message());
   });
 
   self.showIndicator.subscribe(function(val) {
@@ -48,10 +51,10 @@ LUPAPISTE.IndicatorModel = function() {
   hub.subscribe("indicator", function(e) {
     var defaultMessages = {negative: "form.err",
                            positive: "form.saved"};
-    message(loc( e.message  || defaultMessages[e.style] ));
+    var msg = loc( e.message  || defaultMessages[e.style] );
+    self.indicatorMessage( e.html ? msg : _.escape( msg ));
     self.indicatorStyle(e.style);
     self.sticky(!!e.sticky);
-    html( e.html);
     self.showIndicator(true);
   });
 };

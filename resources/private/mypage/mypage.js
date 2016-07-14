@@ -95,8 +95,6 @@
       document: ko.observable()
     };
 
-    self.languages =
-
     self.authority = ko.computed(function() { return self.role() === "authority"; });
 
     self.companyShow = ko.observable();

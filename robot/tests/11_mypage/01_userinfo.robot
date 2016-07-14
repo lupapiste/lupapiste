@@ -82,10 +82,14 @@ Sven changes his user language to Swedish
 
 Upon saving the UI language changes
   Language is  SV
-  [Teardown]  Logout
 
-Sven logs in again, the UI language is now Swedish
-  Language is  FI
+Clicking logout refers to the Swedish login page
+  Click link  jquery=div#logout-header-box a
+  Wait Until  Element should be visible  login-button
+  Language is  SV
+
+Sven changes language to Finnish, logs in again, the UI language is now Swedish
+  Language to  FI
   Sven logs in
   Language is  SV
   No such test id  indicator-primary
