@@ -55,7 +55,13 @@ Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
+# LPK-1995
+Sonja has the power to delete paasuunnittelija
+  Open tab  parties
+  Wait Until  Element should be visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
+
 Sonja rejects hankkeen-kuvaus
+  Open tab  info
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Reject accordion  hankkeen-kuvaus-rakennuslupa
