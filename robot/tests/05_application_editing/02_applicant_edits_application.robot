@@ -126,6 +126,10 @@ Mikko changes hakija-r country and postal code becomes valid
   Select from list  jquery=div#application-parties-tab section[data-doc-type="hakija-r"] select[data-docgen-path="henkilo.osoite.maa"]  CHN
   Wait Until  Element should not be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
 
+# LPK-1995
+Mikko can't delete paasuunnittelija, as it's only removable by authority
+  Element should not be visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
+
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1

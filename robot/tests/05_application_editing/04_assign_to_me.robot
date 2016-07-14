@@ -147,5 +147,8 @@ Sonja cancels the application with reason
 
 Sonja checks that the reason is in the comments
   Open canceled application  ${appname}  ${propertyId}
-  Check comment  Hao de  
-  [Teardown]  Logout
+  Check comment  Hao de
+  Logout
+
+No errors so far
+  There are no frontend errors
