@@ -446,8 +446,7 @@
    {:lastName "Nieminen"
     :firstName "Teppo"
     :enabled true
-    ;; Teppo's language is omitted in order to test the implicit
-    ;; language setting.
+    :language "fi"
     :username "teppo@example.com"
     :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
               :apikey "502cb9e58426c613c8b85abb"}
@@ -460,6 +459,26 @@
     :street "Mutakatu 7"
     :zip "33560"
     :city "Tampere"}
+
+   ;; sven@example.com / sven
+   ;; Svens's language is omitted in order to test the implicit
+   ;; language setting.
+   {:role "applicant",
+    :email "sven@example.com",
+    :personId "070842-559U",
+    :private {:apikey "bfxLwCerNjNUpmJ2HqZbfxLwCerNjNUpmJ2HqZ",
+              :password "$2a$10$i8O320oYo76R6QoV6bh5MunFXeNy.FcS/xqTOKwLnxQOLBg721Ouy"},
+    :phone "0505504444",
+    :city "Tampere",
+    :username "sven@example.com",
+    :firstName "Sven",
+    :street "Ericsgatan 8",
+    :allowDirectMarketing true,
+    :zip "33310",
+    :id "578731b78ca8231afeca99e8",
+    :lastName "Svensson",
+    :enabled true}
+
    ;; Hakija: Mikko Intonen - mikko@example.com / mikko123
    {:id "777777777777777777000010"
     :username "mikko@example.com"

@@ -18,7 +18,7 @@ ${SLOWEST_SPEED}                0.5
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
-${APPLICATIONS PATH}            /app/fi/applicant#!/applications
+${APPLICATIONS PATH}            /applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
@@ -131,6 +131,10 @@ Language To
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
 
+Language Is
+  [Arguments]  ${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
+  
 
 #
 # Navigation
@@ -333,6 +337,9 @@ Mikko logs in
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
+
+Sven logs in
+  Applicant logs in  sven@example.com  sven  Sven Svensson
 
 Arto logs in
   Authority logs in  arto  arto  Arto Viranomainen

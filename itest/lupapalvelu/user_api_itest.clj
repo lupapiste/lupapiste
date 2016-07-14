@@ -181,6 +181,7 @@
                                                         :allowDirectMarketing true
                                                         :email "teppo@example.com"
                                                         :enabled true
+                                                        :language "fi"
                                                         :firstName "Teppo"
                                                         :id "5073c0a1c2e6c470aef589a5"
                                                         :lastName "Nieminen"
@@ -213,14 +214,14 @@
            (fact "language and note" [language indicatorNote] => [lang note])))
 
        (fact "Bad language"
-             (query teppo :user :lang "cn") => fail?)
+             (query sven :user :lang "cn") => fail?)
        (fact "Set language to UI language"
-             (query teppo :user :lang "sv") => (lang-check "sv" "user.language.note"))
+             (query sven :user :lang "sv") => (lang-check "sv" "user.language.note"))
        (fact "Subsequent user queries do not contain indicator note"
-             (query teppo :user :lang "sv") => (lang-check "sv" nil)
-             (query teppo :user :lang "fi") => (lang-check "sv" nil)
-             (query teppo :user :lang nil) => (lang-check "sv" nil)
-             (query teppo :user) => (lang-check "sv" nil)))
+             (query sven :user :lang "sv") => (lang-check "sv" nil)
+             (query sven :user :lang "fi") => (lang-check "sv" nil)
+             (query sven :user :lang nil) => (lang-check "sv" nil)
+             (query sven :user) => (lang-check "sv" nil)))
 
 ;;
 ;; historical tests, dragons be here...

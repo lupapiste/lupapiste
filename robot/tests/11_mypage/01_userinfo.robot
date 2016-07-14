@@ -59,14 +59,37 @@ Mika changes the name and experience back
 
 Name and experience should have changed in Finnish page too
   [Tags]  firefox
-  Language To  FI
-  Wait for Page to Load  Mikko  Intonen
-  User should be logged in  Mikko Intonen
+  Language is  FI
   Checkbox Should Be Selected  allowDirectMarketing
   Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
   Wait until  Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
   Wait until  List Selection Should Be  architect-fiseKelpoisuus-select  vaativa rakennussuunnittelu (uudisrakentaminen)
+  [Teardown]  Logout
+
+Sven logs in and sees language indicator
+  Sven logs in
+  Wait test id visible  indicator-primary
+  Click element  jquery=div.indicator-close
+  No such test id  indicator-primary
+  Language is  FI
+
+Sven changes his user language to Swedish
+  Click element  user-name
+  List selection should be  userinfo-language  fi
+  Select from list by id  userinfo-language  sv
+  Save User Data
+
+Upon saving the UI language changes
+  Language is  SV
+  [Teardown]  Logout
+
+Sven logs in again, the UI language is now Swedish
+  Language is  FI
+  Sven logs in
+  Language is  SV
+  No such test id  indicator-primary
+  [Teardown]  Logout
 
 *** Keywords ***
 
@@ -77,7 +100,6 @@ Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
-  Open accordion by test id  mypage-personal-info-accordion
 
 Change Textfield Value
   [Arguments]  ${field}  ${old}  ${new}

@@ -66,7 +66,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: street,
                                                    disable: disable,
-                                                   id: 'stree',
+                                                   id: 'userinfo.street',
                                                    lLabel: 'userinfo.street',
                                                    required: true}}"></div>
 
@@ -74,7 +74,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: zip,
                                                    disable: disable,
-                                                   id: 'zip',
+                                                   id: 'userinfo.zip',
                                                    lLabel: 'userinfo.zip',
                                                    required: true}}"></div>
 
@@ -82,7 +82,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: city,
                                                    disable: disable,
-                                                   id: 'city',
+                                                   id: 'userinfo.city',
                                                    lLabel: 'userinfo.city',
                                                    required: true}}"></div>
             </div>
@@ -93,7 +93,7 @@
                               options: loc.getSupportedLanguages(),
                               optionsText: loc,
                               disable: disable,
-                              id: 'language',
+                              id: 'userinfo-language',
                               lLabel: 'userinfo.language',
                               required: false}}">
               </div>
