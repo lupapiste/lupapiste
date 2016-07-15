@@ -11,12 +11,12 @@
       </div>
       <div class="hr"></div>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
-      <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
+      <div data-bind="ltext:'mypage.desc'" class="page-info"></div>
 
-      <h3 data-bind="ltext: 'mypage.personalInfo'"></h3>
+      <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
 
 <form>
-          <div class="form-grid">
+          <div class="form-grid no-padding">
             <div class="row">
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
@@ -108,6 +108,9 @@
                                                   lLabel: 'userinfo.allowDirectMarketing'}}"></div>
             </div>
             <div class="row">
+              <span data-bind="lhtml:'userinfo.architect.desc'"></span>
+            </div>
+            <div class="row">
               <div class="col-3"
                    data-bind="component: {name: 'checkbox-field',
                                           params: {value: architect,
@@ -118,7 +121,7 @@
           </div>
 
           <!-- ko if: architect -->
-            <div class="architect-info form-grid">
+            <div class="architect-info form-grid no-padding">
 
               <h2 data-bind="ltext: 'architect.experience.title'"></h2>
 
@@ -221,9 +224,9 @@
 
     <!-- TODO: componentize mypage -->
     <div id="pw-form" class="accordion-container">
-      <h3 data-bind="ltext: 'userinfo.changePassword'"></h3>
+      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
           <form>
-            <div class="form-grid">
+            <div class="form-grid no-padding">
               <div class="row">
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',

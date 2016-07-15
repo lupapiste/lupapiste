@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1468414935552');
+@import url('main-blessed1.css?z=1468565909964');
 
+/* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after, .comment-bubble-authority:before {
+  left: 95%;
+}
 /* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after {
   border-color: rgba(246, 246, 246, 0);
@@ -4340,7 +4344,7 @@ td.comment-text {
 /* line 3, ../../../private/common-html/sass/views/_mypage.scss */
 #mypage .accordion-container .button-group,
 #company .accordion-container .button-group {
-  margin: 20px;
+  margin-bottom: 20px;
   position: relative;
 }
 /* line 9, ../../../private/common-html/sass/views/_mypage.scss */
