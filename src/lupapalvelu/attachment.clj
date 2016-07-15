@@ -619,6 +619,10 @@
     (when (and application file-id (access/can-access-attachment-file? user file-id application))
       (mongo/download file-id))))
 
+(def- not-found {:status 404
+                 :headers {"Content-Type" "text/plain"}
+                 :body "404"})
+
 (defn output-attachment
   ([attachment download?]
   (if attachment
@@ -631,9 +635,7 @@
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
         (update response :headers merge http/no-cache-headers)))
-    {:status 404
-     :headers {"Content-Type" "text/plain"}
-     :body "404"}))
+    not-found))
   ([file-id download? attachment-fn]
    (output-attachment (attachment-fn file-id) download?)))
 
@@ -665,15 +667,15 @@
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
   (let [preview-id (str file-id "-preview")]
-    (when (zero? (mongo/count :fs.files {:_id preview-id}))
-      (let [attachment (get-attachment-file! file-id)
-            file-name (:file-name attachment)
-            content-type (:content-type attachment)
-            content-fn (:content attachment)
-            application-id (:application attachment)]
-        (assert content-fn (str "content for file " file-id))
-        (create-preview! file-id file-name content-type (content-fn) application-id)))
-    (output-attachment preview-id false attachment-fn)))
+    (if-let [attachment (attachment-fn file-id)]
+      (do
+        (when (zero? (mongo/count :fs.files {:_id preview-id}))
+          (let [file-name (:file-name attachment)
+                content-type (:content-type attachment)
+                application-id (:application attachment)]
+            (create-preview! file-id file-name content-type application-id)))
+        (output-attachment preview-id false attachment-fn))
+      not-found)))
 
 (defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
   (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
