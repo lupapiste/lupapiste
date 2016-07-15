@@ -75,7 +75,7 @@
   (let [terms (get-localizations)]
     (or (terms (keyword lang)) (terms default-lang))))
 
-(defn- terms->term [terms] (s/join \. (map #(if (nil? %) "" (name %)) terms)))
+(defn- terms->term [terms] (s/join \. (map #(if (nil? %) "" (name %)) (flatten terms))))
 
 (defn unknown-term [& terms]
   (let [term (terms->term terms)]
@@ -87,6 +87,11 @@
 (defn has-term? [lang & terms]
   (not (nil? (get (get-terms (keyword lang)) (terms->term terms)))))
 
+(defn has-exact-term?
+  "True only if the term is defined for the given language."
+  [lang & terms]
+  (not (nil? (get ((get-localizations) (keyword lang)) (terms->term terms)))))
+
 (defn localize [lang & terms]
   (if-let [result (get (get-terms (keyword lang)) (terms->term terms))]
     result
@@ -94,6 +99,23 @@
 
 (defn localizer [lang]
   (partial localize (keyword lang)))
+
+(defn localize-fallback
+  "Returns first translation found for lang in terms.
+   [fallback]: if not found tries with the fallback language. Default
+  language is the ultimate fallback. When even that fails, the first
+  term localisation with the default language is returned (to ensure
+  the flagging of missing term). Note: terms can be vectors."
+  [lang terms & [fallback]]
+  {:pre [(util/not=as-kw lang fallback)]}
+  (let [terms (if (string? terms) [terms] terms)]
+    (if-let [term (util/find-first (partial has-exact-term? lang)
+                                   terms)]
+     (localize lang term)
+     (if-let [fallback (or fallback (and (util/not=as-kw lang default-lang)
+                                           default-lang))]
+       (localize-fallback fallback terms)
+       (localize default-lang (first terms))))))
 
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."

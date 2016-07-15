@@ -45,15 +45,17 @@
          (info "email was sent successfully." to subject)))))
   nil)
 
-(defn- get-email-subject [{title :title, municipality :municipality}
+
+
+(defn- get-email-subject [{title :title, municipality :municipality} lang
                           & [subject-key show-municipality-in-subject]]
   (let [title-postfix (when subject-key
-                        (if (i18n/has-term? "fi" "email.title" subject-key)
-                          (i18n/localize "fi" "email.title" subject-key)
-                          (i18n/localize "fi" subject-key)))
-        title-begin (str (when show-municipality-in-subject
-                           (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
-    (str "Lupapiste: " title-begin (when (and title subject-key)" - ") (when subject-key title-postfix))))
+                        (i18n/localize-fallback lang [["email.title" subject-key] subject-key]))
+        title-begin   (str (when show-municipality-in-subject
+                             (str (i18n/localize lang "municipality" municipality) ", ")) title)]
+    (str "Lupapiste: " title-begin
+         (when (and title subject-key) " - ")
+         (when subject-key title-postfix))))
 
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except statement persons,
@@ -83,7 +85,8 @@
    :state-fi (i18n/localize :fi (name (:state application)))
    :state-sv (i18n/localize :sv (name (:state application)))
    :modified (to-local-date (:modified application))
-   :name (:firstName recipient)})
+   :name (:firstName recipient)
+   :lang (:language recipient)})
 
 
 ;;
@@ -147,10 +150,13 @@
             command        (assoc command :application application)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (remove invalid-recipient? (recipients-fn command))
-            subject        (get-email-subject application (get conf :subject-key (name template-name)) (get conf :show-municipality-in-subject false))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))]
         (doseq [recipient recipients]
-          (let [model (model-fn command conf recipient)
-                msg   (email/apply-template template-file model)]
+          (let [model   (model-fn command conf recipient)
+                subject (get-email-subject application
+                                           (get conf :subject-key (name template-name))
+                                           (:language recipient)
+                                           (get conf :show-municipality-in-subject false))
+                msg     (email/apply-template template-file model)]
             (send-mail-to-recipient! recipient subject msg)))))))

@@ -8,9 +8,12 @@
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
 
 (facts "email titles"
-  (get-email-subject {:title "Haavikontie 9" :municipality "837" } "new-comment") => "Lupapiste: Haavikontie 9 - uusi kommentti"
-  (get-email-subject {:title "Haavikontie 9" :municipality "837" }) => "Lupapiste: Haavikontie 9"
-  (get-email-subject {:title "Haavikontie 9" :municipality "837" } "statement-request" true) => "Lupapiste: Tampere, Haavikontie 9 - Lausuntopyynt\u00f6")
+       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "fi" "new-comment")
+       => "Lupapiste: Haavikontie 9 - uusi kommentti"
+       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "cn")
+       => "Lupapiste: Haavikontie 9"
+       (get-email-subject {:title "Haavikontie 9" :municipality "837"} "fi" "statement-request" true)
+       => "Lupapiste: Tampere, Haavikontie 9 - Lausuntopyynt\u00f6")
 
 (fact "create application link"
   (fact "..for application"
