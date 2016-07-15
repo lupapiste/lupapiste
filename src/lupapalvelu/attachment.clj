@@ -686,9 +686,9 @@
                   (#{:paatos :paatosote} (keyword type-id))))
          (file-types (keyword mime-type)))))
 
-(defn ->libre-pdfa
+(defn ->libre-pdfa!
   "Converts content to PDF/A using Libre Office conversion client.
-  Replaces original filename and content with Libre data.
+  Replaces (!) original filename and content with Libre data.
   Adds :archivable / :archivabilityError key depending on conversion result.
   Returns given options map with libre data merged (or if conversion failed, the original data).
   If conversion not applicable, returns original given options map."
@@ -722,9 +722,9 @@
       :content-type content-type
       :autoConversion (and (true? archivable) (not (:skip-pdfa-conversion options))))))
 
-(defn upload-file-through-libre
+(defn upload-file-through-libre!
   [application options]
-  (->> (->libre-pdfa options)
+  (->> (->libre-pdfa! options)
        (upload-file application)))
 
 (defn attach-file!
@@ -748,7 +748,7 @@
     (try
       (->> (cond-> options
                    original-file-id (assoc :original-file-id original-file-id))
-           (upload-file-through-libre application)
+           (upload-file-through-libre! application)
            (preview-image! (:id application))
            (merge options {:now (:created options) :stamped (get options :stamped false)})
            (set-attachment-version! application (get-or-create-attachment! application options)))
