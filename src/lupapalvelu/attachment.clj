@@ -688,12 +688,16 @@
 
 (defn ->libre-pdfa
   "Converts content to PDF/A using Libre Office conversion client.
-  If conversion not applicable, returns original filename and content."
+  Replaces original filename and content with Libre data.
+  Adds :archivable / :archivabilityError key depending on conversion result.
+  Returns given options map with libre data merged (or if conversion failed, the original data).
+  If conversion not applicable, returns original given options map."
   [{:keys [filename content skip-pdfa-conversion] :as options}]
   (if (and (not skip-pdfa-conversion)
            (libreoffice-conversion-required? options))
-    (libreoffice-client/convert-to-pdfa filename content)
-    {:filename filename :content content}))
+    (merge options (libreoffice-client/convert-to-pdfa filename content))
+    options))
+
 
 (defn- preview-image!
   "Creates a preview image in own thread pool. Returns the given opts."
@@ -702,23 +706,26 @@
   opts)
 
 (defn- upload-file
-  "Converts file to PDF/A, if required by attachment type,  uploads the file to MongoDB.
+  "Uploads the file to MongoDB.
    Content can be a file or input-stream.
-   Returns attachment options."
-  [{application-id :id :as application} options]
+   Returns given attachment options, with file specific data added."
+  [{application-id :id :as application} {:keys [filename content archivable] :as options}]
   {:pre [(map? application)]}
   (let [file-id (mongo/create-id)
-        {:keys [filename content archivabilityError archivable]} (->libre-pdfa options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
-    (cond-> {:file-id file-id
-             :original-file-id (or (:original-file-id options) file-id)
-             :filename sanitized-filename
-             :content-type content-type}
-      (true? archivable) (assoc :archivable true)
-      (not (nil? archivabilityError)) (assoc :archivabilityError archivabilityError)
-      (and (true? archivable) (not (:skip-pdfa-conversion options))) (assoc :autoConversion true))))
+    (assoc options
+      :file-id file-id
+      :original-file-id (or (:original-file-id options) file-id)
+      :filename sanitized-filename
+      :content-type content-type
+      :autoConversion (and (true? archivable) (not (:skip-pdfa-conversion options))))))
+
+(defn upload-file-through-libre
+  [application options]
+  (->> (->libre-pdfa options)
+       (upload-file application)))
 
 (defn attach-file!
   "1) Uploads the original file to MongoDB if conversion is required and :keep-original-file? is true and
@@ -741,7 +748,7 @@
     (try
       (->> (cond-> options
                    original-file-id (assoc :original-file-id original-file-id))
-           (upload-file application)
+           (upload-file-through-libre application)
            (preview-image! (:id application))
            (merge options {:now (:created options) :stamped (get options :stamped false)})
            (set-attachment-version! application (get-or-create-attachment! application options)))
