@@ -39,3 +39,34 @@
        (fact "Empty language is valid" (valid-language {:data {}}))
        (fact "Unsupported language CN" (valid-language {:data {:lang "CN"}})
              => {:ok false, :text "error.unsupported-language"}))
+
+(facts "Localize with fallback"
+       (fact "Finnish"
+             (localize-fallback :fi [["email.title" "change-foo"] "sldfkjasdf" ["email.title" "change-email"]])
+             => "Uuden s\u00e4hk\u00f6postiosoitteen vahvistus")
+       (fact "Swedish"
+             (localize-fallback :sv [["email.title" "change-foo"] "sldfkjasdf" ["email.title" "change-email"]])
+             => "Verifiering av ny e-postadress")
+       (fact "Chinese (default fallback is Finnish)"
+             (localize-fallback :cn [["email.title" "change-foo"] "no" ["email.title" "change-email"]])
+             => "Ei")
+       (fact "Chinese fallbacking to Swedish"
+             (localize-fallback :cn [["email.title" "change-foo"] "no" ["email.title" "change-email"]] :sv)
+             => "Nej")
+       (fact "Chinese fallbacking to Chinese"
+             (localize-fallback :cn [["email.title" "change-foo"] "no" ["email.title" "change-email"]] :cn)
+             => (throws AssertionError))
+              (fact "Chinese fallbacking to Japanese to Finnish"
+             (localize-fallback :cn [["email.title" "change-foo"] "no" ["email.title" "change-email"]] :jp)
+             => "Ei")
+       (fact "Finnish (not found)"
+             (localize-fallback :fi [["email.title" "change-foo"] "sldfkjasdf" ["email.titledafasf" "change-email"]])
+             => (contains "???"))
+       (fact "Chinese fallbacking to Japanese to Finnish (not found)"
+             (localize-fallback :cn [["email.title" "change-foo"] "asdf" ["email.adsftitle" "change-email"]] :jp)
+             => (contains "???"))
+       (fact "Simple term"
+             (localize-fallback :cn "no" :jp)
+             => "Ei")
+       (fact "Nil fallbacks to default language"
+             (localize-fallback nil "no") => "Ei"))
