@@ -1,5 +1,5 @@
 (ns lupapalvelu.notifications-test
-  (:require [lupapalvelu.notifications :refer [notify!]]
+  (:require [lupapalvelu.notifications :refer [notify! create-app-model]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.user :as user]
@@ -10,6 +10,8 @@
 (facts "email titles"
        (get-email-subject {:title "Haavikontie 9" :municipality "837" } "fi" "new-comment")
        => "Lupapiste: Haavikontie 9 - uusi kommentti"
+       (get-email-subject {:title "Haavikontie 9" :municipality "837" } "sv" "new-comment")
+              => "Lupapiste: Haavikontie 9 - ny kommentar"
        (get-email-subject {:title "Haavikontie 9" :municipality "837" } "cn")
        => "Lupapiste: Haavikontie 9"
        (get-email-subject {:title "Haavikontie 9" :municipality "837"} "fi" "statement-request" true)
@@ -17,7 +19,7 @@
 
 (fact "create application link"
   (fact "..for application"
-    (get-application-link {:id 1} "" "fi" {:role "applicant"})
+        (get-application-link {:id 1} "" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1")
     (get-application-link {:id 1} "/tab" "fi" {:role "applicant"})
       => (str (sade.env/value :host) "/app/fi/applicant#!/application/1/tab")
@@ -26,7 +28,13 @@
 
   (fact "..for inforequest"
     (get-application-link {:id 1 :infoRequest true} "/comment" "fi" {:role "authority"})
-      => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))
+    => (str (sade.env/value :host) "/app/fi/authority#!/inforequest/1/comment")))
+
+(fact "Application model"
+      (create-app-model {:application {:id 1 :state "draft"}} {:tab ""} {:firstName "Bob"
+                                                                         :language "sv"
+                                                                         :role "applicant"})
+      => (contains {:lang "sv" :name "Bob"}))
 
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}

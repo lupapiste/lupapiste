@@ -67,4 +67,6 @@
              => (contains "???"))
        (fact "Simple term"
              (localize-fallback :cn "no" :jp)
-             => "Ei"))
+             => "Ei")
+       (fact "Nil fallbacks to default language"
+             (localize-fallback nil "no") => "Ei"))

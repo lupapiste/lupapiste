@@ -155,8 +155,8 @@
         (doseq [recipient recipients]
           (let [model   (model-fn command conf recipient)
                 subject (get-email-subject application
-                                           (get conf :subject-key (name template-name))
                                            (:language recipient)
+                                           (get conf :subject-key (name template-name))
                                            (get conf :show-municipality-in-subject false))
                 msg     (email/apply-template template-file model)]
             (send-mail-to-recipient! recipient subject msg)))))))

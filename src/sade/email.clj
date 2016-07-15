@@ -110,33 +110,31 @@
 ;; where the language part is optional. Also, if the prefixed template
 ;; is not found, the fallback is a plain template.
 
-(defn- lang-template [template-name lang]
-  (str lang "-" template-name))
+(defn- template-path [template-name lang]
+  (str "email-templates/"
+       (if lang
+         (str lang "-" template-name)
+         template-name)))
 
 (defn find-resource
-  ([resource-name] (find-resource resource-name true))
-  ([resource-name throw-if-not-found]
-   (or (io/resource (str "email-templates/" resource-name))
-       (and throw-if-not-found
-            (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name)))))))
+  [resource-name & [lang]]
+  (if-let [resource (io/resource (template-path resource-name lang))]
+    resource
+    (if lang
+      (find-resource resource-name)
+      (throw (IllegalArgumentException. (str "Can't find mail resource: " resource-name))))))
 
 (defn- slurp-resource [resource]
   (with-open [in (io/input-stream resource)]
     (slurp in)))
 
 (defn fetch-template
-  ([template-name lang]
-   (slurp-resource (or (find-resource (lang-template template-name lang) false)
-                       (find-resource template-name))))
-  ([template-name]
-   (slurp-resource (find-resource template-name))))
+  [template-name & [lang]]
+  (slurp-resource (find-resource template-name lang)))
 
 (defn fetch-html-template
-  ([template-name]
-   (enlive/html-resource (find-resource template-name)))
-  ([template-name lang]
-   (enlive/html-resource (or (find-resource (lang-template template-name lang) false)
-                             (find-resource template-name)))))
+  [template-name & [lang]]
+  (enlive/html-resource (find-resource template-name lang)))
 
 (when-not (env/feature? :no-cache)
   (alter-var-root #'fetch-template memoize)
@@ -212,7 +210,7 @@
      (->> content enlive/content (enlive/transform html-wrap [:body]) endophile/html-string unescape-at)]))
 
 (defn apply-html-template [template-name context]
-  (let [lang     (:language context)
+  (let [lang     (:lang context)
         master   (fetch-html-template "master.html" lang)
         template (fetch-html-template template-name lang)
         html     (-> master

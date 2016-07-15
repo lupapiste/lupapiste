@@ -107,8 +107,9 @@
   term localisation with the default language is returned (to ensure
   the flagging of missing term). Note: terms can be vectors."
   [lang terms & [fallback]]
-  {:pre [(util/not=as-kw lang fallback)]}
-  (let [terms (if (string? terms) [terms] terms)]
+  {:pre [(or (not lang) (util/not=as-kw lang fallback))]}
+  (let [lang (or lang default-lang)
+        terms (if (string? terms) [terms] terms)]
     (if-let [term (util/find-first (partial has-exact-term? lang)
                                    terms)]
      (localize lang term)
