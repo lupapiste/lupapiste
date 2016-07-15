@@ -92,7 +92,8 @@
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. ^String output-file)}
+                  :output-file (File. ^String output-file)
+                  :autoConversion (not (pdf-was-already-compliant? log-lines))}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
                      (io/delete-file output-file :silently)

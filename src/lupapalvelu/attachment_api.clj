@@ -389,7 +389,8 @@
   (when-not (attachment/attach-file! application attachment-data)
     (fail :error.unknown)))
 
-(defn- convert-pdf-and-upload! [application {:keys [pdfa? output-file missing-fonts]}
+(defn- convert-pdf-and-upload! [application
+                                {:keys [pdfa? output-file missing-fonts autoConversion]}
                                 {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
     (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
@@ -402,6 +403,7 @@
                                  :filename new-filename
                                  :comment? false
                                  :archivable true
+                                 :autoConversion autoConversion
                                  :archivabilityError nil)]
       (if (attachment/attach-file! application pdfa-attachment-data)
         (do (io/delete-file output-file :silently)

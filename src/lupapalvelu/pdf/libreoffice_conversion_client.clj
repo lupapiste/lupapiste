@@ -35,7 +35,8 @@
 (defn- success [filename content]
   {:filename   (str (FilenameUtils/removeExtension filename) ".pdf")
    :content    content
-   :archivable true})
+   :archivable true
+   :autoConversion true})
 
 (defn- fallback [filename original-content error-message]
   (error "libreoffice conversion error: " error-message)

@@ -689,7 +689,7 @@
 (defn ->libre-pdfa!
   "Converts content to PDF/A using Libre Office conversion client.
   Replaces (!) original filename and content with Libre data.
-  Adds :archivable / :archivabilityError key depending on conversion result.
+  Adds :archivable + :autoConversion / :archivabilityError key depending on conversion result.
   Returns given options map with libre data merged (or if conversion failed, the original data).
   If conversion not applicable, returns original given options map."
   [{:keys [filename content skip-pdfa-conversion] :as options}]
@@ -709,7 +709,7 @@
   "Uploads the file to MongoDB.
    Content can be a file or input-stream.
    Returns given attachment options, with file specific data added."
-  [{application-id :id :as application} {:keys [filename content archivable] :as options}]
+  [{application-id :id :as application} {:keys [filename content] :as options}]
   {:pre [(map? application)]}
   (let [file-id (mongo/create-id)
         sanitized-filename (mime/sanitize-filename filename)
@@ -719,8 +719,7 @@
       :file-id file-id
       :original-file-id (or (:original-file-id options) file-id)
       :filename sanitized-filename
-      :content-type content-type
-      :autoConversion (and (true? archivable) (not (:skip-pdfa-conversion options))))))
+      :content-type content-type)))
 
 (defn upload-file-through-libre!
   [application options]
@@ -810,7 +809,7 @@
   "Save PDF/A file from pdf-conversion processing result to mongo gridfs.
    Returns map with archivability flags (archivable, missing-fonts, archivability error)
    and if valid PDF/A, fileId, filename and content-type of the uploaded file."
-  [{app-id :id} {:keys [pdfa? output-file missing-fonts]} filename content-type]
+  [{app-id :id} {:keys [pdfa? output-file missing-fonts autoConversion]} filename content-type]
   (if pdfa?
     (let [pdfa-file-id  (mongo/create-id)
           pdfa-filename (filename-for-pdfa filename)
@@ -821,7 +820,8 @@
        :fileId pdfa-file-id
        :file-name pdfa-filename
        :content-type content-type
-       :content-length filesize})
+       :content-length filesize
+       :autoConversion autoConversion})
     {:archivable false :missing-fonts (or missing-fonts []) :archivabilityError :invalid-pdfa}))
 
 (defn archivability-steps!
@@ -853,7 +853,7 @@
           :now now
           :user user
           :stamped false}
-         (select-keys pdfa-result [:archivable :archivabilityError :missing-fonts])))
+         (select-keys pdfa-result [:archivable :archivabilityError :missing-fonts :autoConversion])))
 
 (defn- appeal-attachment-versions-options
   "Create options maps for needed versions. Created version(s) are returned in vector."
