@@ -2291,7 +2291,7 @@
 "userinfo.city" "fi" "Postitoimipaikka"
 "userinfo.city" "sv" "Postanstalt"
 "userinfo.language" "fi" "Asiointikieli"
-"userinfo.language" "fi" "Kontaktspråk"
+"userinfo.language" "sv" "Kontaktspråk"
 "userInfo.company.contract" "fi" "Sopimus"
 "userInfo.company.contract" "sv" "Avtal"
 "userInfo.company.loading" "fi" "Odota, yrityksen tietoja ladataan..."
