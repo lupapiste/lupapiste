@@ -686,7 +686,10 @@
                   (#{:paatos :paatosote} (keyword type-id))))
          (file-types (keyword mime-type)))))
 
-(defn pre-process-attachment [{:keys [filename content skip-pdfa-conversion] :as options}]
+(defn ->libre-pdfa
+  "Converts content to PDF/A using Libre Office conversion client.
+  If conversion not applicable, returns original filename and content."
+  [{:keys [filename content skip-pdfa-conversion] :as options}]
   (if (and (not skip-pdfa-conversion)
            (libreoffice-conversion-required? options))
     (libreoffice-client/convert-to-pdfa filename content)
@@ -705,7 +708,7 @@
   [{application-id :id :as application} options]
   {:pre [(map? application)]}
   (let [file-id (mongo/create-id)
-        {:keys [filename content archivabilityError archivable]} (pre-process-attachment options)
+        {:keys [filename content archivabilityError archivable]} (->libre-pdfa options)
         sanitized-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
