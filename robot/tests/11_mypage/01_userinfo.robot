@@ -54,6 +54,7 @@ Mika changes the name and experience back
   Textfield Value Should Be  architect.graduatingYear  2000
   Change Textfield Value  architect.fise  fise  f
   Select From List  architect-fiseKelpoisuus-select  krävande byggnadsplanering (nybyggnad)
+  Positive indicator should not be visible
   Save User Data
   Positive indicator should be visible
 
