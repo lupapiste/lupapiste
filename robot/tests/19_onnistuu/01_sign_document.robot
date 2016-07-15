@@ -19,7 +19,7 @@ Bob decides to register his company, but then cancels his mind
   Click Element  xpath=//*[@data-test-id='register-company-cancel']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
-Bob decides to register his company after all, but still chikens out
+Bob decides to register his company after all, but still chickens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
@@ -34,6 +34,7 @@ Bob decides to register his company after all, but still chikens out
   Input text by test id  register-company-netbill     yinhang
   Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
+  Test id select is  register-company-language  fi
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
@@ -61,6 +62,7 @@ Bob decides to register his company after all, and this time he means it
   Input text by test id  register-company-netbill     yinhang
   Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
+  Select from test id  register-company-language  sv
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
@@ -94,6 +96,7 @@ Login with the new password
   Login  puuha.pete@pete-rakennus.fi  company123
   User should be logged in  Pete Puuha
   Confirm notification dialog
+  Language is  SV
 
 Company details include company name, identifier and PDF link
   Click Element  user-name

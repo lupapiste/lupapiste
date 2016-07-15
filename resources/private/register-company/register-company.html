@@ -107,6 +107,14 @@
                    data-bind="textInput: personId"
                    data-test-id="register-company-personId" type="text" placeholder="112233-123A" maxlength="11"/>
           </div>
+          <div class="form-entry" data-bind="visible: $parent.userNotLoggedIn">
+            <label class="form-label" data-bind="ltext: 'userinfo.language'"></label>
+            <select class="form-input combobox"
+                   data-bind="value: language,
+                              options: loc.getSupportedLanguages(),
+                              optionsText: loc"
+                   data-test-id="register-company-language"/>
+          </div>
         </div>
 
         <div>

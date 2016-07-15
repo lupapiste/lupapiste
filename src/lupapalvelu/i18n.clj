@@ -10,6 +10,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [schema.core :as sc]
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
@@ -58,6 +59,8 @@
   (get-or-load-localizations))
 
 (def languages (-> (get-localizations) keys set))
+
+(def supported-language-schema (apply sc/enum (map name languages)))
 
 (defn valid-language
   "Input validator for lang parameter. Accepts also empty lang."
