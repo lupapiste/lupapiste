@@ -399,7 +399,7 @@
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
+                         (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml (normalize-special-verdict application app-xml)
           validator-fn (permit/get-verdict-validator (permit/permit-type application))
           organization (if organization @organization (org/get-organization (:organization application)))
