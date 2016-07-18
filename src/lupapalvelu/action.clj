@@ -277,7 +277,7 @@
       (or
         (if-let [handler (:handler meta-data)]
           (let [result (handler command)
-                masked-command (masked command)]
+                masked-command (assoc (masked command) :ns (:ns meta-data))]
             (if (or (= :raw (:type command)) (nil? result) (ok? result))
               (log/log-event :info masked-command)
               (log/log-event :warning masked-command))

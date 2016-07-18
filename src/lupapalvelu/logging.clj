@@ -46,20 +46,27 @@
 (def- ^DateTimeFormatter time-fmt (DateTimeFormat/forPattern time-format))
 (def- ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
-(defn- unsecure-log-event [level event]
-  (.write event-log-out (str (output-fn {:level level :timestamp_ (delay (.print time-fmt (System/currentTimeMillis))) :ns ""}) event \newline))
-  (.flush event-log-out))
+(defn- unsecure-log-event
+  ([level event]
+    (unsecure-log-event level event nil))
+  ([level event opts]
+   (.write event-log-out (str (output-fn {:level level
+                                          :timestamp_ (delay (.print time-fmt (System/currentTimeMillis)))
+                                          :?ns-str (:ns opts)})
+                              event
+                              \newline))
+   (.flush event-log-out)))
 
 (defn log-event [level event]
   (let [stripped (-> event
-                   (dissoc :application :organization)
+                   (dissoc :application :organization :ns)
                    (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
                    (update-in [:data :files] (partial map #(if (:tempfile %)
                                                              (dissoc % :tempfile)
                                                              %)))) ; data in multipart/form-data w/ POST
         jsoned   (json/generate-string stripped)]
     (try
-      (unsecure-log-event level jsoned)
+      (unsecure-log-event level jsoned {:ns (str (:ns event))})
       (catch Exception e
         (error e "Can't write to event log:" jsoned)))))
 
