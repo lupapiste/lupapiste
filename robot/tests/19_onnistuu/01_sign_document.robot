@@ -83,7 +83,7 @@ Registrations succeeds, user gets email
   Open all latest emails
   Wait Until  Page Should Contain  puuha.pete@pete-rakennus.fi
   Page Should Contain  new-company-user
-  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste: Inbjudan till huvudanvändare för Lupapiste-tjänstens företagskonto
 
 Second link in email should lead to password reset
   Click Element  xpath=(//a)[2]
