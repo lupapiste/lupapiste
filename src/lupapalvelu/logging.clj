@@ -9,19 +9,21 @@
             [clojure.java.io :as io])
   (:import [org.joda.time.format DateTimeFormat DateTimeFormatter]))
 
-(def ^:dynamic context {})
-
-(defmacro with-logging-context [logging-context & body]
+(defmacro with-logging-context
+  "Merges given logging context with timbres *context*.
+   Context is available for appedners in timbre data map."
+  [logging-context & body]
   (assert (map? logging-context) "logging-context must be a map")
-  `(binding [context (merge context ~logging-context)]
-     (do ~@body)))
+  `(timbre/with-context
+     (merge timbre/*context* ~logging-context)
+     ~@body))
 
 (defn- output-fn
   "Logging output function"
   ([data] (output-fn {:stacktrace-fonts {}} data))
   ([opts data]
-    (let [{:keys [session-id applicationId userId]} context
-          {:keys [level ?err_ msg_ ?ns-str timestamp_]} data]
+    (let [{:keys [level ?err msg_ ?ns-str timestamp_ context]} data
+          {:keys [session-id applicationId userId]} context]
       (str
         (-> level name s/upper-case)
         \space (force timestamp_) \space
@@ -30,8 +32,7 @@
         \[ userId \] \space
         (or ?ns-str "unknown namespace") " - "
         (force msg_)
-        (when-let [err (force ?err_)]
-          (str "\n" (timbre/stacktrace err opts)))))))
+        (when ?err (str "\n" (timbre/stacktrace ?err opts)))))))
 
 (def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 
