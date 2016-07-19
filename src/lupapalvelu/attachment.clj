@@ -455,6 +455,8 @@
            (run! delete-attachment-file-and-preview!)))
 
 (defn set-attachment-version!
+  "Creates a version from given attachment and options and saves that version to application.
+  Returns version model with attachment-id (not file-id) as id."
   ([application attachment options]
     {:pre [(map? options)]}
     (set-attachment-version! application attachment options 5))
