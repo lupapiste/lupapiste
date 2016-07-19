@@ -1,13 +1,22 @@
 (ns lupapalvelu.file-upload
   (:require [monger.operators :refer :all]
             [sade.util :as util]
+            [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.mime :as mime]))
+            [lupapalvelu.mime :as mime])
+  (:import (java.io File)))
+
+(def UploadFile
+  {:filename      sc/Str
+   :tempfile      File
+   :content-type  sc/Str
+   :size          sc/Num})
 
 (defn save-file
   "Saves given file to mongo GridFS, with metadata (map or kvs).
    File is file map from request, actual file object is taken from :tempfile key."
   [file & metadata]
+  {:pre [(sc/validate UploadFile file)]}
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
