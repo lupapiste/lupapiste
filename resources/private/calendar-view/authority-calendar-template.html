@@ -26,5 +26,10 @@
     <!-- /ko -->
   </div>
 
-  <calendar-view />
+  <calendar-view params="searchConditions: { calendarId: ko.observable(29),
+                                             clientId: 'client1',
+                                             userId: lupapisteApp.models.currentUser.id,
+                                             reservationTypeId: 32 },
+                         view: 'applicationView'">
+  </calendar-view>
 </script>

@@ -8,14 +8,21 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
   self.userId = ko.observable();
+  self.clientId = ko.observable();
+  self.reservationTypeId = ko.observable();
+  self.view = ko.observable();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   if (_.get(params, "searchConditions.calendarId")) {
     self.calendarId = params.searchConditions.calendarId; // observable from parent
-    self.userId = params.searchConditions.userId; // observable from parent
   }
+  self.userId = params.searchConditions.userId; // observable from parent
   self.reservationTypes = params.reservationTypes; // observable from parent
+  self.clientId = params.searchConditions.clientId; // observable from parent
+  self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
+
+  self.view = params.view;
 
   self.firstFullHour = calendarService.params().firstFullHour;
   self.lastFullHour = calendarService.params().lastFullHour;
@@ -67,6 +74,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
       self.sendEvent("calendarView", "calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });
+    } else if (clazz === "available-slot") {
+      self.sendEvent("calendarView", "availableSlotClicked",
+        { calendarId: this.calendarWeekday.calendarId,
+          slot: this.slot }); // FIXME: Mitä muuta? MakeReservation.java
     }
   };
 
@@ -82,7 +93,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
       { calendarId: self.calendarId(),
         week: self.startOfWeek().isoWeek(),
         year: self.startOfWeek().year(),
-        weekObservable: self.calendarWeekdays});
+        weekObservable: self.calendarWeekdays,
+        clientId: self.clientId, // FIXME: Oikeasti observable
+        userId: self.userId(),
+        reservationTypeId: self.reservationTypeId }); // FIXME: Oikeasti observable
   });
 
   self.gotoToday = function() {

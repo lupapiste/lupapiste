@@ -50,14 +50,32 @@
             </div>
             <!-- /ko -->
             <!-- ko foreach: slots -->
+              <!--ko if: $component.view !== "applicationView" -->
               <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
                                                              height: $component.slotHeight($data) },
                                                     css: { 'calendar-slot': 1,
                                                            'booked': status == 'booked',
                                                            'accepted': status == 'accepted' }">
-              <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'calendar-slot'),
-                            text: $component.slotViewText($data)"></a>
-            </div>
+                <a data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'calendar-slot'),
+                              text: $component.slotViewText($data)"></a>
+              </div>
+              <!-- /ko -->
+              <!--ko if: $component.view === "applicationView" -->
+              <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
+                                                             height: $component.slotHeight($data) },
+                                                    css: { 'calendar-slot': 1,
+                                                           'booked': status == 'booked',
+                                                           'accepted': status == 'accepted' }">
+                <button data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'available-slot')"
+                        class="reserve-slot"
+                        data-test-id="reserve-slot">
+                  <div>
+                    <i class="lupicon-circle-plus"></i>
+                    <span data-bind="ltext: 'calendar.reserve.slot'"></span>
+                  </div>
+                </button>
+              </div>
+              <!-- /ko -->
             <!-- /ko -->
           </div>
         </td>

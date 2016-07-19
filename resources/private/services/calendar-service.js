@@ -35,7 +35,7 @@ LUPAPISTE.CalendarService = function() {
       startOfWeekMoment = moment(event.weekObservable()[0].startOfDay).startOf("isoWeek");
     }
 
-    if (event.calendarId) {
+    if (event.calendarId && !event.clientId) {
       ajax.query("calendar-slots", { calendarId: event.calendarId,
                                      week: startOfWeekMoment.isoWeek(),
                                      year: startOfWeekMoment.year() })
@@ -43,10 +43,20 @@ LUPAPISTE.CalendarService = function() {
           notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
         })
         .call();
+    } else if (event.clientId && event.userId && event.reservationTypeId) {
+
+      ajax.query("available-calendar-slots", { clientId: event.clientId, userId: event.userId, reservationTypeId: event.reservationTypeId,
+                                               week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+        .success(function(data) {
+          notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
+        })
+        .error(function(e) {
+          hub.send("indicator", {style: "negative", message: e.code});
+        })
+        .call();
     } else {
       notifyView(event, _weekdays(null, [], startOfWeekMoment));
     }
-
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {

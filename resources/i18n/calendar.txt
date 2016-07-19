@@ -60,6 +60,8 @@
 "mycalendar.no-active-calendar" "sv" "Ingen kalender är skapad för dig i Lupapiste. Tag kontakt med din huvudanvändare"
 "mycalendar.title" "fi" "Minun kalenterini"
 "mycalendar.title" "sv" "Min kalender"
+"calendar.reserve.slot" "fi" "Varaa"
+"calendar.reserve.slot" "sv" ""
 "calendar.error.delete-reservation-slot-not-allowed" "fi" "Varattua aikaa ei voi poistaa"
 "calendar.error.delete-reservation-slot-not-allowed" "sv" "Inbokad tid kan ej raderas"
 "calendar.error.slot-fully-booked" "fi" "Aika on varattu"

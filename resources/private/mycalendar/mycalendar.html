@@ -26,11 +26,12 @@
         </div>
       <!-- /ko -->
 
+      <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' -->
       <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
                                                  userId: lupapisteApp.models.currentUser.id },
                              reservationTypes: reservationTypes"
                      visible="selectedCalendar() !== undefined"></calendar-view>
-
+      <!-- /ko -->
       <!-- ko if: noCalendarsFound -->
         <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
       <!-- /ko -->

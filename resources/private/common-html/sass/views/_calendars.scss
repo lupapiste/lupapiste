@@ -151,6 +151,28 @@
             color: white;
           }
         }
+
+        & button.reserve-slot {
+          background: inherit;
+          width: 100%;
+          height: 100%;
+          font-size: $baseline * 0.95;
+          color: $orange-dark;
+          text-align: center;
+          display: table;
+        }
+
+        & button.reserve-slot div {
+          display: inline;
+          margin-right: auto;
+          margin-left: auto;
+        }
+
+        & button.reserve-slot div i, & button.reserve-slot div span {
+          display: table-cell;
+          vertical-align: middle;
+        }
+
       }
     }
 

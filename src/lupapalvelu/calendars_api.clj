@@ -367,6 +367,18 @@
   [_]
   (ok :reservationTypes (delete-command (str "reservation-types/" reservationTypeId))))
 
+(defquery available-calendar-slots
+          {:user-roles #{:authorityAdmin :authority}
+           :feature    :ajanvaraus
+           :parameters       [userId clientId reservationTypeId year week]
+           :input-validators [(partial action/string-parameters [:userId :clientId :reservationTypeId])]
+           :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+          [_]
+          (->> (api-query "reservationslots/available-slots" {:year year :week week :externalRef (calendar-ref-for-user userId)
+                                                              :clientId clientId :reservationTypeId reservationTypeId})
+               ->FrontendReservationSlots
+               (ok :slots)))
+
 ; For integration tests in dev
 (env/in-dev
   (defn clear-database
