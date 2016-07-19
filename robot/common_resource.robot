@@ -134,7 +134,7 @@ Language To
 Language Is
   [Arguments]  ${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
-  
+
 
 #
 # Navigation
@@ -1352,7 +1352,7 @@ Checkbox wrapper not selected
 Checkbox wrapper disabled
   [Arguments]  ${id}
   Javascript?  $("input#${id}:disabled").length === 1
-  
+
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
@@ -1360,7 +1360,7 @@ Select from test id
 Test id select is
   [Arguments]  ${id}  ${value}
   List selection should be  jquery=select[data-test-id=${id}]  ${value}
-  
+
 
 # Frontend error log
 
