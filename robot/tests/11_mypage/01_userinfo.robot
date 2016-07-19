@@ -60,7 +60,7 @@ Mika changes the name and experience back
 
 Name and experience should have changed in Finnish page too
   [Tags]  firefox
-  Language is  FI
+  Language To  FI
   Checkbox Should Be Selected  allowDirectMarketing
   Wait until  List Selection Should Be  architect-degree-select  Kirvesmies
   Wait until  Textfield Value Should Be  architect.graduatingYear  2000
@@ -82,7 +82,7 @@ Sven changes his user language to Swedish
   Save User Data
 
 Upon saving the UI language changes
-  Language is  SV
+  Wait until  Language is  SV
 
 Clicking logout refers to the Swedish login page
   Click link  jquery=div#logout-header-box a
@@ -103,6 +103,7 @@ Save User Data
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
+  Wait for jQuery
   Wait Until  Textfield Value Should Be  firstName  ${firstName}
   Wait Until  Textfield Value Should Be  lastName   ${lastName}
 
