@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-authority-calendar-template">
+  <div>
+    <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+    <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+    <div>
+      <p>Ohjetekstiä viranomaiselle</p>
+      <h3>Varaa aika tapaamiseen</h3>
+    </div>
+    <!-- /ko -->
+  </div>
+
+  <calendar-view />
+</script>

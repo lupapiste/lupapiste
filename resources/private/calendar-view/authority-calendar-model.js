@@ -1,0 +1,2 @@
+LUPAPISTE.ApplicationAuthorityCalendarModel = function (params) {
+};
