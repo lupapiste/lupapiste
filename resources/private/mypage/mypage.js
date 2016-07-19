@@ -25,7 +25,9 @@
         .success(function(res) {
           model.clear().saved(true);
           util.showSavedIndicator(res);
-          if( params.language && params.language !== loc.getCurrentLanguage()) {
+          if( params.language &&
+              params.language !== lupapisteApp.models.currentUser.language() &&
+              params.language !== loc.getCurrentLanguage()) {
             hub.send( "change-lang", {lang: params.language});
           }
         })
