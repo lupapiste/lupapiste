@@ -268,7 +268,7 @@
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
-     :content-length (.getLength attachment)
+     :size (.getLength attachment)
      :file-name (.getFilename attachment)
      :fileId (.getId attachment)
      :metadata metadata

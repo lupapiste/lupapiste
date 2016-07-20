@@ -329,7 +329,7 @@
       (let [file-id  (mongo/create-id)
             file-obj {:content nil,
                       :content-type "application/pdf",
-                      :content-length 123,
+                      :size 123,
                       :file-name "test-pdf.pdf",
                       :metadata {:uploaded 12344567, :linked false},
                       :application nil
@@ -343,7 +343,12 @@
                                 :appeal
                                 file-obj)]
         (fact "Generated attachment data is valid (no PDF/A generation)"
-          (sc/check Attachment result-attachment) => nil)))))
+          (sc/check Attachment result-attachment) => nil)
+        (fact "Version has correct keys"
+          (:latestVersion result-attachment) => (contains {:size (:size file-obj)
+                                                           :filename (:file-name file-obj)
+                                                           :contentType (:content-type file-obj)
+                                                           :fileId (:fileId file-obj)}))))))
 
 (facts make-ram-attachment
 

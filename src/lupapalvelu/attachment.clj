@@ -633,7 +633,7 @@
           response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:content-length attachment))
+                              "Content-Length" (str (:size attachment))
                               "Content-Disposition" (format "filename=\"%s\"" filename)}}]
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
@@ -825,7 +825,6 @@
               :archivabilityError nil
               :file-name (:filename filedata)
               :contentType content-type
-              :content-length (:size filedata)
               :autoConversion autoConversion}
              filedata))
     {:archivable false :missing-fonts (or missing-fonts []) :archivabilityError :invalid-pdfa}))
@@ -855,7 +854,7 @@
           :original-file-id (:fileId subject)
           :filename         (:file-name subject)
           :contentType      (:content-type subject)
-          :size             (:content-length subject)
+          :size             (:size subject)
           :now now
           :user user
           :stamped false}
