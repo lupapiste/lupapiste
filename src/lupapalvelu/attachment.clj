@@ -27,7 +27,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.preview :as preview]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
-            [lupapalvelu.tiff-validation :as tiff-validation])
+            [lupapalvelu.tiff-validation :as tiff-validation]
+            [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
            [org.apache.commons.io FilenameUtils]
@@ -713,15 +714,10 @@
    Returns given attachment options, with file specific data added."
   [{application-id :id :as application} {:keys [filename content] :as options}]
   {:pre [(map? application)]}
-  (let [file-id (mongo/create-id)
-        sanitized-filename (mime/sanitize-filename filename)
-        content-type (mime/mime-type sanitized-filename)]
-    (mongo/upload file-id sanitized-filename content-type content :application application-id)
-    (assoc options
-      :fileId file-id
-      :original-file-id (or (:original-file-id options) file-id)
-      :filename sanitized-filename
-      :contentType content-type)))
+  (let [filedata (file-upload/save-file (select-keys options [:filename :content :size]) :application application-id)]
+    (merge options
+           filedata
+           {:original-file-id (or (:original-file-id options) (:fileId filedata))})))
 
 (defn upload-file-through-libre!
   [application options]
