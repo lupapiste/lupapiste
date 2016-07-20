@@ -391,21 +391,21 @@
        (sort-by version-number)
        (last)))
 
-(defn- make-version [attachment {:keys [file-id original-file-id filename content-type size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
+(defn- make-version [attachment {:keys [fileId original-file-id filename contentType size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
     (util/assoc-when {:version        version-number
-             :fileId         file-id
-             :originalFileId (or original-file-id file-id)
+             :fileId         fileId
+             :originalFileId (or original-file-id fileId)
              :created        now
              :user           (usr/summary user)
              ;; File name will be presented in ASCII when the file is downloaded.
              ;; Conversion could be done here as well, but we don't want to lose information.
              :filename       filename
-             :contentType    content-type
+             :contentType    contentType
              :size           size}
       :stamped stamped
       :archivable archivable
@@ -703,8 +703,8 @@
 
 (defn- preview-image!
   "Creates a preview image in own thread pool. Returns the given opts."
-  [application-id {:keys [file-id filename content-type] :as opts}]
-  (.submit preview-threadpool #(create-preview! file-id filename content-type application-id mongo/*db-name*))
+  [application-id {:keys [fileId filename contentType] :as opts}]
+  (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*))
   opts)
 
 (defn- upload-file
@@ -718,10 +718,10 @@
         content-type (mime/mime-type sanitized-filename)]
     (mongo/upload file-id sanitized-filename content-type content :application application-id)
     (assoc options
-      :file-id file-id
+      :fileId file-id
       :original-file-id (or (:original-file-id options) file-id)
       :filename sanitized-filename
-      :content-type content-type)))
+      :contentType content-type)))
 
 (defn upload-file-through-libre!
   [application options]
@@ -745,7 +745,7 @@
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file application)
                                 (preview-image! (:id application))
-                                :file-id))]
+                                :fileId))]
     (try
       (->> (cond-> options
                    original-file-id (assoc :original-file-id original-file-id))
@@ -821,7 +821,7 @@
        :archivabilityError nil
        :fileId pdfa-file-id
        :file-name pdfa-filename
-       :content-type content-type
+       :contentType content-type
        :content-length filesize
        :autoConversion autoConversion})
     {:archivable false :missing-fonts (or missing-fonts []) :archivabilityError :invalid-pdfa}))
@@ -847,10 +847,10 @@
 (defn- version-options
   "Returns version options for subject (a file). This is NOT final version model (see make-version)."
   [subject pdfa-result now user]
-  (merge {:file-id          (:fileId subject)
+  (merge {:fileId           (:fileId subject)
           :original-file-id (:fileId subject)
           :filename         (:file-name subject)
-          :content-type     (:content-type subject)
+          :contentType      (:content-type subject)
           :size             (:content-length subject)
           :now now
           :user user

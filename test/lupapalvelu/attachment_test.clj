@@ -241,12 +241,12 @@
                                                            :archivabilityError (apply sc/enum nil archivability-errors)
                                                            :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
-                                                :content-type sc/Str
-                                                :size sc/Int
-                                                :now ssc/Timestamp
-                                                :user user/SummaryUser
-                                                :stamped (sc/maybe sc/Bool)})]
-                (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
+                                                 :contentType sc/Str
+                                                 :size sc/Int
+                                                 :now ssc/Timestamp
+                                                 :user user/SummaryUser
+                                                 :stamped (sc/maybe sc/Bool)})]
+                (let [options (merge {:fileId file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment options)]
                   (is (not (nil? (get-in version [:version :minor]))))
                   (is (not (nil? (get-in version [:version :major]))))
@@ -255,7 +255,7 @@
                   (is (= (:created version) (:now options)))
                   (is (= (:user version) (:user options)))
                   (is (= (:filename version) (:filename options)))
-                  (is (= (:contentType version) (:content-type options)))
+                  (is (= (:contentType version) (:contentType options)))
                   (is (= (:size version) (:size options)))
                   (is (or (not (:stamped options)) (:stamped version)))
                   (is (or (not (:archivable options)) (:archivable version)))
@@ -265,23 +265,23 @@
 (defspec make-version-update-existing {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))
                                                                               (assoc :latestVersion (assoc ver :originalFileId (first fids))))
-                                                                          (assoc opt :file-id (last fids) :original-file-id (first fids))])
+                                                                          (assoc opt :fileId (last fids) :original-file-id (first fids))])
                                                 (gen/tuple (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                                                            (ssg/generator Version)
                                                            (gen/vector-distinct ssg/object-id {:num-elements 2})
                                                            (ssg/generator {:filename sc/Str
-                                                                           :content-type sc/Str
+                                                                           :contentType sc/Str
                                                                            :size sc/Int
                                                                            :now ssc/Timestamp
                                                                            :user user/SummaryUser})))]
                 (let [version (make-version attachment options)]
                   (and (= (:version version) (get-in attachment [:latestVersion :version]))
-                       (= (:fileId version) (:file-id options))
+                       (= (:fileId version) (:fileId options))
                        (= (:originalFileId version) (:original-file-id options))
                        (= (:created version) (:now options))
                        (= (:user version) (:user options))
                        (= (:filename version) (:filename options))
-                       (= (:contentType version) (:content-type options))
+                       (= (:contentType version) (:contentType options))
                        (= (:size version) (:size options))))))
 
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
