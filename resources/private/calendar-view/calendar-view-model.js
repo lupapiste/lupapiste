@@ -91,14 +91,21 @@ LUPAPISTE.CalendarViewModel = function (params) {
   });
 
   self.disposedComputed(function() {
-    hub.send("calendarService::fetchCalendarSlots",
-      { calendarId: self.calendarId(),
-        week: self.startOfWeek().isoWeek(),
-        year: self.startOfWeek().year(),
-        weekObservable: self.calendarWeekdays,
-        clientId: self.clientId,
-        userId: self.userId,
-        reservationTypeId: self.reservationTypeId });
+    if (params.view === 'applicationView') {
+      hub.send("calendarService::fetchApplicationCalendarSlots",
+        { clientId: self.clientId,
+          userId: self.userId,
+          reservationTypeId: self.reservationTypeId,
+          week: self.startOfWeek().isoWeek(),
+          year: self.startOfWeek().year(),
+          weekObservable: self.calendarWeekdays });
+    } else {
+      hub.send("calendarService::fetchCalendarSlots",
+        { calendarId: self.calendarId(),
+          week: self.startOfWeek().isoWeek(),
+          year: self.startOfWeek().year(),
+          weekObservable: self.calendarWeekdays });
+    }
   });
 
   self.gotoToday = function() {

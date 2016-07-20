@@ -27,15 +27,18 @@ LUPAPISTE.CalendarService = function() {
     }
   };
 
-  var doFetchCalendarWeek = function(event) {
-    var startOfWeekMoment;
-    if (event && event.week && event.year) {
-      startOfWeekMoment = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek");
-    } else if (event && event.weekObservable) {
-      startOfWeekMoment = moment(event.weekObservable()[0].startOfDay).startOf("isoWeek");
+  var _getStartOfWeekMoment = function(week, year, weekObservable) {
+    if (week && year) {
+      return moment().set({"isoWeek": week, "year": year}).startOf("isoWeek");
+    } else if (weekObservable) {
+      return moment(weekObservable()[0].startOfDay).startOf("isoWeek");
     }
+  };
 
-    if (event.calendarId && !event.clientId) {
+  var doFetchCalendarWeek = function(event) {
+    var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
+
+    if (event.calendarId) {
       ajax.query("calendar-slots", { calendarId: event.calendarId,
                                      week: startOfWeekMoment.isoWeek(),
                                      year: startOfWeekMoment.year() })
@@ -43,8 +46,15 @@ LUPAPISTE.CalendarService = function() {
           notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
         })
         .call();
-    } else if (event.clientId && event.userId && event.reservationTypeId) {
+    } else {
+      notifyView(event, _weekdays(null, [], startOfWeekMoment));
+    }
+  };
 
+  var doFetchApplicationCalendarWeek = function(event) {
+    var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
+
+    if (event.clientId() && event.userId() && event.reservationTypeId()) {
       ajax.query("available-calendar-slots", { clientId: event.clientId, userId: event.userId, reservationTypeId: event.reservationTypeId,
                                                week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
         .success(function(data) {
@@ -105,6 +115,10 @@ LUPAPISTE.CalendarService = function() {
     doFetchCalendarWeek(event);
   });
 
+  var _fetchApplicationCalendarSlots = hub.subscribe("calendarService::fetchApplicationCalendarSlots", function(event) {
+    doFetchApplicationCalendarWeek(event);
+  });
+
   var _createSlots = hub.subscribe("calendarService::createCalendarSlots", function(event) {
     ajax
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
@@ -153,13 +167,11 @@ LUPAPISTE.CalendarService = function() {
                                           comment: event.comment })
       .success(function() {
         hub.send("indicator", { style: "positive" });
-        doFetchCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id, reservationTypeId: event.reservationTypeId,
-                              weekObservable: event.weekObservable });
+        doFetchApplicationCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id,
+                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
       .error(function(e) {
         hub.send("indicator", {style: "negative", message: e.code});
-        doFetchCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id, reservationTypeId: event.reservationTypeId,
-                              weekObservable: event.weekObservable });
       })
       .call();
   });
@@ -174,5 +186,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_updateSlot);
     hub.unsubscribe(_deleteSlot);
     hub.unsubscribe(_reserveSlot);
+    hub.unsubscribe(_fetchApplicationCalendarSlots);
   };
 };
