@@ -4,29 +4,30 @@
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
-  (:import (java.io File)))
+  (:import (java.io File InputStream)))
 
-(def UploadFile
+(def FileData
   {:filename      sc/Str
-   :tempfile      File
+   :content       (sc/cond-pre File InputStream)
    :content-type  sc/Str
    :size          sc/Num})
 
 (defn save-file
-  "Saves given file to mongo GridFS, with metadata (map or kvs).
-   File is file map from request, actual file object is taken from :tempfile key."
-  [file & metadata]
-  {:pre [(sc/validate UploadFile file)]}
+  "Saves file or input stream to mongo GridFS, with metadata (map or kvs).
+   Filedata is map (see FileData schema).
+   Map of file specific data (fileId, metadata, contentType...) is returned."
+  [filedata & metadata]
+  {:pre [(sc/validate FileData filedata)]}
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
         file-id (mongo/create-id)
-        sanitized-filename (mime/sanitize-filename (:filename file))
+        sanitized-filename (mime/sanitize-filename (:filename filedata))
         content-type       (mime/mime-type sanitized-filename)]
-    (mongo/upload file-id sanitized-filename content-type (:tempfile file) metadata)
+    (mongo/upload file-id sanitized-filename content-type (:content filedata) metadata)
     {:fileId file-id
      :filename sanitized-filename
-     :size (:size file)
+     :size (:size filedata)
      :contentType content-type
      :metadata metadata}))
 
