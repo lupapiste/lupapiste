@@ -20,7 +20,12 @@
       </span>
       <span class="form-entry">
         <label class="form-label">Tapaamisen aihe</label>
-        <select class="form-input combobox">
+        <select class="form-input combobox"
+                data-bind="options: reservationTypes,
+                           optionsValue: function(item) { return _.get(item, 'id'); },
+                           optionsText: function(item) { return _.get(item, 'name'); },
+                           optionsCaption: loc('choose'),
+                           value: selectedReservationType">
         </select>
       </span>
     </div>

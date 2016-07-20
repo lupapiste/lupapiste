@@ -5,9 +5,10 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function (params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.authorizedParties = lupapisteApp.models.application.roles;
+  self.reservationTypes = ko.observableArray([]);
 
   self.selectedParty = ko.observable();
-  self.selectedReservationTypes = ko.observableArray([]);
+  self.selectedReservationType = ko.observable();
 
   self.disposedComputed(function() {
     var organizationId = lupapisteApp.models.application.organization();
@@ -17,7 +18,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function (params) {
   });
 
   self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {
-    self.selectedReservationTypes(event.reservationTypes);
+    self.reservationTypes(event.reservationTypes);
   });
 
   self.partyFullName = function(party) {
