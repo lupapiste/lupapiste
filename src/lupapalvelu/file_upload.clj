@@ -10,7 +10,7 @@
   {:filename                        sc/Str
    :content                         (sc/cond-pre File InputStream)
    (sc/optional-key :content-type)  sc/Str
-   :size                            sc/Num})
+   (sc/optional-key :size)          sc/Num})
 
 (defn save-file
   "Saves file or input stream to mongo GridFS, with metadata (map or kvs).
@@ -21,13 +21,14 @@
   (let [metadata (if (map? (first metadata))
                    (first metadata)
                    (apply hash-map metadata))
-        file-id (mongo/create-id)
+        file-id            (mongo/create-id)
         sanitized-filename (mime/sanitize-filename (:filename filedata))
-        content-type       (mime/mime-type sanitized-filename)]
-    (mongo/upload file-id sanitized-filename content-type (:content filedata) metadata)
+        content-type       (mime/mime-type sanitized-filename)
+
+        result (mongo/upload file-id sanitized-filename content-type (:content filedata) metadata)]
     {:fileId file-id
      :filename sanitized-filename
-     :size (:size filedata)
+     :size (or (:size filedata) (:length result))
      :contentType content-type
      :metadata metadata}))
 
