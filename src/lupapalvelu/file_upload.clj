@@ -7,10 +7,10 @@
   (:import (java.io File InputStream)))
 
 (def FileData
-  {:filename      sc/Str
-   :content       (sc/cond-pre File InputStream)
-   :content-type  sc/Str
-   :size          sc/Num})
+  {:filename                        sc/Str
+   :content                         (sc/cond-pre File InputStream)
+   (sc/optional-key :content-type)  sc/Str
+   :size                            sc/Num})
 
 (defn save-file
   "Saves file or input stream to mongo GridFS, with metadata (map or kvs).
