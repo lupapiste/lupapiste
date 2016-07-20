@@ -80,13 +80,14 @@ LUPAPISTE.CalendarService = function() {
       .call();
    });
 
-  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function() {
-    ajax.query("reservation-types-for-organization")
+  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
+    ajax.query("reservation-types-for-organization", {organizationId: event.organizationId})
       .success(function (data) {
         var obj = {};
         obj[data.organization] = data.reservationTypes;
         self.reservationTypesByOrganization(obj);
-        hub.send("calendarService::organizationReservationTypesFetched", { reservationTypes: data.reservationTypes });
+        hub.send("calendarService::organizationReservationTypesFetched",
+          { organizationId: data.organization, reservationTypes: data.reservationTypes });
       })
       .call();
   });

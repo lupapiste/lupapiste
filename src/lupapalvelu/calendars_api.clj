@@ -336,17 +336,18 @@
   [{user :user}]
   (info "Inserting a reservation type ")
   (ok :result (post-command "reservation-types/" {:reservationType   reservationType
-                                                       :organization      (usr/authority-admins-organization-id user)})))
+                                                  :organization      (usr/authority-admins-organization-id user)})))
 
 (defquery reservation-types-for-organization
-  {:user-roles #{:authorityAdmin}
+  {:user-roles #{:authorityAdmin :authority}
+   :parameters [organizationId]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{user :user}]
-  (let [admin-in-organization-id (usr/authority-admins-organization-id user)]
-    (info "Get reservation types for organization" admin-in-organization-id)
-    (ok :organization admin-in-organization-id
-        :reservationTypes (reservation-types admin-in-organization-id))))
+  (info "Get reservation types for organization" organizationId)
+  (ok :organization organizationId
+      :reservationTypes (reservation-types organizationId)))
 
 (defcommand update-reservation-type
   {:user-roles #{:authorityAdmin}

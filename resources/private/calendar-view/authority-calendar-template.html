@@ -14,7 +14,8 @@
                 data-bind="options: authorizedParties,
                            optionsValue: function(item) { return _.get(item, 'id'); },
                            optionsText: function(item) { return partyFullName(item); },
-                           optionsCaption: loc('choose')">
+                           optionsCaption: loc('choose'),
+                           value: selectedParty">
         </select>
       </span>
       <span class="form-entry">
@@ -23,13 +24,14 @@
         </select>
       </span>
     </div>
-    <!-- /ko -->
-  </div>
 
-  <calendar-view params="searchConditions: { calendarId: ko.observable(29),
+    <calendar-view params="searchConditions: { calendarId: ko.observable(29),
                                              clientId: ko.observable('client1'),
                                              userId: lupapisteApp.models.currentUser.id,
                                              reservationTypeId: ko.observable(32) },
                          view: 'applicationView'">
-  </calendar-view>
+    </calendar-view>
+    <!-- /ko -->
+  </div>
+
 </script>
