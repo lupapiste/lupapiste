@@ -5,8 +5,10 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
 
   self.reservationType = ko.observable();
   self.items = ko.observableArray([]);
+  self.organizationId = ko.observable();
 
   hub.subscribe("calendarService::organizationReservationTypesFetched", function(event) {
+    self.organizationId(event.organizationId);
     self.items(event.reservationTypes || []);
   });
 
@@ -47,7 +49,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("update-reservation-type", {reservationTypeId: id, name: reservationType})
           .success(function() {
-            hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("calendarService::fetchOrganizationReservationTypes", {organizationId: self.organizationId()});
             hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
           })
@@ -67,7 +69,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         ajax
           .command("add-reservation-type-for-organization", {reservationType: reservationType})
           .success(function() {
-            hub.send("calendarService::fetchOrganizationReservationTypes");
+            hub.send("calendarService::fetchOrganizationReservationTypes", {organizationId: self.organizationId()});
             hub.send("indicator", {style: "positive"});
             LUPAPISTE.ModalDialog.close();
           })
@@ -84,7 +86,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
     ajax
       .command("delete-reservation-type", {reservationTypeId: reservationType.id})
       .success(function() {
-        hub.send("calendarService::fetchOrganizationReservationTypes");
+        hub.send("calendarService::fetchOrganizationReservationTypes", {organizationId: self.organizationId()});
         hub.send("indicator", {style: "positive"});
       })
       .error(function(e) {
