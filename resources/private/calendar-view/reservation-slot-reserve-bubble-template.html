@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="reservation-slot-reserve-bubble-template">
+  <div class="calendar-slot-bubble"
+       data-bind="style: { position: 'absolute',
+                           top: positionTop,
+                           'z-index': 1000 },
+                  css: weekdayCss ">
+    <bubble-dialog params="visible: bubbleVisible,
+                           buttonIcon: 'lupicon-save',
+                           buttonText: 'application-guests.send',
+                           okEnabled: okEnabled,
+                           okFun: send,
+                           error: error,
+                           prefix: 'reservation-slot-reserve',
+                           waiting: waiting">
+      <div>
+        <h3 data-bind="ltext: 'calendar.reserve-slot.title'"></h3>
+      </div>
+    </bubble-dialog>
+  </div>
+</script>
+

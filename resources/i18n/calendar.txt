@@ -62,6 +62,8 @@
 "mycalendar.title" "sv" "Min kalender"
 "calendar.reserve.slot" "fi" "Varaa"
 "calendar.reserve.slot" "sv" ""
+"calendar.reserve-slot.title" "fi" "Tapaamisen tiedot"
+"calendar.reserve-slot.title" "sv" ""
 "calendar.error.delete-reservation-slot-not-allowed" "fi" "Varattua aikaa ei voi poistaa"
 "calendar.error.delete-reservation-slot-not-allowed" "sv" "Inbokad tid kan ej raderas"
 "calendar.error.slot-fully-booked" "fi" "Aika on varattu"

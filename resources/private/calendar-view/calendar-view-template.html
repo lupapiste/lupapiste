@@ -29,6 +29,11 @@
                                                   weekdays: $component.calendarWeekdays,
                                                   reservationTypes: $component.reservationTypes"></reservation-slot-edit-bubble>
           </div>
+          <div style="position: relative;">
+            <reservation-slot-reserve-bubble params="calendarId: $component.calendarId,
+                                                     weekdays: $component.calendarWeekdays,
+                                                     reservationTypes: $component.reservationTypes"></reservation-slot-reserve-bubble>
+          </div>
         </td>
       </tr>
       </thead>
@@ -66,7 +71,9 @@
                                                     css: { 'calendar-slot': 1,
                                                            'booked': status == 'booked',
                                                            'accepted': status == 'accepted' }">
-                <button data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'available-slot')"
+                <button data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent,
+                                                                         clientId: $parents[1].clientId,
+                                                                         reservationTypeId: $parents[1].reservationTypeId }, 'available-slot')"
                         class="reserve-slot"
                         data-test-id="reserve-slot">
                   <div>

@@ -76,8 +76,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
           slot: this.slot });
     } else if (clazz === "available-slot") {
       self.sendEvent("calendarView", "availableSlotClicked",
-        { calendarId: this.calendarWeekday.calendarId,
-          slot: this.slot }); // FIXME: Mitä muuta? MakeReservation.java
+        { clientId: this.clientId,
+          slot: this.slot,
+          reservationTypeId: this.reservationTypeId,
+          weekday: this.calendarWeekday });
     }
   };
 
@@ -94,9 +96,9 @@ LUPAPISTE.CalendarViewModel = function (params) {
         week: self.startOfWeek().isoWeek(),
         year: self.startOfWeek().year(),
         weekObservable: self.calendarWeekdays,
-        clientId: self.clientId, // FIXME: Oikeasti observable
-        userId: self.userId(),
-        reservationTypeId: self.reservationTypeId }); // FIXME: Oikeasti observable
+        clientId: self.clientId,
+        userId: self.userId,
+        reservationTypeId: self.reservationTypeId });
   });
 
   self.gotoToday = function() {

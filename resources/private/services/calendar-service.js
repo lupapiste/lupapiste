@@ -146,6 +146,23 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
+  var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
+    ajax
+      .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slotId, reservationTypeId: event.reservationTypeId, 
+                                          comment: event.comment })
+      .success(function() {
+        hub.send("indicator", { style: "positive" });
+        doFetchCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id, reservationTypeId: event.reservationTypeId,
+                              weekObservable: event.weekObservable });
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
+        doFetchCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id, reservationTypeId: event.reservationTypeId,
+                              weekObservable: event.weekObservable });
+      })
+      .call();
+  });
+
   self.dispose = function() {
     hub.unsubscribe(_fetchOrgCalendars);
     hub.unsubscribe(_fetchReservationTypes);
@@ -155,5 +172,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_createSlots);
     hub.unsubscribe(_updateSlot);
     hub.unsubscribe(_deleteSlot);
+    hub.unsubscribe(_reserveSlot);
   };
 };
