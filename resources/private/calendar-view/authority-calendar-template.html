@@ -1,41 +1,42 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-authority-calendar-template">
   <div>
-    <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
     <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-    <div>
-      <p>Ohjetekstiä viranomaiselle</p>
-      <h3>Varaa aika tapaamiseen</h3>
-    </div>
+      <div>
+        <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+        <span data-bind="component: {name: 'help-toggle',
+                         params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
+        <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+      </div>
 
-    <div>
-      <span class="form-entry">
-        <label class="form-label">Kutsuttava henkilö</label>
-        <select class="form-input combobox"
-                data-bind="options: authorizedParties,
-                           optionsValue: function(item) { return _.get(item, 'id'); },
-                           optionsText: function(item) { return partyFullName(item); },
-                           optionsCaption: loc('choose'),
-                           value: selectedParty">
-        </select>
-      </span>
-      <span class="form-entry">
-        <label class="form-label">Tapaamisen aihe</label>
-        <select class="form-input combobox"
-                data-bind="options: reservationTypes,
-                           optionsValue: function(item) { return _.get(item, 'id'); },
-                           optionsText: function(item) { return _.get(item, 'name'); },
-                           optionsCaption: loc('choose'),
-                           value: selectedReservationType">
-        </select>
-      </span>
-    </div>
+      <div class="times-filter-group">
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
+          <select class="form-input combobox tip"
+                  data-bind="options: authorizedParties,
+                             optionsValue: function(item) { return _.get(item, 'id'); },
+                             optionsText: function(item) { return partyFullName(item); },
+                             optionsCaption: loc('choose'),
+                             value: selectedParty">
+          </select>
+        </span>
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
+          <select class="form-input combobox tip"
+                  data-bind="options: reservationTypes,
+                             optionsValue: function(item) { return _.get(item, 'id'); },
+                             optionsText: function(item) { return _.get(item, 'name'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedReservationType">
+          </select>
+        </span>
+      </div>
 
-    <calendar-view params="searchConditions: { calendarId: ko.observable(29),
-                                             clientId: ko.observable('client1'),
-                                             userId: lupapisteApp.models.currentUser.id,
-                                             reservationTypeId: ko.observable(32) },
-                         view: 'applicationView'">
-    </calendar-view>
+      <calendar-view params="searchConditions: { calendarId: ko.observable(29),
+                                               clientId: ko.observable('client1'),
+                                               userId: lupapisteApp.models.currentUser.id,
+                                               reservationTypeId: ko.observable(32) },
+                           view: 'applicationView'">
+      </calendar-view>
     <!-- /ko -->
   </div>
 

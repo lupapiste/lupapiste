@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1468925575683');
+@import url('main-blessed1.css?z=1469010164018');
 
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
@@ -6024,6 +6024,11 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 
 /* line 182, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
+  margin-top: 24px;
+}
+
+/* line 186, ../../../private/common-html/sass/views/_calendars.scss */
+#application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
 
