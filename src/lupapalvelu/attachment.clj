@@ -649,13 +649,21 @@
    :hystrix/fallback-fn  (constantly nil)}
   [file-id filename content-type application-id & [db-name]]
   (when (preview/converter content-type)
-    (mongo/with-db (or db-name mongo/default-db-name)
-      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" (preview/placeholder-image) :application application-id)
-      (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                              (with-open [content ((:content (mongo/download file-id)))]
-                                                (preview/create-preview content content-type)))]
-        (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-        (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpeg" preview-content :application application-id)))))
+    (let [preview-file-id  (str file-id "-preview")
+          preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
+      (mongo/with-db (or db-name mongo/default-db-name)
+        (file-upload/save-file {:fileId preview-file-id
+                                :filename preview-filename
+                                :content (preview/placeholder-image)}
+                               :application application-id)
+        (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                                (with-open [content ((:content (mongo/download file-id)))]
+                                                  (preview/create-preview content content-type)))]
+          (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+          (file-upload/save-file {:fileId preview-file-id
+                                  :filename preview-filename
+                                  :content preview-content}
+                                 :application application-id))))))
 
 (def file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
@@ -809,17 +817,17 @@
    and if valid PDF/A, fileId, filename and content-type of the uploaded file."
   [{app-id :id} {:keys [pdfa? output-file missing-fonts autoConversion]} filename content-type]
   (if pdfa?
-    (let [pdfa-file-id  (mongo/create-id)
-          pdfa-filename (filename-for-pdfa filename)
-          filesize      (.length output-file)]
-      (mongo/upload pdfa-file-id pdfa-filename content-type output-file :application app-id)
-      {:archivable true
-       :archivabilityError nil
-       :fileId pdfa-file-id
-       :file-name pdfa-filename
-       :contentType content-type
-       :content-length filesize
-       :autoConversion autoConversion})
+    (let [filedata  (file-upload/save-file {:filename (filename-for-pdfa filename)
+                                            :content output-file
+                                            :size (.length output-file)}
+                                           :application app-id)]
+      (merge {:archivable true
+              :archivabilityError nil
+              :file-name (:filename filedata)
+              :contentType content-type
+              :content-length (:size filedata)
+              :autoConversion autoConversion}
+             filedata))
     {:archivable false :missing-fonts (or missing-fonts []) :archivabilityError :invalid-pdfa}))
 
 (defn archivability-steps!
