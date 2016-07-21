@@ -2,13 +2,11 @@
   (:require [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [info error]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [schema.core :as sc :refer [defschema]]
-            [sade.http :as http]
             [sade.env :as env]
             [sade.util :as util]
+            [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.organization :as org]
-            [cheshire.core :as json]))
+            [lupapalvelu.organization :as org]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -35,91 +33,14 @@
             :capacity 1}))
        slots))
 
-; -- API Call helpers
-
-(defn- build-url [& path-parts]
-  (apply str (env/value :ajanvaraus :host) path-parts))
-
-(defn- api-call [f action opts]
-  (let [url (build-url action)]
-    (info "Calling:" url " with " opts)
-    (f url (merge {:as               :json
-                   :throw-exceptions false
-                   :basic-auth       [(env/value :ajanvaraus :username)
-                                      (env/value :ajanvaraus :password)]}
-                  opts))))
-
-(defn- api-post-command
-  [action request-body]
-  (api-call http/post action {:body (clj-http.client/json-encode request-body)
-                                :content-type :json}))
-
-(defn- api-put-command [action request-body]
-  (api-call http/put action {:body (clj-http.client/json-encode request-body)
-                             :content-type :json}))
-
-(defn- api-delete-command [action request-body]
-  (api-call http/delete action {:body (clj-http.client/json-encode request-body)
-                                :content-type :json}))
-
-(defn- handle-error-response [response]
-  (let [body (json/decode (:body response) keyword)]
-    (error response)
-    (case (:status response)
-      401 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Bad credentials")
-      403 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Forbidden")
-      (fail! "Bad request" :code (str "calendar.error." (:code body)) :message (:message body)))))
-
-(defn- api-query
-  ([action]
-   (api-query action {}))
-  ([action params]
-   (let [response (api-call http/get (str "/api/" (name action)) {:query-params params})]
-     (when-not (= 200 (:status response))
-       (handle-error-response response))
-     (:body response))))
-
-(defn- post-command
-  ([command]
-   (post-command command []))
-  ([command request-body]
-   (let [response (api-post-command (str "/api/" (name command)) request-body)]
-     (when-not (= 200 (:status response))
-       (handle-error-response response))
-     (:body response))))
-
-(defn- put-command
-  ([command]
-   (put-command command []))
-  ([command request-body]
-   (let [response (api-put-command (str "/api/" (name command)) request-body)]
-     (when-not (= 200 (:status response))
-       (handle-error-response response))
-     (:body response))))
-
-(defn- delete-command
-  ([command]
-   (delete-command command []))
-  ([command request-body]
-   (let [response (api-delete-command (str "/api/" (name command)) request-body)]
-     (when-not (= 200 (:status response))
-       (handle-error-response response))
-     (:body response))))
 
 ; -- calendar API functions
-
-(defn- calendar-ref-for-user [userId]
-  (str "user-" userId))
-
-(defn- calendar-belongs-to-user?
-  [calendar userId]
-  (.endsWith (:externalRef calendar) userId))
 
 (defn- get-calendar
   [calendarId userId]
   (let [calendar (api-query (str "resources/" calendarId))
         user     (usr/get-user-by-id userId)]
-    (when (calendar-belongs-to-user? calendar userId)
+    (when (cal/calendar-belongs-to-user? calendar userId)
       (->FrontendCalendar calendar user))))
 
 (defn- get-calendar-slot
@@ -133,26 +54,12 @@
           orgId    (:organizationCode calendar)]
       (and (:active calendar) (or
         (and (usr/authority-admin? user) (= (usr/authority-admins-organization-id user) orgId))
-        (and (usr/authority? user) (calendar-belongs-to-user? calendar (:id user))))))
+        (and (usr/authority? user) (cal/calendar-belongs-to-user? calendar (:id user))))))
     (catch Exception _
       false)))
 
-(defn- find-calendars-for-organizations
-  [& orgIds]
-  (group-by :externalRef (api-query "resources/by-organization" {:organizationCodes orgIds})))
-
-(defn- find-calendars-for-user
-  [userId]
-  (api-query (str "resources/by-external-ref/" (calendar-ref-for-user userId))))
-
-(defn- find-calendar-for-user-and-organization
-  [userId orgId]
-  (->> (find-calendars-for-user userId)
-       (filter #(= (:organizationCode %) orgId))
-       first))
-
 (defn- authority-admin-assoc-calendar-to-user [cals user]
-  (let [reference-code-for-user (calendar-ref-for-user (:id user))
+  (let [reference-code-for-user (cal/calendar-ref-for-user (:id user))
         calendars-for-user      (get cals reference-code-for-user [])
         calendar                (first calendars-for-user)]
     (if calendar
@@ -166,7 +73,7 @@
   (info "Creating a new calendar" userId organization)
   (post-command "resources" {:name             (str (:firstName target-user) " " (:lastName target-user))
                                   :organizationCode organization
-                                  :externalRef      (calendar-ref-for-user userId)}))
+                                  :externalRef      (cal/calendar-ref-for-user userId)}))
 
 (defn- activate-resource
   [{:keys [id]}]
@@ -183,7 +90,7 @@
 (defn- enable-calendar
   [userId organization]
   (let [target-user       (usr/get-user-by-id userId)
-        existing-calendar (find-calendar-for-user-and-organization userId organization)]
+        existing-calendar (cal/find-calendar-for-user-and-organization userId organization)]
     (when-not (usr/user-is-authority-in-organization? (usr/with-org-auth target-user) organization)
       (error "Tried to enable a calendar with invalid user-organization pairing: " userId organization)
       (unauthorized!))
@@ -194,7 +101,7 @@
 (defn- disable-calendar
   [userId organization]
   (let [target-user       (usr/get-user-by-id userId)
-        existing-calendar (find-calendar-for-user-and-organization userId organization)]
+        existing-calendar (cal/find-calendar-for-user-and-organization userId organization)]
     (when-not (usr/user-is-authority-in-organization? (usr/with-org-auth target-user) organization)
       (error "Tried to disable a calendar with invalid user-organization pairing: " userId organization)
       (unauthorized!))
@@ -220,7 +127,7 @@
    :feature :ajanvaraus
    :pre-checks [(partial calendars-enabled-api-pre-check #{:authority})]}
   [{user :user}]
-  (let [calendars     (map #(->FrontendCalendar % user) (find-calendars-for-user (:id user)))
+  (let [calendars     (map #(->FrontendCalendar % user) (cal/find-calendars-for-user (:id user)))
         calendars     (filter :active calendars)
         organizations (keys (group-by :organization calendars))]
     (ok :calendars        calendars
@@ -247,7 +154,7 @@
   [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)
         users                    (usr/authority-users-in-organizations [admin-in-organization-id])
-        calendars                (find-calendars-for-organizations admin-in-organization-id)]
+        calendars                (cal/find-calendars-for-organizations admin-in-organization-id)]
     (if calendars
       (let [users (map #(authority-admin-assoc-calendar-to-user calendars %) users)]
         (ok :users users))
@@ -375,7 +282,7 @@
            :input-validators [(partial action/string-parameters [:userId :clientId :reservationTypeId])]
            :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
           [_]
-          (->> (api-query "reservationslots/available-slots" {:year year :week week :externalRef (calendar-ref-for-user userId)
+          (->> (api-query "reservationslots/available-slots" {:year year :week week :externalRef (cal/calendar-ref-for-user userId)
                                                               :clientId clientId :reservationTypeId reservationTypeId})
                ->FrontendReservationSlots
                (ok :slots)))
