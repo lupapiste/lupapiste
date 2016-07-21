@@ -49,7 +49,7 @@
                               :archivable         is-pdf-a?
                               :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                               :missing-fonts      []
-                              :source             {:type type :id id}}]
+                              :source             {:type (name type) :id id}}]
     (cond-> base-attachment-opts
             (= :tasks type) (assoc :target {:type :task :id id}))))
 

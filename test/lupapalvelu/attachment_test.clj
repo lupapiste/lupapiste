@@ -91,43 +91,45 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [{:type {:type-group :g :type-id :a}} {:type {:type-group :g :type-id :b}}] false true true)
-  => (just [{:id                   "123"
-             :locked               false
-             :modified             999
-             :op                   nil
-             :state                :requires_user_action
-             :target               nil
-             :type                 {:type-group :g :type-id :a}
-             :applicationState     :draft
-             :contents             nil
-             :signatures           []
-             :versions             []
-             :auth                 []
-             :notNeeded            false
-             :required             true
-             :requestedByAuthority true
-             :forPrinting          false
-             :readOnly             false}
-            {:id                   "123"
-             :locked               false
-             :modified             999
-             :op                   nil
-             :state                :requires_user_action
-             :target               nil
-             :type                 {:type-group :g :type-id :b}
-             :applicationState     :draft
-             :contents             nil
-             :signatures           []
-             :versions             []
-             :auth                 []
-             :notNeeded            false
-             :required             true
-             :requestedByAuthority true
-             :forPrinting          false
-             :readOnly             false}])
-  (provided
-    (mongo/create-id) => "123"))
+  (let [type1 (ssg/generate Type)
+        type2 (ssg/generate Type)]
+    (make-attachments 999 :draft [{:type type1} {:type type2}] false true true)
+    => (just [{:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 type1
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}
+              {:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 type2
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}])
+    (provided
+      (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
 (fact "attachment can be found with file-id"
   (get-attachment-info-by-file-id {:attachments [{:versions [{:fileId "123"}
@@ -165,16 +167,18 @@
 
 
 (fact "make attachments with metadata"
-  (let [types-with-metadata [{:type {:type-group :g :type-id :a} :metadata {"foo" "bar"}}
-                             {:type {:type-group :g :type-id :b} :metadata {"bar" "baz"}}]]
+  (let [type1 (ssg/generate Type)
+        type2 (ssg/generate Type)
+        types-with-metadata [{:type type1 :metadata {:foo "bar"}}
+                             {:type type2 :metadata {:bar "baz"}}]]
     (make-attachments 999 :draft types-with-metadata false true true)
-    => (just [{:id                   "123"
+    => (just [{:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
                :op                   nil
                :state                :requires_user_action
                :target               nil
-               :type                 {:type-group :g :type-id :a}
+               :type                 type1
                :applicationState     :draft
                :contents             nil
                :signatures           []
@@ -184,15 +188,15 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :metadata             {"foo" "bar"}
+               :metadata             {:foo "bar"}
                :readOnly             false}
-              {:id                   "123"
+              {:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
                :op                   nil
                :state                :requires_user_action
                :target               nil
-               :type                 {:type-group :g :type-id :b}
+               :type                 type2
                :applicationState     :draft
                :contents             nil
                :signatures           []
@@ -202,10 +206,10 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :metadata             {"bar" "baz"}
+               :metadata             {:bar "baz"}
                :readOnly             false}])
     (provided
-     (mongo/create-id) => "123")))
+     (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
 (facts "facts about attachment metada"
   (fact "visibility"

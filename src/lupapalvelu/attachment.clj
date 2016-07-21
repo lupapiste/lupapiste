@@ -169,6 +169,9 @@
 ;; Utils
 ;;
 
+(def attachment-type-coercer (ssc/json-coercer Type))
+(def attachment-target-coercer (ssc/json-coercer Target))
+
 (defn filename-for-pdfa [filename]
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
@@ -219,14 +222,17 @@
 (defn create-read-only-update-statements [attachments file-ids]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
+(defn make-attachment
+  [now target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
+  {:pre  [(sc/validate Type attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
+   :post [(sc/validate Attachment %)]}
   (cond-> {:id (or attachment-id (mongo/create-id))
-           :type (select-keys attachment-type [:type-id :type-group])
+           :type attachment-type
            :modified now
            :locked locked?
            :readOnly (boolean read-only?)
-           :applicationState (if (and (= "verdict" (:type target)) (not (states/post-verdict-states (keyword application-state))))
-                               "verdictGiven"
+           :applicationState (if (and (= :verdict (:type target)) (not (states/post-verdict-states application-state)))
+                               :verdictGiven
                                application-state)
            :state :requires_user_action
            :target target
@@ -246,7 +252,7 @@
 (defn make-attachments
   "creates attachments with nil target"
   [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
-  (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
+  (map #(make-attachment now nil required? requested-by-authority? locked? (keyword application-state) nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
@@ -260,13 +266,13 @@
   [application attachment-type group now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
   (let [metadata (default-tos-metadata-for-attachment-type attachment-type application)]
     (make-attachment now
-                     target
+                     (when target (attachment-target-coercer target))
                      required?
                      requested-by-authority?
                      locked?
-                     (:state application)
+                     (-> application :state keyword)
                      group
-                     attachment-type
+                     (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
                      contents
@@ -298,7 +304,9 @@
 
 (defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-tos-metadata-for-attachment-type type application)}) attachment-types)
+  (let [attachment-types-with-metadata (map (fn [type] {:type     (attachment-type-coercer type)
+                                                        :metadata (default-tos-metadata-for-attachment-type type application)})
+                                            attachment-types)
         attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
@@ -343,7 +351,7 @@
 
 (defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application now]
   (->> (default-tos-metadata-for-attachment-type type application)
-       (make-attachment now target false false false (:state application) op type)
+       (make-attachment now (when target (attachment-target-coercer target)) false false false (-> application :state keyword) op (attachment-type-coercer type))
        (#(merge {:ramLink id}
                 %
                 (when contents {:contents contents})
@@ -392,7 +400,9 @@
        (sort-by version-number)
        (last)))
 
-(defn make-version [attachment {:keys [fileId original-file-id filename contentType size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
+(defn make-version
+  [attachment {:keys [fileId original-file-id filename contentType size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
+  {:post [(sc/validate Version %)]}
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
