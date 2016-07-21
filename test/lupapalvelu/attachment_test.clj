@@ -24,10 +24,8 @@
                    attachment-file-ids
                    version-number
                    latest-version-after-removing-file
-                   make-version
                    build-version-updates
                    default-metadata-for-attachment-type
-                   create-appeal-attachment-data!
                    make-ram-attachment)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
@@ -320,35 +318,6 @@
                 (let [updates (build-version-updates application attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
-
-
-(facts "appeal attachment updates"
-  (against-background
-    [(lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false]
-    (fact "appeal-attachment-data"
-      (let [file-id  (mongo/create-id)
-            file-obj {:content nil,
-                      :content-type "application/pdf",
-                      :size 123,
-                      :file-name "test-pdf.pdf",
-                      :metadata {:uploaded 12344567, :linked false},
-                      :application nil
-                      :fileId file-id}
-            command {:application {:state :verdictGiven}
-                     :created 12345
-                     :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
-            result-attachment (create-appeal-attachment-data!
-                                command
-                                (mongo/create-id)
-                                :appeal
-                                file-obj)]
-        (fact "Generated attachment data is valid (no PDF/A generation)"
-          (sc/check Attachment result-attachment) => nil)
-        (fact "Version has correct keys"
-          (:latestVersion result-attachment) => (contains {:size (:size file-obj)
-                                                           :filename (:file-name file-obj)
-                                                           :contentType (:content-type file-obj)
-                                                           :fileId (:fileId file-obj)}))))))
 
 (facts make-ram-attachment
 
