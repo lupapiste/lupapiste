@@ -288,6 +288,17 @@
                                                               :clientId clientId
                                                               :reservationTypeId reservationTypeId}))))
 
+(defcommand reserve-calendar-slot
+  {:user-roles       #{:authorityAdmin :authority}
+   :feature          :ajanvaraus
+   :parameters       [clientId slotId reservationTypeId comment]
+   :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
+                      (partial action/string-parameters [:clientId :comment])]
+   :pre-checks       [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+  [_]
+  (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
+                                            :reservationTypeId reservationTypeId :comment comment })))
+
 ; For integration tests in dev
 (env/in-dev
   (defn clear-database

@@ -31,10 +31,10 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.send = function() {
     self.sendEvent("calendarService", "reserveCalendarSlot",
-      { clientId: self.clientId(),
-        slotId: self.slot().id,
-        reservationTypeId: self.reservationTypeId(),
-        comment: self.comment(),
+      { clientId: self.clientId,
+        slot: self.slot,
+        reservationTypeId: self.reservationTypeId,
+        comment: self.comment,
         weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };
