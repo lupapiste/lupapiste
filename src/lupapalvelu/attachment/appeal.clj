@@ -51,7 +51,7 @@
   (merge {:fileId           (:fileId subject)
           :original-file-id (:fileId subject)
           :filename         (:file-name subject)
-          :contentType      (:content-type subject)
+          :contentType      (or (:content-type subject) (:contentType subject))
           :size             (:size subject)
           :now now
           :user user
