@@ -4,6 +4,7 @@
                            top: positionTop,
                            'z-index': 1000 },
                   css: weekdayCss ">
+
     <bubble-dialog params="visible: bubbleVisible,
                            buttonIcon: 'lupicon-save',
                            buttonText: 'application-guests.send',
@@ -12,9 +13,62 @@
                            error: error,
                            prefix: 'reservation-slot-reserve',
                            waiting: waiting">
+      <!--ko if: $parent.slot-->
       <div>
         <h3 data-bind="ltext: 'calendar.reserve-slot.title'"></h3>
+
+        <div class="form-grid no-padding" style="min-width: 450px">
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="text: 'Aika'"></span>:
+            </div>
+            <div class="col-3">
+              <span data-bind="dateTimeString: $parent.slot().startTime"></span>&nbsp;-&nbsp;<span data-bind="text: $parent.endHour"></span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="text: 'Paikka'"></span>:
+            </div>
+            <div class="col-3">
+              <input type="text" data-bind="textInput: $parent.location" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="text: 'Tapaamisen aihe'"></span>:
+            </div>
+            <div class="col-3" data-bind="with: $parent.reservationType">
+              <span data-bind="text: name"></span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="text: 'Osallistujat'"></span>:
+            </div>
+            <div class="col-3">
+              <!--ko foreach: $parent.participants-->
+                <span data-bind="text: $data" style="display: block"></span>
+              <!--/ko-->
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="text: 'Lisätietoa'"></span>:
+            </div>
+            <div class="col-3">
+              <textarea data-bind="textInput: $parent.comment"/>
+            </div>
+          </div>
+
+        </div>
+
       </div>
+      <!--/ko-->
     </bubble-dialog>
   </div>
 </script>

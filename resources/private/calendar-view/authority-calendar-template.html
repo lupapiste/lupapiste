@@ -37,11 +37,15 @@
         </div>
 
         <calendar-view params="searchConditions: { clientId: selectedParty,
-                                                   userId: lupapisteApp.models.currentUser.id,
-                                                   reservationTypeId: selectedReservationType },
-                               view: 'applicationView'">
+                                               userId: lupapisteApp.models.currentUser.id,
+                                               reservationTypeId: selectedReservationType },
+                               view: 'applicationView',
+                               reservationTypes: reservationTypes,
+                               authorizedParties: authorizedParties,
+                               participant: selectedParty">
         </calendar-view>
       <!-- /ko -->
+
     <!-- /ko -->
   </div>
 

@@ -30,9 +30,12 @@
                                                   reservationTypes: $component.reservationTypes"></reservation-slot-edit-bubble>
           </div>
           <div style="position: relative;">
-            <reservation-slot-reserve-bubble params="calendarId: $component.calendarId,
+            <reservation-slot-reserve-bubble params="authorizedParties: $component.authorizedParties,
+                                                     participant: $component.participant,
                                                      weekdays: $component.calendarWeekdays,
-                                                     reservationTypes: $component.reservationTypes"></reservation-slot-reserve-bubble>
+                                                     reservationTypes: $component.reservationTypes,
+                                                     reservationTypeId: $component.reservationTypeId,
+                                                     clientId: $component.clientId"></reservation-slot-reserve-bubble>
           </div>
         </td>
       </tr>

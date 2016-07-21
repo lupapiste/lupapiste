@@ -6,10 +6,18 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.clientId = ko.observable();
-  self.reservationTypeId = ko.observable();
-  self.slotId = ko.observable();
+  self.clientId = params.clientId;
+  self.reservationTypeId = params.reservationTypeId;
+  self.reservationTypes = params.reservationTypes;
+  self.participant = params.participant;
+  self.authorizedParties = params.authorizedParties;
+
+  self.slot = ko.observable();
+  self.location = ko.observable();
   self.comment = ko.observable();
+  self.participants = ko.observableArray([]);
+  self.reservationType = ko.observable();
+  self.endHour = ko.observable();
 
   self.weekdayCss = ko.observable();
   self.positionTop = ko.observable();
@@ -24,7 +32,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.send = function() {
     self.sendEvent("calendarService", "reserveCalendarSlot",
       { clientId: self.clientId(),
-        slotId: self.slotId(),
+        slotId: self.slot().id,
         reservationTypeId: self.reservationTypeId(),
         comment: self.comment(),
         weekObservable: params.weekdays});
@@ -36,13 +44,16 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.addEventListener("calendarView", "availableSlotClicked", function(event) {
 
-    self.clientId = event.clientId;
-    self.reservationTypeId = event.reservationTypeId;
-    self.slotId(event.slot.id);
+    self.slot(event.slot);
+    self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
+
+    var party = _.find(self.authorizedParties(), function(party) { return party.id() === self.participant(); });
+    self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName() + " " + party.lastName()]);
 
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();
     var timestamp = moment(event.weekday.startOfDay).hour(hour).minutes(minutes);
+    self.endHour(moment(event.slot.endTime).format("HH:mm"));
 
     self.error(false);
 
