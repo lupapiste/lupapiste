@@ -278,13 +278,13 @@
 (defquery available-calendar-slots
   {:user-roles #{:authorityAdmin :authority}
    :feature    :ajanvaraus
-   :parameters       [userId clientId reservationTypeId year week]
-   :input-validators [(partial action/string-parameters [:userId :clientId :reservationTypeId])]
+   :parameters       [authorityId clientId reservationTypeId year week]
+   :input-validators [(partial action/non-blank-parameters [:authorityId :clientId :reservationTypeId :year :week])]
    :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [_]
   (ok :slots (->FrontendReservationSlots
                (cal/available-calendar-slots-for-appointment {:year year :week week
-                                                              :authority userId
+                                                              :authority authorityId
                                                               :clientId clientId
                                                               :reservationTypeId reservationTypeId}))))
 

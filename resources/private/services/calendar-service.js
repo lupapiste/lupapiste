@@ -55,7 +55,7 @@ LUPAPISTE.CalendarService = function() {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
 
     if (event.clientId() && event.userId() && event.reservationTypeId()) {
-      ajax.query("available-calendar-slots", { clientId: event.clientId, userId: event.userId, reservationTypeId: event.reservationTypeId,
+      ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.userId, reservationTypeId: event.reservationTypeId,
                                                week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
         .success(function(data) {
           notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));

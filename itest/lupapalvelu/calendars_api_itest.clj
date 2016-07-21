@@ -94,7 +94,7 @@
       (fact "Reservation API functions"
         (fact "Find available slots"
           (let [result (query authority :available-calendar-slots
-                              :userId authority-id
+                              :authorityId authority-id
                               :clientId "w8354yleakw"
                               :reservationTypeId (get varaustyypit :Testityyppi)
                               :year current-year
