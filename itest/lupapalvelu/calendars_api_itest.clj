@@ -36,7 +36,7 @@
         (fact "Add reservation type for organization"
           (command sipoo :add-reservation-type-for-organization :reservationType "Testityyppi")
           (command sipoo :add-reservation-type-for-organization :reservationType "Katselmus")
-          (let [result (query sipoo :reservation-types-for-organization)
+          (let [result (query sipoo :reservation-types-for-organization :organizationId "753-R")
                 varaustyypit (:reservationTypes result)
                 varaustyypit (zipmap (map (comp keyword :name) varaustyypit) (map :id varaustyypit))]
             (keys varaustyypit) => (just #{:Testityyppi :Katselmus})
@@ -44,7 +44,7 @@
             (fact "Delete reservation type created in the previous fact"
               (let [reservation-type-id (get varaustyypit :Katselmus)]
                 (command sipoo :delete-reservation-type :reservationTypeId reservation-type-id) => ok?
-                (let [foobar (query sipoo :reservation-types-for-organization)]
+                (let [foobar (query sipoo :reservation-types-for-organization :organizationId "753-R")]
                   (count (:reservationTypes foobar)) => 1
                   (map :name (:reservationTypes foobar)) => (just #{"Testityyppi"}))))
 
