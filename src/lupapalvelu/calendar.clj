@@ -79,12 +79,14 @@
 
 ; -- Second level helpers
 
-(defn- calendar-ref-for-user [userId]
+(defn calendar-ref-for-user [userId]
   (str "user-" userId))
 
-(defn- calendar-belongs-to-user?
+(defn calendar-belongs-to-user?
   [calendar userId]
   (.endsWith (:externalRef calendar) userId))
+
+; -- Service functions
 
 (defn find-calendars-for-organizations
   [& orgIds]
@@ -100,7 +102,12 @@
        (filter #(= (:organizationCode %) orgId))
        first))
 
-
+(defn available-calendar-slots-for-appointment
+  [opts]
+  (let [calendar-external-ref (calendar-ref-for-user (:authority opts))
+        query-params (select-keys opts [:year :week :clientId :reservationTypeId])
+        query-params (merge query-params {:externalRef calendar-external-ref})]
+    (api-query "reservationslots/available-slots" query-params)))
 
 ; -- Configuration
 

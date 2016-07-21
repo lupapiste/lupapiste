@@ -276,16 +276,17 @@
   (ok :reservationTypes (delete-command (str "reservation-types/" reservationTypeId))))
 
 (defquery available-calendar-slots
-          {:user-roles #{:authorityAdmin :authority}
-           :feature    :ajanvaraus
-           :parameters       [userId clientId reservationTypeId year week]
-           :input-validators [(partial action/string-parameters [:userId :clientId :reservationTypeId])]
-           :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
-          [_]
-          (->> (api-query "reservationslots/available-slots" {:year year :week week :externalRef (cal/calendar-ref-for-user userId)
-                                                              :clientId clientId :reservationTypeId reservationTypeId})
-               ->FrontendReservationSlots
-               (ok :slots)))
+  {:user-roles #{:authorityAdmin :authority}
+   :feature    :ajanvaraus
+   :parameters       [userId clientId reservationTypeId year week]
+   :input-validators [(partial action/string-parameters [:userId :clientId :reservationTypeId])]
+   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+  [_]
+  (ok :slots (->FrontendReservationSlots
+               (cal/available-calendar-slots-for-appointment {:year year :week week
+                                                              :authority userId
+                                                              :clientId clientId
+                                                              :reservationTypeId reservationTypeId}))))
 
 ; For integration tests in dev
 (env/in-dev
