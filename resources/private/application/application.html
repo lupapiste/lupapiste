@@ -400,8 +400,11 @@
                             <li data-bind="if: $root.authorization.ok('calendars-enabled'), css: {'active': $parent.selectedTabName() === 'calendar'}">
                               <a data-bind="click: changeTab" href="#" data-target="calendar" data-test-id="application-open-calendar-tab" class="link-btn">
                                 <span data-bind="ltext: 'application.tabCalendar'"></span>
-<!--                                      <span data-bind="if: partyDocumentIndicator">
-                                          <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span>--></a></li>
+                                <span data-bind="if: calendarNotificationIndicator">
+                                  <span data-bind="text: calendarNotificationIndicator" id="applicationCalendarNotificationIndicator" class="indicator"></span>
+                                </span>
+                              </a>
+                            </li>
 
                             <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
