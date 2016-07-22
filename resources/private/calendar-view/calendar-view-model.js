@@ -8,14 +8,24 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
   self.userId = ko.observable();
+  self.clientId = ko.observable();
+  self.reservationTypeId = ko.observable();
+  self.authorizedParties = ko.observable();
+  self.view = ko.observable();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   if (_.get(params, "searchConditions.calendarId")) {
     self.calendarId = params.searchConditions.calendarId; // observable from parent
-    self.userId = params.searchConditions.userId; // observable from parent
   }
+  self.userId = params.searchConditions.userId; // observable from parent
   self.reservationTypes = params.reservationTypes; // observable from parent
+  self.clientId = params.searchConditions.clientId; // observable from parent
+  self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
+  self.authorizedParties = params.authorizedParties; // observable from parent
+  self.participant = params.participant; // observable from parent
+
+  self.view = params.view;
 
   self.firstFullHour = calendarService.params().firstFullHour;
   self.lastFullHour = calendarService.params().lastFullHour;
@@ -67,6 +77,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
       self.sendEvent("calendarView", "calendarSlotClicked",
         { calendarId: this.calendarWeekday.calendarId,
           slot: this.slot });
+    } else if (clazz === "available-slot") {
+      self.sendEvent("calendarView", "availableSlotClicked",
+        { slot: this.slot,
+          weekday: this.calendarWeekday });
     }
   };
 
@@ -78,11 +92,21 @@ LUPAPISTE.CalendarViewModel = function (params) {
   });
 
   self.disposedComputed(function() {
-    hub.send("calendarService::fetchCalendarSlots",
-      { calendarId: self.calendarId(),
-        week: self.startOfWeek().isoWeek(),
-        year: self.startOfWeek().year(),
-        weekObservable: self.calendarWeekdays});
+    if (params.view === 'applicationView') {
+      hub.send("calendarService::fetchApplicationCalendarSlots",
+        { clientId: self.clientId,
+          userId: self.userId,
+          reservationTypeId: self.reservationTypeId,
+          week: self.startOfWeek().isoWeek(),
+          year: self.startOfWeek().year(),
+          weekObservable: self.calendarWeekdays });
+    } else {
+      hub.send("calendarService::fetchCalendarSlots",
+        { calendarId: self.calendarId(),
+          week: self.startOfWeek().isoWeek(),
+          year: self.startOfWeek().year(),
+          weekObservable: self.calendarWeekdays });
+    }
   });
 
   self.gotoToday = function() {

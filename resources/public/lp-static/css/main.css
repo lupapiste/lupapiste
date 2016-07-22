@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1468565909964');
+@import url('main-blessed1.css?z=1469010164018');
 
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
@@ -6000,9 +6000,35 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .calendar-table table td div.calendar-slot.accepted a {
   color: white;
 }
+/* line 155, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot button.reserve-slot {
+  background: inherit;
+  width: 100%;
+  height: 100%;
+  font-size: 22.8px;
+  color: #f39129;
+  text-align: center;
+  display: table;
+}
+/* line 165, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot button.reserve-slot div {
+  display: inline;
+  margin-right: auto;
+  margin-left: auto;
+}
+/* line 171, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot button.reserve-slot div i, .calendar-table table td div.calendar-slot button.reserve-slot div span {
+  display: table-cell;
+  vertical-align: middle;
+}
 
-/* line 160, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 182, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
+  margin-top: 24px;
+}
+
+/* line 186, ../../../private/common-html/sass/views/_calendars.scss */
+#application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
 
