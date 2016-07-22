@@ -216,6 +216,15 @@
   [application attachment-id]
   (first (get-attachments-infos application [attachment-id])))
 
+(defn get-attachment-info-by-file-id
+  "gets an attachment from application or nil"
+  [{:keys [attachments]} file-id]
+  (first (filter (partial by-file-ids #{file-id}) attachments)))
+
+(defn get-attachments-by-operation
+  [{:keys [attachments] :as application} op-id]
+  (filter #(= (:id (:op %)) op-id) attachments))
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
@@ -552,11 +561,6 @@
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
       :else (create-attachment! application attachment-type group created target locked required requested-by-authority? attachment-id contents read-only source))))
 
-(defn get-attachment-info-by-file-id
-  "gets an attachment from application or nil"
-  [{:keys [attachments]} file-id]
-  (first (filter (partial by-file-ids #{file-id}) attachments)))
-
 (defn- attachment-file-ids
   "Gets all file-ids from attachment."
   [attachment]
@@ -770,9 +774,6 @@
       (finally
         (io/delete-file temp-file :silently)))))
 
-(defn get-attachments-by-operation
-  [{:keys [attachments] :as application} op-id]
-  (filter #(= (:id (:op %)) op-id) attachments))
 
 (defn- append-stream [zip file-name in]
   (when in
