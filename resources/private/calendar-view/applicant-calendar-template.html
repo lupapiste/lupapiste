@@ -1,0 +1,44 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="applicant-calendar-template">
+  <div>
+    <div>
+      <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+      <span data-bind="component: {name: 'help-toggle',
+                       params: {lhtml: 'application.calendar.applicant.helpText'}}"></span>
+      <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+    </div>
+
+    <div class="times-filter-group">
+      <span class="form-entry">
+        <label class="form-label tip" data-bind="ltext: 'application.calendar.select-authority'"></label>
+        <select class="form-input combobox tip"
+                data-bind="options: authorities,
+                           optionsValue: function(item) { return _.get(item, 'id'); },
+                           optionsText: function(item) { return partyFullName(item); },
+                           optionsCaption: loc('choose'),
+                           value: selectedParty">
+        </select>
+      </span>
+      <span class="form-entry">
+        <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
+        <select class="form-input combobox tip"
+                data-bind="options: reservationTypes,
+                           optionsValue: function(item) { return _.get(item, 'id'); },
+                           optionsText: function(item) { return _.get(item, 'name'); },
+                           optionsCaption: loc('choose'),
+                           value: selectedReservationType">
+        </select>
+      </span>
+    </div>
+
+    <calendar-view params="searchConditions: { clientId: lupapisteApp.models.currentUser.id,
+                                               userId: selectedParty,
+                                               reservationTypeId: selectedReservationType },
+                           view: 'applicationView',
+                           reservationTypes: reservationTypes,
+                           authorizedParties: authorities,
+                           participant: selectedParty">
+    </calendar-view>
+
+  </div>
+
+</script>

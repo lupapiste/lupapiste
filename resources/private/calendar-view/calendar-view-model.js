@@ -96,6 +96,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
       hub.send("calendarService::fetchApplicationCalendarSlots",
         { clientId: self.clientId,
           userId: self.userId,
+          applicationId: lupapisteApp.models.application.id(),
           reservationTypeId: self.reservationTypeId,
           week: self.startOfWeek().isoWeek(),
           year: self.startOfWeek().year(),

@@ -31,7 +31,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.calendar :as cal]))
 
 ;;
 ;; ==============================================================================
@@ -732,16 +733,8 @@
                       unauthorized)))]}
   [_])
 
-(defn calendars-enabled-api-pre-check
-  [rolez {user :user {:keys [organization]} :application}]
-  (let [org-set (if organization
-                  #{organization}
-                  (usr/organization-ids-by-roles user rolez))]
-    (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
-      unauthorized)))
-
 (defquery calendars-enabled
-  {:user-roles #{:authority :authorityAdmin}
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority :authorityAdmin})]
-   :feature :ajanvaraus}
+  {:user-roles #{:authority :authorityAdmin :applicant}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :authorityAdmin :applicant})]
+   :feature    :ajanvaraus}
   [_])

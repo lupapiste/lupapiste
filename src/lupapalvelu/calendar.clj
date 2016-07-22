@@ -1,10 +1,12 @@
 (ns lupapalvelu.calendar
-  (:require [sade.core :refer [fail!]]
+  (:require [sade.core :refer [fail! unauthorized]]
             [sade.env :as env]
             [taoensso.timbre :as timbre :refer [info error]]
             [sade.strings :as str]
             [cheshire.core :as json]
-            [sade.http :as http]))
+            [sade.http :as http]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]))
 
 ; -- API Call helpers
 
@@ -87,6 +89,14 @@
   (.endsWith (:externalRef calendar) userId))
 
 ; -- Service functions
+
+(defn calendars-enabled-api-pre-check
+  [rolez {user :user {:keys [organization]} :application}]
+  (let [org-set (if organization
+                  #{organization}
+                  (usr/organization-ids-by-roles user rolez))]
+    (when (or (empty? org-set) (not (org/some-organization-has-calendars-enabled? org-set)))
+      unauthorized)))
 
 (defn find-calendars-for-organizations
   [& orgIds]

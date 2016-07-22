@@ -1,51 +1,48 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-authority-calendar-template">
   <div>
-    <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-      <div>
-        <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
-        <span data-bind="component: {name: 'help-toggle',
-                         params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
-        <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+    <div>
+      <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
+      <span data-bind="component: {name: 'help-toggle',
+                       params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
+      <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+    </div>
+
+    <!-- ko if: noCalendarFoundForOrganization -->
+      <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+    <!-- /ko -->
+
+    <!-- ko ifnot: noCalendarFoundForOrganization -->
+      <div class="times-filter-group">
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
+          <select class="form-input combobox tip"
+                  data-bind="options: authorizedParties,
+                             optionsValue: function(item) { return _.get(item, 'id'); },
+                             optionsText: function(item) { return partyFullName(item); },
+                             optionsCaption: loc('choose'),
+                             value: selectedParty">
+          </select>
+        </span>
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
+          <select class="form-input combobox tip"
+                  data-bind="options: reservationTypes,
+                             optionsValue: function(item) { return _.get(item, 'id'); },
+                             optionsText: function(item) { return _.get(item, 'name'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedReservationType">
+          </select>
+        </span>
       </div>
 
-      <!-- ko if: noCalendarFoundForOrganization -->
-        <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
-      <!-- /ko -->
-
-      <!-- ko ifnot: noCalendarFoundForOrganization -->
-        <div class="times-filter-group">
-          <span class="form-entry">
-            <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
-            <select class="form-input combobox tip"
-                    data-bind="options: authorizedParties,
-                               optionsValue: function(item) { return _.get(item, 'id'); },
-                               optionsText: function(item) { return partyFullName(item); },
-                               optionsCaption: loc('choose'),
-                               value: selectedParty">
-            </select>
-          </span>
-          <span class="form-entry">
-            <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
-            <select class="form-input combobox tip"
-                    data-bind="options: reservationTypes,
-                               optionsValue: function(item) { return _.get(item, 'id'); },
-                               optionsText: function(item) { return _.get(item, 'name'); },
-                               optionsCaption: loc('choose'),
-                               value: selectedReservationType">
-            </select>
-          </span>
-        </div>
-
-        <calendar-view params="searchConditions: { clientId: selectedParty,
-                                               userId: lupapisteApp.models.currentUser.id,
-                                               reservationTypeId: selectedReservationType },
-                               view: 'applicationView',
-                               reservationTypes: reservationTypes,
-                               authorizedParties: authorizedParties,
-                               participant: selectedParty">
-        </calendar-view>
-      <!-- /ko -->
-
+      <calendar-view params="searchConditions: { clientId: selectedParty,
+                                             userId: lupapisteApp.models.currentUser.id,
+                                             reservationTypeId: selectedReservationType },
+                             view: 'applicationView',
+                             reservationTypes: reservationTypes,
+                             authorizedParties: authorizedParties,
+                             participant: selectedParty">
+      </calendar-view>
     <!-- /ko -->
   </div>
 

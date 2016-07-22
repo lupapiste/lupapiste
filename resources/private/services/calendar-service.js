@@ -56,6 +56,7 @@ LUPAPISTE.CalendarService = function() {
 
     if (event.clientId() && event.userId() && event.reservationTypeId()) {
       ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.userId, reservationTypeId: event.reservationTypeId,
+                                               id: event.applicationId,
                                                week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
         .success(function(data) {
           notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
@@ -90,8 +91,26 @@ LUPAPISTE.CalendarService = function() {
       .call();
    });
 
+  var _fetchApplicationAuthorities = hub.subscribe("calendarService::fetchAuthoritiesForApplication", function(event) {
+    ajax.query("application-authorities-with-calendar", {id: event.applicationId})
+      .success(function(d) {
+        hub.send("calendarService::applicationAuthoritiesFetched", { authorities: d.authorities || [] });
+      })
+      .call();
+  });
+
   var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
-    ajax.query("reservation-types-for-organization", {organizationId: event.organizationId})
+    var endpoint, options;
+    if (event.applicationId) {
+      endpoint = "reservation-types-for-application";
+      options = {id: event.applicationId};
+    } else if (event.organizationId) {
+      endpoint = "reservation-types-for-organization";
+      options = {organizationId: event.organizationId};
+    } else {
+      return;
+    }
+    ajax.query(endpoint, options)
       .success(function (data) {
         var obj = {};
         obj[data.organization] = data.reservationTypes;
