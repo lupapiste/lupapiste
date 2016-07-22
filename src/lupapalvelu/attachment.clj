@@ -233,6 +233,11 @@
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
 
+(defn get-attachments-by-type
+  [{:keys [attachments]} type]
+  {:pre [(map? type)]}
+  (filter #(= (:type %) type) attachments))
+
 (defn create-sent-timestamp-update-statements [attachments file-ids timestamp]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :sent timestamp))
 
