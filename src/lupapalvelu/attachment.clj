@@ -181,6 +181,14 @@
              (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
+(defn attachment-value-is?
+  "predicate is invoked for attachment value of key"
+  [pred key attachment]
+  (pred (get attachment (keyword key))))
+
+(def attachment-is-readOnly? (partial attachment-value-is? true? :readOnly))
+(def attachment-is-locked?   (partial attachment-value-is? true? :locked))
+
 ;;
 ;; Api
 ;;
