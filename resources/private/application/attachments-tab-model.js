@@ -162,7 +162,8 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
       attachmentId: null,
       attachmentType: null,
       typeSelector: true,
-      opSelector: self.primaryOperation()["attachment-op-selector"]
+      opSelector: self.primaryOperation()["attachment-op-selector"],
+      archiveEnabled: self.authorizationModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
