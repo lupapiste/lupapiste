@@ -186,6 +186,7 @@
 "attachment.upload.instructions.extensions" "sv" "Tillåtna filtyper är PDF-, bild, Microsoft Office-, OpenOffice- och zip-filer."
 "attachment.upload.instructions.pdfa" "fi" "Mikäli mahdollista, tallenna PDF-tiedostot arkistokelpoisessa PDF/A-1b, PDF/A-2b tai PDF/A-3b -muodossa. Muut PDF-muodot muunnetaan PDF/A-muotoon automaattisesti, jolloin joudut tarkastamaan lopputuloksen."
 "attachment.upload.instructions.pdfa" "sv" "Spara om möjligt PDF-filer i arkivdugligt format PDF/A-1b, PDF/A-2b eller PDF/A-3b. Andra PDF-format omvandlas automatiskt till PDF/A-format, varvid du måste kontrollera slutresultatet."
+"attachment.upload.instructions.pdfa.signature" "fi" "Sähköisesti allekirjoitetut asiakirjat tulee tallentaa valmiiksi arkistokelpoisessa PDF/A-muodossa, koska muunnoksen jälkeen allekirjoitus ei ole enää validi."
 "attachment.upload.instructions.size" "fi" "Suurin sallittu tiedostokoko on 100 Mt."
 "attachment.upload.instructions.size" "sv" "Största tillåtna filstorlek är 100 Mb."
 "attachment.valid-pdfa" "fi" "Validi PDF/A-tiedosto"
