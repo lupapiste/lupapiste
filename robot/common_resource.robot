@@ -30,18 +30,22 @@ ${DB COOKIE}                    test_db_name
 ${DB PREFIX}                    test_
 
 *** Keywords ***
+
+Set DB cookie
+  ${timestamp}=  Get Time  epoch
+  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
+
 Browser
   [Arguments]
-  ${timestamp}=  Get Time  epoch
-  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
   # Setting cookies on login page fails on IE8, perhaps because of
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
-  Add Cookie  ${DB COOKIE}  ${dbname}
-  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
-  Log  Cookie: ${DB COOKIE} = ${dbname}
+  Set DB cookie
 
 Open browser to login page
   Browser
@@ -167,7 +171,8 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
+  Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
 Open side panel
   [Arguments]  ${name}
