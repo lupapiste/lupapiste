@@ -699,10 +699,10 @@
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment
           attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
-          maybe-attachment-id    (str application-id "." user-id "." attachment-id)          ; proposed attachment id (if empty placeholder is not found)
+          maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
           same-attachments       (allowed-attachments-same-type application attachment-type)      ; attachments of same type
           old-user-attachment-id (some (hash-set maybe-attachment-id) (map :id same-attachments)) ; if id is already present, use it
-          
+
           attachment-id (or old-user-attachment-id
                             (-> (remove :latestVersion same-attachments) first :id) ; upload user attachment to empty placeholder
                             maybe-attachment-id)]

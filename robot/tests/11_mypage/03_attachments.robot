@@ -48,21 +48,24 @@ Copy own attachments button is not shown to non-architect
   Wait for Page to Load  Mikko  Intonen
   Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
 
-Mikko deletes own attachment from application
+Mikko deletes own attachment from application and submits
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-osapuolet.cv"]
   Confirm yes no dialog
-  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
-
-Application is submited and given verdict
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
   Submit application
   Logout
+
+Sonja asks for the cv
   As Sonja
   Open application  ${appname}  753-416-25-30
-  Open tab  verdict
-  Fetch verdict
-  Wait until  Application state should be  verdictGiven
+  Open tab  attachments
+  Add empty attachment template  CV  osapuolet  cv
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="osapuolet.cv"]
+  ${trCount}=   Get Matching Xpath Count  //div[@data-test-id="application-pre-attachments-table"]//tr[@class='attachment-row' and .//a[@data-test-type="osapuolet.cv"]]/preceding-sibling::tr[@class='attachment-row']
+  ${index}=  Evaluate  ${trCount}+${1}
+  Set Suite Variable  ${cvIndex}  ${index}
   Logout
 
 Mikko logs in and sets himself architect
@@ -74,7 +77,26 @@ Mikko logs in and sets himself architect
   Reload Page
   Wait Until  Checkbox Should Be Selected  architect
 
+Mikko copies own CV to application
+  Open application  ${appname}  753-416-25-30
+  Open tab  attachments
+  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Confirm yes no dialog
+
+Mikko's CV should be uploaded to placeholder requested by Sonja
+  Wait until  Element should contain  xpath=//div[@data-test-id="application-pre-attachments-table"]//tr[@class='attachment-row'][${cvIndex}]/td[@class='attachment-file-info']//a[1]  ${PDF_TESTFILE_NAME}
+  Logout
+
+Application is given verdict
+  As Sonja
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  Fetch verdict
+  Wait until  Application state should be  verdictGiven
+  Logout
+
 Mikko can add his attachments in post verdict state
+  As Mikko
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
