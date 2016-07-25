@@ -34,14 +34,11 @@
   (env/value :pdf2pdf :license-key))
 
 (defn- pdftools-pdfa-command
-  "Conversion error mask 9028 means that the following things will cause the conversion to fail:
-   - Visual differences in output file
-   - Removal of embedded files
-   - Error during linearization of output file
-   - Removal of digital signature because of conversion
-   - OCR error occurred (OCR not currently in use)"
+  "Conversion error mask 68 means that the following things will cause the conversion to fail:
+   - Visual differences in output file (4)
+   - Removal of embedded files (64)"
   [input-file output-file cl]
-  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "9028" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+  [(pdf2pdf-executable) "-ad" "-au" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
 
 (defn- pdftools-analyze-command [input-file output-file]
   [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2b" input-file output-file])
@@ -75,9 +72,11 @@
 (defn- compliance-level [input-file output-file {:keys [application filename]}]
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
-        required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
+        required-part (or (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
+                          (when (re-find #"Processing embedded file" log) "3")
+                          "2")
         level (if (= required-part "1") "b" "u")
-        cl (str "pdfa-" (or required-part "2") level)
+        cl (str "pdfa-" required-part level)
         not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
         missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
     (when (or not-prints missing-appearances)
