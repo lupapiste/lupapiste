@@ -640,6 +640,23 @@
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
 
+(defn upload-user-attachment [apikey attachment-type expect-to-succeed & [filename]]
+  (let [filename    (or filename "dev-resources/test-attachment.txt")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/upload/user-attachment")
+        resp        (http-post uri
+                               {:headers {"authorization" (str "apikey=" apikey)}
+                                :multipart [{:name "attachmentType"  :content attachment-type}
+                                            {:name "files[]"         :content uploadfile}]})
+        body        (:body (decode-response resp))]
+    (if expect-to-succeed
+      (facts "successful"
+        resp => http200?
+        body => ok?)
+      (facts "should fail"
+        body => fail?))
+    body))
+
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 
 (defn get-attachment-by-id [apikey application-id attachment-id]

@@ -39,7 +39,7 @@
 ;; Validators and pre-checks
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data application :application}]
-  (when (-> (attachment/get-attachment-info application attachmentId) :locked true?)
+  (when (-> (attachment/get-attachment-info application attachmentId) attachment/attachment-is-locked?)
     (fail :error.attachment-is-locked)))
 
 (defn- attachment-id-is-present-in-application-or-not-set [{{:keys [attachmentId]} :data {:keys [attachments]} :application}]
@@ -47,7 +47,7 @@
     (fail :error.attachment.id)))
 
 (defn attachment-not-readOnly [{{attachmentId :attachmentId} :data application :application}]
-  (when (-> (attachment/get-attachment-info application attachmentId) :readOnly true?)
+  (when (-> (attachment/get-attachment-info application attachmentId) attachment/attachment-is-readOnly?)
     (fail :error.unauthorized
           :desc "Read-only attachments cannot be modified.")))
 

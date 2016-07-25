@@ -14,7 +14,7 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
@@ -669,6 +669,23 @@
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
+(defn- allowed-state?
+  "Check possible attachments against application state.
+   pre-verdict states are all true, post-verdict states are checked by attachment's applicationState.
+   Similar to attachment-editable-by-application-state pre-check"
+  [app-state {create-state :applicationState}]
+  (if (states/post-verdict-states (keyword app-state))
+    (not (nil? (states/post-verdict-states (keyword create-state))))
+    true))
+
+(defn allowed-attachments-same-type
+  "Return attachments of given type, that are allowed in current state and not flagged readOnly / locked."
+  [application attachment-type]
+  (->> (att/get-attachments-by-type application attachment-type)
+       (filter (partial allowed-state? (:state application)))
+       (remove #(or (att/attachment-is-readOnly? %) (att/attachment-is-locked? %)))))
+
+
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
@@ -681,20 +698,28 @@
     (let [application-id id
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment
-          attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
-          attachment-id (str application-id "." user-id "." attachment-id)]
-      (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
-        (attachment/attach-file! application
-                                 {:attachment-id attachment-id
-                                  :attachment-type attachment-type
-                                  :content ((:content attachment))
-                                  :filename file-name
-                                  :content-type content-type
-                                  :size size
-                                  :created created
-                                  :user user
-                                  :required false
-                                  :locked false}))))
+          attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+          maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
+          same-attachments       (allowed-attachments-same-type application attachment-type)      ; attachments of same type
+          old-user-attachment-id (some (hash-set maybe-attachment-id) (map :id same-attachments)) ; if id is already present, use it
+
+          attachment-id (or old-user-attachment-id
+                            (-> (remove :latestVersion same-attachments) first :id) ; upload user attachment to empty placeholder
+                            maybe-attachment-id)]
+      (when (zero? (mongo/count :applications {:_id application-id
+                                               :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
+                                                                         :latestVersion.type attachment-type}}}))
+        (att/attach-file! application
+                          {:attachment-id attachment-id
+                           :attachment-type attachment-type
+                           :content ((:content attachment))
+                           :filename file-name
+                           :content-type content-type
+                           :size size
+                           :created created
+                           :user user
+                           :required false
+                           :locked false}))))
   (ok))
 
 (defquery email-in-use
