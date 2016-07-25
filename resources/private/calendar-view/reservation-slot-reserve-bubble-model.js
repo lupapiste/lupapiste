@@ -47,8 +47,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.slot(event.slot);
     self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
-    var party = _.find(self.authorizedParties(), function(party) { return party.id() === self.participant(); });
-    self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName() + " " + party.lastName()]);
+    var party = _.find(self.authorizedParties(), function(party) { return party.id === self.participant(); });
+    self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();

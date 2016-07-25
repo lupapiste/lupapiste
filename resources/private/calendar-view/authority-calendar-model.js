@@ -5,7 +5,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.authorizedParties = lupapisteApp.models.application.roles;
+  self.authorizedParties = ko.observableArray([]);
   self.reservationTypes = ko.observableArray([]);
 
   self.selectedParty = ko.observable();
@@ -21,6 +21,11 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     }
   });
 
+  self.disposedComputed(function() {
+    var parties = lupapisteApp.models.application.roles();
+    self.authorizedParties(_.map(parties, ko.mapping.toJS));
+  });
+
   self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {
     self.reservationTypes(event.reservationTypes);
   });
@@ -33,7 +38,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   });
 
   self.partyFullName = function(party) {
-    return party.firstName() + " " + party.lastName();
+    return party.firstName + " " + party.lastName;
   };
 
 };
