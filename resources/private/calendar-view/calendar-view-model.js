@@ -92,7 +92,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
   });
 
   self.disposedComputed(function() {
-    if (params.view === 'applicationView') {
+    if (params.view === "applicationView") {
       hub.send("calendarService::fetchApplicationCalendarSlots",
         { clientId: self.clientId,
           userId: self.userId,

@@ -206,5 +206,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_deleteSlot);
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
+    hub.unsubscribe(_fetchApplicationAuthorities);
   };
 };

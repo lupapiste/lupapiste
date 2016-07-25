@@ -1,5 +1,6 @@
-LUPAPISTE.ApplicantCalendarModel = function (params) {
+LUPAPISTE.ApplicantCalendarModel = function () {
 
+  "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());

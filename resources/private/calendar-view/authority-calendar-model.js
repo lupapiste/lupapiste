@@ -1,5 +1,6 @@
-LUPAPISTE.ApplicationAuthorityCalendarModel = function (params) {
+LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
+  "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());

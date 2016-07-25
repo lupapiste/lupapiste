@@ -18,7 +18,6 @@
         self.selectedCalendarId(undefined);
         self.noCalendarsFound(true);
       }
-      console.log(self.noCalendarsFound());
     });
   }
 
