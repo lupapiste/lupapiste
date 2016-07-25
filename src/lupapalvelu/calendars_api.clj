@@ -5,9 +5,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
-            [lupapalvelu.user :as usr]
-            [lupapalvelu.organization :as org]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.user :as usr]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -296,12 +294,8 @@
    :parameters [:id]
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
-  [{{:keys [organization]} :application}]
-  (let [calendars     (cal/find-calendars-for-organizations organization)
-        authority-ids (->> (filter #(.startsWith % "user-") (keys calendars))
-                           (map #(.replace % "user-" "")))]
-    (ok :authorities (filter #(util/contains-value? authority-ids (:id %))
-                             (app/application-org-authz-users app "authority")))))
+  [{appl :application}]
+  (ok :authorities (cal/find-application-authz-with-calendar appl)))
 
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}

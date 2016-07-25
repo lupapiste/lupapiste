@@ -6,7 +6,9 @@
             [cheshire.core :as json]
             [sade.http :as http]
             [lupapalvelu.organization :as org]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [sade.util :as util]
+            [lupapalvelu.application :as app]))
 
 ; -- API Call helpers
 
@@ -101,6 +103,14 @@
 (defn find-calendars-for-organizations
   [& orgIds]
   (group-by :externalRef (api-query "resources/by-organization" {:organizationCodes orgIds})))
+
+(defn find-application-authz-with-calendar
+  [{:keys [organization] :as application}]
+  (let [calendars     (find-calendars-for-organizations organization)
+        authority-ids (->> (filter #(.startsWith % "user-") (keys calendars))
+                           (map #(.replace % "user-" "")))]
+    (filter #(util/contains-value? authority-ids (:id %))
+             (app/application-org-authz-users application "authority"))))
 
 (defn find-calendars-for-user
   [userId]
