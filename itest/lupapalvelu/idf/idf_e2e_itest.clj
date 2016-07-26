@@ -81,34 +81,34 @@
         (get-in email [:body :plain]) => (partial re-matches #"(?sm).+/app/fi/welcome#!/link-account/\w{48}\s.+")))))
 
 (fact "Old user is linked"
-  (mongo/with-db local-db-name
-    (let [test-id "123"
-          user (assoc (get-user-by-id pena-id) :id test-id)]
-      (fact "Meta: Old user is not yet linked to partner app"
-        (get-in user [:partnerApplications :lupapiste :id]) => nil?
-        (get-in user [:partnerApplications :rakentajafi :id]) => nil?)
+  (let [test-id "123"]
+    (mongo/with-db local-db-name
+      (let [user (assoc (get-user-by-id pena-id) :id test-id)]
+        (fact "Meta: Old user is not yet linked to partner app"
+          (get-in user [:partnerApplications :lupapiste :id]) => nil?
+          (get-in user [:partnerApplications :rakentajafi :id]) => nil?)
 
-      (fact "send-user-data succeeds"
-        (send-user-data user "rakentaja.fi" :cookie-store cookies) => true) ; In local & dev profiles sends actually to localhost
+        (fact "send-user-data succeeds"
+          (send-user-data user "rakentaja.fi" :cookie-store cookies) => true) ; In local & dev profiles sends actually to localhost
 
-      (fact "Local user is linked to partner app: got pena's id in response"
-        (let [linked-user (get-user-by-id pena-id)]
-          (get-in linked-user [:partnerApplications :rakentajafi :id]) => pena-id
-          (get-in linked-user [:partnerApplications :rakentajafi :created]) => truthy
-          (get-in linked-user [:partnerApplications :rakentajafi :origin]) => false))
+        (fact "Local user is linked to partner app: got pena's id in response"
+          (let [linked-user (get-user-by-id pena-id)]
+            (get-in linked-user [:partnerApplications :rakentajafi :id]) => pena-id
+            (get-in linked-user [:partnerApplications :rakentajafi :created]) => truthy
+            (get-in linked-user [:partnerApplications :rakentajafi :origin]) => false))))
 
-      (fact "User is linked on remote end too: we sent test-id"
-        (let [user-resp (query admin :users :userId pena-id)
-              remote-user (first (:users user-resp))]
-          user-resp => ok?
-          (get-in remote-user [:partnerApplications :lupapiste :id]) => test-id
-          (get-in remote-user [:partnerApplications :lupapiste :created]) => truthy
-          (get-in remote-user [:partnerApplications :lupapiste :origin]) => true)))))
+    (fact "User is linked on remote end too: we sent test-id"
+      (let [user-resp (query admin :users :userId pena-id)
+            remote-user (first (:users user-resp))]
+        user-resp => ok?
+        (get-in remote-user [:partnerApplications :lupapiste :id]) => test-id
+        (get-in remote-user [:partnerApplications :lupapiste :created]) => truthy
+        (get-in remote-user [:partnerApplications :lupapiste :origin]) => true))))
 
 (fact "Invalid app"
-  (let [resp (do-post (assoc documented-params :app "attacker"))]
-    (:status resp) => 400
-    (:body resp) => (contains "Invalid app")))
+    (let [resp (do-post (assoc documented-params :app "attacker"))]
+      (:status resp) => 400
+      (:body resp) => (contains "Invalid app")))
 
 (fact "Invalid mac"
   (let [resp (do-post (assoc documented-params :mac "3d5251fb99d198cd01b280838acea3c40acb25698d1537448ad82c0000000000"))]
