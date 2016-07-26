@@ -24,6 +24,14 @@
                 :startTime (util/to-millis-from-local-datetime-string (-> s :time :start))
                 :endTime   (util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
+(defn- ->FrontendReservations [backend-reservations]
+  (map (fn [r] {:id        (:id r)
+                :status    :booked
+                :reservationType (:reservationType r)
+                :startTime (util/to-millis-from-local-datetime-string (-> r :time :start))
+                :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
+                :comment   (:comment r)}) backend-reservations))
+
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
          (let [{start :start end :end reservationTypeIds :reservationTypes} s]
@@ -59,7 +67,7 @@
       false)))
 
 (defn- authority-admin-assoc-calendar-to-user [cals user]
-  (let [reference-code-for-user (cal/calendar-ref-for-user (:id user))
+  (let [reference-code-for-user (:id user)
         calendars-for-user      (get cals reference-code-for-user [])
         calendar                (first calendars-for-user)]
     (if calendar
@@ -73,7 +81,7 @@
   (info "Creating a new calendar" userId organization)
   (post-command "resources" {:name             (str (:firstName target-user) " " (:lastName target-user))
                                   :organizationCode organization
-                                  :externalRef      (cal/calendar-ref-for-user userId)}))
+                                  :externalRef      userId}))
 
 (defn- activate-resource
   [{:keys [id]}]
