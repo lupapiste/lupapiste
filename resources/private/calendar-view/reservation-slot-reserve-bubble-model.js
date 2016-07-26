@@ -50,6 +50,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     var party = _.find(self.authorizedParties(), function(party) { return party.id === self.participant(); });
     self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
+    self.location(params.defaultLocation());
+
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();
     var timestamp = moment(event.weekday.startOfDay).hour(hour).minutes(minutes);

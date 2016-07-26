@@ -5,7 +5,8 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.organization :as o]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -236,16 +237,6 @@
   (ok :result (post-command "reservation-types/" {:reservationType   reservationType
                                                   :organization      (usr/authority-admins-organization-id user)})))
 
-(defquery reservation-types-for-application
-  {:user-roles #{:applicant}
-   :feature    :ajanvaraus
-   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
-  [{app :application}]
-  (let [organizationId (:organization app)]
-    (info "Get reservation types for application " (:id app) ", organization" organizationId)
-    (ok :organization organizationId
-        :reservationTypes (reservation-types organizationId))))
-
 (defquery reservation-types-for-organization
   {:user-roles #{:authorityAdmin :authority}
    :parameters [organizationId]
@@ -289,13 +280,15 @@
                                                               :clientId clientId
                                                               :reservationTypeId reservationTypeId}))))
 
-(defquery application-authorities-with-calendar
+(defquery application-calendar-config
   {:user-roles #{:applicant}
    :parameters [:id]
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
-  [{appl :application}]
-  (ok :authorities (cal/find-application-authz-with-calendar appl)))
+  [{{:keys [organization] :as appl} :application}]
+  (ok :authorities (cal/find-application-authz-with-calendar appl)
+      :reservationTypes (reservation-types organization)
+      :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
 
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}

@@ -7,6 +7,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
 
   self.authorities = ko.observableArray([]);
   self.reservationTypes = ko.observableArray([]);
+  self.defaultLocation = ko.observable();
 
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
@@ -14,17 +15,14 @@ LUPAPISTE.ApplicantCalendarModel = function () {
   self.disposedComputed(function() {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
-      self.sendEvent("calendarService", "fetchOrganizationReservationTypes", {applicationId: id});
-      self.sendEvent("calendarService", "fetchAuthoritiesForApplication", {applicationId: id});
+      self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
     }
   });
 
-  self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {
-    self.reservationTypes(event.reservationTypes);
-  });
-
-  self.addEventListener("calendarService", "applicationAuthoritiesFetched", function(event) {
+  self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
     self.authorities(event.authorities);
+    self.reservationTypes(event.reservationTypes);
+    self.defaultLocation(event.defaultLocation);
   });
 
   self.partyFullName = function(party) {
