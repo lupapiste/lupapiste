@@ -96,7 +96,7 @@
 (def oulu-property-id "56400000000000")
 (def no-backend-property-id oulu-property-id)
 
-(defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
+(defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 
 (def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
@@ -115,7 +115,7 @@
   (proxy [Cookie] []
     (getName [] name)
     (getValue [] value)
-    (getDomain [] (get (re-matches #"(http(s)?://)([^\d]+)(:\d+)?" (server-address)) 3))
+    (getDomain [] (get (re-matches #"(http(s)?://)([a-z0-9-\.]+)(:\d+)?" (server-address)) 3))
     (getPath [] "/")
     (isSecure [] false)
     (getVersion [] 2)
