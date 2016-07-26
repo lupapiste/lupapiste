@@ -49,11 +49,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     var party = self.participant();
     self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
-<<<<<<< Updated upstream
-=======
-    //self.location(params.defaultLocation());
+    self.location(params.defaultLocation());
 
->>>>>>> Stashed changes
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();
     var timestamp = moment(event.weekday.startOfDay).hour(hour).minutes(minutes);
