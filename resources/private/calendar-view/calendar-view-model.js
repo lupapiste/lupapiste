@@ -10,7 +10,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.userId = ko.observable();
   self.clientId = ko.observable();
   self.reservationTypeId = ko.observable();
-  self.authorizedParties = ko.observable();
   self.view = ko.observable();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -22,7 +21,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.reservationTypes = params.reservationTypes; // observable from parent
   self.clientId = params.searchConditions.clientId; // observable from parent
   self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
-  self.authorizedParties = params.authorizedParties; // observable from parent
   self.participant = params.participant; // observable from parent
   self.defaultLocation = params.defaultLocation;
 

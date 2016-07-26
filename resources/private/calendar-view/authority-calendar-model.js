@@ -23,7 +23,19 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
   self.disposedComputed(function() {
     var parties = lupapisteApp.models.application.roles();
-    self.authorizedParties(_.map(parties, ko.mapping.toJS));
+    var partyDocs = _.filter(lupapisteApp.models.application._js.documents, util.isPartyDoc);
+
+    self.authorizedParties(
+      _.map(parties, function (p) {
+        var party = ko.mapping.toJS(p);
+        var docs = _.concat(
+            _.filter(partyDocs, { data: { userId: { value: party.id }}}),
+            _.filter(partyDocs, { data: { henkilo: { userId: { value: party.id }}}}));
+        var partyType = _.map(docs, function (d) { return _.get(d, "schema-info.name"); });
+        return _.extend(party, { partyType: partyType });
+      }));
+
+    console.log(self.authorizedParties());
   });
 
   self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {

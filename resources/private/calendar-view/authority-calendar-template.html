@@ -17,7 +17,6 @@
           <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
           <select class="form-input combobox tip"
                   data-bind="options: authorizedParties,
-                             optionsValue: function(item) { return _.get(item, 'id'); },
                              optionsText: function(item) { return partyFullName(item); },
                              optionsCaption: loc('choose'),
                              value: selectedParty">
@@ -40,7 +39,6 @@
                                              reservationTypeId: selectedReservationType },
                              view: 'applicationView',
                              reservationTypes: reservationTypes,
-                             authorizedParties: authorizedParties,
                              participant: selectedParty">
       </calendar-view>
     <!-- /ko -->

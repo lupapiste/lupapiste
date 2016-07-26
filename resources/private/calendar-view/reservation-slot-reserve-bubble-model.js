@@ -10,7 +10,6 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.reservationTypeId = params.reservationTypeId;
   self.reservationTypes = params.reservationTypes;
   self.participant = params.participant;
-  self.authorizedParties = params.authorizedParties;
 
   self.slot = ko.observable();
   self.location = ko.observable();
@@ -47,11 +46,14 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.slot(event.slot);
     self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
-    var party = _.find(self.authorizedParties(), function(party) { return party.id === self.participant(); });
+    var party = self.participant();
     self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
-    self.location(params.defaultLocation());
+<<<<<<< Updated upstream
+=======
+    //self.location(params.defaultLocation());
 
+>>>>>>> Stashed changes
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();
     var timestamp = moment(event.weekday.startOfDay).hour(hour).minutes(minutes);
