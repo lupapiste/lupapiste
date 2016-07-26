@@ -307,6 +307,17 @@
   (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
                                             :reservationTypeId reservationTypeId :comment comment })))
 
+(defquery reservations-for-user
+  {:user-roles       #{:authorityAdmin :authority}
+   :feature          :ajanvaraus
+   :parameters       [userId year week]
+   :input-validators [(partial action/non-blank-parameters [:userId :year :week])]
+   :pre-checks       [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+  [_]
+  (->> (api-query (str "reservations/by-external-ref/" userId) {:year year :week week})
+       ->FrontendReservations
+       (ok :reservations)))
+
 ; For integration tests in dev
 (env/in-dev
   (defn clear-database

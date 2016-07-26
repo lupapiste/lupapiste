@@ -53,20 +53,31 @@ LUPAPISTE.CalendarService = function() {
 
   var doFetchApplicationCalendarWeek = function(event) {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
+    var slots = [];
 
-    if (event.clientId() && event.userId() && event.reservationTypeId()) {
-      ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.userId, reservationTypeId: event.reservationTypeId,
-                                               week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
-        .success(function(data) {
-          notifyView(event, _weekdays(event.calendarId, data.slots, startOfWeekMoment));
-        })
-        .error(function(e) {
-          hub.send("indicator", {style: "negative", message: e.code});
-        })
-        .call();
-    } else {
-      notifyView(event, _weekdays(null, [], startOfWeekMoment));
-    }
+    ajax.query("reservations-for-user", { userId: event.userId, week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+      .success(function(data) {
+        slots = slots.concat(data.reservations);
+
+        notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+
+        if (event.clientId && event.userId && event.reservationTypeId) {
+          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.userId, reservationTypeId: event.reservationTypeId,
+                                                   week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+            .success(function(data) {
+              slots = slots.concat(data.slots);
+
+              notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+            })
+            .error(function(e) {
+              hub.send("indicator", {style: "negative", message: e.code});
+            })
+            .call();
+        }
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
+      }).call();
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {

@@ -67,7 +67,7 @@
                               text: $component.slotViewText($data)"></a>
               </div>
               <!-- /ko -->
-              <!--ko if: $component.view === "applicationView" -->
+              <!--ko if: $component.view === "applicationView" && $data.status === 'available' -->
               <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
                                                              height: $component.slotHeight($data) },
                                                     css: { 'calendar-slot': 1,
@@ -83,6 +83,16 @@
                     <span data-bind="ltext: 'calendar.reserve.slot'"></span>
                   </div>
                 </button>
+              </div>
+              <!-- /ko -->
+              <!--ko if: $component.view === "applicationView" && $data.status === 'booked' -->
+              <div class="calendar-slot" data-bind="style: { top: $component.slotPositionTop($data),
+                                                             height: $component.slotHeight($data) },
+                                                    css: { 'calendar-slot': 1,
+                                                           'booked': status == 'booked',
+                                                           'accepted': status == 'accepted' }">
+                <div data-bind="text: $data.reservationType.name"></div>
+                <div data-bind="text: $data.location"></div>
               </div>
               <!-- /ko -->
             <!-- /ko -->
