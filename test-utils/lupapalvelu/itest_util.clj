@@ -98,6 +98,9 @@
 
 (defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
 
+;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
+(defn target-server-or-localhost-address [] (System/getProperty "target_server" "http://localhost:8000"))
+
 (def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
 (defn decode-response [resp]
