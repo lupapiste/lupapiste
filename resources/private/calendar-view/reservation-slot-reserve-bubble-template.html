@@ -20,7 +20,7 @@
         <div class="form-grid no-padding" style="min-width: 450px">
           <div class="row">
             <div class="col-1">
-              <span data-bind="text: 'Aika'"></span>:
+              <span data-bind="ltext: 'application.calendar.reservation.time'"></span>:
             </div>
             <div class="col-3">
               <span data-bind="dateTimeString: $parent.slot().startTime"></span>&nbsp;-&nbsp;<span data-bind="text: $parent.endHour"></span>
@@ -29,7 +29,7 @@
 
           <div class="row">
             <div class="col-1">
-              <span data-bind="text: 'Paikka'"></span>:
+              <span data-bind="ltext: 'application.calendar.reservation.location'"></span>:
             </div>
             <div class="col-3">
               <input type="text" data-bind="textInput: $parent.location" style="width: 100%"/>
@@ -38,7 +38,7 @@
 
           <div class="row">
             <div class="col-1">
-              <span data-bind="text: 'Tapaamisen aihe'"></span>:
+              <span data-bind="ltext: 'application.calendar.reservation-type'"></span>:
             </div>
             <div class="col-3" data-bind="with: $parent.reservationType">
               <span data-bind="text: name"></span>
@@ -47,7 +47,7 @@
 
           <div class="row">
             <div class="col-1">
-              <span data-bind="text: 'Osallistujat'"></span>:
+              <span data-bind="ltext: 'application.calendar.reservation.participants'"></span>:
             </div>
             <div class="col-3">
               <!--ko if: $parent.client-->
@@ -61,7 +61,7 @@
 
           <div class="row">
             <div class="col-1">
-              <span data-bind="text: 'Lisätietoa'"></span>:
+              <span data-bind="ltext: 'application.calendar.reservation.additional.information'"></span>:
             </div>
             <div class="col-3">
               <textarea data-bind="textInput: $parent.comment"/>
