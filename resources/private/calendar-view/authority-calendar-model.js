@@ -5,6 +5,8 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  self.authority = ko.observable({id: lupapisteApp.models.currentUser.id()});
+
   self.authorizedParties = ko.observableArray([]);
   self.reservationTypes = ko.observableArray([]);
 
@@ -34,8 +36,6 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
         var partyType = _.map(docs, function (d) { return _.get(d, "schema-info.name"); });
         return _.extend(party, { partyType: partyType });
       }));
-
-    console.log(self.authorizedParties());
   });
 
   self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {

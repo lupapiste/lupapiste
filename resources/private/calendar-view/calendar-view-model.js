@@ -8,8 +8,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
   self.userId = ko.observable();
-  self.clientId = ko.observable();
-  self.reservationTypeId = ko.observable();
   self.view = ko.observable();
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -17,9 +15,12 @@ LUPAPISTE.CalendarViewModel = function (params) {
   if (_.get(params, "searchConditions.calendarId")) {
     self.calendarId = params.searchConditions.calendarId; // observable from parent
   }
-  self.userId = params.searchConditions.userId; // observable from parent
+  if (_.get(params, "searchConditions.userId")) {
+    self.userId = params.searchConditions.userId; // observable from parent
+  }
+  self.authority = params.searchConditions.authority; // observable from parent
   self.reservationTypes = params.reservationTypes; // observable from parent
-  self.clientId = params.searchConditions.clientId; // observable from parent
+  self.client = params.searchConditions.client; // observable from parent
   self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
   self.participant = params.participant; // observable from parent
 
@@ -92,8 +93,8 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
       hub.send("calendarService::fetchApplicationCalendarSlots",
-        { clientId: self.clientId(),
-          userId: self.userId(),
+        { clientId: _.get(self.client(), "id"),
+          authorityId: _.get(self.authority(), "id"),
           reservationTypeId: self.reservationTypeId(),
           week: self.startOfWeek().isoWeek(),
           year: self.startOfWeek().year(),

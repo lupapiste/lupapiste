@@ -6,10 +6,10 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.clientId = params.clientId;
+  self.client = params.client;
+  self.authority = params.authority;
   self.reservationTypeId = params.reservationTypeId;
   self.reservationTypes = params.reservationTypes;
-  self.participant = params.participant;
 
   self.slot = ko.observable();
   self.location = ko.observable();
@@ -30,7 +30,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.send = function() {
     self.sendEvent("calendarService", "reserveCalendarSlot",
-      { clientId: self.clientId,
+      { clientId: _.get(self.client(), "id"),
+        authorityId: _.get(self.authority(), "id"),
         slot: self.slot,
         reservationTypeId: self.reservationTypeId,
         comment: self.comment,
@@ -46,7 +47,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.slot(event.slot);
     self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
-    var party = self.participant();
+    var party = self.client();
     self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
     //self.location(params.defaultLocation());

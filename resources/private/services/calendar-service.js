@@ -55,14 +55,14 @@ LUPAPISTE.CalendarService = function() {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
     var slots = [];
 
-    ajax.query("reservations-for-user", { userId: event.userId, week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+    ajax.query("reservations-for-user", { userId: event.authorityId, week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
         notifyView(event, _weekdays(event, slots, startOfWeekMoment));
 
-        if (event.clientId && event.userId && event.reservationTypeId) {
-          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.userId, reservationTypeId: event.reservationTypeId,
+        if (event.clientId && event.authorityId && event.reservationTypeId) {
+          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId, reservationTypeId: event.reservationTypeId,
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
             .success(function(data) {
               slots = slots.concat(data.slots);
@@ -174,11 +174,11 @@ LUPAPISTE.CalendarService = function() {
 
   var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
     ajax
-      .command("reserve-calendar-slot", { clientId: event.clientId(), slotId: event.slot().id, reservationTypeId: event.reservationTypeId(),
+      .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId(),
                                           comment: event.comment() })
       .success(function() {
         hub.send("indicator", { style: "positive" });
-        doFetchApplicationCalendarWeek({ clientId: event.clientId, userId: lupapisteApp.models.currentUser.id,
+        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
                                          reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
       .error(function(e) {

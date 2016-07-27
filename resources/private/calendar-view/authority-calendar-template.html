@@ -34,9 +34,9 @@
         </span>
       </div>
 
-      <calendar-view params="searchConditions: { clientId: selectedParty,
-                                             userId: lupapisteApp.models.currentUser.id,
-                                             reservationTypeId: selectedReservationType },
+      <calendar-view params="searchConditions: { client: selectedParty,
+                                                 authority: authority,
+                                                 reservationTypeId: selectedReservationType },
                              view: 'applicationView',
                              reservationTypes: reservationTypes,
                              participant: selectedParty">
