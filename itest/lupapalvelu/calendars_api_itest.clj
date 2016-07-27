@@ -79,9 +79,9 @@
                                       :end   (tc/to-long tomorrow-at-noon)
                                       :reservationTypes [(get varaustyypit :Testityyppi)]}]) => ok?
           (let [slots (:slots (query authority :calendar-slots
-                                   :calendarId authority-calendar-id
-                                   :week       tomorrow-week
-                                   :year       tomorrow-year))]
+                                               :calendarId authority-calendar-id
+                                               :week       tomorrow-week
+                                               :year       tomorrow-year))]
             (count slots) => 2
 
             (fact "The available slot is deletable"
@@ -91,16 +91,37 @@
                                               :week       current-week
                                               :year       current-year))) => 1))))
 
-      (fact "Reservation API functions"
-        (fact "Find available slots"
-          (let [result (query authority :available-calendar-slots
-                              :authorityId authority-id
-                              :clientId "w8354yleakw"
-                              :reservationTypeId (get varaustyypit :Testityyppi)
-                              :year current-year
-                              :week current-week)]
-            result => ok?
-            (count (:slots result)) => 1)))))
+      (fact "With application"
+        (let [app-id (create-app-id pena)]
+          (fact "Reservation API functions"
+            (fact "Find available slots as authority"
+              (let [result (query authority :available-calendar-slots
+                                  :authorityId       authority-id
+                                  :clientId          pena-id
+                                  :reservationTypeId (get varaustyypit :Testityyppi)
+                                  :id   app-id
+                                  :year current-year
+                                  :week current-week)]
+                result => ok?
+                (count (:slots result)) => 1))
+            (fact "Find available slots as applicant"
+              (let [result (query pena :available-calendar-slots
+                                  :authorityId       authority-id
+                                  :clientId          pena-id
+                                  :reservationTypeId (get varaustyypit :Testityyppi)
+                                  :id   app-id
+                                  :year current-year
+                                  :week current-week)]
+                result => ok?
+                (count (:slots result)) => 1))
+            (fact "Find available slots as applicant without the correct application in context should fail"
+              (let [result (query pena :available-calendar-slots
+                                  :authorityId       authority-id
+                                  :clientId          pena-id
+                                  :reservationTypeId (get varaustyypit :Testityyppi)
+                                  :year current-year
+                                  :week current-week)]
+                result => unauthorized?)))))))
 
   (fact "clear db"
     (clear-ajanvaraus-db)))
