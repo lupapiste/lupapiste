@@ -5,7 +5,10 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.authority = ko.observable({id: lupapisteApp.models.currentUser.id()});
+  self.authority = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
+                                   lastName: lupapisteApp.models.currentUser.lastName(),
+                                   id: lupapisteApp.models.currentUser.id(),
+                                   organizationName: lupapisteApp.models.application.organizationName() });
 
   self.authorizedParties = ko.observableArray([]);
   self.reservationTypes = ko.observableArray([]);

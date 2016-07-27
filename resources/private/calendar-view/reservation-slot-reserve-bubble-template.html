@@ -50,8 +50,11 @@
               <span data-bind="text: 'Osallistujat'"></span>:
             </div>
             <div class="col-3">
-              <!--ko foreach: $parent.participants-->
-                <span data-bind="text: $data" style="display: block"></span>
+              <!--ko if: $parent.client-->
+                <span data-bind="text: $parent.clientDisplayText()" style="display: block"></span>
+              <!--/ko-->
+              <!--ko if: $parent.authority-->
+                <span data-bind="text: $parent.authorityDisplayText()" style="display: block"></span>
               <!--/ko-->
             </div>
           </div>

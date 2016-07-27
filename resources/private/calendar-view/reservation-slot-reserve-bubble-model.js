@@ -42,6 +42,29 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.init = function() {
   };
 
+  self.authorityDisplayText = function() {
+    var authority = self.authority();
+    if (authority) {
+      var text = authority.firstName + " " + authority.lastName;
+      if (!_.isEmpty(authority.organizationName)) {
+        text += ", ";
+        text += authority.organizationName;
+      }
+      return text;
+    }
+  };
+
+  self.clientDisplayText = function() {
+    var client = self.client();
+    if (client) {
+      var text = client.firstName + " " + client.lastName;
+      if (!_.isEmpty(client.partyType)) {
+        _.forEach(client.partyType, function (t) { text += ", " + loc("schemas."+t); });
+      }
+      return text;
+    }
+  };
+
   self.addEventListener("calendarView", "availableSlotClicked", function(event) {
 
     self.slot(event.slot);
