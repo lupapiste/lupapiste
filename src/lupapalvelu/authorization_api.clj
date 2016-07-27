@@ -113,7 +113,7 @@
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
-               :auth.$   (util/assoc-when (user/user-in-role user role) :inviter inviter :inviteAccepted created)}})
+               :auth.$   (util/assoc-when-pred (user/user-in-role user role) util/not-empty-or-nil? :inviter inviter :inviteAccepted created)}})
       (when-not (empty? document-id)
         (let [application (domain/get-application-as id user :include-canceled-apps? true)]
           ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.

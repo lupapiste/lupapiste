@@ -107,7 +107,7 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Ilmoitukset :melutarina :Melutarina :liitetieto]
-                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
         xml (ymparistoilmoitus-element-to-xml canonical krysp-version)
         all-canonical-attachments (concat attachments-canonical (attachments-canon/flatten-statement-attachments statement-attachments))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]

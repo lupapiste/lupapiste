@@ -208,10 +208,10 @@
   (api-query "reservation-types/by-organization" {:organization organization}))
 
 (defn calendars-enabled-api-pre-check
-  [rolez command {:keys [organization]}]
+  [rolez {user :user {:keys [organization]} :application}]
   (let [org-set (if organization
                   #{organization}
-                  (usr/organization-ids-by-roles (:user command) rolez))]
+                  (usr/organization-ids-by-roles user rolez))]
     (when (or (empty? org-set) (not (org/some-organization-has-calendars-enabled? org-set)))
       unauthorized)))
 

@@ -480,7 +480,6 @@
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)
         app (query-application sonja id)
-        actions (:actions (query sonja :allowed-actions :id id))
         denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
@@ -495,7 +494,7 @@
     app => map?
     (doseq [command (ca/foreach-action {} user {} app)
             :let [action (keyword (:action command))
-                  result (a/validate-authority-in-drafts command app)]]
+                  result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
         (when (denied-actions action)
           result => unauthorized?)))))
@@ -518,9 +517,7 @@
       (:name primary-op) => "varasto-tms")))
 
 (facts "Changing application state after verdict"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
-        application    (query-application pena application-id)]
-
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
     (command sonja :check-for-verdict :id application-id)

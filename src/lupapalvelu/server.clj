@@ -62,9 +62,8 @@
             [lupapalvelu.guest-api]
             [lupapalvelu.archiving-api]
             [lupapalvelu.appeal-api]
-            [lupapalvelu.calendars-api]))
-
-
+            [lupapalvelu.calendars-api]
+            [lupapalvelu.suti-api]))
 
 (defonce jetty (atom nil))
 

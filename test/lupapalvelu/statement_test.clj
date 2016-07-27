@@ -82,41 +82,47 @@
   (prop/for-all [email (ssg/generator ssc/Email)]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc-in [:person :email] email))
-                      command   {:data {:statementId (:id statement)} :user {:email email}}]
-                  (nil? (statement-owner command (dummy-application statement))))))
+                      command   {:data {:statementId (:id statement)} :user {:email email}
+                                 :application (dummy-application statement)}]
+                  (nil? (statement-owner command)))))
 
 (defspec validate-statement-owner-fail 5
   (prop/for-all [[email1 email2] (gen/such-that (partial apply not=) (gen/tuple (ssg/generator ssc/Email) (ssg/generator ssc/Email)))]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc-in [:person :email] email1))
-                      command   {:data {:statementId (:id statement)} :user {:email email2}}]
-                  (-> (statement-owner command (dummy-application statement))
+                      command   {:data {:statementId (:id statement)} :user {:email email2}
+                                 :application (dummy-application statement)}]
+                  (-> (statement-owner command)
                       :ok false?))))
 
 (defspec validate-statement-given-pass 5
   (prop/for-all [state (gen/elements [:given :replyable :replied])]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc :state state))]
-                  (nil? (statement-given {:data {:statementId (:id statement)}} (dummy-application statement))))))
+                  (nil? (statement-given {:data {:statementId (:id statement)}
+                                          :application (dummy-application statement)})))))
 
 (defspec validate-statement-given-fail 5
   (prop/for-all [state (gen/elements [:requested :draft :unknown-state])]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc :state state))]
-                  (-> (statement-given {:data {:statementId (:id statement)}} (dummy-application statement))
+                  (-> (statement-given {:data {:statementId (:id statement)}
+                                        :application (dummy-application statement)})
                       :ok false?))))
 
 (defspec validate-statement-replyable-pass 1
   (prop/for-all [state (gen/elements [:replyable])]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc :state state))]
-                  (nil? (statement-replyable {:data {:statementId (:id statement)}} (dummy-application statement))))))
+                  (nil? (statement-replyable {:data {:statementId (:id statement)}
+                                              :application (dummy-application statement)})))))
 
 (defspec validate-statement-replyable-fail 10
   (prop/for-all [state (gen/elements [:requested :draft :given :replied :unknown-state])]
                 (let [statement (-> (ssg/generate Statement)
                                     (assoc :state state))]
-                  (-> (statement-replyable {:data {:statementId (:id statement)}} (dummy-application statement))
+                  (-> (statement-replyable {:data {:statementId (:id statement)}
+                                            :application (dummy-application statement)})
                       :ok false?))))
 
 (def id-1 (ssg/generate ssc/ObjectIdStr))

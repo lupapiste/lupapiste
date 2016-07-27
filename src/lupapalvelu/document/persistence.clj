@@ -81,7 +81,7 @@
                        (after-update-triggered-updates application collection document updated-doc))
        :post-results  post-results})))
 
-(defmulti transform-value (fn [transform _] transform))
+(defmulti transform-value (fn [transform _] (keyword transform)))
 
 (defmethod transform-value :default [_ value] value)
 
@@ -100,6 +100,8 @@
       (->> value ss/trim Long/parseLong (format "%04d"))
       (catch Exception _ value))
     value))
+
+(defmethod transform-value :trim [_ value] (ss/trim value))
 
 (defn transform
   "Processes model updates with the schema-defined transforms if defined."

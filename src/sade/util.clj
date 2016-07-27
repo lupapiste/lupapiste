@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
-            [sade.core :refer :all]
+            [sade.core :refer [fail!]]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.core :refer [hours days weeks months years ago from-now]]
@@ -341,9 +341,14 @@
 (defn boolean? [x] (instance? Boolean x))
 
 (defn assoc-when
-  "Assocs entries with not-empty-or-nil values into m."
+  "Assocs entries with falsey values into m."
   [m & kvs]
-  (apply merge m (filter (fn-> val not-empty-or-nil?) (apply hash-map kvs))))
+  (apply merge m (filter val (apply hash-map kvs))))
+
+(defn assoc-when-pred
+  "Assocs entries into m when pred returns truthy for value."
+  [m pred & kvs]
+  (apply merge m (filter (comp pred val) (apply hash-map kvs))))
 
 (defn relative-local-url? [^String url]
   (not (or (not (string? url)) (ss/starts-with url "//") (re-matches #"^\w+://.*" url))))
@@ -420,11 +425,6 @@
 
 (defn select-values [m keys]
   (map #(get m %) keys))
-
-(defn validate-url [url]
-  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
-  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
-    (fail :error.invalid.url)))
 
 (defn this-jar
   "utility function to get the name of jar in which this function is invoked"

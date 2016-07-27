@@ -22,7 +22,7 @@
         {:Hakemus
          {:hakija (remove nil? (map canonical-common/get-yhteystiedot (get documents hakija-key)))}
          }
-        :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
+        :maksajatieto (util/assoc-when-pred {} util/not-empty-or-nil? :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
         :sijaintitieto (canonical-common/get-sijaintitieto application)
         :koontiKentta kuvaus
         :asianKuvaus kuvaus

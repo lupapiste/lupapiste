@@ -215,7 +215,7 @@
 (defn company-user-edit-allowed
   "Pre-check enforcing that the caller has sufficient credentials to
   edit company member."
-  [{caller :user :as cmd} app]
+  [{caller :user :as cmd}]
   (when-let [target-user (some-> cmd :data :user-id usr/get-user-by-id)]
     (when-not (or (= (:role caller) "admin")
                   (and (= (get-in caller [:company :role])
@@ -270,6 +270,7 @@
                             :username    (:email user)
                             :firstName   (:firstName user)
                             :lastName    (:lastName user)
+                            :language    (:language user)
                             :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
                             :personId    (:personId user)
                             :password    password
@@ -279,9 +280,14 @@
     :send-email false)
   (ok))
 
-(defn invite-user! [user-email company-id role submit]
+(defn invite-user! [user-email company-id role submit firstname lastname]
   (let [company   (find-company! {:id company-id})
         user      (usr/get-user-by-email user-email)
+        user      (if (usr/dummy? user)
+                    (do                                     ; update firstname and lastname from frontend for dummy user
+                      (usr/update-user-by-email user-email {:firstName firstname :lastName lastname})
+                      (usr/get-user-by-email user-email))
+                    user)
         token-id  (token/make-token :invite-company-user nil {:user user
                                                               :company company
                                                               :role role
@@ -344,7 +350,7 @@
 (defn company-not-already-invited
   "Pre-checker for company-invite command. Fails if the company is
   already authorized to the application."
-  [{{:keys [company-id]} :data} {:keys [auth]}]
+  [{{:keys [company-id]} :data {:keys [auth]} :application}]
   ;; We identify companies by their y (Y-tunnus), since the id
   ;; is not available in the auth for not yet accepted invites.
   ;; See company-invite function below.
@@ -389,12 +395,12 @@
       (update-application
        (application->command application)
        {:auth {$elemMatch {:invite.user.id company-id}}}
-       {$set  {:auth.$ (-> company company->auth (util/assoc-when :inviter inviter :inviteAccepted (now)))}}))
+       {$set  {:auth.$ (-> company company->auth (util/assoc-when-pred util/not-empty-or-nil? :inviter inviter :inviteAccepted (now)))}}))
     (ok)))
 
 (defn cannot-submit
   "Pre-check that succeeds only if a company user does not have submit
   rights"
-  [{{company :company} :user} application]
+  [{{company :company} :user}]
   (when-not (and company  (not (:submit company)))
     (fail :error.authorized)))

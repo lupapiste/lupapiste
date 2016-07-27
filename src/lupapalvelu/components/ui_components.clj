@@ -128,7 +128,7 @@
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
+   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -192,7 +192,8 @@
                    "scroll-service.js"
                    "ram-service.js"
                    "calendar-service.js"
-                   "attachments-service.js"]}
+                   "attachments-service.js"
+                   "suti-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -204,8 +205,8 @@
                   :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
-                  :js ["change-email-model.js" "mypage.js"]
-                  :html ["change-email-template.html" "mypage.html"]}
+                  :js [ "mypage.js"]
+                  :html ["mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
 
@@ -291,6 +292,7 @@
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
+                         "required-fields-summary-tab-template.html"
                          "case-file-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
@@ -363,6 +365,10 @@
                    :js (distinct (conj (get-ui-components :ui-components :models) "docgen/ui-components.js"))
                    :html (get-ui-components :ui-components :templates)}
 
+   :authority-admin-components {:depends [:common-html]
+                   :js (distinct (conj (get-ui-components :authority-admin-components :models) "register-authority-admin-components.js"))
+                   :html (get-ui-components :authority-admin-components :templates)}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -399,7 +405,9 @@
 
    :authority-admin-app {:depends []
                          :js ["authority-admin-app.js"]}
-   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer :ui-components]
+   :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins
+                                   :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
+                                   :ui-components :authority-admin-components]
                          :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
                               "calendars-model.js" "organization-reservation-types-model.js" "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]

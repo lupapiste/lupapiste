@@ -78,6 +78,9 @@
 (defschema Tel
   (sc/constrained sc/Str (partial re-matches #"^\+?[\d\s-]+") "Telephone number"))
 
+(defschema HttpUrl
+  (sc/constrained sc/Str validators/http-url? "HTTP(S) URL"))
+
 (defschema Rakennusnumero
   (sc/constrained sc/Str validators/rakennusnumero? "Finnish building number"))
 
@@ -124,6 +127,14 @@
 
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))
+
+;; Schemas for blank or valid values
+
+(sc/defschema OptionalHttpUrl
+  (sc/if ss/blank? BlankStr HttpUrl))
+
+(sc/defschema OptionalEmail
+  (sc/if ss/blank? BlankStr Email))
 
 ;;
 ;; Dynamic schema constructors

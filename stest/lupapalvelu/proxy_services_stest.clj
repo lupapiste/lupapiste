@@ -340,18 +340,18 @@
                                      :number "6",
                                      :name {:fi "Helsinki" :sv "Helsingfors"}
                                      :municipality "186"
-                                     :location {:x 395505.5226496456,
-                                                :y 6706123.673429373}})))
+                                     :location {:x 394978.12474035326,
+                                                :y 6706574.7845555935}})))
 
 
   ; The point is in Jarvenpaa although the address refers to Helsinki.
-  ; Test data has Liljankuja 77 at the same point location as the first result.
+  ; Test data has Liljankuja 6 at the same point location as the first result.
 
   (fact "address-by-point-proxy"
-    (let [response (address-by-point-proxy {:params {:lang "fi" :x "395505" :y "6706123"}})
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "394978" :y "6706574"}})
           body (json/decode (:body response) true)]
       (fact (:street body) => "Liljankuja")
-      (fact (:number body) => "77")
+      (fact (:number body) => "6")
       (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4"))))
 
 (facts "municipality-by-point"

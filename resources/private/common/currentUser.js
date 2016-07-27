@@ -13,6 +13,7 @@ LUPAPISTE.CurrentUser = function() {
     lastName:       "",
     phone:          "",
     username:       "",
+    language:       "",
     orgAuthz:       undefined,
     company: {
       id:   undefined,
@@ -30,6 +31,12 @@ LUPAPISTE.CurrentUser = function() {
   };
 
   function constructor(user) {
+    if( user.indicatorNote ) {
+      hub.send( "indicator", {style: "primary",
+                              message: user.indicatorNote,
+                              sticky: true, html: true});
+      delete user.indicatorNote;
+    }
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
   }
 
@@ -112,7 +119,7 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   hub.subscribe("reload-current-user", function() {
-    ajax.query("user")
+    ajax.query("user", {lang: loc.getCurrentLanguage()})
       .success(function (res) {
         if (res.user) {
           constructor(res.user);

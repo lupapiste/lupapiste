@@ -272,7 +272,7 @@
       (with-open [my-in  (io/input-stream (str f))
                   my-out (io/output-stream (str f "-leima.pdf"))]
         (try
-          (stamp-pdf my-stamp my-in my-out 10 100 0)
+          (stamp-pdf my-stamp my-in my-out {:x-margin 10 :y-margin 100 :transparency 0 :page :first})
           (catch Throwable t (error t))))))
 
   ; This REPL-snippet can be used to read metadata from a given pdf. Data is written to target/pdf-metadata-output.txt

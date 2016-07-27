@@ -1,22 +1,21 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container" id="change-email-template">
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="change-email-template">
+  <h2 data-bind="ltext: 'userinfo.change-email'"></h2>
   <form>
-    <div class="form-grid">
+    <div class="form-grid no-padding">
       <div class="row">
         <div class="col-1"
              data-bind="component: {name: 'text-field',
-                                    params: {value: email,
-                                             id: 'oldEmail',
-                                             disable: true,
-                                             lLabel: 'userinfo.current-email'}}"></div>
+                        params: {value: email,
+                        id: 'oldEmail',
+                        disable: true,
+                        lLabel: 'userinfo.current-email'}}"></div>
         <!-- ko if: authorized() -->
         <div class="col-1"
              data-bind="component: {name: 'text-field',
-                                    params: {value: newEmail,
-                                             id: 'newEmail',
-                                             lLabel: 'userinfo.new-email'}}"></div>
+                        params: {value: newEmail,
+                        id: 'newEmail',
+                        lLabel: 'userinfo.new-email'}}"></div>
 
         <div class="col-1" style="padding-top: 24px">
           <button data-bind="click: save,
@@ -24,9 +23,9 @@
                              enable: ok,
                              css: {waiting: pending}" class="positive"
                   data-test-id="change-email">
-              <i class="lupicon-refresh"></i>
-              <i class="wait spin lupicon-refresh"></i>
-              <span data-bind="ltext: 'userinfo.change-email-submit'"></span>
+            <i class="lupicon-refresh"></i>
+            <i class="wait spin lupicon-refresh"></i>
+            <span data-bind="ltext: 'userinfo.change-email-submit'"></span>
           </button>
         </div>
         <!-- /ko -->
@@ -42,6 +41,4 @@
   <div data-bind="ifnot: authorized()" class="row">
     <p data-bind="ltext: 'userinfo.change-email-not-possible'"></p>
   </div>
-  </section>
-</body>
-</html>
+</script>

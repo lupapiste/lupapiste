@@ -40,10 +40,6 @@ jQuery(document).ready(function() {
     {name: "ok-button-group"},
     {name: "company-edit"},
     {name: "tags-editor"},
-    {name: "municipality-maps"},
-    {name: "municipality-maps-server"},
-    {name: "municipality-maps-layers"},
-    {name: "municipality-maps-map"},
     {name: "upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
@@ -129,14 +125,10 @@ jQuery(document).ready(function() {
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
-    {name: "filters"}
+    {name: "filters"},
+    {name: "suti-display"},
+    {name: "change-email"}
 ];
 
-  _.forEach(components, function(component) {
-    ko.components.register(component.name, {
-      viewModel: LUPAPISTE[_.capitalize(_.camelCase(component.model ? component.model : component.name + "Model"))],
-      template: { element: (component.template ? component.template : component.name + "-template")},
-      synchronous: component.synchronous ? true : false
-    });
-  });
+  ko.registerLupapisteComponents(components);
 });

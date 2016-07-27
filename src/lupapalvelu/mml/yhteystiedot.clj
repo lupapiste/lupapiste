@@ -2,7 +2,7 @@
   (:require [sade.common-reader :as cr]
             [sade.xml :refer :all]
             [sade.common-reader :refer :all]
-            [sade.util :refer [assoc-when]]
+            [sade.util :as util]
             [sade.env :as env]
             [sade.validators :as v]
             [net.cgrand.enlive-html :as enlive]
@@ -21,8 +21,9 @@
 
 (defn- ->henkilo [henkilo-xml]
   (when-not (empty? henkilo-xml)
-    (assoc-when
+    (util/assoc-when-pred
       {}
+      util/not-empty-or-nil?
       ;; OL=omaan lukuun (oletus), PA=perustettavan asunto-osakeyhtion lukuun, PY=perustettavan yhtion lukuun
       ;;:lukuuntoiminnanlaji (get-in henkilo-xml [:attrs :lukuuntoiminnanlaji])
       :henkilolaji (->henkilolaji (get-text henkilo-xml (path :henkilonTiedot :henkilolaji)))

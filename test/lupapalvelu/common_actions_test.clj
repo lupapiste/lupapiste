@@ -22,6 +22,8 @@
                           :fetch-validation-errors
                           :add-comment
                           :comments
+                          :attachments
+                          :attachment-groups
                           :attachment-types
                           :attachment-operations
                           :view-attachment
@@ -31,6 +33,7 @@
                           :upload-attachment
                           :rotate-pdf
                           :pdf-export
+                          :submitted-application-pdf-export
                           :download-all-attachments
                           :download-attachment
                           :delete-attachment-version
@@ -50,7 +53,10 @@
                           :authority-notice
                           :application-guests
                           :statement-attachment-allowed
-                          :ram-linked-attachments}
+                          :ram-linked-attachments
+                          :latest-attachment-version
+                          :suti-application-data
+                          :suti-application-products}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action {} user {} application)
@@ -66,7 +72,8 @@
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
-                              :toggle-guest-subscription :application-guests :decline-invitation}]
+                               :toggle-guest-subscription :application-guests :decline-invitation
+                               :suti-update-id :suti-update-added}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -88,11 +95,12 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                           :get-building-info-from-wfs
-                           :pdfa-casefile
+                           :get-building-info-from-wfs :tasks-tab-visible
+                           :pdfa-casefile :suti-application-data :suti-application-products
+                           :ram-linked-attachments :attachment-groups
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
-                           :application-guests}]
+                           :application-guests :latest-attachment-version :submitted-application-pdf-export}]
     (doseq [command (ca/foreach-action {} user {} application)
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]

@@ -59,7 +59,7 @@ $app-gray-darkest: $gray187;
       }
       @content;
     }
-} 
+}
 
 /*Summary styles*/
 .application_summary {
@@ -712,9 +712,6 @@ $app-gray-darkest: $gray187;
 
 .inforequest-conversation {
   margin-top: 42px;
-  h2 {
-    border-bottom: 1px solid darken($lp-light-grey, 20%);
-  }
 }
 
 .attachments-actions {
@@ -827,7 +824,7 @@ $app-gray-darkest: $gray187;
   margin: $marginL 0 $marginS;
 }
 
-.requiredField-line {
+.info-line {
   display: table-row;
   span, a {
     display: table-cell;
@@ -840,6 +837,11 @@ $app-gray-darkest: $gray187;
   }
   .lupicon-circle-attention {
     color: $red;
+  }
+  &.warning {
+    .lupicon-circle-attention {
+      color: $orange-dark;
+    }
   }
 }
 

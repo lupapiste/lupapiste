@@ -71,7 +71,7 @@
   (when (> (required-link-permits application) (count-link-permits application))
     (fail :error.permit-must-have-link-permit)))
 
-(defn authorized-to-remove-link-permit [{user :user} application]
+(defn authorized-to-remove-link-permit [{user :user application :application}]
   (when (and (not (usr/authority? user))
              (>= (required-link-permits application) (count-link-permits application)))
     unauthorized))
@@ -79,45 +79,29 @@
 (defn validate-only-authority-before-verdict-given
   "Validator: Restrict applicant access before the application verdict
   is given. To be used in commands' :pre-checks vector"
-  [{user :user} {state :state}]
-  (when-not (or (states/post-verdict-states (keyword state))
+  [{user :user app :application}]
+  (when-not (or (states/post-verdict-states (keyword (:state app)))
                 (usr/authority? user))
     unauthorized))
 
 (defn validate-authority-in-drafts
   "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
-  [{user :user} {state :state}]
-  (when (and (= :draft (keyword state)) (usr/authority? user))
+  [{user :user application :application}]
+  (when (and (= :draft (keyword (:state application))) (usr/authority? user))
     unauthorized))
 
-(defn validate-has-subtypes [_ application]
+(defn validate-has-subtypes [{application :application}]
   (when (empty? (resolve-valid-subtypes application))
     (fail :error.permit-has-no-subtypes)))
 
-(defn pre-check-permit-subtype [{data :data} application]
+(defn pre-check-permit-subtype [{data :data application :application}]
   (when-let [subtype (:permitSubtype data)]
     (when-not (util/contains-value? (resolve-valid-subtypes application) (keyword subtype))
       (fail :error.permit-has-no-such-subtype))))
 
-(defn submitted? [{:keys [submitted state primaryOperation]}]
-  (or
-    (not (nil? submitted))
-    (and
-      (= "aiemmalla-luvalla-hakeminen" (:name primaryOperation))
-      (states/post-submitted-states state))))
-
-(defn- link-permit-submitted? [link-id]
-  (submitted? (domain/get-application-no-access-checking link-id)))
-
-; Foreman
-(defn- foreman-submittable? [application]
-  (let [result (when (-> application :state keyword #{:draft :open :submitted :complementNeeded})
-                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
-                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
-    (if (nil? result)
-      true
-      result)))
+(defn submitted? [{:keys [state]}]
+  ((conj states/post-submitted-states :submitted) (keyword state)))
 
 ;;
 ;; Helpers
@@ -222,11 +206,6 @@
 ;; Application query post process
 ;;
 
-(defn- process-foreman-v2 [application]
-  (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
-    (assoc application :submittable (foreman-submittable? application))
-    application))
-
 (def merge-operation-skeleton (partial merge domain/operation-skeleton))
 
 (defn ensure-operations
@@ -252,7 +231,6 @@
        meta-fields/enrich-with-link-permit-data
        (meta-fields/with-meta-fields user)
        action/without-system-keys
-       process-foreman-v2
        (process-documents-and-tasks user)
        location->object))
 
@@ -260,14 +238,16 @@
 ;; Application creation
 ;;
 
-(defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
+(defn make-attachments
+  [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
-                            (filter #(or (get-in % [:metadata :operation-specific]) (not (att-type/contains? existing-types %)))))
-        ops            (map #(when (get-in % [:metadata :operation-specific]) operation) types)
-        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial att/make-attachment created target true false false applicationState) ops types metadatas)))
+                            (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
+        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :groupType group)) types)
+        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)
+        stripped-types (map #(select-keys % [:type-id :type-group]) types)] ; attachments contain metadata, but it's not saved to db. Thus select only type information.
+    (map (partial att/make-attachment created target true false false (keyword applicationState)) groups stripped-types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -283,8 +263,8 @@
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
         schema-version (:schema-version application)
-        default-schema-datas (util/assoc-when {}
-                                              op-schema-name (:schema-data op-info))
+        default-schema-datas (util/assoc-when-pred {} util/not-empty-or-nil?
+                                                   op-schema-name (:schema-data op-info))
         merged-schema-datas (merge-with conj default-schema-datas manual-schema-datas)
         make (fn [schema]
                {:pre [(:info schema)]}
@@ -322,7 +302,7 @@
 
 (defn make-op [op-name created]
   {:id          (mongo/create-id)
-   :name        (keyword op-name)
+   :name        op-name
    :description nil
    :created     created})
 
@@ -500,7 +480,7 @@
 
 (defn valid-new-state
   "Pre-check for change-application-state command."
-  [{{new-state :state} :data} application]
+  [{{new-state :state} :data application :application}]
   (when-not (or (nil? new-state)
                 ((change-application-state-targets application) (keyword new-state)))
     (fail :error.illegal-state)))

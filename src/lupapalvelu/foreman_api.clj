@@ -72,7 +72,7 @@
         (doc-persistence/persist-model-updates application "tasks" task updates created))
       (fail :error.not-found))))
 
-(defn foreman-app-check [_ application]
+(defn foreman-app-check [{application :application}]
   (when-not (foreman/foreman-app? application)
     (fail :error.not-foreman-app)))
 

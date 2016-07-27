@@ -19,6 +19,9 @@
       (valid-email? email)
       (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email)))))
 
+; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
+(def http-url? (partial matches? #"^(https?)://[^\s/$.?#].[^\s]*$"))
+
 (defn finnish-y? [y]
   (if y
     (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]

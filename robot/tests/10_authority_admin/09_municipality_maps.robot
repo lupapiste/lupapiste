@@ -22,19 +22,19 @@ Open integrations tab
 Admin inputs bad server address
   No error
   No layers
-  Scroll to test id  server-details-send
-  Input text with jQuery  [data-test-id=server-details-url]  foobar
+  Scroll to test id  munimap-send
+  Input text with jQuery  .munimaps [data-test-id=munimap-url]  foobar
 
-  Scroll and click  [data-test-id=server-details-send]
+  Scroll and click  .munimaps [data-test-id=munimap-send]
   # Error popup
   Confirm  dynamic-ok-confirm-dialog
   Yes error
   No layers
 
 Admin inputs good server address
-  Scroll to test id  server-details-send
-  Input text with jQuery  [data-test-id=server-details-url]  ${url}
-  Scroll and click  [data-test-id=server-details-send]
+  Scroll to test id  munimap-send
+  Input text with jQuery  [data-test-id=munimap-url]  ${url}
+  Scroll and click  [data-test-id=munimap-send]
   No error
   Yes layers
 
@@ -75,10 +75,10 @@ Admin unsets layers
 *** Keywords ***
 
 No error
-  Wait until  element should not be visible  jquery=p.munimaps--error
+  Wait until  element should not be visible  jquery=.munimaps p.serversettings--error
 
 Yes error
-  Wait until  element should be visible  jquery=p.munimaps--error
+  Wait until  element should be visible  jquery=.munimaps p.serversettings--error
 
 No layers
   Wait until  Element should not be visible  jquery=table[data-test-id=layers-table]

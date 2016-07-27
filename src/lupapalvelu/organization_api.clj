@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-optional-url] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -31,7 +31,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]))
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.i18n :as i18n]))
 ;;
 ;; local api
 ;;
@@ -90,11 +91,6 @@
     {}
     (map :permitType scope)))
 
-;; Validators
-(defn validate-optional-url [param command]
-  (let [url (ss/trim (get-in command [:data param]))]
-    (when-not (ss/blank? url)
-      (util/validate-url url))))
 
 ;;
 ;; Actions
@@ -112,7 +108,9 @@
                         (assoc :operationsAttachments ops-with-attachments
                                :selectedOperations selected-operations-with-permit-type
                                :allowedRoles allowed-roles)
-                        (dissoc :operations-attachments :selected-operations))
+                        (dissoc :operations-attachments :selected-operations)
+                        (update-in [:map-layers :server] select-keys [:url :username])
+                        (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
 (defquery user-organizations-for-permit-type
@@ -334,6 +332,14 @@
   (o/update-organization (user/authority-admins-organization-id user) {$set {:validate-verdict-given-date enabled}})
   (ok))
 
+(defcommand set-organization-use-attachment-links-integration
+  {:parameters       [enabled]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:use-attachment-links-integration enabled}})
+  (ok))
+
 (defcommand set-organization-calendars-enabled
   {:parameters [enabled organizationId]
    :user-roles #{:admin}
@@ -357,7 +363,7 @@
   {:parameters [date]
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial number-parameters [:date])]
-   :pre-checks [(fn [{:keys [user]} _]
+   :pre-checks [(fn [{:keys [user]}]
                   (when-not (o/some-organization-has-archive-enabled? [(user/authority-admins-organization-id user)])
                     unauthorized))]}
   [{user :user}]
@@ -596,7 +602,9 @@
   {:description "Organization server and layer details."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok (o/organization-map-layers-data (user/authority-admins-organization-id user))))
+  (let [org-id (user/authority-admins-organization-id user)
+        {:keys [server layers]} (o/organization-map-layers-data org-id)]
+    (ok :server (select-keys server [:url :username]), :layers layers)))
 
 (defcommand update-map-server-details
   {:parameters [url username password]
@@ -621,11 +629,20 @@
         (ok))
       (fail :error.missing-parameters))))
 
+(defcommand update-suti-server-details
+  {:parameters [url username password]
+   :input-validators [(partial validate-optional-url :url)]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (o/update-organization-suti-server (user/authority-admins-organization-id user)
+                                     (ss/trim url) username password)
+  (ok))
+
 (defraw waste-ads-feed
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt]
    :optional-parameters [org lang]
-   :input-validators [o/valid-feed-format o/valid-org o/valid-language]
+   :input-validators [o/valid-feed-format o/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
   ((memo/ttl o/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)

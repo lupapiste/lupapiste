@@ -44,10 +44,11 @@
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
   (let [{:keys [tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
-        defaults (util/assoc-when {:jarjestysnumero nil
-                                   :kiinttun (:propertyId application)
-                                   :muuTunnustieto [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
-                                                    {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}]}
+        defaults (util/assoc-when-pred {:jarjestysnumero nil
+                                        :kiinttun (:propertyId application)
+                                        :muuTunnustieto [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
+                                                         {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}]}
+                   util/not-empty-or-nil?
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
@@ -101,16 +102,17 @@
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
                              (when (util/not-empty-or-nil? (:huoneisto huoneistot))
                                {:asuinhuoneistot huoneistot})
-                             (util/assoc-when rakennuksen-tiedot-basic-info
+                             (util/assoc-when-pred rakennuksen-tiedot-basic-info util/not-empty-or-nil?
                                :kantavaRakennusaine kantava-rakennus-aine-map
                                :lammonlahde lammonlahde-map
                                :julkisivu julkisivu-map))]
 
-    (util/assoc-when {:yksilointitieto (-> info :op :id)
-                      :alkuHetki (util/to-xml-datetime  created)
-                      :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-                      :rakentajatyyppi (:rakentajaTyyppi kaytto)
-                      :rakennuksenTiedot rakennuksen-tiedot}
+    (util/assoc-when-pred {:yksilointitieto (-> info :op :id)
+                           :alkuHetki (util/to-xml-datetime  created)
+                           :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                           :rakentajatyyppi (:rakentajaTyyppi kaytto)
+                           :rakennuksenTiedot rakennuksen-tiedot}
+      util/not-empty-or-nil?
       :omistajatieto (remove nil? (for [m (vals (:rakennuksenOmistajat toimenpide))] (get-rakennuksen-omistaja m))))))
 
 (defn- get-rakennus-data [application doc]
@@ -273,7 +275,7 @@
                             (= operation-name "jatkoaika")
                             (= operation-name "raktyo-aloit-loppuunsaat"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
-                      util/assoc-when
+                      util/assoc-when-pred util/not-empty-or-nil?
                       :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
                                                                        (:rakennuspaikka-ilman-ilmoitusta documents-by-type))
                                                                application)
@@ -324,8 +326,8 @@
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]
-                                           (util/assoc-when
-                                             (select-keys building [:jarjestysnumero :kiinttun])
+                                           (util/assoc-when-pred
+                                             (select-keys building [:jarjestysnumero :kiinttun]) util/not-empty-or-nil?
                                              :rakennusnro (:rakennusnro building)
                                              :valtakunnallinenNumero (:valtakunnallinenNumero building)  ; v2.1.2
                                              ))
@@ -339,8 +341,8 @@
                                                                 building-canonical (if (s/blank? (:kiinttun building-canonical))
                                                                                      (assoc building-canonical :kiinttun (:propertyId application))
                                                                                      building-canonical)
-                                                                building-canonical (util/assoc-when
-                                                                                    building-canonical
+                                                                building-canonical (util/assoc-when-pred
+                                                                                    building-canonical util/not-empty-or-nil?
                                                                                     :muuTunnustieto (when-let [op-id (:operationId building)]
                                                                                                       [{:MuuTunnus {:tunnus op-id :sovellus "toimenpideId"}}
                                                                                                        {:MuuTunnus {:tunnus op-id :sovellus "Lupapiste"}}])

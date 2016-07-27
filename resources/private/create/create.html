@@ -45,11 +45,14 @@
             autofocus="autofocus"
             data-test-id="create-inforequest-message">
         </textarea>
+        <h3 data-bind="ltext: 'newRequest.attachments.title'"></h3>
+        <p data-bind="ltext: 'newRequest.attachments.desc'"></p>
         <button
             data-bind="click: createInfoRequest, enable: message().length > 0,
                        css: {waiting: pending}"
-            class="positive no-icon-pad"
+            class="positive"
             data-test-id="create-inforequest">
+            <i class="lupicon-circle-question"></i>
             <span data-bind="ltext: 'application.startConversation'"></span>
             <i class="wait spin lupicon-refresh"></i>
         </button>

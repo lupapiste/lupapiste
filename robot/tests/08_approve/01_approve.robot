@@ -36,7 +36,7 @@ Mikko can't approve application
 Mikko adds an attachment
   Open tab  attachments
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
 
 Mikko decides to submit application
   Submit application
@@ -55,7 +55,13 @@ Sonja logs in for approval
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
+# LPK-1995
+Sonja has the power to delete paasuunnittelija
+  Open tab  parties
+  Wait Until  Element should be visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
+
 Sonja rejects hankkeen-kuvaus
+  Open tab  info
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Reject accordion  hankkeen-kuvaus-rakennuslupa

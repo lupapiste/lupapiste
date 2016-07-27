@@ -161,8 +161,7 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :stateSeq :fn #(sm/application-state-seq %2)}
-                   {:field :submittable :fn (fn [_ _] true)}))
+                   {:field :stateSeq :fn #(sm/application-state-seq %2)}))
 
 (defn- enrich-with-meta-fields [fields user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))

@@ -21,12 +21,17 @@
 (defn- application-link [lang role full-path]
   (str (env/value :host) "/app/" lang "/" (user/applicationpage-for role) "#!" full-path))
 
-(defn- create-model [{{id :id info-request? :infoRequest} :application, {target :target} :data} _ {role :role}]
+(defn- create-model [{{id :id info-request? :infoRequest} :application
+                      {target :target}                    :data}
+                     _
+                     {role :role
+                      name :firstName}]
   (let [permit-type-path (if info-request? "/inforequest" "/application")
         full-path (if (= (:type target) "verdict")
                      (str "/verdict/" id "/" (:id target))
                      (str permit-type-path "/" id "/conversation"))]
-    {:link-fi (application-link "fi" role full-path)
+    {:name    name
+     :link-fi (application-link "fi" role full-path)
      :link-sv (application-link "sv" role full-path)}))
 
 (notifications/defemail :new-comment
@@ -45,7 +50,7 @@
 ;; Validation
 ;;
 
-(defn applicant-cant-set-to [{{:keys [to]} :data user :user} _]
+(defn applicant-cant-set-to [{{:keys [to]} :data user :user}]
   (when (and to (not (user/authority? user)))
     (fail :error.to-settable-only-by-authority)))
 

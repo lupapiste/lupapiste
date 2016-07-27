@@ -15,8 +15,8 @@ Mikko uploads attachment
   Mikko logs in
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko sets CV to be visible only to himself and authorities
   Open attachment details  osapuolet.cv
@@ -31,7 +31,7 @@ Mikko sets CV to be visible only to himself and authorities
 Mikko uploads attachment to placeholder asemapiirros
   Open attachment details  paapiirustus.asemapiirros
   Wait Until  Element Should Be Disabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
-  Add attachment version  ${TXT_TESTFILE_PATH}
+  Add attachment version  ${PNG_TESTFILE_PATH}
   Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
@@ -52,7 +52,8 @@ Teppo logs in, doesn't see Mikko's CV
 Teppo uploads new version to asemapiirros
   # When Teppo uploads version to attachment, he is authed to attachment and can see contents even if visibility is set to only-authority level
   Open attachment details  paapiirustus.asemapiirros
-  Add attachment version  ${TXT_TESTFILE_PATH}
+  Add attachment version  ${PNG_TESTFILE_PATH}
+  Wait Until  Click button  id=show-attachment-versions
   Wait Until  Xpath Should Match X Times  //section[@id='attachment']//div[@class='attachment-file-versions-content']//table/tbody/tr  2
 
 Teppo sets asemapiirros to only-authority visibility

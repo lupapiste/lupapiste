@@ -1,6 +1,9 @@
 LUPAPISTE.BulletinVersionsModel = function(params) {
   "use strict";
   var self = this;
+
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
+
   self.params = params;
 
   self.bulletin = params.bulletin;
@@ -24,7 +27,7 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     return model;
   }
 
-  self.versions = ko.pureComputed(function() {
+  self.versions = self.disposedPureComputed(function() {
     return self.bulletin() ? _.map(self.bulletin().versions, mapVersions) : [];
   });
 
@@ -32,5 +35,5 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
     bulletin.edit(!bulletin.edit());
   };
 
-  self.bulletinUrl = "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]);
+  self.bulletinUrl = self.disposedPureComputed(function() { return "/app/" + loc.getCurrentLanguage() + "/bulletins#!/bulletin/" + util.getIn(self, ["bulletin", "id"]); });
 };

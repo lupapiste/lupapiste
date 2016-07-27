@@ -20,7 +20,7 @@
                 (= (:id company) requested-company))
     unauthorized))
 
-(defn validate-user-is-admin-or-company-admin [{user :user} _]
+(defn validate-user-is-admin-or-company-admin [{user :user}]
   (when-not (or (= (:role user) "admin")
                 (= (get-in user [:company :role]) "admin"))
     unauthorized))
@@ -77,7 +77,7 @@
   [_]
   (c/delete-user! user-id))
 
-(defn- user-limit-not-exceeded [command _]
+(defn- user-limit-not-exceeded [command]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
         company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))
@@ -97,10 +97,11 @@
    :pre-checks [validate-user-is-admin-or-company-admin]}
   [{caller :user}]
   (c/search-result caller email (fn [user]
-                                  (ok (assoc (select-keys user [:firstName :lastName]) :result :found)))))
+                                  (ok (assoc (select-keys user [:firstName :lastName :role]) :result :found)))))
 
 (defcommand company-invite-user
   {:parameters [email admin submit]
+   :optional-parameters [firstName lastName]
    :user-roles #{:applicant}
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/boolean-parameters [:admin :submit])
@@ -110,7 +111,10 @@
   (c/search-result caller email (fn [_]
                                   (c/invite-user! email
                                                   (-> caller :company :id)
-                                                  (if admin :admin :user) submit)
+                                                  (if admin :admin :user)
+                                                  submit
+                                                  firstName
+                                                  lastName)
                                   (ok :result :invited))))
 
 (defcommand company-add-user
@@ -151,11 +155,3 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
-
-(defquery company-user-cannot-submit
-  {:description "Negative pseudo query that succeeds only if the
-  current user is a company member but does not have submit rights."
-   :parameters [:id]
-   :user-roles #{:applicant}
-   :pre-checks [c/cannot-submit]}
-  [_])

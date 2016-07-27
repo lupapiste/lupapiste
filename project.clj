@@ -20,7 +20,7 @@
                  [com.novemberain/monger "3.0.2"]
 
                  ; Logging
-                 [com.taoensso/timbre "4.0.2"]
+                 [com.taoensso/timbre "4.6.0"]
                  [org.slf4j/slf4j-log4j12 "1.7.21"]
 
                  ;;Hystrix
@@ -56,7 +56,7 @@
                  [commons-codec/commons-codec "1.10"]
 
                  ; Joda time wrapper
-                 [clj-time "0.11.0"]
+                 [clj-time "0.12.0"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]

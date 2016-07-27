@@ -30,7 +30,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.suti :as suti]))
 
 ;; Notifications
 
@@ -97,7 +98,9 @@
         repeating-party-schemas (app/filter-party-docs schema-version original-schema-names true)
         current-schema-name-set (->> documents (filter app/party-document?) (map (comp name :name :schema-info)) set)
         missing-schema-names    (remove current-schema-name-set original-party-schemas)]
-    (ok :partyDocumentNames (conj (concat missing-schema-names repeating-party-schemas) (op/get-applicant-doc-schema-name application)))))
+    (ok :partyDocumentNames (-> (concat missing-schema-names repeating-party-schemas)
+                                (conj (op/get-applicant-doc-schema-name application))
+                                distinct))))
 
 (defcommand mark-seen
   {:parameters       [:id type]
@@ -184,6 +187,8 @@
   [{:keys [created user] :as command}]
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
 
+;; Submit
+
 (defn- do-submit [command application created]
   (let [history-entries (remove nil?
                           [(when-not (:opened application) (app/history-entry :open created (:user command)))
@@ -205,18 +210,39 @@
 
 (notifications/defemail :neighbor-hearing-requested
   {:pred-fn       (fn [command] (get-in command [:application :options :municipalityHearsNeighbors]))
-   :recipients-fn (fn [{application :application}]
-                    (let [organization (org/get-organization (:organization application))
+   :recipients-fn (fn [{application :application org :organization}]
+                    (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :neighbor-order-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :tab "statement"})
 
 (notifications/defemail :organization-on-submit
   (assoc state-change
-    :recipients-fn (fn [{application :application}]
-                      (let [organization (org/get-organization (:organization application))
+    :recipients-fn (fn [{application :application org :organization}]
+                      (let [organization (or (and org @org) (org/get-organization (:organization application)))
                             emails (get-in organization [:notifications :submit-notification-emails])]
                         (map (fn [e] {:email e, :role "authority"}) emails)))))
+
+(defn submit-validation-errors [{:keys [application] :as command}]
+  (remove nil? (conj []
+                     (foreman/validate-application application)
+                     (app/validate-link-permits application)
+                     (when-not (company/cannot-submit command)
+                       (fail :company.user.cannot.submit))
+                     (when (env/feature? :suti)
+                       (suti/suti-submit-validation command)))))
+
+(defquery application-submittable
+  {:description "Query for frontend, to display possible errors regarding application submit"
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:applicant :authority}
+   :states           #{:draft :open}}
+  [command]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data (:application command)))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
+      (ok))))
 
 (defcommand submit-application
   {:parameters       [id]
@@ -230,13 +256,12 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application created] :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (or
-      (foreman/validate-application application)
-      (app/validate-link-permits application)
-      (when-not (company/cannot-submit command application) (fail :company.user.cannot.submit))
+  [{:keys [application organization created] :as command}]
+  (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
+    (if-some [errors (seq (submit-validation-errors command))]
+      (fail :error.cannot-submit-application :errors errors)
       (do-submit command application created))))
+
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -321,8 +346,8 @@
   {:template      "inforequest-invite.html"
    :subject-key   "applications.inforequest"
    :show-municipality-in-subject true
-   :recipients-fn (fn [{application :application}]
-                    (let [organization (org/get-organization (:organization application))
+   :recipients-fn (fn [{application :application org :organization}]
+                    (let [organization (or (and org @org) (org/get-organization (:organization application)))
                           emails (get-in organization [:notifications :inforequest-notification-emails])]
                       (map (fn [e] {:email e, :role "authority"}) emails)))
    :model-fn (fn [{application :application} _ recipient]
@@ -354,7 +379,7 @@
         (error "KTJ data was not updated:" (.getMessage e))))
     (ok :id (:id created-application))))
 
-(defn- add-operation-allowed? [_ application]
+(defn- add-operation-allowed? [{application :application}]
   (let [op (-> application :primaryOperation :name keyword)
         permit-subtype (keyword (:permitSubtype application))]
     (when-not (and (or (nil? op) (:add-operation-allowed (op/operations op)))
@@ -368,11 +393,15 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?
                       app/validate-authority-in-drafts]}
-  [{{attachments :attachments organization :organization app-state :state tos-function :tosFunction :as application} :application created :created :as command}]
+  [{{attachments :attachments
+     app-state :state
+     tos-function :tosFunction :as application} :application
+    organization :organization
+    created :created :as command}]
   (let [op (app/make-op operation created)
         new-docs (app/make-documents nil created op application)
-        organization (org/get-organization organization)
-        new-attachments (app/make-attachments created op organization app-state tos-function :existing-attachments-types (set (map :type attachments)))]
+        existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
+        new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types existing-attachment-types)]
     (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
                                         :attachments {$each new-attachments}}
@@ -422,9 +451,9 @@
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
   (ok))
 
-(defn authority-if-post-verdict-state [{user :user} {state :state}]
+(defn authority-if-post-verdict-state [{user :user app :application}]
   (when-not (or (usr/authority? user)
-                (states/pre-verdict-states (keyword state)))
+                (states/pre-verdict-states (keyword (:state app))))
     (fail :error.unauthorized)))
 
 (defcommand change-location
@@ -483,7 +512,7 @@
            :parameters  [:id]
            :user-roles  #{:applicant :authority}
            :states      states/pre-sent-application-states
-           :pre-checks  [(fn [_ application]
+           :pre-checks  [(fn [{application :application}]
                            (when-not (app/validate-link-permits application)
                              (fail :error.link-permit-not-required)))]})
 
@@ -521,7 +550,7 @@
         final-results (map #(select-keys % [:id :text]) organized-results)]
     (ok :app-links final-results)))
 
-(defn- validate-linking [command app]
+(defn- validate-linking [{app :application :as command}]
   (let [link-permit-id (ss/trim (get-in command [:data :linkPermitId]))
         {:keys [appsLinkingToUs linkPermitData]} (meta-fields/enrich-with-link-permit-data app)
         max-outgoing-link-permits (op/get-primary-operation-metadata app :max-outgoing-link-permits)
@@ -634,7 +663,7 @@
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 
-(defn- validate-not-jatkolupa-app [_ application]
+(defn- validate-not-jatkolupa-app [{:keys [application]}]
   (when (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
@@ -675,7 +704,7 @@
     (ok :id (:id continuation-app))))
 
 
-(defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
+(defn- validate-new-applications-enabled [{{:keys [permitType municipality] :as application} :application}]
   (when application
     (let [scope (org/resolve-organization-scope municipality permitType)]
       (when-not (:new-application-enabled scope)
@@ -686,9 +715,8 @@
    :user-roles #{:applicant :authority}
    :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
-  [{:keys [user created application] :as command}]
-  (let [op (:primaryOperation application)
-        organization (org/get-organization (:organization application))]
+  [{:keys [user created application organization] :as command}]
+  (let [op (:primaryOperation application)]
     (update-application command
                         (util/deep-merge
                           (app/state-transition-update :open created user)
@@ -697,34 +725,32 @@
                                   :convertedToApplication created
                                   :documents              (app/make-documents user created op application)
                                   :modified               created}
-                           $push {:attachments {$each (app/make-attachments created op organization (:state application) (:tosFunction application))}}}))
+                           $push {:attachments {$each (app/make-attachments created op @organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
-(defn- validate-organization-backend-urls [_ {org-id :organization}]
-  (when org-id
-    (let [org (org/get-organization org-id)]
-      (if-let [conf (:vendor-backend-redirect org)]
-        (->> (vals conf)
-             (remove ss/blank?)
-             (some util/validate-url))
-        (fail :error.vendor-urls-not-set)))))
+(defn- validate-organization-backend-urls [{organization :organization}]
+  (when-let [org (and organization @organization)]
+    (if-let [conf (:vendor-backend-redirect org)]
+      (->> (vals conf)
+           (remove ss/blank?)
+           (some action/validate-url))
+      (fail :error.vendor-urls-not-set))))
 
 (defn get-vendor-backend-id [verdicts]
   (->> verdicts
        (remove :draft)
        (some :kuntalupatunnus)))
 
-(defn- get-backend-and-lp-urls [org-id]
-  (-> (org/get-organization org-id)
-      :vendor-backend-redirect
+(defn- get-backend-and-lp-urls [org]
+  (-> (:vendor-backend-redirect org)
       (util/select-values [:vendor-backend-url-for-backend-id
                            :vendor-backend-url-for-lp-id])))
 
-(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+(defn- correct-urls-configured [{{:keys [verdicts] :as application} :application organization :organization}]
   (when application
     (let [vendor-backend-id          (get-vendor-backend-id verdicts)
-          [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+          [backend-id-url lp-id-url] (get-backend-and-lp-urls @organization)
           lp-id-url-missing?         (ss/blank? lp-id-url)
           both-urls-missing?         (and lp-id-url-missing?
                                           (ss/blank? backend-id-url))]
@@ -740,9 +766,9 @@
    :states     states/post-submitted-states
    :pre-checks [validate-organization-backend-urls
                 correct-urls-configured]}
-  [{{:keys [verdicts organization]} :application}]
+  [{{:keys [verdicts]} :application organization :organization}]
   (let [vendor-backend-id          (get-vendor-backend-id verdicts)
-        [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+        [backend-id-url lp-id-url] (get-backend-and-lp-urls @organization)
         url-parts                  (if (and vendor-backend-id
                                             (not (ss/blank? backend-id-url)))
                                      [backend-id-url vendor-backend-id]

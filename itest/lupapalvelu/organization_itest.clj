@@ -482,13 +482,13 @@
                                                                           nil)
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
                                 (select-keys [:password :crypto-iv])) => {:password nil})
-                      (fact "No extra credentials are stored (\"\")"
+                      (fact "No extra credentials are stored ('')"
                             (local-org-api/update-organization-map-server "753-YA"
                                                                           "http://stilldoesnotmatter"
                                                                           ""
                                                                           "")
                             (-> "753-YA" local-org-api/get-organization :map-layers :server
-                                (select-keys [:password :crypto-iv])) => {:password ""})))))))
+                                (select-keys [:password :crypto-iv])) => {:password nil})))))))
 
 (doseq [[command-name config-key] [[:set-organization-neighbor-order-email :neighbor-order-emails]
                                    [:set-organization-submit-notification-email :submit-notification-emails
@@ -514,6 +514,23 @@
       (command sipoo command-name :emails "") => ok?
       (-> (query sipoo :organization-by-user)
         (get-in [:organization :notifications config-key])) => empty?)))
+
+(facts "Suti server datails"
+  (fact "initially empty"
+    (let [initial-org-resp (query sipoo :organization-by-user)]
+      initial-org-resp => ok?
+      (get-in initial-org-resp [:organization :suti :server]) => empty?))
+
+  (fact "updated succeeds"
+    (command sipoo :update-suti-server-details :url "http://localhost:8000/dev/suti" :username "sipoo" :password "xx") => ok?)
+
+  (fact "is set"
+    (let [{:keys [organization] :as org-resp} (query sipoo :organization-by-user)]
+     org-resp => ok?
+     (get-in organization [:suti :server]) => (contains {:url "http://localhost:8000/dev/suti" :username "sipoo"})
+
+     (fact "password not echoed"
+       (get-in organization [:suti :server :password]) => nil))))
 
 (facts "Construction waste feeds"
   (mongo/with-db local-db-name
@@ -729,13 +746,7 @@
         => nil)
       (fact "Invalid organization 888-X" (local-org-api/valid-org {:data {:org "888-X"}})
         => {:ok false, :text "error.organization-not-found"})
-      (fact "Supported language FI" (local-org-api/valid-language {:data {:lang "FI"}})
-        => nil)
-      (fact "Supported language sV" (local-org-api/valid-language {:data {:lang "sV"}})
-        => nil)
-      (fact "Empty language is valid" (local-org-api/valid-language {:data {}}))
-      (fact "Unsupported language CN" (local-org-api/valid-language {:data {:lang "CN"}})
-        => {:ok false, :text "error.unsupported-language"}))))
+      )))
 
 
 

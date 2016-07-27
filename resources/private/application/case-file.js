@@ -4,14 +4,17 @@
   var model = function(params) {
     var self = this;
     self.application = params.application;
+
     self.caseFile = ko.observableArray();
 
     var fetchCaseFile = function() {
-      ajax.query("case-file-data", {id: ko.unwrap(params.application.id), lang: loc.getCurrentLanguage()})
-        .success(function (data) {
-          self.caseFile(data.process);
-        })
-        .call();
+      if (params.authModel.ok("case-file-data")) {
+        ajax.query("case-file-data", {id: self.application.id(), lang: loc.getCurrentLanguage()})
+          .success(function (data) {
+            self.caseFile(data.process);
+          })
+          .call();
+      }
     };
     fetchCaseFile();
 

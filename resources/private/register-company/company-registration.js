@@ -31,13 +31,14 @@
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
                                               usernameAsync: self.userNotLoggedIn}),
-      personId:     ko.observable("").extend({conditional_required: self.userNotLoggedIn, personId: true})
+      personId:     ko.observable("").extend({conditional_required: self.userNotLoggedIn, personId: true}),
+      language:     ko.observable( loc.getCurrentLanguage())
     });
 
     self.accountFieldNames = ["accountType"];
     self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "netbill", "ovt", "pop"];
     self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
-    self.signerFieldNames = ["firstName", "lastName", "email", "personId"];
+    self.signerFieldNames = ["firstName", "lastName", "email", "personId", "language"];
 
     self.stateInfo  = 0;
     self.stateReady = 1;

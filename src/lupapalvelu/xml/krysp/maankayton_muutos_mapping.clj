@@ -55,7 +55,7 @@
         canonical (assoc-in
                     canonical-without-attachments
                     [:Maankaytonmuutos :maankayttomuutosTieto muutos :liitetieto]
-                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
         mapping (->mapping muutos)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]

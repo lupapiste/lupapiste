@@ -67,20 +67,17 @@
       transfer
       (assoc transfer :attachments (map :id attachments)))))
 
-(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
-  (let [organization (organization/get-organization (:organization application))]
-    (if (organization/krysp-integration? organization (permit/permit-type application))
-      (or
-        (application/validate-link-permits application)
-        (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
-              sent-file-ids   (if jatkoaika-app?
-                                (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                                (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                  (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
-          (do-rest-fn attachments-updates)))
-      ;; Integration details not defined for the organization -> let the approve command pass
-      (do-rest-fn nil))))
+(defn- do-approve [application organization created id lang do-rest-fn]
+  (if (organization/krysp-integration? organization (permit/permit-type application))
+    (or
+      (application/validate-link-permits application)
+      (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
+            sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
+                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
+            attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
+        (do-rest-fn attachments-updates)))
+    ;; Integration details not defined for the organization -> let the approve command pass
+    (do-rest-fn nil)))
 
 (defcommand approve-application
   {:parameters       [id lang]
@@ -90,7 +87,7 @@
    :on-success       (action/notify :application-state-change)
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
-  [{:keys [application created user] :as command}]
+  [{:keys [application created user organization] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         next-state   (if jatkoaika-app?
                        :closed ; FIXME create a state machine for :ya-jatkoaika
@@ -123,10 +120,10 @@
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application created id lang jatkoaika-app? do-update user)))
+    (do-approve application @organization created id lang do-update)))
 
 (defn- application-already-exported [type]
-  (fn [_ application]
+  (fn [{application :application}]
     (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
       (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
             filtered-transfers (filter (comp export-ops keyword :type) (:transfers application))]
@@ -142,7 +139,7 @@
                 (application-already-exported :exported-to-backing-system)]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application user organization] :as command}]
 
   (let [all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
         attachments-wo-sent-timestamp (filter
@@ -155,8 +152,7 @@
                                           (some #{(:id %)} attachmentIds))
                                         all-attachments)]
     (if (pos? (count attachments-wo-sent-timestamp))
-      (let [organization  (organization/get-organization (:organization application))
-            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
+      (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang @organization)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
             transfer      (get-transfer-item :exported-to-backing-system command attachments-wo-sent-timestamp)]
         (update-application command {$push {:transfers transfer}
@@ -260,7 +256,7 @@
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
-(defn- has-asianhallinta-operation [_ {:keys [primaryOperation]}]
+(defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
 
@@ -272,7 +268,7 @@
    :on-success (action/notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
-  [{:keys [application created user]:as command}]
+  [{:keys [application created user organization]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
                       (update-in application
@@ -284,9 +280,8 @@
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
 
         app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
-        organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)
-        file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
+        file-ids (ah/save-as-asianhallinta application lang submitted-application @organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
@@ -345,7 +340,7 @@
    :parameters [id]
    :user-roles #{:authority}
    :states     states/all-states
-   :pre-checks [(fn [{{ip :client-ip} :web user :user} {:keys [organization]}]
+   :pre-checks [(fn [{{ip :client-ip} :web user :user {:keys [organization]} :application}]
                   (if organization
                     (when-not (autologin/allowed-ip? ip organization)
                       (fail :error.ip-not-allowed))
@@ -378,8 +373,8 @@
    :user-roles #{:authority}
    :org-authz-roles  #{:approver}
    :states #{:sent :complementNeeded}}
-  [{{org-id :organization municipality :municipality permit-type :permitType} :application}]
-  (let [organization (organization/get-organization org-id)
+  [{{municipality :municipality permit-type :permitType} :application org :organization}]
+  (let [organization     @org
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
         ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
@@ -390,7 +385,7 @@
   (->>
     (ss/replace content-str (re-pattern validators/finnish-hetu-str) "******x****")
     (resp/content-type (mime/mime-type filename))
-    (resp/set-headers http/no-cache-headers)
+    (resp/set-headers (assoc http/no-cache-headers "Content-Disposition" (format "filename=\"%s\"" filename)))
     (resp/status 200)))
 
 (defn validate-integration-message-filename [{{:keys [id filename]} :data}]
@@ -403,9 +398,8 @@
 
 (defn- resolve-integration-message-file
   "Resolves organization's integration output directory and returns a File from there."
-  [application transfer-type file-type filename]
-  (let [{org-id :organization municipality :municipality permit-type :permitType} application
-        organization (organization/get-organization org-id)
+  [application organization transfer-type file-type filename]
+  (let [{municipality :municipality permit-type :permitType} application
         dir (case transfer-type
               "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
               "ah" (ah/resolve-output-directory
@@ -432,8 +426,8 @@
                           (fail :error.invalid-key)))
                       validate-integration-message-filename]
    :states #{:sent :complementNeeded}}
-  [{application :application :as command}]
-  (let [f (resolve-integration-message-file application transferType fileType filename)]
+  [{application :application org :organization :as command}]
+  (let [f (resolve-integration-message-file application @org transferType fileType filename)]
     (assert (ss/starts-with (.getName f) (:id application))) ; Can't be too paranoid...
     (if (.exists f)
       (transferred-file-response (.getName f) (slurp f))

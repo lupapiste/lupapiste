@@ -25,6 +25,11 @@
         .success(function(res) {
           model.clear().saved(true);
           util.showSavedIndicator(res);
+          if( params.language &&
+              params.language !== lupapisteApp.models.currentUser.language() &&
+              params.language !== loc.getCurrentLanguage()) {
+            hub.send( "change-lang", {lang: params.language});
+          }
         })
         .error(function(res) {
           model.error(res.text).clear().saved(false);
@@ -50,6 +55,7 @@
     self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
     self.phone = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.role = ko.observable();
+    self.language = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable().extend({ maxLength: LUPAPISTE.config.inputMaxLength });
     self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
@@ -125,6 +131,7 @@
         .firstName(u.firstName)
         .lastName(u.lastName)
         .username(u.username)
+        .language(u.language)
         .email(u.email)
         .street(u.street)
         .city(u.city)
@@ -163,7 +170,7 @@
     self.save = makeSaveFn("update-user",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
-         "architect",
+         "language", "architect",
          "degree", "graduatingYear", "fise", "fiseKelpoisuus",
          "companyName", "companyId",
          "allowDirectMarketing"]);
@@ -280,13 +287,25 @@
     self.stateSending  = 2;
     self.stateDone     = 3;
     self.stateError    = 4;
+    self.errorText     = ko.observable("");
 
     self.state = ko.observable(-1); // -1 makes sure that init() fires state change.
 
     self.ready = _.partial(self.state, self.stateReady);
     self.sending = _.partial(self.state, self.stateSending);
-    self.done = _.partial(self.state, self.stateDone);
-    self.error = _.partial(self.state, self.stateError);
+    self.done = function(data) {
+      if (data.result.ok) {
+        self.state(self.stateDone);
+        LUPAPISTE.ModalDialog.close();
+      } else {
+        self.state(self.stateReady);
+        self.errorText(data.result.text);
+      }
+    };
+    self.error = function(e, data) {
+      self.state(self.stateError);
+      error("AJAX: ERROR", data.url, data.result);
+    };
 
     self.start = ko.observable();
     self.filename = ko.observable();
@@ -310,7 +329,8 @@
         .filesize(null)
         .start(null)
         .attachmentType(null)
-        .csrf($.cookie("anti-csrf-token"));
+        .csrf($.cookie("anti-csrf-token"))
+        .errorText("");
     };
 
     self.open = function() {
@@ -373,9 +393,8 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function() {
-              uploadModel.done();
-              LUPAPISTE.ModalDialog.close();
+            done: function(e, data) {
+              uploadModel.done(data);
             },
             fail: uploadModel.error
           });

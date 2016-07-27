@@ -85,12 +85,18 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return self.docModel.testId( id + "-" + self.docModel.schemaName);
   };
 
+  function removableIfAuthority() {
+    // if removable only by authority, check if authority, else removable ok
+    return self.info["removable-only-by-authority"] ? lupapisteApp.models.currentUser.isAuthority() : true;
+  }
+
   self.remove = {};
   // Remove
   if (self.info.removable
-    && !self.docModel.isDisabled
-    && self.auth.ok("remove-doc")
-    && !self.isPrimaryOperation()) {
+      && !self.docModel.isDisabled
+      && self.auth.ok("remove-doc")
+      && !self.isPrimaryOperation()
+      && removableIfAuthority()) {
     self.remove.fun = self.docModel.removeDocument;
     self.remove.testClass = self.docModel.testId( "delete-schemas."
                                                 + self.docModel.schemaName );

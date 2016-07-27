@@ -1,29 +1,25 @@
 (ns lupapalvelu.tasks-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [lupapalvelu.document.model :as model]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]))
 
 ;; Helpers
 
 (defn- task-state-assertion [states]
-  (fn [{{task-id :taskId} :data} {tasks :tasks}]
-    (if-let [task (util/find-by-id task-id tasks)]
+  (fn [{{task-id :taskId} :data app :application}]
+    (if-let [task (util/find-by-id task-id (:tasks app))]
       (when-not ((set states) (keyword (:state task)))
         (fail :error.command-illegal-state))
       (fail :error.task-not-found))))
@@ -35,18 +31,18 @@
       {$set {:tasks.$.state state :modified created}}
       updates)))
 
-(defn- validate-task-is-not-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-not-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
-(defn- validate-task-is-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when-not (tasks/task-is-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
 (defn- task-is-end-review? [task]
   (re-matches #"(?i)^(osittainen )?loppukatselmus$" (or (get-in task [:data :katselmuksenLaji :value]) "")))
 
-(defn- validate-task-is-end-review [{{task-id :taskId} :data} {tasks :tasks}]
+(defn- validate-task-is-end-review [{{task-id :taskId} :data {tasks :tasks} :application}]
   (when-not (task-is-end-review? (util/find-by-id task-id tasks))
     (fail :error.invalid-task-type)))
 
@@ -104,10 +100,6 @@
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
-
-(defn generate-task-pdfa [application {info :schema-info :as task} user lang]
-  (when (tasks/task-is-review? task)
-    (child-to-attachment/create-attachment-from-children user application :tasks (:id task) lang)))
 
 (defcommand approve-task
   {:description "Authority can approve task, moves to ok"
@@ -192,7 +184,7 @@
                  (task-state-assertion (tasks/all-states-but :sent))]
    :user-roles  #{:authority}
    :states      valid-states}
-  [{application :application user :user created :created :as command}]
+  [{application :application user :user created :created organization :organization :as command}]
   (validate-required-review-fields! command application)
   (validate-review-kind command application)
   (let [task (util/find-by-id taskId (:tasks application))
@@ -203,7 +195,7 @@
         all-attachments (:attachments application)
         command (assoc command :application application)
 
-        sent-file-ids (mapping-to-krysp/save-review-as-krysp application task user lang)
+        sent-file-ids (mapping-to-krysp/save-review-as-krysp application @organization task user lang)
         review-attachments (if-not sent-file-ids
                              (->> (:attachments application)
                                   (filter #(= {:type "task" :id taskId} (:target %)) )

@@ -46,7 +46,7 @@
 (defn validate-state-transition
   "Function for composing action pre-checs.
    E.g. :pre-checks [(partial state-machine/validate-state-transition :canceled)]"
-  [next-state _ application]
+  [next-state {:keys [application]}]
   (if (map? application)
     (when-not (can-proceed? application next-state)
       (fail :error.command-illegal-state :state (:state application) :next-state next-state))

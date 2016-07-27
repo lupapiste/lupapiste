@@ -29,7 +29,7 @@
            :hasAccess already-has-access)))
 
 (defn organization-guest-authorities
-  "Guest authorities for the given organisation."
+  "Guest authorities for the given organisation. Fetches organization from db."
   ([org-id]
    (->> org-id
         org/get-organization
@@ -74,7 +74,7 @@
 (defn no-duplicate-guests
   "Pre check for avoiding duplicate guests or unnecessary access.
   Note: only application-defined access is checked."
-  [{{email :email} :data} application]
+  [{{email :email} :data application :application}]
   (when email
    (let [guest (usr/get-user-by-email email)]
      (when (auth/user-authz? auth/all-authz-roles application guest)
@@ -83,10 +83,11 @@
 (defn known-guest-authority
   "Pre check to make sure that guest authority is defined for the
   organization."
-  [{{:keys [email role]} :data} {:keys [organization]}]
+  [{{:keys [email role]} :data app :application org :organization}]
   (when (and (= role "guestAuthority")
              (not-any? #(= email (:email %))
-                       (organization-guest-authorities organization)))
+                       (or (and org (:guestAuthorities @org))
+                           (organization-guest-authorities (:organization app)))))
     (fail :error.not-guest-authority)))
 
 (defn valid-guest-role [{{role :role} :data}]
@@ -118,10 +119,10 @@
 
 (defn- guest-authority-description-map
   "email description map"
-  [org-id]
+  [guest-authorities]
   (reduce (fn [acc {:keys [email description]}]
             (assoc acc email description)) {}
-          (organization-guest-authorities org-id)))
+          guest-authorities))
 
 (defn- usercatname [{:keys [firstName lastName]}]
   (ss/trim (str firstName " " lastName)))
@@ -146,8 +147,8 @@
 
 (defn application-guests
   "Namesake query implementation."
-  [{:keys [application user]}]
-  (let [ga-descriptions (guest-authority-description-map (:organization application))]
+  [{:keys [application organization]}]
+  (let [ga-descriptions (guest-authority-description-map (:guestAuthorities @organization))]
     (map (partial auth-info ga-descriptions) (application-guest-auths application))))
 
 (defn- username-auth-role
@@ -164,7 +165,7 @@
 (defn auth-modification-check
   "User can manipulate every guest but only organization authority can
   modify guestAuthorities."
-  [{{:keys [username]} :data user :user} application]
+  [{{:keys [username]} :data user :user application :application}]
   (when username
     (let [role (username-auth-role application username)]
       (when-not (or (= role :guest)
@@ -195,9 +196,7 @@
 
 (defn delete-guest-application
   "Namesake command implementation."
-  [{{:keys [username]} :data
-    application :application
-    :as command}]
+  [{{:keys [username]} :data :as command}]
   (action/update-application command
                              {$pull {:auth {:username username
                                             :role #"guest(Authority)?"}}})
@@ -206,5 +205,5 @@
 
 (defn guest-authorities-application-organization
   "Namesake query implementation."
-  [{:keys [application]}]
-  (organization-guest-authorities (:organization application)))
+  [{:keys [organization]}]
+  (get @organization :guestAuthorities))

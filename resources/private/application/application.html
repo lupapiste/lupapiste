@@ -443,14 +443,17 @@
                         </div>
                         <div class="operation-info">
 
-                            <div data-bind="if: $root.authorization.ok('add-operation')">
+                            <div class="margins-m no-top" data-bind="if: $root.authorization.ok('add-operation')">
+                              <div class="help-box">
                                 <p data-bind="lhtml: 'help.' + permitType() + '.AddOperations'"></p>
                                 <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="positive">
                                     <i class="lupicon-circle-plus"></i>
                                     <span data-bind="ltext: 'application.addOperation'"></span>
                                 </button>
+                              </div>
                             </div>
                             <div data-bind="if: $root.authorization.ok('link-permit-required')">
+                              <div class="help-box margins-m">
                                 <p data-bind="ltext: 'help.AddPermit'"></p>
                                 <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
                                                    enable: $root.authorization.ok('link-permit-required'),
@@ -459,12 +462,13 @@
                                     <i class="lupicon-circle-plus"></i>
                                     <span data-bind="ltext: 'application.addLinkPermit'"></span>
                                 </button>
+                              </div>
                             </div>
                         </div>
                         <div class="organizationLinks"
                              data-bind="template: 'organization-links-template'">
                         </div>
-                        <p data-bind="lhtml: 'required.field.desc'"></p>
+                        <p class="top-marginM" data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
                         <div class="application_section">
                            <div id="applicationDocgen" class="docgen-content">
@@ -601,6 +605,8 @@
                         <div data-bind="component: {name: 'export-attachments'}"></div>
                         <!-- /ko -->
 
+                        <suti-display></suti-display>
+                        
                         <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
                             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
                             <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
@@ -651,140 +657,7 @@
                     <!-- Required field summary tab -->
 
                     <!-- ko if: selectedTabName() === 'requiredFieldSummary' -->
-                    <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
-                        <div>
-                            <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
-
-                            <div class="clear spacerM"></div>
-                            <!-- ko if: municipalityHearsNeighborsVisible -->
-                            <div class="form-grid form-grid--no-border">
-                              <div class="row">
-                                <div data-bind="component: {name: 'checkbox-field', params: {value: optionMunicipalityHearsNeighbors, id: 'optionMunicipalityHearsNeighbors', lLabel: 'application.municipality-hears-neighbors', disable: optionMunicipalityHearsNeighborsDisabled}}" ></div>
-                              </div>
-                            </div>
-                            <!-- /ko -->
-
-                            <div data-bind="ifnot: submittable">
-                                <p class="error-text" data-test-id="foreman-not-submittable" data-bind="ltext: 'error.not-submittable.foreman-link'"></p>
-                            </div>
-
-                            <!-- ko ifnot: missingSomeInfo -->
-                            <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
-                            <!-- /ko -->
-
-                            <!-- show error text before buttons if fields missing -->
-                            <!-- ko if: missingSomeInfo -->
-                            <i class="error-text" data-bind="ltext: 'application.requiredDataDesc',
-                                                             visible: requiredFieldsFillingObligatory() && missingSomeInfo()">
-                            </i>
-                            <br>
-                            <!-- /ko -->
-                            <p data-bind="ltext: 'company.user.cannot.submit',
-                                            visible: $root.authorization.ok( 'company-user-cannot-submit')"></p>
-                            <button class="positive"
-                                    data-test-id="application-submit-btn"
-                                    data-bind="click: submitApplication,
-                                               visible: $root.authorization.ok('submit-application'),
-                                               enable: submitButtonEnabled() && !$root.authorization.ok( 'company-user-cannot-submit')">
-                                <i class="lupicon-download"></i>
-                                <span data-bind="ltext: 'application.submitApplication'"></span>
-                            </button>
-
-                            <div class="auth-actions stacked inner-margins">
-                                <button data-bind="click: approveApplication,
-                                                   visible: $root.authorization.ok('approve-application'),
-                                                   enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
-                                        data-test-id="approve-application-summaryTab"
-                                        class="positive">
-                                    <i class="lupicon-circle-arrow-right"></i>
-                                    <span data-bind="ltext: 'application.approveApplication'"></span>
-                                </button>
-
-                                <button data-bind="click: toAsianhallinta,
-                                                   visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
-                                                   enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
-                                                   attr: {'title': loc('tooltip.toAsianhallinta')}"
-                                        data-test-id="to-asianhallinta-summaryTab"
-                                        class="positive">
-                                    <i class="lupicon-circle-arrow-right"></i>
-                                    <span data-bind="ltext: 'application.toAsianhallinta'"></span>
-                                </button>
-                            </div>
-
-                            <!-- missing information -->
-
-                            <!-- ko if: hasFieldWarnings -->
-                            <div id="applicationWarnings" data-test-id="test-application-warnings">
-                              <h2 data-bind="ltext: 'application.warningsInDocument'" class="missing-info-title"></h2>
-                              <!-- ko foreach: fieldWarnings -->
-                                <div data-bind="with: $data[0]">
-                                   <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
-                                </div>
-                                <!-- ko foreach: $data -->
-                                  <div class="requiredField-line">
-                                      <div class="like-btn">
-<!--                                       TODO: Tahan keltainen ikoni -->
-                                          <i class="lupicon-circle-attention"></i>
-                                          <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
-                                      </div>
-                                      <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
-                                  </div>
-                                <!-- /ko -->
-                              <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
-
-                            <!-- ko if: hasIncorrectlyFilledRequiredFields -->
-                            <div id="applicationRequiredFields" data-test-id="test-application-required-fields">
-                              <h2 data-bind="ltext: 'application.requiredDataMissing'" class="missing-info-title"></h2>
-                              <!-- ko foreach: incorrectlyFilledRequiredFields -->
-                                <div data-bind="with: $data[0]">
-                                    <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
-                                </div>
-                                <!-- ko foreach: $data -->
-                                <div class="requiredField-line">
-                                    <div class="like-btn">
-                                        <i class="lupicon-circle-attention"></i>
-                                        <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
-                                    </div>
-                                    <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
-                                </div>
-                                <!-- /ko -->
-                              <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
-
-                            <!-- ko if: hasMissingRequiredAttachments -->
-                            <div id="applicationRequiredAttachments" data-test-id="test-application-required-attachments">
-                              <h2 data-bind="ltext: 'application.missingRequiredAttachments'" class="missing-info-title"></h2>
-                              <!-- ko foreach: missingRequiredAttachments -->
-                                <h3 class="required-field-error-doc"
-                                    data-bind="text: loc(['attachmentType', $data[0], '_group_label'])"></h3>
-                                <!-- ko foreach: $data[1] -->
-                                  <div class="requiredField-line">
-                                      <div class="like-btn">
-                                          <i class="lupicon-circle-attention"></i>
-                                          <span class="required-field-error-element-name"
-                                                data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
-                                      </div>
-                                      <a data-bind="click: $root.application.moveToMissingRequiredAttachment, ltext: 'view'" href="#"></a>
-                                  </div>
-                                <!-- /ko -->
-                              <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
-
-                        </div>
-
-                        <!-- /missing information -->
-
-                        <div class="process-nav">
-                            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-                                <i class="lupicon-chevron-left"></i>
-                                <span data-bind="ltext: 'application.previous-tab'"></span>
-                            </a>
-                        </div>
-                    </div>
+                    <div data-bind="template: 'required-fields-summary-tab-template'"></div>
                     <!-- /ko -->
 
 
@@ -921,7 +794,7 @@
                     <!--ko if: selectedTabName() === 'caseFile' && $root.authorization.ok("permanent-archive-enabled") && $root.authorization.ok('tos-operations-enabled') && application.id -->
                     <div id="application-caseFile-tab" class="tab-content">
                       <div>
-                        <div data-bind="component: {name: 'case-file', params: {application: application}}"></div>
+                        <div data-bind="component: {name: 'case-file', params: {application: application, authModel: $root.authorization}}"></div>
                       </div>
                     </div>
                     <!-- /ko -->
@@ -1398,12 +1271,13 @@
                     <!-- /ko -->
 
                     <!-- Calendars tab -->
+                    <!-- ko if: selectedTabName() === 'calendar' -->
                     <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
                       <div>
                         <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
                       </div>
-                      <calendar-view params="searchConditions: { }"></calendar-view>
                     </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div id="boxes">

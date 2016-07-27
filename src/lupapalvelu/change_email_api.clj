@@ -41,7 +41,7 @@
       (not (ss/blank? (:personId full-user))))
     false))
 
-(defn- validate-has-person-id [{user :user} _]
+(defn- validate-has-person-id [{user :user}]
   (when-not (has-person-id? user)
     (fail :error.unauthorized)))
 

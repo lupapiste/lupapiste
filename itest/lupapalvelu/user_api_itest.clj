@@ -181,6 +181,7 @@
                                                         :allowDirectMarketing true
                                                         :email "teppo@example.com"
                                                         :enabled true
+                                                        :language "fi"
                                                         :firstName "Teppo"
                                                         :id "5073c0a1c2e6c470aef589a5"
                                                         :lastName "Nieminen"
@@ -207,27 +208,25 @@
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
+(facts "Implicit user language"
+       (defn lang-check [lang note]
+         (fn [{{:keys [language indicatorNote]} :user}]
+           (fact "language and note" [language indicatorNote] => [lang note])))
+
+       (fact "Bad language"
+             (query sven :user :lang "cn") => fail?)
+       (fact "Set language to UI language"
+             (query sven :user :lang "sv") => (lang-check "sv" "user.language.note"))
+       (fact "Subsequent user queries do not contain indicator note"
+             (query sven :user :lang "sv") => (lang-check "sv" nil)
+             (query sven :user :lang "fi") => (lang-check "sv" nil)
+             (query sven :user :lang nil) => (lang-check "sv" nil)
+             (query sven :user) => (lang-check "sv" nil)))
+
 ;;
 ;; historical tests, dragons be here...
 ;;
 
-(defn upload-user-attachment [apikey attachment-type expect-to-succeed]
-  (let [filename    "dev-resources/test-attachment.txt"
-        uploadfile  (io/file filename)
-        uri         (str (server-address) "/api/upload/user-attachment")
-        resp        (http-post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "attachmentType"  :content attachment-type}
-                                   {:name "files[]"         :content uploadfile}]})
-        body        (:body (decode-response resp))]
-    (if expect-to-succeed
-      (facts "successful"
-        resp => http200?
-        body => ok?)
-      (facts "should fail"
-        (:status resp) =not=> 200
-        body => fail?))
-    body))
 
 (facts* "uploading user attachment"
   (apply-remote-minimal)
@@ -270,6 +269,12 @@
 
     (command pena "remove-user-attachment" :attachment-id attachment-id) => ok?
     (:attachments (query pena "user-attachments")) => empty?))
+
+(facts* "upload errors"
+  (fact "illegal attachment type"
+    (upload-user-attachment pena "foo" false) => (partial expected-failure? :error.illegal-attachment-type))
+  (fact "illegal mime"
+    (upload-user-attachment pena "osapuolet.tutkintotodistus" false  "dev-resources/krysp/verdict-r.xml") => (partial expected-failure? :error.file-upload.illegal-file-type)))
 
 ;;
 ;; ==============================================================================

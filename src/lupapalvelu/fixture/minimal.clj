@@ -13,6 +13,7 @@
     :email "admin@solita.fi"
     :enabled true
     :role "admin"
+    :language "fi"
     :firstName "Admin"
     :lastName "Admin"
     :phone "03030303"
@@ -26,6 +27,7 @@
     :email "etl@lupapiste.fi"
     :firstName "Solita"
     :lastName "DW ETL-lataus"
+    :language "fi"
     :enabled true
     :role "trusted-etl"
     :private {:password "$2a$10$uog/cI4n4vxFBNgku4xTpu6lcrF56cttBDW5zkTfDaSClgEw54/Nm"}}
@@ -38,6 +40,7 @@
     :lastName "Tampere"
     :firstName "Paakayttaja-YA"
     :city "Tampere"
+    :language "fi"
     :username "tampere-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
@@ -51,6 +54,7 @@
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:837-R #{:authority}}
     :firstName "Veikko"
@@ -65,6 +69,7 @@
     :email "jussi.viranomainen@tampere.fi"
     :enabled true
     :role "authority"
+    :language "fi"
     :username "jussi"
     :orgAuthz {:837-YA #{:authority}}
     :firstName "Jussi"
@@ -83,6 +88,7 @@
     :email "sakari.viranomainen@kuopio.fi"
     :enabled true
     :role "authority"
+    :language "fi"
     :username "sakari"
     :orgAuthz {:297-YA #{:authority}}
     :firstName "Sakari"
@@ -99,6 +105,7 @@
     :lastName "Kuopio"
     :firstName "Paakayttaja-YA"
     :city "Kuopio"
+    :language "fi"
     :username "kuopio-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
@@ -114,6 +121,7 @@
     :enabled true
     :role "authority"
     :username "velho"
+    :language "fi"
     :orgAuthz {:297-R #{:authority :approver}
                :297-YA #{:authority :approver}}
     :firstName "Velho"
@@ -133,6 +141,7 @@
     :lastName "Kuopio"
     :firstName "Paakayttaja-R"
     :city "Kuopio"
+    :language "fi"
     :username "kuopio-r"
     :street "Paapankuja 12"
     :phone "0102030405"
@@ -152,6 +161,7 @@
     :role "authorityAdmin"
     :orgAuthz {:753-R #{:authorityAdmin}}
     :firstName "Simo"
+    :language "fi"
     :lastName "Suurvisiiri"
     :username "sipoo"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
@@ -164,6 +174,7 @@
     :role "authorityAdmin"
     :orgAuthz {:753-YA #{:authorityAdmin}}
     :firstName "Simo"
+    :language "fi"
     :lastName "YA-Suurvisiiri"
     :username "sipoo-ya"
     :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"
@@ -180,6 +191,7 @@
                :998-R-TESTI-2 #{:authority :approver}}
     :firstName "Sonja"
     :lastName "Sibbo"
+    :language "fi"
     :phone "03121991"
     :street "Katuosoite 1 a 1"
     :zip "33456"
@@ -210,6 +222,7 @@
     :username "ronja"
     :role "authority"
     :enabled true
+    :language "fi"
     :email "ronja.sibbo@sipoo.fi"
     :orgAuthz {:753-R #{:authority}}
     :firstName "Ronja"
@@ -226,6 +239,7 @@
     :username "luukas"
     :role "authority"
     :enabled true
+    :language "fi"
     :email "luukas.lukija@sipoo.fi"
     :orgAuthz {:753-R #{:reader}}
     :firstName "Luukas"
@@ -242,6 +256,7 @@
     :username "kosti"
     :role "authority"
     :enabled true
+    :language "fi"
     :email "kosti.kommentoija@sipoo.fi"
     :orgAuthz {:753-R #{:commenter}}
     :firstName "Kosti"
@@ -257,16 +272,17 @@
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
    {:id "777777777777777777000033"
-     :email "pekka.borga@porvoo.fi"
-     :enabled true
-     :role "authority"
-     :orgAuthz {:638-R #{:authority :approver}}
-     :firstName "Pekka"
-     :lastName "Borga"
-     :phone "121212"
-     :username "pekka"
-     :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
-               :apikey "4761896258863737181711425832653651926670"}}
+    :email "pekka.borga@porvoo.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:638-R #{:authority :approver}}
+    :firstName "Pekka"
+    :lastName "Borga"
+    :phone "121212"
+    :username "pekka"
+    :private {:password "$2a$10$C65v2OgWcCzo4SVDtofawuP8xXDnZn5.URbODSpeOWmRABxUU01k6"
+              :apikey "4761896258863737181711425832653651926670"}}
 
    ;; Oulu
 
@@ -275,6 +291,7 @@
    {:id "777777777777734777000034"
     :email "ymp-admin@oulu.fi"
     :enabled true
+    :language "fi"
     :role "authorityAdmin"
     :orgAuthz {:564-YMP #{:authorityAdmin}}
     :firstName "Oulu Ymp"
@@ -289,6 +306,7 @@
    {:id "777777777777777777000034"
     :email "olli.uleaborg@ouka.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:564-R #{:authority :approver}
                :529-R #{:authority :approver}
@@ -309,6 +327,7 @@
     :role "authorityAdmin"
     :orgAuthz {:529-R #{:authorityAdmin}}
     :firstName "Admin"
+    :language "fi"
     :lastName "Naantali"
     :username "admin@naantali.fi"
     :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
@@ -318,6 +337,7 @@
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:529-R #{:authority}
                :186-R #{:authority}}
@@ -330,6 +350,7 @@
    {:id "50ac77ecd2e6c2ea6e73f841"
     :email "lupasihteeri@naantali.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:529-R #{:authority}}
     :firstName "Lupasihteeri"
@@ -344,6 +365,7 @@
    {:id "50ac77ecd2e6c2ea6e73f850"
     :email "admin@jarvenpaa.fi"
     :enabled true
+    :language "fi"
     :role "authorityAdmin"
     :orgAuthz {:186-R #{:authorityAdmin}}
     :firstName "Admin"
@@ -355,6 +377,7 @@
    {:id "50ac77ecd2e6c2ea6e73f851"
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:186-R #{:authority}}
     :firstName "Rakennustarkastaja"
@@ -366,6 +389,7 @@
    {:id "50ac77ecd2e6c2ea6e73f852"
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :orgAuthz {:186-R #{:authority}}
     :firstName "Lupasihteeri"
@@ -380,6 +404,7 @@
     :firstName "J\u00E4rvenp\u00E4\u00E4"
     :lastName "Taustaj\u00E4rjestelm\u00E4"
     :enabled true
+    :language "fi"
     :role "rest-api"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
     :orgAuthz {:186-R #{:authority}}}
@@ -390,6 +415,7 @@
    {:id "77775577777777777700769"
     :email "arto.viranomainen@loppi.fi"
     :enabled true
+    :language "fi"
     :role "authority"
     :username "arto"
     :orgAuthz {:433-R #{:authority}}
@@ -401,12 +427,26 @@
     :city "Loppi"
     :private {:password "$2a$10$MX9RWSqjBocwxg1ikSp/POV8lXd6lKA4yDymRIg7.GsXdRigZxmjK"}}
 
+   ;; Helsinki - rakennnustarkastaja@hel.fi / helsinki
+   {:id "5770f6ffd358719a09397a45"
+    :email "rakennustarkastaja@hel.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:091-R #{:authority :approver :archivist :tos-editor :tos-publisher}}
+    :firstName "Hannu"
+    :lastName "Helsinki"
+    :username "rakennustarkastaja@hel.fi"
+    :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
+              :apikey "a0ac77ecd2e6c2ea6e73f860"}}
+
    ;; Hakijat
 
    ;; Hakija: Mikko's neighbour - teppo@example.com / teppo69
    {:lastName "Nieminen"
     :firstName "Teppo"
     :enabled true
+    :language "fi"
     :username "teppo@example.com"
     :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
               :apikey "502cb9e58426c613c8b85abb"}
@@ -419,10 +459,31 @@
     :street "Mutakatu 7"
     :zip "33560"
     :city "Tampere"}
+
+   ;; sven@example.com / sven
+   ;; Svens's language is omitted in order to test the implicit
+   ;; language setting.
+   {:role "applicant",
+    :email "sven@example.com",
+    :personId "070842-559U",
+    :private {:apikey "bfxLwCerNjNUpmJ2HqZbfxLwCerNjNUpmJ2HqZ",
+              :password "$2a$10$i8O320oYo76R6QoV6bh5MunFXeNy.FcS/xqTOKwLnxQOLBg721Ouy"},
+    :phone "0505504444",
+    :city "Tampere",
+    :username "sven@example.com",
+    :firstName "Sven",
+    :street "Ericsgatan 8",
+    :allowDirectMarketing true,
+    :zip "33310",
+    :id "578731b78ca8231afeca99e8",
+    :lastName "Svensson",
+    :enabled true}
+
    ;; Hakija: Mikko Intonen - mikko@example.com / mikko123
    {:id "777777777777777777000010"
     :username "mikko@example.com"
     :enabled true
+    :language "fi"
     :role "applicant"
     :personId "210281-9988" ; = Nordea demo
     :firstName "Mikko"
@@ -446,6 +507,7 @@
    {:id "777777777777777777000020"
     :username "pena"
     :enabled true
+    :language "fi"
     :role "applicant"
     :personId "010203-040A"
     :firstName "Pena"
@@ -464,6 +526,7 @@
    ;; Dummy hakija 1: pena / pena
    {:id  "51112424c26b7342d92acf3c"
     :enabled  false
+    :language "fi"
     :username  "dummy"
     :firstName "Duff"
     :lastName "Dummy"
@@ -474,6 +537,7 @@
    ;; Dummy hakija 2: pena / pena
    {:id  "51112424c26b7342d92acf3d"
     :enabled  false
+    :language "fi"
     :username  "dummy2"
     :firstName "Duff2"
     :lastName "Dummy2"
@@ -483,9 +547,10 @@
    ;; Dummy hakija 3: pena / pena
    {:id  "51112424c26b7342d92acf3e"
     :enabled  false
+    :language "fi"
     :username  "dummy3"
-    :firstName "Duff3"
-    :lastName "Dummy3"
+    :firstName ""
+    :lastName ""
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "dummy"}
@@ -494,6 +559,7 @@
 
    {:id "kainosolita"
     :enabled true
+    :language "fi"
     :username "kaino@solita.fi" ; / kaino123
     :firstName "Kaino"
     :lastName "Solita"
@@ -546,7 +612,8 @@
                                       :kopiolaitos-orderer-address nil
                                       :kopiolaitos-orderer-email nil
                                       :kopiolaitos-orderer-phone nil
-                                      :calendars-enabled false})
+                                      :calendars-enabled false
+                                      :use-attachment-links-integration false})
 
 (def organizations (map
                      (partial merge default-keys-for-organizations)
@@ -854,6 +921,26 @@
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
+
+                      ;; Helsinki R
+                      {:id "091-R"
+                       :name {:fi "Helsingin rakennusvalvontavirasto"
+                              :sv "Helsingfors byggnadstillsynsverket"}
+                       :scope [{:municipality "091"
+                                :permitType "R"
+                                :new-application-enabled true
+                                :inforequest-enabled true}]
+                       :links [{:name {:fi "Helsinki" :sv "Helsingfors"}
+                                :url "http://www.hel.fi"}
+                               {:name {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
+                                :url "http://www.hel.fi/www/rakvv/fi"}]
+                       :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_helsinki"}}
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]]}
+                       :permanent-archive-enabled true
+                       :permanent-archive-in-use-since 1451613600000
+                       :use-attachment-links-integration true}
 
                       ;;
                       ;; Ymparisto organisaatiot

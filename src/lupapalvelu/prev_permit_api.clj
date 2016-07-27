@@ -36,7 +36,7 @@
                       (fn [{{propertyId :propertyId} :data :as command}]
                         (when (not (ss/blank? propertyId))
                           (action/property-id-parameters [:propertyId] command)))]
-   :pre-checks [(fn [{:keys [user data]} _]
+   :pre-checks [(fn [{:keys [user data]}]
                   (when-let [organization-id (:organizationId data)]
                     (when-not (user/user-is-authority-in-organization? user organization-id)
                       unauthorized)))]}

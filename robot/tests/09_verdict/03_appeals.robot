@@ -111,10 +111,10 @@ Every appeal type is shown in the Attachments tab
   Element should be visible  jquery=#attachment-row-muutoksenhaku-valitus
   Element should be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
   # There is a verdict and an appealVerdict
-  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  2
-  Open tab  verdict
+  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  3
 
 Show info buttons show correct data
+  Open tab  verdict
   Scroll to test id  add-appeal-0-0
   Click by test id  show-appeal-0-0-0
   Test id should contain  info-appeal-0-0-0  I am unhappy!
@@ -193,7 +193,7 @@ There are no appeals attachments in the Attachments tab
   Open tab  attachments
   Element should not be visible  jquery=#attachment-row-muutoksenhaku-valitus
   Element should not be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
-  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  1
+  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  2
   [Teardown]  Logout
 
 

@@ -36,7 +36,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
+            [lupapalvelu.organization :as org])
   (:import [java.net URL]))
 
 (notifications/defemail :application-verdict
@@ -226,7 +227,8 @@
                                      :locked true
                                      :user user
                                      :created (or attachment-time timestamp)
-                                     :state :ok})
+                                     :state :ok
+                                     :keep-original-file? true})
            (error (str (:status resp) " - unable to download " url ": " resp)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
@@ -393,14 +395,14 @@
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
 
-(defn do-check-for-verdict [{:keys [application] :as command}]
+(defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))]
+                         (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml (normalize-special-verdict application app-xml)
-          organization (organization/get-organization (:organization application))
           validator-fn (permit/get-verdict-validator (permit/permit-type application))
+          organization (if organization @organization (org/get-organization (:organization application)))
           validation-errors (validator-fn app-xml organization)]
       (if-not validation-errors
         (save-verdicts-from-xml command app-xml)
@@ -444,8 +446,7 @@
         top-keys [:tila :pitoPvm :pitaja]
         h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
         ]
-    (and (not-empty katselmus-data)
-         (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
+    (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
 (defn- merge-review-tasks
@@ -528,10 +529,14 @@
         (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
       ;; else
-      (do
+      (let [update-result (update-application command (util/deep-merge task-updates building-updates))
+            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
+            ;; updated-application (domain/get-application-as (:id application) (:user command)) ;; returns nil?
+            ]
         (doseq [added-task added-tasks-with-updated-buildings]
-          (tasks/generate-task-pdfa application added-task (:user command) (:lang command "fi")))
-        (update-application command (util/deep-merge task-updates building-updates))
+          (tasks/generate-task-pdfa
+           updated-application
+           added-task (:user command) (:lang command "fi")))
         (ok)))))
 
 

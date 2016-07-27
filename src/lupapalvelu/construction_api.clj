@@ -40,7 +40,7 @@
         :notified   true
         :pre-checks [(permit/validate-permit-type-is permit/R)]
         :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
-       [{:keys [user created application] :as command}]
+       [{:keys [user created application organization] :as command}]
     (let [timestamp    (util/to-millis-from-local-date-string startedDate)
           app-updates  (merge
                         {:modified created}
@@ -48,7 +48,7 @@
                             {:started created
                              :state  :constructionStarted}))
           application  (merge application app-updates)
-          organization (organization/get-organization (:organization application))
+          organization @organization
           krysp?       (organization/krysp-integration? organization (permit/permit-type application))
           building     (or
                         (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
@@ -76,14 +76,14 @@
    :pre-checks [(permit/validate-permit-type-is permit/YA)
                 (partial state-machine/validate-state-transition :closed)]
    :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
-  [{:keys [user created application] :as command}]
+  [{:keys [user created application organization] :as command}]
   (let [timestamp    (util/to-millis-from-local-date-string readyTimestampStr)
         app-updates  {:modified created
                       :closed timestamp
                       :closedBy (select-keys user [:id :firstName :lastName])
                       :state :closed}
         application  (merge application app-updates)
-        organization (organization/get-organization (:organization application))
+        organization @organization
         krysp?       (organization/krysp-integration? organization (permit/permit-type application))]
     (when krysp?
       (mapping-to-krysp/save-application-as-krysp application lang application organization))

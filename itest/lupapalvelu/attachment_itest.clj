@@ -20,8 +20,8 @@
             op-id (-> application :primaryOperation :id)]
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
-        (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+        (fact "pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
+          (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -121,28 +121,52 @@
 
 
       (fact "Pena change attachment metadata"
+        (let [{:keys [primaryOperation]} (query-application pena application-id)
+              op-id (:id primaryOperation)]
 
-        (fact "Pena can change operation"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
-        (fact "Pena can change contents"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
-        (fact "Pena can change size"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
-        (fact "Pena can change scale"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
+          (fact "Pena can change operation"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :id op-id}}) => ok?)
+          (fact "Pena can change contents"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
+          (fact "Pena can change size"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
+          (fact "Pena can change scale"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
 
-        (fact "Metadata is set"
-          (let [application (query-application pena application-id)
-                attachment (get-attachment-info application (first attachment-ids))
-                op (:op attachment)
-                contents (:contents attachment)
-                size (:size attachment)
-                scale (:scale attachment)]
-            (:id op) => "foo"
-            (:name op) => "bar"
-            contents => "foobart"
-            size => "A4"
-            scale => "1:500")))
+          (fact "Metadata is set"
+            (let [application (query-application pena application-id)
+                  attachment (get-attachment-info application (first attachment-ids))
+                  op (:op attachment)
+                  contents (:contents attachment)
+                  size (:size attachment)
+                  scale (:scale attachment)]
+              (:id op) => op-id
+              contents => "foobart"
+              size => "A4"
+              scale => "1:500"))
+
+          (fact "Operation id must exist in application"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id "aaabbbcccdddeeefff000111"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+
+          (fact "Metadata for op is validated against schema"
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op {:id op-id :unknown "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+
+          (fact "Operation metadata can be set to null"
+            (fact "but id can't be nil"
+              (command pena :set-attachment-meta
+                       :id application-id
+                       :attachmentId (first attachment-ids)
+                       :meta {:op {:id nil}}) => (partial expected-failure? :error.illegal-attachment-operation))
+            (command pena :set-attachment-meta
+                     :id application-id
+                     :attachmentId (first attachment-ids)
+                     :meta {:op nil}) => ok?)))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
@@ -270,13 +294,60 @@
         application (query-application pena application-id)
         attachment1 (-> application :attachments first)]
     (:state application) => "verdictGiven"
-    (count (:attachments application)) => 5
+    (count (:attachments application)) => 6
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
       (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
-    (count (:attachments (query-application pena application-id))) => 6))
+    (count (:attachments (query-application pena application-id))) => 7))
+
+(facts "Attachments query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+    (facts "initialization"
+      (fact "verdict" verdict-resp => ok?)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true))
+
+    (facts "Authority"
+      (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
+        query-resp => ok?
+        (count attachments) => 5
+        (fact "verdict draft included"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 1)))
+
+    (facts "Applicant"
+      (let [{attachments :attachments :as query-resp} (query pena :attachments :id application-id)]
+        query-resp => ok?
+        (count attachments) => 4
+        (fact "verdict draft is filtered out"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 0)))
+
+    (fact "Unauthorized"
+      (let [query-resp (query mikko :attachments :id application-id)]
+       query-resp => (partial expected-failure? "error.application-not-accessible")))))
+
+(facts "Attachment-groups query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {groups :groups :as query-resp} (query sonja :attachment-groups :id application-id)]
+
+    query-resp => ok?
+
+    (fact "Three groups"
+      (count groups) => 3)
+
+    (fact "Three different kind of groups"
+      (map :groupType groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+
+    (fact "Operation groupType has operation specific info fields"
+      (keys (util/find-first (comp #{"operation"} :groupType) groups)) => (contains [:groupType :id :name :description] :in-any-order :gaps-ok))
+
+    (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
+
+    (fact "Four groups"
+      (-> (query sonja :attachment-groups :id application-id)
+          :groups
+          count) => 4)))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
@@ -295,7 +366,7 @@
     attachment1 =not=> attachment2
 
     (upload-attachment sonja application-id attachment1 true :filename "dev-resources/test-pdf.pdf")
-    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-attachment.txt")
+    (upload-attachment sonja application-id attachment2 true :filename "dev-resources/test-gif-attachment.gif")
 
     (fact "Can rotate PDF"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 90) => ok?)
@@ -303,7 +374,7 @@
     (fact "Can not rotate PDF 0 degrees"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment1) :rotation 0) => fail?)
 
-    (fact "Can not rotate txt"
+    (fact "Can not rotate gif"
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (facts "Rotate PDF - versions and files"
@@ -340,6 +411,40 @@
                       first)]
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
+
+(facts "Convert attachment to PDF/A"
+       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+             application-id (:id application)
+             attachment (first (:attachments application))
+             attachment-id (:id attachment)]
+
+       (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+
+       (let [attachment (first (:attachments (query-application sonja application-id)))]
+           (fact "Auto conversion should be done to txt -file"
+                 (get-in attachment [:latestVersion :autoConversion]) => true)
+
+           (fact "File should be converted to PDF/A"
+                 (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+                 (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
+
+           (fact "Latest version should be 0.2 after conversion"
+                 (get-in attachment [:latestVersion :version :major]) => 0
+                 (get-in attachment [:latestVersion :version :minor]) => 2)
+
+           (fact "After deleting converted version, original version should exists"
+                (command sonja
+                         :delete-attachment-version
+                         :id application-id
+                         :attachmentId attachment-id
+                         :fileId (get-in attachment [:latestVersion :fileId])
+                         :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?
+                (let [original-attachment (get-attachment-by-id sonja application-id (:id attachment))]
+                     (get-in original-attachment [:latestVersion :version :major]) => 0
+                     (get-in original-attachment [:latestVersion :version :minor]) => 1
+                     (get-in original-attachment [:latestVersion :contentType]) => "text/plain"
+                     (get-in original-attachment [:latestVersion :filename]) => "test-attachment.txt")))))
+
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
@@ -612,6 +717,14 @@
                            :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
                   => (partial expected-failure? :error.ram-cannot-delete-root))))
     (let [ram-id (:id (latest-attachment))]
+      (facts "Latest attachment has RAM link"
+             (let [{[a b] :ram-links} (query pena :ram-linked-attachments :id application-id :attachmentId ram-id)]
+              (fact "Base attachment has no link" (:ram-link a) => nil)
+              (fact "RAM attachment links to base attachment" (:ramLink b) => (:id a))))
+      (fact "Authority can query RAM links"
+            (query sonja :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
+      (fact "Reader authority can query RAM links"
+            (query luukas :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
       (fact "Sonja approves RAM attachment"
             (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
       (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]

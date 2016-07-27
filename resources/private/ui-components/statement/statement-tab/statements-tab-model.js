@@ -2,6 +2,8 @@ LUPAPISTE.StatementsTabModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   self.application = params.application;
   self.authorization = params.authModel;
 
@@ -13,11 +15,11 @@ LUPAPISTE.StatementsTabModel = function(params) {
   self.saateText = ko.observable();
   self.maaraaika = ko.observable();
 
-  self.disabled = ko.pureComputed(function() {
+  self.disabled = self.disposedPureComputed(function() {
     return _.isEmpty(self.selectedPersons()) || self.submitting();
   });
 
-  self.combinedData = ko.computed(function() {
+  self.combinedData = self.disposedPureComputed(function() {
     return self.data().concat(self.manualData());
   });
 
@@ -31,15 +33,16 @@ LUPAPISTE.StatementsTabModel = function(params) {
 
   function DataTemplate() {
     var selfie = this;
+    ko.utils.extend(selfie, new LUPAPISTE.ComponentBaseModel());
     selfie.text = ko.observable("").extend({ required: true });
     selfie.name = ko.observable("").extend({ required: true });
     selfie.email = ko.observable("").extend({ required: true, email: true });
     // Make the statement givers entered by authority admin (self.data) read-only. Those have an ID, others (dynamically input ones - self.manualData) do not.
-    selfie.readonly = ko.pureComputed(function() {
+    selfie.readonly = selfie.disposedPureComputed(function() {
       return selfie.id ? true : false;
     });
     selfie.errors = ko.validation.group(selfie);
-    selfie.errors.subscribe(function(errs) {
+    selfie.disposedSubscribe(selfie.errors, function(errs) {
       if (errs.length === 0 && self.showInviteSection && self.showInviteSection()) {
         self.selectedPersons.push(selfie);
         addManualData();

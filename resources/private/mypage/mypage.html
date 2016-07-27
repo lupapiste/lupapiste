@@ -11,16 +11,12 @@
       </div>
       <div class="hr"></div>
       <h1 data-bind="ltext: 'mypage.title'"></h1>
-      <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
+      <div data-bind="ltext:'mypage.desc'" class="page-info"></div>
 
-      <div data-test-id="mypage-personal-info-accordion"
-           data-bind="component: {name: 'accordion', params: {ltitle: 'mypage.personalInfo',
-                                                              accordionContentTemplate: 'mypage-personal-info-template',
-                                                              accordionContentTemplateData: $data}}"></div>
+      <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
 
-      <script type="text/x-jquery-tmpl" id="mypage-personal-info-template">
-        <form>
-          <div class="form-grid">
+<form>
+          <div class="form-grid no-padding">
             <div class="row">
               <div class="col-1"
                    data-bind="component: {name: 'text-field',
@@ -70,7 +66,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: street,
                                                    disable: disable,
-                                                   id: 'stree',
+                                                   id: 'userinfo.street',
                                                    lLabel: 'userinfo.street',
                                                    required: true}}"></div>
 
@@ -78,7 +74,7 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: zip,
                                                    disable: disable,
-                                                   id: 'zip',
+                                                   id: 'userinfo.zip',
                                                    lLabel: 'userinfo.zip',
                                                    required: true}}"></div>
 
@@ -86,9 +82,21 @@
                    data-bind="component: {name: 'text-field',
                                           params: {value: city,
                                                    disable: disable,
-                                                   id: 'city',
+                                                   id: 'userinfo.city',
                                                    lLabel: 'userinfo.city',
                                                    required: true}}"></div>
+            </div>
+            <div class="row">
+              <div class="col-1"
+                   data-bind="component: {name: 'select-field',
+                              params: {value: language,
+                              options: loc.getSupportedLanguages(),
+                              optionsText: loc,
+                              disable: disable,
+                              id: 'userinfo-language',
+                              lLabel: 'userinfo.language',
+                              required: false}}">
+              </div>
             </div>
 
             <div class="row">
@@ -98,6 +106,9 @@
                                                   disable: disable,
                                                   id: 'allowDirectMarketing',
                                                   lLabel: 'userinfo.allowDirectMarketing'}}"></div>
+            </div>
+            <div class="row">
+              <span data-bind="lhtml:'userinfo.architect.desc'"></span>
             </div>
             <div class="row">
               <div class="col-3"
@@ -110,7 +121,7 @@
           </div>
 
           <!-- ko if: architect -->
-            <div class="architect-info form-grid">
+            <div class="architect-info form-grid no-padding">
 
               <h2 data-bind="ltext: 'architect.experience.title'"></h2>
 
@@ -208,19 +219,14 @@
           </div>
 
         </form>
-      </script>
+
     </div>
 
     <!-- TODO: componentize mypage -->
     <div id="pw-form" class="accordion-container">
-      <div data-test-id="mypage-change-password-accordion"
-           data-bind="component: {name: 'accordion', params: {ltitle: 'userinfo.changePassword',
-                                                              accordionContentTemplate: 'mypage-change-password',
-                                                              accordionContentTemplateData: $data}}"></div>
-      <script type="text/x-jquery-tmpl" id="mypage-change-password">
-        <div>
+      <h2 data-bind="ltext: 'userinfo.changePassword'"></h2>
           <form>
-            <div class="form-grid">
+            <div class="form-grid no-padding">
               <div class="row">
                 <div class="col-1"
                      data-bind="component: {name: 'password-field',
@@ -258,13 +264,12 @@
               </div>
             </div>
           </form>
-        </div>
-      </script>
     </div>
 
     <div id="mypage-change-email"  class="accordion-container">
       <div data-test-id="mypage-change-email-accordion"
-           data-bind="component: {name: 'change-email', params: {ltitle: 'userinfo.change-email', data: $data.userinfo, authorization: $data.authorization}}"></div>
+           data-bind="component: {name: 'change-email', 
+                      params: {data: $data.userinfo, authorization: $data.authorization}}"></div>
     </div>
 
     <div id="mypage-company" class="accordion-container">
@@ -351,6 +356,8 @@
         <div data-bind="visible: state() === stateSending, ltext: 'userinfo.architect.upload.state.sending'"></div>
         <div data-bind="visible: state() === stateDone, ltext: 'userinfo.architect.upload.state.ready'"></div>
         <div data-bind="visible: state() === stateError, ltext: 'userinfo.architect.upload.state.error'"></div>
+        <div data-bind="visible: errorText(), ltext: errorText()" data-test-id="userinfo-upload-error"></div>
+
 
         <form>
 

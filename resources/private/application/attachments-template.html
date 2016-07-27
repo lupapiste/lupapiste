@@ -101,13 +101,21 @@
               data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id; }">
                 <span data-bind="if: $data.latestVersion">
                   <a href="#" target="_blank"
-                     data-bind="text: latestVersion.filename,
-                                attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion.fileId,
-                                       title: loc('download')},
-                                click: function() {return true;},
+                     data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion.fileId,
+                                       title: loc('view-file')},
+                                click: _.constant(true),
+                                text: latestVersion.filename,
                                 clickBubble: false"></a><br/>
-                  <i data-bind="ltext: latestVersion.contentType"></i>
-                  <i data-bind="size: latestVersion.size"></i>
+
+              <a href="#"
+                     data-bind="attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
+                                       title: loc('download-file')},
+                                click: _.constant(true),
+                                clickBubble: false">
+                <i class="lupicon-download btn-small"></i>
+                <span data-bind="ltext: 'download-file'"></span>
+              </a>
+              (<i data-bind="size: latestVersion.size"></i>)
                 </span>
                 <!-- ko if: !$data.latestVersion -->
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>

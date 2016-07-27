@@ -24,6 +24,7 @@
       <div data-bind="if: archiveEnabled">
         <div>
           <p data-bind="ltext: 'attachment.upload.instructions.pdfa'"></p>
+          <p data-bind="ltext: 'attachment.upload.instructions.pdfa.signature'"></p>
         </div>
       </div>
     </div>
@@ -58,8 +59,8 @@
     <!-- ko if: opSelector() -->
     <label data-bind="ltext: 'attachment.label.operation'" for="attachmentOperation"></label> *
     <select name="operationId" class="form-input combobox long" id="attachmentOperation"
-            data-bind="options: selectableOperations,
-                       optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
+            data-bind="options: selectableGroups,
+                       optionsText: getGroupOptionsText,
                        optionsValue: 'id',
                        optionsCaption: loc('attachment.label.operation.choose'),
                        value: operationId"></select>

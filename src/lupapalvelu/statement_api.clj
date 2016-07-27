@@ -92,9 +92,8 @@
    :user-roles #{:authority}
    :user-authz-roles auth/default-authz-writer-roles
    :states states/all-application-states}
-  [{application :application}]
-  (let [org-id (:organization application)]
-    (statement/fetch-organization-statement-givers org-id)))
+  [{application :application organization :organization}]
+  (statement/fetch-organization-statement-givers @organization))
 
 (defn- get-dueDate-loc [lang dueDate]
   (if dueDate

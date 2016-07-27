@@ -18,7 +18,7 @@ ${SLOWEST_SPEED}                0.5
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
-${APPLICATIONS PATH}            /app/fi/applicant#!/applications
+${APPLICATIONS PATH}            /applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
@@ -30,18 +30,22 @@ ${DB COOKIE}                    test_db_name
 ${DB PREFIX}                    test_
 
 *** Keywords ***
+
+Set DB cookie
+  ${timestamp}=  Get Time  epoch
+  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
+
 Browser
   [Arguments]
-  ${timestamp}=  Get Time  epoch
-  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
-  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # Setting cookies on login page fails on IE8, perhaps because of
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
-  Add Cookie  ${DB COOKIE}  ${dbname}
-  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
-  Log  Cookie: ${DB COOKIE} = ${dbname}
+  Set DB cookie
 
 Open browser to login page
   Browser
@@ -131,6 +135,10 @@ Language To
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
 
+Language Is
+  [Arguments]  ${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
+
 
 #
 # Navigation
@@ -163,7 +171,8 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
+  Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
 Open side panel
   [Arguments]  ${name}
@@ -334,6 +343,9 @@ Mikko logs in
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
 
+Sven logs in
+  Applicant logs in  sven@example.com  sven  Sven Svensson
+
 Arto logs in
   Authority logs in  arto  arto  Arto Viranomainen
 
@@ -469,6 +481,12 @@ Element should be visible by test id
 Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
+# Workaround for HTML5 inputs
+Value should be
+  [Arguments]    ${textfield}    ${expected}
+  ${actual}=    Get Value    ${textfield}
+  Should Be Equal    ${expected}    ${actual}
 
 #
 # The following do not take data-test-id as argument
@@ -692,7 +710,7 @@ Open attachment details
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until Page Contains  ${PNG_TESTFILE_NAME}
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
@@ -756,7 +774,7 @@ Click tree item by text
 
 
 # Cancel application or inforequest
-  
+
 Close current inforequest
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="inforequest-cancel-btn"]
   Click enabled by test id  inforequest-cancel-btn
@@ -817,6 +835,16 @@ Submit application
   Click enabled by test id  application-submit-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
+
+Submit application errors count is
+  [Arguments]  ${count}
+  Wait until  Xpath Should Match X Times  //div[@data-test-id='submit-errors-container']//div[contains(@class,'info-line')]  ${count}
+
+Submit application error should be
+  [Arguments]  ${errorText}
+  Wait until  Element should be visible  //div[@data-test-id='submit-errors-container']
+  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
+  Should Be Equal As Strings  ${errorText}  ${attrValue}
 
 Approve application ok
   Click enabled by test id  approve-application
@@ -1298,7 +1326,11 @@ Test id should contain
 
 Test id input is
   [Arguments]  ${id}  ${text}
-  Wait until  Textfield value should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Value should be  jquery=[data-test-id=${id}]  ${text}
+
+Test id text is
+  [Arguments]  ${id}  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}
@@ -1311,20 +1343,29 @@ Javascript?
 
 Click label
   [Arguments]  ${for}
+  Scroll to  label[for=${for}]
   Click element  jquery=label[for=${for}]
-  
 
 Checkbox wrapper selected
   [Arguments]  ${id}
-  Javascript?  $("input#${id}:checked").length
+  Javascript?  $("input#${id}:checked").length === 1
 
 Checkbox wrapper not selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 0
 
+Checkbox wrapper disabled
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:disabled").length === 1
+
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
+
+Test id select is
+  [Arguments]  ${id}  ${value}
+  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+
 
 # Frontend error log
 

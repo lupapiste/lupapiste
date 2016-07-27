@@ -46,7 +46,8 @@
              :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
              :email     (sc/pred valid-email? "valid email")
-             :personId  (sc/pred valid-hetu? "valid hetu")})
+             :personId  (sc/pred valid-hetu? "valid hetu")
+             (sc/optional-key :language)  i18n/supported-language-schema})
 
 ;
 ; Utils:

@@ -82,7 +82,7 @@
   (let [canonical-without-attachments (kiinteistotoimitus-canonical application lang)
         attachments-canonical (attachments-canon/get-attachments-as-canonical application begin-of-link)
         canonical (bind-attachments canonical-without-attachments
-                                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical))
+                                    (mapping-common/add-generated-pdf-attachments application begin-of-link attachments-canonical lang))
         mapping (->mapping)
         xml (emit/element-to-xml canonical mapping)
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
