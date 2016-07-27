@@ -98,7 +98,7 @@
             (get-in linked-user [:partnerApplications :rakentajafi :origin]) => false))))
 
     (fact "User is linked on remote end too: we sent test-id"
-      (let [user-resp (local-query admin :users :userId pena-id)
+      (let [user-resp (query admin :users :userId pena-id)
             remote-user (first (:users user-resp))]
         user-resp => ok?
         (get-in remote-user [:partnerApplications :lupapiste :id]) => test-id
