@@ -276,11 +276,11 @@
   (ok :reservationTypes (delete-command (str "reservation-types/" reservationTypeId))))
 
 (defquery available-calendar-slots
-  {:user-roles #{:authorityAdmin :authority :applicant}
+  {:user-roles #{:authority :applicant}
    :feature    :ajanvaraus
    :parameters       [authorityId clientId reservationTypeId year week]
    :input-validators [(partial action/non-blank-parameters [:authorityId :clientId :reservationTypeId :year :week])]
-   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority :applicant})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
   [_]
   (ok :slots (->FrontendReservationSlots
                (cal/available-calendar-slots-for-appointment {:year year :week week
@@ -310,15 +310,17 @@
                                             :reservationTypeId reservationTypeId :comment comment })))
 
 (defquery my-reservations
-  {:user-roles       #{:authority}
+  {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [year week]
-   :input-validators [(partial action/non-blank-parameters [:year :week])]
-   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]}
-  [{{:keys [id]} :user}]
-  (->> (api-query (str "reservations/by-external-ref/" id) {:year year :week week})
-       ->FrontendReservations
-       (ok :reservations)))
+   :input-validators [(partial action/non-blank-parameters [:year :week])]}
+  [{{:keys [id] :as user} :user}]
+  (->>
+    (cond
+      (usr/authority? user) (api-query (str "reservations/by-external-ref/" id) {:year year :week week})
+      (usr/applicant? user) [])
+    ->FrontendReservations
+    (ok :reservations)))
 
 ; For integration tests in dev
 (env/in-dev

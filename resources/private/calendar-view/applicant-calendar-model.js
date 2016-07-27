@@ -9,6 +9,10 @@ LUPAPISTE.ApplicantCalendarModel = function () {
   self.reservationTypes = ko.observableArray([]);
   self.defaultLocation = ko.observable();
 
+  self.client = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
+                                lastName: lupapisteApp.models.currentUser.lastName(),
+                                id: lupapisteApp.models.currentUser.id(),
+                                partyType: [] });
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
 

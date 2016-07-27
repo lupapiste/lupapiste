@@ -12,7 +12,6 @@
         <label class="form-label tip" data-bind="ltext: 'application.calendar.select-authority'"></label>
         <select class="form-input combobox tip"
                 data-bind="options: authorities,
-                           optionsValue: function(item) { return _.get(item, 'id'); },
                            optionsText: function(item) { return partyFullName(item); },
                            optionsCaption: loc('choose'),
                            value: selectedParty">
@@ -30,12 +29,11 @@
       </span>
     </div>
 
-    <calendar-view params="searchConditions: { clientId: lupapisteApp.models.currentUser.id,
-                                               userId: selectedParty,
+    <calendar-view params="searchConditions: { client: client,
+                                               authority: selectedParty,
                                                reservationTypeId: selectedReservationType },
                            view: 'applicationView',
                            reservationTypes: reservationTypes,
-                           authorizedParties: authorities,
                            defaultLocation: defaultLocation,
                            participant: selectedParty">
     </calendar-view>
