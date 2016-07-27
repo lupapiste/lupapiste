@@ -15,15 +15,27 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
+  self.defaultLocation = ko.observable();
 
   self.noCalendarFoundForOrganization = ko.observable();
 
   self.disposedComputed(function() {
     var organizationId = lupapisteApp.models.application.organization();
     if (!_.isEmpty(organizationId)) {
-      self.sendEvent("calendarService", "fetchOrganizationReservationTypes", {organizationId: organizationId});
       self.sendEvent("calendarService", "fetchMyCalendars");
     }
+  });
+
+  self.disposedComputed(function() {
+    var id = lupapisteApp.models.application.id();
+    if (!_.isEmpty(id)) {
+      self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+    }
+  });
+
+  self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
+    self.reservationTypes(event.reservationTypes);
+    self.defaultLocation(event.defaultLocation);
   });
 
   self.disposedComputed(function() {
@@ -39,10 +51,6 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
         var partyType = _.map(docs, function (d) { return _.get(d, "schema-info.name"); });
         return _.extend(party, { partyType: partyType });
       }));
-  });
-
-  self.addEventListener("calendarService", "organizationReservationTypesFetched", function(event) {
-    self.reservationTypes(event.reservationTypes);
   });
 
   self.addEventListener("calendarService", "myCalendarsFetched", function(event) {

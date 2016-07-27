@@ -289,10 +289,10 @@
                                                               :reservationTypeId reservationTypeId}))))
 
 (defquery application-calendar-config
-  {:user-roles #{:applicant}
+  {:user-roles #{:applicant :authority}
    :parameters [:id]
    :feature    :ajanvaraus
-   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
   [{{:keys [organization] :as appl} :application}]
   (ok :authorities (cal/find-application-authz-with-calendar appl)
       :reservationTypes (reservation-types organization)
