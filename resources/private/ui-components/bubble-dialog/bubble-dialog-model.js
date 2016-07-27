@@ -55,7 +55,7 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
                            }
                          });
 
-  ko.computed( function() {
+  self.disposedComputed( function() {
     if( self.bubbleVisible()) {
       self.sendEvent( BUBBLE, BUBBLE, {id: bubbleId});
       initFun();

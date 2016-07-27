@@ -37,7 +37,8 @@
 (def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 
 (timbre/set-level! env/log-level)
-(timbre/merge-config! {:timestamp-opts {:pattern time-format}
+(timbre/merge-config! {:timestamp-opts {:pattern time-format
+                                        :timezone :jvm-default}
                        :output-fn output-fn})
 
 ;;

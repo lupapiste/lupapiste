@@ -46,9 +46,9 @@
         (att/set-attachment-version! application
                                            (att/get-attachment-info application attachment-id)
                                            {:attachment-id  attachment-id
-                                            :file-id new-file-id :original-file-id new-file-id
+                                            :fileId new-file-id :original-file-id new-file-id
                                             :filename filename
-                                            :content-type contentType :size (.length file)
+                                            :contentType contentType :size (.length file)
                                             :comment-text nil :now now :user user
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)

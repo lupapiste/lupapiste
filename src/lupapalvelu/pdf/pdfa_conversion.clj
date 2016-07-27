@@ -106,6 +106,9 @@
                           (do (warn "PDF/A conversion failed probably because of missing fonts")
                               (warn error-lines)
                               {:pdfa? false})))
+      (= exit 10) (do
+                    (error "pdf2pdf - not a valid license")
+                    {:pdfa? false})
       :else (do (warn "pdf2pdf error:" err "exit status:" exit)
                 (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))

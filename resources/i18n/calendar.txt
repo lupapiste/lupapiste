@@ -89,3 +89,5 @@
 "application.calendar.party-to-invite" "sv" ""
 "application.calendar.reservation-type" "fi" "Tapaamisen aihe"
 "application.calendar.reservation-type" "sv" ""
+"application.calendar.select-authority" "fi" "Valitse viranomainen"
+"application.calendar.select-authority" "sv" ""

@@ -238,14 +238,16 @@
 ;; Application creation
 ;;
 
-(defn make-attachments [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
+(defn make-attachments
+  [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
   (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
                             (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
         groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :groupType group)) types)
-        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
-    (map (partial att/make-attachment created target true false false applicationState) groups types metadatas)))
+        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)
+        stripped-types (map #(select-keys % [:type-id :type-group]) types)] ; attachments contain metadata, but it's not saved to db. Thus select only type information.
+    (map (partial att/make-attachment created target true false false (keyword applicationState)) groups stripped-types metadatas)))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -300,7 +302,7 @@
 
 (defn make-op [op-name created]
   {:id          (mongo/create-id)
-   :name        (keyword op-name)
+   :name        op-name
    :description nil
    :created     created})
 

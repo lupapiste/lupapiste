@@ -101,6 +101,17 @@ LUPAPISTE.CalendarService = function() {
       .call();
    });
 
+  var _fetchApplicationCalendarConfig = hub.subscribe("calendarService::fetchApplicationCalendarConfig", function(event) {
+    ajax.query("application-calendar-config", {id: event.applicationId})
+      .success(function(d) {
+        hub.send("calendarService::applicationCalendarConfigFetched",
+          { authorities: d.authorities || [],
+            reservationTypes: d.reservationTypes,
+            defaultLocation: d.defaultLocation });
+      })
+      .call();
+  });
+
   var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
     ajax.query("reservation-types-for-organization", {organizationId: event.organizationId})
       .success(function (data) {
@@ -198,5 +209,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_deleteSlot);
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
+    hub.unsubscribe(_fetchApplicationCalendarConfig);
   };
 };

@@ -70,8 +70,6 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.slot(event.slot);
     self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
-    var party = self.client();
-    self.participants([lupapisteApp.models.currentUser.displayName(), party.firstName + " " + party.lastName]);
 
     //self.location(params.defaultLocation());
 

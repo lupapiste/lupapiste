@@ -241,6 +241,9 @@
   [collection query]
   (.wasAcknowledged (mc/remove (get-db) collection (remove-null-chars query))))
 
+;;
+;; Grid FS
+;;
 (defn ^{:perfmon-exclude true} set-file-id [^GridFSInputFile input ^String id]
   (.setId input (remove-null-chars id))
   input)
@@ -268,7 +271,7 @@
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
-     :content-length (.getLength attachment)
+     :size (.getLength attachment)
      :file-name (.getFilename attachment)
      :fileId (.getId attachment)
      :metadata metadata
@@ -278,6 +281,11 @@
   "Returns only GridFS file metadata as map. Use download-find to get content."
   [query]
   (gfs/find-one-as-map (get-gfs) (with-_id (remove-null-chars query))))
+
+(defn update-file-by-query
+  [query updates]
+  {:pre [(max-1-elem-match? query) (map? query) (map? updates)]}
+  (update-by-query :fs.files query updates))
 
 (defn download-find-many [query]
   (map gridfs-file-as-map (gfs/find (get-gfs) (with-_id (remove-null-chars query)))))

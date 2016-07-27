@@ -24,10 +24,8 @@
                    attachment-file-ids
                    version-number
                    latest-version-after-removing-file
-                   make-version
                    build-version-updates
                    default-metadata-for-attachment-type
-                   create-appeal-attachment-data!
                    make-ram-attachment)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
@@ -93,43 +91,45 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [{:type {:type-group :g :type-id :a}} {:type {:type-group :g :type-id :b}}] false true true)
-  => (just [{:id                   "123"
-             :locked               false
-             :modified             999
-             :op                   nil
-             :state                :requires_user_action
-             :target               nil
-             :type                 {:type-group :g :type-id :a}
-             :applicationState     :draft
-             :contents             nil
-             :signatures           []
-             :versions             []
-             :auth                 []
-             :notNeeded            false
-             :required             true
-             :requestedByAuthority true
-             :forPrinting          false
-             :readOnly             false}
-            {:id                   "123"
-             :locked               false
-             :modified             999
-             :op                   nil
-             :state                :requires_user_action
-             :target               nil
-             :type                 {:type-group :g :type-id :b}
-             :applicationState     :draft
-             :contents             nil
-             :signatures           []
-             :versions             []
-             :auth                 []
-             :notNeeded            false
-             :required             true
-             :requestedByAuthority true
-             :forPrinting          false
-             :readOnly             false}])
-  (provided
-    (mongo/create-id) => "123"))
+  (let [type1 (ssg/generate Type)
+        type2 (ssg/generate Type)]
+    (make-attachments 999 :draft [{:type type1} {:type type2}] false true true)
+    => (just [{:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 type1
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}
+              {:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :op                   nil
+               :state                :requires_user_action
+               :target               nil
+               :type                 type2
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}])
+    (provided
+      (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
 (fact "attachment can be found with file-id"
   (get-attachment-info-by-file-id {:attachments [{:versions [{:fileId "123"}
@@ -167,16 +167,18 @@
 
 
 (fact "make attachments with metadata"
-  (let [types-with-metadata [{:type {:type-group :g :type-id :a} :metadata {"foo" "bar"}}
-                             {:type {:type-group :g :type-id :b} :metadata {"bar" "baz"}}]]
+  (let [type1 (ssg/generate Type)
+        type2 (ssg/generate Type)
+        types-with-metadata [{:type type1 :metadata {:foo "bar"}}
+                             {:type type2 :metadata {:bar "baz"}}]]
     (make-attachments 999 :draft types-with-metadata false true true)
-    => (just [{:id                   "123"
+    => (just [{:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
                :op                   nil
                :state                :requires_user_action
                :target               nil
-               :type                 {:type-group :g :type-id :a}
+               :type                 type1
                :applicationState     :draft
                :contents             nil
                :signatures           []
@@ -186,15 +188,15 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :metadata             {"foo" "bar"}
+               :metadata             {:foo "bar"}
                :readOnly             false}
-              {:id                   "123"
+              {:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
                :op                   nil
                :state                :requires_user_action
                :target               nil
-               :type                 {:type-group :g :type-id :b}
+               :type                 type2
                :applicationState     :draft
                :contents             nil
                :signatures           []
@@ -204,10 +206,10 @@
                :required             true
                :requestedByAuthority true
                :forPrinting          false
-               :metadata             {"bar" "baz"}
+               :metadata             {:bar "baz"}
                :readOnly             false}])
     (provided
-     (mongo/create-id) => "123")))
+     (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
 (facts "facts about attachment metada"
   (fact "visibility"
@@ -241,12 +243,12 @@
                                                            :archivabilityError (apply sc/enum nil archivability-errors)
                                                            :missing-fonts (sc/eq ["Arial"])}))
                  general-options (ssg/generator {:filename sc/Str
-                                                :content-type sc/Str
-                                                :size sc/Int
-                                                :now ssc/Timestamp
-                                                :user user/SummaryUser
-                                                :stamped (sc/maybe sc/Bool)})]
-                (let [options (merge {:file-id file-id :original-file-id file-id} archivability general-options)
+                                                 :contentType sc/Str
+                                                 :size sc/Int
+                                                 :now ssc/Timestamp
+                                                 :user user/SummaryUser
+                                                 :stamped (sc/maybe sc/Bool)})]
+                (let [options (merge {:fileId file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment options)]
                   (is (not (nil? (get-in version [:version :minor]))))
                   (is (not (nil? (get-in version [:version :major]))))
@@ -255,7 +257,7 @@
                   (is (= (:created version) (:now options)))
                   (is (= (:user version) (:user options)))
                   (is (= (:filename version) (:filename options)))
-                  (is (= (:contentType version) (:content-type options)))
+                  (is (= (:contentType version) (:contentType options)))
                   (is (= (:size version) (:size options)))
                   (is (or (not (:stamped options)) (:stamped version)))
                   (is (or (not (:archivable options)) (:archivable version)))
@@ -265,23 +267,23 @@
 (defspec make-version-update-existing {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment options] (gen/fmap (fn [[att ver fids opt]] [(-> (update att :versions assoc 0 (assoc ver :originalFileId (first fids)))
                                                                               (assoc :latestVersion (assoc ver :originalFileId (first fids))))
-                                                                          (assoc opt :file-id (last fids) :original-file-id (first fids))])
+                                                                          (assoc opt :fileId (last fids) :original-file-id (first fids))])
                                                 (gen/tuple (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                                                            (ssg/generator Version)
                                                            (gen/vector-distinct ssg/object-id {:num-elements 2})
                                                            (ssg/generator {:filename sc/Str
-                                                                           :content-type sc/Str
+                                                                           :contentType sc/Str
                                                                            :size sc/Int
                                                                            :now ssc/Timestamp
                                                                            :user user/SummaryUser})))]
                 (let [version (make-version attachment options)]
                   (and (= (:version version) (get-in attachment [:latestVersion :version]))
-                       (= (:fileId version) (:file-id options))
+                       (= (:fileId version) (:fileId options))
                        (= (:originalFileId version) (:original-file-id options))
                        (= (:created version) (:now options))
                        (= (:user version) (:user options))
                        (= (:filename version) (:filename options))
-                       (= (:contentType version) (:content-type options))
+                       (= (:contentType version) (:contentType options))
                        (= (:size version) (:size options))))))
 
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
@@ -320,30 +322,6 @@
                 (let [updates (build-version-updates application attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
-
-
-(facts "appeal attachment updates"
-  (against-background
-    [(lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false]
-    (fact "appeal-attachment-data"
-      (let [file-id  (mongo/create-id)
-            file-obj {:content nil,
-                      :content-type "application/pdf",
-                      :content-length 123,
-                      :file-name "test-pdf.pdf",
-                      :metadata {:uploaded 12344567, :linked false},
-                      :application nil
-                      :fileId file-id}
-            command {:application {:state :verdictGiven}
-                     :created 12345
-                     :user {:id "foo" :username "tester" :role "authority" :firstName "Tester" :lastName "Testby"}}
-            result-attachment (create-appeal-attachment-data!
-                                command
-                                (mongo/create-id)
-                                :appeal
-                                file-obj)]
-        (fact "Generated attachment data is valid (no PDF/A generation)"
-          (sc/check Attachment result-attachment) => nil)))))
 
 (facts make-ram-attachment
 

@@ -1276,7 +1276,12 @@
                     <!-- Calendars tab -->
                     <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
                     <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
-                      <application-authority-calendar/>
+                      <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                        <application-authority-calendar/>
+                      <!-- /ko -->
+                      <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                        <applicant-calendar/>
+                      <!-- /ko -->
                     </div>
                     <!-- /ko -->
                 </div>

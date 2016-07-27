@@ -188,7 +188,7 @@ Kaino logs in and could submit application
   Login  kaino@solita.fi  kaino123
   Open application  ${appname}  ${propertyId}
   Open tab  requiredFieldSummary
-  Test id enabled  application-submit-btn
+  Wait until  Test id enabled  application-submit-btn
   [Teardown]  Logout
 
 Pena logs in and could not submit application

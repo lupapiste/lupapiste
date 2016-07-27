@@ -6,7 +6,7 @@
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as o]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -122,18 +122,10 @@
   [organization]
   (api-query "reservation-types/by-organization" {:organization organization}))
 
-(defn calendars-enabled-api-pre-check
-  [rolez {user :user {:keys [organization]} :application}]
-  (let [org-set (if organization
-                  #{organization}
-                  (usr/organization-ids-by-roles user rolez))]
-    (when (or (empty? org-set) (not (org/some-organization-has-calendars-enabled? org-set)))
-      unauthorized)))
-
 (defquery my-calendars
   {:user-roles #{:authority}
    :feature :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority})]}
   [{user :user}]
   (let [calendars     (map #(->FrontendCalendar % user) (cal/find-calendars-for-user (:id user)))
         calendars     (filter :active calendars)
@@ -146,7 +138,7 @@
    :feature :ajanvaraus
    :input-validators [(partial action/non-blank-parameters [:calendarId :userId])]
    :user-roles #{:authorityAdmin :authority}
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{user :user}]
   (let [calendar (get-calendar calendarId userId)]
     (when-not (authorized-to-edit-calendar? user calendarId)
@@ -158,7 +150,7 @@
 (defquery calendars-for-authority-admin
   {:user-roles #{:authorityAdmin}
    :feature :ajanvaraus
-  :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+  :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [{user :user}]
   (let [admin-in-organization-id (usr/authority-admins-organization-id user)
         users                    (usr/authority-users-in-organizations [admin-in-organization-id])
@@ -174,7 +166,7 @@
    :input-validators [(partial action/non-blank-parameters [:userId])
                       (partial action/boolean-parameters [:enabled])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [{adminUser :user}]
   (let [orgId (usr/authority-admins-organization-id adminUser)]
     (info "Set calendar enabled status" userId "in organization" orgId "as" enabled)
@@ -187,7 +179,7 @@
    :parameters [calendarId year week]
    :input-validators [(partial action/non-blank-parameters [:calendarId :year :week])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [_]
   (->> (api-query (str "reservationslots/calendar/" calendarId) {:year year :week week})
        ->FrontendReservationSlots
@@ -204,7 +196,7 @@
    :input-validators [(partial action/number-parameters [:calendarId])
                       (partial action/vector-parameter-of :slots valid-frontend-slot?)]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{user :user}]
   (when-not (authorized-to-edit-calendar? user calendarId)
     (unauthorized!))
@@ -233,7 +225,7 @@
    :parameters       [slotId]
    :input-validators [(partial action/number-parameters [:slotId])]
    :feature          :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{user :user}]
   (let [slot       (get-calendar-slot slotId)
         calendarId (:resourceId slot)]
@@ -247,7 +239,7 @@
    :parameters [reservationType]
    :input-validators [(partial action/non-blank-parameters [:reservationType])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [{user :user}]
   (info "Inserting a reservation type ")
   (ok :result (post-command "reservation-types/" {:reservationType   reservationType
@@ -258,8 +250,8 @@
    :parameters [organizationId]
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
-  [{user :user}]
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+  [_]
   (info "Get reservation types for organization" organizationId)
   (ok :organization organizationId
       :reservationTypes (reservation-types organizationId)))
@@ -270,7 +262,7 @@
    :input-validators [(partial action/number-parameters [:reservationTypeId])
                       (partial action/non-blank-parameters [:name])]
    :feature :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [_]
   (ok :reservationTypes (put-command (str "reservation-types/" reservationTypeId) {:name name})))
 
@@ -279,16 +271,16 @@
    :parameters [reservationTypeId]
    :input-validators [(partial action/number-parameters [:reservationTypeId])]
    :feature    :ajanvaraus
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin})]}
   [_]
   (ok :reservationTypes (delete-command (str "reservation-types/" reservationTypeId))))
 
 (defquery available-calendar-slots
-  {:user-roles #{:authorityAdmin :authority}
+  {:user-roles #{:authorityAdmin :authority :applicant}
    :feature    :ajanvaraus
    :parameters       [authorityId clientId reservationTypeId year week]
    :input-validators [(partial action/non-blank-parameters [:authorityId :clientId :reservationTypeId :year :week])]
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority :applicant})]}
   [_]
   (ok :slots (->FrontendReservationSlots
                (cal/available-calendar-slots-for-appointment {:year year :week week
@@ -296,13 +288,23 @@
                                                               :clientId clientId
                                                               :reservationTypeId reservationTypeId}))))
 
+(defquery application-calendar-config
+  {:user-roles #{:applicant}
+   :parameters [:id]
+   :feature    :ajanvaraus
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
+  [{{:keys [organization] :as appl} :application}]
+  (ok :authorities (cal/find-application-authz-with-calendar appl)
+      :reservationTypes (reservation-types organization)
+      :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
+
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}
    :feature          :ajanvaraus
    :parameters       [clientId slotId reservationTypeId comment]
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment])]
-   :pre-checks       [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [_]
   (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
                                             :reservationTypeId reservationTypeId :comment comment })))
