@@ -309,14 +309,14 @@
   (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
                                             :reservationTypeId reservationTypeId :comment comment })))
 
-(defquery reservations-for-user
-  {:user-roles       #{:authorityAdmin :authority}
+(defquery my-reservations
+  {:user-roles       #{:authority}
    :feature          :ajanvaraus
-   :parameters       [userId year week]
-   :input-validators [(partial action/non-blank-parameters [:userId :year :week])]
-   :pre-checks       [(partial calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
-  [_]
-  (->> (api-query (str "reservations/by-external-ref/" userId) {:year year :week week})
+   :parameters       [year week]
+   :input-validators [(partial action/non-blank-parameters [:year :week])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]}
+  [{{:keys [id]} :user}]
+  (->> (api-query (str "reservations/by-external-ref/" id) {:year year :week week})
        ->FrontendReservations
        (ok :reservations)))
 

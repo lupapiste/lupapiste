@@ -55,7 +55,7 @@ LUPAPISTE.CalendarService = function() {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
     var slots = [];
 
-    ajax.query("reservations-for-user", { userId: event.authorityId, week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+    ajax.query("my-reservations", { week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
