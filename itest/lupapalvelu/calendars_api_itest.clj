@@ -122,7 +122,10 @@
                     (fact "my-reservations for authority includes the new reservation"
                       (->> (query authority :my-reservations :year current-year :week current-week)
                            :reservations
-                           (map :id)) => (just #{reservation-id}))))))
+                           (map :id)) => (just #{reservation-id})))
+                    (fact "Calendar can not be disabled if it has reservations in the future"
+                      (command sipoo :set-calendar-enabled-for-authority
+                                     :userId authority-id :enabled false) => fail?))))
             (fact "Find available slots as applicant"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
