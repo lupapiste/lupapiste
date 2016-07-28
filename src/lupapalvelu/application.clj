@@ -121,6 +121,15 @@
   (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
     (= (:type schema-info) :party)))
 
+(defn get-previous-app-state
+  "Returns second last history item's state as keyword"
+  [{history :history}]
+  (->> (sort-by :ts history)
+       butlast
+       last
+       :state
+       keyword))
+
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts"})
 
