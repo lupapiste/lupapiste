@@ -304,14 +304,14 @@
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}
    :feature          :ajanvaraus
-   :parameters       [clientId slotId reservationTypeId comment location applicationId]
+   :parameters       [clientId slotId reservationTypeId comment location :id]
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
-                      (partial action/string-parameters [:clientId :comment :location :applicationId])]
+                      (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
-  [_]
+  [{{:keys [id]} :application}]
   (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
                                             :reservationTypeId reservationTypeId :comment comment
-                                            :location location :contextId applicationId })))
+                                            :location location :contextId id })))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
