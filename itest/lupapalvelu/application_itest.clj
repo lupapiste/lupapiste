@@ -169,10 +169,11 @@
           (count (:comments application)) => 1
           (-> application :comments (first) :text) => (contains cancel-reason))))))
 
-(facts* "Pena cancels his application"
+(facts "Pena cancels his application"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id :address "Penahouse 88")
+        intial-submitted (:submitted application)
         application-id (:id application)
         reason-text "Cancellation notice."]
 
@@ -182,6 +183,7 @@
           (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
     (fact "Sonja sees the canceled application"
       (let [application (query-application sonja application-id)]
+        (:state application) => "canceled"
         (-> application :history last :state) => "canceled"))
     (fact "Pena sees the cancel reason text in comments"
           (let [application (query-application pena application-id)]
@@ -195,7 +197,22 @@
       (:to email) => (contains (email-for-key pena))
       (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id "applicant"))))
+      email => (partial contains-application-link? application-id "applicant"))
+
+    (fact "Sonja can undo cancellation"
+      (command sonja :undo-cancellation :id application-id) => ok?
+      (let [{:keys [state history canceled submitted]} (query-application pena application-id)]
+        state => "submitted"
+        canceled => nil
+        (fact "new submitted history entry is added"
+          (-> history last :state) => "submitted"
+          (> submitted intial-submitted) => true)
+        (fact "old canceled history entry is preserved"
+          (-> history butlast last :state) => "canceled")))
+
+    (fact "Pena can cancel again"
+      (command pena :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
+      (:state (query-application pena application-id)) => "canceled")))
 
 (fact "Authority is unable to create an application to a municipality in another organization"
   (create-app sonja :propertyId tampere-property-id) => unauthorized?)

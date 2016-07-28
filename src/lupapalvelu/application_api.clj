@@ -176,6 +176,25 @@
   [command]
   (app/cancel-application command))
 
+(defcommand undo-cancellation
+  {:parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :pre-checks       [(fn [{:keys [application]}]
+                        (when-not (= "canceled"
+                                     (->> (:history application)
+                                          (sort-by :ts)
+                                          ((comp name :state last))))
+                          (error "Last history entry not 'canceled'")
+                          (fail :error.latest-state-not-canceled)))]
+   :states           #{:canceled}}
+  [{:keys [application created user] :as command}]
+  (update-application command
+                      {:state :canceled}
+                      (merge
+                        (app/state-transition-update (app/get-previous-app-state application) created user)
+                        {$unset {:canceled 1}})))
+
 
 (defcommand request-for-complement
   {:parameters       [:id]
