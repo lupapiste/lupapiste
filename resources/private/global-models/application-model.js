@@ -543,13 +543,18 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.undoCancellation = function() {
-    ajax
-      .command("undo-cancellation", {id: self.id()})
-      .success(function() {
-        repository.load(self.id());
-      })
-      .processing(self.processing)
-      .call();
+    var sendCommand = ajax
+                        .command("undo-cancellation", {id: self.id()})
+                        .success(function() {
+                          repository.load(self.id());
+                        })
+                        .processing(self.processing);
+
+    hub.send("show-dialog", {ltitle: "application.undoCancellation",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: loc("application.undoCancellation.areyousure", loc(util.getPreviousState(self._js))),
+                                               yesFn: function() { sendCommand.call(); }}});
   };
 
   self.exportPdf = function() {

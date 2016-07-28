@@ -600,3 +600,5 @@
 "application.integration-messages.loading" "sv" ""
 "application.not-submittable" "fi" "Hakemusta ei voi jättää"
 "application.not-submittable" "sv" "Ansökan kan inte lämnas"
+"application.undoCancellation.areyousure" "fi" "Haluatko varmasti palauttaa hakemuksen tilaan '{0}'?"
+"application.undoCancellation.areyousure" "sv" ""
