@@ -35,6 +35,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
         slot: self.slot,
         reservationTypeId: self.reservationTypeId,
         comment: self.comment,
+        location: self.location,
+        applicationId: lupapisteApp.models.application.id,
         weekObservable: params.weekdays});
     self.bubbleVisible(false);
   };

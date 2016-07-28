@@ -27,10 +27,13 @@
 (defn- ->FrontendReservations [backend-reservations]
   (map (fn [r] {:id        (:id r)
                 :status    :booked
+                :reservationStatus (:status r)
                 :reservationType (:reservationType r)
                 :startTime (util/to-millis-from-local-datetime-string (-> r :time :start))
                 :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
-                :comment   (:comment r)}) backend-reservations))
+                :comment   (:comment r)
+                :location  (:location r)
+                :applicationId (:contextId r)}) backend-reservations))
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
@@ -301,13 +304,14 @@
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authorityAdmin :authority}
    :feature          :ajanvaraus
-   :parameters       [clientId slotId reservationTypeId comment]
+   :parameters       [clientId slotId reservationTypeId comment location applicationId]
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
-                      (partial action/string-parameters [:clientId :comment])]
+                      (partial action/string-parameters [:clientId :comment :location :applicationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [_]
   (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
-                                            :reservationTypeId reservationTypeId :comment comment })))
+                                            :reservationTypeId reservationTypeId :comment comment
+                                            :location location :contextId applicationId })))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
