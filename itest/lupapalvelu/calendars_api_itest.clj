@@ -109,15 +109,20 @@
                 result => ok?
                 (count available-slots) => 3
                 (fact "Authority invites the applicant"
-                      (let [result (command authority :reserve-calendar-slot
-                                            :clientId pena-id
-                                            :authorityId authority-id
-                                            :reservationTypeId (get varaustyypit :Testityyppi)
-                                            :id app-id
-                                            :slotId (:id (first available-slots))
-                                            :comment "diipadaapa"
-                                            :location "paikka")]
-                        result => ok?))))
+                  (let [result (command authority :reserve-calendar-slot
+                                        :clientId pena-id
+                                        :authorityId authority-id
+                                        :reservationTypeId (get varaustyypit :Testityyppi)
+                                        :id app-id
+                                        :slotId (:id (first available-slots))
+                                        :comment "diipadaapa"
+                                        :location "paikka")
+                        reservation-id (:reservationId result)]
+                    result => ok?
+                    (fact "my-reservations for authority includes the new reservation"
+                      (->> (query authority :my-reservations :year current-year :week current-week)
+                           :reservations
+                           (map :id)) => (just #{reservation-id}))))))
             (fact "Find available slots as applicant"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id

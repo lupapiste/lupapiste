@@ -309,9 +309,9 @@
                       (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [{{:keys [id]} :application}]
-  (ok :result (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
-                                            :reservationTypeId reservationTypeId :comment comment
-                                            :location location :contextId id })))
+  (ok :reservationId (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
+                                                   :reservationTypeId reservationTypeId :comment comment
+                                                   :location location :contextId id })))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
