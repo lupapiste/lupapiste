@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1469010164018');
+@import url('main-blessed1.css?z=1469692622932');
 
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
@@ -6021,13 +6021,25 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: table-cell;
   vertical-align: middle;
 }
+/* line 176, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 6px;
+  color: white;
+  background: #2ca92c;
+}
+/* line 183, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation div {
+  height: 20px;
+}
 
-/* line 182, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 194, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
   margin-top: 24px;
 }
 
-/* line 186, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 198, ../../../private/common-html/sass/views/_calendars.scss */
 #application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }

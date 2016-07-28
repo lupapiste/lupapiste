@@ -173,6 +173,18 @@
           vertical-align: middle;
         }
 
+        &.reservation {
+          padding-top: 0;
+          padding-bottom: 0;
+          padding-left: $baseline / 4;
+          color: white;
+          background: $green-dark;
+
+          div {
+            height: 20px;
+          }
+        }
+
       }
     }
 
