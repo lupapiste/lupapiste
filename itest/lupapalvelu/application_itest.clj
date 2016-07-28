@@ -199,6 +199,9 @@
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id "applicant"))
 
+    (fact "Luukas (reader) can't undo-cancellation"
+      (command luukas :undo-cancellation :id application-id) => unauthorized?)
+
     (fact "Sonja can undo cancellation"
       (command sonja :undo-cancellation :id application-id) => ok?
       (let [{:keys [state history canceled submitted]} (query-application pena application-id)]
