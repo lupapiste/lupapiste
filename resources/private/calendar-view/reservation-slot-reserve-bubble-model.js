@@ -46,11 +46,12 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.authorityDisplayText = function() {
     var authority = self.authority();
+    console.log(authority);
     if (authority) {
       var text = authority.firstName + " " + authority.lastName;
-      if (!_.isEmpty(authority.organizationName)) {
+      if (!_.isEmpty(lupapisteApp.models.application.organizationName())) {
         text += ", ";
-        text += authority.organizationName;
+        text += lupapisteApp.models.application.organizationName();
       }
       return text;
     }
