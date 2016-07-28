@@ -53,7 +53,7 @@
           <div style="position: relative;">
             <!-- ko foreach: $component.timelineSlots($data) -->
             <div class="timeline-slot" data-bind="attr: { 'data-test-id': dataTestId },
-                                                  click: $component.clickHandler.bind($data, 'timeline-slot')">
+                                                  click: $component.view !== 'applicationView' ? $component.clickHandler.bind($data, 'timeline-slot') : _.noop">
               &nbsp;
             </div>
             <!-- /ko -->
