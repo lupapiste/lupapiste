@@ -62,7 +62,7 @@ The same application is opened, new one is not created
   Should Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
 Cancel the created application and re-fetch application
-  Close current application as authority
+  Cancel current application as authority
   Wait until  Element should be visible  applications
 
   Go to prev permit page and fill the kuntalupatunnus

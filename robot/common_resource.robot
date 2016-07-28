@@ -780,14 +780,14 @@ Close current inforequest
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
-Close current application
+Cancel current application
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click enabled by test id  application-cancel-btn
   Fill test id  cancel-application-reason  ${reason}
   Confirm  dialog-cancel-application
 
-Close current application as authority
+Cancel current application as authority
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
   Click enabled by test id  application-cancel-authority-btn
