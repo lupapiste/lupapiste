@@ -118,6 +118,8 @@
 "application.button.informConstructionStarted" "sv" "Meddela att ditt projekt har inletts"
 "application.cancelApplication" "fi" "Peruuta hakemus"
 "application.cancelApplication" "sv" "Avbryt ansökan"
+"application.undoCancellation" "fi" "Kumoa peruutus"
+"application.undoCancellation" "sv" ""
 "application.canceled.reason" "fi" "Peruutuksen syy"
 "application.canceled.reason" "sv" "Orsaken av återkallandet"
 "application.canceled.text" "fi" "Hakemus on peruutettu"

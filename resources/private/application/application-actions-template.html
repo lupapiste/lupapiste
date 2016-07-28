@@ -75,6 +75,12 @@
                 <span data-bind="ltext: 'application.cancelApplication'"></span>
             </button>
             <button class="function"
+                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !processing()"
+                    data-test-id="application-undo-cancellation-btn">
+                <i class="lupicon-circle-remove"></i>
+                <span data-bind="ltext: 'application.undoCancellation'"></span>
+            </button>
+            <button class="function"
                     data-bind="click: refreshKTJ, visible: $root.authorization.ok('refresh-ktj'), enable: !processing() && $root.authorization.ok('refresh-ktj')"
                     data-test-id="application-refresh-ktj-btn">
                 <i class="lupicon-refresh"></i>
