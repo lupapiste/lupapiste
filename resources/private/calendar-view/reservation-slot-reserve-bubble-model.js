@@ -13,7 +13,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.slot = ko.observable();
   self.location = ko.observable();
-  self.comment = ko.observable();
+  self.comment = ko.observable("");
   self.participants = ko.observableArray([]);
   self.reservationType = ko.observable();
   self.endHour = ko.observable();
