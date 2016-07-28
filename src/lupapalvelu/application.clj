@@ -101,7 +101,7 @@
       (fail :error.permit-has-no-such-subtype))))
 
 (defn submitted? [{:keys [state]}]
-  ((conj states/post-submitted-states :submitted) (keyword state)))
+  (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
 
 ;;
 ;; Helpers
