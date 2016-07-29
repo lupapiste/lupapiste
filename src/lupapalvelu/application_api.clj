@@ -179,14 +179,17 @@
 (defcommand undo-cancellation
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:authority}
+   :user-roles       #{:authority :applicant}
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= "canceled"
-                                     (->> (:history application)
-                                          (sort-by :ts)
-                                          ((comp name :state last))))
+                                     ((comp name :state) (app/last-history-item application)))
                           (error "Last history entry not 'canceled'")
-                          (fail :error.latest-state-not-canceled)))]
+                          (fail :error.latest-state-not-canceled)))
+                      (fn [{:keys [application user]}]
+                        (when-not (usr/authority? user)
+                          (let [canceled-entry (app/last-history-item application)]
+                            (when-not (= (:username user) (get-in canceled-entry [:user :username]))
+                              (fail :error.undo-only-for-canceler)))))]
    :states           #{:canceled}}
   [{:keys [application created user] :as command}]
   (update-application command

@@ -486,3 +486,7 @@
 "error.illegal-attachment-operation" "sv" ""
 "error.illegal-attachment-group-type" "fi" "Virheellinen ryhmittelytyyppi"
 "error.illegal-attachment-group-type" "sv" ""
+"error.latest-state-not-canceled" "fi" "Hakemusta ei voi palauttaa aktiiviseksi, koska hakemuksen viimeisin tila ei ole peruutettu"
+"error.latest-state-not-canceled" "sv" ""
+"error.undo-only-for-canceler" "fi" "Hakemuksen voi palauttaa aktiiviseksi ainoastaan peruuttaja itse, tai viranomainen"
+"error.undo-only-for-canceler" "sv" ""

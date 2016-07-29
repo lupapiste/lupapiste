@@ -121,6 +121,10 @@
   (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
     (= (:type schema-info) :party)))
 
+(defn last-history-item
+  [{history :history}]
+  (last (sort-by :ts history)))
+
 (defn get-previous-app-state
   "Returns second last history item's state as keyword"
   [{history :history}]
