@@ -14,19 +14,27 @@
                            prefix: 'reservation-slot-create',
                            waiting: waiting">
       <h3 data-bind="ltext: 'calendar.create-slot.title'"></h3>
-      <p><span data-bind="ltext: 'calendar.create-slot.first-start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
-      <p><span data-bind="ltext: 'calendar.slot.duration'"></span>:
-        <!-- ko if: $parent.durationHours !== 0 -->
-          <!-- ko text: $parent.durationHours --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.hours'"></span>
-        <!-- /ko -->
-        <!-- ko if: $parent.durationMinutes !== 0 -->
-          <!-- ko text: $parent.durationMinutes --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.minutes'"></span>
-        <!-- /ko -->
-      </p>
-      <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>:</p>
-      <p class="amount-controls"><i class="lupicon-circle-minus" data-bind="click: $parent.amountMinus"></i><input type="text" class="form-input" style="display: inline" data-test-id="reservation-slot-create-amount"
-                                 data-bind="value: $parent.amount"><i class="lupicon-circle-plus" data-bind="click: $parent.amountPlus"></i></p>
-      <p><span data-bind="ltext: 'calendar.slot.reservation-types'"></span>:</p>
+      <div>
+        <p><span data-bind="ltext: 'calendar.create-slot.first-start-time'"></span>: <span data-bind="dateTimeString: $parent.startTime"></span></p>
+        <p><span data-bind="ltext: 'calendar.slot.duration'"></span>:
+          <!-- ko if: $parent.durationHours !== 0 -->
+            <!-- ko text: $parent.durationHours --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.hours'"></span>
+          <!-- /ko -->
+          <!-- ko if: $parent.durationMinutes !== 0 -->
+            <!-- ko text: $parent.durationMinutes --><!-- /ko --> <span data-bind="ltext: 'calendar.slot.duration.minutes'"></span>
+          <!-- /ko -->
+        </p>
+      </div>
+      <div>
+        <p><span data-bind="ltext: 'calendar.create-slot.amount'"></span>:</p>
+        <p class="amount-controls">
+          <i class="lupicon-circle-minus" data-bind="click: $parent.amountMinus"></i>
+          <input type="text" class="input-default" style="display: inline" data-test-id="reservation-slot-create-amount"
+                         data-bind="value: $parent.amount">
+          <i class="lupicon-circle-plus" data-bind="click: $parent.amountPlus"></i>
+        </p>
+      </div>
+      <div><span data-bind="ltext: 'calendar.slot.reservation-types'"></span>:</div>
       <div data-bind="foreach: $parent.reservationTypes">
         <p>
           <input type="checkbox" data-bind="attr: { 'data-test-id': 'reservation-slot-create-type-checkbox-' + $index() },
