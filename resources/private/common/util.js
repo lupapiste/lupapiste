@@ -364,7 +364,7 @@ var util = (function($) {
   }
 
   function getPreviousState(application) {
-    var history = getIn(application, ["history"]);
+    var history = _.filter(getIn(application, ["history"]), "state"); // select only entries with 'state' value
     var previous = _.head(_.takeRight(history, 2));
     return ko.unwrap(previous.state);
   }

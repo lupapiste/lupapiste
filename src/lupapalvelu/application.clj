@@ -126,9 +126,10 @@
   (last (sort-by :ts history)))
 
 (defn get-previous-app-state
-  "Returns second last history item's state as keyword"
+  "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
   [{history :history}]
-  (->> (sort-by :ts history)
+  (->> (filter :state history)                              ; only history elements that regard state change
+       (sort-by :ts)
        butlast
        last
        :state

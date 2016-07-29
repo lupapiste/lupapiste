@@ -138,3 +138,13 @@
     (fact "no previous state if no history"
       (get-previous-app-state nil) => nil
       (get-previous-app-state []) => nil)))
+
+(facts "Get previous state (history)"
+  (let [state-seq [:one nil :two :three nil nil]
+        now (now)
+        history {:history
+                 (map-indexed
+                   (fn [i state] (history-entry state (+ now i) {:username "Pena"}))
+                   state-seq)}]
+    (fact "only entries with :state are regarded"
+      (get-previous-app-state history) => :two)))
