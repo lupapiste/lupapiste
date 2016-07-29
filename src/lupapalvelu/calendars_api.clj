@@ -127,7 +127,7 @@
 
 (defn- with-reservation-types
   [calendar]
-  (assoc calendar :reservationTypes (reservation-types (:organization cal))))
+  (assoc calendar :reservationTypes (reservation-types (:organization calendar))))
 
 (defquery my-calendars
   {:user-roles #{:authority}
