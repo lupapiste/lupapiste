@@ -160,7 +160,9 @@
       ; permit/YM
       ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
 
-      ["puun-kaataminen" :puun-kaataminen]])])
+      ["puiden-kaataminen"
+       [["ilmoitus-puiden-kaatamisesta-asemakaava-alueella" :yl-puiden-kaataminen]]]
+      ])])
 
 (def operation-tree-for-KT ; aka kiinteistotoimitus aka maanmittaustoimitukset
   ["maanmittaustoimitukset"
@@ -342,15 +344,15 @@
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta false}
-   :puun-kaataminen             {:schema "maisematyo"
-                                  :permit-type permit/YL
-                                  :applicant-doc-schema applicant-doc-schema-name-hakija
-                                  :required ["ymp-ilm-kesto-mini"]
-                                  :optional #{"paasuunnittelija"}
-                                  :attachments [:paapiirustus [:asemapiirros]] ;; Or [] like in other YL above?
-                                  :add-operation-allowed true
-                                  :min-outgoing-link-permits 0
-                                  :asianhallinta false}
+   :yl-puiden-kaataminen           {:schema "maisematyo"
+                                    :permit-type permit/YL
+                                    :applicant-doc-schema applicant-doc-schema-name-R
+                                    :required mini-rakval-schemas
+                                    :optional optional-mini-rakval-schemas
+                                    :attachments [:paapiirustus [:asemapiirros]]
+                                    :add-operation-allowed true
+                                    :min-outgoing-link-permits 0
+                                    :asianhallinta false}
    })
 
 (def- yi-operations
