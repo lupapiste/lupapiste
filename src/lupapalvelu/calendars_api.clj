@@ -125,16 +125,19 @@
   [organization]
   (api-query "reservation-types/by-organization" {:organization organization}))
 
+(defn- with-reservation-types
+  [calendar]
+  (assoc calendar :reservationTypes (reservation-types (:organization cal))))
+
 (defquery my-calendars
   {:user-roles #{:authority}
    :feature :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority})]}
   [{user :user}]
-  (let [calendars     (map #(->FrontendCalendar % user) (cal/find-calendars-for-user (:id user)))
-        calendars     (filter :active calendars)
-        organizations (keys (group-by :organization calendars))]
-    (ok :calendars        calendars
-        :reservationTypes (zipmap organizations (map reservation-types organizations)))))
+  (let [calendars   (map #(->FrontendCalendar % user) (cal/find-calendars-for-user (:id user)))
+        calendars   (filter :active calendars)
+        calendars   (map with-reservation-types calendars)]
+    (ok :calendars calendars)))
 
 (defquery calendar
   {:parameters [calendarId userId]

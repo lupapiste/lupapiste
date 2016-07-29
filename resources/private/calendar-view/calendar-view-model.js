@@ -84,13 +84,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
     }
   };
 
-  self.calendarId.subscribe(function(val) {
-    if (!_.isUndefined(val)) {
-      self.sendEvent("calendarService", "fetchCalendar",
-        {calendarId: val, user: self.userId(), reservationTypesObservable: self.reservationTypes});
-    }
-  });
-
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
       hub.send("calendarService::fetchApplicationCalendarSlots",

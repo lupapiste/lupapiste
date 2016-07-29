@@ -14,15 +14,14 @@
       </div>
 
       <!-- ko if: calendars().length > 0 -->
-        <div class="form-grid form-grid--no-border">
-          <span data-bind="ltext: 'mycalendar.in-organization'"></span>: &nbsp; &nbsp;
-          <!-- ko foreach: calendars -->
-          <span data-bind="component: {name: 'radio-field',
-                                       params: {value: id,
-                                                selectedValue: $parent.selectedCalendarId,
-                                                name: 'selectedCalendarId',
-                                                label: organization}}"></span>
-          <!-- /ko -->
+        <div class="form-entry">
+          <span data-bind="ltext: 'mycalendar.in-organization'"></span>:
+          <select class="form-input combobox tip"
+                  data-bind="options: calendars,
+                             optionsText: function(item) { return _.get(item, 'organization'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedCalendar">
+          </select>
         </div>
       <!-- /ko -->
 

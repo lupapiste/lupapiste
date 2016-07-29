@@ -3,7 +3,6 @@ LUPAPISTE.CalendarService = function() {
   var self = this,
       params = LUPAPISTE.config.calendars;
 
-  self.reservationTypesByOrganization = ko.observable();
   self.params = ko.observable(params);
 
   var _weekdays = function(calendarId, slots, startOfWeekMoment) {
@@ -84,9 +83,6 @@ LUPAPISTE.CalendarService = function() {
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
     ajax.query("calendar", {calendarId: event.calendarId, userId: event.user})
       .success(function(data) {
-        if (event.reservationTypesObservable) {
-          event.reservationTypesObservable(self.reservationTypesByOrganization()[data.calendar.organization]);
-        }
         if (event.calendarObservable) {
           event.calendarObservable(data.calendar);
         }
@@ -118,7 +114,6 @@ LUPAPISTE.CalendarService = function() {
       .success(function (data) {
         var obj = {};
         obj[data.organization] = data.reservationTypes;
-        self.reservationTypesByOrganization(obj);
         hub.send("calendarService::organizationReservationTypesFetched",
           { organizationId: data.organization, reservationTypes: data.reservationTypes });
       })
@@ -128,7 +123,6 @@ LUPAPISTE.CalendarService = function() {
   var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
     ajax.query("my-calendars")
       .success(function(data) {
-        self.reservationTypesByOrganization(data.reservationTypes);
         hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
       })
       .call();
