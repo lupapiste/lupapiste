@@ -75,7 +75,7 @@
                 <span data-bind="ltext: 'application.cancelApplication'"></span>
             </button>
             <button class="function"
-                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !processing()"
+                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !processing(), attr: {'title': loc('tooltip.undoCancellation')}"
                     data-test-id="application-undo-cancellation-btn">
                 <i class="lupicon-circle-attention"></i>
                 <span data-bind="ltext: 'application.undoCancellation'"></span>
