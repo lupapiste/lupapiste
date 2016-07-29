@@ -181,7 +181,7 @@ LUPAPISTE.CalendarService = function() {
   var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
     ajax
       .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId(),
-                                          comment: event.comment(), location: event.location(), applicationId: event.applicationId() })
+                                          comment: event.comment(), location: event.location(), id: event.applicationId() })
       .success(function() {
         hub.send("indicator", { style: "positive" });
         doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
