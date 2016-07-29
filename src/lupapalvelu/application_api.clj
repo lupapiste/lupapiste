@@ -185,6 +185,9 @@
                                      ((comp name :state) (app/last-history-item application)))
                           (error "Last history entry not 'canceled'")
                           (fail :error.latest-state-not-canceled)))
+                      (fn [{:keys [application]}]
+                        (when-not (states/all-states (app/get-previous-app-state application))
+                          (fail :error.illegal-state)))
                       (fn [{:keys [application user]}]
                         (when-not (usr/authority? user)
                           (let [canceled-entry (app/last-history-item application)]
