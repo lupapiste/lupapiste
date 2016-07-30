@@ -38,7 +38,7 @@
           </div>
 
           <!-- ko if: data().length > 0 -->
-          <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}">
+          <ul class="autocomplete-result" data-bind="event: {mousedown: retainFocus}, css: {'autocomplete-result-grouped': groupedResults}, style: {'max-height': maxHeightPx}">
             <!-- ko foreach: data -->
               <!-- ko if: $data.groupHeader -->
               <li class="autocomplete-group-header" data-bind="text: $component.optionsText ? $data[$component.optionsText] : $data,
