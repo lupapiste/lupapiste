@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1469706880249');
+@import url('main-blessed1.css?z=1469893629338');
 
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
@@ -894,7 +894,6 @@
   top: 38px;
   z-index: 1000;
   width: inherit;
-  max-height: 800px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: auto;
@@ -904,23 +903,23 @@
   background-color: #fff;
   color: black;
 }
-/* line 124, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 123, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 129, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 128, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 134, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 133, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 140, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 139, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -928,16 +927,16 @@
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 147, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 146, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 150, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 149, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 154, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 153, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
