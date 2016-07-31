@@ -1,19 +1,23 @@
-LUPAPISTE.Window = function() {
-  "use strict";
-  var self = this;
-  self.serviceName = "windowService";
+;(function($) {
+ "use strict";
 
-  var win = $(window);
+   LUPAPISTE.Window = function() {
+    var self = this;
+    self.serviceName = "windowService";
 
-  self.windowWidth = ko.observable(win.width());
-  self.windowHeight = ko.observable(win.height());
+    var win = $(window);
 
-  // listen widow change events
-  win.resize(function() {
-    self.windowWidth(win.width());
-    self.windowHeight(win.height());
-  });
-};
+    self.windowWidth = ko.observable(win.width());
+    self.windowHeight = ko.observable(win.height());
+
+    // listen widow change events
+    win.resize(function() {
+      self.windowWidth(win.width());
+      self.windowHeight(win.height());
+    });
+  };
+
+})(jQuery);
 
 ;(function() {
   "use strict";
