@@ -63,7 +63,8 @@
             [lupapalvelu.archiving-api]
             [lupapalvelu.appeal-api]
             [lupapalvelu.calendars-api]
-            [lupapalvelu.suti-api]))
+            [lupapalvelu.suti-api])
+  (:import [javax.imageio ImageIO]))
 
 (defonce jetty (atom nil))
 
@@ -157,6 +158,7 @@
     (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
     (System/getProperty "javax.net.ssl.trustStore"))
   (info "Running on Clojure" (clojure-version))
+  (info "ImageIO: Registered image MIME types:" (s/join " " (ImageIO/getReaderMIMETypes)))
 
   (init!)
   (start-jetty!))
