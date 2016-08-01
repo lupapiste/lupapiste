@@ -298,41 +298,9 @@ User nav menu is visible
 User nav menu is not visible
   Element should not be visible  //*[@data-test-id='user-nav-menu']
 
-As Mikko
+As ${name}
   Go to login page
-  Mikko logs in
-
-As Teppo
-  Go to login page
-  Teppo logs in
-
-As Veikko
-  Go to login page
-  Veikko logs in
-
-As Sonja
-  Go to login page
-  Sonja logs in
-
-As Sipoo
-  Go to login page
-  Sipoo logs in
-
-As Solitaadmin
-  Go to login page
-  Solitaadmin logs in
-
-As Velho
-  Go to login page
-  Velho logs in
-
-As Olli
-  Go to login page
-  Olli logs in
-
-As Pekka
-  Go to login page
-  Pekka logs in
+  Run Keyword  ${name} logs in
 
 Olli logs in
   Authority logs in  olli  olli  Olli Ule\u00e5borg
@@ -780,14 +748,14 @@ Close current inforequest
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
-Close current application
+Cancel current application
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click enabled by test id  application-cancel-btn
   Fill test id  cancel-application-reason  ${reason}
   Confirm  dialog-cancel-application
 
-Close current application as authority
+Cancel current application as authority
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
   Click enabled by test id  application-cancel-authority-btn
@@ -980,7 +948,7 @@ Comment count is
 Is authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}

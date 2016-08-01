@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer [$set $push]]
+            [sade.core :refer [now]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
@@ -118,3 +119,32 @@
         (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}}) => nil
         (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "foobar"}}) => error
         (permit/valid-permit-types m3 {:application {:permitType "P" :permitSubtype "foo"}}) => error))
+
+(facts "Previous app state"
+  (let [user {:username "pena"}
+        now (now)
+        state-seq [:one :two :three :four :five]]
+
+    (dotimes [i (count state-seq)]
+      (let [prev-state (get-previous-app-state
+                         {:history (map
+                                     #(history-entry % now user)
+                                     (take (+ i 1) state-seq))})]
+        (if (= i 0)
+          (fact "no previous state" prev-state => nil)
+          (fact {:midje/description prev-state}
+            prev-state => (nth state-seq (- i 1))))))
+
+    (fact "no previous state if no history"
+      (get-previous-app-state nil) => nil
+      (get-previous-app-state []) => nil)))
+
+(facts "Get previous state (history)"
+  (let [state-seq [:one nil :two :three nil nil]
+        now (now)
+        history {:history
+                 (map-indexed
+                   (fn [i state] (history-entry state (+ now i) {:username "Pena"}))
+                   state-seq)}]
+    (fact "only entries with :state are regarded"
+      (get-previous-app-state history) => :two)))

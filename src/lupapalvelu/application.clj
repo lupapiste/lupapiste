@@ -101,7 +101,7 @@
       (fail :error.permit-has-no-such-subtype))))
 
 (defn submitted? [{:keys [state]}]
-  ((conj states/post-submitted-states :submitted) (keyword state)))
+  (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
 
 ;;
 ;; Helpers
@@ -120,6 +120,20 @@
 (defn party-document? [doc]
   (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
     (= (:type schema-info) :party)))
+
+(defn last-history-item
+  [{history :history}]
+  (last (sort-by :ts history)))
+
+(defn get-previous-app-state
+  "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
+  [{history :history}]
+  (->> (filter :state history)                              ; only history elements that regard state change
+       (sort-by :ts)
+       butlast
+       last
+       :state
+       keyword))
 
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts"})
