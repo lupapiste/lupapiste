@@ -13,3 +13,6 @@
 (defn rotate-pdf [in file-name rotation]
   (let [rot (case rotation -90 "left", 90 "right", 180 "down")]
     (handle-result (shell/sh "pdftk" "-" "cat" (str "1-end" rot) "output" file-name :in in))))
+
+(defn uncompress-pdf [in file-name]
+  (handle-result (shell/sh "pdftk" "-" "output" file-name "uncompress" :in in)))

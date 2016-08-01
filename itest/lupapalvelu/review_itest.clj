@@ -23,7 +23,6 @@
   ([application-id task-id]
    (task-deleted-check application-id task-id falsey)))
 
-
 (let [{application-id :id} (create-and-submit-application pena :municilapity sonja-muni)]
   (fact "Fetch verdict"
         (command sonja :check-for-verdict :id application-id) => ok?)
@@ -56,4 +55,4 @@
            (fact "Sent review still exists"
                  (task-deleted-check application-id root-id truthy))
            (fact "New review deleted"
-                 (task-deleted-check application-id task-id)))))
+             (task-deleted-check application-id task-id)))))
