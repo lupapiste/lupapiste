@@ -181,8 +181,8 @@
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:authority :applicant}
    :pre-checks       [(fn [{:keys [application]}]
-                        (when-not (= "canceled"
-                                     ((comp name :state) (app/last-history-item application)))
+                        (when-not (= :canceled
+                                     ((comp keyword :state) (app/last-history-item application)))
                           (error "Last history entry not 'canceled'")
                           (fail :error.latest-state-not-canceled)))
                       (fn [{:keys [application]}]
