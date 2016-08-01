@@ -16,13 +16,18 @@ LUPAPISTE.ScrollService = function() {
 
   var positions = {};
 
+  function getHash() {
+    // Null-safe regardign location.
+    return _.get( window, "location.hash");
+  }
+
   // Options [optional]:
   //  [override]: If true the current position wll override the
   //  possibly stored one (default false).
   self.push = function( options ) {
     options = options || {};
-    var hash = window.location.hash;
-    if( !positions[hash] || options.override ) {
+    var hash = getHash();
+    if( hash && ( !positions[hash] || options.override ) ) {
       positions[hash] = {x: window.scrollX, y: window.scrollY };
     }
   };
@@ -31,13 +36,13 @@ LUPAPISTE.ScrollService = function() {
   // [delay]: delay in milliseconds before scrolling (default 1).
   self.pop = function( options ) {
     options = options || {};
-    var hash = window.location.hash;
+    var hash = getHash();
     var pos = positions[hash];
     delete positions[hash];
     if( pos ) {
       _.delay( function() {
         // The page may have changed during delay
-        if( hash === window.location.hash ) {
+        if( hash === getHash()) {
           window.scrollTo(pos.x, pos.y);
         }
       }, options.delay || 1 );
