@@ -47,6 +47,7 @@
 (facts* "Foreman application"
         (let [apikey                       mikko
               email                        (email-for-key apikey)
+              fake-application             (create-and-submit-application apikey :operation "pientalo") => truthy
               {application-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
               application                  (query-application apikey application-id)
               _                            (generate-documents application apikey)
@@ -54,9 +55,13 @@
                :as foreman-application}    (create-foreman-app apikey sonja application-id)
               foreman-link-permit-data     (first (foreman-application :linkPermitData))
               foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+              _                            (command apikey :add-link-permit :id (:id fake-application) :linkPermitId application-id)
               application                  (query-application apikey application-id)
-              link-to-application          (first (application :appsLinkingToUs))
+              link-to-application          (second (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
+
+          (fact "Has two link permits (pientalo and foreman)"
+            (count (:appsLinkingToUs application)) => 2)
 
           (fact "Initial permit subtype is blank"
             (:permitSubtype foreman-application) => ss/blank?)
