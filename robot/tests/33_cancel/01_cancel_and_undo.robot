@@ -43,7 +43,7 @@ Pena sees cancellation and can't undo it
 Sonja undos cancellation as requested by Teppo
   As Sonja
   Open canceled application  cancel-app  753-416-25-22
-  Application state should be  canceled
+  Wait until  Application state should be  canceled
   Wait test id visible  application-undo-cancellation-btn
   Click by test id  application-undo-cancellation-btn
   Confirm yes no dialog
