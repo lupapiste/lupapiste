@@ -1,8 +1,13 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="bulletin-versions-template">
-  <div data-test-id="bulletin-versions-accordion"
-       data-bind="component: {name: 'accordion', params: {ltitle: 'bulletin.versions.history',
-                                                          accordionContentTemplate: 'bulletin-versions-accordion-content',
-                                                          accordionContentTemplateData: $data}}"></div>
+  <rollup data-test-id="bulletin-versions-accordion"
+          params="open: open">
+    <rollup-button params="open: $parent.open,
+                           css: {secondary: true},
+                           ltext: 'bulletin.versions.history'"></rollup-button>
+    <div class="rollup__open"
+         data-bind="template: {name: 'bulletin-versions-accordion-content', data: $parent}">
+    </div>
+  </rollup>
 
 </script>
 
