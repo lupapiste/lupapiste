@@ -183,7 +183,6 @@
    :pre-checks       [(fn [{:keys [application]}]
                         (when-not (= :canceled
                                      ((comp keyword :state) (app/last-history-item application)))
-                          (error "Last history entry not 'canceled'")
                           (fail :error.latest-state-not-canceled)))
                       (fn [{:keys [application]}]
                         (when-not (states/all-states (app/get-previous-app-state application))
