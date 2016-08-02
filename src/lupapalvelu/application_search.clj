@@ -107,7 +107,7 @@
 (defn- archival-query [user]
   (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
                      (organization/earliest-archive-enabled-ts))
-        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed"]}} {:archived.application nil}]}
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse"]}} {:archived.application nil}]}
                          {$and [{:state "closed"} {:archived.completed nil}]}]}]
     (if from-ts
       {$and [base-query
