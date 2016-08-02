@@ -686,22 +686,26 @@
    :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
    :hystrix/fallback-fn  (constantly nil)}
   [file-id filename content-type application-id & [db-name]]
-  (when (preview/converter content-type)
-    (let [preview-file-id  (str file-id "-preview")
-          preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
-      (mongo/with-db (or db-name mongo/default-db-name)
-        (file-upload/save-file {:fileId preview-file-id
-                                :filename preview-filename
-                                :content (preview/placeholder-image)}
-                               :application application-id)
-        (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                                (with-open [content ((:content (mongo/download file-id)))]
-                                                  (preview/create-preview content content-type)))]
-          (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-          (file-upload/save-file {:fileId preview-file-id
-                                  :filename preview-filename
-                                  :content preview-content}
-                                 :application application-id))))))
+  (try
+    (when (preview/converter content-type)
+      (let [preview-file-id  (str file-id "-preview")
+            preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
+        (mongo/with-db (or db-name mongo/default-db-name)
+                       (file-upload/save-file {:fileId preview-file-id
+                                               :filename preview-filename
+                                               :content (preview/placeholder-image)}
+                                              :application application-id)
+                       (if-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                                             (with-open [content ((:content (mongo/download file-id)))]
+                                                               (preview/create-preview content content-type)))]
+                         (do (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+                             (file-upload/save-file {:fileId preview-file-id
+                                                     :filename preview-filename
+                                                     :content preview-content}
+                                                    :application application-id))
+                         (error "Preview generation failed: id=%s, type=%s file=%s" file-id content-type filename)))))
+    (catch Throwable t
+      (error "Preview generation failed" t))))
 
 (def file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
