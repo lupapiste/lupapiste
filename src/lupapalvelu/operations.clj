@@ -350,7 +350,7 @@
                                     :required mini-rakval-schemas
                                     :optional optional-mini-rakval-schemas
                                     :attachments [:paapiirustus [:asemapiirros]]
-                                    :add-operation-allowed true
+                                    :add-operation-allowed false
                                     :min-outgoing-link-permits 0
                                     :asianhallinta true}
    })
