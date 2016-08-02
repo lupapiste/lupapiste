@@ -124,13 +124,13 @@
 ;;
 
 (defquery attachments
-  {:description "WIP Get all attachments in application filtered by user visibility"
+  {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments :as application} :application}]
-  (ok :attachments (map #(assoc % :tags (attachment/attachment-tags application %)) attachments)))
+  (ok :attachments (map #(assoc % :tags (attachment/attachment-tags %)) attachments)))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"

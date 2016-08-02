@@ -205,19 +205,25 @@
 (defn attachment-groups-for-application [application]
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
+(defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
+  (if (states/post-verdict-states app-state)
+    :postVerdict
+    :preVerdict))
+
+(defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
+  (if not-needed
+    :notNeeded
+    :needed))
+
 (defn attachment-tags
-  "WIP Returns tags for a single attachment that are used to filter and group attachments for application"
-  [application attachment]
-  (remove nil?
-          [(if (states/post-verdict-states (:applicationState attachment))
-             :postVerdict
-             :preVerdict)
-           (get-in attachment [:groupType])
-           (get-in attachment [:op :id])
-           (if (:notNeeded attachment)
-             :notNeeded
-             :needed)
-           (att-type/tag-by-type attachment)]))
+  "Returns tags for a single attachment for filtering and grouping attachments of an application"
+  [attachment]
+  (->> [(tag-by-applicationState attachment)
+        (get-in attachment [:groupType])
+        (get-in attachment [:op :id])
+        (tag-by-notNeeded attachment)
+        (att-type/tag-by-type attachment)]
+       (remove nil?)))
 
 (defn attachment-tag-groups
   "WIP Get hierarchical attachment grouping by attachments tags.
