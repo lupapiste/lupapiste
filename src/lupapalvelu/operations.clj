@@ -352,7 +352,7 @@
                                     :attachments [:paapiirustus [:asemapiirros]]
                                     :add-operation-allowed true
                                     :min-outgoing-link-permits 0
-                                    :asianhallinta false}
+                                    :asianhallinta true}
    })
 
 (def- yi-operations
