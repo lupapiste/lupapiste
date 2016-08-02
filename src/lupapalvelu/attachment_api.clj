@@ -149,15 +149,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments :as application} :application}]
-  (ok :attachments-filters [[{:tag :preVerdict :default false}
-                             {:tag :postVerdict :default false}]
-                            [{:tag :paapiirustus :default false}
-                             {:tag :iv_suunnitelma :default false}
-                             {:tag :kvv_suunnitelma :default false}
-                             {:tag :rakennesuunnitelma :default false}]
-                            [{:tag :needed :default true}
-                             {:tag :notNeeded :default false}]]))
+  [{{attachments :attachments} :application}]
+  (ok :attachments-filters (att-tags/attachments-filters attachments)))
 
 (defquery attachments-tag-groups
   {:description "WIP Get hierarchical attachment grouping by attachment tags."

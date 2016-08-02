@@ -38,3 +38,16 @@
                         distinct
                         (map #(vector % att-type/type-groups)))]
     (concat [[:default]] groups operations)))
+
+
+(defn attachments-filters
+  "WIP Get all possible filters with default values for attachments based on attachment data."
+  [attachments]
+  [[{:tag :preVerdict :default false}
+    {:tag :postVerdict :default false}]
+   [{:tag :paapiirustus :default false}
+    {:tag :iv_suunnitelma :default false}
+    {:tag :kvv_suunnitelma :default false}
+    {:tag :rakennesuunnitelma :default false}]
+   [{:tag :needed :default true}
+    {:tag :notNeeded :default false}]])
