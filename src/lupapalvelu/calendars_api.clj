@@ -325,7 +325,7 @@
   (->>
     (cond
       (usr/authority? user) (api-query (str "reservations/by-external-ref/" id) {:year year :week week})
-      (usr/applicant? user) [])
+      (usr/applicant? user) (api-query (str "reservations/for-client/" id) {:year year :week week}))
     ->FrontendReservations
     (ok :reservations)))
 
