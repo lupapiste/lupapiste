@@ -69,7 +69,7 @@
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
-(def attachment-groups #{:operation :parties :building-site})
+(def attachment-groups [:parties :building-site :operation])
 
 (defschema AttachmentId
   (ssc/min-length-string 24))
@@ -193,12 +193,17 @@
 ;; Api
 ;;
 
-(defn attachment-groups-for-application [{primary-op :primaryOperation secondary-ops :secondaryOperations}]
-  (let [operations (->> (cons primary-op secondary-ops)
-                        (map (partial merge {:groupType :operation})))]
-    (->> (remove #{:operation} attachment-groups)
-         (map (partial assoc {} :groupType))
-         (apply conj operations))))
+(defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
+
+(defmethod groups-for-attachment-group-type :default [_ group-type]
+  [{:groupType group-type}])
+
+(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
+  (->> (cons primary-op secondary-ops)
+       (map (partial merge {:groupType :operation}))))
+
+(defn attachment-groups-for-application [application]
+  (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
 (defn attachment-grouping [{group-type :groupType operation :op :as attachment}]
   (let [group-type (or group-type (when operation :operation))] ;; Group not set for old attachments.

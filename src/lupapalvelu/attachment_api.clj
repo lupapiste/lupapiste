@@ -88,7 +88,7 @@
 
 (defn- validate-group-type [group]
   (when-let [group-type (keyword (:groupType group))]
-    (when-not (attachment/attachment-groups group-type)
+    (when-not ((set attachment/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]
