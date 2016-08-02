@@ -30,7 +30,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
   });
 
   self.partyFullName = function(party) {
-    return party.firstName + " " + party.lastName;
+    return _.join([_.get(party, "firstName", ""), _.get(party, "lastName", "")], " ");
   };
 
 };

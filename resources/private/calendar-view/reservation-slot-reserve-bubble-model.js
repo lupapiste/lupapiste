@@ -41,8 +41,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.bubbleVisible(false);
   };
 
-  self.init = function() {
-  };
+  self.init = _.noop();
 
   self.authorityDisplayText = function() {
     var authority = self.authority();
