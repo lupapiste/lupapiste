@@ -287,8 +287,7 @@
                        (= (:size version) (:size options))))))
 
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
-  (prop/for-all [application    (ssg/generator {:state sc/Keyword})
-                 attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
+  (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
                  options        (ssg/generator {:now ssc/Timestamp
                                                 :target (sc/maybe Target)
@@ -296,7 +295,7 @@
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
                                                 :comment-text sc/Str})]
-                (let [updates (build-version-updates application attachment version-model options)]
+                (let [updates (build-version-updates attachment version-model options)]
                   (and (= (get-in updates [$addToSet :attachments.$.auth :role]) (if (:stamped options) :stamper :uploader))
                        (= (get-in updates [$set :modified] (:now options)))
                        (= (get-in updates [$set :attachments.$.modified] (:now options)))
@@ -308,8 +307,7 @@
                        (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
-  (prop/for-all [application    (ssg/generator {:state sc/Keyword})
-                 [attachment version-model] (gen/fmap (fn [[att fids]]
+  (prop/for-all [[attachment version-model] (gen/fmap (fn [[att fids]]
                                                         (let [ver (assoc (get-in att [:versions 1]) :originalFileId (first fids))]
                                                           [(-> (assoc-in att [:versions 1] ver)
                                                                (assoc :latestVersion ver))
@@ -319,7 +317,7 @@
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
                  options (ssg/generator {:now ssc/Timestamp
                                          :user user/SummaryUser})]
-                (let [updates (build-version-updates application attachment version-model options)]
+                (let [updates (build-version-updates attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
 

@@ -457,21 +457,16 @@
    :timestamp timestamp
    :fileId file-id})
 
-(defn- build-version-updates [application attachment version-model {:keys [now target state user stamped comment? comment-text]
-                                                                    :or   {comment? true, state :requires_authority_action} :as options}]
-  {:pre [(map? application) (map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
+(defn- build-version-updates [attachment version-model {:keys [now target state user stamped]
+                                                        :or   {state :requires_authority_action} :as options}]
+  {:pre [(map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
                                (some [(:originalFileId version-model)]))
                            (count (:versions attachment)))
-        user-role      (if stamped :stamper :uploader)
-        comment-target (merge {:type :attachment
-                               :id (:id  attachment)}
-                              (select-keys version-model [:version :fileId :filename]))]
+        user-role      (if stamped :stamper :uploader)]
     (util/deep-merge
-     (when comment?
-       (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
      (when target
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
@@ -492,6 +487,14 @@
            (remove (set [file-id original-file-id]))
            (run! delete-attachment-file-and-preview!)))
 
+(defn- attachment-comment-updates [application attachment version-model {:keys [comment? comment-text user now]
+                                                                         :or   {comment? true}}]
+  (let [comment-target (merge {:type :attachment
+                               :id (:id attachment)}
+                              (select-keys version-model [:version :fileId :filename]))]
+    (when comment?
+      (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))))
+
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
@@ -501,14 +504,17 @@
   ([application {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
     {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
     (if (pos? retry-limit)
-      (let [latest-version (get-in attachment [:latestVersion :version])
-            version-model  (make-version attachment options)]
+      (let [latest-version  (get-in attachment [:latestVersion :version])
+            version-model   (make-version attachment options)
+            comment-updates (attachment-comment-updates application attachment version-model options)]
         ; Check return value and try again with new version number
         (if (pos? (update-application
                    (application->command application)
                    {:attachments {$elemMatch {:id attachment-id
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
-                   (build-version-updates application attachment version-model options)
+                   (merge
+                     comment-updates
+                     (build-version-updates attachment version-model options))
                    true))
           (do
             (remove-old-files! attachment version-model)
