@@ -41,13 +41,13 @@
 
 
 (defn attachments-filters
-  "WIP Get all possible filters with default values for attachments based on attachment data."
+  "Get all possible filters with default values for attachments based on attachment data."
   [attachments]
   [[{:tag :preVerdict :default false}
     {:tag :postVerdict :default false}]
-   [{:tag :paapiirustus :default false}
-    {:tag :iv_suunnitelma :default false}
-    {:tag :kvv_suunnitelma :default false}
-    {:tag :rakennesuunnitelma :default false}]
+   (->> (map att-type/tag-by-type attachments)
+        (remove nil?)
+        distinct
+        (hash-map :default false :tag))
    [{:tag :needed :default true}
     {:tag :notNeeded :default false}]])
