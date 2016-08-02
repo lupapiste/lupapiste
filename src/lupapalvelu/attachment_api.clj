@@ -166,7 +166,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments} :application}]
-  (ok :tag-groups (attachment/attachment-tag-groups attachments)))
+  (ok :tag-groups (att-tags/attachment-tag-groups attachments)))
 
 ;;
 ;; Types
