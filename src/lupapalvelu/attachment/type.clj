@@ -154,6 +154,8 @@
    {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
    {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus})
 
+(def type-groups (-> (keys type-grouping) distinct))
+
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]
    (->> (update attachment-type :metadata util/assoc-when

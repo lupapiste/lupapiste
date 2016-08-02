@@ -158,6 +158,15 @@
                             [{:tag :needed :default true}
                              {:tag :notNeeded :default false}]]))
 
+(defquery attachments-tag-groups
+  {:description "WIP Get hierarchical attachment grouping by attachment tags."
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments} :application}]
+  (ok :tag-groups (attachment/attachment-tag-groups attachments)))
+
 ;;
 ;; Types
 ;;

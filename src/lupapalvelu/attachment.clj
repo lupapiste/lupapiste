@@ -219,6 +219,22 @@
              :needed)
            (att-type/tag-by-type attachment)]))
 
+(defn attachment-tag-groups
+  "WIP Get hierarchical attachment grouping by attachments tags.
+  There are one and two level groups in tag hierarchy (operations are two level groups).
+  eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus :iv_suunnitelma]] [opid2 [:kvv_suunnitelma]]]"
+  [attachments]
+  (let [groups     (->> (map :groupType attachments)
+                        (map keyword)
+                        (remove #{:operation})
+                        (remove nil?)
+                        distinct
+                        (map vector))
+        operations (->> (map (comp :id :op) attachments)
+                        (remove nil?)
+                        distinct
+                        (map #(vector % att-type/type-groups)))]
+    (concat [[:default]] groups operations)))
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
