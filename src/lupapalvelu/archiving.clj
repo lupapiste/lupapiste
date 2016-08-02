@@ -209,7 +209,8 @@
                        :location-etrs-tm35fin location
                        :location-wgs84        location-wgs84
                        :kuntalupatunnukset    (remove nil? (map :kuntalupatunnus (:verdicts application)))
-                       :lupapvm               (get-verdict-date application :lainvoimainen)
+                       :lupapvm               (or (get-verdict-date application :lainvoimainen)
+                                                  (get-paatospvm application))
                        :paatospvm             (get-paatospvm application)
                        :paatoksentekija       (get-from-verdict-minutes application :paatoksentekija)
                        :tiedostonimi          (get-in attachment [:latestVersion :filename] (str id ".pdf"))
