@@ -55,9 +55,9 @@
                :as foreman-application}    (create-foreman-app apikey sonja application-id)
               foreman-link-permit-data     (first (foreman-application :linkPermitData))
               foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
-              _                            (command apikey :add-link-permit :id (:id fake-application) :linkPermitId application-id)
+              _                            (command apikey :add-link-permit :id (:id fake-application) :linkPermitId application-id) => ok?
               application                  (query-application apikey application-id)
-              link-to-application          (second (application :appsLinkingToUs))
+              link-from-foreman            (some #(when (= "tyonjohtajan-nimeaminen-v2" (:operation %)) %) (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
           (fact "Has two link permits (pientalo and foreman)"
@@ -70,7 +70,7 @@
                 (:id foreman-link-permit-data) => application-id)
 
           (fact "Original application contains link to foreman application"
-                (:id link-to-application) => foreman-application-id)
+                (:id link-from-foreman) => foreman-application-id)
 
           (fact "All linked Foreman applications are returned in query"
                 (let [applications (:applications foreman-applications)]
