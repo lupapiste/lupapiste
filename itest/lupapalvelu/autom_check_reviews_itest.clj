@@ -95,21 +95,22 @@
             (count (filter  (partial = "aloituskokous") review-types)) => 2))))))
 
 (facts "Imported review PDF generation"
-  (let [parsed-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
-        application    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
-        application-id (:id application)
-        command (assoc (lupapalvelu.action/application->command application)
+  (mongo/with-db db-name
+    (let [parsed-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+          application    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
+          application-id (:id application)
+          command (assoc (lupapalvelu.action/application->command application)
                        :user (lupapalvelu.batchrun/batchrun-user-for-review-fetch (lupapalvelu.batchrun/orgs-for-review-fetch))
                        :created (sade.core/now))]
-    (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-    (lupapalvelu.verdict/save-reviews-from-xml command parsed-xml) ;; => ok?
-    (let [updated-application (lupapalvelu.domain/get-application-no-access-checking application-id)
-          last-attachment-id (last (get-attachment-ids updated-application))
-          last-attachment-file-id (lupapalvelu.attachment/attachment-latest-file-id updated-application last-attachment-id)
-          temp-pdf-path (File/createTempFile "review-test" ".tmp")]
-      (try
-        (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
-          (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
-        (finally
-          io/delete-file temp-pdf-path :silently))
-      (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty)))
+      (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+      (lupapalvelu.verdict/save-reviews-from-xml command parsed-xml) ;; => ok?
+      (let [updated-application (lupapalvelu.domain/get-application-no-access-checking application-id)
+            last-attachment-id (last (get-attachment-ids updated-application))
+            last-attachment-file-id (lupapalvelu.attachment/attachment-latest-file-id updated-application last-attachment-id)
+            temp-pdf-path (File/createTempFile "review-test" ".tmp")]
+        (try
+          (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
+            (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
+          (finally
+            io/delete-file temp-pdf-path :silently))
+        (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty))))
