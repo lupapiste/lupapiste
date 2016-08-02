@@ -104,8 +104,7 @@
 (defn find-application-authz-with-calendar
   [{:keys [organization] :as application}]
   (let [calendars     (find-calendars-for-organizations organization)
-        authority-ids (->> (filter #(.startsWith % "user-") (keys calendars))
-                           (map #(.replace % "user-" "")))]
+        authority-ids (keys calendars)]
     (filter #(util/contains-value? authority-ids (:id %))
              (app/application-org-authz-users application "authority"))))
 
