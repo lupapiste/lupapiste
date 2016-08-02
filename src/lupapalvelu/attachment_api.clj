@@ -13,6 +13,7 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.stamping :as stamping]
@@ -130,7 +131,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments :as application} :application}]
-  (ok :attachments (map #(assoc % :tags (attachment/attachment-tags %)) attachments)))
+  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
