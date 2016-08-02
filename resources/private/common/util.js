@@ -363,6 +363,12 @@ var util = (function($) {
     });
   }
 
+  function getPreviousState(application) {
+    var history = _.filter(getIn(application, ["history"]), "state"); // select only entries with 'state' value
+    var previous = _.head(_.takeRight(history, 2));
+    return ko.unwrap(previous.state);
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -401,7 +407,8 @@ var util = (function($) {
     isNonNegative: isNonNegative,
     createSortableColumn: createSortableColumn,
     elementInViewport: elementInViewport,
-    verdictsWithTasks: verdictsWithTasks
+    verdictsWithTasks: verdictsWithTasks,
+    getPreviousState: getPreviousState
   };
 
 })(jQuery);

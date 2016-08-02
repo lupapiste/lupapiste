@@ -230,9 +230,19 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
     self.retainFocus();
   };
 
+  self.maxHeightPx = ko.pureComputed(function() {
+    var windowHeight = lupapisteWindow.windowHeight();
+    if ( windowHeight ) {
+      return windowHeight / 2 + "px"; // magic number 2, seems to work pretty well with different window sizes (zoom levels)
+    } else {
+      return 800 + "px";
+    }
+  });
+
   self.dispose = function() {
     while(subscriptions.length !== 0) {
       subscriptions.pop().dispose();
     }
+    self.maxHeightPx.dispose();
   };
 };

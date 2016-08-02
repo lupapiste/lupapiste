@@ -84,7 +84,7 @@ Mikko creates new application
 Mikko closes application at Latokuja 3 and logs out
   [Tags]  firefox
   Open application  create-app-2  753-416-25-22
-  Close current application  Zaijian
+  Cancel current application  Zaijian
   Wait Until  Request should be visible  create-app
   Wait Until  Request should not be visible  create-app-2
   Open canceled application  create-app-2  753-416-25-22

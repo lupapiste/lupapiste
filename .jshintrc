@@ -74,7 +74,8 @@
     "util": true,
     "vetuma": true,
     "warn": true,
-    "Waypoint":false
+    "Waypoint":false,
+    "lupapisteWindow" :true
   },
   "exported": [
     "accordion","AccordionState","ajax","attachment",

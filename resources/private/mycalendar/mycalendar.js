@@ -5,19 +5,24 @@
     var self = this;
     self.calendars = ko.observableArray([]);
     self.noCalendarsFound = ko.observable(false);
+    self.selectedCalendar = ko.observable();
     self.selectedCalendarId = ko.observable();
     self.reservationTypes = ko.observableArray();
 
     hub.subscribe("calendarService::myCalendarsFetched", function(event) {
       self.calendars(event.calendars);
       if (event.calendars.length > 0) {
-        // conversion to string for compatibility with radio-field...
-        self.selectedCalendarId("" + event.calendars[0].id);
+        self.selectedCalendar(event.calendars[0]);
         self.noCalendarsFound(false);
       } else {
-        self.selectedCalendarId(undefined);
+        self.selectedCalendar(undefined);
         self.noCalendarsFound(true);
       }
+    });
+
+    self.selectedCalendar.subscribe(function(val) {
+      self.reservationTypes(_.get(val, "reservationTypes", []));
+      self.selectedCalendarId(_.get(val, "id", undefined));
     });
   }
 

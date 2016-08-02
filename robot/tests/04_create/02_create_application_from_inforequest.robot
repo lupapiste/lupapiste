@@ -30,5 +30,5 @@ Proper attachment templates are present
 
 Mikko closes application
   [Tags]  firefox
-  Close current application
+  Cancel current application
   Wait Until  Element should be visible  applications

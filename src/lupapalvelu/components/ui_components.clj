@@ -164,7 +164,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
-                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
@@ -279,9 +279,13 @@
 
    :calendar-view {:depends [:common-html]
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
-                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
+                        "authority-calendar-model.js" "applicant-calendar-model.js"
+                        "reservation-slot-reserve-bubble-model.js"]
                    :html ["reservation-slot-edit-bubble-template.html"
-                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
+                          "authority-calendar-template.html" "applicant-calendar-template.html"
+                          "reservation-slot-reserve-bubble-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view]
@@ -293,7 +297,7 @@
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
                          "required-fields-summary-tab-template.html"
-                         "case-file-template.html"]}
+                         "case-file-template.html" "application-actions-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]

@@ -5,7 +5,7 @@ LUPAPISTE.BulletinVersionsModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
   self.params = params;
-
+  self.open = ko.observable( true );
   self.bulletin = params.bulletin;
 
   self.authModel = params.authModel;

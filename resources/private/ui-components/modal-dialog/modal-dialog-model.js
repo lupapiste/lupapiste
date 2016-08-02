@@ -1,18 +1,13 @@
 LUPAPISTE.ModalDialogModel = function () {
   "use strict";
   var self = this;
-  var win = $(window);
 
-  var setWindowSize = function(width, height) {
-    self.windowWidth(width);
-    self.windowHeight(height);
-  };
-
+  self.windowService = lupapisteWindow;
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
   self.componentParams = ko.observable();
-  self.windowWidth = ko.observable().extend({notify: "always"});
-  self.windowHeight = ko.observable().extend({notify: "always"});
+  self.windowWidth = ko.observable(self.windowService.windowWidth()).extend({notify: "always"});
+  self.windowHeight = ko.observable(self.windowService.windowHeight()).extend({notify: "always"});
   self.dialogVisible = ko.observable(false);
   self.title = ko.observable();
   self.size = ko.observable();
@@ -109,16 +104,10 @@ LUPAPISTE.ModalDialogModel = function () {
   hub.subscribe("close-dialog", function() {
     self.closeDialog();
   });
-
   hub.subscribe("resize-dialog", function() {
-    setWindowSize(win.width(), win.height());
+    self.windowWidth(self.windowService.windowWidth());
+    self.windowHeight(self.windowService.windowHeight());
   });
 
-  // set initial dialog size
-  setWindowSize(win.width(), win.height());
 
-  // listen widow change events
-  win.resize(function() {
-    setWindowSize(win.width(), win.height());
-  });
 };

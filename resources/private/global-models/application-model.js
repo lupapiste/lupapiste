@@ -177,6 +177,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
+
+  self.calendarNotificationIndicator = ko.observable(0);
+
   self.linkPermitData = ko.observable(null);
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
@@ -512,8 +515,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.cancelText = ko.observable("");
 
-
-
   self.cancelApplication = function() {
     var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
           ? "cancel-application-authority"
@@ -529,7 +530,12 @@ LUPAPISTE.ApplicationModel = function() {
           .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
-            pageutil.openPage("applications");
+            if (command === "cancel-application") {
+              // regular user, can't undo cancellation so redirect to applications view
+              pageutil.openPage("applications");
+            } else { // authority, can undo so don't redirect, just reload application to canceled state
+              self.lightReload();
+            }
           })
           .processing(self.processing)
           .call();
@@ -537,6 +543,21 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("no")}
     );
     LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+  };
+
+  self.undoCancellation = function() {
+    var sendCommand = ajax
+                        .command("undo-cancellation", {id: self.id()})
+                        .success(function() {
+                          repository.load(self.id());
+                        })
+                        .processing(self.processing);
+
+    hub.send("show-dialog", {ltitle: "application.undoCancellation",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: loc("application.undoCancellation.areyousure", loc(util.getPreviousState(self._js))),
+                                               yesFn: function() { sendCommand.call(); }}});
   };
 
   self.exportPdf = function() {

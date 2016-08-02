@@ -2145,6 +2145,8 @@
 "tooltip.statement-or-reply-has-attachments" "sv" "Det finns bilagor till utlåtandet eller genmälet"
 "tooltip.toAsianhallinta" "fi" "Siirtää hakemuksen asianhallintajärjestelmään käsittelyä varten. Hakemus lukitaan Lupapisteessä ja hakija ei voi muokata hakemusta."
 "tooltip.toAsianhallinta" "sv" "Flyttar ansökan till ärendehanteringssystemet för handläggning. I Lupapiste är ansökan låst och sökanden kan inte längre bearbeta den."
+"tooltip.undoCancellation" "fi" "Palauttaa jo peruutetun hakemuksen aktiiviseksi. Hakemus palautuu peruuttamista edeltäneeseen tilaan."
+"tooltip.undoCancellation" "sv" ""
 "tos.function" "fi" "Menettely"
 "tos.function" "sv" "Procedur"
 "tree.back" "fi" "Takaisin"
