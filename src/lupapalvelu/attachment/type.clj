@@ -231,7 +231,7 @@
                           (-> application :permitType keyword attachment-types-by-permit-type))]
     (contains? allowed-types attachment-type)))
 
-(defn group-by-type [{type :type :as attachment}]
+(defn tag-by-type [{type :type :as attachment}]
   (get type-grouping
        (-> (select-keys type [:type-group :type-id])
            (util/convert-values keyword))))

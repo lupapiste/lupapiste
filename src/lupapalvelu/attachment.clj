@@ -205,11 +205,20 @@
 (defn attachment-groups-for-application [application]
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
-(defn attachment-grouping [{group-type :groupType operation :op :as attachment}]
-  (let [group-type (or group-type (when operation :operation))] ;; Group not set for old attachments.
-    {:by-ref  (merge {:groupType group-type}
-                     (when (= :operation group-type) operation))
-     :by-type (att-type/group-by-type attachment)}))
+(defn attachment-tags
+  "WIP Returns tags for a single attachment that are used to filter and group attachments for application"
+  [application attachment]
+  (remove nil?
+          [(if (states/post-verdict-states (:applicationState attachment))
+             :postVerdict
+             :preVerdict)
+           (get-in attachment [:groupType])
+           (get-in attachment [:op :id])
+           (if (:notNeeded attachment)
+             :notNeeded
+             :needed)
+           (att-type/tag-by-type attachment)]))
+
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
