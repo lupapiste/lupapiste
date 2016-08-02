@@ -89,7 +89,7 @@
 
 (defn- validate-group-type [group]
   (when-let [group-type (keyword (:groupType group))]
-    (when-not ((set attachment/attachment-groups) group-type)
+    (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]
@@ -141,7 +141,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
-  (ok :groups (attachment/attachment-groups-for-application application)))
+  (ok :groups (att-tags/attachment-groups-for-application application)))
 
 (defquery attachments-filters
   {:description "WIP Get all attachments filters for application"

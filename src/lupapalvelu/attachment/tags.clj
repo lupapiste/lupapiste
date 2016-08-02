@@ -2,6 +2,20 @@
   (:require [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]))
 
+(def attachment-groups [:parties :building-site :operation])
+
+(defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
+
+(defmethod groups-for-attachment-group-type :default [_ group-type]
+  [{:groupType group-type}])
+
+(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
+  (->> (cons primary-op secondary-ops)
+       (map (partial merge {:groupType :operation}))))
+
+(defn attachment-groups-for-application [application]
+  (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
+
 (defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
   (if (states/post-verdict-states app-state)
     :postVerdict

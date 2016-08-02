@@ -12,6 +12,7 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.metadata :as metadata]
@@ -68,8 +69,6 @@
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
-
-(def attachment-groups [:parties :building-site :operation])
 
 (defschema AttachmentId
   (ssc/min-length-string 24))
@@ -155,7 +154,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :groupType)          (apply sc/enum attachment-groups)
+   (sc/optional-key :groupType)          (apply sc/enum att-tags/attachment-groups)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -192,18 +191,6 @@
 ;;
 ;; Api
 ;;
-
-(defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
-
-(defmethod groups-for-attachment-group-type :default [_ group-type]
-  [{:groupType group-type}])
-
-(defmethod groups-for-attachment-group-type :operation [{primary-op :primaryOperation secondary-ops :secondaryOperations} _]
-  (->> (cons primary-op secondary-ops)
-       (map (partial merge {:groupType :operation}))))
-
-(defn attachment-groups-for-application [application]
-  (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
 (defn link-file-to-application [app-id fileId]
   {:pre [(string? app-id)]}
