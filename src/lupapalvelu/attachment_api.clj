@@ -142,6 +142,22 @@
   [{application :application}]
   (ok :groups (attachment/attachment-groups-for-application application)))
 
+(defquery attachments-filters
+  {:description "WIP Get all attachments filters for application"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments :as application} :application}]
+  (ok :attachments-filters [[{:tag :preVerdict :default false}
+                             {:tag :postVerdict :default false}]
+                            [{:tag :paapiirustus :default false}
+                             {:tag :iv_suunnitelma :default false}
+                             {:tag :kvv_suunnitelma :default false}
+                             {:tag :rakennesuunnitelma :default false}]
+                            [{:tag :needed :default true}
+                             {:tag :notNeeded :default false}]]))
+
 ;;
 ;; Types
 ;;
