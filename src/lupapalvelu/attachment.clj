@@ -438,21 +438,16 @@
    :timestamp timestamp
    :fileId file-id})
 
-(defn- build-version-updates [application attachment version-model {:keys [now target state user stamped comment? comment-text]
-                                                                    :or   {comment? true, state :requires_authority_action} :as options}]
-  {:pre [(map? application) (map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
+(defn- build-version-updates [attachment version-model {:keys [now target state user stamped]
+                                                        :or   {state :requires_authority_action} :as options}]
+  {:pre [(map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
                                (some [(:originalFileId version-model)]))
                            (count (:versions attachment)))
-        user-role      (if stamped :stamper :uploader)
-        comment-target (merge {:type :attachment
-                               :id (:id  attachment)}
-                              (select-keys version-model [:version :fileId :filename]))]
+        user-role      (if stamped :stamper :uploader)]
     (util/deep-merge
-     (when comment?
-       (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
      (when target
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
@@ -473,6 +468,14 @@
            (remove (set [file-id original-file-id]))
            (run! delete-attachment-file-and-preview!)))
 
+(defn- attachment-comment-updates [application attachment version-model {:keys [comment? comment-text user now]
+                                                                         :or   {comment? true}}]
+  (let [comment-target (merge {:type :attachment
+                               :id (:id attachment)}
+                              (select-keys version-model [:version :fileId :filename]))]
+    (when comment?
+      (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))))
+
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
@@ -482,14 +485,17 @@
   ([application {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
     {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
     (if (pos? retry-limit)
-      (let [latest-version (get-in attachment [:latestVersion :version])
-            version-model  (make-version attachment options)]
+      (let [latest-version  (get-in attachment [:latestVersion :version])
+            version-model   (make-version attachment options)
+            comment-updates (attachment-comment-updates application attachment version-model options)]
         ; Check return value and try again with new version number
         (if (pos? (update-application
                    (application->command application)
                    {:attachments {$elemMatch {:id attachment-id
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
-                   (build-version-updates application attachment version-model options)
+                   (merge
+                     comment-updates
+                     (build-version-updates attachment version-model options))
                    true))
           (do
             (remove-old-files! attachment version-model)
@@ -661,22 +667,26 @@
    :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
    :hystrix/fallback-fn  (constantly nil)}
   [file-id filename content-type application-id & [db-name]]
-  (when (preview/converter content-type)
-    (let [preview-file-id  (str file-id "-preview")
-          preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
-      (mongo/with-db (or db-name mongo/default-db-name)
-        (file-upload/save-file {:fileId preview-file-id
-                                :filename preview-filename
-                                :content (preview/placeholder-image)}
-                               :application application-id)
-        (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                                (with-open [content ((:content (mongo/download file-id)))]
-                                                  (preview/create-preview content content-type)))]
-          (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-          (file-upload/save-file {:fileId preview-file-id
-                                  :filename preview-filename
-                                  :content preview-content}
-                                 :application application-id))))))
+  (try
+    (when (preview/converter content-type)
+      (let [preview-file-id  (str file-id "-preview")
+            preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
+        (mongo/with-db (or db-name mongo/default-db-name)
+                       (file-upload/save-file {:fileId preview-file-id
+                                               :filename preview-filename
+                                               :content (preview/placeholder-image)}
+                                              :application application-id)
+                       (if-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                                             (with-open [content ((:content (mongo/download file-id)))]
+                                                               (preview/create-preview content content-type)))]
+                         (do (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+                             (file-upload/save-file {:fileId preview-file-id
+                                                     :filename preview-filename
+                                                     :content preview-content}
+                                                    :application application-id))
+                         (error "Preview generation failed: id=%s, type=%s file=%s" file-id content-type filename)))))
+    (catch Throwable t
+      (error "Preview generation failed" t))))
 
 (def file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation

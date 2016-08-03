@@ -83,6 +83,25 @@
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuLF5AQqkSO5S1DJOgziMep.xJLYm3.xG"
               :apikey "5051ba0caa2480f374dcfeff"}}
 
+   ;; Hakija: pena / pena
+   {:id "777777777777777777000020"
+    :username "pena"
+    :enabled true
+    :language "fi"
+    :role "applicant"
+    :personId "010203-040A"
+    :firstName "Pena"
+    :lastName "Panaani"
+    :email "pena@example.com"
+    :street "Paapankuja 12"
+    :zip "10203"
+    :city "Piippola"
+    :phone "0102030405"
+    :allowDirectMarketing true
+    :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"
+              :apikey "502cb9e58426c613c8b85abd"}}
+
+
    ])
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false

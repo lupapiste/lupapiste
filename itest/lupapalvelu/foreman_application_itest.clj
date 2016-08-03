@@ -55,9 +55,9 @@
                :as foreman-application}    (create-foreman-app apikey sonja application-id)
               foreman-link-permit-data     (first (foreman-application :linkPermitData))
               foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
-              _                            (command apikey :add-link-permit :id (:id fake-application) :linkPermitId application-id)
+              _                            (command apikey :add-link-permit :id (:id fake-application) :linkPermitId application-id) => ok?
               application                  (query-application apikey application-id)
-              link-to-application          (second (application :appsLinkingToUs))
+              link-from-foreman            (some #(when (= "tyonjohtajan-nimeaminen-v2" (:operation %)) %) (application :appsLinkingToUs))
               foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
 
           (fact "Has two link permits (pientalo and foreman)"
@@ -70,7 +70,7 @@
                 (:id foreman-link-permit-data) => application-id)
 
           (fact "Original application contains link to foreman application"
-                (:id link-to-application) => foreman-application-id)
+                (:id link-from-foreman) => foreman-application-id)
 
           (fact "All linked Foreman applications are returned in query"
                 (let [applications (:applications foreman-applications)]
@@ -156,27 +156,6 @@
                  (fact "can no longer comment"
                        (comment-application apikey foreman-application-id) => fail?))
 
-          (facts "updating other foreman projects to current foreman application"
-                 (let [{application1-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
-                       {foreman-application1-id :id} (create-foreman-app apikey sonja application1-id) => truthy
-                       {application2-id :id}         (create-and-open-application apikey :operation "kerrostalo-rivitalo") => truthy
-                       {foreman-application2-id :id} (create-foreman-app apikey sonja application2-id)
-                       foreman-application1          (query-application apikey foreman-application1-id)
-                       foreman-application2          (query-application apikey foreman-application2-id)
-
-                       foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
-                       foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
-                   (fact "other project is updated into current foreman application"
-                         (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
-                         (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
-                         (command apikey :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
-
-                         (let [updated-application (query-application apikey foreman-application2-id)
-                               updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
-                               project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
-                           (fact "first project is in other projects document"
-                                 project-id => application1-id)))))
-
           (facts "Special foreman/designer verdicts"
                  (let [xml-file           (fn [filename] (-> filename io/resource slurp
                                                              (xml/parse-string "utf-8")
@@ -236,6 +215,28 @@
                                        elems (-> norm (enlive/select [:RakennusvalvontaAsia :> enlive/any-node]))]]
                              (do (fact (str e " is last") (-> elems last :tag) => e)
                                  (fact "Paatostieto is next to last" (->> elems (drop-last 2) first :tag) => :paatostieto)))))))))
+
+(facts "updating other foreman projects to current foreman application"
+  (apply-remote-minimal)
+  (let [{application1-id :id}         (create-and-open-application mikko :operation "kerrostalo-rivitalo") => truthy
+        {foreman-application1-id :id} (create-foreman-app mikko sonja application1-id) => truthy
+        {application2-id :id}         (create-and-open-application mikko :operation "kerrostalo-rivitalo") => truthy
+        {foreman-application2-id :id} (create-foreman-app mikko sonja application2-id)
+        foreman-application1          (query-application mikko foreman-application1-id)
+        foreman-application2          (query-application mikko foreman-application2-id)
+
+        foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
+        foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
+    (fact "other project is updated into current foreman application"
+      (command mikko :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
+      (command mikko :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
+      (command mikko :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
+
+      (let [updated-application (query-application mikko foreman-application2-id)
+            updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
+            project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
+        (fact "first project is in other projects document"
+          project-id => application1-id)))))
 
 (facts "Link foreman application to task"
   (let [apikey                       mikko
