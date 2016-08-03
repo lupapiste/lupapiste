@@ -102,8 +102,8 @@
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]]
 
     (tag-grouping-for-group-type attachments :operation) => [[operation-id1]
-                                                             [operation-id2 [:somegroup :default]]
-                                                             [operation-id3 [:somegroup :anothergroup :default]]]
+                                                             [operation-id2 [:somegroup] [:default]]
+                                                             [operation-id3 [:somegroup] [:anothergroup] [:default]]]
 
       (provided (att-type/tag-by-type {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)
       (provided (att-type/tag-by-type {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)
@@ -131,8 +131,8 @@
     (attachment-tag-groups attachments) => [[:default]
                                             [:parties]
                                             [operation-id1]
-                                            [operation-id2 [:somegroup :default]]
-                                            [operation-id3 [:somegroup :anothergroup :default]]]
+                                            [operation-id2 [:somegroup] [:default]]
+                                            [operation-id3 [:somegroup] [:anothergroup] [:default]]]
 
     (provided (att-type/tag-by-type {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)
     (provided (att-type/tag-by-type {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)

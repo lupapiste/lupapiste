@@ -65,7 +65,9 @@
   [type-groups operation-id]
   (if (empty? type-groups)
     [operation-id]
-    [operation-id (conj (vec type-groups) :default)]))
+    (->> (conj (vec type-groups) :default)
+         (map vector)
+         (cons operation-id))))
 
 (defmulti tag-grouping-for-group-type (fn [attachments group-type] group-type))
 
@@ -80,7 +82,7 @@
 (defn attachment-tag-groups
   "Get hierarchical attachment grouping by attachments tags.
   There are one and two level groups in tag hierarchy (operations are two level groups).
-  eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus :iv_suunnitelma :default]] [opid2 [:kvv_suunnitelma :default]]]"
+  eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
   [attachments]
   (->> (filter (set (attachments-group-types attachments)) attachment-groups) ;; keep sorted
        (cons :default)
