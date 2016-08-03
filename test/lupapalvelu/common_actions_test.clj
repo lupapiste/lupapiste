@@ -23,6 +23,8 @@
                           :add-comment
                           :comments
                           :attachments
+                          :attachments-tag-groups
+                          :attachments-filters
                           :attachment-groups
                           :attachment-types
                           :attachment-operations
