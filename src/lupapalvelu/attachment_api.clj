@@ -144,7 +144,7 @@
   (ok :groups (att-tags/attachment-groups-for-application application)))
 
 (defquery attachments-filters
-  {:description "WIP Get all attachments filters for application"
+  {:description "Get all attachments filters for application"
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
@@ -153,7 +153,7 @@
   (ok :attachments-filters (att-tags/attachments-filters attachments)))
 
 (defquery attachments-tag-groups
-  {:description "WIP Get hierarchical attachment grouping by attachment tags."
+  {:description "Get hierarchical attachment grouping by attachment tags."
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
