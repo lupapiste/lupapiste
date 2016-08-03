@@ -5,6 +5,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
+            [lupapalvelu.icalendar :as ical]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]))
@@ -316,7 +317,8 @@
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
   ; Organization of application must be the same as the organization in reservation slot
-  (let [slot (get-calendar-slot slotId)]
+  (let [slot          (get-calendar-slot slotId)
+        target-user   (usr/get-user-by-id clientId)]
     (when (and (usr/applicant? user) (not (= clientId userId)))
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
@@ -324,11 +326,19 @@
       (error "authority trying to invite " clientId " not satisfying the owner-or-write-access rule, failing reservation")
       (fail! :error.unauthorized))
     (when (not (= (:organizationCode slot) organization))
-      (fail! :error.illegal-organization)))
-  (ok :reservationId (post-command "reservation/"
-                                   {:clientId clientId :reservationSlotId slotId
-                                    :reservationTypeId reservationTypeId :comment comment
-                                    :location location :contextId id :reservedBy userId})))
+      (fail! :error.illegal-organization))
+    (ok :reservationId (post-command "reservation/"
+                                     {:clientId clientId :reservationSlotId slotId
+                                      :reservationTypeId reservationTypeId :comment comment
+                                      :location location :contextId id :reservedBy userId}))
+    (ical/send-calendar-event {:to (:email target-user)
+                               :start (util/to-millis-from-local-datetime-string (-> slot :time :start))
+                               :end (util/to-millis-from-local-datetime-string (-> slot :time :end))
+                               :title "Sinulle on ehdotettu tapaamista"
+                               :description comment
+                               :url "FIXME_linkki_hankkeelle"
+                               :location location
+                               :organizer {:email (:email user) :name (str (:firstName user) " " (:lastName user))}})))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}

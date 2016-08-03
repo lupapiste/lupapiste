@@ -50,6 +50,9 @@
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
 
+                 ; iCalendar
+                 [org.mnode.ical4j/ical4j "1.0.2"]
+
                  ; Apache Commons
                  [org.apache.commons/commons-lang3 "3.4"]
                  [commons-io/commons-io "2.4"]
