@@ -5,6 +5,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]))
 
@@ -305,16 +306,29 @@
       :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
 
 (defcommand reserve-calendar-slot
-  {:user-roles       #{:authorityAdmin :authority}
+  {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [clientId slotId reservationTypeId comment location :id]
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment :location])]
-   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
-  [{{:keys [id]} :application}]
-  (ok :reservationId (post-command "reservation/" {:clientId clientId :reservationSlotId slotId
-                                                   :reservationTypeId reservationTypeId :comment comment
-                                                   :location location :contextId id })))
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
+  ; Applicant: clientId must be the same as user id
+  ; Authority: authorityId must be the same as user id
+  ; Organization of application must be the same as the organization in reservation slot
+  (let [slot (get-calendar-slot slotId)]
+    (when (and (usr/applicant? user) (not (= clientId userId)))
+      (error "applicant trying to impersonate as " clientId " , failing reservation")
+      (fail! :error.unauthorized))
+    (when (and (usr/authority? user) (not (domain/owner-or-write-access? application clientId)))
+      (error "authority trying to invite " clientId " not satisfying the owner-or-write-access rule, failing reservation")
+      (fail! :error.unauthorized))
+    (when (not (= (:organizationCode slot) organization))
+      (fail! :error.illegal-organization)))
+  (ok :reservationId (post-command "reservation/"
+                                   {:clientId clientId :reservationSlotId slotId
+                                    :reservationTypeId reservationTypeId :comment comment
+                                    :location location :contextId id :reservedBy userId})))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
