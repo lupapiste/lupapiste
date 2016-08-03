@@ -8,7 +8,9 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [sade.util :as util]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.action :refer [application->command update-application]]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.comment :as comment]))
 
 ; -- API Call helpers
 
@@ -124,6 +126,24 @@
         query-params (select-keys opts [:year :week :clientId :reservationTypeId])
         query-params (merge query-params {:externalRef calendar-external-ref})]
     (api-query "reservationslots/available-slots" query-params)))
+
+(defn update-mongo-for-new-reservation
+  [application reservation user to-user timestamp]
+  (let [comment-update (comment/comment-mongo-update (:state application)
+                                                     (:comment reservation)
+                                                     {:type "reservation-new"
+                                                      :id (:id reservation)}
+                                                     "system"
+                                                     false ; mark-answered
+                                                     user
+                                                     to-user
+                                                     timestamp)
+        reservation-push {$push {:reservations (select-keys reservation [:id :reservationType :startTime :endTime])}}
+        state-change (case (keyword (:state application))
+                       :draft )]
+    (update-application
+      (application->command application)
+      (util/deep-merge comment-update reservation-push))))
 
 ; -- Configuration
 

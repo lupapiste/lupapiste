@@ -1,13 +1,15 @@
 (ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [info error]]
-            [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.organization :as o]))
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.comment :as comment]
+            [monger.operators :refer :all]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -25,16 +27,19 @@
                 :startTime (util/to-millis-from-local-datetime-string (-> s :time :start))
                 :endTime   (util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
 
+(defn- ->FrontendReservation [r]
+  {:id        (:id r)
+   :status    :booked
+   :reservationStatus (:status r)
+   :reservationType (:reservationType r)
+   :startTime (util/to-millis-from-local-datetime-string (-> r :time :start))
+   :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
+   :comment   (:comment r)
+   :location  (:location r)
+   :applicationId (:contextId r)})
+
 (defn- ->FrontendReservations [backend-reservations]
-  (map (fn [r] {:id        (:id r)
-                :status    :booked
-                :reservationStatus (:status r)
-                :reservationType (:reservationType r)
-                :startTime (util/to-millis-from-local-datetime-string (-> r :time :start))
-                :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
-                :comment   (:comment r)
-                :location  (:location r)
-                :applicationId (:contextId r)}) backend-reservations))
+  (map ->FrontendReservation backend-reservations))
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
@@ -48,12 +53,16 @@
 
 ; -- calendar API functions
 
+(defn- get-calendar-for-resource
+  ([resourceId]
+   (api-query (str "resources/" resourceId))))
+
 (defn- get-calendar
   [calendarId userId]
-  (let [calendar (api-query (str "resources/" calendarId))
+  (let [calendar (get-calendar-for-resource calendarId)
         user     (usr/get-user-by-id userId)]
-    (when (cal/calendar-belongs-to-user? calendar userId)
-      (->FrontendCalendar calendar user))))
+   (when (cal/calendar-belongs-to-user? calendar userId)
+     (->FrontendCalendar calendar user))))
 
 (defn- get-calendar-slot
   [slotId]
@@ -312,11 +321,13 @@
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
   ; Organization of application must be the same as the organization in reservation slot
-  (let [slot (get-calendar-slot slotId)]
+  (let [slot (get-calendar-slot slotId)
+        calendar (get-calendar-for-resource (:resourceId slot))
+        authorityId (:externalRef calendar)]
     (when (and (usr/applicant? user) (not (= clientId userId)))
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
@@ -324,11 +335,29 @@
       (error "authority trying to invite " clientId " not satisfying the owner-or-write-access rule, failing reservation")
       (fail! :error.unauthorized))
     (when (not (= (:organizationCode slot) organization))
-      (fail! :error.illegal-organization)))
-  (ok :reservationId (post-command "reservation/"
-                                   {:clientId clientId :reservationSlotId slotId
-                                    :reservationTypeId reservationTypeId :comment comment
-                                    :location location :contextId id :reservedBy userId})))
+      (fail! :error.illegal-organization))
+
+    (let [reservationId (post-command "reservation/"
+                                      {:clientId clientId :reservationSlotId slotId
+                                       :reservationTypeId reservationTypeId :comment comment
+                                       :location location :contextId id :reservedBy userId})
+          reservation (->FrontendReservation (api-query (str "reservation/" reservationId)))
+          to-user (cond
+                    (usr/applicant? user) (usr/get-user-by-id authorityId)
+                    (usr/authority? user) (usr/get-user-by-id clientId))
+          comment-update (comment/comment-mongo-update (:state application)
+                                                       (:comment reservation)
+                                                       {:type "reservation-new"
+                                                        :id (:id reservation)}
+                                                       "system"
+                                                       false ; mark-answered
+                                                       user
+                                                       to-user
+                                                       timestamp)
+          reservation-push {$push {:reservations (select-keys reservation [:id :reservationType :startTime :endTime])}}]
+      (update-application command
+                          (util/deep-merge comment-update reservation-push))
+      (ok :reservationId reservationId))))
 
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
