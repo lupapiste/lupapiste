@@ -7563,35 +7563,6 @@ LUPAPISTE.AttachmentsService = function() {
       .value();
   }
 
-  //
-  // Filter manipulation
-  //
-
-  // returns an observable
-  var filters = {
-        "hakemus": ko.observable(false),
-        "rakentaminen": ko.observable(false),
-        "ei-tarpeen": ko.observable(false),
-        "iv": ko.observable(false),
-        "kvv": ko.observable(false),
-        "rakenne": ko.observable(false),
-        "paapiirustukset": ko.observable(false)
-  };
-
-  self.filtersArray = ko.observableArray(
-    _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
-            "rakenne", "ei-tarpeen"],
-           function( s ) {
-             return {ltext: "filter." + s,
-                     filter: filters[s]};
-           }));
-
-  self.disableAllFilters = function() {
-    _.forEach(_.values(filters), function(filter) {
-      filter(false);
-    });
-  };
-
 
   //
   // Attachments
@@ -7640,6 +7611,10 @@ LUPAPISTE.AttachmentsService = function() {
                                                     flag :
                                                     self.SCHEDULED_FOR_NOT_NEEDED});
   };
+
+  // When an attachment is set to "not needed" with self.setNotNeeded, it
+  // is actually first scheduled for the change. Calling this function
+  // will change the state from "scheduled" to "not needed".
   self.changeScheduledNotNeeded = function() {
     var attachmentIds = _(self.attachments.peek()).map(function(attachment) {
       return attachment();
@@ -7661,7 +7636,7 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment && attachment.notNeeded === true;
   };
 
-  function getAttachmentValue(attachmentId) {
+  function getUnwrappedAttachment(attachmentId) {
     var attachment = self.getAttachment(attachmentId);
     if (attachment) {
       return attachment();
@@ -7671,13 +7646,16 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // returns a function for use in computed
+  // If all of the attachments are approved -> approved
+  // If some of the attachments are rejected -> rejected
+  // Else null
   self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      if (_.every(_.map(attachmentIds, getAttachmentValue),
+      if (_.every(_.map(attachmentIds, getUnwrappedAttachment),
                   self.isApproved)) {
         return self.APPROVED;
       } else {
-        return _.some(_.map(attachmentIds, getAttachmentValue),
+        return _.some(_.map(attachmentIds, getUnwrappedAttachment),
                       self.isRejected) ? self.REJECTED : null;
       }
     };
@@ -7708,7 +7686,7 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  function getOpId(attachment) {
+  function getAttachmentOperationId(attachment) {
     return attachment.op && attachment.op.id;
   }
 
@@ -7722,8 +7700,8 @@ LUPAPISTE.AttachmentsService = function() {
     case "rakennuspaikka":
       return "rakennuspaikka";
     }
-    if (getOpId(attachment)) {
-      return getOpId(attachment);
+    if (getAttachmentOperationId(attachment)) {
+      return getAttachmentOperationId(attachment);
     } else {
       return "yleiset";
     }
@@ -7733,7 +7711,7 @@ LUPAPISTE.AttachmentsService = function() {
     // Dummy implementation for dummy data
     if (getMainGroup(attachment) === "osapuolet") {
       return "no-sub-group";
-    } else if (getOpId(attachment)) {
+    } else if (getAttachmentOperationId(attachment)) {
       if (attachment.type["type-group"] === "paapiirustus") {
         return "paapiirustus";
       } else {
@@ -7743,6 +7721,35 @@ LUPAPISTE.AttachmentsService = function() {
       return "no-sub-group";
     }
   }
+
+  //
+  // Filter manipulation
+  //
+
+  // returns an observable
+  var filters = {
+        "hakemus": ko.observable(false),
+        "rakentaminen": ko.observable(false),
+        "ei-tarpeen": ko.observable(false),
+        "iv": ko.observable(false),
+        "kvv": ko.observable(false),
+        "rakenne": ko.observable(false),
+        "paapiirustukset": ko.observable(false)
+  };
+
+  self.filtersArray = ko.observableArray(
+    _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
+            "rakenne", "ei-tarpeen"],
+           function( s ) {
+             return {ltext: "filter." + s,
+                     filter: filters[s]};
+           }));
+
+  self.disableAllFilters = function() {
+    _.forEach(_.values(filters), function(filter) {
+      filter(false);
+    });
+  };
 
   function isTypeId(typeId) {
     return function(attachment) {
@@ -7818,6 +7825,10 @@ LUPAPISTE.AttachmentsService = function() {
     );
   }
 
+  //
+  // Attachments hierarchy
+  //
+
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
     var attachments = _.map(self.attachments(), function (a) { return a.peek(); });
@@ -7841,7 +7852,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
 
-  function idToAttachment(attachmentId) {
+  function getAttachmentById(attachmentId) {
     var attachment = self.getAttachment(attachmentId);
     if (attachment) {
       return attachment;
@@ -7853,7 +7864,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.modelForAttachmentInfo = function(attachmentIds) {
     var attachments = _(attachmentIds)
-          .map(idToAttachment)
+          .map(getAttachmentById)
           .value();
     return {
       approve:      self.approveAttachment,
@@ -7874,6 +7885,7 @@ LUPAPISTE.AttachmentsService = function() {
       type: "sub",
       ltitle: subGroup.name, // TODO
       attachmentInfos: attachmentInfos,
+      // all approved or some rejected
       status: ko.pureComputed(self.attachmentsStatus(subGroup.attachmentIds)),
       hasContent: ko.pureComputed(function() {
         return attachmentInfos && attachmentInfos.attachments &&
@@ -7882,6 +7894,9 @@ LUPAPISTE.AttachmentsService = function() {
     };
   }
 
+  // If all of the subgroups in the main group are approved -> approved
+  // If some of the subgroups in the main group are rejected -> rejected
+  // Else null
   function subGroupsStatus(subGroups) {
 
     return ko.pureComputed(function() {
@@ -7949,7 +7964,7 @@ LUPAPISTE.AttachmentsService = function() {
                         groupToModel);
   });
 
-  self.getAttachmentsForGroup = function() {
+  function getAttachmentsForGroup() {
     function getAttachments(group) {
       if (_.isPlainObject(group)) {
         return _.flatten(_.map(_.values(group), getAttachments));
@@ -7977,7 +7992,7 @@ LUPAPISTE.AttachmentsService = function() {
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
           name: _.last(args),
-          attachmentIds: _.spread(self.getAttachmentsForGroup)(args)
+          attachmentIds: _.spread(getAttachmentsForGroup)(args)
         });
       })
     };
