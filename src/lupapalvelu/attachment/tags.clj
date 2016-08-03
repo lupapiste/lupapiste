@@ -62,6 +62,6 @@
    (->> (map att-type/tag-by-type attachments)
         (remove nil?)
         distinct
-        (hash-map :default false :tag))
+        (map (partial hash-map :default false :tag)))
    [{:tag :needed :default true}
     {:tag :notNeeded :default false}]])
