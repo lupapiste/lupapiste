@@ -20,9 +20,9 @@
 (def approve-doc-states #{:open :submitted :complementNeeded})
 
 (defn validate-is-construction-time-doc
-  [{{doc-id :doc} :data} {state :state documents :documents}]
+  [{{doc-id :doc} :data app :application}]
   (when doc-id
-    (when-not (some-> (domain/get-document-by-id documents doc-id)
+    (when-not (some-> (domain/get-document-by-id (:documents app) doc-id)
                       (model/get-document-schema)
                       (get-in [:info :construction-time]))
       (fail :error.document-not-construction-time-doc))))

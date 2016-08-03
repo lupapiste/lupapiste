@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.poikkeamis-schemas]
@@ -202,7 +203,9 @@
 
 (def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
-(def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
+(def- common-ymparistolupa-schemas ["ymp-maksaja" "toiminnan-sijainti"])
+
+(def- optional-ymparistolupa-schemas #{"ymp-maksaja"})
 
 (def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
@@ -344,6 +347,7 @@
                                   :permit-type permit/YI
                                   :applicant-doc-schema applicant-doc-schema-name-ilmoittaja
                                   :required ["ymp-ilm-kesto"]
+                                  :optional optional-ymparistolupa-schemas
                                   :attachments [:kartat [:kartta-melun-ja-tarinan-leviamisesta]]
                                   :add-operation-allowed false
                                   :min-outgoing-link-permits 0
@@ -382,6 +386,7 @@
                                                                       :permit-type permit/YM
                                                                       :applicant-doc-schema applicant-doc-schema-name-hakija
                                                                       :required ["kiinteisto"]
+                                                                      :optional optional-ymparistolupa-schemas
                                                                       :attachments []
                                                                       :add-operation-allowed false
                                                                       :min-outgoing-link-permits 0
@@ -1171,7 +1176,19 @@
                                   (or (empty? selected-operations) (selected-operations node))
                                   (= (name permit-type) (permit-type-of-operation node))))]
     (sort-operation-tree
-      (operations-filtered filtering-fn true))))
+     (operations-filtered filtering-fn true))))
+
+(defn visible-operation
+  "Input validator for operation id. Operation must exist and be visible.
+   param: Parameter key for the operation id.
+   command: Action command."
+  [param command]
+  (if-let [operation (some-> (get-in command [:data param])
+                             ss/trim
+                             get-operation-metadata)]
+    (when (:hidden operation)
+      (fail :error.operations.hidden))
+    (fail :error.operations.not-found)))
 
 (comment
   ; operations (keys) with asianhallinta enabled

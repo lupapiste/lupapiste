@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-optional-url] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -31,7 +31,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.logging :as logging]))
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.i18n :as i18n]))
 ;;
 ;; local api
 ;;
@@ -90,11 +91,6 @@
     {}
     (map :permitType scope)))
 
-;; Validators
-(defn validate-optional-url [param command]
-  (let [url (ss/trim (get-in command [:data param]))]
-    (when-not (ss/blank? url)
-      (action/validate-url url))))
 
 ;;
 ;; Actions
@@ -367,7 +363,7 @@
   {:parameters [date]
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial number-parameters [:date])]
-   :pre-checks [(fn [{:keys [user]} _]
+   :pre-checks [(fn [{:keys [user]}]
                   (when-not (o/some-organization-has-archive-enabled? [(user/authority-admins-organization-id user)])
                     unauthorized))]}
   [{user :user}]
@@ -646,7 +642,7 @@
   {:description "Simple RSS feed for construction waste information."
    :parameters [fmt]
    :optional-parameters [org lang]
-   :input-validators [o/valid-feed-format o/valid-org o/valid-language]
+   :input-validators [o/valid-feed-format o/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
   ((memo/ttl o/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)

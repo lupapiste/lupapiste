@@ -1,5 +1,107 @@
-@import url('main-blessed1.css?z=1467274341162');
+@import url('main-blessed1.css?z=1470122347557');
 
+/* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after, .comment-bubble-authority:before {
+  left: 95%;
+}
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-top-color: #f6f6f6;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:before {
+  border-color: rgba(187, 187, 187, 0);
+  border-top-color: #bbbbbb;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 203, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header {
+  border-bottom: 2px solid #bbbbbb;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  width: 100%;
+  overflow-y: hidden;
+  vertical-align: top;
+}
+/* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender {
+  font-weight: bold;
+}
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role {
+  text-transform: lowercase;
+}
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role:before {
+  content: "(";
+}
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .role:after {
+  content: ")";
+}
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .sender .to:before {
+  margin-left: 12px;
+  margin-right: 12px;
+  content: "→";
+}
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header .timestamp {
+  float: right;
+}
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .content .target {
+  margin-right: 6px;
+}
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority a {
+  color: #f39129;
+  text-decoration: none;
+}
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:link, .comment-bubble-authority a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble-authority a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .deleted {
+  text-decoration: line-through;
+}
+/* line 253, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority .header {
+  border-bottom-color: #05d3b9;
+}
+
+/* line 258, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble > .content > span,
+.comment-bubble-authority > .content > span {
+  white-space: pre-wrap;
+}
+
+/* line 263, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble.attachment > .content > span.target,
+.comment-bubble-authority.attachment > .content > span.target {
+  white-space: normal;
+}
+
+/* line 271, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble.attachment .header,
+.comment-bubble-authority.attachment .header {
+  border-bottom-color: #f7ac2e;
+}
 
 /* line 278, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble.for-me .header,
@@ -792,7 +894,6 @@
   top: 38px;
   z-index: 1000;
   width: inherit;
-  max-height: 800px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: auto;
@@ -802,23 +903,23 @@
   background-color: #fff;
   color: black;
 }
-/* line 124, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 123, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result.autocomplete-result-grouped li.autocomplete-result-item {
   padding: 0 12px;
 }
-/* line 129, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 128, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li {
   height: 40px;
   line-height: 40px;
 }
-/* line 134, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 133, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 0 6px;
 }
-/* line 140, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 139, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
   position: relative;
@@ -826,16 +927,16 @@
   overflow: hidden;
   padding-right: 6px;
 }
-/* line 147, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 146, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #f7ac2e;
   color: #fff;
 }
-/* line 150, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 149, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #fbc732;
 }
-/* line 154, ../../../private/common-html/sass/partials/_autocomplete.scss */
+/* line 153, ../../../private/common-html/sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-group-header {
   font-weight: 700;
   padding-left: 6px;
@@ -1998,48 +2099,63 @@ div.search i {
 #indicator .indicator-bar {
   display: none;
   position: fixed;
-  height: 50px;
   width: 100%;
   z-index: 2001;
   color: #fff;
   font-size: 18px;
   box-sizing: border-box;
 }
-/* line 13, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 12, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-box {
   max-width: 1280px;
   min-width: 640px;
   margin: 0 auto;
   padding-left: 6px;
+  padding-right: 6px;
   padding-top: 12px;
+  padding-bottom: 12px;
 }
-/* line 21, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 24, ../../../private/common-html/sass/partials/_indicator.scss */
+#indicator a {
+  color: white;
+  font-weight: bold;
+}
+/* line 29, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-bar.positive {
   background-color: #2ca92c;
 }
-/* line 25, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 33, ../../../private/common-html/sass/partials/_indicator.scss */
+#indicator .indicator-bar.primary {
+  background-color: #f39129;
+}
+/* line 37, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-bar.negative {
   background-color: #df3215;
 }
-/* line 29, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 41, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-info {
-  float: left;
+  vertical-align: top;
+  display: table-cell;
   margin-right: 24px;
 }
-/* line 34, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 47, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-message {
-  float: left;
+  vertical-align: top;
+  display: table-cell;
+  width: 100%;
+  padding-left: 6px;
+  padding-right: 6px;
 }
-/* line 38, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 57, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-close {
-  float: right;
+  vertical-align: top;
+  display: table-cell;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 64, ../../../private/common-html/sass/partials/_indicator.scss */
 .admin #indicator .indicator-bar, .authority-admin #indicator .indicator-bar {
   z-index: 2003;
   margin-top: -38px;
-  height: 52px;
 }
 
 /* line 2, ../../../private/common-html/sass/partials/_indicator-icon.scss */
@@ -3442,101 +3558,105 @@ span.icon_clear:before {
 }
 
 /* line 827, ../../../private/common-html/sass/views/_application.scss */
-.requiredField-line {
+.info-line {
   display: table-row;
 }
 /* line 829, ../../../private/common-html/sass/views/_application.scss */
-.requiredField-line span, .requiredField-line a {
+.info-line span, .info-line a {
   display: table-cell;
 }
 /* line 832, ../../../private/common-html/sass/views/_application.scss */
-.requiredField-line a {
+.info-line a {
   padding-left: 12px;
 }
 /* line 835, ../../../private/common-html/sass/views/_application.scss */
-.requiredField-line .required-field-error-element-name {
+.info-line .required-field-error-element-name {
   padding-left: 6px;
 }
 /* line 838, ../../../private/common-html/sass/views/_application.scss */
-.requiredField-line .lupicon-circle-attention {
+.info-line .lupicon-circle-attention {
   color: #e34319;
 }
+/* line 842, ../../../private/common-html/sass/views/_application.scss */
+.info-line.warning .lupicon-circle-attention {
+  color: #f39129;
+}
 
-/* line 843, ../../../private/common-html/sass/views/_application.scss */
+/* line 848, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 845, ../../../private/common-html/sass/views/_application.scss */
+/* line 850, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 847, ../../../private/common-html/sass/views/_application.scss */
+/* line 852, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 855, ../../../private/common-html/sass/views/_application.scss */
+/* line 860, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 858, ../../../private/common-html/sass/views/_application.scss */
+/* line 863, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 864, ../../../private/common-html/sass/views/_application.scss */
+/* line 869, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 867, ../../../private/common-html/sass/views/_application.scss */
+/* line 872, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 873, ../../../private/common-html/sass/views/_application.scss */
+/* line 878, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 878, ../../../private/common-html/sass/views/_application.scss */
+/* line 883, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 883, ../../../private/common-html/sass/views/_application.scss */
+/* line 888, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 886, ../../../private/common-html/sass/views/_application.scss */
+/* line 891, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 891, ../../../private/common-html/sass/views/_application.scss */
+/* line 896, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 894, ../../../private/common-html/sass/views/_application.scss */
+/* line 899, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 900, ../../../private/common-html/sass/views/_application.scss */
+/* line 905, ../../../private/common-html/sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 905, ../../../private/common-html/sass/views/_application.scss */
+/* line 910, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 910, ../../../private/common-html/sass/views/_application.scss */
+/* line 915, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 912, ../../../private/common-html/sass/views/_application.scss */
+/* line 917, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -3556,30 +3676,30 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
-/* line 919, ../../../private/common-html/sass/views/_application.scss */
+/* line 924, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
 }
-/* line 922, ../../../private/common-html/sass/views/_application.scss */
+/* line 927, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata {
   max-width: 875px;
 }
-/* line 924, ../../../private/common-html/sass/views/_application.scss */
+/* line 929, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 931, ../../../private/common-html/sass/views/_application.scss */
+/* line 936, ../../../private/common-html/sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 936, ../../../private/common-html/sass/views/_application.scss */
+/* line 941, ../../../private/common-html/sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
 
-/* line 940, ../../../private/common-html/sass/views/_application.scss */
+/* line 945, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
 }
@@ -3863,14 +3983,13 @@ div.review-tasks {
 }
 /* line 60, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content {
-  display: none;
   padding: 6px 0;
 }
-/* line 63, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 62, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content th {
   padding: 6px;
 }
-/* line 66, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 65, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content td {
   padding: 6px;
   max-width: 130px;
@@ -3878,28 +3997,28 @@ div.review-tasks {
   text-overflow: ellipsis;
 }
 
-/* line 75, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 74, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-file-conversation {
   width: 48%;
 }
 
-/* line 79, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 78, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info {
   width: 100%;
 }
-/* line 82, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 81, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info .container {
   padding: 0;
   margin-top: 0;
 }
-/* line 87, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 86, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info .col1 {
   display: inline-block;
   padding-right: 12px;
   width: 49%;
   vertical-align: top;
 }
-/* line 95, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 94, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info .col2 {
   display: inline-block;
   padding-left: 12px;
@@ -3907,7 +4026,7 @@ div.review-tasks {
   vertical-align: top;
 }
 @media (max-width: 991px) {
-  /* line 102, ../../../private/common-html/sass/views/_attachment.scss */
+  /* line 101, ../../../private/common-html/sass/views/_attachment.scss */
   .attachment-info .col1, .attachment-info .col2 {
     display: block;
     width: 100%;
@@ -3916,7 +4035,7 @@ div.review-tasks {
     margin-top: 6px;
   }
 }
-/* line 111, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 110, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info .attachment-actions {
   width: 16.25em;
   float: right;
@@ -3924,46 +4043,46 @@ div.review-tasks {
   vertical-align: top;
 }
 
-/* line 119, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 118, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-wrapper {
   margin-top: 24px;
   width: 80%;
 }
-/* line 122, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 121, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-wrapper .tab-info {
   width: 80%;
 }
 
-/* line 127, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 126, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-header {
   width: 100%;
   display: block;
   vertical-align: baseline;
 }
-/* line 131, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 130, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-header h1 {
   line-height: normal;
   max-width: 80%;
   display: inline-block;
 }
-/* line 136, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 135, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-header a {
   margin-left: 48px;
 }
 
-/* line 144, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 143, ../../../private/common-html/sass/views/_attachment.scss */
 td.comment-text {
   vertical-align: top;
   text-align: left;
 }
 
-/* line 149, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 148, ../../../private/common-html/sass/views/_attachment.scss */
 .new-attachment-version-details {
   display: block;
   font-style: italic;
 }
 
-/* line 154, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 153, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-group-header {
   font-weight: bold;
   font-size: 1.5em;
@@ -3971,80 +4090,80 @@ td.comment-text {
   height: 50px;
   vertical-align: bottom;
 }
-/* line 160, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 159, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-group-header td {
   padding: 6px 0;
 }
 
-/* line 165, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 164, ../../../private/common-html/sass/views/_attachment.scss */
 .inline-block {
   display: inline-block;
 }
 
-/* line 169, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 168, ../../../private/common-html/sass/views/_attachment.scss */
 #attachment-type-select {
   margin-bottom: 24px;
 }
 
-/* line 173, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 172, ../../../private/common-html/sass/views/_attachment.scss */
 .change-type {
   clear: both;
   display: block;
 }
 
-/* line 178, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 177, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label {
   margin-bottom: 12px;
   overflow: hidden;
 }
-/* line 183, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 182, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label #attachment-latest-version-info {
   margin-bottom: 24px;
 }
-/* line 187, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 186, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 193, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 192, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
   font-weight: bold;
 }
-/* line 198, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 197, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-info-item {
   margin-right: 24px;
 }
-/* line 202, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 201, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 100%;
   height: 26px;
 }
-/* line 209, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 208, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input[type="checkbox"] {
   display: inline-block;
   width: 3.75em;
 }
-/* line 214, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 213, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 100%;
 }
-/* line 219, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 218, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
   position: relative;
 }
 
-/* line 225, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 224, ../../../private/common-html/sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 229, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 228, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -4052,7 +4171,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 236, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 235, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -4061,58 +4180,58 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 244, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 243, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-cell {
   display: table-cell;
   width: 200px;
 }
 
-/* line 249, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 248, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content {
   margin-top: 12px;
 }
-/* line 252, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 251, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable {
   margin: 0;
 }
-/* line 254, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 253, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable tr {
   background: transparent;
   border: none;
 }
-/* line 258, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 257, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable th, .tos-metadata-content .subtable td {
   background: transparent;
   padding: 0;
 }
 
-/* line 265, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 264, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions {
   margin-bottom: 24px;
 }
-/* line 266, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 265, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions p {
   line-height: normal;
   margin-bottom: 12px;
 }
 
-/* line 273, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 272, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid {
   margin-top: 12px;
 }
-/* line 275, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 274, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid [class^="lupicon-"] {
   vertical-align: middle;
   margin-left: 2px;
   font-size: 18px;
 }
 
-/* line 282, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 281, ../../../private/common-html/sass/views/_attachment.scss */
 .modal-body p {
   max-width: 600px;
 }
 
-/* line 286, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 285, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone {
   display: table-cell;
   vertical-align: middle;
@@ -4122,28 +4241,28 @@ td.comment-text {
   text-align: center;
   background-color: #2ca92c;
 }
-/* line 294, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 293, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone h1 {
   float: none;
   display: block;
   color: #fff;
 }
-/* line 299, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 298, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone.active {
   background-color: #46b02d;
 }
-/* line 302, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 301, ../../../private/common-html/sass/views/_attachment.scss */
 .drop-zone i {
   font-size: 50px;
 }
 
-/* line 308, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 307, ../../../private/common-html/sass/views/_attachment.scss */
 .targetted-attachments {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-/* line 315, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 314, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-operations {
   margin-top: 1em;
   margin-bottom: 2em;
@@ -4224,7 +4343,7 @@ td.comment-text {
 /* line 3, ../../../private/common-html/sass/views/_mypage.scss */
 #mypage .accordion-container .button-group,
 #company .accordion-container .button-group {
-  margin: 20px;
+  margin-bottom: 20px;
   position: relative;
 }
 /* line 9, ../../../private/common-html/sass/views/_mypage.scss */
@@ -4454,6 +4573,21 @@ table.admin-settings td.value .save-indicator {
 /* line 96, ../../../private/common-html/sass/views/_authority_admin.scss */
 .permanent-archive-date-input input {
   width: 100px;
+}
+
+/* line 102, ../../../private/common-html/sass/views/_authority_admin.scss */
+table.selected-operations-table th.sot--full-width {
+  width: 100%;
+}
+/* line 105, ../../../private/common-html/sass/views/_authority_admin.scss */
+table.selected-operations-table div.checkbox-wrapper, table.selected-operations-table div.sectionbox-wrapper {
+  text-align: center;
+  border: none;
+  display: inline-block;
+}
+/* line 110, ../../../private/common-html/sass/views/_authority_admin.scss */
+table.selected-operations-table td.sot--center {
+  text-align: center;
 }
 
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */
@@ -5706,60 +5840,61 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   font-size: 15.84px;
 }
 /* line 7, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-slot-bubble div {
+  margin-bottom: 12px;
+}
+/* line 11, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble p {
   margin-bottom: 0px;
 }
-/* line 10, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 14, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble.weekday-1 {
   float: left;
   margin-left: 6%;
 }
-/* line 14, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 18, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble.weekday-2 {
   float: left;
   margin-left: 25%;
 }
-/* line 18, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 22, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble.weekday-3 {
   float: left;
   margin-left: 44%;
 }
-/* line 22, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 26, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble.weekday-4 {
   float: left;
   margin-left: 63%;
 }
-/* line 26, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 30, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble.weekday-5 {
   right: 0px;
   margin-right: 1%;
 }
-/* line 31, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 35, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-slot-bubble input[type=text] {
   padding-left: 6px;
   width: 48px;
 }
-/* line 36, ../../../private/common-html/sass/views/_calendars.scss */
-.calendar-slot-bubble p.amount-controls {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 4px;
-  line-height: 24px;
-  margin: 2px 6px 12px 0;
+/* line 40, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-slot-bubble .amount-controls > [class^="lupicon-"]:before, .calendar-slot-bubble [class*=" lupicon-"]:before {
+  position: relative;
+  top: 4px;
 }
 
-/* line 45, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 46, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table {
   width: 100%;
   min-height: 144px;
   padding-top: 24px;
 }
-/* line 50, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 51, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions {
   width: 96%;
   text-align: right;
 }
-/* line 52, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 53, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions .month {
   float: left;
   margin-left: 5%;
@@ -5767,30 +5902,30 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   font-size: 18px;
   font-weight: bold;
 }
-/* line 59, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 60, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions .nav-links {
   vertical-align: top;
 }
-/* line 65, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 66, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table {
   width: 96%;
 }
-/* line 67, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 68, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table tr {
   border: none;
 }
-/* line 71, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 72, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table th {
   background: white;
   font-size: 18px;
   font-weight: normal;
 }
-/* line 76, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 77, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table th.date-today {
   background: #dddddd;
   border: 1px solid #dddddd;
 }
-/* line 82, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 83, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td {
   background: #f6f6f6;
   padding: 0;
@@ -5798,7 +5933,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   width: 18%;
   border: 1px solid #dddddd;
 }
-/* line 89, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 90, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td:first-child {
   font-size: 18px;
   font-weight: normal;
@@ -5806,38 +5941,38 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   width: 5%;
   border: none;
 }
-/* line 97, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 98, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today {
   background: #dddddd;
 }
-/* line 101, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 102, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.timestamp {
   height: 60px;
 }
-/* line 105, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 106, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot {
   height: 60px;
   border-bottom: 1px solid #ccc;
 }
-/* line 109, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 110, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot:nth-child(even) {
   background: white;
 }
-/* line 113, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 114, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 118, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 119, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today div.timeline-slot {
   height: 60px;
   border-bottom: 1px solid #ccc;
   background: #eeeeee;
 }
-/* line 123, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 124, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 128, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 129, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot {
   position: absolute;
   width: 100%;
@@ -5847,27 +5982,65 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   white-space: nowrap;
   color: #f39129;
 }
-/* line 137, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 138, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked {
   color: white;
   background: #2ca92c;
 }
-/* line 141, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 142, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked a {
   color: white;
 }
-/* line 146, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 147, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.accepted {
   color: white;
   background: #f39129;
 }
-/* line 150, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 151, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.accepted a {
   color: white;
 }
+/* line 156, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.available-slot button.reserve-slot {
+  background: inherit;
+  width: 100%;
+  height: 100%;
+  font-size: 22.8px;
+  color: #f39129;
+  text-align: center;
+  display: table;
+}
+/* line 166, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.available-slot button.reserve-slot div {
+  display: inline;
+  margin-right: auto;
+  margin-left: auto;
+}
+/* line 172, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.available-slot button.reserve-slot div i, .calendar-table table td div.calendar-slot button.reserve-slot div span {
+  display: table-cell;
+  vertical-align: middle;
+}
+/* line 177, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 6px;
+  color: white;
+  background: #2ca92c;
+}
+/* line 184, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation div {
+  height: 20px;
+}
 
-/* line 160, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 195, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
+  margin-top: 24px;
+}
+
+/* line 199, ../../../private/common-html/sass/views/_calendars.scss */
+#application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
 

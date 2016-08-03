@@ -7,7 +7,7 @@
             [sade.env :as env]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application]]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.company :as company]
             [lupapalvelu.mongo :as mongo]
@@ -20,7 +20,7 @@
             [lupapalvelu.operations :as op]
             [monger.operators :refer :all]))
 
-(defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data} {tasks :tasks}]
+(defn ensure-foreman-not-linked [{{foreman-app-id :foremanAppId task-id :taskId} :data {:keys [tasks]} :application}]
   (when (and (not (ss/blank? foreman-app-id))
              (->> (filter (comp #{:task-vaadittu-tyonjohtaja} keyword :name :schema-info) tasks)
                   (remove (comp #{task-id} :id))
@@ -137,29 +137,36 @@
     (foreman-app? application)
     (= "tyonjohtaja-ilmoitus" (:permitSubtype application))))
 
+(defn validate-foreman-submittable [application link-permit]
+  (when-not (app/submitted? application)
+    (when link-permit
+      (when-not (app/submitted? link-permit)
+        (fail :error.not-submittable.foreman-link)))))
+
 (defn- validate-notice-or-application [{subtype :permitSubtype :as application}]
   (when (and (foreman-app? application) (ss/blank? subtype))
     (fail :error.foreman.type-not-selected)))
 
-(defn- validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
+(defn- validate-notice-submittable [application link-permit]
   (when (notice? application)
-    (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
-      (when-not (states/post-verdict-states (keyword
-                                              (get
-                                                (mongo/select-one :applications {:_id (:id link)} {:state 1})
-                                                :state)))
+    (when link-permit
+      (when-not (states/post-verdict-states (keyword (:state link-permit)))
         (fail :error.foreman.notice-not-submittable)))))
 
 (defn validate-application
   "Validates foreman applications. Returns nil if application is OK, or fail map."
   [application]
   (when (foreman-app? application)
-    (or
-      (validate-notice-or-application application)
-      (validate-notice-submittable application))))
+    (let [link        (some #(when (= (:type %) "lupapistetunnus") %) (:linkPermitData application))
+          link-permit (when link
+                        (mongo/select-one :applications {:_id (:id link)} {:state 1}))]
+      (or
+        (validate-notice-or-application application)
+        (validate-notice-submittable application link-permit)
+        (validate-foreman-submittable application link-permit)))))
 
 (defn new-foreman-application [{:keys [created user application] :as command}]
-  (-> (application/do-create-application
+  (-> (app/do-create-application
         (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
                               :x (-> application :location first)
                               :y (-> application :location second)
@@ -260,10 +267,6 @@
     (->> (auth/create-invite-auth user foreman-user (:id foreman-app) "foreman" created)
          (update foreman-app :auth conj))
     foreman-app))
-
-(defn create-foreman-application-with-docs [command linked-application foreman-role]
-  (-> (new-foreman-application command)
-      (update-foreman-docs linked-application foreman-role)))
 
 (defn- invite-company! [foreman-app {user :user} auth]
   (let [company-id (get-in auth [:invite :user :id])

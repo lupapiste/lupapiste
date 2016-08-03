@@ -6,7 +6,8 @@
             [lupapalvelu.itest-util :as itest]
             [lupapalvelu.user :as usr]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.guest :as guest]))
+            [lupapalvelu.guest :as guest]
+            [lupapalvelu.organization :as org]))
 
 (def local-db-name (str "test_guest_itest_" (sade/now)))
 
@@ -36,11 +37,11 @@
                                                                      :description "Dude"}])
            (fact "Organization known guest authorities"
                  (guest/known-guest-authority {:data {:email veikko
-                                                      :role "guestAuthority"}}
-                                              {:organization "753-R"})=> nil
+                                                      :role "guestAuthority"}
+                                               :application {:organization "753-R"}})=> nil
                  (guest/known-guest-authority {:data {:email "not.known@foo.bar"
-                                                      :role "guestAuthority"}}
-                                              {:organization "753-R"})=> itest/fail?)
+                                                      :role "guestAuthority"}
+                                               :application {:organization "753-R"}})=> itest/fail?)
 
            (fact "Update Veikko"
                  (guest/update-guest-authority-organization admin veikko "Veikko" "The Man" "Boss")
@@ -68,10 +69,11 @@
         (guest/valid-guest-role {:data {:role "bad"}}) => itest/fail?)
   (facts "Application guests and guest authorities"
          (let [app (itest/create-and-submit-local-application itest/pena :property itest/sipoo-property-id :address "Gongti beilu 88")
-               cmd (fn [username & [data]] {:user (usr/get-user {:username username})
-                                            :application (domain/get-application-no-access-checking (:id app))
-                                            :created (sade/now)
-                                            :data (assoc data :id (:id app))})
+               cmd (fn [username & [data]] {:user         (usr/get-user {:username username})
+                                            :application  (domain/get-application-no-access-checking (:id app))
+                                            :organization (delay (org/get-organization (:organization app)))
+                                            :created      (sade/now)
+                                            :data         (assoc data :id (:id app))})
                auth-cmd (fn [username & [data]]
                           (let [{:keys [user] :as cmd} (cmd username data)]
                             (assoc cmd :user (usr/with-org-auth user))))
@@ -139,11 +141,10 @@
                                                                     :unsubscribe false})) => itest/ok?
                  (-> "veikko" cmd guest/application-guests last :unsubscribed) => false?)
            (fact "Auth modification check"
-                 (let [{app :application} (cmd "pena")]
-                   (guest/auth-modification-check (cmd "pena" {:username mikko}) app) => nil?
-                   (guest/auth-modification-check (cmd "pena" {:username "veikko"}) app) => itest/fail?
-                   (guest/auth-modification-check (auth-cmd "sonja" {:username mikko}) app) => nil?
-                   (guest/auth-modification-check (auth-cmd "sonja" {:username "veikko"}) app) => nil?))
+             (guest/auth-modification-check (cmd "pena" {:username mikko})) => nil?
+             (guest/auth-modification-check (cmd "pena" {:username "veikko"})) => itest/fail?
+             (guest/auth-modification-check (auth-cmd "sonja" {:username mikko})) => nil?
+             (guest/auth-modification-check (auth-cmd "sonja" {:username "veikko"})) => nil?)
            (fact "Pena deletes Mikko"
                  (guest/delete-guest-application (cmd "pena" {:username mikko})) => itest/ok?)
            (fact "Sonja deletes Veikko"

@@ -46,7 +46,7 @@ feature.neighbors       true
 feature.neighborsz      false
 ```
 
-Käyttössä olevat ominaisuudet näkyvät ajoaikaisesti admin-käyttöliittymässä.
+Käytössä olevat ominaisuudet näkyvät ajoaikaisesti admin-käyttöliittymässä.
 
 Ominaisuuksien käyttö Clojure-koodissa:
 
@@ -81,10 +81,22 @@ HTML ja KnockoutJS:
 
 ```HTML
 <h1>BlaBla</h1>
-<div data-bind="if: features.enabled('neighbors')"><div class="feature">
+<div data-bind="if: features.enabled('neighbors')">
+  <div class="feature">
+    <span class="legend">neighbors</span>
+    I have neighbors.
+  </div>
+</div>
+```
+
+Tai lyhyemmin:
+
+```HTML
+<h1>BlaBla</h1>
+<div data-bind="feature: 'neighbors'">
   <span class="legend">neighbors</span>
   I have neighbors.
-</div></div>
+</div>
 ```
 
 ## Lopullinen tuotantoonvienti

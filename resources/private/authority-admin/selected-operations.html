@@ -5,16 +5,48 @@
       <div class="container">
         <section>
           <h2 data-bind="ltext: 'auth-admin.selected-operations'"></h2>
-          <table data-test-id="organization-selected-operations">
-          <!-- ko foreach: organization.selectedOperations -->
+          <table data-test-id="organization-selected-operations"
+                 class="selected-operations-table">
+            <!-- ko foreach: organization.selectedOperations -->
             <thead>
               <tr>
-                <th data-bind="ltext: permitType"></th>
+                <th data-bind="ltext: permitType"
+                    class="sot--full-width"></th>
+                <th data-bind="ltext: 'section.column',
+                               feature: 'section'"></th>
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
+                <th data-bind="ltext: 'suti.column',
+                               feature: 'suti'"></th>
+                <!-- /ko -->
               </tr>
             </thead>
             <tbody data-bind="foreach: operations">
-              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">
+              <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
+                <td data-bind="feature: 'section'"
+                    class="sot--center">
+                  <div class="sectionbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="attr: {id: 'section-' + id},
+                                      checked: $root.organization.isSectionOperation( $data )">
+                    <label class="sectionbox-label"
+                           data-bind="attr: {'for': 'section-' + id},
+                                      click: $root.organization.toggleSectionOperation"></label>
+                  </div>
+                </td>
+                <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
+                <td data-bind="feature: 'suti'"
+                    class="sot--center">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox"
+                           data-bind="attr: {id: 'suti-' + id},
+                                      checked: lupapisteApp.services.sutiService.isSutiOperation( $data )">
+                    <label class="checkbox-label"
+                           data-bind="attr: {'for': 'suti-' + id},
+                                      click: lupapisteApp.services.sutiService.toggleSutiOperation"></label>
+                  </div>
+                </td>
+                <!-- /ko-->
               </tr>
             </tbody>
           <!-- /ko -->

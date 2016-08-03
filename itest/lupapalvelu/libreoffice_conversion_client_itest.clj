@@ -13,6 +13,7 @@
   (let [file-out (File/createTempFile "test-libre-rtf-" ".pdf")]
     (try
       (fact "libre enabled, No connnection error expected" (:archivabilityError response) => nil)
+      (fact "Auto conversion flag is set" (:autoConversion response) => true)
 
       (io/copy (:content response) file-out)
       (let [pdf-content (pdfbox/extract (.getAbsolutePath file-out))

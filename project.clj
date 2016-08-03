@@ -20,7 +20,7 @@
                  [com.novemberain/monger "3.0.2"]
 
                  ; Logging
-                 [com.taoensso/timbre "4.0.2"]
+                 [com.taoensso/timbre "4.6.0"]
                  [org.slf4j/slf4j-log4j12 "1.7.21"]
 
                  ;;Hystrix
@@ -56,7 +56,7 @@
                  [commons-codec/commons-codec "1.10"]
 
                  ; Joda time wrapper
-                 [clj-time "0.11.0"]
+                 [clj-time "0.12.0"]
 
                  ; String case manipulation
                  [camel-snake-kebab "0.4.0"]
@@ -110,7 +110,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.36"]
+                 [lupapiste/commons "0.7.37"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

@@ -6,7 +6,7 @@
       <div class="indicator-bar" data-bind="fader: showIndicator, duration: 250, css: indicatorStyle, attr: {'data-test-id': 'indicator-' + indicatorStyle()}">
         <div class="indicator-box">
           <div class="indicator-info" data-bind="css: iconStyle"></div>
-          <div class="indicator-message" data-bind="ltext: indicatorMessage"></div>
+          <div class="indicator-message" data-bind="html: indicatorMessage"></div>
           <div class="indicator-close lupicon-remove" data-bind="visible: showCloseButton, click: closeIndicator"></div>
         </div>
       </div>

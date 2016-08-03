@@ -14,25 +14,27 @@
       </div>
 
       <!-- ko if: calendars().length > 0 -->
-        <div class="form-grid form-grid--no-border">
-          <span data-bind="ltext: 'mycalendar.in-organization'"></span>: &nbsp; &nbsp;
-          <!-- ko foreach: calendars -->
-          <span data-bind="component: {name: 'radio-field',
-                                       params: {value: id,
-                                                selectedValue: $parent.selectedCalendarId,
-                                                name: 'selectedCalendarId',
-                                                label: organization}}"></span>
-          <!-- /ko -->
+        <div class="form-entry">
+          <span data-bind="ltext: 'mycalendar.in-organization'"></span>:
+          <select class="form-input combobox tip"
+                  data-bind="options: calendars,
+                             optionsText: function(item) { return _.get(item, 'organization'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedCalendar">
+          </select>
         </div>
       <!-- /ko -->
 
-      <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
-                                                 userId: lupapisteApp.models.currentUser.id },
-                             reservationTypes: reservationTypes"
-                     visible="selectedCalendar() !== undefined"></calendar-view>
-
       <!-- ko if: noCalendarsFound -->
         <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
+      <!-- /ko -->
+      <!-- ko ifnot: noCalendarsFound -->
+        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' -->
+        <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
+                                                   userId: lupapisteApp.models.currentUser.id },
+                               reservationTypes: reservationTypes"
+                       visible="selectedCalendar() !== undefined"></calendar-view>
+        <!-- /ko -->
       <!-- /ko -->
     <!-- /ko -->
 

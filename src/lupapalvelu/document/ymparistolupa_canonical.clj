@@ -18,7 +18,7 @@
          {:kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
           :luvanTunnistetiedot (canonical-common/lupatunnus application)
           :lausuntotieto (canonical-common/get-statements (:statements application))
-          :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
+          :maksajatieto (util/assoc-when-pred {} util/not-empty-or-nil? :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
           :hakija (remove nil? (map canonical-common/get-yhteystiedot (get documents hakija-key)))
           :toiminta (select-keys kuvaus [:kuvaus :peruste])
           :laitoksentiedot {:Laitos (assoc generic-id :kiinttun (:propertyId application))}

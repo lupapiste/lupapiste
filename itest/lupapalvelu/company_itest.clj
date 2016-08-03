@@ -98,8 +98,8 @@
 
 (facts "Teppo cannot submit even his own applications"
        (let [application-id (create-app-id teppo :propertyId sipoo-property-id :address "Xi Dawang Lu 8")]
-         (fact "Cannot submit pseudo-query is ok"
-               (query teppo :company-user-cannot-submit :id application-id) => ok?)
+         (fact "Query says can't submit"
+               (query teppo :application-submittable :id application-id) => (partial expected-failure? :company.user.cannot.submit))
          (fact "Submit application fails"
                (command teppo :submit-application :id application-id) => fail?)))
 
@@ -108,8 +108,8 @@
         (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         auth (:auth (query-application mikko application-id))]
     (count auth) => 1
-    (fact "Cannot submit pseudo-query fails for Mikko"
-          (query mikko :company-user-cannot-submit :id application-id) => (partial expected-failure? "error.authorized"))
+    (fact "Can submit"
+          (query mikko :application-submittable :id application-id) => ok?)
     (fact "Applicant invites company"
           (command mikko :company-invite :id application-id :company-id "solita") => ok?)
 
@@ -132,12 +132,12 @@
         (some #(= "solita" %) auth-ids) => true))
 
     (fact "Kaino and Mikko could submit application"
-          (query mikko :company-user-cannot-submit :id application-id) => fail?
-          (query kaino :company-user-cannot-submit :id application-id) => fail?)
+      (query mikko :application-submittable :id application-id) => ok?
+      (query kaino :application-submittable :id application-id) => ok?)
 
     (facts "Teppo cannot submit application"
-           (fact "Cannot submit pseudo-query is ok"
-                 (query teppo :company-user-cannot-submit :id application-id) => ok?)
+           (fact "Query says can't submit"
+                 (query teppo :application-submittable :id application-id) => (partial expected-failure? :company.user.cannot.submit))
            (fact "Submit application fails"
                  (command teppo :submit-application :id application-id) => fail?))
     (fact "Teppo cannot edit his company user details"
@@ -149,10 +149,9 @@
     (fact "Teppo can now edit his company user details"
           (command teppo :company-user-update :user-id teppo-id :role "user" :submit true) => ok?)
     (facts "Teppo can submit application"
-           (fact "Cannot submit pseudo-query fails"
-                 (query teppo :company-user-cannot-submit :id application-id) => fail?)
            (fact "Submit application succeeds"
-                 (command teppo :submit-application :id application-id) => ok?))))
+             (query teppo :application-submittable :id application-id) => ok?
+             (command teppo :submit-application :id application-id) => ok?))))
 
 (defn result
   ([v]

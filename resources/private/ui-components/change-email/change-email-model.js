@@ -38,6 +38,3 @@ LUPAPISTE.ChangeEmailModel = function(params) {
     self.newEmail(userEmail);
   });
 };
-
-// accordion-template is the base template, change-email-template is set above as an extension
-ko.components.register("change-email", {viewModel: LUPAPISTE.ChangeEmailModel, template: {element: "accordion-template"}});

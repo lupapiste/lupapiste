@@ -1,5 +1,6 @@
 (ns lupapalvelu.file-upload-api
   (:require [noir.response :as resp]
+            [clojure.set :refer [rename-keys]]
             [sade.core :refer :all]
             [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.action :refer [defcommand defraw]]
@@ -21,8 +22,10 @@
   {:user-roles #{:anonymous}
    :parameters [files]
    :input-validators [file-mime-type-accepted file-size-legal]}
-  (let [file-info {:files (pmap #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false) files)}]
-    (->> (assoc file-info :ok true)
+  (let [file-info (pmap
+                    #(file-upload/save-file % :sessionId (vetuma/session-id) :linked false)
+                    (map #(rename-keys % {:tempfile :content}) files))]
+    (->> {:files file-info :ok true}
          (resp/json)
          (resp/content-type "text/plain")
          (resp/status 200))))

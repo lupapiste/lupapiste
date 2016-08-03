@@ -55,6 +55,8 @@
 (def mikko-id    (id-for "mikko@example.com"))
 (def teppo       (apikey-for "teppo@example.com"))
 (def teppo-id    (id-for "teppo@example.com"))
+(def sven        (apikey-for "sven@example.com"))
+(def sven-id     (id-for "sven@example.com"))
 (def veikko      (apikey-for "veikko"))
 (def veikko-id   (id-for "veikko"))
 (def sonja       (apikey-for "sonja"))
@@ -94,7 +96,10 @@
 (def oulu-property-id "56400000000000")
 (def no-backend-property-id oulu-property-id)
 
-(defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
+(defn server-address [] (System/getProperty "target_server" (or (env/value :host) "http://localhost:8000")))
+
+;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
+(defn target-server-or-localhost-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
 (def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
@@ -113,7 +118,7 @@
   (proxy [Cookie] []
     (getName [] name)
     (getValue [] value)
-    (getDomain [] (get (re-matches #"(http(s)?://)([^\d]+)(:\d+)?" (server-address)) 3))
+    (getDomain [] (get (re-matches #"(http(s)?://)([a-z0-9-\.]+)(:\d+)?" (server-address)) 3))
     (getPath [] "/")
     (isSecure [] false)
     (getVersion [] 2)
@@ -247,6 +252,7 @@
 
 (defchecker expected-failure? [expected-text e]
   (cond
+    (sequential? (:errors e)) (some (partial = (keyword expected-text)) (map (comp keyword :text) (:errors e)))
     (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
     (captured-throwable? e) (= (some-> e throwable .getData :text name) (name expected-text))
     :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))
@@ -611,7 +617,7 @@
              (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.115.html") => 0)))))
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -635,7 +641,24 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
       (facts "upload to target should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.115.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
+
+(defn upload-user-attachment [apikey attachment-type expect-to-succeed & [filename]]
+  (let [filename    (or filename "dev-resources/test-attachment.txt")
+        uploadfile  (io/file filename)
+        uri         (str (server-address) "/api/upload/user-attachment")
+        resp        (http-post uri
+                               {:headers {"authorization" (str "apikey=" apikey)}
+                                :multipart [{:name "attachmentType"  :content attachment-type}
+                                            {:name "files[]"         :content uploadfile}]})
+        body        (:body (decode-response resp))]
+    (if expect-to-succeed
+      (facts "successful"
+        resp => http200?
+        body => ok?)
+      (facts "should fail"
+        body => fail?))
+    body))
 
 (defn get-attachment-ids [application] (->> application :attachments (map :id)))
 

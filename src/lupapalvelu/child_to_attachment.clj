@@ -35,7 +35,6 @@
                                                     :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
                                                     :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
                                                     {:type-group "muut" :type-id "muu"})
-                              :op                 nil
                               :contents           (case type
                                                     :statements (get-in child [:person :text])
                                                     :neighbors (get-in child [:owner :name])
@@ -50,7 +49,7 @@
                               :archivable         is-pdf-a?
                               :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                               :missing-fonts      []
-                              :source             {:type type :id id}}]
+                              :source             {:type (name type) :id id}}]
     (cond-> base-attachment-opts
             (= :tasks type) (assoc :target {:type :task :id id}))))
 

@@ -162,7 +162,8 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
       attachmentId: null,
       attachmentType: null,
       typeSelector: true,
-      opSelector: self.primaryOperation()["attachment-op-selector"]
+      opSelector: self.primaryOperation()["attachment-op-selector"],
+      archiveEnabled: self.authorizationModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
@@ -184,6 +185,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
 
   self.deleteSingleAttachment = function(a) {
     var attId = _.isFunction(a.id) ? a.id() : a.id;
+    var versions = ko.unwrap(a.versions);
     var doDelete = function() {
       ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
         .success(self.appModel.lightReload)
@@ -195,7 +197,7 @@ LUPAPISTE.AttachmentsTabModel = function(signingModel, verdictAttachmentPrintsOr
     hub.send("show-dialog", {ltitle: "attachment.delete.header",
                              size: "medium",
                              component: "yes-no-dialog",
-                             componentParams: {ltext: "attachment.delete.message",
+                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                yesFn: doDelete}});
   };
 

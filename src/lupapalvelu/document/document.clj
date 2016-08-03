@@ -21,14 +21,14 @@
 (defn user-can-be-set? [user-id application]
   (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
 
-(defn create-doc-validator [command {documents :documents permit-type :permitType}]
+(defn create-doc-validator [{{documents :documents permit-type :permitType} :application}]
   ;; Hide the "Lisaa osapuoli" button when application contains "party" type documents and more can not be added.
   (when (and
           (not (permit/multiple-parties-allowed? permit-type))
           (some (comp (partial = "party") :type :schema-info) documents))
     (fail :error.create-doc-not-allowed)))
 
-(defn user-can-be-set-validator [{{user-id :userId} :data} application]
+(defn user-can-be-set-validator [{{user-id :userId} :data application :application}]
   (when-not (or (ss/blank? user-id) (user-can-be-set? user-id application))
     (fail :error.application-does-not-have-given-auth)))
 
@@ -50,7 +50,7 @@
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
-(defn remove-doc-validator [{data :data user :user} application]
+(defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
       (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)

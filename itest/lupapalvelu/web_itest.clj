@@ -4,6 +4,8 @@
             [lupapalvelu.itest-util :refer :all]
             [sade.env :as env]))
 
+(apply-remote-minimal)
+
 (facts "redirect-after-login"
   (let [store (atom {})
         initial-params {:cookie-store (->cookie-store store)

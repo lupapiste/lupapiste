@@ -17,12 +17,14 @@
         (fact "PDF conversion ok with file"
           (convert-to-pdf-a invalid-pdf
                             opts) => (contains {:output-file (partial instance? java.io.File)
-                                                                      :pdfa? true}))
+                                                :pdfa? true
+                                                :autoConversion true}))
 
         (fact "Conversion with InputStream is OK"
           (convert-to-pdf-a (FileInputStream. invalid-pdf)
                             opts) => (contains {:output-file (partial instance? java.io.File)
-                                                                      :pdfa?        true}))
+                                                :pdfa? true
+                                                :autoConversion true}))
 
         (fact "If conversion result is empty, original is returned"
           (convert-to-pdf-a invalid-pdf opts) => {:pdfa? false}

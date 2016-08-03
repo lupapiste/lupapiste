@@ -13,6 +13,7 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
   self.positionTop = ko.observable();
   self.weekdayCss = ko.observable();
 
+  self.timestamp = ko.observable();
   self.amount = ko.observable();
   self.maxAmountUntilNextSlot = ko.observable();
   self.maxAmountUntilEndOfDay = ko.observable();
@@ -51,6 +52,8 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
       self.error("calendar.error.cannot-create-slots-outside-calendar-day");
     } else if (self.amount() > self.maxAmountUntilNextSlot()) {
       self.error("calendar.error.cannot-create-overlapping-slots");
+    } else if (self.timestamp() && self.timestamp().isBefore(moment())) {
+      self.error("calendar.error.slot-in-past");
     } else {
       self.error(false);
     }
@@ -81,20 +84,14 @@ LUPAPISTE.ReservationSlotCreateBubbleModel = function(params) {
     var weekday = event.weekday;
     var hour = event.hour;
     var minutes = event.minutes;
-    var timestamp = moment(weekday.startOfDay).hour(hour).minutes(minutes);
+    self.timestamp(moment(weekday.startOfDay).hour(hour).minutes(minutes));
 
-    self.error(false);
-    // can not create slots to the past
-    if (timestamp.isBefore(moment())) {
-      self.error("calendar.error.slot-in-past");
-    }
-
-    self.startTime(timestamp);
+    self.startTime(self.timestamp());
     self.positionTop((event.hour - config.firstFullHour + 1) * 60 + "px");
-    self.weekdayCss("weekday-" + timestamp.isoWeekday());
+    self.weekdayCss("weekday-" + self.timestamp().isoWeekday());
     self.selectedReservationTypes([]);
     self.amount(1);
-    calculateFreeTimeAfterGivenTime(weekday, timestamp.valueOf());
+    calculateFreeTimeAfterGivenTime(weekday, self.timestamp().valueOf());
     self.bubbleVisible(true);
   });
 

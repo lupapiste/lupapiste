@@ -234,7 +234,7 @@
 
 (defn validate-permit-type-is-not [& validator-permit-types]
   (let [invalid-permit-types (set (map name validator-permit-types))]
-    (fn [_ application]
+    (fn [{:keys [application]}]
       (if application
         (when (invalid-permit-types (permit-type application))
           (fail :error.invalid-permit-type :permit-type validator-permit-types))
@@ -242,7 +242,7 @@
 
 (defn validate-permit-type-is [& validator-permit-types]
   (let [valid-permit-types (set (map name validator-permit-types))]
-    (fn [_ application]
+    (fn [{:keys [application]}]
       (if application
         (when-not (valid-permit-types (permit-type application))
           (fail :error.invalid-permit-type :permit-type validator-permit-types))
@@ -260,7 +260,7 @@
 
   {:R [\"tyonjohtaja-hakemus\" :empty]} -> Only Rs with tyonjohtaja-hakemus
   subtype or no subtype are valid."
-  [permit-types _ {:keys [permitType permitSubtype]}]
+  [permit-types {{:keys [permitType permitSubtype]} :application}]
   (let [app-type (keyword permitType)
         subs     (get permit-types app-type)]
     (when-not (and subs
@@ -273,8 +273,8 @@
 
 (defn valid-permit-types-for-state-change
   "Convenience pre-checker."
-  [_ application]
+  [command]
   (let [allow-state-change (->> (filter (fn [[k v]] (contains? v :allow-state-change)) (permit-types))
                                 (map (fn [[k v]] [(keyword k) (:allow-state-change v)]))
                                 (into {}))]
-    (valid-permit-types allow-state-change _ application)))
+    (valid-permit-types allow-state-change command)))

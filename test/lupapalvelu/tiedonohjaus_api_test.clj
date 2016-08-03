@@ -115,21 +115,21 @@
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
   (fact "process metadata is updated correctly"
-    (let [command {:application {:organization    "753-R"
-                                 :processMetadata {}
-                                 :id              "ABC123"
-                                 :state           "submitted"}
-                   :created     1000
-                   :user        {:orgAuthz      {:753-R #{:authority :archivist}}
-                                 :organizations ["753-R"]
-                                 :role          :authority}
-                   :action      "store-tos-metadata-for-process"
-                   :data        {:metadata {"julkisuusluokka" "julkinen"
-                                            "henkilotiedot"   "ei-sisalla"
-                                            "sailytysaika"    {"arkistointi" "ikuisesti"
-                                                               "perustelu"   "foo"}
-                                            "kieli"           "fi"}
-                                 :id       "ABC123"}}]
+    (let [command {:application  {:organization    "753-R"
+                                  :processMetadata {}
+                                  :id              "ABC123"
+                                  :state           "submitted"}
+                   :created      1000
+                   :user         {:orgAuthz      {:753-R #{:authority :archivist}}
+                                  :organizations ["753-R"]
+                                  :role          :authority}
+                   :action       "store-tos-metadata-for-process"
+                   :data         {:metadata {"julkisuusluokka" "julkinen"
+                                             "henkilotiedot"   "ei-sisalla"
+                                             "sailytysaika"    {"arkistointi" "ikuisesti"
+                                                                "perustelu"   "foo"}
+                                             "kieli"           "fi"}
+                                  :id       "ABC123"}}]
       (execute command) => {:ok true
                             :metadata {:julkisuusluokka :julkinen
                                        :henkilotiedot   :ei-sisalla
@@ -137,7 +137,7 @@
                                                          :perustelu   "foo"}
                                        :kieli           :fi}}
       (provided
-        (lupapalvelu.action/update-application command {$set {:modified        1000
+        (lupapalvelu.action/update-application anything {$set {:modified        1000
                                                               :processMetadata {:julkisuusluokka :julkinen
                                                                                 :henkilotiedot   :ei-sisalla
                                                                                 :sailytysaika    {:arkistointi :ikuisesti
@@ -189,7 +189,7 @@
                                  :julkisuusluokka :salainen
                                  :kayttajaryhmakuvaus :muokkausoikeus}}
       (provided
-        (lupapalvelu.action/update-application command
+        (lupapalvelu.action/update-application anything
                                                {"$set" {:modified 1000, :attachments [{:id 1
                                                                                        :metadata {:tila :luonnos
                                                                                                   :salassapitoaika 5
@@ -239,7 +239,7 @@
                                  :kieli :fi
                                  :henkilotiedot :sisaltaa}}
       (provided
-        (lupapalvelu.action/update-application command
+        (lupapalvelu.action/update-application anything
                                                {"$set" {:modified 1000, :attachments [{:id 1
                                                                                        :metadata {:julkisuusluokka :julkinen
                                                                                                   :tila :luonnos
@@ -291,7 +291,7 @@
         (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
         (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
         (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
-        (update-application command {"$set"  {:modified        1000
+        (update-application anything {"$set"  {:modified        1000
                                               :tosFunction     fc
                                               :metadata        {:julkisuusluokka :julkinen}
                                               :processMetadata {:julkisuusluokka :salainen}
@@ -330,7 +330,7 @@
         (t/tos-function-with-name "10 03 00 01" "753-R") => {:code "10 03 00 01" :text "Foobar"}
         (t/document-with-updated-metadata application "753-R" fc application "hakemus") => (merge application {:metadata {:julkisuusluokka :julkinen}})
         (t/metadata-for-process "753-R" fc) => {:julkisuusluokka :salainen}
-        (update-application command {"$set"  {:modified        1000
+        (update-application anything {"$set"  {:modified        1000
                                               :tosFunction     fc
                                               :metadata        {:julkisuusluokka :julkinen}
                                               :processMetadata {:julkisuusluokka :salainen}

@@ -3,8 +3,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.user-api :refer :all]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.states :as states]))
 
 
 ;;
@@ -13,7 +12,7 @@
 ;; ==============================================================================
 ;;
 
-(testable-privates lupapalvelu.user-api validate-update-user!)
+(testable-privates lupapalvelu.user-api validate-update-user! allowed-state?)
 
 (fact "filter-storage-key and default-filter-storage-key keys match"
   (set (keys filter-storage-key)) => (set (keys default-filter-storage-key)))
@@ -45,4 +44,18 @@
 (facts "add-user-attachment-allowed?"
   (fact "applicant" (add-user-attachment-allowed? applicant-user-data) => truthy)
   (fact "authority" (add-user-attachment-allowed? authority-user-data) => falsey))
+
+(facts "allowed-state?"
+  (facts "pre-sent states"
+    (doseq [state states/pre-sent-application-states]
+      (fact {:midje/description state}
+        (allowed-state? state {:applicationState irrelevant}) => true)))
+  (facts "post-verdict states"
+    (doseq [state states/post-verdict-states]
+      (fact {:midje/description state}
+        (allowed-state? state {:applicationState :draft}) => false
+        (allowed-state? state {:applicationState :sent}) => false
+        (allowed-state? state {:applicationState state}) => true)))
+  (fact "sent"
+    (allowed-state? :sent {:applicationState irrelevant}) => true))
 

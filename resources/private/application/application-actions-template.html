@@ -1,0 +1,142 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-actions-template">
+    <div class="stacked" data-bind="with: application">
+        <!-- ko if: !hasInvites() -->
+            <button data-bind="click: approveApplication,
+                           visible: $root.authorization.ok('approve-application'),
+                           enable: !processing() && $root.authorization.ok('approve-application'),
+                           attr: {'title': loc('tooltip.approveApplication')}"
+                    data-test-id="approve-application"
+                    class="positive caps">
+                <i class="lupicon-circle-arrow-right"></i>
+                <span data-bind="ltext: 'application.approveApplication'"></span>
+            </button>
+            <div data-bind="component: {name: 'export-attachments'}"></div>
+            <button class="positive caps"
+                    data-bind="click: toAsianhallinta,
+                               visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                               enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                               attr: {'title': loc('tooltip.toAsianhallinta')}"
+                    data-test-id="to-asianhallinta">
+                <i class="lupicon-circle-arrow-right"></i>
+                <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')"
+                    data-test-id="request-for-complement">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'application.requestForComplement'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: _.partial(hub.send, 'show-dialog', {ltitle: 'application.integration-messages.title', size: 'medium', component: 'integration-message-monitor', componentParams: {id:id()}}),
+                               visible: $root.authorization.ok('integration-messages'), enable: !processing() && $root.authorization.ok('integration-messages')"
+                    data-test-id="show-integration-messages">
+                <i class="lupicon-upload"></i>
+                <span data-bind="ltext: 'application.integration-messages.open'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: addOperation, visible: $root.authorization.ok('add-operation'), enable: !processing() && $root.authorization.ok('add-operation')"
+                    data-test-id="add-operation">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'application.addOperation'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: exportPdf, visible: $root.authorization.ok('pdf-export'), enable: !processing() && $root.authorization.ok('pdf-export')"
+                    data-test-id="application-pdf-btn">
+                <i class="lupicon-print"></i>
+                <span data-bind="ltext: 'application.pdf'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, visible: $root.authorization.ok('add-link-permit'), enable: !processing() && $root.authorization.ok('add-link-permit')" data-test-id="application-add-link-permit-btn">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'application.addLinkPermit'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: createChangePermit, visible: $root.authorization.ok('create-change-permit'), enable: !processing() && $root.authorization.ok('create-change-permit')"
+                    data-test-id="change-permit-create-btn">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'application.createChangePermit'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: createContinuationPeriodPermit, visible: $root.authorization.ok('create-continuation-period-permit'), enable: !processing() && $root.authorization.ok('create-continuation-period-permit')"
+                    data-test-id="continuation-period-create-btn">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !processing() && $root.authorization.ok('cancel-application')"
+                    data-test-id="application-cancel-btn">
+                <i class="lupicon-circle-remove"></i>
+                <span data-bind="ltext: 'application.cancelApplication'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                    data-test-id="application-cancel-authority-btn">
+                <i class="lupicon-circle-remove"></i>
+                <span data-bind="ltext: 'application.cancelApplication'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !processing(), attr: {'title': loc('tooltip.undoCancellation')}"
+                    data-test-id="application-undo-cancellation-btn">
+                <i class="lupicon-circle-attention"></i>
+                <span data-bind="ltext: 'application.undoCancellation'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: refreshKTJ, visible: $root.authorization.ok('refresh-ktj'), enable: !processing() && $root.authorization.ok('refresh-ktj')"
+                    data-test-id="application-refresh-ktj-btn">
+                <i class="lupicon-refresh"></i>
+                <span data-bind="ltext: 'application.refreshKTJ'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: findOwners, visible: $root.authorization.ok('application-property-owners'), enable: !processing() && $root.authorization.ok('application-property-owners')"
+                    data-test-id="application-property-owners-btn">
+                <i class="lupicon-search"></i>
+                <span data-bind="ltext: 'application.find-owners'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: resetIndicators, visible: $root.authorization.ok('mark-everything-seen'), enable: !processing() && $root.authorization.ok('mark-everything-seen')"
+                    data-test-id="application-mark-everything-seen-btn">
+                <i class="lupicon-eye"></i>
+                <span data-bind="ltext: 'application.reset-indicators'"></span>
+            </button>
+            <!-- Link to organization's backing system URL if given and valid -->
+            <button class="function"
+                    data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')">
+                <i class="lupicon-circle-arrow-right"></i>
+                <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+            </button>
+            <!-- ko if: externalApi.enabled -->
+            <button class="function"
+                    data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                    data-test-id="external-open-permit">
+                <i class="lupicon-circle-arrow-right"></i>
+                <span data-bind="ltext: 'application.showInBackingSystem'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                    data-test-id="external-show-on-map">
+              <i class="lupicon-location"></i>
+              <span data-bind="text: 'Siirry kartalle'"></span>
+            </button>
+            <!-- /ko -->
+            <!-- Add property -->
+            <button class="function"
+                    data-bind="click: addProperty, visible: showAddPropertyButton"
+                    data-test-id="add-property">
+              <i class="lupicon-circle-plus"></i>
+              <span data-bind="ltext: 'secondary-kiinteistot._append_label'"></span>
+            </button>
+        <!-- /ko  -->
+        <!-- ko if: hasInvites -->
+            <button class="positive"
+                    data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')"
+                    data-test-id="accept-invite-button">
+                <span data-bind="ltext: 'applications.approveInvite'"></span>
+            </button>
+            <button class="function"
+                    data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')"
+                    data-test-id="decline-invite-button">
+                <span data-bind="ltext: 'applications.declineInvite'"></span>
+            </button>
+        <!-- /ko -->
+    </div>
+</script>

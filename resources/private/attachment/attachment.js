@@ -60,8 +60,9 @@ var attachment = (function() {
     previewDisabled:              ko.observable(false),
     previewVisible:               ko.observable(false),
     operation:                    ko.observable(),
-    selectedOperationId:          ko.observable(),
-    selectableOperations:         ko.observableArray(),
+    groupType:                    ko.observable(),
+    selectedGroup:                ko.observable(),
+    selectableGroups:             ko.observableArray(),
     contents:                     ko.observable(),
     scale:                        ko.observable(),
     scales:                       ko.observableArray(LUPAPISTE.config.attachmentScales),
@@ -123,10 +124,11 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
+      var versions = model.versions();
       hub.send("show-dialog", {ltitle: "attachment.delete.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {ltext: "attachment.delete.message",
+                               componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                  yesFn: deleteAttachmentFromServer}});
     },
 
@@ -240,6 +242,14 @@ var attachment = (function() {
       return false;
     },
 
+    getGroupOptionsText: function(item) {
+      if (item.groupType === "operation") {
+        return item.description ? loc([item.name, "_group_label"]) + " - " + item.description : loc([item.name, "_group_label"]);
+      } else if (item.groupType) {
+        return loc([item.groupType, "_group_label"]);
+      }
+    },
+
     isNotOk: function() { return !model.stateIs("ok");},
     doesNotRequireUserAction: function() { return !model.stateIs("requires_user_action");},
     isApprovable: function() { return authorizationModel.ok("approve-attachment") && model.initialized(); },
@@ -330,12 +340,16 @@ var attachment = (function() {
       }, 500)));
     }
 
-    model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
-      if (!model.operation() || id !== model.operation().id) {
-        var op = _.find(model.selectableOperations(), {id: id}) || null;
-        op = _.pick(op, "id");
-        var finalOp = _.isEmpty(op) ? null : op;
-        saveLabelInformation("operation", {meta: {op: finalOp}});
+    model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
+      // Update attachment group type + operation when new group is selected
+      if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
+          util.getIn(group, ["groupType"]) !== util.getIn(model, ["groupType"])) {
+
+        group = _.pick(group, ["id", "name", "groupType"]);
+        saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
+
+        model.operation(util.getIn(group, ["id"]) ? _.omit(group, "groupType") : null);
+        model.groupType(util.getIn(group, ["groupType"]));
       }
     }));
 
@@ -464,9 +478,8 @@ var attachment = (function() {
     model.approval(attachment.approved);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    model.selectableOperations(application.allOperations);
     model.operation(attachment.op);
-    model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
+    model.groupType(attachment.groupType);
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
@@ -481,6 +494,19 @@ var attachment = (function() {
     model.showAttachmentVersionHistory(false);
     model.showTosMetadata(false);
     model.isRamAttachment( Boolean( attachment.ramLink));
+
+    ajax
+      .query("attachment-groups", {id: applicationId})
+      .success(function(resp) {
+        var currentGroup = _.pickBy({groupType: attachment.groupType,
+                                     id: util.getIn(attachment, ["op", "id"])},
+                                    _.isString);
+        model.selectableGroups(resp.groups);
+        if (!_.isEmpty(currentGroup)) {
+          model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
+        }
+      })
+      .call();
 
     pageutil.hideAjaxWait();
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {

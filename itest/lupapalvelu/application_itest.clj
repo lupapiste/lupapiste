@@ -169,33 +169,63 @@
           (count (:comments application)) => 1
           (-> application :comments (first) :text) => (contains cancel-reason))))))
 
-(facts* "Pena cancels his application"
+(facts "Pena cancels his application"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id :address "Penahouse 88")
+        intial-submitted (:submitted application)
         application-id (:id application)
         reason-text "Cancellation notice."]
 
     (fact "Pena sees the application" (query pena :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
+
+    ; Invite & approve Teppo
+    (command pena :invite-with-role :id application-id :email (email-for-key teppo) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+    (command teppo :approve-invite :id application-id) => ok?
+
     (fact "Pena can cancel his application with reason text"
-          (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
+      (command pena :cancel-application :id application-id :text reason-text :lang "fi") => ok?)
     (fact "Sonja sees the canceled application"
       (let [application (query-application sonja application-id)]
+        (:state application) => "canceled"
         (-> application :history last :state) => "canceled"))
-    (fact "Pena sees the cancel reason text in comments"
-          (let [application (query-application pena application-id)]
-            (count (:comments application)) => 1
-            (-> application :comments (first) :text) => (contains reason-text)))
-    (fact "Sonja sees the cancel reason text in comments"
-          (let [application (query-application sonja application-id)]
-            (count (:comments application)) => 1
-            (-> application :comments (first) :text) => (contains reason-text)))
+    (doseq [apikey [pena sonja teppo]]
+      (fact {:midje/description (str (email-for-key apikey) " sees the cancel reason text in comments")}
+        (let [application (query-application apikey application-id)]
+          (count (:comments application)) => 1
+          (-> application :comments (first) :text) => (contains reason-text))))
+
     (let [email (last-email)]
-      (:to email) => (contains (email-for-key pena))
+      (:to email) => (contains (email-for-key teppo))
       (:subject email) => "Lupapiste: Penahouse 88 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
-      email => (partial contains-application-link? application-id "applicant"))))
+      email => (partial contains-application-link? application-id "applicant"))
+
+    (fact "Luukas (reader) can't undo-cancellation"
+      (command luukas :undo-cancellation :id application-id) => unauthorized?)
+    (fact "Teppo can't undo cancellation, as he is not the canceler"
+      (command teppo :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
+    (fact "Pena can undo his cancellation"
+      (command pena :undo-cancellation :id application-id) => ok?)
+
+    (fact "Teppo can now cancel"
+      (command teppo :cancel-application :id application-id :text "I want it canceled!" :lang "fi") => ok?
+      (:state (query-application teppo application-id)) => "canceled")
+
+    (fact "Pena can't undo Teppos cancelation, although he is the owner"
+      (command pena :undo-cancellation :id application-id) => (partial expected-failure? :error.undo-only-for-canceler))
+
+    (fact "Sonja can undo cancellation"
+      (command sonja :undo-cancellation :id application-id) => ok?
+      (let [{:keys [state history canceled submitted]} (query-application pena application-id)]
+        state => "submitted"
+        canceled => nil
+        (fact "new submitted history entry is added"
+          (-> history last :state) => "submitted"
+          (> submitted intial-submitted) => true)
+        (fact "old canceled history entry is preserved"
+          (-> history butlast last :state) => "canceled")))))
 
 (fact "Authority is unable to create an application to a municipality in another organization"
   (create-app sonja :propertyId tampere-property-id) => unauthorized?)
@@ -480,7 +510,6 @@
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)
         app (query-application sonja id)
-        actions (:actions (query sonja :allowed-actions :id id))
         denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
@@ -495,7 +524,7 @@
     app => map?
     (doseq [command (ca/foreach-action {} user {} app)
             :let [action (keyword (:action command))
-                  result (a/validate-authority-in-drafts command app)]]
+                  result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
         (when (denied-actions action)
           result => unauthorized?)))))
@@ -518,9 +547,7 @@
       (:name primary-op) => "varasto-tms")))
 
 (facts "Changing application state after verdict"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
-        application    (query-application pena application-id)]
-
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
     (command sonja :check-for-verdict :id application-id)

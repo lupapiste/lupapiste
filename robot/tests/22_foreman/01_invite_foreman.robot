@@ -37,14 +37,6 @@ Mikko accepts invitation
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
   [Teardown]  logout
 
-# Pena sets Mikko as hakija
-#   Pena logs in
-#   Open application  ${appname}  753-416-25-22
-#   Open tab  parties
-#   Open foreman accordions
-#   Select From List  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Intonen Mikko
-#   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
-
 Pena sets Solita as hakija
   Pena logs in
   Open application  ${appname}  753-416-25-22
@@ -114,7 +106,7 @@ Foreman can see application
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon tai rivitalon rakentaminen
   [Teardown]  logout
 
-Foreman application can't be submitted before link permit application
+Foreman application can't be submitted before subtype is selected
   Pena logs in
   Open project application
   Wait until  Element should be visible  xpath=//a[@data-test-id='test-application-app-linking-to-us']
@@ -122,7 +114,15 @@ Foreman application can't be submitted before link permit application
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   Open tab  requiredFieldSummary
   Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
-  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//p[@data-test-id='foreman-not-submittable']
+  Submit application error should be  error.foreman.type-not-selected
+
+Foreman application can't be submitted before link permit is submitted
+  Select from list by value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Open tab  requiredFieldSummary
+  Wait for jQuery
+  Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
+  Wait until  Submit application error should be  error.not-submittable.foreman-link
+
 
 Application is submitted
   Open project application

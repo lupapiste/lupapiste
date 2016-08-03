@@ -39,6 +39,7 @@ Set maaraaika-datepicker field value
 Invite 'manual' statement giver
   [Arguments]  ${index}  ${roletext}  ${name}  ${email}  ${date}
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
+  Wait Until  Test id enabled  statement-giver-role-text-${index}
   Input text  xpath=//*[@data-test-id='statement-giver-role-text-${index}']  ${roletext}
   Input text  xpath=//*[@data-test-id='statement-giver-name-${index}']  ${name}
   Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']

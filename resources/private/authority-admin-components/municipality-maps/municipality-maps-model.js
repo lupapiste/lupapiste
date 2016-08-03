@@ -9,6 +9,7 @@ LUPAPISTE.MunicipalityMapsModel = function() {
   self.serverParams.header = "auth-admin.municipality-maps.server-details";
   self.serverParams.urlLabel = "auth-admin.municipality-maps.url";
   self.serverParams.saveLabel = "auth-admin.municipality-maps.fetch";
+  self.serverParams.prefix = "munimap";
   self.layersParams = params.layers;
   self.mapParams    = params.map;
 

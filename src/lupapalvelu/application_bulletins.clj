@@ -126,9 +126,9 @@
   (update-bulletin bulletin-id {} changes :upsert true))
 
 (defn update-file-metadata [bulletin-id comment-id files]
-  (mongo/update-by-query :fs.files {:_id {$in (map :fileId files)}} {$set {:metadata.linked     true
-                                                                           :metadata.bulletinId bulletin-id
-                                                                           :metadata.commentId  comment-id}}))
+  (mongo/update-file-by-query {:_id {$in (map :fileId files)}} {$set {:metadata.linked     true
+                                                                      :metadata.bulletinId bulletin-id
+                                                                      :metadata.commentId  comment-id}}))
 
 ;;;
 ;;; Date checkers

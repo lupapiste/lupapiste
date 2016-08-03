@@ -18,7 +18,7 @@ ${SLOWEST_SPEED}                0.5
 ${LOGIN URL}                    ${SERVER}/app/fi/welcome#!/login
 ${LOGOUT URL}                   ${SERVER}/app/fi/logout
 ${BULLETINS URL}                ${SERVER}/app/fi/bulletins
-${APPLICATIONS PATH}            /app/fi/applicant#!/applications
+${APPLICATIONS PATH}            /applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
@@ -30,18 +30,22 @@ ${DB COOKIE}                    test_db_name
 ${DB PREFIX}                    test_
 
 *** Keywords ***
+
+Set DB cookie
+  ${timestamp}=  Get Time  epoch
+  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}
+  Add Cookie  ${DB COOKIE}  ${dbname}
+  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
+  Log  Cookie: ${DB COOKIE} = ${dbname}
+
 Browser
   [Arguments]
-  ${timestamp}=  Get Time  epoch
-  Set Test Variable  \${dbname}  ${DB PREFIX}${timestamp}
-  # Setting cookies on login page fails on IE8, perhaps bacause of
+  # Setting cookies on login page fails on IE8, perhaps because of
   # caching headers:
   # https://code.google.com/p/selenium/issues/detail?id=6985
   # Open a static HTML page and set cookie there
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
-  Add Cookie  ${DB COOKIE}  ${dbname}
-  Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
-  Log  Cookie: ${DB COOKIE} = ${dbname}
+  Set DB cookie
 
 Open browser to login page
   Browser
@@ -131,6 +135,10 @@ Language To
   Click Element  partial link=${lang}
   Wait Until  Element Should Contain  language-select  ${lang}
 
+Language Is
+  [Arguments]  ${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
+
 
 #
 # Navigation
@@ -163,7 +171,8 @@ Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
-  Wait Until  Page should contain  Haluan kirjautua palveluun
+  Wait until  Element should be visible  xpath=//section[@id='login']//h3[1]
+  Wait Until  Element text should be  xpath=//section[@id='login']//h3[1]  Haluan kirjautua palveluun
 
 Open side panel
   [Arguments]  ${name}
@@ -289,41 +298,9 @@ User nav menu is visible
 User nav menu is not visible
   Element should not be visible  //*[@data-test-id='user-nav-menu']
 
-As Mikko
+As ${name}
   Go to login page
-  Mikko logs in
-
-As Teppo
-  Go to login page
-  Teppo logs in
-
-As Veikko
-  Go to login page
-  Veikko logs in
-
-As Sonja
-  Go to login page
-  Sonja logs in
-
-As Sipoo
-  Go to login page
-  Sipoo logs in
-
-As Solitaadmin
-  Go to login page
-  Solitaadmin logs in
-
-As Velho
-  Go to login page
-  Velho logs in
-
-As Olli
-  Go to login page
-  Olli logs in
-
-As Pekka
-  Go to login page
-  Pekka logs in
+  Run Keyword  ${name} logs in
 
 Olli logs in
   Authority logs in  olli  olli  Olli Ule\u00e5borg
@@ -333,6 +310,9 @@ Mikko logs in
 
 Teppo logs in
   Applicant logs in  teppo@example.com  teppo69  Teppo Nieminen
+
+Sven logs in
+  Applicant logs in  sven@example.com  sven  Sven Svensson
 
 Arto logs in
   Authority logs in  arto  arto  Arto Viranomainen
@@ -768,14 +748,14 @@ Close current inforequest
   Click enabled by test id  inforequest-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
-Close current application
+Cancel current application
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
   Click enabled by test id  application-cancel-btn
   Fill test id  cancel-application-reason  ${reason}
   Confirm  dialog-cancel-application
 
-Close current application as authority
+Cancel current application as authority
   [Arguments]  ${reason}=${EMPTY}
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
   Click enabled by test id  application-cancel-authority-btn
@@ -823,6 +803,16 @@ Submit application
   Click enabled by test id  application-submit-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
+
+Submit application errors count is
+  [Arguments]  ${count}
+  Wait until  Xpath Should Match X Times  //div[@data-test-id='submit-errors-container']//div[contains(@class,'info-line')]  ${count}
+
+Submit application error should be
+  [Arguments]  ${errorText}
+  Wait until  Element should be visible  //div[@data-test-id='submit-errors-container']
+  ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
+  Should Be Equal As Strings  ${errorText}  ${attrValue}
 
 Approve application ok
   Click enabled by test id  approve-application
@@ -958,7 +948,7 @@ Comment count is
 Is authorized party
   # Party can be either email or username
   [Arguments]  ${party}
-  Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//table//td[contains(., '${party}')]
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@class='parties-list']//table/tbody//td[contains(., '${party}')]
 
 Fill application person invite bubble
   [Arguments]  ${email}  ${message}
@@ -1304,7 +1294,11 @@ Test id should contain
 
 Test id input is
   [Arguments]  ${id}  ${text}
-  Wait until  Textfield value should be  jquery=[data-test-id=${id}]  ${text}
+  Wait until  Value should be  jquery=[data-test-id=${id}]  ${text}
+
+Test id text is
+  [Arguments]  ${id}  ${text}
+  Wait until  Element text should be  jquery=[data-test-id=${id}]  ${text}
 
 Javascript? helper
   [Arguments]  ${expression}
@@ -1317,20 +1311,29 @@ Javascript?
 
 Click label
   [Arguments]  ${for}
+  Scroll to  label[for=${for}]
   Click element  jquery=label[for=${for}]
-
 
 Checkbox wrapper selected
   [Arguments]  ${id}
-  Javascript?  $("input#${id}:checked").length
+  Javascript?  $("input#${id}:checked").length === 1
 
 Checkbox wrapper not selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 0
 
+Checkbox wrapper disabled
+  [Arguments]  ${id}
+  Javascript?  $("input#${id}:disabled").length === 1
+
 Select from test id
   [Arguments]  ${id}  ${value}
   Select from list  jquery=select[data-test-id=${id}]  ${value}
+
+Test id select is
+  [Arguments]  ${id}  ${value}
+  List selection should be  jquery=select[data-test-id=${id}]  ${value}
+
 
 # Frontend error log
 

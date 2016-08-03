@@ -93,7 +93,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.applicantPhone = ko.observable();
   self.organizationMeta = ko.observable();
   self.neighbors = ko.observable([]);
-  self.submittable = ko.observable(true);
+  self.submitErrors = ko.observableArray();
 
   self.organization = ko.observable([]);
 
@@ -177,6 +177,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
+
+  self.calendarNotificationIndicator = ko.observable(0);
+
   self.linkPermitData = ko.observable(null);
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
@@ -249,20 +252,21 @@ LUPAPISTE.ApplicationModel = function() {
   // Required attachments
 
   self.missingRequiredAttachments = ko.observable([]);
-  self.hasMissingRequiredAttachments = ko.computed(function() {
+  self.hasMissingRequiredAttachments = ko.pureComputed(function() {
     return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
   });
 
-  self.missingSomeInfo = ko.computed(function() {
+  self.missingSomeInfo = ko.pureComputed(function() {
     return self.hasFieldWarnings() || self.hasIncorrectlyFilledRequiredFields() || self.hasMissingRequiredAttachments();
   });
 
-  self.submitButtonEnabled = ko.computed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && self.submittable();
+  self.submitButtonEnabled = ko.pureComputed(function() {
+    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
   });
 
 
   self.reload = function() {
+    self.submitErrors([]);
     repository.load(self.id());
   };
 
@@ -313,18 +317,7 @@ LUPAPISTE.ApplicationModel = function() {
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
               .success(self.reload)
-              .onError("error.foreman.type-not-selected", function() {
-                hub.send("show-dialog", {ltitle: "error.dialog.title",
-                                         size: "medium",
-                                         component: "ok-dialog",
-                                         componentParams: {ltext: "error.foreman.type-not-selected"}});
-              })
-              .onError("error.foreman.notice-not-submittable", function() {
-                hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
-                                         size: "medium",
-                                         component: "ok-dialog",
-                                         componentParams: {ltext: "foreman.dialog.notice-submit-warning.text"}});
-              })
+              .onError("error.cannot-submit-application", cannotSubmitResponse)
               .processing(self.processing)
               .call();
             hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
@@ -522,8 +515,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.cancelText = ko.observable("");
 
-
-
   self.cancelApplication = function() {
     var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
           ? "cancel-application-authority"
@@ -539,7 +530,12 @@ LUPAPISTE.ApplicationModel = function() {
           .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
-            pageutil.openPage("applications");
+            if (command === "cancel-application") {
+              // regular user, can't undo cancellation so redirect to applications view
+              pageutil.openPage("applications");
+            } else { // authority, can undo so don't redirect, just reload application to canceled state
+              self.lightReload();
+            }
           })
           .processing(self.processing)
           .call();
@@ -547,6 +543,21 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("no")}
     );
     LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+  };
+
+  self.undoCancellation = function() {
+    var sendCommand = ajax
+                        .command("undo-cancellation", {id: self.id()})
+                        .success(function() {
+                          repository.load(self.id());
+                        })
+                        .processing(self.processing);
+
+    hub.send("show-dialog", {ltitle: "application.undoCancellation",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: loc("application.undoCancellation.areyousure", loc(util.getPreviousState(self._js))),
+                                               yesFn: function() { sendCommand.call(); }}});
   };
 
   self.exportPdf = function() {
@@ -653,7 +664,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
-        .query("fetch-validation-errors", {id: self.id()})
+        .query("fetch-validation-errors", {id: self.id.peek()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
         })
@@ -706,7 +717,22 @@ LUPAPISTE.ApplicationModel = function() {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
+    fetchApplicationSubmittable();
   };
+
+  function cannotSubmitResponse(data) {
+    self.submitErrors(_.map(data.errors, "text"));
+  }
+
+  function fetchApplicationSubmittable() {
+    if (lupapisteApp.models.applicationAuthModel.ok("submit-application")) {
+      ajax
+        .query("application-submittable", {id: self.id.peek()})
+        .success(function() { self.submitErrors([]); })
+        .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .call();
+    }
+  }
 
   self.toggleHelp = function(param) {
     self[param](!self[param]());

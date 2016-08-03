@@ -192,7 +192,8 @@
                    "scroll-service.js"
                    "ram-service.js"
                    "calendar-service.js"
-                   "attachments-service.js"]}
+                   "attachments-service.js"
+                   "suti-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -204,8 +205,8 @@
                   :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
-                  :js ["change-email-model.js" "mypage.js"]
-                  :html ["change-email-template.html" "mypage.html"]}
+                  :js [ "mypage.js"]
+                  :html ["mypage.html"]}
 
    :header     {:html ["header.html"], :js ["header.js"]}
 
@@ -278,9 +279,13 @@
 
    :calendar-view {:depends [:common-html]
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
-                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"]
+                        "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
+                        "authority-calendar-model.js" "applicant-calendar-model.js"
+                        "reservation-slot-reserve-bubble-model.js"]
                    :html ["reservation-slot-edit-bubble-template.html"
-                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html" ]}
+                          "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
+                          "authority-calendar-template.html" "applicant-calendar-template.html"
+                          "reservation-slot-reserve-bubble-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view]
@@ -291,7 +296,8 @@
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
-                         "case-file-template.html"]}
+                         "required-fields-summary-tab-template.html"
+                         "case-file-template.html" "application-actions-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]

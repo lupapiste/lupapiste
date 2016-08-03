@@ -1294,6 +1294,10 @@ $max-columns: 12;
   }
 }
 
+.no-padding {
+  padding: 0 !important;
+}
+
 // Support for form-cell component wrapper.
 // The component's use cases and visuals
 // are similar to error-message, but it
@@ -1473,7 +1477,7 @@ textarea.grid-style-input {
   @extend .btn-base;
   display: block;
 }
-
+ 
 div.review-done {
   margin: $marginL;
 }

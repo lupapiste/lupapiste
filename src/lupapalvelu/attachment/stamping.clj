@@ -2,7 +2,6 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as att]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.stamper :as stamper]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
@@ -47,9 +46,9 @@
         (att/set-attachment-version! application
                                            (att/get-attachment-info application attachment-id)
                                            {:attachment-id  attachment-id
-                                            :file-id new-file-id :original-file-id new-file-id
+                                            :fileId new-file-id :original-file-id new-file-id
                                             :filename filename
-                                            :content-type contentType :size (.length file)
+                                            :contentType contentType :size (.length file)
                                             :comment-text nil :now now :user user
                                             :archivable is-pdf-a?
                                             :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
@@ -60,10 +59,6 @@
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
-
-(defn- operation-specific? [{attachment-type :attachment-type}]
-  (->> (util/convert-values attachment-type keyword)
-       (contains? att-type/operation-specific-types)))
 
 (defn- select-buildings-by-operation [buildings operation-id]
   (filter (comp #{operation-id} :operation-id) buildings))
@@ -119,7 +114,7 @@
                                        (make-operation-specific-stamps context info-fields))]
     (doseq [{op-id :operation-id :as file-info} file-infos]
       (-> (cond (and (asemapiirros? file-info) include-buildings) stamp-with-buildings
-                (and (operation-specific? file-info) op-id) (operation-specific-stamps op-id)
+                op-id (operation-specific-stamps op-id)
                 :else stamp-without-buildings)
           (stamp-attachment! file-info context job-id (:id application))))))
 

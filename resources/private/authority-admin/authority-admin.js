@@ -439,6 +439,14 @@
   });
 
   if (features.enabled("ajanvaraus")) {
+    ko.computed(function() {
+      var organizationId = organizationModel.organizationId();
+      if (lupapisteApp.models.globalAuthModel.ok("calendars-enabled") && !_.isUndefined(organizationId)) {
+        hub.send("calendarService::fetchOrganizationReservationTypes",
+          {organizationId: organizationId});
+      }
+    });
+
     hub.onPageLoad("calendar-admin", function() {
       var path = pageutil.getPagePath();
       if (path.length > 1) {
@@ -447,12 +455,10 @@
         hub.send("calendarService::fetchCalendar", {user: path[0], calendarId: path[1],
                                                     calendarObservable: calendarsModel.calendarInView});
       }
-      hub.send("calendarService::fetchOrganizationReservationTypes");
     });
 
     hub.onPageLoad("organization-calendars", function() {
       hub.send("calendarService::fetchOrganizationCalendars");
-      hub.send("calendarService::fetchOrganizationReservationTypes");
       reservationPropertiesModel.load();
     });
   }

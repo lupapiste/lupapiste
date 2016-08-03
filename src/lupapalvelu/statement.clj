@@ -76,38 +76,38 @@
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))
 
-(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
+(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user application :application}]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
     (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
-(defn authority-or-statement-owner-applicant [{{role :role} :user :as command} application]
+(defn authority-or-statement-owner-applicant [{{role :role} :user :as command}]
   (when-not (or
               (= :authority (keyword role))
-              (and (= :applicant (keyword role)) (nil? (statement-owner command application))))
+              (and (= :applicant (keyword role)) (nil? (statement-owner command))))
     (fail :error.not-authority-or-statement-owner-applicant)))
 
-(defn statement-replyable [{{statement-id :statementId} :data :as command} application]
+(defn statement-replyable [{{statement-id :statementId} :data application :application}]
   (when-not (->> (get-statement application statement-id) :state keyword #{:replyable})
     (fail :error.statement-is-not-replyable)))
 
-(defn reply-visible [{{statement-id :statementId} :data :as command} application]
+(defn reply-visible [{{statement-id :statementId} :data application :application}]
   (when-not (->> (get-statement application statement-id) :state keyword post-repliable-states)
     (fail :error.statement-reply-is-not-visible)))
 
-(defn reply-not-visible [{{statement-id :statementId} :data :as command} application]
+(defn reply-not-visible [{{statement-id :statementId} :data application :application}]
   (when-not (->> (get-statement application statement-id) :state keyword pre-repliable-states)
     (fail :error.statement-reply-is-already-visible)))
 
-(defn statement-not-given [{{:keys [statementId]} :data} application]
+(defn statement-not-given [{{:keys [statementId]} :data application :application}]
   (when-not (->> statementId (get-statement application) :state keyword pre-given-states)
     (fail :error.statement-already-given)))
 
-(defn statement-given [{{:keys [statementId]} :data} application]
+(defn statement-given [{{:keys [statementId]} :data application :application}]
   (when-not (->> statementId (get-statement application) :state keyword post-given-states)
     (fail :error.statement-not-given)))
 
-(defn replies-enabled [command {permit-type :permitType :as application}]
+(defn replies-enabled [{{permit-type :permitType} :application}]
   (when-not (#{"YM" "YL" "VVVL" "MAL" "YI"} permit-type) ; FIXME set in permit meta data
     (fail :error.organization-has-not-enabled-statement-replies)))
 
@@ -118,20 +118,17 @@
          (sc/validate Statement))
     (fail! :error.statement-updated-after-last-save :statementId (:id statement))))
 
-(defn statement-in-sent-state-allowed [_ {:keys [state] :as application}]
-  (when (= (keyword state) :sent)
-    (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all}
-                               _
-                               application)))
+(defn statement-in-sent-state-allowed [{:keys [application] :as command}]
+  (when (= (keyword (:state application)) :sent)
+    (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
 
-(defn upload-attachment-allowed [{{:keys [target]} :data :as command}
-                                 {:keys [state] :as application}]
+(defn upload-attachment-allowed [{{:keys [target]} :data {:keys [state]} :application :as command}]
   (if (and (= (-> target :type keyword) :statement) (= (keyword state) :sent))
-    (statement-in-sent-state-allowed command application)
-    (att/if-not-authority-state-must-not-be #{:sent} command application)))
+    (statement-in-sent-state-allowed command)
+    (att/if-not-authority-state-must-not-be #{:sent} command)))
 
 (defn delete-attachment-allowed? [attachment-id {:keys [state statements] :as application}]
-  (when (and (= (keyword state) :sent) (not (statement-in-sent-state-allowed nil application)))
+  (when (and (= (keyword state) :sent) (not (statement-in-sent-state-allowed {:application application})))
     (let [{target :target} (att/get-attachment-info application attachment-id)]
       (when (= (-> target :type keyword) :statement)
         (some (fn [{stat-id :id stat-state :state}]
@@ -173,8 +170,8 @@
 ;; Statement givers
 ;;
 
-(defn fetch-organization-statement-givers [org-id]
-  (let [organization (organization/get-organization org-id)
+(defn fetch-organization-statement-givers [org-or-id]
+  (let [organization (if (map? org-or-id) org-or-id (organization/get-organization org-or-id))
         statement-givers (->> (or (:statementGivers organization) [])
                               (sort-by (juxt :text :name)))]
     (ok :data statement-givers)))

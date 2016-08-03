@@ -257,13 +257,13 @@
   (map
     (fn [[k v]]
       (array-map
-        (loc "task-katselmus.rakennus.rakennusnumero") (get-in v [:rakennusnro :value])
-        (loc "task-katselmus.rakennus.kiinteistotunnus") (get-in v [:kiinttun :value])
-        (loc "task-katselmus.rakennus.jarjestysnumero") (get-in v [:jarjestysnumero :value])
-        (loc "task-katselmus.rakennus.valtakunnallinenNumero") (get-in v [:valtakunnallinenNumero :value])
-        (loc "task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero") (get-in v [:kunnanSisainenPysyvaRakennusnumero :value])
-        (loc "task-katselmus.rakennus.tila.kayttoonottava") (if (get-in v [:kayttoonottava :value]) (loc "yes") (loc "no"))
-        (loc "task-katselmus.rakennus.tila.tila._group_label") (get-in v [:tila :value]))) rakennus))
+        (loc "task-katselmus.rakennus.rakennusnumero") (get-in v [:rakennus :rakennusnro :value])
+        (loc "task-katselmus.rakennus.kiinteistotunnus") (get-in v [:rakennus :kiinttun :value])
+        (loc "task-katselmus.rakennus.jarjestysnumero") (get-in v [:rakennus :jarjestysnumero :value])
+        (loc "task-katselmus.rakennus.valtakunnallinenNumero") (get-in v [:rakennus :valtakunnallinenNumero :value])
+        (loc "task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero") (get-in v [:rakennus :kunnanSisainenPysyvaRakennusnumero :value])
+        (loc "task-katselmus.rakennus.tila.kayttoonottava") (if (get-in v [:tila :kayttoonottava :value]) (loc "yes") (loc "no"))
+        (loc "task-katselmus.rakennus.tila.tila._group_label") (get-in v [:tila :tila :value]))) rakennus))
 
 (defn collect-task-fields [tasks attachment-count]
   (map
@@ -281,7 +281,7 @@
             poikkeamat (get-in data [:katselmus :poikkeamat :value])
             tila (get-in data [:katselmus :tila :value])
             rakennus (:rakennus data)]
-        (array-map
+      (array-map
           (loc "task-katselmus.katselmuksenLaji._group_label") (if (ss/blank? katselmuksenLaji) "-" (loc (str i18n-prefix "." katselmuksenLaji)))
           (loc "vaadittuLupaehtona") (if vaadittuLupaehtona (loc "yes") (loc "no"))
           (loc "task-katselmus.katselmus.pitoPvm") (if (ss/blank? pitoPvm) (loc "application.export.empty") pitoPvm)

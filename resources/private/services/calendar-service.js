@@ -3,7 +3,6 @@ LUPAPISTE.CalendarService = function() {
   var self = this,
       params = LUPAPISTE.config.calendars;
 
-  self.reservationTypesByOrganization = ko.observable();
   self.params = ko.observable(params);
 
   var _weekdays = function(calendarId, slots, startOfWeekMoment) {
@@ -27,13 +26,16 @@ LUPAPISTE.CalendarService = function() {
     }
   };
 
-  var doFetchCalendarWeek = function(event) {
-    var startOfWeekMoment;
-    if (event && event.week && event.year) {
-      startOfWeekMoment = moment().set({"isoWeek": event.week, "year": event.year}).startOf("isoWeek");
-    } else if (event && event.weekObservable) {
-      startOfWeekMoment = moment(event.weekObservable()[0].startOfDay).startOf("isoWeek");
+  var _getStartOfWeekMoment = function(week, year, weekObservable) {
+    if (week && year) {
+      return moment().set({"isoWeek": week, "year": year}).startOf("isoWeek");
+    } else if (weekObservable) {
+      return moment(weekObservable()[0].startOfDay).startOf("isoWeek");
     }
+  };
+
+  var doFetchCalendarWeek = function(event) {
+    var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
 
     if (event.calendarId) {
       ajax.query("calendar-slots", { calendarId: event.calendarId,
@@ -46,15 +48,41 @@ LUPAPISTE.CalendarService = function() {
     } else {
       notifyView(event, _weekdays(null, [], startOfWeekMoment));
     }
+  };
 
+  var doFetchApplicationCalendarWeek = function(event) {
+    var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
+    var slots = [];
+
+    ajax.query("my-reservations", { week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+      .success(function(data) {
+        slots = slots.concat(data.reservations);
+
+        notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+
+        if (event.clientId && event.authorityId && event.reservationTypeId) {
+          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId, reservationTypeId: event.reservationTypeId,
+                                                   week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
+                                                   id: lupapisteApp.models.application.id() })
+            .success(function(data) {
+              slots = slots.concat(data.slots);
+
+              notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+            })
+            .error(function(e) {
+              hub.send("indicator", {style: "negative", message: e.code});
+            })
+            .call();
+        }
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
+      }).call();
   };
 
   var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
     ajax.query("calendar", {calendarId: event.calendarId, userId: event.user})
       .success(function(data) {
-        if (event.reservationTypesObservable) {
-          event.reservationTypesObservable(self.reservationTypesByOrganization()[data.calendar.organization]);
-        }
         if (event.calendarObservable) {
           event.calendarObservable(data.calendar);
         }
@@ -70,13 +98,24 @@ LUPAPISTE.CalendarService = function() {
       .call();
    });
 
-  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function() {
-    ajax.query("reservation-types-for-organization")
+  var _fetchApplicationCalendarConfig = hub.subscribe("calendarService::fetchApplicationCalendarConfig", function(event) {
+    ajax.query("application-calendar-config", {id: event.applicationId})
+      .success(function(d) {
+        hub.send("calendarService::applicationCalendarConfigFetched",
+          { authorities: d.authorities || [],
+            reservationTypes: d.reservationTypes,
+            defaultLocation: d.defaultLocation });
+      })
+      .call();
+  });
+
+  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
+    ajax.query("reservation-types-for-organization", {organizationId: event.organizationId})
       .success(function (data) {
         var obj = {};
         obj[data.organization] = data.reservationTypes;
-        self.reservationTypesByOrganization(obj);
-        hub.send("calendarService::organizationReservationTypesFetched", { reservationTypes: data.reservationTypes });
+        hub.send("calendarService::organizationReservationTypesFetched",
+          { organizationId: data.organization, reservationTypes: data.reservationTypes });
       })
       .call();
   });
@@ -84,7 +123,6 @@ LUPAPISTE.CalendarService = function() {
   var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
     ajax.query("my-calendars")
       .success(function(data) {
-        self.reservationTypesByOrganization(data.reservationTypes);
         hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
       })
       .call();
@@ -92,6 +130,10 @@ LUPAPISTE.CalendarService = function() {
 
   var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
     doFetchCalendarWeek(event);
+  });
+
+  var _fetchApplicationCalendarSlots = hub.subscribe("calendarService::fetchApplicationCalendarSlots", function(event) {
+    doFetchApplicationCalendarWeek(event);
   });
 
   var _createSlots = hub.subscribe("calendarService::createCalendarSlots", function(event) {
@@ -136,6 +178,21 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
+  var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
+    ajax
+      .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId(),
+                                          comment: event.comment(), location: event.location(), id: event.applicationId() })
+      .success(function() {
+        hub.send("indicator", { style: "positive" });
+        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
+                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.code});
+      })
+      .call();
+  });
+
   self.dispose = function() {
     hub.unsubscribe(_fetchOrgCalendars);
     hub.unsubscribe(_fetchReservationTypes);
@@ -145,5 +202,8 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_createSlots);
     hub.unsubscribe(_updateSlot);
     hub.unsubscribe(_deleteSlot);
+    hub.unsubscribe(_reserveSlot);
+    hub.unsubscribe(_fetchApplicationCalendarSlots);
+    hub.unsubscribe(_fetchApplicationCalendarConfig);
   };
 };

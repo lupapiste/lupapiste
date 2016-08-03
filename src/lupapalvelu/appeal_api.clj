@@ -9,42 +9,42 @@
             [lupapalvelu.appeal :as appeal]
             [lupapalvelu.appeal-verdict :as appeal-verdict]
             [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.appeal :as att-appeal]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]))
 
 (defn- verdict-exists
   "Pre-check to validate that for selected verdictId a verdict exists"
-  [{{verdictId :verdictId} :data} {:keys [verdicts]}]
+  [{{verdictId :verdictId} :data {:keys [verdicts]} :application}]
   (when verdictId
     (when-not (util/find-first #(= verdictId (:id %)) verdicts)
       (fail :error.verdict-not-found))))
 
 (defn- appeal-exists
   "Pre-check to validate that at least one appeal exists before appeal verdict can be created"
-  [{{:keys [verdictId]} :data} {:keys [appeals]}]
+  [{{:keys [verdictId]} :data {:keys [appeals]} :application}]
   (when verdictId
     (when (zero? (count (filter #(= verdictId (:target-verdict %)) appeals)))
      (fail :error.appeals-not-found))))
 
 (defn- appeal-id-exists
   "Pre-check to validate that given ID exists in application"
-  [{{appeal-id :appealId} :data} {:keys [appeals]}]
+  [{{appeal-id :appealId} :data {:keys [appeals]} :application}]
   (when appeal-id ; optional parameter, could be nil in command
     (when-not (util/find-by-id appeal-id appeals)
       (fail :error.unknown-appeal))))
 
 (defn- appeal-verdict-id-exists
   "Pre-check to validate that id from parameters exist in :appealVerdicts"
-  [{{appeal-id :appealId} :data} {:keys [appealVerdicts]}]
+  [{{appeal-id :appealId} :data {:keys [appealVerdicts]} :application}]
   (when appeal-id
     (when-not (util/find-by-id appeal-id appealVerdicts)
       (fail :error.unknown-appeal-verdict))))
 
 (defn- deny-type-change
   "Pre-check: when appeal is updated, type of appeal can't be changed"
-  [{{appeal-id :appealId type :type} :data} {:keys [appeals]}]
+  [{{appeal-id :appealId type :type} :data {:keys [appeals]} :application}]
   (when appeal-id
     (when-some [appeal (util/find-by-id appeal-id appeals)]
       (when-not (= type (:type appeal))
@@ -72,7 +72,7 @@
 
 (defn- appeal-editable?
   "Pre-check to check that appeal can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
+  [{{appeal-id :appealId} :data {:keys [appeals appealVerdicts] :as application} :application}]
   (when (and appeal-id appealVerdicts)
     (if-let [appeal (util/find-by-id appeal-id appeals)]
       (when-not (appeal-item-editable? application appeal)
@@ -81,7 +81,7 @@
 
 (defn- appeal-verdict-editable?
   "Pre-check to check that appeal-verdict can be edited."
-  [{{appeal-id :appealId} :data} {:keys [appeals appealVerdicts] :as application}]
+  [{{appeal-id :appealId} :data {:keys [appealVerdicts] :as application} :application}]
   (when appeal-id
     (if-let [appeal-verdict (util/find-by-id appeal-id appealVerdicts)]
       (when-not (appeal-item-editable? application (assoc appeal-verdict :type :appealVerdict))
@@ -120,7 +120,7 @@
                                 attachments)
           appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
           new-file-ids     (difference (set file-ids) (set appeal-file-ids))
-          new-attachment-updates (attachment/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
+          new-attachment-updates (att-appeal/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
           removable-file-ids (difference (set appeal-file-ids) (set file-ids))
           removable-attachments (filter
                                   (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
@@ -152,10 +152,10 @@
         (:mongo-updates updates)
         new-updates))
     (when (seq removable-attachment-ids)
-      (run! (partial attachment/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
+      (run! (partial att/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
     (when (seq new-file-ids)
       ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
-      (run! (partial attachment/link-file-to-application (:id app)) new-file-ids))))
+      (run! (partial att/link-file-to-application (:id app)) new-file-ids))))
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"

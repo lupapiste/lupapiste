@@ -5,7 +5,8 @@
             [sade.core :refer [now]]
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]))
 
 (apply-remote-minimal)
 
@@ -311,9 +312,9 @@
         expected-att-cnt 1
         resp1  (upload-file raktark-jarvenpaa "dev-resources/test-attachment.txt")
         file-id-1 (get-in resp1 [:files 0 :fileId])
-        resp2  (upload-file raktark-jarvenpaa "dev-resources/test-pdf.pdf")
+        resp2  (upload-file raktark-jarvenpaa "dev-resources/invalid-pdfa.pdf")
         file-id-2 (get-in resp2 [:files 0 :fileId])
-        pdfa-conversion? (string? (env/value :pdf2pdf :license-key))]
+        pdfa-conversion? (and (string? (env/value :pdf2pdf :license-key)) (pdfa-conversion/pdf2pdf-executable))]
     resp0 => ok?
     resp1 => ok?
     resp2 => ok?

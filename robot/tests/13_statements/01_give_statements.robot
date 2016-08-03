@@ -107,7 +107,7 @@ Sonja types in draft
 Sonja adds and removes attachment to statement draft
   Wait test id visible  statement-attachments-no-attachments
   Scroll and click test id  add-statement-attachment
-  Add attachment  statement  ${TXT_TESTFILE_PATH}  Important note
+  Add attachment  statement  ${PDF_TESTFILE_PATH}  Important note
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
   Scroll to test id  add-statement-attachment
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
@@ -212,7 +212,7 @@ Mikko logs in and submits application
   Mikko logs in
   Open application  ${appname}  ${appPropertyId}
   Submit application
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Sonja logs in and approves application
   Sonja logs in
@@ -228,13 +228,13 @@ Luukas logs in but cannot edit statement
   Luukas logs in
   Open application  ${appname}  ${appPropertyId}
   Open tab  statement
-  Open statement  luukas.lukija@sipoo.fi  
+  Open statement  luukas.lukija@sipoo.fi
   Wait until  Element should not be visible  statement-submit
   Element should not be visible  jquery=#statement-submit
-  [Teardown]  Return from statement  
+  [Teardown]  Return from statement
 
 Luukas can still delete (empty) statement
   Scroll and click test id  delete-statement-3
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  jquery=tr.statement-row i.lupicon-remove
-  [Teardown]  Logout  
+  [Teardown]  Logout

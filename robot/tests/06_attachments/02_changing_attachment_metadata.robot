@@ -48,9 +48,18 @@ Mikko opens attachment details
 
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
+  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Osapuolet
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
+  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Yleisesti hankkeeseen
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
+  Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Rakennuspaikka
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
   Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
-  Sleep  1
-  Negative indicator icon should not be visible
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
 
 Mikko can change size
   Element should be visible  xpath=//select[@data-test-id='attachment-size-select']

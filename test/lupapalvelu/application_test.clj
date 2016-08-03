@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer [$set $push]]
+            [sade.core :refer [now]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.application :refer :all]
@@ -78,20 +79,20 @@
     (doseq [operation lupapalvelu.operations/operations]
       (let [[op {permit-type :permit-type}] operation
             application {:primaryOperation {:name (name op)} :permitSubtype nil}
-            operation-allowed (add-operation-allowed? nil application)]
+            operation-allowed (add-operation-allowed? {:application application})]
         (fact {:midje/description (name op)}
           (if (or (not (contains? #{"R" "KT" "P" "YM"} permit-type)) (not-allowed-for op))
             (fact "Add operation not allowed" operation-allowed => error)
             (fact "Add operation allowed" operation-allowed => nil?)))))
 
     (fact "Add operation not allowed for :muutoslupa"
-      (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))
+      (add-operation-allowed? {:application {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}}) => error)))
 
 (fact "validate-has-subtypes"
-  (validate-has-subtypes nil {:permitType "P"}) => nil
-  (validate-has-subtypes nil {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}) => nil
-  (validate-has-subtypes nil {:permitType "R"}) => {:ok false :text "error.permit-has-no-subtypes"}
-  (validate-has-subtypes nil nil) => {:ok false :text "error.permit-has-no-subtypes"})
+  (validate-has-subtypes {:application {:permitType "P"}}) => nil
+  (validate-has-subtypes {:application {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}}}) => nil
+  (validate-has-subtypes {:application {:permitType "R"}}) => {:ok false :text "error.permit-has-no-subtypes"}
+  (validate-has-subtypes nil) => {:ok false :text "error.permit-has-no-subtypes"})
 
 (fact "State transitions"
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
@@ -104,17 +105,46 @@
             m1 {:R [] :P :all}
             m2 {:R ["tyonjohtaja-hakemus"] :P :all}
             m3 {:R ["tyonjohtaja-hakemus" :empty]}]
-        (permit/valid-permit-types m1 nil {:permitType "R"}) => nil
-        (permit/valid-permit-types m1 nil {:permitType "P"}) => nil
-        (permit/valid-permit-types m1 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => error
-        (permit/valid-permit-types m1 nil {:permitType "P" :permitSubtype "foo"}) => nil
-        (permit/valid-permit-types m2 nil {:permitType "R"}) => error
-        (permit/valid-permit-types m2 nil {:permitType "P"}) => nil
-        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
-        (permit/valid-permit-types m2 nil {:permitType "R" :permitSubtype "foobar"}) => error
-        (permit/valid-permit-types m2 nil {:permitType "P" :permitSubtype "foo"}) => nil
-        (permit/valid-permit-types m3 nil {:permitType "R"}) => nil
-        (permit/valid-permit-types m3 nil {:permitType "P"}) => error
-        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}) => nil
-        (permit/valid-permit-types m3 nil {:permitType "R" :permitSubtype "foobar"}) => error
-        (permit/valid-permit-types m3 nil {:permitType "P" :permitSubtype "foo"}) => error))
+        (permit/valid-permit-types m1 {:application {:permitType "R"}}) => nil
+        (permit/valid-permit-types m1 {:application {:permitType "P"}}) => nil
+        (permit/valid-permit-types m1 {:application {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}}) => error
+        (permit/valid-permit-types m1 {:application {:permitType "P" :permitSubtype "foo"}}) => nil
+        (permit/valid-permit-types m2 {:application {:permitType "R"}}) => error
+        (permit/valid-permit-types m2 {:application {:permitType "P"}}) => nil
+        (permit/valid-permit-types m2 {:application {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}}) => nil
+        (permit/valid-permit-types m2 {:application {:permitType "R" :permitSubtype "foobar"}}) => error
+        (permit/valid-permit-types m2 {:application {:permitType "P" :permitSubtype "foo"}}) => nil
+        (permit/valid-permit-types m3 {:application {:permitType "R"}}) => nil
+        (permit/valid-permit-types m3 {:application {:permitType "P"}}) => error
+        (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "tyonjohtaja-hakemus"}}) => nil
+        (permit/valid-permit-types m3 {:application {:permitType "R" :permitSubtype "foobar"}}) => error
+        (permit/valid-permit-types m3 {:application {:permitType "P" :permitSubtype "foo"}}) => error))
+
+(facts "Previous app state"
+  (let [user {:username "pena"}
+        now (now)
+        state-seq [:one :two :three :four :five]]
+
+    (dotimes [i (count state-seq)]
+      (let [prev-state (get-previous-app-state
+                         {:history (map
+                                     #(history-entry % now user)
+                                     (take (+ i 1) state-seq))})]
+        (if (= i 0)
+          (fact "no previous state" prev-state => nil)
+          (fact {:midje/description prev-state}
+            prev-state => (nth state-seq (- i 1))))))
+
+    (fact "no previous state if no history"
+      (get-previous-app-state nil) => nil
+      (get-previous-app-state []) => nil)))
+
+(facts "Get previous state (history)"
+  (let [state-seq [:one nil :two :three nil nil]
+        now (now)
+        history {:history
+                 (map-indexed
+                   (fn [i state] (history-entry state (+ now i) {:username "Pena"}))
+                   state-seq)}]
+    (fact "only entries with :state are regarded"
+      (get-previous-app-state history) => :two)))

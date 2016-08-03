@@ -12,8 +12,7 @@ LUPAPISTE.Upload = {
   targetType: ko.observable(),
   targetId: ko.observable(),
   locked: ko.observable(),
-  selectableOperations: ko.observableArray(),
-  selectedOperationId: ko.observable(),
+  selectableGroups: ko.observableArray(),
   helpVisible: ko.observable(false),
   archiveEnabled: ko.observable(false)
 };
@@ -24,7 +23,7 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentId(options.attachmentId);
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
-  LUPAPISTE.Upload.selectableOperations([{id: options.operationId}]);
+  LUPAPISTE.Upload.selectableGroups([{groupType: options.group, id: options.operationId}]);
   LUPAPISTE.Upload.operationId(options.operationId);
   LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
@@ -52,14 +51,20 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   }
 };
 
-LUPAPISTE.Upload.loadOperations = function(applicationId) {
+LUPAPISTE.Upload.loadGroups = function(applicationId) {
   "use strict";
   if (applicationId) {
     ajax
-      .query("attachment-operations", {id: applicationId})
+      .query("attachment-groups", {id: applicationId})
       .success(function(data) {
-        if (data.operations) {
-          LUPAPISTE.Upload.selectableOperations(data.operations);
+        if (data.groups) {
+          LUPAPISTE.Upload.selectableGroups(_.map(data.groups, function(g) {
+            // group type is uploaded as operationId
+            if (!g.id) {
+              g.id = g.groupType;
+            }
+            return g;
+          }));
           LUPAPISTE.Upload.operationId.valueHasMutated();
         }
       })
@@ -67,11 +72,21 @@ LUPAPISTE.Upload.loadOperations = function(applicationId) {
   }
 };
 
+LUPAPISTE.Upload.getGroupOptionsText = function(item) {
+  "use strict";
+  if (item.groupType === "operation") {
+    return item.description ? loc([item.name, "_group_label"]) + " - " + item.description : loc([item.name, "_group_label"]);
+  } else if (item.groupType) {
+    return loc([item.groupType, "_group_label"]);
+  }
+};
+
+
 LUPAPISTE.Upload.init = function(options) {
   "use strict";
   LUPAPISTE.Upload.setModel(options);
   LUPAPISTE.Upload.loadTypes(options.applicationId);
-  LUPAPISTE.Upload.loadOperations(options.applicationId);
+  LUPAPISTE.Upload.loadGroups(options.applicationId);
 };
 
 LUPAPISTE.Upload.initFromURLParams = function() {

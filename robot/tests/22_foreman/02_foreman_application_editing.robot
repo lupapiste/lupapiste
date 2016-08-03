@@ -38,11 +38,8 @@ Foreman submits the second application
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
   Select from list by value  permitSubtypeSelect  tyonjohtaja-ilmoitus
   Open tab  requiredFieldSummary
-  Click enabled by test id  application-submit-btn
-  Wait Until  Click element  xpath=//div[@id='dynamic-yes-no-confirm-dialog']//button[@data-test-id='confirm-yes']
-  Wait Until  Element should be visible  xpath=//div[@id='modal-dialog-content']
-  Element should contain  xpath=//div[@id='modal-dialog-content']/div[@class='header']/span[@class="title"]  Työnjohtajan ilmoitus
-  Confirm notification dialog
+  Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
+  Submit application error should be  error.foreman.notice-not-submittable
   Wait Until  Application state should be  open
 
 Foreman application can be submitted

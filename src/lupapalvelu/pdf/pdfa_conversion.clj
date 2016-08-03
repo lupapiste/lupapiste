@@ -34,17 +34,14 @@
   (env/value :pdf2pdf :license-key))
 
 (defn- pdftools-pdfa-command
-  "Conversion error mask 9028 means that the following things will cause the conversion to fail:
-   - Visual differences in output file
-   - Removal of embedded files
-   - Error during linearization of output file
-   - Removal of digital signature because of conversion
-   - OCR error occurred (OCR not currently in use)"
+  "Conversion error mask 68 means that the following things will cause the conversion to fail:
+   - Visual differences in output file (4)
+   - Removal of embedded files (64)"
   [input-file output-file cl]
-  [(pdf2pdf-executable) "-mp" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "9028" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+  [(pdf2pdf-executable) "-ad" "-au" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
 
 (defn- pdftools-analyze-command [input-file output-file]
-  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2b" input-file output-file])
+  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2u" input-file output-file])
 
 (defn- parse-log-file [output-filename]
   (try
@@ -75,9 +72,12 @@
 (defn- compliance-level [input-file output-file {:keys [application filename]}]
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
-        required-part (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
-        level (if (= required-part "1") "b" "u")
-        cl (str "pdfa-" (or required-part "2") level)
+        required-part (or (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d" log))
+                          (when (re-find #"Processing embedded file" log) "3")
+                          "2")
+        required-conformance (last (re-find #"The XMP property 'pdfaid:conformance' has the invalid value '(\w)'. Required is '\w" log))
+        level (ss/lower-case (or required-conformance (if (= required-part "1") "b" "u")))
+        cl (str "pdfa-" required-part level)
         not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
         missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
     (when (or not-prints missing-appearances)
@@ -92,7 +92,8 @@
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. ^String output-file)}
+                  :output-file (File. ^String output-file)
+                  :autoConversion (not (pdf-was-already-compliant? log-lines))}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
                      (io/delete-file output-file :silently)
@@ -105,6 +106,9 @@
                           (do (warn "PDF/A conversion failed probably because of missing fonts")
                               (warn error-lines)
                               {:pdfa? false})))
+      (= exit 10) (do
+                    (error "pdf2pdf - not a valid license")
+                    {:pdfa? false})
       :else (do (warn "pdf2pdf error:" err "exit status:" exit)
                 (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))

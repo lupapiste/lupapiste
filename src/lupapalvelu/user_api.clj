@@ -4,7 +4,7 @@
             [noir.request :as request]
             [noir.response :as resp]
             [noir.core :refer [defpage]]
-            [slingshot.slingshot :refer [throw+]]
+            [slingshot.slingshot :refer [throw+ try+]]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.util :refer [future*]]
@@ -14,7 +14,7 @@
             [sade.core :refer :all]
             [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
-            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.states :as states]
@@ -31,7 +31,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            ))
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.calendar :as cal]))
 
 ;;
 ;; ==============================================================================
@@ -46,10 +47,12 @@
       (dissoc full-user :private :personId))))
 
 (defquery user
-  {:user-roles auth/all-authenticated-user-roles}
+  {:optional-parameters [lang]
+   :input-validators [i18n/valid-language]
+   :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user full-user)
+    (ok :user (usr/update-user-language full-user (ss/lower-case lang)))
     (fail)))
 
 (defquery users
@@ -174,7 +177,7 @@
 ;; General changes:
 ;;
 
-(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone :language
                                  :architect :degree :graduatingYear :fise :fiseKelpoisuus
                                  :companyName :companyId :allowDirectMarketing])
 
@@ -482,7 +485,9 @@
         (if-let [application-page (usr/applicationpage-for (:role user))]
           (ssess/merge-to-session
             command
-            (ok :user (-> user usr/with-org-auth usr/non-private) :applicationpage application-page)
+            (ok :user (-> user usr/with-org-auth usr/non-private)
+                :applicationpage application-page
+                :lang (:language user))
             {:user (usr/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
@@ -520,6 +525,7 @@
 
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
+   :optional-parameters [language]
    :user-roles       #{:anonymous}
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
@@ -532,7 +538,7 @@
                       nil
                       (merge
                         (set/rename-keys vetuma-data {:userid :personId})
-                        (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
+                        (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
                         (when (:architect data)
                           (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
                         {:email email :role "applicant" :enabled false}))]
@@ -605,37 +611,39 @@
 
 (defquery add-user-attachment-allowed
   {:description "Dummy command for UI logic: returns falsey if current user is not allowed to add \"user attachments\"."
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (add-user-attachment-allowed? (:user command))
                     unauthorized))]
    :user-roles #{:anonymous}})
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename size]}] :files attachmentType :attachmentType}
-  (let [user              (usr/current-user (request/ring-request))
-        filename          (mime/sanitize-filename filename)
-        attachment-type   (att-type/parse-attachment-type attachmentType)
-        attachment-id     (mongo/create-id)
-        content-type      (mime/mime-type filename)
-        file-info         {:attachment-type  attachment-type
-                           :attachment-id    attachment-id
-                           :file-name        filename
-                           :content-type     content-type
-                           :size             size
-                           :created          (now)}]
+  (try+
+    (let [user              (usr/current-user (request/ring-request))
+          filename          (mime/sanitize-filename filename)
+          attachment-type   (att-type/parse-attachment-type attachmentType)
+          attachment-id     (mongo/create-id)
+          content-type      (mime/mime-type filename)
+          file-info         {:attachment-type  attachment-type
+                             :attachment-id    attachment-id
+                             :file-name        filename
+                             :content-type     content-type
+                             :size             size
+                             :created          (now)}]
 
-    (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
+      (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
-    (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
-    (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
-    (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
+      (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename size "id=" attachment-id)
+      (when-not ((set att-type/osapuolet) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
+      (when-not (mime/allowed-file? filename) (fail! :error.file-upload.illegal-file-type))
 
-    (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
-    (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-
-    (->> (assoc file-info :ok true)
-      (resp/json)
-      (resp/content-type "text/plain") ; IE is fucking stupid: must use content type text/plain, or else IE prompts to download response.
-      (resp/status 200))))
+      (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
+      (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
+      (resp/json (assoc file-info :ok true)))
+    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+      (resp/json (fail text)))
+    (catch Exception e
+      (error e "exception while uploading user attachment" (class e) (str e))
+      (resp/json (fail :error.unknown)))))
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
@@ -647,7 +655,7 @@
     {:status 200
      :body ((:content attachment))
      :headers {"Content-Type" (:content-type attachment)
-               "Content-Length" (str (:content-length attachment))
+               "Content-Length" (str (:size attachment))
                "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
     {:status 404
      :body (str "can't file attachment: id=" attachment-id)}))
@@ -662,11 +670,28 @@
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
+(defn- allowed-state?
+  "Check possible attachments against application state.
+   pre-verdict states are all true, post-verdict states are checked by attachment's applicationState.
+   Similar to attachment-editable-by-application-state pre-check"
+  [app-state {create-state :applicationState}]
+  (if (states/post-verdict-states (keyword app-state))
+    (not (nil? (states/post-verdict-states (keyword create-state))))
+    true))
+
+(defn allowed-attachments-same-type
+  "Return attachments of given type, that are allowed in current state and not flagged readOnly / locked."
+  [application attachment-type]
+  (->> (att/get-attachments-by-type application attachment-type)
+       (filter (partial allowed-state? (:state application)))
+       (remove #(or (att/attachment-is-readOnly? %) (att/attachment-is-locked? %)))))
+
+
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
    :states     (states/all-application-states-but states/terminal-states)
-   :pre-checks [(fn [command _]
+   :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
                     unauthorized))]}
   [{application :application user :user}]
@@ -674,20 +699,28 @@
     (let [application-id id
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment
-          attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
-          attachment-id (str application-id "." user-id "." attachment-id)]
-      (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
-        (attachment/attach-file! application
-                                 {:attachment-id attachment-id
-                                  :attachment-type attachment-type
-                                  :content ((:content attachment))
-                                  :filename file-name
-                                  :content-type content-type
-                                  :size size
-                                  :created created
-                                  :user user
-                                  :required false
-                                  :locked false}))))
+          attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
+          maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
+          same-attachments       (allowed-attachments-same-type application attachment-type)      ; attachments of same type
+          old-user-attachment-id (some (hash-set maybe-attachment-id) (map :id same-attachments)) ; if id is already present, use it
+
+          attachment-id (or old-user-attachment-id
+                            (-> (remove :latestVersion same-attachments) first :id) ; upload user attachment to empty placeholder
+                            maybe-attachment-id)]
+      (when (zero? (mongo/count :applications {:_id application-id
+                                               :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
+                                                                         :latestVersion.type attachment-type}}}))
+        (att/attach-file! application
+                          {:attachment-id attachment-id
+                           :attachment-type attachment-type
+                           :content ((:content attachment))
+                           :filename file-name
+                           :content-type content-type
+                           :size size
+                           :created created
+                           :user user
+                           :required false
+                           :locked false}))))
   (ok))
 
 (defquery email-in-use
@@ -707,35 +740,26 @@
 (defquery enable-foreman-search
   {:user-roles #{:authority}
    :org-authz-roles (disj auth/all-org-authz-roles :tos-editor :tos-publisher)
-   :pre-checks [(fn [command application]
-                  (let [org-ids (usr/organization-ids (:user command))]
+   :pre-checks [(fn [{:keys [user application]}]
+                  (let [org-ids (usr/organization-ids user)]
                     (if-not application
                       (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                         unauthorized)
-                      unauthorized))
-                  )]}
+                      unauthorized)))]}
   [_])
 
 (defquery permanent-archive-enabled
   {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [command {:keys [organization]}]
+   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
                   (let [org-set (if organization
                                   #{organization}
-                                  (usr/organization-ids-by-roles (:user command) #{:authority :tos-editor :tos-publisher :archivist}))]
+                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
                     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
 
-(defn calendars-enabled-api-pre-check
-  [rolez command {:keys [organization]}]
-  (let [org-set (if organization
-                  #{organization}
-                  (usr/organization-ids-by-roles (:user command) rolez))]
-    (when (or (empty? org-set) (not (organization/some-organization-has-calendars-enabled? org-set)))
-      unauthorized)))
-
 (defquery calendars-enabled
-  {:user-roles #{:authority :authorityAdmin}
-   :pre-checks [(partial calendars-enabled-api-pre-check #{:authority :authorityAdmin})]
-   :feature :ajanvaraus}
+  {:user-roles #{:authority :authorityAdmin :applicant}
+   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :authorityAdmin :applicant})]
+   :feature    :ajanvaraus}
   [_])

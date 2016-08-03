@@ -20,7 +20,7 @@
                 (= (:id company) requested-company))
     unauthorized))
 
-(defn validate-user-is-admin-or-company-admin [{user :user} _]
+(defn validate-user-is-admin-or-company-admin [{user :user}]
   (when-not (or (= (:role user) "admin")
                 (= (get-in user [:company :role]) "admin"))
     unauthorized))
@@ -77,7 +77,7 @@
   [_]
   (c/delete-user! user-id))
 
-(defn- user-limit-not-exceeded [command _]
+(defn- user-limit-not-exceeded [command]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
         company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))
@@ -155,11 +155,3 @@
       (fail! :forbidden)))
   (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))
-
-(defquery company-user-cannot-submit
-  {:description "Negative pseudo query that succeeds only if the
-  current user is a company member but does not have submit rights."
-   :parameters [:id]
-   :user-roles #{:applicant}
-   :pre-checks [c/cannot-submit]}
-  [_])

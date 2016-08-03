@@ -20,8 +20,8 @@
             op-id (-> application :primaryOperation :id)]
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
-        (fact "only pohjapiirros is related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+        (fact "pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
+          (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -125,7 +125,7 @@
               op-id (:id primaryOperation)]
 
           (fact "Pena can change operation"
-            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id op-id}}) => ok?)
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :id op-id}}) => ok?)
           (fact "Pena can change contents"
             (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
           (fact "Pena can change size"
@@ -294,13 +294,60 @@
         application (query-application pena application-id)
         attachment1 (-> application :attachments first)]
     (:state application) => "verdictGiven"
-    (count (:attachments application)) => 5
+    (count (:attachments application)) => 6
     (fact "Uploading versions to pre-verdict attachment is not possible"
       (upload-attachment pena application-id attachment1 false :filename "dev-resources/test-pdf.pdf"))
     (fact "Uploading new post-verdict attachment is possible"
       (upload-attachment pena application-id {:id "" :type {:type-group "selvitykset" :type-id "energiatodistus"}} true :filename "dev-resources/test-pdf.pdf"))
 
-    (count (:attachments (query-application pena application-id))) => 6))
+    (count (:attachments (query-application pena application-id))) => 7))
+
+(facts "Attachments query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+    (facts "initialization"
+      (fact "verdict" verdict-resp => ok?)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true))
+
+    (facts "Authority"
+      (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
+        query-resp => ok?
+        (count attachments) => 5
+        (fact "verdict draft included"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 1)))
+
+    (facts "Applicant"
+      (let [{attachments :attachments :as query-resp} (query pena :attachments :id application-id)]
+        query-resp => ok?
+        (count attachments) => 4
+        (fact "verdict draft is filtered out"
+          (count (filter (comp #{"verdict"} :type :target) attachments)) => 0)))
+
+    (fact "Unauthorized"
+      (let [query-resp (query mikko :attachments :id application-id)]
+       query-resp => (partial expected-failure? "error.application-not-accessible")))))
+
+(facts "Attachment-groups query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {groups :groups :as query-resp} (query sonja :attachment-groups :id application-id)]
+
+    query-resp => ok?
+
+    (fact "Three groups"
+      (count groups) => 3)
+
+    (fact "Three different kind of groups"
+      (map :groupType groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+
+    (fact "Operation groupType has operation specific info fields"
+      (keys (util/find-first (comp #{"operation"} :groupType) groups)) => (contains [:groupType :id :name :description] :in-any-order :gaps-ok))
+
+    (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
+
+    (fact "Four groups"
+      (-> (query sonja :attachment-groups :id application-id)
+          :groups
+          count) => 4)))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
@@ -670,6 +717,14 @@
                            :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
                   => (partial expected-failure? :error.ram-cannot-delete-root))))
     (let [ram-id (:id (latest-attachment))]
+      (facts "Latest attachment has RAM link"
+             (let [{[a b] :ram-links} (query pena :ram-linked-attachments :id application-id :attachmentId ram-id)]
+              (fact "Base attachment has no link" (:ram-link a) => nil)
+              (fact "RAM attachment links to base attachment" (:ramLink b) => (:id a))))
+      (fact "Authority can query RAM links"
+            (query sonja :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
+      (fact "Reader authority can query RAM links"
+            (query luukas :ram-linked-attachments :id application-id :attachmentId ram-id) => ok?)
       (fact "Sonja approves RAM attachment"
             (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
       (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]
