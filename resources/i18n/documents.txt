@@ -5,4 +5,4 @@
 "document.operation-editor.description" "fi" "Kuvaus"
 "document.operation-editor.description" "sv" "Beskrivning"
 "document.operation-identifier.notice" "fi" "<b>Ohje:</b> Toimenpiteen kohde (rakennus, rakennelma tms) yksilöidään asemapiirroksessa tällä tunnuksella. Voit käyttää tunnuksessa numeroita ja/tai kirjaimia (esim. 1, A, 000)."
-"document.operation-identifier.notice" "sv" ""
+"document.operation-identifier.notice" "sv" "<b>Ohje:</b> Objektet för åtgärden (byggnad, konstruktion el. dyl.) identifieras i detaljplanen med denna beteckning. Du kan använda siffror och/eller bokstäver i beteckningen (t.ex. 1, A, 000)."
