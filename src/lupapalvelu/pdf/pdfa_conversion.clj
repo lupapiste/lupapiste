@@ -41,7 +41,7 @@
   [(pdf2pdf-executable) "-ad" "-au" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
 
 (defn- pdftools-analyze-command [input-file output-file]
-  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2b" input-file output-file])
+  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2u" input-file output-file])
 
 (defn- parse-log-file [output-filename]
   (try
@@ -72,10 +72,11 @@
 (defn- compliance-level [input-file output-file {:keys [application filename]}]
   (apply shell/sh (pdftools-analyze-command input-file output-file))
   (let [log (apply str (parse-log-file output-file))
-        required-part (or (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d'." log))
+        required-part (or (last (re-find #"The XMP property 'pdfaid:part' has the invalid value '(\d)'. Required is '\d" log))
                           (when (re-find #"Processing embedded file" log) "3")
                           "2")
-        level (if (= required-part "1") "b" "u")
+        required-conformance (last (re-find #"The XMP property 'pdfaid:conformance' has the invalid value '(\w)'. Required is '\w" log))
+        level (ss/lower-case (or required-conformance (if (= required-part "1") "b" "u")))
         cl (str "pdfa-" required-part level)
         not-prints (re-find #"The value of the key . is 'Not Print' but must be 'Print'" log)
         missing-appearances (re-find #"The appearance dictionary doesn't contain an entry" log)]
