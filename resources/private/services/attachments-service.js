@@ -28,7 +28,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
 
-  self.queryAttachments = function(applicationId) {
+  self.queryAttachments = function() {
     ajax.query("attachments", {"id": self.applicationId})
       .success(self.setAttachments)
       .onError("error.unauthorized", notify.ajaxError)
@@ -53,7 +53,7 @@ LUPAPISTE.AttachmentsService = function() {
     self.queryTagGroups();
   };
 
-  self.queryFilters = function(applicationId) {
+  self.queryFilters = function() {
     ajax.query("attachments-filters", {"id": self.applicationId})
       .success(self.setFilters)
       .onError("error.unauthorized", notify.ajaxError)
@@ -465,7 +465,7 @@ LUPAPISTE.AttachmentsService = function() {
     var args = _.toArray(arguments);
     var group = _.get(self.attachmentsHierarchy.peek(), args);
     return getAttachments(group);
-  };
+  }
 
   function getDataForGroup() {
     var args = _.toArray(arguments);
