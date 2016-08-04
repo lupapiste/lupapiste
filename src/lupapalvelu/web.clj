@@ -33,6 +33,7 @@
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
@@ -461,7 +462,7 @@
         attachment-type (att-type/parse-attachment-type attachmentType)
         group (cond
                 (ss/blank? operationId) nil
-                ((set att/attachment-groups) (keyword operationId)) {:groupType operationId}
+                ((set att-tags/attachment-groups) (keyword operationId)) {:groupType (keyword operationId)}
                 :else {:id operationId})
         upload-data (-> upload
                         (assoc :id applicationId

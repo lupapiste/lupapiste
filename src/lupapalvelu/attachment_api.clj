@@ -13,6 +13,7 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.stamping :as stamping]
@@ -88,7 +89,7 @@
 
 (defn- validate-group-type [group]
   (when-let [group-type (keyword (:groupType group))]
-    (when-not ((set attachment/attachment-groups) group-type)
+    (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]
@@ -129,8 +130,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :attachments (map #(assoc % :group (attachment/attachment-grouping %)) attachments)))
+  [{{attachments :attachments :as application} :application}]
+  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
@@ -140,7 +141,25 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
-  (ok :groups (attachment/attachment-groups-for-application application)))
+  (ok :groups (att-tags/attachment-groups-for-application application)))
+
+(defquery attachments-filters
+  {:description "Get all attachments filters for application"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments} :application}]
+  (ok :attachments-filters (att-tags/attachments-filters attachments)))
+
+(defquery attachments-tag-groups
+  {:description "Get hierarchical attachment grouping by attachment tags."
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{{attachments :attachments} :application}]
+  (ok :tag-groups (att-tags/attachment-tag-groups attachments)))
 
 ;;
 ;; Types

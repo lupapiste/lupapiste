@@ -441,7 +441,7 @@
   if (features.enabled("ajanvaraus")) {
     ko.computed(function() {
       var organizationId = organizationModel.organizationId();
-      if (!_.isUndefined(organizationId)) {
+      if (lupapisteApp.models.globalAuthModel.ok("calendars-enabled") && !_.isUndefined(organizationId)) {
         hub.send("calendarService::fetchOrganizationReservationTypes",
           {organizationId: organizationId});
       }

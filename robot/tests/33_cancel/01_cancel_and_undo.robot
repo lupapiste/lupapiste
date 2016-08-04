@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Authority can resurrect canceled application
+Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 

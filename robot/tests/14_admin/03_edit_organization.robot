@@ -54,6 +54,7 @@ Organization 753-R has now inforequest enabled and application disabled
   Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
 
 Admin impersonated Sipoo authority
+  Wait Until  Positive indicator should not be visible
   Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
   Scroll to  [data-impersonate=753-R]
