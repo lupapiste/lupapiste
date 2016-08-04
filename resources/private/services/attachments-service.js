@@ -635,4 +635,33 @@ LUPAPISTE.AttachmentsService = function() {
     toggleAccordions(1);
   };
   ko.options.deferUpdates = false;
+
+  // self.testAttachments = [{tags: ["foo", "bar", "baz"]},
+  //                         {tags: ["foo", "quux"]},
+  //                         {tags: ["dui"]}];
+
+  self.subGroupIndex = function(tagGroups, attachment) {
+    var possibleSubGroupTags = _.map(tagGroups, _.first);
+    return _.findIndex(possibleSubGroupTags, function (groupTag) {
+      return _.find(attachment.tags, function (attachmentTag) {
+        return groupTag === attachmentTag;
+      }) || "default";
+    });
+  };
+  self.testHierarchy = function(attachments, tagGroups) {
+    if (_.isEmpty(attachments)) {
+      return null;
+    }
+    if (tagGroups.length === 1) {
+      return [tagGroups[0], attachments];
+    }
+    var grouped =  _(attachments)
+          .groupBy(_.partial(self.subGroupIndex, _.tail(tagGroups)))
+          .omit(-1)
+          .mapValues(function (attachments, idx) {
+            return [attachments, tagGroups[parseInt(idx, 10) + 1]];
+          }).values().value();
+    return _.concat([tagGroups[0]],
+                    _.map(grouped, _.spread(self.testHierarchy)));
+  };
 };
