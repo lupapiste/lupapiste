@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
@@ -34,25 +34,28 @@
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user now] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (File/createTempFile "lupapiste.stamp." ".tmp")
-        new-file-id (mongo/create-id)]
+        file (File/createTempFile "lupapiste.stamp." ".tmp")]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
-    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))]
-      (debug "uploading stamped file: " (.getAbsolutePath file))
-      (mongo/upload new-file-id filename contentType file :application (:id application))
+    (debug "uploading stamped file: " (.getAbsolutePath file))
+    (let [is-pdf-a?              (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
+          {new-file-id :fileId}  (file-upload/save-file  {:filename filename
+                                                          :content-type contentType
+                                                          :content file}
+                                                         {:application (:id application)})]
+
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
         (att/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
         (att/set-attachment-version! application
-                                           (att/get-attachment-info application attachment-id)
-                                           {:attachment-id  attachment-id
-                                            :fileId new-file-id :original-file-id new-file-id
-                                            :filename filename
-                                            :contentType contentType :size (.length file)
-                                            :comment-text nil :now now :user user
-                                            :archivable is-pdf-a?
-                                            :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-                                            :stamped true :comment? false :state :ok}))
+                                     (att/get-attachment-info application attachment-id)
+                                     {:attachment-id  attachment-id
+                                      :fileId new-file-id :original-file-id new-file-id
+                                      :filename filename
+                                      :contentType contentType :size (.length file)
+                                      :comment-text nil :now now :user user
+                                      :archivable is-pdf-a?
+                                      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
+                                      :stamped true :comment? false :state :ok}))
       (io/delete-file file :silently)
       (tos/mark-attachment-final! application now attachment-id))
     new-file-id))
