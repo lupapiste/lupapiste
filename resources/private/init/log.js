@@ -1,12 +1,15 @@
 ;(function() {
   "use strict";
 
-  function nop() {
-  }
-
   function filtered(page, message) {
     var pageFilter = /^(resource:\/|Unknown script code|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
     return pageFilter.test(page) || _.includes(message, "NPObject");
+  }
+
+  function reloadNotice() {
+    if (confirm(loc("error.frontend-outdated"))) {
+      window.location.reload();
+    }
   }
 
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];
@@ -27,7 +30,9 @@
                                     page: page,
                                     message: message,
                                     build: LUPAPISTE.config.build})
-      .fail(nop).error(nop).call();
+        .success(function(resp) {
+          if (resp.expired) { reloadNotice(); }
+        }).fail(_.noop).error(_.noop).call();
     }
   };
 
@@ -42,14 +47,9 @@
   if (LUPAPISTE.config.mode !== "dev") {
     window.onerror = function(msg, url, line, col, error) {
       ajax.query("newest-version", {frontendBuild: LUPAPISTE.config.build})
-        .onError("frontend-too-old", function() {
-          if (confirm(loc("error.frontend-outdated"))) {
-            window.location.reload();
-          }
-        })
+        .onError("frontend-too-old", reloadNotice)
         .success(_.noop)
         .call();
-
       if (url) {
         var sourcePosition = (col === undefined) ? line : line + ":" + col;
         var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
