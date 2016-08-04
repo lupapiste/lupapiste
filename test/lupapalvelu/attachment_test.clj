@@ -242,20 +242,20 @@
                  archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
                                                            :archivabilityError (apply sc/enum nil archivability-errors)
                                                            :missing-fonts (sc/eq ["Arial"])}))
+                 user            (ssg/generator user/SummaryUser)
                  general-options (ssg/generator {:filename sc/Str
                                                  :contentType sc/Str
                                                  :size sc/Int
                                                  :now ssc/Timestamp
-                                                 :user user/SummaryUser
                                                  :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:fileId file-id :original-file-id file-id} archivability general-options)
-                      version (make-version attachment options)]
+                      version (make-version attachment user options)]
                   (is (not (nil? (get-in version [:version :minor]))))
                   (is (not (nil? (get-in version [:version :major]))))
                   (is (= (:fileId version)         file-id))
                   (is (= (:originalFileId version) file-id))
                   (is (= (:created version) (:now options)))
-                  (is (= (:user version) (:user options)))
+                  (is (= (:user version) user))
                   (is (= (:filename version) (:filename options)))
                   (is (= (:contentType version) (:contentType options)))
                   (is (= (:size version) (:size options)))
@@ -274,37 +274,38 @@
                                                            (ssg/generator {:filename sc/Str
                                                                            :contentType sc/Str
                                                                            :size sc/Int
-                                                                           :now ssc/Timestamp
-                                                                           :user user/SummaryUser})))]
-                (let [version (make-version attachment options)]
-                  (and (= (:version version) (get-in attachment [:latestVersion :version]))
-                       (= (:fileId version) (:fileId options))
-                       (= (:originalFileId version) (:original-file-id options))
-                       (= (:created version) (:now options))
-                       (= (:user version) (:user options))
-                       (= (:filename version) (:filename options))
-                       (= (:contentType version) (:contentType options))
-                       (= (:size version) (:size options))))))
+                                                                           :now ssc/Timestamp})))
+                 user (ssg/generator user/SummaryUser)]
+                (let [version (make-version attachment user options)]
+                  (is (= (:version version) (get-in attachment [:latestVersion :version])))
+                  (is (= (:fileId version) (:fileId options)))
+                  (is (= (:originalFileId version) (:original-file-id options)))
+                  (is (= (:created version) (:now options)))
+                  (is (= (:user version) user))
+                  (is (= (:filename version) (:filename options)))
+                  (is (= (:contentType version) (:contentType options)))
+                  (is (= (:size version) (:size options))))))
 
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
+                 user           (ssg/generator user/SummaryUser)
                  options        (ssg/generator {:now ssc/Timestamp
                                                 :target (sc/maybe Target)
-                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
                                                 :comment-text sc/Str})]
-                (let [updates (build-version-updates attachment version-model options)]
-                  (and (= (get-in updates [$addToSet :attachments.$.auth :role]) (if (:stamped options) :stamper :uploader))
-                       (= (get-in updates [$set :modified] (:now options)))
-                       (= (get-in updates [$set :attachments.$.modified] (:now options)))
-                       (= (get-in updates [$set :attachments.$.state] (:state options)))
-                       (if (:target options)
-                         (= (get-in updates [$set :attachments.$.target] (:target options)))
-                         (not (contains? (get updates $set) :attachments.$.target)))
-                       (= (get-in updates [$set :attachments.$.latestVersion] version-model))
-                       (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
+                (let [updates (build-version-updates user attachment version-model options)]
+                  (is (= (get-in updates [$addToSet :attachments.$.auth :role])
+                         (if (:stamped options) :stamper :uploader)))
+                  (is (= (get-in updates [$set :modified] (:now options))))
+                  (is (= (get-in updates [$set :attachments.$.modified] (:now options))))
+                  (is (= (get-in updates [$set :attachments.$.state] (:state options))))
+                  (is (if (:target options)
+                        (= (get-in updates [$set :attachments.$.target] (:target options)))
+                        (not (contains? (get updates $set) :attachments.$.target))))
+                  (is (= (get-in updates [$set :attachments.$.latestVersion] version-model)))
+                  (is (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment version-model] (gen/fmap (fn [[att fids]]
@@ -315,9 +316,9 @@
                                                       (gen/tuple (ssg/generator Attachment {Version   nil
                                                                                             [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
-                 options (ssg/generator {:now ssc/Timestamp
-                                         :user user/SummaryUser})]
-                (let [updates (build-version-updates attachment version-model options)]
+                 options (ssg/generator {:now ssc/Timestamp})
+                 user (ssg/generator user/SummaryUser)]
+                (let [updates (build-version-updates user attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
 

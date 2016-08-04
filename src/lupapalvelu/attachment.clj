@@ -409,7 +409,7 @@
        (last)))
 
 (defn make-version
-  [attachment {:keys [fileId original-file-id filename contentType size now user stamped archivable archivabilityError missing-fonts autoConversion]}]
+  [attachment user {:keys [fileId original-file-id filename contentType size now stamped archivable archivabilityError missing-fonts autoConversion]}]
   {:post [(sc/validate Version %)]}
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
@@ -438,8 +438,8 @@
    :timestamp timestamp
    :fileId file-id})
 
-(defn- build-version-updates [attachment version-model {:keys [now target state user stamped]
-                                                        :or   {state :requires_authority_action} :as options}]
+(defn- build-version-updates [user attachment version-model {:keys [now target state stamped]
+                                                             :or   {state :requires_authority_action} :as options}]
   {:pre [(map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
@@ -468,7 +468,7 @@
            (remove (set [file-id original-file-id]))
            (run! delete-attachment-file-and-preview!)))
 
-(defn- attachment-comment-updates [application attachment version-model {:keys [comment? comment-text user now]
+(defn- attachment-comment-updates [application user attachment version-model {:keys [comment? comment-text now]
                                                                          :or   {comment? true}}]
   (let [comment-target (merge {:type :attachment
                                :id (:id attachment)}
@@ -479,15 +479,15 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application attachment options]
+  ([application user attachment options]
     {:pre [(map? options)]}
-    (set-attachment-version! application attachment options 5))
-  ([application {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
+    (set-attachment-version! application user attachment options 5))
+  ([application user {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
     {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
     (if (pos? retry-limit)
       (let [latest-version  (get-in attachment [:latestVersion :version])
-            version-model   (make-version attachment options)
-            comment-updates (attachment-comment-updates application attachment version-model options)]
+            version-model   (make-version attachment user options)
+            comment-updates (attachment-comment-updates application user attachment version-model options)]
         ; Check return value and try again with new version number
         (if (pos? (update-application
                    (application->command application)
@@ -495,7 +495,7 @@
                                               :latestVersion.version.fileId (:fileId latest-version)}}}
                    (merge
                      comment-updates
-                     (build-version-updates attachment version-model options))
+                     (build-version-updates user attachment version-model options))
                    true))
           (do
             (remove-old-files! attachment version-model)
@@ -506,7 +506,7 @@
               attachment-id retry-limit)
             (let [application (mongo/by-id :applications (:id application) [:attachments :state])
                   attachment  (get-attachment-info application attachment-id)]
-              (set-attachment-version! application attachment options (dec retry-limit))))))
+              (set-attachment-version! application user attachment options (dec retry-limit))))))
       (do
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
@@ -555,9 +555,9 @@
              :attachments.$.latestVersion.created now}})))
 
 (defn- get-or-create-attachment!
-  "If the attachment-id matches any old attachment, a new version will be added.
+  "If the attachment-id matches any old attachment, it is returned.
    Otherwise a new attachment is created."
-  [application {:keys [attachment-id attachment-type group created user target locked required contents read-only source] :as options}]
+  [application user {:keys [attachment-id attachment-type group created target locked required contents read-only source] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (usr/authority? user))
         find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))]
@@ -772,14 +772,15 @@
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file application)
                                 (preview-image! (:id application))
-                                :fileId))]
+                                :fileId))
+        user             (:user options)]
     (try
       (->> (cond-> options
                    original-file-id (assoc :original-file-id original-file-id))
            (upload-file-through-libre! application)
            (preview-image! (:id application))
            (merge options {:now (:created options) :stamped (get options :stamped false)})
-           (set-attachment-version! application (get-or-create-attachment! application options)))
+           (set-attachment-version! application user (get-or-create-attachment! application (:user options) options)))
       (finally
         (io/delete-file temp-file :silently)))))
 

@@ -47,31 +47,29 @@
 
 (defn- version-options
   "Returns version options for subject (a file). This is NOT final version model (see make-version)."
-  [subject pdfa-result now user]
+  [subject pdfa-result now]
   (merge {:fileId           (:fileId subject)
           :original-file-id (:fileId subject)
           :filename         (:file-name subject)
           :contentType      (or (:content-type subject) (:contentType subject))
           :size             (:size subject)
           :now now
-          :user user
           :stamped false}
          (select-keys pdfa-result [:archivable :archivabilityError :missing-fonts :autoConversion])))
 
 (defn- appeal-attachment-versions-options
   "Create options maps for needed versions. Created version(s) are returned in vector."
-  [{now :created user :user} pdfa-result original-file]
+  [{now :created} pdfa-result original-file]
   (if-not (nil? pdfa-result) ; nil if content-type is not regarded as archivable
     (if (:already-valid pdfa-result)
-      [(version-options original-file pdfa-result now user)]
+      [(version-options original-file pdfa-result now)]
       (let [initial-versions-options [(version-options original-file ; initial version without archive results
                                                        (merge pdfa-result initial-archive-options)
-                                                       now
-                                                       user)]]
+                                                       now)]]
         (if (contains? pdfa-result :fileId) ; if PDF/A file was uploaded to mongo
-          (conj initial-versions-options (version-options pdfa-result pdfa-result now user)) ; add PDF/A version
-          [(version-options original-file pdfa-result now user)]))) ; just return original file, with pdfa conversion result merged
-    [(version-options original-file initial-archive-options now user)]))
+          (conj initial-versions-options (version-options pdfa-result pdfa-result now)) ; add PDF/A version
+          [(version-options original-file pdfa-result now)]))) ; just return original file, with pdfa conversion result merged
+    [(version-options original-file initial-archive-options now)]))
 
 (defn- create-appeal-attachment-data!
   "Return attachment model for new appeal attachment with version(s) included.
@@ -84,7 +82,7 @@
         archivability-result (archivability-steps! command file)
         versions-options     (appeal-attachment-versions-options command archivability-result file)]
     (reduce (fn [attachment version-options] ; reduce attachment over versions, thus version number gets incremented correctly
-              (let [version (att/make-version attachment version-options)]
+              (let [version (att/make-version user attachment version-options)]
                 (-> attachment
                     (update :versions conj version)
                     (assoc :latestVersion version))))

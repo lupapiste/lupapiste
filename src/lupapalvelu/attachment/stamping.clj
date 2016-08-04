@@ -47,12 +47,13 @@
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
         (att/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
         (att/set-attachment-version! application
+                                     user
                                      (att/get-attachment-info application attachment-id)
                                      {:attachment-id  attachment-id
                                       :fileId new-file-id :original-file-id new-file-id
                                       :filename filename
                                       :contentType contentType :size (.length file)
-                                      :comment-text nil :now now :user user
+                                      :comment-text nil :now now
                                       :archivable is-pdf-a?
                                       :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                       :stamped true :comment? false :state :ok}))
