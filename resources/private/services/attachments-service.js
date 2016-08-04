@@ -168,22 +168,22 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.op && attachment.op.id;
   }
 
-  // self.matchGroupsToAttchment = function(attachment) {
-  //   // 1. get attachment tags
-  //   // 2. ??
-  //   // 3. match attachment tags against top level groups
-  //   var isTopLevel = function(v) {
-  //     if (typeof v[0] == "string" && v.length == 1)
-  //       return "tag";
-  //     else
-  //       return "sub";
-  //   };
-  //   var groupingTagHierarchy = _.map(self.tagGroups(), ko.utils.unwrapObservable);
-  //   //var mainGroups = _.filter(groupingTagHierarchy, isTopLevel);
-  //   var groups = _.groupBy(groupingTagHierarchy, isTopLevel);
-  //   groups.main = _.first(_.intersection(attachment.tags, groups.tag) || "default");
-  //   return groups;
-  // };
+  self.matchGroupsToAttchment = function(attachment) {
+    // 1. get attachment tags
+    // 2. ??
+    // 3. match attachment tags against top level groups
+    var isTopLevel = function(v) {
+      if (typeof v[0] == "string" && v.length == 1)
+        return "tag";
+      else
+        return "sub";
+    };
+    var groupingTagHierarchy = _.map(self.tagGroups(), ko.utils.unwrapObservable);
+    //var mainGroups = _.filter(groupingTagHierarchy, isTopLevel);
+    var groups = _.groupBy(groupingTagHierarchy, isTopLevel);
+    groups.main = _.first(_.intersection(attachment.tags, groups.tag) || "default");
+    return groups;
+  };
 
     function getMainGroup(attachment) {
     // 1. get attachment tags

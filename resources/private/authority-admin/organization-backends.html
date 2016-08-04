@@ -163,9 +163,9 @@
       </section>
 
       <section data-bind="component: {name: 'municipality-maps'}"></section>
-
+      <!-- ko if: features.enabled("suti") -->
       <suti-admin></suti-admin>
-      
+      <!-- /ko -->
       </div>
 
       <!-- DIALOGS -->
