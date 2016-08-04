@@ -10,7 +10,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-
   //
   // Attachments
   //
@@ -25,7 +24,7 @@ LUPAPISTE.AttachmentsService = function() {
 
 
   self.queryAll = function queryAll(attachmentId) {
-    var fireQuery = function(commandName, responseJsonKey, obsArray, dataSetter) {
+    var fireQuery = function(commandName, responseJsonKey, dataSetter) {
       ajax.query(commandName, {"id": self.applicationId})
         .success(function(data) {
           dataSetter(data[responseJsonKey]);
@@ -34,9 +33,9 @@ LUPAPISTE.AttachmentsService = function() {
         .call();
     };
 
-    fireQuery("attachments", "attachments", self.attachments, self.setAttachments);
-    fireQuery("attachments-tag-groups", "tag-groups", self.tagGroups, self.setTagGroups);
-    fireQuery("attachments-filters", "attachments-filters", self.attachments, self.setAttachments);
+    fireQuery("attachments", "attachments", self.setAttachments);
+    fireQuery("attachments-tag-groups", "tag-groups", self.setTagGroups);
+    fireQuery("attachments-filters", "attachments-filters", self.setFilters);
   };
 
   self.setAttachments = function(data) {
@@ -44,6 +43,8 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setTagGroups = function(data) {
+    data.push(["preVerdict"]);
+    data.push(["postVerdict"]);
     self.tagGroups(_.map(data, createArrayModel));
   };
 
@@ -159,8 +160,10 @@ LUPAPISTE.AttachmentsService = function() {
   function getVerdictGroup(attachment) {
     if (isPreVerdict(attachment)) {
       return "preVerdict";
-    } else {
+    } else if (isPostVerdict(attachment)) {
       return "postVerdict";
+    } else {
+      return "default";
     }
   }
 
@@ -319,42 +322,46 @@ LUPAPISTE.AttachmentsService = function() {
   // Attachments hierarchy
   //
 
-  self.getAttachmentsHierarchy = function(attachments) { // undummy version
-    attachments = attachments || _.map(self.attachments(), ko.util.unwrapObservable);
-    var subgroup = function(attachmentsOfMainGroup) {
-            var subGroups = _(attachmentsOfMainGroup)
-              .groupBy(getSubGroup)
-              .mapValues(function(attachments) {
-                return _.map(attachments, "id");
-              })
-              .value();
-            return subGroups["default"] || subGroups;
-    };
-    var unfiltered = function(attachmentsOfVerdictGroup) {
-        return _(attachmentsOfVerdictGroup)
-          .groupBy(getMainGroup)
-          .mapValues(subgroup)
-          .value();
-    };
-    // return _(applyFilters(attachments))
-    //   .groupBy(getVerdictGroup)
-    //   .mapValues(unfiltered)
-    //   .value();
-    return unfiltered;
-  };
+  // self.getAttachmentsHierarchy = function(attachments) { // undummy version
+  //   attachments = attachments || _.map(self.attachments(), ko.util.unwrapObservable);
+  //   var subgroup = function(attachmentsOfMainGroup) {
+  //           var subGroups = _(attachmentsOfMainGroup)
+  //             .groupBy(getSubGroup)
+  //             .mapValues(function(attachments) {
+  //               return _.map(attachments, "id");
+  //             })
+  //             .value();
+  //           return subGroups["default"] || subGroups;
+  //   };
+  //   var unfiltered = function(attachmentsOfVerdictGroup) {
+  //       return _(attachmentsOfVerdictGroup)
+  //         .groupBy(getMainGroup)
+  //         .mapValues(subgroup)
+  //         .value();
+  //   };
+  //   // return _(applyFilters(attachments))
+  //   //   .groupBy(getVerdictGroup)
+  //   //   .mapValues(unfiltered)
+  //   //   .value();
+  //   return unfiltered;
+  // };
+
 
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.attachments(), function (a) { return a.peek(); });
+    var attachments = _.map(self.attachments(), function (a) { return a(); });
+
     return _(applyFilters(attachments))
       .groupBy(getVerdictGroup)
       .mapValues(function(attachmentsOfVerdictGroup) {
+        // console.log("attachmentsOfVerdictgroup", attachmentsOfVerdictGroup);
         return _(attachmentsOfVerdictGroup)
           .groupBy(getMainGroup)
           .mapValues(function(attachmentsOfMainGroup) {
             var subGroups = _(attachmentsOfMainGroup)
               .groupBy(getSubGroup)
               .mapValues(function(attachments) {
+                // console.log("in inner getAttachments fn", attachments, attachments.length, attachments[0]["id"]);
                 return _.map(attachments, "id");
               })
               .value();
@@ -394,6 +401,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   function modelForSubAccordion(subGroup) {
     _.forEach(_.values(filters), function(f) { f(); });
+    // console.log("modelForSubAccordion: attachmentIds", subGroup.attachmentIds);
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -486,7 +494,8 @@ LUPAPISTE.AttachmentsService = function() {
       }
     }
     var args = _.toArray(arguments);
-    var group = _.get(self.attachmentsHierarchy.peek(), args);
+    var group = _.get(self.attachmentsHierarchy(), args) || "default";
+    // console.log("getAttachmentsForGroup getting", args, group);
     return getAttachments(group);
   }
 
@@ -540,7 +549,13 @@ LUPAPISTE.AttachmentsService = function() {
       name: "postVerdict",
       data: getDataForGroup("postVerdict"),
       accordions: attachmentTypeLayout("postVerdict")
+    },
+    {
+      name: "default",
+      data: getDataForGroup("default"),
+      accordions: attachmentTypeLayout("default")
     }
+
   ];
 
 
