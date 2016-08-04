@@ -57,8 +57,8 @@
                                       :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                       :stamped true :comment? false :state :ok}))
       (io/delete-file file :silently)
-      (tos/mark-attachment-final! application now attachment-id))
-    new-file-id))
+      (tos/mark-attachment-final! application now attachment-id)
+      new-file-id)))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
