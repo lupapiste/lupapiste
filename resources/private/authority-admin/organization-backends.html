@@ -163,9 +163,9 @@
       </section>
 
       <section data-bind="component: {name: 'municipality-maps'}"></section>
-
+      <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
       <suti-admin></suti-admin>
-      
+      <!-- /ko -->
       </div>
 
       <!-- DIALOGS -->

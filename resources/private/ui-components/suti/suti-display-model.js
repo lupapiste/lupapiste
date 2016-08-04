@@ -65,7 +65,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   });
 
   self.enabled = self.disposedPureComputed( function() {
-    var user = lupapisteApp.models.applicationAuthModel.ok( "suti-update-id");
+    var user = features.enabled("suti") && lupapisteApp.models.applicationAuthModel.ok( "suti-update-id");
     var idEnabled = user && !self.sutiAdded();
     return { id: idEnabled,
              link: idEnabled && self.suti().www,

@@ -474,8 +474,9 @@
 
                         <div data-bind="component: {name: 'export-attachments'}"></div>
                         <!-- /ko -->
-
+                        <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                         <suti-display></suti-display>
+                        <!-- /ko -->
 
                         <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
                             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
