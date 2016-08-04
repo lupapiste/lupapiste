@@ -259,7 +259,7 @@
 
 (defn process-retention-period-updates [{:keys [metadata attachments processMetadata]} modified-ts]
   (let [new-process-md (calculate-process-metadata processMetadata metadata attachments)]
-    (when-not (= (:processMetadata application) new-process-md)
+    (when-not (= processMetadata new-process-md)
       {$set {:modified modified-ts
              :processMetadata new-process-md}})))
 
