@@ -246,7 +246,7 @@
                  general-options (ssg/generator {:filename sc/Str
                                                  :contentType sc/Str
                                                  :size sc/Int
-                                                 :now ssc/Timestamp
+                                                 :created ssc/Timestamp
                                                  :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:fileId file-id :original-file-id file-id} archivability general-options)
                       version (make-version attachment user options)]
@@ -254,7 +254,7 @@
                   (is (not (nil? (get-in version [:version :major]))))
                   (is (= (:fileId version)         file-id))
                   (is (= (:originalFileId version) file-id))
-                  (is (= (:created version) (:now options)))
+                  (is (= (:created version) (:created options)))
                   (is (= (:user version) user))
                   (is (= (:filename version) (:filename options)))
                   (is (= (:contentType version) (:contentType options)))
@@ -274,13 +274,13 @@
                                                            (ssg/generator {:filename sc/Str
                                                                            :contentType sc/Str
                                                                            :size sc/Int
-                                                                           :now ssc/Timestamp})))
+                                                                           :created ssc/Timestamp})))
                  user (ssg/generator user/SummaryUser)]
                 (let [version (make-version attachment user options)]
                   (is (= (:version version) (get-in attachment [:latestVersion :version])))
                   (is (= (:fileId version) (:fileId options)))
                   (is (= (:originalFileId version) (:original-file-id options)))
-                  (is (= (:created version) (:now options)))
+                  (is (= (:created version) (:created options)))
                   (is (= (:user version) user))
                   (is (= (:filename version) (:filename options)))
                   (is (= (:contentType version) (:contentType options)))
@@ -290,22 +290,26 @@
   (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
                  user           (ssg/generator user/SummaryUser)
-                 options        (ssg/generator {:now ssc/Timestamp
+                 options        (ssg/generator {:created ssc/Timestamp
                                                 :target (sc/maybe Target)
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
-                                                :comment-text sc/Str})]
+                                                :comment-text sc/Str
+                                                :state (:state Attachment)})]
                 (let [updates (build-version-updates user attachment version-model options)]
                   (is (= (get-in updates [$addToSet :attachments.$.auth :role])
                          (if (:stamped options) :stamper :uploader)))
-                  (is (= (get-in updates [$set :modified] (:now options))))
-                  (is (= (get-in updates [$set :attachments.$.modified] (:now options))))
-                  (is (= (get-in updates [$set :attachments.$.state] (:state options))))
+                  (is (= (get-in updates [$set :modified]) (:created options)))
+                  (is (= (get-in updates [$set :attachments.$.modified]) (:created options)))
+                  (is (= (get-in updates [$set :attachments.$.state])
+                         (if (:state options)
+                           (:state options)
+                           :requires_authority_action)))
                   (is (if (:target options)
-                        (= (get-in updates [$set :attachments.$.target] (:target options)))
+                        (= (get-in updates [$set :attachments.$.target]) (:target options))
                         (not (contains? (get updates $set) :attachments.$.target))))
-                  (is (= (get-in updates [$set :attachments.$.latestVersion] version-model)))
-                  (is (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
+                  (is (= (get-in updates [$set :attachments.$.latestVersion]) version-model))
+                  (is (= (get-in updates [$set "attachments.$.versions.0"]) version-model)))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment version-model] (gen/fmap (fn [[att fids]]
@@ -316,11 +320,11 @@
                                                       (gen/tuple (ssg/generator Attachment {Version   nil
                                                                                             [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
-                 options (ssg/generator {:now ssc/Timestamp})
+                 options (ssg/generator {:created ssc/Timestamp})
                  user (ssg/generator user/SummaryUser)]
                 (let [updates (build-version-updates user attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
-                       (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
+                       (= (get-in updates [$set "attachments.$.versions.1"]) version-model)))))
 
 (facts make-ram-attachment
 

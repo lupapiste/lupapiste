@@ -231,12 +231,12 @@
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
 
 (defn make-attachment
-  [now target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
+  [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
   {:pre  [(sc/validate Type attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
    :post [(sc/validate Attachment %)]}
   (cond-> {:id (or attachment-id (mongo/create-id))
            :type attachment-type
-           :modified now
+           :modified created
            :locked locked?
            :readOnly (boolean read-only?)
            :applicationState (if (and (= :verdict (:type target)) (not (states/post-verdict-states application-state)))
@@ -259,8 +259,8 @@
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
-  (map #(make-attachment now nil required? requested-by-authority? locked? (keyword application-state) nil (:type %) (:metadata %)) attachment-types-with-metadata))
+  [created application-state attachment-types-with-metadata locked? required? requested-by-authority?]
+  (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
@@ -271,15 +271,15 @@
 
 (defn- required-options-check [options-map]
   (and (map?    (:attachment-type options-map))
-       (number? (:now options-map))))
+       (number? (:created options-map))))
 
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
-  [application {:keys [attachment-id attachment-type group now target locked required requested-by-authority contents read-only source]
+  [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority contents read-only source]
                 :or {required false locked false requested-by-authority false} :as options}]
   {:pre [(required-options-check options)]}
   (let [metadata (default-tos-metadata-for-attachment-type attachment-type application)]
-    (make-attachment now
+    (make-attachment created
                      (when target (attachment-target-coercer target))
                      required
                      requested-by-authority
@@ -295,27 +295,27 @@
 
 (defn- create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
-  [application options]
+  [application {ts :created :as options}]
   {:pre [(map? application)]}
   (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
-      {$set {:modified now}
+      {$set {:modified ts}
        $push {:attachments attachment-data}})
-    (tos/update-process-retention-period (:id application) now)
+    (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
-(defn create-attachments! [application attachment-types now locked? required? requested-by-authority?]
+(defn create-attachments! [application attachment-types created locked? required? requested-by-authority?]
   {:pre [(map? application)]}
   (let [attachment-types-with-metadata (map (fn [type] {:type     (attachment-type-coercer type)
                                                         :metadata (default-tos-metadata-for-attachment-type type application)})
                                             attachment-types)
-        attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
+        attachments (make-attachments created (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
-      {$set {:modified now}
+      {$set {:modified created}
        $push {:attachments {$each attachments}}})
-    (tos/update-process-retention-period (:id application) now)
+    (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
 
 ;; -------------------------------------------------------------------
@@ -352,23 +352,23 @@
     (fail :error.ram-cannot-delete-root)))
 
 
-(defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application now]
+(defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application created]
   (->> (default-tos-metadata-for-attachment-type type application)
-       (make-attachment now (when target (attachment-target-coercer target)) false false false (-> application :state keyword) op (attachment-type-coercer type))
+       (make-attachment created (when target (attachment-target-coercer target)) false false false (-> application :state keyword) op (attachment-type-coercer type))
        (#(merge {:ramLink id}
                 %
                 (when contents {:contents contents})
                 (when scale    {:scale scale})
                 (when size     {:size size})))))
 
-(defn create-ram-attachment! [{attachments :attachments :as application} attachment-id now]
+(defn create-ram-attachment! [{attachments :attachments :as application} attachment-id created]
   {:pre [(map? application)]}
-  (let [ram-attachment (make-ram-attachment (util/find-by-id attachment-id attachments) application now)]
+  (let [ram-attachment (make-ram-attachment (util/find-by-id attachment-id attachments) application created)]
     (update-application
      (application->command application)
-     {$set {:modified now}
+     {$set {:modified created}
       $push {:attachments ram-attachment}})
-    (tos/update-process-retention-period (:id application) now)
+    (tos/update-process-retention-period (:id application) created)
     (:id ram-attachment)))
 
 (defn resolve-ram-links [attachments attachment-id]
@@ -404,7 +404,7 @@
        (last)))
 
 (defn make-version
-  [attachment user {:keys [fileId original-file-id filename contentType size now stamped archivable archivabilityError missing-fonts autoConversion]}]
+  [attachment user {:keys [fileId original-file-id filename contentType size created stamped archivable archivabilityError missing-fonts autoConversion]}]
   {:post [(sc/validate Version %)]}
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
@@ -414,7 +414,7 @@
     (util/assoc-when {:version        version-number
              :fileId         fileId
              :originalFileId (or original-file-id fileId)
-             :created        now
+             :created        created
              :user           (usr/summary user)
              ;; File name will be presented in ASCII when the file is downloaded.
              ;; Conversion could be done here as well, but we don't want to lose information.
@@ -433,9 +433,9 @@
    :timestamp timestamp
    :fileId file-id})
 
-(defn- build-version-updates [user attachment version-model {:keys [now target state stamped]
+(defn- build-version-updates [user attachment version-model {:keys [created target state stamped]
                                                              :or   {state :requires_authority_action} :as options}]
-  {:pre [(map? attachment) (map? version-model) (number? now) (map? user) (keyword? state)]}
+  {:pre [(map? attachment) (map? version-model) (number? created) (map? user) (keyword? state)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
@@ -448,10 +448,10 @@
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
        {$set {:attachments.$.latestVersion version-model}})
      (if (and (usr/authority? user) (not= state :requires_authority_action))
-       {$set {:attachments.$.approved (->approval state user now (:fileId version-model))}}
+       {$set {:attachments.$.approved (->approval state user created (:fileId version-model))}}
        {$unset {:attachments.$.approved 1}})
-     {$set {:modified now
-            :attachments.$.modified now
+     {$set {:modified created
+            :attachments.$.modified created
             :attachments.$.state  state
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
@@ -463,13 +463,13 @@
            (remove (set [file-id original-file-id]))
            (run! delete-attachment-file-and-preview!)))
 
-(defn- attachment-comment-updates [application user attachment version-model {:keys [comment? comment-text now]
+(defn- attachment-comment-updates [application user attachment version-model {:keys [comment? comment-text created]
                                                                          :or   {comment? true}}]
   (let [comment-target (merge {:type :attachment
                                :id (:id attachment)}
                               (select-keys version-model [:version :fileId :filename]))]
     (when comment?
-      (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))))
+      (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created))))
 
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
@@ -775,7 +775,7 @@
                    original-file-id (assoc :original-file-id original-file-id))
            (upload-file-through-libre! application)
            (preview-image! (:id application))
-           (merge options {:now (:created options) :stamped (get options :stamped false)})
+           (merge options {:stamped (get options :stamped false)})
            (set-attachment-version! application user (get-or-create-attachment! application (:user options) options)))
       (finally
         (io/delete-file temp-file :silently)))))

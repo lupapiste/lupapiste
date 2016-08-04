@@ -53,7 +53,7 @@
           :filename         (:file-name subject)
           :contentType      (or (:content-type subject) (:contentType subject))
           :size             (:size subject)
-          :now now
+          :created now
           :stamped false}
          (select-keys pdfa-result [:archivable :archivabilityError :missing-fonts :autoConversion])))
 
@@ -74,13 +74,13 @@
 (defn- create-appeal-attachment-data!
   "Return attachment model for new appeal attachment with version(s) included.
    If PDF, converts to PDF/A (if applicable) and thus creates a new file to GridFS as side effect."
-  [{app :application now :created user :user :as command} appeal-id appeal-type file]
+  [{app :application created :created user :user :as command} appeal-id appeal-type file]
   (let [type                 (att-type/attachment-type-for-appeal appeal-type)
         target               {:id appeal-id
                               :type appeal-type}
         attachment-data      (att/create-attachment-data app
                                                          {:attachment-type type
-                                                          :now now
+                                                          :created created
                                                           :target target
                                                           :locked true
                                                           :read-only true})

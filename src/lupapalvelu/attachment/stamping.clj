@@ -31,7 +31,7 @@
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
-(defn- update-stamp-to-attachment! [stamp file-info {:keys [application user now] :as context}]
+(defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
         file (File/createTempFile "lupapiste.stamp." ".tmp")]
@@ -45,7 +45,7 @@
                                                          {:application (:id application)})]
 
       (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (att/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
+        (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
         (att/set-attachment-version! application
                                      user
                                      (att/get-attachment-info application attachment-id)
@@ -53,12 +53,12 @@
                                       :fileId new-file-id :original-file-id new-file-id
                                       :filename filename
                                       :contentType contentType :size (.length file)
-                                      :comment-text nil :now now
+                                      :comment-text nil :created created
                                       :archivable is-pdf-a?
                                       :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
                                       :stamped true :comment? false :state :ok}))
       (io/delete-file file :silently)
-      (tos/mark-attachment-final! application now attachment-id)
+      (tos/mark-attachment-final! application created attachment-id)
       new-file-id)))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
@@ -75,13 +75,13 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
+(defn- info-fields->stamp [{:keys [text stamp-created transparency lang]} fields]
   {:pre [text (pos? created)]}
   (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
        ((juxt :backend-id :section :extra-info :buildings :organization))
        flatten
        (map (fn-> str (ss/limit 100)))
-       (stamper/make-stamp (ss/limit text 100) created transparency)))
+       (stamper/make-stamp (ss/limit text 100) stamp-created transparency)))
 
 (defn- make-stamp-without-buildings [context info-fields]
   (->> (dissoc info-fields :buildings)

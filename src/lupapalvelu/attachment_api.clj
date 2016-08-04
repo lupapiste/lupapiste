@@ -560,8 +560,8 @@
                           :user (:user command)
                           :lang lang
                           :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-                          :created  stamp-timestamp
-                          :now      (:created command)
+                          :stamp-created stamp-timestamp
+                          :created  (:created command)
                           :x-margin (util/->long xMargin)
                           :y-margin (util/->long yMargin)
                           :page     (keyword page)
