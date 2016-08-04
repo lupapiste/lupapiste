@@ -23,10 +23,10 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
   self.filters = ko.observableArray([]);
 
+
   self.setAttachments = function(data) {
     self.attachments(_.map(data.attachments, createAttachmentModel));
   };
-
 
   self.queryAttachments = function(applicationId) {
     ajax.query("attachments", {"id": self.applicationId})
@@ -35,9 +35,8 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
-
   self.setTagGroups = function(data) {
-    self.tagGroups(_.map(data.tagGroups, createAttachmentModel));
+    self.tagGroups(_.map(data["tag-groups"], createAttachmentModel));
     self.queryAttachments();
   };
 
@@ -49,7 +48,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setFilters = function(data) {
-    self.filters(_.map(data.filters, createAttachmentModel));
+    self.filters(_.map(data["attachments-filters", createAttachmentModel));
     self.queryTagGroups();
   };
 
@@ -60,13 +59,10 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
-
   lupapisteApp.models.application.id.subscribe(function(newId) {
     self.applicationId = newId;
     self.queryFilters();
   });
-
-
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
@@ -180,22 +176,33 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.op && attachment.op.id;
   }
 
-  function getMainGroup(attachment) {
-    // Dummy implementation for dummy data
-    switch (attachment.type["type-group"]) {
-    case "osapuolet":
-    case "hakija":
-      return "osapuolet";
-    case "rakennuspaikan_hallinta":
-    case "rakennuspaikka":
-      return "rakennuspaikka";
-    }
-    if (getAttachmentOperationId(attachment)) {
-      return getAttachmentOperationId(attachment);
-    } else {
-      return "yleiset";
-    }
-  }
+    function getMainGroup(attachment) {
+        // 1. get attachment tags
+        // 2. top level groups are first elements of each first level vector in tag groups
+        // 3. match attachment tags against top level groups
+        var koUnwrap = function(v) { return v() }
+        var groupingTagHierarchy = = _.map(self.tagGroups(), koUnwrap);
+        var mainGroups = _.map(groupingTagHierarchy, _.first);
+        var matchingMainGroup = _.intersection(attachment.tags, mainGroups);
+        return _.first(matchingMainGroup) || mainGroups[0];
+    };
+
+  //   function getMainGroup(attachment) {
+  //   // Dummy implementation for dummy data
+  //   switch (attachment.type["type-group"]) {
+  //   case "osapuolet":
+  //   case "hakija":
+  //     return "osapuolet";
+  //   case "rakennuspaikan_hallinta":
+  //   case "rakennuspaikka":
+  //     return "rakennuspaikka";
+  //   }
+  //   if (getAttachmentOperationId(attachment)) {
+  //     return getAttachmentOperationId(attachment);
+  //   } else {
+  //     return "yleiset";
+  //   }
+  // }
 
   function getSubGroup(attachment) {
     // Dummy implementation for dummy data
