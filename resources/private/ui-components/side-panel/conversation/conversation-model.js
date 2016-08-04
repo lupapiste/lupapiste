@@ -116,10 +116,27 @@ LUPAPISTE.ConversationModel = function(params) {
     return util.getIn(comment, ["roles", 0]) === "authority";
   }
 
+  self.isCalendarComment = function(comment) {
+    var res = _.startsWith(util.getIn(comment, ["target", "type"]), "reservation");
+    return res;
+  }
+
+  self.showCalendarComments = function() { return lupapisteApp.models.applicationAuthModel.ok("calendars-enabled"); };
+
+  function commentVisibilityCheck(comment) {
+    if (self.isForAttachment(comment)) {
+      return self.showAttachmentComments();
+    } else if (self.isCalendarComment(comment)) {
+      return self.showCalendarComments();
+    } else if (isPreparationComment(comment)) {
+      return self.showPreparationComments();
+    } else {
+      return true;
+    }
+  }
+
   self.isVisible = function(comment) {
-    return !self.showAllComments() ||
-             ((self.showAttachmentComments()  || !self.isForAttachment(comment)) &&
-              (!isPreparationComment(comment) || self.showPreparationComments()));
+    return !self.showAllComments() || commentVisibilityCheck(comment);
   };
 
   self.isForMe = function(comment) {
