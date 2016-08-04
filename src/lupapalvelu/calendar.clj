@@ -10,7 +10,8 @@
             [sade.util :as util]
             [lupapalvelu.action :refer [application->command update-application]]
             [lupapalvelu.application :as app]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.comment :as comment]
+            [monger.operators :refer :all]))
 
 ; -- API Call helpers
 
