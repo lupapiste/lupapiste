@@ -461,7 +461,7 @@
         attachment-type (att-type/parse-attachment-type attachmentType)
         group (cond
                 (ss/blank? operationId) nil
-                ((set att/attachment-groups) (keyword operationId)) {:groupType operationId}
+                ((set att/attachment-groups) (keyword operationId)) {:groupType (keyword operationId)}
                 :else {:id operationId})
         upload-data (-> upload
                         (assoc :id applicationId
