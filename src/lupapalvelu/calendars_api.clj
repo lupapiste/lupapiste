@@ -8,8 +8,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.comment :as comment]
-            [monger.operators :refer :all]))
+            [lupapalvelu.comment :as comment]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -341,22 +340,11 @@
                                       {:clientId clientId :reservationSlotId slotId
                                        :reservationTypeId reservationTypeId :comment comment
                                        :location location :contextId id :reservedBy userId})
-          reservation (->FrontendReservation (api-query (str "reservation/" reservationId)))
+          reservation (->FrontendReservation (api-query (str "reservations/" reservationId)))
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
-                    (usr/authority? user) (usr/get-user-by-id clientId))
-          comment-update (comment/comment-mongo-update (:state application)
-                                                       (:comment reservation)
-                                                       {:type "reservation-new"
-                                                        :id (:id reservation)}
-                                                       "system"
-                                                       false ; mark-answered
-                                                       user
-                                                       to-user
-                                                       timestamp)
-          reservation-push {$push {:reservations (select-keys reservation [:id :reservationType :startTime :endTime])}}]
-      (update-application command
-                          (util/deep-merge comment-update reservation-push))
+                    (usr/authority? user) (usr/get-user-by-id clientId))]
+      (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
 (defquery my-reservations

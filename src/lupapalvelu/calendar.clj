@@ -11,7 +11,8 @@
             [lupapalvelu.action :refer [application->command update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.comment :as comment]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.application :as application]))
 
 ; -- API Call helpers
 
@@ -141,10 +142,11 @@
                                                      timestamp)
         reservation-push {$push {:reservations (select-keys reservation [:id :reservationType :startTime :endTime])}}
         state-change (case (keyword (:state application))
-                       :draft )]
+                       :draft (application/state-transition-update :open timestamp user)
+                       nil)]
     (update-application
       (application->command application)
-      (util/deep-merge comment-update reservation-push))))
+      (util/deep-merge comment-update reservation-push state-change))))
 
 ; -- Configuration
 
