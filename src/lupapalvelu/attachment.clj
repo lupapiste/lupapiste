@@ -269,40 +269,35 @@
       metadata
       {:nakyvyys :julkinen})))
 
+(defn- required-options-check [options-map]
+  (and (map?    (:attachment-type options-map))
+       (number? (:now options-map))))
+
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
-  [application attachment-type group now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+  [application {:keys [attachment-id attachment-type group now target locked required requested-by-authority contents read-only source]
+                :or {required false locked false requested-by-authority false} :as options}]
+  {:pre [(required-options-check options)]}
   (let [metadata (default-tos-metadata-for-attachment-type attachment-type application)]
     (make-attachment now
                      (when target (attachment-target-coercer target))
-                     required?
-                     requested-by-authority?
-                     locked?
+                     required
+                     requested-by-authority
+                     locked
                      (-> application :state keyword)
                      group
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
                      contents
-                     read-only?
+                     read-only
                      source)))
 
 (defn- create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
-  [application attachment-type group now target locked? required? requested-by-authority? & [attachment-id contents read-only? source]]
+  [application options]
   {:pre [(map? application)]}
-  (let [attachment-data (create-attachment-data application
-                                                attachment-type
-                                                group
-                                                now
-                                                target
-                                                locked?
-                                                required?
-                                                requested-by-authority?
-                                                attachment-id
-                                                contents
-                                                read-only?
-                                                source)]
+  (let [attachment-data (create-attachment-data application options)]
     (update-application
      (application->command application)
       {$set {:modified now}
@@ -554,17 +549,18 @@
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
 
-(defn- get-or-create-attachment!
+(defn get-or-create-attachment!
   "If the attachment-id matches any old attachment, it is returned.
    Otherwise a new attachment is created."
-  [application user {:keys [attachment-id attachment-type group created target locked required contents read-only source] :as options}]
+  [application user {:keys [attachment-id] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (usr/authority? user))
-        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))]
+        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))
+        attachment-options (assoc options :requested-by-authority requested-by-authority?)]
     (cond
-      (ss/blank? attachment-id) (create-attachment! application attachment-type group created target locked required requested-by-authority? nil contents read-only source)
+      (ss/blank? attachment-id) (create-attachment! application attachment-options)
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
-      :else (create-attachment! application attachment-type group created target locked required requested-by-authority? attachment-id contents read-only source))))
+      :else (create-attachment! application attachment-options))))
 
 (defn- attachment-file-ids
   "Gets all file-ids from attachment."

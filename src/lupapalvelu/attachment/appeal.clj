@@ -78,7 +78,12 @@
   (let [type                 (att-type/attachment-type-for-appeal appeal-type)
         target               {:id appeal-id
                               :type appeal-type}
-        attachment-data      (att/create-attachment-data app type nil now target true false false nil nil true)
+        attachment-data      (att/create-attachment-data app
+                                                         {:attachment-type type
+                                                          :now now
+                                                          :target target
+                                                          :locked true
+                                                          :read-only true})
         archivability-result (archivability-steps! command file)
         versions-options     (appeal-attachment-versions-options command archivability-result file)]
     (reduce (fn [attachment version-options] ; reduce attachment over versions, thus version number gets incremented correctly
