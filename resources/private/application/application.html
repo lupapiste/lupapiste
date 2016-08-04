@@ -474,7 +474,7 @@
 
                         <div data-bind="component: {name: 'export-attachments'}"></div>
                         <!-- /ko -->
-                        <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
+                        <!-- ko if: features.enabled("suti") -->
                         <suti-display></suti-display>
                         <!-- /ko -->
 
