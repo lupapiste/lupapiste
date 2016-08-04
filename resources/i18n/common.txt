@@ -90,6 +90,8 @@
 "attachment.approve" "sv" "Godkänn"
 "attachment.changeType" "fi" "Vaihda liitteen tyyppiä"
 "attachment.changeType" "sv" "Ändra bilagans typ"
+"attachment.editAdditionalData" "fi" "Muuta liitteen tietoja"
+"attachment.editAdditionalData" "sv" ""
 "attachment.chooseFile" "fi" "Valitse tiedosto"
 "attachment.chooseFile" "sv" "Välj fil"
 "attachment.chooseType" "fi" "Liitteen tyyppi"

@@ -134,6 +134,22 @@
             .call();
         });
       }
+      if (attachment.contents) {
+        attachment.contents.subscribe(function (value) {
+          ajax
+            .command("set-attachment-contents",
+            {id: applicationId, attachmentId: attachment.id(), contents: value})
+            .success(function() {
+              hub.send("indicator-icon", {style: "positive"});
+              repository.load(applicationId);
+            })
+            .error(function(e) {
+              repository.load(applicationId);
+              error(e.text);
+            })
+            .call();
+        });
+      }
       var lv = attachment.latestVersion;
       attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
       attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
@@ -157,7 +173,6 @@
     var mainDocuments = ko.pureComputed(function() {
       return addAdditionalFieldsToAttachments(docs);
     });
-
     self.stateMap = ko.pureComputed(function() {
       var getState = function(doc) {
         if (util.getIn(doc, ["metadata", "tila"])) {
