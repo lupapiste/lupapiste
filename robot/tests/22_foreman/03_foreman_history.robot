@@ -61,6 +61,27 @@ Authority sees foreman applications on foreman search
   ${foremanAppId4} =  Get From List  ${foremanApps}  4
   Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId4}']
 
+History is empty due to foreman apps' state
+  Open foreman application  4
+  Open tab  parties
+  Open accordions  parties
+  Wait until  Foreman history should have text X times  Ei hankkeita  1
+
+Foreman submits applications
+  Foreman logs in
+  Foreman submit application  0
+  Foreman submit application  1
+  Foreman submit application  2
+  Foreman submit application  3  
+  [Teardown]  Logout
+
+Sonja gives verdicts to foreman applications
+  Sonja logs in
+  Verdict for foreman application  0
+  Verdict for foreman application  1
+  Verdict for foreman application  2
+  Verdict for foreman application  3
+  
 Authority sees foreman history
   Open foreman application  4
   Open tab  parties

@@ -22,6 +22,15 @@
    (command apikey :approve-invite :id foreman-application-id)
    (query-application apikey foreman-application-id)))
 
+(defn finalize-foreman-app [apikey authority foreman-app-id application?]
+  (facts "Finalize foreman application"
+         (command apikey :change-permit-sub-type :id foreman-app-id
+                  :permitSubtype (if application?  "tyonjohtaja-hakemus" "tyonjohtaja-ilmoitus")) => ok?
+         (command apikey :submit-application :id foreman-app-id) => ok?
+         (if application?
+           (command authority :check-for-verdict :id foreman-app-id)
+           (command authority :approve-application :lang :fi :id foreman-app-id)) => ok?))
+
 (defn add-invites [apikey application-id]
   (let [{hakija1 :doc}               (command apikey :create-doc :id application-id :schemaName "hakija-r")
         {hakija-no-auth :doc}        (command apikey :create-doc :id application-id :schemaName "hakija-r")
@@ -227,16 +236,30 @@
 
         foreman-doc1                  (domain/get-document-by-name foreman-application1 "tyonjohtaja-v2")
         foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
-    (fact "other project is updated into current foreman application"
-      (command mikko :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
-      (command mikko :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
-      (command mikko :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
+    (fact "other project is not updated into the current foreman application because the corresponding foreman application is in a pre-verdict state"
+          (command mikko :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents") => truthy
+          (command mikko :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents") => truthy
+          (command mikko :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
 
-      (let [updated-application (query-application mikko foreman-application2-id)
-            updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
-            project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
-        (fact "first project is in other projects document"
-          project-id => application1-id)))))
+          (let [updated-application (query-application mikko foreman-application2-id)
+                updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
+                project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
+            (fact "first project is in other projects document"
+                  project-id => "")))
+
+    (fact "other project is updated into current foreman application after the corresponding foreman application is in post-verdict state"
+          (command mikko :change-permit-sub-type :id foreman-application1-id :permitSubtype "tyonjohtaja-hakemus") => ok?
+          (command mikko :submit-application :id application1-id) => ok?
+          (command sonja :check-for-verdict  :id application1-id) => ok?
+          (command mikko :submit-application :id foreman-application1-id) => ok?
+          (command sonja :check-for-verdict  :id foreman-application1-id) => ok?
+          (command mikko :update-foreman-other-applications :id foreman-application2-id :foremanHetu "") => ok?
+
+          (let [updated-application (query-application mikko foreman-application2-id)
+                updated-foreman-doc (domain/get-document-by-name updated-application "tyonjohtaja-v2")
+                project-id (get-in updated-foreman-doc [:data :muutHankkeet :0 :luvanNumero :value])]
+            (fact "first project is in other projects document"
+                  project-id => application1-id)))))
 
 (facts "Link foreman application to task"
   (let [apikey                       mikko
@@ -281,12 +304,23 @@
 
     (command mikko :cancel-application :id foreman-app-canceled :text nil :lang "fi") => ok?
 
-    (facts "reduced"
-      (fact "reduced history should contain reduced history (excluding canceled application)"
-        (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
-              history-ids (map :foremanAppId (:projects reduced-history))]
-          history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
-          (some #{foreman-app-id4} history-ids) => nil?))
+    (facts"reduced"
+          (fact "History is empty since all foreman applications are in the pre-verdict state"
+                (let [reduced (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?]
+                  (-> reduced :projects empty?) => true))
+          (finalize-foreman-app mikko sonja foreman-app-id1 true)
+          (finalize-foreman-app mikko sonja foreman-app-id2 false)
+          (finalize-foreman-app mikko sonja foreman-app-id3 true)
+          (finalize-foreman-app mikko sonja foreman-app-id4 true)
+          (finalize-foreman-app mikko sonja foreman-app-id5 true)
+
+          (fact "Appeal one foreman-app"
+                (command sonja :change-application-state :id foreman-app-id5 :state :appealed) => ok?)
+          (fact "reduced history should contain reduced history (excluding canceled application)"
+                (let [reduced-history (query sonja :reduced-foreman-history :id base-foreman-app-id) => ok?
+                      history-ids (map :foremanAppId (:projects reduced-history))]
+                  history-ids => (just [foreman-app-id1 foreman-app-id2 foreman-app-id3 foreman-app-id5] :in-any-order)
+                  (some #{foreman-app-id4} history-ids) => nil?))
 
       (fact "reduced history should depend on the base application"
         (let [reduced-history (query sonja :reduced-foreman-history :id foreman-app-id1) => ok?
