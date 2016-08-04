@@ -23,7 +23,8 @@
         user            (or (user/canonize-email email) "(anonymous)")
         sanitized-ua    (sanitize user-agent)
         sanitized-build (sanitize build)
-        build-check     (if (not= sanitized-build (:build-number env/buildinfo))
+        expired?        (not= sanitized-build (:build-number env/buildinfo))
+        build-check     (if expired?
                          " - CLIENT HAS EXPIRED VERSION"
                          "")
         sanitized-msg   (sanitize (str message))
@@ -31,7 +32,9 @@
                           user sanitized-ua sanitized-page sanitized-build build-check sanitized-msg)]
     (when (env/dev-mode?)
       (swap! frontend-log update level conj {:ts ts :msg formatted-msg}))
-    (timbre/log level formatted-msg)))
+    (timbre/log level formatted-msg)
+    (when expired?
+      (ok :expired true))))
 
 (defquery frontend-log-entries
   {:user-roles #{:admin}}
