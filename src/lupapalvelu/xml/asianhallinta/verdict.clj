@@ -60,7 +60,7 @@
         batchrun-user (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (mongo/create-id)]
-    (attachment/attach-file! application
+    (attachment/upload-and-attach-file! application
                              {:filename filename
                               :size file-size
                               :content file

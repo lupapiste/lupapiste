@@ -710,7 +710,7 @@
       (when (zero? (mongo/count :applications {:_id application-id
                                                :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
                                                                          :latestVersion.type attachment-type}}}))
-        (att/attach-file! application
+        (att/upload-and-attach-file! application
                           {:attachment-id attachment-id
                            :attachment-type attachment-type
                            :content ((:content attachment))

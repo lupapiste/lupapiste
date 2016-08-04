@@ -216,7 +216,7 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/attach-file! current-application
+           (attachment/upload-and-attach-file! current-application
                                     {:filename (or header-filename filename)
                                      :size content-length
                                      :content (:body resp)

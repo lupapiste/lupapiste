@@ -751,7 +751,7 @@
   (->> (->libre-pdfa! options)
        (upload-file application)))
 
-(defn attach-file!
+(defn upload-and-attach-file!
   "1) Uploads the original file to MongoDB if conversion is required and :keep-original-file? is true and
    2) converts file to PDF/A, if the file format is convertable and
    3) uploads the file to MongoDB and

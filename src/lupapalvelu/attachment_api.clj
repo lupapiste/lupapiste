@@ -405,14 +405,14 @@
    :missing-fonts []})
 
 (defn- attach-or-fail! [application attachment-data]
-  (when-not (attachment/attach-file! application attachment-data)
+  (when-not (attachment/upload-and-attach-file! application attachment-data)
     (fail :error.unknown)))
 
 (defn- convert-pdf-and-upload! [application
                                 {:keys [pdfa? output-file missing-fonts autoConversion]}
                                 {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
   (if pdfa?
-    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
+    (let [attach-file-result (or upload-pdfa-only (attachment/upload-and-attach-file! application attachment-data) (fail! :error.unknown))
           new-filename (attachment/filename-for-pdfa filename)
           new-id       (or (:id attach-file-result) attachment-id)
           application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
@@ -424,7 +424,7 @@
                                  :archivable true
                                  :autoConversion autoConversion
                                  :archivabilityError nil)]
-      (if (attachment/attach-file! application pdfa-attachment-data)
+      (if (attachment/upload-and-attach-file! application pdfa-attachment-data)
         (do (io/delete-file output-file :silently)
             nil)
         (fail :error.unknown)))
@@ -446,7 +446,7 @@
                            (attach-or-fail! application attachment-data))
 
       (attachment/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
-                                                                         (attachment/attach-file! application)
+                                                                         (attachment/upload-and-attach-file! application)
                                                                          :id
                                                                          (assoc attachment-data :attachment-id)
                                                                          (attach-or-fail! application))

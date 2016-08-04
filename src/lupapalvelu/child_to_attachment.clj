@@ -79,7 +79,7 @@
   (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang)
         file (:content attachment-options)]
     (try
-      (attachment/attach-file! application attachment-options)
+      (attachment/upload-and-attach-file! application attachment-options)
       (finally
         (io/delete-file file :silently)))))
 
