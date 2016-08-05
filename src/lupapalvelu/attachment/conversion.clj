@@ -46,7 +46,7 @@
 
 (defmulti convert-file (fn [_ filedata] (keyword (:contentType filedata))))
 
-(defmethod convert-file :application/pdf [{:keys [application]} {:keys [content filename]}]
+(defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
     (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
       (try
@@ -85,18 +85,18 @@
 (defn conversion-steps!
   "Validates file for archivability, and converts content if needed.
   Returns map (see ConversionResult schema)."
-  [command filedata]
+  [application filedata]
   {:pre  [(contains? filedata :contentType) (contains? filedata :content)]
    :post [(sc/validate ConversionResult %)]}
-  (convert-file command filedata))
+  (convert-file application filedata))
 
 (defn convert-and-upload!
   "Runs conversion steps (validation + conversion).
    If file was converted, uploads file to mongo.
    Returns ConversionResult. If conversion was made and file uploaded,
    returns ConversionResult with filedata added (fileId etc)"
-  [command filedata]
-  (let [conversion (conversion-steps! command filedata)
+  [application filedata]
+  (let [conversion (conversion-steps! application filedata)
         converted? (contains? conversion :content)]
     (if converted?
       (merge conversion
