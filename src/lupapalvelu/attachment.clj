@@ -171,9 +171,6 @@
 (def attachment-type-coercer (ssc/json-coercer Type))
 (def attachment-target-coercer (ssc/json-coercer Target))
 
-(defn filename-for-pdfa [filename]
-  {:pre [(string? filename)]}
-  (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
 
 (defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
   (when (and (not (usr/authority? user))

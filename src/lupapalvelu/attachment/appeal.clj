@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment.appeal
   (:require [sade.core :refer :all]
             [monger.operators :refer :all]
+            [lupapalvelu.attachment.file :as file]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
@@ -15,7 +16,7 @@
    and if valid PDF/A, fileId, filename and content-type of the uploaded file."
   [{app-id :id} {:keys [pdfa? output-file missing-fonts autoConversion]} filename content-type]
   (if pdfa?
-    (let [filedata  (file-upload/save-file {:filename (att/filename-for-pdfa filename)
+    (let [filedata  (file-upload/save-file {:filename (file/filename-for-pdfa filename)
                                             :content  output-file
                                             :size     (.length output-file)}
                                            :application app-id)]
