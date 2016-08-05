@@ -320,7 +320,7 @@
   :suggest-appointment
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
-   :calendar-fn                  (fn [{application :application} _ recipient]
+   :calendar-fn                  (fn [{application :application}]
                                    (let [reservation (last (:reservations application))]
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
