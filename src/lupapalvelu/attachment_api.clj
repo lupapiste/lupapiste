@@ -150,7 +150,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments} :application}]
-  (ok :attachments-filters (att-tags/attachments-filters attachments)))
+  (ok :attachmentsFilters (att-tags/attachments-filters attachments)))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."
@@ -159,7 +159,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments} :application}]
-  (ok :tag-groups (att-tags/attachment-tag-groups attachments)))
+  (ok :tagGroups (att-tags/attachment-tag-groups attachments)))
 
 ;;
 ;; Types
