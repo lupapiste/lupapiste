@@ -530,9 +530,9 @@
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
-(defn meta->attachment-data [{group :group :as meta}]
+(defn meta->attachment-data [meta]
   (merge (select-keys meta [:contents :size :scale])
-         (when (:group meta)
+         (when (contains? meta :group)
            {:op (not-empty (select-keys (:group meta) [:id :name]))
             :groupType (get-in meta [:group :groupType])})))
 
