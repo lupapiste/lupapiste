@@ -142,7 +142,9 @@
           "foremanApplication" (assoc authority-application-states :permitSubtype "tyonjohtaja-hakemus")
           "foremanNotice"      (assoc authority-application-states :permitSubtype "tyonjohtaja-ilmoitus")
           "readyForArchival"   (archival-query user)
-          {:state {$nin ["draft" "canceled"]}}))
+          {$and [{:state {$ne "canceled"}}
+                 {$or [{:state {$ne "draft"}}
+                       {:organization {$nin (->> user :orgAuthz keys (map name))}}]}]}))
       (when-not (empty? handlers)
         (if ((set handlers) no-handler)
           {$or [{:authority.id  {$exists false}}, {:authority.id {$in [nil ""]}}]}

@@ -563,7 +563,7 @@
           (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))
 
 (facts "Authority can create application in other organisation"
-       (let [application-id  (create-app-id luukas
+       (let [application-id (create-app-id luukas
                                             :operation "kerrostalo-rivitalo"
                                             :propertyId oulu-property-id)
              {:keys [state]} (query-application luukas application-id)]
@@ -576,6 +576,25 @@
          (fact "Owner submits application"
                (command luukas :submit-application :id application-id) => ok?)
          (facts "Local authority cannot use applicant commands"
-                (command olli :cancel-application :id application-id :lang "fi" :text "") => unauthorized?)
+                (command olli :cancel-application :id application-id :lang "fi" :text "")=> unauthorized?)
          (fact "(Outside) authority cannot access the application"
-               (query sonja :application :id application-id) => not-accessible?)))
+               (query sonja :application :id application-id) => not-accessible?)
+         (facts "Applications search result contains correct applications"
+                (let [sipoo-draft     (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+                      luukas-canceled (create-app-id luukas
+                                                     :operation "kerrostalo-rivitalo"
+                                                     :propertyId oulu-property-id)
+                      _               (command luukas :cancel-application :id luukas-canceled :lang "fi" :text "")
+                      luukas-draft    (create-app-id luukas
+                                                     :operation "kerrostalo-rivitalo"
+                                                     :propertyId oulu-property-id)
+                      applications    (->> (query luukas :applications-search :applicationType "all" :limit 100)
+                                           :data :applications  (map :id) set)]
+                  (fact "Created application is listed"
+                        (contains? applications application-id) => true)
+                  (fact "Sipoo draft is not listed"
+                        (contains? applications sipoo-draft) => false)
+                  (fact "Canceled application is not listed"
+                        (contains? applications luukas-canceled) => false)
+                  (fact "Created draft is listed"
+                        (contains? applications luukas-draft) => true)))))
