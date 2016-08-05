@@ -153,11 +153,12 @@
         {:tags {$in tags}})
       (when-not (empty? organizations)
         {:organization {$in organizations}})
-      (if-not (empty? operations)
-        {:primaryOperation.name {$in operations}}
-        (when (and (user/authority? user) (not= applicationType "unlimited"))
-          ; Hide foreman applications in default search, see LPK-923
-          {:primaryOperation.name {$ne "tyonjohtajan-nimeaminen-v2"}}))
+      (cond
+        (seq operations) {:primaryOperation.name {$in operations}}
+        (and (user/authority? user) (not= applicationType "unlimited"))
+        ; Hide foreman applications in default search, see LPK-923
+        {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
+                                              (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
       (when-not (empty? areas)
         (make-area-query areas user))])})
 
