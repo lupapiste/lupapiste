@@ -1706,6 +1706,8 @@
 "purkaminen._group_label" "sv" "Byggnadsrivning"
 "puun-kaataminen._group_label" "fi" "Puun kaataminen"
 "puun-kaataminen._group_label" "sv" "Trädfällning"
+"puiden-kaataminen._group_label" "fi" "Puiden kaataminen"
+"puiden-kaataminen._group_label" "sv" "Trädfällning"
 "R" "fi" "Rakentamisen lupa"
 "R" "sv" "Bygglov"
 "rajankaynnin-hakeminen._group_label" "fi" "Rajakäynnin hakeminen"
