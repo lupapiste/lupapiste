@@ -295,19 +295,9 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
 
-  function getAttachmentById(attachmentId) {
-    var attachment = self.getAttachment(attachmentId);
-    if (attachment) {
-      return attachment;
-    } else {
-      return null;
-    }
-  }
-
-
   self.modelForAttachmentInfo = function(attachmentIds) {
     var attachments = _(attachmentIds)
-          .map(getAttachmentById)
+          .map(self.getAttachment)
           .filter(_.identity)
           .value();
     return {
