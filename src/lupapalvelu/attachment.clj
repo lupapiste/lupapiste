@@ -463,11 +463,10 @@
            (remove (set [file-id original-file-id]))
            (run! delete-attachment-file-and-preview!)))
 
-(defn- attachment-comment-updates [application user attachment version-model {:keys [comment? comment-text created]
-                                                                         :or   {comment? true}}]
-  (let [comment-target (merge {:type :attachment
-                               :id (:id attachment)}
-                              (select-keys version-model [:version :fileId :filename]))]
+(defn- attachment-comment-updates [application user attachment {:keys [comment? comment-text created]
+                                                                :or   {comment? true}}]
+  (let [comment-target {:type :attachment
+                        :id (:id attachment)}]
     (when comment?
       (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil created))))
 
@@ -482,7 +481,7 @@
     (if (pos? retry-limit)
       (let [latest-version  (get-in attachment [:latestVersion :version])
             version-model   (make-version attachment user options)
-            comment-updates (attachment-comment-updates application user attachment version-model options)]
+            comment-updates (attachment-comment-updates application user attachment options)]
         ; Check return value and try again with new version number
         (if (pos? (update-application
                    (application->command application)
