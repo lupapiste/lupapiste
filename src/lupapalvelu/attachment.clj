@@ -234,7 +234,7 @@
   [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
   {:pre  [(sc/validate Type attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
    :post [(sc/validate Attachment %)]}
-  (cond-> {:id (or attachment-id (mongo/create-id))
+  (cond-> {:id (if (ss/blank? attachment-id) (mongo/create-id) attachment-id)
            :type attachment-type
            :modified created
            :locked locked?
