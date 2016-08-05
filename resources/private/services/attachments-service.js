@@ -308,6 +308,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.modelForAttachmentInfo = function(attachmentIds) {
     var attachments = _(attachmentIds)
           .map(getAttachmentById)
+          .filter(_.identity)
           .value();
     return {
       approve:      self.approveAttachment,
