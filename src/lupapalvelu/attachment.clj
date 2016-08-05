@@ -12,6 +12,7 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.accessibility :as access]
@@ -21,14 +22,11 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapiste-commons.preview :as preview]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
-            [lupapalvelu.tiff-validation :as tiff-validation]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
@@ -68,7 +66,6 @@
 
 (def attachment-states #{:ok :requires_user_action :requires_authority_action})
 
-(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
 
 (defschema AttachmentId
   (ssc/min-length-string 24))
@@ -124,7 +121,7 @@
    :size                                 (sc/maybe sc/Int)  ;; file size
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
-   (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum archivability-errors))
+   (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
    (sc/optional-key :missing-fonts)      (sc/maybe [sc/Str])
    (sc/optional-key :autoConversion)     (sc/maybe sc/Bool)})
 
@@ -680,14 +677,6 @@
     (catch Throwable t
       (error "Preview generation failed" t))))
 
-(def file-types
-  #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
-    :application/vnd.openxmlformats-officedocument.wordprocessingml.document
-    :application/vnd.oasis.opendocument.text
-    :application/vnd.ms-powerpoint
-    :application/rtf
-    :application/msword
-    :text/plain})
 
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
@@ -703,15 +692,6 @@
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
-(defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
-  (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
-        {:keys [type-group type-id]} attachment-type]
-    (and (libreoffice-client/enabled?)
-         (or (env/feature? :convert-all-attachments)
-             (and (= :paatoksenteko (keyword type-group))
-                  (#{:paatos :paatosote} (keyword type-id))))
-         (file-types (keyword mime-type)))))
-
 (defn ->libre-pdfa!
   "Converts content to PDF/A using Libre Office conversion client.
   Replaces (!) original filename and content with Libre data.
@@ -720,7 +700,7 @@
   If conversion not applicable, returns original given options map."
   [{:keys [filename content skip-pdfa-conversion] :as options}]
   (if (and (not skip-pdfa-conversion)
-           (libreoffice-conversion-required? options))
+           (conversion/libreoffice-conversion-required? options))
     (merge options (libreoffice-client/convert-to-pdfa filename content))
     options))
 
@@ -735,7 +715,7 @@
   "Uploads the file to MongoDB.
    Content can be a file or input-stream.
    Returns given attachment options, with file specific data added."
-  [{application-id :id :as application} {:keys [filename content] :as options}]
+  [{application-id :id :as application} options]
   {:pre [(map? application)]}
   (let [filedata (file-upload/save-file (select-keys options [:filename :content :size]) :application application-id)]
     (merge options
@@ -760,7 +740,7 @@
         _                (io/copy (:content options) temp-file)
         options          (assoc options :content temp-file)
         original-file-id (when (and (:keep-original-file? options)
-                                    (libreoffice-conversion-required? options))
+                                    (conversion/libreoffice-conversion-required? options))
                            (->> (assoc options :skip-pdfa-conversion true)
                                 (upload-file application)
                                 (preview-image! (:id application))

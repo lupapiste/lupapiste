@@ -12,6 +12,8 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.attachment.conversion :as conversion]
+            [lupapalvelu.attachment.file :as file]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
@@ -20,6 +22,7 @@
             [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
@@ -33,10 +36,7 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [sade.env :as env]
-            [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.attachment.file :as file])
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
   (:import [java.io File]))
 
 ;; Validators and pre-checks
@@ -447,7 +447,7 @@
                                attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
                            (attach-or-fail! application attachment-data))
 
-      (attachment/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
+      (conversion/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
                                                                          (attachment/upload-and-attach-file! application)
                                                                          :id
                                                                          (assoc attachment-data :attachment-id)
