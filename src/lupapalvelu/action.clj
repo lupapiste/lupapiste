@@ -17,7 +17,8 @@
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; construct command, query and raw
@@ -228,8 +229,14 @@
     (info "invalid type:" (name type))
     (fail :error.invalid-type)))
 
+(defn authority-in-applicant-role? [{:keys [user application] :as command}]
+  (and (((meta-data command) :user-roles) :applicant)
+       (util/=as-kw (:role user) :authority)
+       (not (usr/user-is-authority-in-organization? user (:organization application)))))
+
 (defn missing-roles [command]
-  (when-not (has-required-user-role command (meta-data command))
+  (when-not (or (has-required-user-role command (meta-data command))
+                (authority-in-applicant-role? command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     unauthorized))
 
@@ -485,12 +492,13 @@
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (if (= #{:authority} user-roles)
-                             #{} ; By default, authority gets authorization fron organization role
-                             (auth/default-user-authz action-type))
-         :org-authz-roles (cond
-                            (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
-                            (user-roles :anonymous) auth/all-org-authz-roles)}
+       {:user-authz-roles (if (:applicant user-roles)
+                            (auth/default-user-authz action-type)
+                            ;; By default, authority gets authorization fron organization role
+                            #{})
+        :org-authz-roles (cond
+                           (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
+                           (user-roles :anonymous) auth/all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

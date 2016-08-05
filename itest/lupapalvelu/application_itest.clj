@@ -91,7 +91,7 @@
          (:id authority-before-assignation) => nil
          authority-after-assignation => (contains {:id ronja-id})
          (fact "Authority is not able to submit"
-           sonja =not=> (allowed? sonja :submit-application :id application-id))))
+           sonja =not=> (allowed? :submit-application :id application-id))))
 
 (fact* "Assign application to an authority and then to no-one"
        (let [application-id (create-app-id pena :propertyId sipoo-property-id)
@@ -226,9 +226,6 @@
           (> submitted intial-submitted) => true)
         (fact "old canceled history entry is preserved"
           (-> history butlast last :state) => "canceled")))))
-
-(fact "Authority is unable to create an application to a municipality in another organization"
-  (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"
   (let [operation "kerrostalo-rivitalo"
@@ -510,6 +507,7 @@
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)
         app (query-application sonja id)
+        user (find-user-from-minimal-by-apikey sonja)
         denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
@@ -519,14 +517,13 @@
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
-                         :change-application-state :change-application-state-targets}
-        user (find-user-from-minimal-by-apikey sonja)]
+                         :change-application-state :change-application-state-targets}]
     app => map?
     (doseq [command (ca/foreach-action {} user {} app)
             :let [action (keyword (:action command))
                   result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
-        (when (denied-actions action)
+            (when (denied-actions action)
           result => unauthorized?)))))
 
 (fact "Primary operation can be changed"
@@ -564,3 +561,21 @@
           (command sonja :change-application-state :id application-id :state "appealed") => ok?
           (-> (query sonja :change-application-state-targets :id application-id) :states set (contains? "verdictGiven")) => true
           (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))
+
+(facts "Authority can create application in other organisation"
+       (let [application-id  (create-app-id luukas
+                                            :operation "kerrostalo-rivitalo"
+                                            :propertyId oulu-property-id)
+             {:keys [state]} (query-application luukas application-id)]
+         (fact "Application state is draft (not open)"
+               state => "draft")
+         (facts "As an application owner, authority can use applicant commands"
+                (doseq [cmd [:submit-application :cancel-application]]
+                  (fact {:midje/description cmd}
+                        luukas => (allowed? cmd :id application-id))))
+         (fact "Owner submits application"
+               (command luukas :submit-application :id application-id) => ok?)
+         (facts "Local authority cannot use applicant commands"
+                (command olli :cancel-application :id application-id :lang "fi" :text "") => unauthorized?)
+         (fact "(Outside) authority cannot access the application"
+               (query sonja :application :id application-id) => not-accessible?)))
