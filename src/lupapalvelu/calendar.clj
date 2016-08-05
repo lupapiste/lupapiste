@@ -140,7 +140,7 @@
                                                      user
                                                      to-user
                                                      timestamp)
-        reservation-push {$push {:reservations (select-keys reservation [:id :reservationType :startTime :endTime])}}
+        reservation-push {$push {:reservations reservation}}
         state-change (case (keyword (:state application))
                        :draft (application/state-transition-update :open timestamp user)
                        nil)]

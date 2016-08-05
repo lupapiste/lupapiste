@@ -62,9 +62,10 @@
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         calendar-body (when calendar {:content calendar :type "text/calendar; charset=utf-8; method=REQUEST"})
-        body       (if (and plain-body html-body calendar-body)
-                     [:alternative plain-body html-body calendar-body]
-                     [(or plain-body html-body calendar-body)])
+        body       (remove nil? [:alternative plain-body html-body calendar-body])
+        body       (if (= (count body) 2)
+                     (second body)
+                     body)
         attachments (when attachments
                       (for [attachment attachments]
                         (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
@@ -95,9 +96,9 @@
                         (warnf "Ignoring message to %s bacause address matches blacklist %s" to blacklist)
                         false) ; false = pretend that the message was send
 
-    :else (let [[plain html] msg]
+    :else (let [[plain html calendar] msg]
             (try
-              (send-mail to subject :plain plain :html html :attachments attachments)
+              (send-mail to subject :plain plain :html html :calendar calendar :attachments attachments)
               false
               (catch Exception e
                 (error "Email failure:" e)

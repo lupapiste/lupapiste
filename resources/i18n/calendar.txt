@@ -99,3 +99,4 @@
 "application.calendar.reservation.participants" "sv" ""
 "application.calendar.reservation.additional.information" "fi" "Lisätietoa"
 "application.calendar.reservation.additional.information" "sv" "Tilläggsuppgifter"
+"application.calendar.appointment.suggestion" "fi" "Sinulle on ehdotettu tapaamista"

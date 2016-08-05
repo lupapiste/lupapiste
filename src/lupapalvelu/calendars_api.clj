@@ -1,7 +1,7 @@
 (ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [info error]]
-            [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
@@ -9,7 +9,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.comment :as comment]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.organization :as org]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -314,13 +316,28 @@
       :reservationTypes (reservation-types organization)
       :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
 
+(notifications/defemail
+  :suggest-appointment
+  {:template                     "suggest-appointment.html"
+   :subject-key                  "application.calendar.appointment.suggestion"
+   :show-municipality-in-subject true
+   :recipients-fn                (fn [{application :application}]
+                                   (map usr/get-user-by-id (:calendar-recipients (last (:reservations application)))))
+   :model-fn                     (fn [{application :application} _ recipient]
+                                   {:link-fi (notifications/get-application-link application nil "fi" recipient)
+                                    :link-sv (notifications/get-application-link application nil "sv" recipient)
+                                    :info-fi (str (env/value :host) "/ohjeet")
+                                    :info-sv (str (env/value :host) "/ohjeet")})
+   })
+
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [clientId slotId reservationTypeId comment location :id]
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment :location])]
-   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
+   :on-success       (notify :suggest-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
@@ -341,18 +358,12 @@
                                        :reservationTypeId reservationTypeId :comment comment
                                        :location location :contextId id :reservedBy userId})
           reservation (->FrontendReservation (api-query (str "reservations/" reservationId)))
+          reservation (assoc reservation :calendar-recipients [clientId userId])
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
                     (usr/authority? user) (usr/get-user-by-id clientId))]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
-      (ical/send-calendar-event {:to (:email to-user)
-                                 :start (util/to-millis-from-local-datetime-string (-> slot :time :start))
-                                 :end (util/to-millis-from-local-datetime-string (-> slot :time :end))
-                                 :title "Sinulle on ehdotettu tapaamista"
-                                 :description comment
-                                 :url "FIXME_linkki_hankkeelle"
-                                 :location location
-                                 :organizer {:email (:email user) :name (str (:firstName user) " " (:lastName user))}})
+      (clojure.pprint/pprint command)
       (ok :reservationId reservationId))))
 
 (defquery my-reservations
