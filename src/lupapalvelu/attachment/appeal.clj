@@ -87,7 +87,7 @@
         archivability-result (archivability-steps! command file)
         versions-options     (appeal-attachment-versions-options command archivability-result file)]
     (reduce (fn [attachment version-options] ; reduce attachment over versions, thus version number gets incremented correctly
-              (let [version (att/make-version user attachment version-options)]
+              (let [version (att/make-version attachment user version-options)]
                 (-> attachment
                     (update :versions conj version)
                     (assoc :latestVersion version))))

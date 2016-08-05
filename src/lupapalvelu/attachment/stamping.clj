@@ -76,7 +76,7 @@
                            [national-id]))))))
 
 (defn- info-fields->stamp [{:keys [text stamp-created transparency lang]} fields]
-  {:pre [text (pos? created)]}
+  {:pre [text (pos? stamp-created)]}
   (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
        ((juxt :backend-id :section :extra-info :buildings :organization))
        flatten
