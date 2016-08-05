@@ -354,14 +354,12 @@ LUPAPISTE.AttachmentsService = function() {
     return _(applyFilters(attachments))
       .groupBy(getVerdictGroup)
       .mapValues(function(attachmentsOfVerdictGroup) {
-        // console.log("attachmentsOfVerdictgroup", attachmentsOfVerdictGroup);
         return _(attachmentsOfVerdictGroup)
           .groupBy(getMainGroup)
           .mapValues(function(attachmentsOfMainGroup) {
             var subGroups = _(attachmentsOfMainGroup)
               .groupBy(getSubGroup)
               .mapValues(function(attachments) {
-                // console.log("in inner getAttachments fn", attachments, attachments.length, attachments[0]["id"]);
                 return _.map(attachments, "id");
               })
               .value();
@@ -401,7 +399,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   function modelForSubAccordion(subGroup) {
     _.forEach(_.values(filters), function(f) { f(); });
-    // console.log("modelForSubAccordion: attachmentIds", subGroup.attachmentIds);
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -495,7 +492,6 @@ LUPAPISTE.AttachmentsService = function() {
     }
     var args = _.toArray(arguments);
     var group = _.get(self.attachmentsHierarchy(), args) || "default";
-    // console.log("getAttachmentsForGroup getting", args, group);
     return getAttachments(group);
   }
 
