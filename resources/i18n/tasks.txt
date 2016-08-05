@@ -162,7 +162,7 @@
 "task-katselmus.rakennus.jarjestysnumero" "sv" "Ordningsnummer"
 "task-katselmus.rakennus.valtakunnallinenNumero" "fi" "Valtakunnallinen numero"
 "task-katselmus.rakennus.valtakunnallinenNumero" "sv" "Landsomfattande nummer"
-"task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero" "fi" "Kunna sisäinen pysyvä numero"
+"task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero" "fi" "Kunnan sisäinen pysyvä numero"
 "task-katselmus.rakennus.kunnanSisainenPysyvaRakennusnumero" "sv" "Beständig nummer inom kommunen"
 "task-katselmus.selite" "fi" "Selite"
 "task-katselmus.selite" "sv" "Förklaring"
