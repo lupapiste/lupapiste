@@ -20,8 +20,10 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
-  self.filters = ko.observableArray([]);
 
+  self.filters = ko.observableArray([]);
+  self.filteredAttachments = ko.pureComputed(function() {return self.attachments();});
+  self.selectedFilters = ko.pureComputed(function() {return self.filters();});
 
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
@@ -66,7 +68,6 @@ LUPAPISTE.AttachmentsService = function() {
       return attachment().id === attachmentId;
     });
   };
-
 
   self.updateAttachment = function(attachmentId, updates) {
     var oldAttachment = self.getAttachment(attachmentId);
@@ -289,7 +290,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.attachments(), function (a) { return a.peek(); });
+    var attachments = _.map(self.filteredAttachments(), ko.utils.unwrapObservable);
     return {preVerdict: groupAttachmentsByTags(applyFilters(attachments))};
   };
 
