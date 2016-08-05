@@ -22,6 +22,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
 
   self.filters = ko.observableArray([]);
+  //self.activeFilters = ko.pureComputed(function() {console.log(self.filters()); return [[{"tag": "preVerdict"}]];});
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
 
   self.filteredAttachments = ko.pureComputed( 
@@ -266,9 +267,11 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.isAttachmentFiltered = function (att) {
-    console.log("tarkastetaan on filtteröity", att());
-    return _.first(_.intersection(att().tags, _.map(function (filter) { return filter.tag; })))
-  }
+    //console.log("tarkastetaan on filtteröity", att());
+    console.log("tarkastetaan näkyykö liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    console.log
+    return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
+  };
 
   function applyFilters(attachments) {
     console.log("käytettäisiin uusia filttereitä ", self.filters());
