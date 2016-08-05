@@ -271,6 +271,24 @@
       });
     };
 
+    self.selectAllPreAttachments = function() {
+      var selectIfArchivable = function(attachment) {
+        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+          attachment.sendToArchive(true);
+        }
+      };
+      _.forEach(archivedPreAttachments(), selectIfArchivable);
+    };
+
+    self.selectAllPostAttachments = function() {
+      var selectIfArchivable = function(attachment) {
+        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+          attachment.sendToArchive(true);
+        }
+      };
+      _.forEach(archivedPostAttachments(), selectIfArchivable);
+    };
+
     var updateState = function(docs, newStateMap) {
       _.forEach(docs, function(doc) {
         var id = ko.unwrap(doc.id);
