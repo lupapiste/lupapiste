@@ -108,6 +108,7 @@
 
 (def Email {(sc/optional-key :template)        sc/Str
             (sc/optional-key :subject-key)     sc/Str
+            (sc/optional-key :calendar-fn)     util/Fn
 
             ; Recipients function takes command map as parameter and
             ; returs a sequence of recipients.
@@ -151,12 +152,16 @@
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (remove invalid-recipient? (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
-            template-file  (get conf :template (str (name template-name) ".md"))]
+            template-file  (get conf :template (str (name template-name) ".md"))
+            calendar-fn    (get conf :calendar-fn identity)]
         (doseq [recipient recipients]
           (let [model   (model-fn command conf recipient)
                 subject (get-email-subject application
                                            (:language recipient)
                                            (get conf :subject-key (name template-name))
                                            (get conf :show-municipality-in-subject false))
-                msg     (email/apply-template template-file model)]
+                calendar (calendar-fn command conf recipient)
+                msg     (email/apply-template template-file model)
+                msg     (if (some? calendar)
+                          (conj msg (:calendar model)))]
             (send-mail-to-recipient! recipient subject msg)))))))

@@ -320,6 +320,9 @@
   :suggest-appointment
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
+   :calendar-fn                  (fn [{application :application} _ recipient]
+                                   (let [reservation (last (:reservations application))]
+                                     (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application}]
                                    (map usr/get-user-by-id (:calendar-recipients (last (:reservations application)))))
@@ -363,7 +366,6 @@
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
                     (usr/authority? user) (usr/get-user-by-id clientId))]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
-      (clojure.pprint/pprint command)
       (ok :reservationId reservationId))))
 
 (defquery my-reservations
