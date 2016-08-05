@@ -111,7 +111,7 @@
                          {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil}]}]}]
     (if from-ts
       {$and [base-query
-             {:created {$gte from-ts}}]}
+             {:submitted {$gte from-ts}}]}
       base-query)))
 
 (defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter]} user]
