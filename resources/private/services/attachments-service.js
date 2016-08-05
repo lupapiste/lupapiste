@@ -19,13 +19,14 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.attachments = ko.observableArray([]);
-  self.filteredAttachments = ko.pureComputed( function() { return applyFilters(self.attachments()); } );
   self.tagGroups = ko.observableArray([]);
-
 
   self.filters = ko.observableArray([]);
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
-  self.filteredAttachments = ko.pureComputed(function() {return self.attachments();});
+
+  self.filteredAttachments = ko.pureComputed( 
+    function() { 
+      return applyFilters(self.attachments(), self.activeFilters());});
 
   self.queryAll = function queryAll(attachmentId) {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
@@ -198,6 +199,12 @@ LUPAPISTE.AttachmentsService = function() {
         "paapiirustukset": ko.observable(false)
   };
 
+  self.disableAllFilters = function() {
+    _.forEach(_.values(filters), function(filter) {
+      filter(false);
+    });
+  };
+
   self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
             "rakenne", "ei-tarpeen"],
@@ -205,12 +212,6 @@ LUPAPISTE.AttachmentsService = function() {
              return {ltext: "filter." + s,
                      filter: filters[s]};
            }));
-
-  self.disableAllFilters = function() {
-    _.forEach(_.values(filters), function(filter) {
-      filter(false);
-    });
-  };
 
   function isTypeId(typeId) {
     return function(attachment) {
@@ -260,30 +261,21 @@ LUPAPISTE.AttachmentsService = function() {
     });
   }
 
-  function preVerdictAttachments(attachments) {
-    return filteredAttachments("hakemus", attachments);
-  }
-
-  function postVerdictAttachments(attachments) {
-    return filteredAttachments("rakentaminen", attachments);
-  }
-
   function notNeededForModel(attachment) {
     return attachment.notNeeded;
   }
 
+  self.isAttachmentFiltered = function (att) {
+    console.log("tarkastetaan on filtteröity", att());
+    return _.first(_.intersection(att().tags, _.map(function (filter) { return filter.tag; })))
+  }
+
   function applyFilters(attachments) {
-    var atts = _(attachments)
-          .filter(function(attachment) {
-            return filters["ei-tarpeen"]() || !self.isNotNeeded(attachment);
-          }).value();
+    console.log("käytettäisiin uusia filttereitä ", self.filters());
     if (showAll()) {
-      return atts;
+      return attachments;
     }
-    return _.concat(
-      preVerdictAttachments(_.filter(atts, isPreVerdict)),
-      postVerdictAttachments(_.filter(atts, isPostVerdict))
-    );
+    return _.filter(attachments, self.isAttachmentFiltered);
   }
 
   //
@@ -292,13 +284,8 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
-<<<<<<< HEAD
     var attachments = _.map(self.filteredAttachments(), ko.utils.unwrapObservable);
-    return {preVerdict: groupAttachmentsByTags(applyFilters(attachments))};
-=======
-    var attachments = _.map(self.filteredAttachments(), function (a) { return a.peek(); });
     return groupAttachmentsByTags(attachments);
->>>>>>> refs/remotes/origin/develop
   };
 
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
@@ -452,7 +439,6 @@ LUPAPISTE.AttachmentsService = function() {
     } else {
       return getDataForAccordion(groupPath);
     }
-
   }
 
   self.layout = ko.computed(function() {
