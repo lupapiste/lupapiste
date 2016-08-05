@@ -57,7 +57,7 @@
                                 {:state {"$nin" ["draft" "canceled"]}}
                                 {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
                                 {:tags {"$in" ["test1" "test2"]}}
-                                {:primaryOperation.name {"$ne" "tyonjohtajan-nimeaminen-v2"}}]})
+                                {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2"]}}]})
 
 (fact "Organization are present in query"
   (-> (make-query {} {:organizations ["753-R" "753-YA"]} {}) (get "$and") last :organization) => {"$in" ["753-R" "753-YA"]})
