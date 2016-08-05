@@ -294,15 +294,17 @@ var attachment = (function() {
   });
 
   function saveLabelInformation(name, data) {
-    data.id = applicationId;
-    data.attachmentId = attachmentId;
-    ajax
-      .command("set-attachment-meta", data)
-      .success(function() {
-        hub.send("indicator-icon", {style: "positive"});
-        model.dirty = true;
-      })
-      .call();
+    if( authorizationModel.ok( "set-attachment-meta" )) {
+      data.id = applicationId;
+      data.attachmentId = attachmentId;
+      ajax
+        .command("set-attachment-meta", data)
+        .success(function() {
+          hub.send("indicator-icon", {style: "positive"});
+          model.dirty = true;
+        })
+        .call();
+    }
   }
 
   function subscribe() {
