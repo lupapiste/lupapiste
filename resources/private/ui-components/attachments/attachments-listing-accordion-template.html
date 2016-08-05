@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-accordion-template">
-  <!-- ko if: $data.data && $data.data().hasContent -->
+  <!-- ko if: $data.data && $data.data() && $data.data().hasContent -->
     <rollup params="open: $data.open">
       <rollup-status-button
          params="open: $parent.open,

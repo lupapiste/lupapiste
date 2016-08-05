@@ -48,7 +48,7 @@
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
   <div>
-    <!-- ko if: groups()[0] && groups()[0].data().hasContent && groups()[0].data().hasContent() -->
+    <!-- ko if: groups() && !_.isEmpty(groups().accordions) -->
     <h2 data-bind="ltext: 'application.attachments.pre-verdict'"
         class="help-adjacent-title" />
     <button class="ghost right"
@@ -57,21 +57,7 @@
       <span data-bind="text: 'Avaa / sulje kaikki'"></span>
     </button>
     <div class="attachments-accordions"
-         data-bind="foreach: groups()[0].accordions">
-      <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                      data: _.merge($data, {level: 0})}"></div>
-    </div>
-    <!-- /ko -->
-    <!-- ko if: util.getIn(groups, [1, "data", "hasContent"]) -->
-    <h2 data-bind="ltext: 'application.attachments.post-verdict'"
-        class="help-adjacent-title"/>
-    <button class="ghost right"
-            data-bind="click: togglePostVerdictGroups">
-      <i class="lupicon-menu"></i>
-      <span data-bind="text: 'Avaa / sulje kaikki'"></span>
-    </button>
-    <div class="attachments-accordions"
-         data-bind="foreach: groups[1].accordions">
+         data-bind="foreach: groups().accordions">
       <div data-bind="template: {name: 'attachments-listing-accordion-template',
                       data: _.merge($data, {level: 0})}"></div>
     </div>
