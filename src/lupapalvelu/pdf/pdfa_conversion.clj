@@ -185,9 +185,6 @@
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
         false)))
 
-(defn pdf-a-required? [organization-id]
-  (organization/some-organization-has-archive-enabled? #{organization-id}))
-
 (defn convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
@@ -207,6 +204,12 @@
           false))
       (finally
         (io/delete-file temp-file :silently)))))
+
+(defn pdf-a-required? [organization-or-id]
+  (cond
+    (string? organization-or-id) (organization/some-organization-has-archive-enabled? #{organization-or-id})
+    (map? organization-or-id)    (true? (:permanent-archive-enabled organization-or-id))
+    (delay? organization-or-id)  (true? (:permanent-archive-enabled @organization-or-id))))
 
 (defn ensure-pdf-a-by-organization
   "Ensures PDF file PDF/A compatibility status if the organization uses permanent archive"
