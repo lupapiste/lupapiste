@@ -484,20 +484,17 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)))]
       (fail! (:text validation-error))))
 
-  (upload! application
-           (merge
-             base-upload-options
-             {:filename filename
-              :size size
-              :content tempfile
-              :attachment-id attachmentId
-              :attachment-type attachmentType
-              :group group
-              :comment-text text
-              :target target
-              :locked locked
-              :user user
-              :created created})))
+  (let [file-options       {:filename filename :size size :content tempfile}
+        attachment-options {:attachment-id attachmentId     ; options for attachment creation (not version)
+                            :attachment-type  attachmentType
+                            :group group
+                            :created created
+                            :target target
+                            :locked locked
+                            :required false
+                            :comment-text text}]
+    (when-not (:id (attachment/upload-and-attach-new! command attachment-options file-options))
+      (fail! :error.unknown))))
 
 ;;
 ;; Rotate
@@ -526,6 +523,7 @@
                             :original-file-id originalFileId
                             :upload-pdfa-only true
                             :attachment-id attachmentId
+                            :attachment-type (:type attachment)
                             :filename filename
                             :content-type contentType
                             :created created

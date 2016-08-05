@@ -413,38 +413,27 @@
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
 (facts "Convert attachment to PDF/A"
-       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
-             application-id (:id application)
-             attachment (first (:attachments application))
-             attachment-id (:id attachment)]
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (first (:attachments application))]
 
-       (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
 
-       (let [attachment (first (:attachments (query-application sonja application-id)))]
-           (fact "Auto conversion should be done to txt -file"
-                 (get-in attachment [:latestVersion :autoConversion]) => true)
+    (let [attachment (first (:attachments (query-application sonja application-id)))]
+      (fact "One version, but original file id points to original file"
+        (count (:versions attachment)) => 1
+        (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
 
-           (fact "File should be converted to PDF/A"
-                 (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-                 (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
+      (fact "Auto conversion should be done to txt -file"
+        (get-in attachment [:latestVersion :autoConversion]) => true)
 
-           (fact "Latest version should be 0.2 after conversion"
-                 (get-in attachment [:latestVersion :version :major]) => 0
-                 (get-in attachment [:latestVersion :version :minor]) => 2)
+      (fact "File should be converted to PDF/A"
+        (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+        (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
 
-           (fact "After deleting converted version, original version should exists"
-                (command sonja
-                         :delete-attachment-version
-                         :id application-id
-                         :attachmentId attachment-id
-                         :fileId (get-in attachment [:latestVersion :fileId])
-                         :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?
-                (let [original-attachment (get-attachment-by-id sonja application-id (:id attachment))]
-                     (get-in original-attachment [:latestVersion :version :major]) => 0
-                     (get-in original-attachment [:latestVersion :version :minor]) => 1
-                     (get-in original-attachment [:latestVersion :contentType]) => "text/plain"
-                     (get-in original-attachment [:latestVersion :filename]) => "test-attachment.txt")))))
-
+      (fact "Latest version should be 0.1 after conversion"
+        (get-in attachment [:latestVersion :version :major]) => 0
+        (get-in attachment [:latestVersion :version :minor]) => 1))))
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
