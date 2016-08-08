@@ -406,9 +406,6 @@
    :upload-pdfa-only false
    :missing-fonts []})
 
-(defn- attach-or-fail! [application attachment-data]
-  (when-not (attachment/upload-and-attach-file! application attachment-data)
-    (fail :error.unknown)))
 
 (defn- convert-pdf-and-upload! [application
                                 {:keys [pdfa? output-file missing-fonts autoConversion]}
@@ -431,7 +428,7 @@
             nil)
         (fail :error.unknown)))
     (let [missing-fonts (or missing-fonts [])]
-      (attach-or-fail! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
+      (attachment/upload-and-attach-file! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
 
 (defn- upload! [application {:keys [filename content] :as attachment-data}]
   (let [mt (keyword (mime/mime-type filename))]
@@ -440,20 +437,20 @@
            (pdf-conversion/pdf-a-required?
              (:organization application))) (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
                                              (if (:already-valid-pdfa? processing-result)
-                                               (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
+                                               (attachment/upload-and-attach-file! application (assoc attachment-data :archivable true :archivabilityError nil))
                                                (convert-pdf-and-upload! application processing-result attachment-data)))
 
       (= mt :image/tiff) (let [valid? (tiff-validation/valid-tiff? content)
                                attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                           (attach-or-fail! application attachment-data))
+                           (attachment/upload-and-attach-file! application attachment-data))
 
       (conversion/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
                                                                          (attachment/upload-and-attach-file! application)
                                                                          :id
                                                                          (assoc attachment-data :attachment-id)
-                                                                         (attach-or-fail! application))
+                                                                         (attachment/upload-and-attach-file! application))
 
-      :else (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true)))))
+      :else (attachment/upload-and-attach-file! application (assoc attachment-data :skip-pdfa-conversion true)))))
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
