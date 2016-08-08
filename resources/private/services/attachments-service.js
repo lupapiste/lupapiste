@@ -4,9 +4,9 @@
 //
 
 LUPAPISTE.AttachmentsService = function() {
+  "use strict";
   var dmsg = window["console"].log;
   /* jshint devel: true */
-  "use strict";
   var self = this;
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
