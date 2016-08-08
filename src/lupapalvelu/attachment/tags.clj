@@ -26,14 +26,25 @@
     :notNeeded
     :needed))
 
+(defn- op-id->tag [op-id]
+  (when op-id
+    (str "op-id-" op-id)))
+
+(defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
+  (or (keyword group-type) (when op-id :operation)))
+
+(defn- tag-by-operation [{{op-id :id} :op :as attachment}]
+  (op-id->tag op-id))
+
 (defn attachment-tags
   "Returns tags for a single attachment for filtering and grouping attachments of an application"
   [attachment]
-  (->> [(tag-by-applicationState attachment)
-        (keyword (get-in attachment [:groupType]))
-        (get-in attachment [:op :id])
-        (tag-by-notNeeded attachment)
-        (att-type/tag-by-type attachment)]
+  (->> ((juxt tag-by-applicationState
+              tag-by-group-type
+              tag-by-operation
+              tag-by-notNeeded
+              att-type/tag-by-type)
+        attachment)
        (remove nil?)))
 
 (defn- attachments-group-types [attachments]
@@ -64,10 +75,10 @@
   "Creates subgrouping for operations attachments if needed."
   [type-groups operation-id]
   (if (empty? type-groups)
-    [operation-id]
+    [(op-id->tag operation-id)]
     (->> (conj (vec type-groups) :default)
          (map vector)
-         (cons operation-id))))
+         (cons (op-id->tag operation-id)))))
 
 (defmulti tag-grouping-for-group-type (fn [attachments group-type] group-type))
 

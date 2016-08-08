@@ -75,22 +75,29 @@
            :processMetadata.tila next-state}}))
 
 (defn- mark-application-archived-if-done [{:keys [id] :as application} now]
+  ; If these queries return 0 results, we mark the corresponding phase as archived
   (let [pre-verdict-query {:_id id
+                           ; Look for pre-verdict attachments that have versions, are not yet archived, but need to be
                            $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
                                                             :applicationState                  {$nin [states/post-verdict-states]}
                                                             :versions                          {$gt  []}
                                                             :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                                 ; Check if the application itself is not yet archived, but needs to be
                                  {:metadata.tila                     {$ne :arkistoitu}
                                   :metadata.sailytysaika.arkistointi {$ne :ei}}]}
         post-verdict-query {:_id id
+                            ; Look for any attachments that have versions, are not yet arcvhived, but need to be
                             $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
                                                              :versions                          {$gt  []}
                                                              :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                                  ; Check if the application itself is not yet archived, but needs to be
                                   {:metadata.tila                     {$ne :arkistoitu}
                                    :metadata.sailytysaika.arkistointi {$ne :ei}}
+                                  ; Check if the case file is not yet archived, but needs to be
                                   {:processMetadata.tila                     {$ne :arkistoitu}
                                    :processMetadata.sailytysaika.arkistointi {$ne :ei}}
-                                  {:state {$ne :closed}}]}]
+                                  ; Check if the application is not in a final state
+                                  {:state {$nin [:closed :extinct :foremanVerdictGiven]}}]}]
 
     (when (zero? (mongo/count :applications pre-verdict-query))
       (action/update-application
@@ -109,7 +116,8 @@
         (.submit
           upload-threadpool
           (fn []
-            (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
+            (try
+              (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
               (if (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
@@ -123,6 +131,9 @@
                       (state-update-fn :arkistoitu application now id)
                       (mark-application-archived-if-done application now))
                     (state-update-fn :valmis application now id)))))
+              (catch Throwable t
+                (error "Failed to archive attachment id" id "from application" app-id "message:" t)
+                (state-update-fn :valmis application now id)))
             (when (instance? File is-or-file)
               (io/delete-file is-or-file :silently)))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))

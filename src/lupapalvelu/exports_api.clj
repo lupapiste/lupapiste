@@ -122,6 +122,7 @@
    :yl-uusi-toiminta                                                  "B"
    :yl-olemassa-oleva-toiminta                                        "D"
    :yl-toiminnan-muutos                                               "D"
+   :yl-puiden-kaataminen                                              "D"
    :koeluontoinen-toiminta                                            "D"
    :tonttijako                                                        "D"
    :rasitetoimitus                                                    "D"
