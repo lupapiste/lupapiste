@@ -38,6 +38,8 @@
 "application.attachmentInfo" "sv" "Fordras"
 "application.attachmentNotNeeded" "fi" "Ei tarpeen"
 "application.attachmentNotNeeded" "sv" "Fordras inte"
+"application.attachments" "fi" "Liitteet"
+"application.attachments" "sv" "Bilagor"
 "application.attachments.post-verdict" "fi" "Rakentamisen aikaiset liitteet"
 "application.attachments.post-verdict" "sv" "Bilagor under byggnadstiden"
 "application.attachments.pre-verdict" "fi" "Hakemuksen aikaiset liitteet"
