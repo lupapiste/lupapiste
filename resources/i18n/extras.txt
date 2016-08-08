@@ -1,0 +1,2 @@
+"extra.1" "fi" "Hakemusta voi muokata, kunnes se siirretään käsittelyyn. Jos sen jälkeen hakemusta tulee vielä korjata, hakemus pitää palauttaa täydennettäväksi."
+"extra.2" "fi" "Tämä tarkoittaa, että aikaisemmin peruutettu hakemus on palautettu aktiiviseksi peruutusta edeltävään tilaan."
