@@ -765,15 +765,15 @@
    4) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
   [{:keys [application user]} attachment-options file-options]
-  (let [original-filedata  (file-upload/save-file file-options {:application (:id application) :linked false})
-        conversion-result  (conversion/convert-and-upload! application (assoc original-filedata
+  (let [initial-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
+        conversion-result  (conversion/convert-and-upload! application (assoc initial-filedata
                                                                               :attachment-type (:attachment-type attachment-options)
                                                                               :content (:content file-options)))
         attachment         (get-or-create-attachment! application user attachment-options)
         options            (merge attachment-options
-                                  original-filedata
-                                  conversion-result ; if conversion was made, original-filedata's fileId will be overwritten
-                                  {:original-file-id (:fileId original-filedata)})
+                                  initial-filedata
+                                  conversion-result ; if conversion was made, initial-filedata 's fileId will be overwritten
+                                  {:original-file-id (:fileId initial-filedata)})
         linked-version     (set-attachment-version! application user attachment options)]
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     linked-version))
