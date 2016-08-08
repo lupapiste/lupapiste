@@ -155,7 +155,8 @@
       (run! (partial att/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
     (when (seq new-file-ids)
       ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
-      (att/link-files-to-application (:id app) new-file-ids))))
+      (att/link-files-to-application (:id app) new-file-ids))
+    (ok)))
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"
