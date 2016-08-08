@@ -2,7 +2,9 @@
 // Provides services for attachments tab.
 //
 //
+
 LUPAPISTE.AttachmentsService = function() {
+  /* jshint devel: true */
   "use strict";
   var self = this;
   ko.options.deferUpdates = true;
@@ -266,10 +268,22 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.notNeeded;
   }
 
+  function unwrapValuePair(val, key) {
+    var res = {};
+    res[ko.utils.unwrapObservable(key)] = ko.utils.unwrapObservable(val);
+    return res;
+  }
+
+  function observable_vector_values(arr) {
+    return _.map(ko.utils.unwrapObservable(arr),ko.utils.unwrapObservable);
+  }
+  function observable_object_values(arr) {
+    return _.map(ko.utils.unwrapObservable(arr), unwrapValuePair);
+  }
   self.isAttachmentFiltered = function (att) {
     //console.log("tarkastetaan on filtteröity", att());
     console.log("tarkastetaan näkyykö liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
-    console.log
+    console.log("filters ", observable_object_values(filters));
     return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
   };
 
