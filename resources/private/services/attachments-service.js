@@ -416,27 +416,48 @@ LUPAPISTE.AttachmentsService = function() {
     });
   }
 
+  function getOperationLocalization(operationId) {
+    var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
+    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
+  }
+
+  function getLocalizationForDefaultGroup(groupPath) {
+    if (groupPath.length === 1) {
+      return loc("application.attachments.general");
+    } else {
+      return loc("application.attachments.other");
+    }
+  }
+
+  function groupToAccordionName(groupPath) {
+    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
+        key = _.last(groupPath);
+    if (opIdRegExp.test(key)) {
+      return getOperationLocalization(opIdRegExp.exec(key)[1]);
+    } else if (_.last(groupPath) === "default") {
+      return getLocalizationForDefaultGroup(groupPath);
+    } else {
+      return loc(["application", "attachments", key]);
+    }
+  }
+
   function getDataForAccordion(groupPath) {
     return {
-      name: _.last(groupPath),
+      lname: groupToAccordionName(groupPath),
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
-          name: _.last(groupPath),
+          lname: groupToAccordionName(groupPath),
           attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
     };
   }
 
-  function groupToAccordionName(groupPath) {
-    return _.last(groupPath);
-  }
-
   function attachmentTypeLayout(groupPath, tagGroups) {
     if (tagGroups.length) {
       return {
-        name: groupToAccordionName(groupPath),
+        lname: groupToAccordionName(groupPath),
         open: ko.observable(),
         data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {

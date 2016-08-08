@@ -8,7 +8,7 @@
                          'tertiary': $parent.level > 0,
                          'attachments-accordion': true},
                  status: $parent.data().status,
-                 ltext: 'application.attachments.' + $parent.name">
+                 text: $parent.lname">
       </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
         <!-- ko if: $parent.data().type === "main" -->
