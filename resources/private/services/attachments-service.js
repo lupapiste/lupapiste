@@ -13,19 +13,14 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-  //
-  // Attachments
-  //
-
-  function createArrayModel(attachment) {
-    return ko.observable(attachment);
+  function createArrayModel(array) {
+    return ko.observable(array);
   }
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
-
   self.filters = ko.observableArray([]);
-  //self.activeFilters = ko.pureComputed(function() {dmsg(self.filters()); return [[{"tag": "preVerdict"}]];});
+
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
 
   self.filteredAttachments = ko.pureComputed(
@@ -121,13 +116,8 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment && attachment.notNeeded === true;
   };
 
-  function getUnwrappedAttachment(attachmentId) {
-    var attachment = self.getAttachment(attachmentId);
-    if (attachment) {
-      return attachment();
-    } else {
-      return null;
-    }
+  function getUnwrappedAttachmentById(attachmentId) {
+    return ko.utils.unwrapObservable(self.getAttachment(attachmentId));
   }
 
   // returns a function for use in computed
@@ -136,11 +126,11 @@ LUPAPISTE.AttachmentsService = function() {
   // Else null
   self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      if (_.every(_.map(attachmentIds, getUnwrappedAttachment),
+      if (_.every(_.map(attachmentIds, getUnwrappedAttachmentById),
                   self.isApproved)) {
         return self.APPROVED;
       } else {
-        return _.some(_.map(attachmentIds, getUnwrappedAttachment),
+        return _.some(_.map(attachmentIds, getUnwrappedAttachmentById),
                       self.isRejected) ? self.REJECTED : null;
       }
     };
@@ -176,18 +166,6 @@ LUPAPISTE.AttachmentsService = function() {
     return resolveTagGrouping(attachments, self.tagGroups());
   }
 
-  var preVerdictStates = [
-    "draft", "info", "answered", "open", "submitted", "complementNeeded", "sent"
-  ];
-
-  function isPreVerdict(attachment) {
-    return _.includes(preVerdictStates, attachment.applicationState);
-  }
-
-  function isPostVerdict(attachment) {
-    return !isPreVerdict(attachment);
-  }
-
   //
   // Filter manipulation
   //
@@ -215,7 +193,7 @@ LUPAPISTE.AttachmentsService = function() {
            function( s ) {
              return {ltext: "filter." + s,
                      filter: filters[s]};
-           })); 
+           }));
 
   function isTypeId(typeId) {
     return function(attachment) {
@@ -228,16 +206,6 @@ LUPAPISTE.AttachmentsService = function() {
       return attachment.type["type-group"] === typeGroup;
     };
   }
-
-  var filterFunctions = {
-    "hakemus": isPreVerdict,
-    "rakentaminen": isPostVerdict,
-    "ei-tarpeen": self.isNotNeeded,
-    "iv": isTypeId("iv_suunnitelma"),
-    "kvv": isTypeId("kvv_suunnitelma"),
-    "rakenne": isTypeId("rakennesuunnitelma"),
-    "paapiirustukset": isTypeGroup("paapiirustus")
-  };
 
   function showAll() {
     var filterValues = _.mapValues(filters, function(f) { return f(); });
