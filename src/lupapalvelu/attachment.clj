@@ -399,22 +399,23 @@
 
 (defn make-version
   [attachment user {:keys [fileId original-file-id filename contentType size created stamped archivable archivabilityError missing-fonts autoConversion]}]
-  {:post [(sc/validate Version %)]}
+  {:post [(nil? (sc/check Version %))]}
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp #{original-file-id} :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
-    (util/assoc-when {:version        version-number
-             :fileId         fileId
-             :originalFileId (or original-file-id fileId)
-             :created        created
-             :user           (usr/summary user)
-             ;; File name will be presented in ASCII when the file is downloaded.
-             ;; Conversion could be done here as well, but we don't want to lose information.
-             :filename       filename
-             :contentType    contentType
-             :size           size}
+    (util/assoc-when
+      {:version        version-number
+       :fileId         fileId
+       :originalFileId (or original-file-id fileId)
+       :created        created
+       :user           (usr/summary user)
+       ;; File name will be presented in ASCII when the file is downloaded.
+       ;; Conversion could be done here as well, but we don't want to lose information.
+       :filename       filename
+       :contentType    contentType
+       :size           size}
       :stamped stamped
       :archivable archivable
       :archivabilityError archivabilityError
