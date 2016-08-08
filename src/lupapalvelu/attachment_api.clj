@@ -514,22 +514,24 @@
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [contentType fileId originalFileId filename user created] :as latest-version} (last (:versions attachment))
           temp-pdf (File/createTempFile fileId ".tmp")
-          upload-options (merge
-                           base-upload-options
-                           {:content temp-pdf
-                            :original-file-id originalFileId
-                            :upload-pdfa-only true
-                            :attachment-id attachmentId
-                            :attachment-type (:type attachment)
-                            :filename filename
-                            :content-type contentType
-                            :created created
-                            :user user})]
+          attachment-options {:comment-text nil
+                              :required false
+                              :original-file-id originalFileId
+                              :attachment-id attachmentId
+                              :attachment-type (:type attachment)
+                              :created created
+                              :user user}]
       (try
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
-          (upload! application (assoc upload-options :size (.length temp-pdf))))
+          (attachment/upload-and-attach-new! {:application application :user user} ; NOTE: user is user from attachment version
+                                             attachment-options
+                                             {:content temp-pdf
+                                              :filename filename
+                                              :content-type contentType
+                                              :size (.length temp-pdf)}))
+        (ok)
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))

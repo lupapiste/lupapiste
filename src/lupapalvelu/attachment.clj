@@ -772,8 +772,9 @@
         attachment         (get-or-create-attachment! application user attachment-options)
         options            (merge attachment-options
                                   initial-filedata
-                                  conversion-result ; if conversion was made, initial-filedata 's fileId will be overwritten
-                                  {:original-file-id (:fileId initial-filedata)})
+                                  conversion-result ; if conversion (and thus upload) was made, initial-filedata's fileId will be overwritten
+                                  {:original-file-id (or (:original-file-id attachment-options)
+                                                         (:fileId initial-filedata))})
         linked-version     (set-attachment-version! application user attachment options)]
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     linked-version))
