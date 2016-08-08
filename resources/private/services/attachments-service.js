@@ -176,7 +176,7 @@ LUPAPISTE.AttachmentsService = function() {
   //
 
   // returns an observable
-  var filters = {
+  var oldDummyFilters = {
         "hakemus": ko.observable(false),
         "rakentaminen": ko.observable(false),
         "ei-tarpeen": ko.observable(false),
@@ -187,7 +187,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.disableAllFilters = function() {
-    _.forEach(_.values(filters), function(filter) {
+    _.forEach(_.values(oldDummyFilters), function(filter) {
       filter(false);
     });
   };
@@ -197,7 +197,7 @@ LUPAPISTE.AttachmentsService = function() {
             "rakenne", "ei-tarpeen"],
            function( s ) {
              return {ltext: "filter." + s,
-                     filter: filters[s]};
+                     filter: oldDummyFilters[s]};
            })); */
 
   var internedObservables = {};
@@ -235,7 +235,7 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function showAll() {
-    var filterValues = _.mapValues(filters, function(f) { return f(); });
+    var filterValues = _.mapValues(oldDummyFilters, function(f) { return f(); });
     return _(filterValues).omit("ei-tarpeen").values()
            .every(function(f) { return !f; });
   }
@@ -258,12 +258,12 @@ LUPAPISTE.AttachmentsService = function() {
     //dmsg("tarkastetaan on filtteroity", att());
     dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
     dmsg(self.filters());
-    dmsg("filters taas on ", unwrapArrayValues(filters));
+    dmsg("filters taas on ", unwrapArrayValues(oldDummyFilters));
     dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa:")
     dmsg(" taso 0 ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
     dmsg(" taso 1 ", _.map(self.activeFilters()[1], function(filter) { return filter.tag; }));
     dmsg(" taso 2 ", _.map(self.activeFilters()[2], function(filter) { return filter.tag; }));
-    //dmsg("filters ", observable_object_values(filters));
+    //dmsg("filters ", observable_object_values(oldDummyFilters));
     return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
   };
 
@@ -305,7 +305,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   function modelForSubAccordion(subGroup) {
-    _.forEach(_.values(filters), function(f) { f(); });
+    _.forEach(_.values(oldDummyFilters), function(f) { f(); });
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -528,9 +528,9 @@ LUPAPISTE.AttachmentsService = function() {
     previousAttachmentsHierarchy = oldValue;
   }, self, "beforeChange");
 
-  self.previousFilterValues = _.mapValues(filters, function() { return false; });
+  self.previousFilterValues = _.mapValues(oldDummyFilters, function() { return false; });
   var filterValues = ko.pureComputed(function() {
-    return _.mapValues(filters, function(f) { return f(); });
+    return _.mapValues(oldDummyFilters, function(f) { return f(); });
   });
   filterValues.subscribe(function(oldValue) {
     self.previousFilterValues = oldValue || self.previousFilterValues;
