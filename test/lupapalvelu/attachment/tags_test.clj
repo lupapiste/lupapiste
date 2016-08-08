@@ -99,9 +99,12 @@
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]]
+                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]
+        application {:primaryOperation {:id operation-id1}
+                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                     :attachments attachments}]
 
-    (tag-grouping-for-group-type attachments :operation) => [[(str "op-id-" operation-id1)]
+    (tag-grouping-for-group-type application :operation) => [[(str "op-id-" operation-id1)]
                                                              [(str "op-id-" operation-id2) [:somegroup] [:default]]
                                                              [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:default]]]
 
@@ -126,9 +129,12 @@
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]]
+                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]
+        application {:primaryOperation {:id operation-id1}
+                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                     :attachments attachments}]
 
-    (attachment-tag-groups attachments) => [[:default]
+    (attachment-tag-groups application) => [[:default]
                                             [:parties]
                                             [(str "op-id-" operation-id1)]
                                             [(str "op-id-" operation-id2) [:somegroup] [:default]]
@@ -155,9 +161,12 @@
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]]
+                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "single-attachment-type"}}]
+        application {:primaryOperation {:id operation-id1}
+                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                     :attachments attachments}]
 
-    (attachments-filters attachments) =>   [[{:tag :preVerdict :default false}
+    (attachments-filters application) =>   [[{:tag :preVerdict :default false}
                                              {:tag :postVerdict :default false}]
                                             [{:tag :somegroup :default false}
                                              {:tag :anothergroup :default false}

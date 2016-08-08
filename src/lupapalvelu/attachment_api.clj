@@ -149,8 +149,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :attachmentsFilters (att-tags/attachments-filters attachments)))
+  [{application :application}]
+  (ok :attachmentsFilters (att-tags/attachments-filters application)))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."
@@ -158,8 +158,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :tagGroups (att-tags/attachment-tag-groups attachments)))
+  [{application :application}]
+  (ok :tagGroups (att-tags/attachment-tag-groups application)))
 
 ;;
 ;; Types
