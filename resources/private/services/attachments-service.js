@@ -29,14 +29,18 @@ LUPAPISTE.AttachmentsService = function() {
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
+  self.authModel = lupapisteApp.models.applicationAuthModel;
+
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
-      ajax.query(commandName, {"id": self.applicationId})
-        .success(function(data) {
-          dataSetter(data[responseJsonKey]);
-        })
-        .onError("error.unauthorized", notify.ajaxError)
-        .call();
+      if (self.authModel.ok(commandName)) {
+        ajax.query(commandName, {"id": self.applicationId})
+          .success(function(data) {
+            dataSetter(data[responseJsonKey]);
+          })
+          .onError("error.unauthorized", notify.ajaxError)
+          .call();
+      }
     };
 
     fireQuery("attachments", "attachments", self.setAttachments);
