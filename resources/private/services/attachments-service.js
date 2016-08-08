@@ -25,7 +25,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.activeFilters = ko.observableArray([]);
 
 
-  self.queryAll = function queryAll(attachmentId) {
+  self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
       ajax.query(commandName, {"id": self.applicationId})
         .success(function(data) {
