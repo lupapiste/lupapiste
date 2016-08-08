@@ -432,9 +432,6 @@ LUPAPISTE.AttachmentsService = function() {
   function groupToAccordionName(groupPath) {
     var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
         key = _.last(groupPath);
-    console.log("key", key);
-    console.log("test", opIdRegExp.test(key));
-    console.log("exec", opIdRegExp.exec(key));
     if (opIdRegExp.test(key)) {
       return getOperationLocalization(opIdRegExp.exec(key)[1]);
     } else if (_.last(groupPath) === "default") {
