@@ -4,8 +4,6 @@
 //
 
 LUPAPISTE.AttachmentsService = function() {
-  var dmsg = window["console"].log;
-  /* jshint devel: true */
   "use strict";
   var self = this;
   ko.options.deferUpdates = true;
@@ -25,7 +23,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
 
   self.filters = ko.observableArray([]);
-  //self.activeFilters = ko.pureComputed(function() {dmsg(self.filters()); return [[{"tag": "preVerdict"}]];});
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
 
   self.filteredAttachments = ko.pureComputed(
@@ -282,14 +279,10 @@ LUPAPISTE.AttachmentsService = function() {
     return _.map(ko.utils.unwrapObservable(arr), unwrapValuePair);
   }
   self.isAttachmentFiltered = function (att) {
-    //dmsg("tarkastetaan on filtteroity", att());
-    //dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
-    //dmsg("filters ", observable_object_values(filters));
     return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
   };
 
   function applyFilters(attachments) {
-    //dmsg("kaytettaisiin uusia filttereita ", self.filters());
     if (showAll()) {
       return attachments;
     }
