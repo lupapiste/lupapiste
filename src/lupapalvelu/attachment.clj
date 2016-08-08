@@ -471,8 +471,8 @@
   ([application user attachment options]
     {:pre [(map? options)]}
     (set-attachment-version! application user attachment options 5))
-  ([application user {attachment-id :id :as attachment} {:keys [stamped] :as options} retry-limit]
-    {:pre [(map? application) (map? attachment) (map? options) (not (nil? stamped))]}
+  ([application user {attachment-id :id :as attachment} options retry-limit]
+    {:pre [(map? application) (map? attachment) (map? options)]}
     (if (pos? retry-limit)
       (let [latest-version  (get-in attachment [:latestVersion :version])
             version-model   (make-version attachment user options)
