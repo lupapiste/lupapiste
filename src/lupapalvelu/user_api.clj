@@ -694,7 +694,7 @@
    :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
                     unauthorized))]}
-  [{application :application user :user}]
+  [{application :application user :user :as command}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id
           user-id (:id user)
@@ -710,17 +710,16 @@
       (when (zero? (mongo/count :applications {:_id application-id
                                                :attachments {$elemMatch {:id attachment-id ; skip upload when user attachment as already been uploaded
                                                                          :latestVersion.type attachment-type}}}))
-        (att/upload-and-attach-file! application
-                          {:attachment-id attachment-id
-                           :attachment-type attachment-type
-                           :content ((:content attachment))
-                           :filename file-name
-                           :content-type content-type
-                           :size size
-                           :created created
-                           :user user
-                           :required false
-                           :locked false}))))
+        (att/upload-and-attach-new! command
+                                    {:attachment-id attachment-id
+                                     :attachment-type attachment-type
+                                     :created created
+                                     :required false
+                                     :locked false}
+                                    {:content ((:content attachment))
+                                     :filename file-name
+                                     :content-type content-type
+                                     :size size}))))
   (ok))
 
 (defquery email-in-use
