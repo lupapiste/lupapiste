@@ -9,7 +9,8 @@
     [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
     [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
     [clojure.java.io :as io]
-    [clojure.string :as s])
+    [clojure.string :as s]
+    [sade.util :as util])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -54,9 +55,9 @@
             (= :tasks type) (assoc :target {:type :task :id id}))))
 
 (defn- get-child-attachment-id [app child-type id]
-  (let [attachment (filter #(= {:type (name child-type) :id id} (:source %)) (:attachments app))
-        attachment-id (:id (first attachment))]
-    attachment-id))
+  (:id (util/find-first
+         #(= {:type (name child-type) :id id} (:source %))
+         (:attachments app))))
 
 (defn- generate-attachment-from-child!
   "Builds attachment and return attachment data as map"
@@ -77,9 +78,12 @@
   "Generates attachment from child and saves it. Returns created attachment version."
   [user application child-type child-id lang]
   (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang)
+        file-options       (select-keys attachment-options [:filename :size :content])
         file (:content attachment-options)]
     (try
-      (attachment/upload-and-attach-file! application attachment-options)
+      (attachment/upload-and-attach-new! {:application application :user user}
+                                         attachment-options
+                                         file-options)
       (finally
         (io/delete-file file :silently)))))
 
