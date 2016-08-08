@@ -645,11 +645,10 @@
       (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
 
     (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
-      (facts "PDF/A conversion"
-        (fact "Original version and PDF/A version exists"
-          (count (:versions pdf-attachment)) => 2)
-        (fact "Is archivable"
-          (-> pdf-attachment :latestVersion :archivable) => true)))
+      (facts "Is archivable after PDF/A conversion"
+        (count (:versions pdf-attachment)) => 1             ; only one version
+        (get-in pdf-attachment [:latestVersion :fileId]) =not=> (get-in pdf-attachment [:latestVersion :originalFileId]) ; original file is known
+        (-> pdf-attachment :latestVersion :archivable) => true))
 
     (fact "After upload comments count is + 1"
       (count (:comments application)) => 0 ; before upload

@@ -3,10 +3,10 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.strings :refer [encode-filename]]
-            [sade.env :as env]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.metadata :refer :all]
             [lupapalvelu.i18n :as i18n]
@@ -239,9 +239,9 @@
 (defspec make-version-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
-                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
-                                                           :archivabilityError (apply sc/enum nil archivability-errors)
-                                                           :missing-fonts (sc/eq ["Arial"])}))
+                 archivability   (ssg/generator (sc/maybe {:archivable         sc/Bool
+                                                           :archivabilityError (apply sc/enum nil conversion/archivability-errors)
+                                                           :missing-fonts      (sc/eq ["Arial"])}))
                  user            (ssg/generator user/SummaryUser)
                  general-options (ssg/generator {:filename sc/Str
                                                  :contentType sc/Str
