@@ -25,6 +25,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
 
   self.filters = ko.observableArray([]);
+
   //self.activeFilters = ko.pureComputed(function() {dmsg(self.filters()); return [[{"tag": "preVerdict"}]];});
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
 
@@ -209,14 +210,33 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.filtersArray = ko.observableArray(
+  /* self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
             "rakenne", "ei-tarpeen"],
            function( s ) {
              return {ltext: "filter." + s,
                      filter: filters[s]};
-           })); 
+           })); */
 
+  var internedObservables = {};
+
+  // keep track of filter toggles, since they are passed over to the UI, and 
+  // we need to keep using the same ones after tag updates
+  function internFilterBoolean(key, def) {
+    if (!internedObservables[key]) {
+      dmsg("Interning filter flag " + key + " as " + def);
+      internedObservables[key] = ko.observable(def);
+    }
+    return internedObservables[key];
+  }
+
+  self.filtersArray = ko.pureComputed( function() {
+    return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+          function(filter) { 
+            dmsg("adding, ", filter, ", to filtersArray"); 
+            return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)}; 
+          }))})
+    
   function isTypeId(typeId) {
     return function(attachment) {
       return attachment.type["type-id"] === typeId;
