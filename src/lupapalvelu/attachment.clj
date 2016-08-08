@@ -757,24 +757,6 @@
       (finally
         (io/delete-file temp-file :silently)))))
 
-(defn attach-file-version!
-  "Creates new version for attachment.
-   Sets :linked true for file(s) in mongo.
-   Attachment version is returned"
-  [application user attachment attachment-options]
-  (let [{:keys [fileId
-                originalFileId]
-         :as linked-version}   (set-attachment-version!
-                                         application
-                                         user
-                                         attachment
-                                         (merge attachment-options
-                                                {:stamped (get attachment-options :stamped false)}))]
-    (link-file-to-application (:id application) fileId)
-    (when (and originalFileId (not= originalFileId fileId))
-      (link-file-to-application (:id application) originalFileId))
-    linked-version))
-
 
 (defn upload-and-attach-new!
   "1) Uploads original file to GridFS
@@ -784,18 +766,17 @@
    Returns attached version."
   [{:keys [application user]} attachment-options file-options]
   (let [original-filedata  (file-upload/save-file file-options {:application (:id application) :linked false})
-        conversion-options (assoc original-filedata :attachment-type (:attachment-type attachment-options)
-                                                    :content (:content file-options))
-        conversion-result  (conversion/convert-and-upload! application conversion-options)
-        attachment         (get-or-create-attachment! application user attachment-options)]
-    (attach-file-version! application
-                          user
-                          attachment
-                          (merge attachment-options
-                                 original-filedata
-                                 {:original-file-id (:fileId original-filedata)}
-                                 conversion-result ; if conversion was made, original-filedata's fileId will be overwritten
-                                 ))))
+        conversion-result  (conversion/convert-and-upload! application (assoc original-filedata
+                                                                              :attachment-type (:attachment-type attachment-options)
+                                                                              :content (:content file-options)))
+        attachment         (get-or-create-attachment! application user attachment-options)
+        options            (merge attachment-options
+                                  original-filedata
+                                  conversion-result ; if conversion was made, original-filedata's fileId will be overwritten
+                                  {:original-file-id (:fileId original-filedata)})
+        linked-version     (set-attachment-version! application user attachment options)]
+    (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    linked-version))
 
 (defn- append-stream [zip file-name in]
   (when in
