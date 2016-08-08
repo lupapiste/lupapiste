@@ -80,13 +80,14 @@
          (map vector)
          (cons (op-id->tag operation-id)))))
 
-(defmulti tag-grouping-for-group-type (fn [attachments group-type] group-type))
+(defmulti tag-grouping-for-group-type (fn [application group-type] group-type))
 
 (defmethod tag-grouping-for-group-type :default [_ group-type]
   [[group-type]])
 
-(defmethod tag-grouping-for-group-type :operation [attachments _]
-  (->> (attachments-operation-ids attachments)
+(defmethod tag-grouping-for-group-type :operation [{attachments :attachments primary-op :primaryOperation secondary-ops :secondaryOperations :as application} _]
+  (->> (map :id (cons primary-op secondary-ops)) ; all operation ids sorted
+       (filter (set (attachments-operation-ids attachments)))
        (map #(-> (type-groups-for-operation attachments %)
                  (operation-grouping %)))))
 
@@ -94,14 +95,14 @@
   "Get hierarchical attachment grouping by attachments tags.
   There are one and two level groups in tag hierarchy (operations are two level groups).
   eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
-  [attachments]
-  (->> (filter (set (attachments-group-types attachments)) attachment-groups) ;; keep sorted
+  [{attachments :attachments :as application}]
+  (->> (filter (set (attachments-group-types attachments)) attachment-groups) ; keep sorted
        (cons :default)
-       (mapcat (partial tag-grouping-for-group-type attachments))))
+       (mapcat (partial tag-grouping-for-group-type application))))
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [attachments]
+  [{attachments :attachments}]
   [[{:tag :preVerdict :default false}
     {:tag :postVerdict :default false}]
    (->> (map att-type/tag-by-type attachments)
