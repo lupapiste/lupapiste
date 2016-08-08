@@ -82,23 +82,10 @@
    (sc/optional-key :content)        (sc/cond-pre File InputStream)
    (sc/optional-key :filename)       sc/Str})
 
-(defn conversion-steps!
+(defn archivability-conversion
   "Validates file for archivability, and converts content if needed.
-  Returns map (see ConversionResult schema)."
+  Returns ConversionResult map."
   [application filedata]
   {:pre  [(contains? filedata :contentType) (contains? filedata :content)]
    :post [(sc/validate ConversionResult %)]}
   (convert-file application filedata))
-
-(defn convert-and-upload!
-  "Runs conversion steps (validation + conversion).
-   If file was converted, uploads file to mongo.
-   Returns ConversionResult. If conversion was made and file uploaded,
-   returns ConversionResult with filedata added (fileId etc)"
-  [application filedata]
-  (let [conversion (conversion-steps! application filedata)
-        converted? (contains? conversion :content)]
-    (if converted?
-      (merge conversion
-             (file-upload/save-file (select-keys conversion [:content :filename]) {:application (:id application) :linked false}))
-      conversion)))

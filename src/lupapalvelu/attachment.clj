@@ -766,13 +766,17 @@
    Returns attached version."
   [{:keys [application user]} attachment-options file-options]
   (let [initial-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
-        conversion-result  (conversion/convert-and-upload! application (assoc initial-filedata
+        conversion-result  (conversion/archivability-conversion application (assoc initial-filedata
                                                                               :attachment-type (:attachment-type attachment-options)
                                                                               :content (:content file-options)))
+        conversion-result  (if (:autoConversion conversion-result)
+                             (merge conversion-result (file-upload/save-file (select-keys conversion-result [:content :filename])
+                                                                             {:application (:id application) :linked false}))
+                             conversion-result)
         attachment         (get-or-create-attachment! application user attachment-options)
         options            (merge attachment-options
                                   initial-filedata
-                                  conversion-result ; if conversion (and thus upload) was made, initial-filedata's fileId will be overwritten
+                                  conversion-result ; when conversion (and thus upload) was made, initial-filedata's fileId will be overwritten
                                   {:original-file-id (or (:original-file-id attachment-options)
                                                          (:fileId initial-filedata))})
         linked-version     (set-attachment-version! application user attachment options)]
