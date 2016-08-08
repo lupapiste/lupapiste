@@ -378,31 +378,33 @@
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (facts "Rotate PDF - versions and files"
-  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
         attachment-id (:id attachment)]
 
-    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
+    (upload-attachment pena application-id attachment true :filename "dev-resources/test-pdf.pdf")
 
-    (let [v1 (-> (get-attachment-by-id sonja application-id attachment-id)
-                 :versions
-                 first)]
+    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+          v1 (first v1-versions)]
+      (fact "one version" (count v1-versions) => 1)
       (fact "fileID is set" (:fileId v1) => truthy)
       (fact "fileID is set" (:originalFileId v1) => truthy)
       (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
+      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
 
-      (fact "version number is set" (:version v1) => {:major 0 :minor 1})
+      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
 
       (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-      (let [v2 (->> (get-attachment-by-id sonja application-id  attachment-id)
-                    :versions
-                    first)]
+      (let [v2-versions (:versions (get-attachment-by-id sonja application-id  attachment-id))
+            v2          (first v2-versions)]
+        (fact "No new version" (count v2-versions) => 1)
         (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
-        (fact "Original file is the same" (:originalFileId v1) => (:originalFileId v1))
+        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
 
-        (fact "version number is not changed" (:version v1) => {:major 0 :minor 1})
+        (fact "version number is not changed" (:version v2) => (:version v1))
 
         (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
