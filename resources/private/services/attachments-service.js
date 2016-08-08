@@ -245,26 +245,6 @@ LUPAPISTE.AttachmentsService = function() {
            .every(function(f) { return !f; });
   }
 
-  function filteredAttachments(preOrPost, attachments) {
-    var subFilters = [
-      "iv",
-      "kvv",
-      "rakenne",
-      "paapiirustukset"
-    ];
-    if (filters[preOrPost]() &&
-        !_.some(subFilters, function(f) {
-          return filters[f]();
-        })) {
-      return attachments;
-    }
-    return _.filter(attachments, function(attachment) {
-      return _.some(subFilters, function(f) {
-        return filters[f]() && filterFunctions[f](attachment);
-      });
-    });
-  }
-
   function notNeededForModel(attachment) {
     return attachment.notNeeded;
   }
@@ -275,12 +255,6 @@ LUPAPISTE.AttachmentsService = function() {
     return res;
   }
 
-  function observable_vector_values(arr) {
-    return _.map(ko.utils.unwrapObservable(arr),ko.utils.unwrapObservable);
-  }
-  function observable_object_values(arr) {
-    return _.map(ko.utils.unwrapObservable(arr), unwrapValuePair);
-  }
   self.isAttachmentFiltered = function (att) {
     //dmsg("tarkastetaan on filtteroity", att());
     //dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
