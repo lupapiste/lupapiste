@@ -100,5 +100,5 @@
         converted? (contains? conversion :content)]
     (if converted?
       (merge conversion
-             (file-upload/save-file (select-keys conversion [:content :filename])))
+             (file-upload/save-file (select-keys conversion [:content :filename]) {:application (:id application) :linked false}))
       conversion)))
