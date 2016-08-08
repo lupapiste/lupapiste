@@ -435,8 +435,8 @@
       (fact "fileID is set" (:originalFileId v1) => truthy)
       (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
       (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
-
       (fact "version number is set" (:version v1) => {:major 1 :minor 0})
+      (fact "Auto conversion flag is set" (:autoConversion v1) => true)
 
       (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
@@ -446,8 +446,8 @@
         (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
         (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
         (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
-
-        (fact "version number is not changed" (:version v2) => (:version v1))))))
+        (fact "version number is not changed" (:version v2) => (:version v1))
+        (fact "Auto conversion flag is preserved" (:autoConversion v2) => true)))))
 
 (facts "Convert attachment to PDF/A"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)

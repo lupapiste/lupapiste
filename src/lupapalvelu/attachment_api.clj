@@ -512,15 +512,16 @@
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId originalFileId filename user created] :as latest-version} (last (:versions attachment))
+    (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
           temp-pdf (File/createTempFile fileId ".tmp")
-          attachment-options {:comment-text nil
-                              :required false
-                              :original-file-id originalFileId
-                              :attachment-id attachmentId
-                              :attachment-type (:type attachment)
-                              :created created
-                              :user user}]
+          attachment-options (util/assoc-when {:comment-text nil
+                                               :required false
+                                               :original-file-id originalFileId
+                                               :attachment-id attachmentId
+                                               :attachment-type (:type attachment)
+                                               :created created
+                                               :user user}
+                                              :autoConversion autoConversion)]
       (try
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
