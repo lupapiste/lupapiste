@@ -4,6 +4,7 @@
 //
 
 LUPAPISTE.AttachmentsService = function() {
+  var dmsg = window["console"].log;
   /* jshint devel: true */
   "use strict";
   var self = this;
@@ -24,11 +25,11 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
 
   self.filters = ko.observableArray([]);
-  //self.activeFilters = ko.pureComputed(function() {console.log(self.filters()); return [[{"tag": "preVerdict"}]];});
+  //self.activeFilters = ko.pureComputed(function() {dmsg(self.filters()); return [[{"tag": "preVerdict"}]];});
   self.activeFilters = ko.pureComputed(function() {return self.filters();});
 
-  self.filteredAttachments = ko.pureComputed( 
-    function() { 
+  self.filteredAttachments = ko.pureComputed(
+    function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
   self.queryAll = function queryAll() {
@@ -281,14 +282,14 @@ LUPAPISTE.AttachmentsService = function() {
     return _.map(ko.utils.unwrapObservable(arr), unwrapValuePair);
   }
   self.isAttachmentFiltered = function (att) {
-    //console.log("tarkastetaan on filtteröity", att());
-    console.log("tarkastetaan näkyykö liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
-    console.log("filters ", observable_object_values(filters));
+    //dmsg("tarkastetaan on filtteroity", att());
+    //dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    //dmsg("filters ", observable_object_values(filters));
     return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
   };
 
   function applyFilters(attachments) {
-    console.log("käytettäisiin uusia filttereitä ", self.filters());
+    //dmsg("kaytettaisiin uusia filttereita ", self.filters());
     if (showAll()) {
       return attachments;
     }
