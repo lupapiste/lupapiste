@@ -154,7 +154,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :groupType)          (apply sc/enum att-tags/attachment-groups)
+   (sc/optional-key :groupType)          (sc/maybe (apply sc/enum att-tags/attachment-groups))
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
