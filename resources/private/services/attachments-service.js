@@ -210,7 +210,7 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  /* self.filtersArray = ko.observableArray(
+  /*self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
             "rakenne", "ei-tarpeen"],
            function( s ) {
@@ -230,12 +230,16 @@ LUPAPISTE.AttachmentsService = function() {
     return internedObservables[key];
   }
 
-  self.filtersArray = ko.pureComputed( function() {
-    return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
-          function(filter) { 
+  self.filtersArray = ko.observableArray([]);
+
+  // depends on self.filters(), updates self.filtersArray
+  self.filtersArrayDep = ko.computed( function() {
+    dmsg("computing...");
+    self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+          function(filter, idx) { 
             dmsg("adding, ", filter, ", to filtersArray"); 
-            return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)}; 
-          }))})
+            //self.filtersArray[idx] = {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};
+            return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
     
   function isTypeId(typeId) {
     return function(attachment) {
