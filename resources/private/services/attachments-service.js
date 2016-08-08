@@ -215,7 +215,7 @@ LUPAPISTE.AttachmentsService = function() {
            function( s ) {
              return {ltext: "filter." + s,
                      filter: filters[s]};
-           }));
+           })); 
 
   function isTypeId(typeId) {
     return function(attachment) {
@@ -249,6 +249,10 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.notNeeded;
   }
 
+  function unwrapArrayValues(arr) {
+    return _.mapValues(arr, ko.utils.unwrapObservable);
+  }
+
   function unwrapValuePair(val, key) {
     var res = {};
     res[ko.utils.unwrapObservable(key)] = ko.utils.unwrapObservable(val);
@@ -257,7 +261,13 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.isAttachmentFiltered = function (att) {
     //dmsg("tarkastetaan on filtteroity", att());
-    //dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    dmsg(self.filters());
+    dmsg("filters taas on ", unwrapArrayValues(filters));
+    dmsg("tarkastetaan nakyyko liite tageilla ", att().tags, " valittuna ollessa:")
+    dmsg(" taso 0 ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    dmsg(" taso 1 ", _.map(self.activeFilters()[1], function(filter) { return filter.tag; }));
+    dmsg(" taso 2 ", _.map(self.activeFilters()[2], function(filter) { return filter.tag; }));
     //dmsg("filters ", observable_object_values(filters));
     return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
   };
@@ -467,6 +477,7 @@ LUPAPISTE.AttachmentsService = function() {
   // Automatically open relevant accordions when filters are toggled.
   //
 
+  /*
   function attachmentsToAmounts(val) {
     if (_.isPlainObject(val)) {
       return _.mapValues(val, attachmentsToAmounts);
@@ -568,13 +579,13 @@ LUPAPISTE.AttachmentsService = function() {
     } else {
       _.forEach(toggles, function(t) { t(true); });
     }
-  }
+  } */
 
   self.togglePreVerdictAccordions = function() {
-    toggleAccordions(0);
+    //toggleAccordions(0);
   };
   self.togglePostVerdictAccordions = function() {
-    toggleAccordions(1);
+    //toggleAccordions(1);
   };
   ko.options.deferUpdates = false;
 };
