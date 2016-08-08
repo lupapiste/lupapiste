@@ -77,8 +77,8 @@
 (sc/defschema ConversionResult
   {:archivable                       sc/Bool
    :archivabilityError               (sc/maybe (apply sc/enum archivability-errors))
-   (sc/optional-key :missing-fonts)  (sc/maybe [sc/Str])
-   (sc/optional-key :autoConversion) (sc/maybe sc/Bool)
+   (sc/optional-key :missing-fonts)  [sc/Str]
+   (sc/optional-key :autoConversion) sc/Bool
    (sc/optional-key :content)        (sc/cond-pre File InputStream)
    (sc/optional-key :filename)       sc/Str})
 
