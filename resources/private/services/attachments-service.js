@@ -5,7 +5,7 @@
 
 LUPAPISTE.AttachmentsService = function() {
   "use strict";
-  var dmsg = window["console"].log;
+  var dmsg = window["console"].log.bind(window["console"]);
   /* jshint devel: true */
   var self = this;
   ko.options.deferUpdates = true;
@@ -187,13 +187,38 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.filtersArray = ko.observableArray(
+  /*self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
             "rakenne", "ei-tarpeen"],
            function( s ) {
              return {ltext: "filter." + s,
                      filter: filters[s]};
-           }));
+           })); */
+
+  var internedObservables = {};
+
+  // keep track of filter toggles, since they are passed over to the UI, and
+  // we need to keep using the same ones after tag updates
+  function internFilterBoolean(key, def) {
+    if (!internedObservables[key]) {
+      dmsg("Interning filter flag " + key + " as " + def);
+      internedObservables[key] = ko.observable(def);
+    }
+    return internedObservables[key];
+  }
+
+  self.filtersArray = ko.observableArray([]);
+
+  // depends on self.filters(), updates self.filtersArray
+  self.filtersArrayDep = ko.computed( function() {
+    // XX debugviesti nakyy ekalla kerralla vain?
+    dmsg("computing...");
+    self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+          function(filter, idx) {
+            dmsg("adding, ", filter, ", to filtersArray");
+            //self.filtersArray[idx] = {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};
+            // mahdollisesti ui ei osaa riippua naistä boolean observableista jotka luodaan on demand, eli hoksaako knockout riippuvuuden jos computedin sisällä luodaan uusi observable?
+            return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
 
   function isTypeId(typeId) {
     return function(attachment) {
