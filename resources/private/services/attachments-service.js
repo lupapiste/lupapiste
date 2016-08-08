@@ -21,7 +21,12 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
   self.filters = ko.observableArray([]);
 
-  self.activeFilters = ko.pureComputed(function() {return self.filters();});
+  self.activeFilters = ko.pureComputed(function() {
+    console.log("activeFilters computed called, #filters", self.filtersArray().length);
+    return _.filter(self.filtersArray(), function(f) {
+      console.log("activeFilters: filter", name, f.filter());
+      return f.filter() == true});
+  });
 
   self.filteredAttachments = ko.pureComputed(
     function() {
@@ -208,16 +213,13 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.filtersArray = ko.observableArray([]);
-
   // depends on self.filters(), updates self.filtersArray
   self.filtersArrayDep = ko.computed( function() {
-    // XX debugviesti nakyy ekalla kerralla vain?
     dmsg("computing...");
     self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
           function(filter, idx) {
             dmsg("adding, ", filter, ", to filtersArray");
             //self.filtersArray[idx] = {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};
-            // mahdollisesti ui ei osaa riippua naistä boolean observableista jotka luodaan on demand, eli hoksaako knockout riippuvuuden jos computedin sisällä luodaan uusi observable?
             return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
 
   function isTypeId(typeId) {
