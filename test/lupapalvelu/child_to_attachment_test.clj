@@ -5,8 +5,11 @@
             [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:import (java.io File)))
+
+(testable-privates lupapalvelu.child-to-attachment build-attachment-options)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
