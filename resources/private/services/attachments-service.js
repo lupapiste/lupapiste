@@ -2,7 +2,9 @@
 // Provides services for attachments tab.
 //
 //
+
 LUPAPISTE.AttachmentsService = function() {
+  /* jshint devel: true */
   "use strict";
   var self = this;
   ko.options.deferUpdates = true;
@@ -10,63 +12,56 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-
   //
   // Attachments
   //
 
-  function createAttachmentModel(attachment) {
+  function createArrayModel(attachment) {
     return ko.observable(attachment);
   }
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
+
   self.filters = ko.observableArray([]);
+  //self.activeFilters = ko.pureComputed(function() {console.log(self.filters()); return [[{"tag": "preVerdict"}]];});
+  self.activeFilters = ko.pureComputed(function() {return self.filters();});
+
+  self.filteredAttachments = ko.pureComputed( 
+    function() { 
+      return applyFilters(self.attachments(), self.activeFilters());});
+
+  self.queryAll = function queryAll() {
+    var fireQuery = function(commandName, responseJsonKey, dataSetter) {
+      ajax.query(commandName, {"id": self.applicationId})
+        .success(function(data) {
+          dataSetter(data[responseJsonKey]);
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .call();
+    };
+
+    fireQuery("attachments", "attachments", self.setAttachments);
+    fireQuery("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    fireQuery("attachments-filters", "attachmentsFilters", self.setFilters);
+  };
 
   self.setAttachments = function(data) {
-    self.attachments(_.map(data.attachments, createAttachmentModel));
+    self.attachments(_.map(data, createArrayModel));
   };
-
-
-  self.queryAttachments = function() {
-    ajax.query("attachments", {"id": self.applicationId})
-      .success(self.setAttachments)
-      .onError("error.unauthorized", notify.ajaxError)
-      .call();
-  };
-
 
   self.setTagGroups = function(data) {
-    self.tagGroups(_.map(data.tagGroups, createAttachmentModel));
-    self.queryAttachments();
-  };
-
-  self.queryTagGroups = function() {
-    ajax.query("attachments-tag-groups", {"id": self.applicationId})
-      .success(self.setTagGroups)
-      .onError("error.unauthorized", notify.ajaxError)
-      .call();
+    self.tagGroups(data);
   };
 
   self.setFilters = function(data) {
-    self.filters(_.map(data.filters, createAttachmentModel));
-    self.queryTagGroups();
+    self.filters(data);
   };
-
-  self.queryFilters = function() {
-    ajax.query("attachments-filters", {"id": self.applicationId})
-      .success(self.setFilters)
-      .onError("error.unauthorized", notify.ajaxError)
-      .call();
-  };
-
 
   lupapisteApp.models.application.id.subscribe(function(newId) {
     self.applicationId = newId;
-    self.queryFilters();
+    self.queryAll();
   });
-
-
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
@@ -79,7 +74,6 @@ LUPAPISTE.AttachmentsService = function() {
       return attachment().id === attachmentId;
     });
   };
-
 
   self.updateAttachment = function(attachmentId, updates) {
     var oldAttachment = self.getAttachment(attachmentId);
@@ -156,6 +150,31 @@ LUPAPISTE.AttachmentsService = function() {
   // Attachment hierarchy
   //
 
+  function findMatchingTag(tags, attachment) {
+    return _.find(tags, function(tag) {
+      return _.includes(attachment.tags, tag);
+    }) || "default";
+  }
+
+  function resolveTagGrouping(attachments, tagGroups) {
+    if (!tagGroups || !tagGroups.length) {
+      return _.map(attachments, "id");
+    }
+    return _(attachments)
+      .groupBy(_.partial(findMatchingTag, _.map(tagGroups, _.head)))
+      .mapValues(function (attachmentsInGroup, tagGroupName) {
+        var tagGroup = _.find(tagGroups, function(tagGroup) {
+          return _.head(tagGroup) === tagGroupName;
+        });
+        return resolveTagGrouping(attachmentsInGroup, _.tail(tagGroup));
+      })
+      .value();
+  }
+
+  function groupAttachmentsByTags(attachments) {
+    return resolveTagGrouping(attachments, self.tagGroups());
+  }
+
   var preVerdictStates = [
     "draft", "info", "answered", "open", "submitted", "complementNeeded", "sent"
   ];
@@ -166,50 +185,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   function isPostVerdict(attachment) {
     return !isPreVerdict(attachment);
-  }
-
-  function getVerdictGroup(attachment) {
-    if (isPreVerdict(attachment)) {
-      return "preVerdict";
-    } else {
-      return "postVerdict";
-    }
-  }
-
-  function getAttachmentOperationId(attachment) {
-    return attachment.op && attachment.op.id;
-  }
-
-  function getMainGroup(attachment) {
-    // Dummy implementation for dummy data
-    switch (attachment.type["type-group"]) {
-    case "osapuolet":
-    case "hakija":
-      return "osapuolet";
-    case "rakennuspaikan_hallinta":
-    case "rakennuspaikka":
-      return "rakennuspaikka";
-    }
-    if (getAttachmentOperationId(attachment)) {
-      return getAttachmentOperationId(attachment);
-    } else {
-      return "yleiset";
-    }
-  }
-
-  function getSubGroup(attachment) {
-    // Dummy implementation for dummy data
-    if (getMainGroup(attachment) === "osapuolet") {
-      return "no-sub-group";
-    } else if (getAttachmentOperationId(attachment)) {
-      if (attachment.type["type-group"] === "paapiirustus") {
-        return "paapiirustus";
-      } else {
-        return attachment.type["type-id"];
-      }
-    } else {
-      return "no-sub-group";
-    }
   }
 
   //
@@ -227,6 +202,12 @@ LUPAPISTE.AttachmentsService = function() {
         "paapiirustukset": ko.observable(false)
   };
 
+  self.disableAllFilters = function() {
+    _.forEach(_.values(filters), function(filter) {
+      filter(false);
+    });
+  };
+
   self.filtersArray = ko.observableArray(
     _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
             "rakenne", "ei-tarpeen"],
@@ -234,12 +215,6 @@ LUPAPISTE.AttachmentsService = function() {
              return {ltext: "filter." + s,
                      filter: filters[s]};
            }));
-
-  self.disableAllFilters = function() {
-    _.forEach(_.values(filters), function(filter) {
-      filter(false);
-    });
-  };
 
   function isTypeId(typeId) {
     return function(attachment) {
@@ -289,30 +264,35 @@ LUPAPISTE.AttachmentsService = function() {
     });
   }
 
-  function preVerdictAttachments(attachments) {
-    return filteredAttachments("hakemus", attachments);
-  }
-
-  function postVerdictAttachments(attachments) {
-    return filteredAttachments("rakentaminen", attachments);
-  }
-
   function notNeededForModel(attachment) {
     return attachment.notNeeded;
   }
 
+  function unwrapValuePair(val, key) {
+    var res = {};
+    res[ko.utils.unwrapObservable(key)] = ko.utils.unwrapObservable(val);
+    return res;
+  }
+
+  function observable_vector_values(arr) {
+    return _.map(ko.utils.unwrapObservable(arr),ko.utils.unwrapObservable);
+  }
+  function observable_object_values(arr) {
+    return _.map(ko.utils.unwrapObservable(arr), unwrapValuePair);
+  }
+  self.isAttachmentFiltered = function (att) {
+    //console.log("tarkastetaan on filtteröity", att());
+    console.log("tarkastetaan näkyykö liite tageilla ", att().tags, " valittuna ollessa ", _.map(self.activeFilters()[0], function(filter) { return filter.tag; }));
+    console.log("filters ", observable_object_values(filters));
+    return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
+  };
+
   function applyFilters(attachments) {
-    var atts = _(attachments)
-          .filter(function(attachment) {
-            return filters["ei-tarpeen"]() || !self.isNotNeeded(attachment);
-          }).value();
+    console.log("käytettäisiin uusia filttereitä ", self.filters());
     if (showAll()) {
-      return atts;
+      return attachments;
     }
-    return _.concat(
-      preVerdictAttachments(_.filter(atts, isPreVerdict)),
-      postVerdictAttachments(_.filter(atts, isPostVerdict))
-    );
+    return _.filter(attachments, self.isAttachmentFiltered);
   }
 
   //
@@ -321,40 +301,16 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Return attachment ids grouped first by type-groups and then by type ids.
   self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.attachments(), function (a) { return a.peek(); });
-    return _(applyFilters(attachments))
-      .groupBy(getVerdictGroup)
-      .mapValues(function(attachmentsOfVerdictGroup) {
-        return _(attachmentsOfVerdictGroup)
-          .groupBy(getMainGroup)
-          .mapValues(function(attachmentsOfMainGroup) {
-            var subGroups = _(attachmentsOfMainGroup)
-              .groupBy(getSubGroup)
-              .mapValues(function(attachments) {
-                return _.map(attachments, "id");
-              })
-              .value();
-            return subGroups["no-sub-group"] || subGroups;
-          })
-          .value();
-      })
-      .value();
+    var attachments = _.map(self.filteredAttachments(), ko.utils.unwrapObservable);
+    return groupAttachmentsByTags(attachments);
   };
+
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
-
-  function getAttachmentById(attachmentId) {
-    var attachment = self.getAttachment(attachmentId);
-    if (attachment) {
-      return attachment;
-    } else {
-      return null;
-    }
-  }
-
 
   self.modelForAttachmentInfo = function(attachmentIds) {
     var attachments = _(attachmentIds)
-          .map(getAttachmentById)
+          .map(self.getAttachment)
+          .filter(_.identity)
           .value();
     return {
       approve:      self.approveAttachment,
@@ -388,7 +344,6 @@ LUPAPISTE.AttachmentsService = function() {
   // If some of the subgroups in the main group are rejected -> rejected
   // Else null
   function subGroupsStatus(subGroups) {
-
     return ko.pureComputed(function() {
       if (_.every(_.values(subGroups),
                   function(sg) {
@@ -400,8 +355,7 @@ LUPAPISTE.AttachmentsService = function() {
         return _.some(_.values(subGroups),
                       function(sg) {
                         return sg.status() === self.REJECTED;
-                     })
-        ? self.REJECTED : null;
+                     }) ? self.REJECTED : null;
       }
     });
   }
@@ -424,7 +378,7 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function hierarchyToGroups(hierarchy) {
-    return _(hierarchy).mapValues(function(group, name) {
+    return _.mapValues(hierarchy, function(group, name) {
       if (_.isPlainObject(group)) {
         return {
           type: "main",
@@ -438,7 +392,7 @@ LUPAPISTE.AttachmentsService = function() {
           attachmentIds: group
         };
       }
-    }).value();
+    });
   }
 
   function groupToModel(group) {
@@ -449,12 +403,12 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  self.verdicts = ko.pureComputed(function() {
-    return  _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
-                        groupToModel);
+  self.attachmentGroups = ko.pureComputed(function() {
+    return _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
+                       groupToModel);
   });
 
-  function getAttachmentsForGroup() {
+  function getAttachmentsForGroup(groupPath) {
     function getAttachments(group) {
       if (_.isPlainObject(group)) {
         return _.flatten(_.map(_.values(group), getAttachments));
@@ -462,63 +416,76 @@ LUPAPISTE.AttachmentsService = function() {
         return group;
       }
     }
-    var args = _.toArray(arguments);
-    var group = _.get(self.attachmentsHierarchy.peek(), args);
+    var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
     return getAttachments(group);
   }
 
-  function getDataForGroup() {
-    var args = _.toArray(arguments);
+  function getDataForGroup(groupPath) {
     return ko.pureComputed(function() {
-      return  _.merge(_.get(self.verdicts(), args));
+      return util.getIn(self.attachmentGroups(), groupPath);
     });
   }
 
-  function getDataForAccordion() {
-    var args = _.toArray(arguments);
+  function getOperationLocalization(operationId) {
+    var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
+    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
+  }
+
+  function getLocalizationForDefaultGroup(groupPath) {
+    if (groupPath.length === 1) {
+      return loc("application.attachments.general");
+    } else {
+      return loc("application.attachments.other");
+    }
+  }
+
+  function groupToAccordionName(groupPath) {
+    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
+        key = _.last(groupPath);
+    if (opIdRegExp.test(key)) {
+      return getOperationLocalization(opIdRegExp.exec(key)[1]);
+    } else if (_.last(groupPath) === "default") {
+      return getLocalizationForDefaultGroup(groupPath);
+    } else {
+      return loc(["application", "attachments", key]);
+    }
+  }
+
+  function getDataForAccordion(groupPath) {
     return {
-      name: _.last(args),
+      lname: groupToAccordionName(groupPath),
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
-          name: _.last(args),
-          attachmentIds: _.spread(getAttachmentsForGroup)(args)
+          lname: groupToAccordionName(groupPath),
+          attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
     };
   }
 
-  function attachmentTypeLayout(verdictType) {
-    return [
-      getDataForAccordion(verdictType, "yleiset"),
-      getDataForAccordion(verdictType, "osapuolet"),
-      getDataForAccordion(verdictType, "rakennuspaikka"),
-      {name: "op-id", // TODO generalize for any number of ops
-       open: ko.observable(),
-       data: getDataForGroup(verdictType, "op-id"),
-       accordions: [
-         getDataForAccordion(verdictType, "op-id", "paapiirustus"),
-         getDataForAccordion(verdictType, "op-id", "kvv_suunnitelma"),
-         getDataForAccordion(verdictType, "op-id", "iv_suunnitelma"),
-         getDataForAccordion(verdictType, "op-id", "rakennesuunnitelma"),
-         getDataForAccordion(verdictType, "op-id", "muu_suunnitelma")
-       ]
-      }
-    ];
+  function attachmentTypeLayout(groupPath, tagGroups) {
+    if (tagGroups.length) {
+      return {
+        lname: groupToAccordionName(groupPath),
+        open: ko.observable(),
+        data: getDataForGroup(groupPath),
+        accordions: _.map(tagGroups, function(tagGroup) {
+          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup));
+        })
+      };
+    } else {
+      return getDataForAccordion(groupPath);
+    }
   }
 
-  self.layout = [
-    {
-      name: "preVerdict",
-      data: getDataForGroup("preVerdict"),
-      accordions: attachmentTypeLayout("preVerdict")
-    },
-    {
-      name: "postVerdict",
-      data: getDataForGroup("postVerdict"),
-      accordions: attachmentTypeLayout("postVerdict")
+  self.layout = ko.computed(function() {
+    if (self.tagGroups().length) {
+      return attachmentTypeLayout([], self.tagGroups());
+    } else {
+      return {};
     }
-  ];
+  });
 
 
   //

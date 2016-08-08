@@ -22,19 +22,23 @@ Sonja inits applications
   Sonja creates an application and invites foreman
   Sonja creates an application and invites foreman
 
-Submit the base app
-  Click by test id  test-application-link-permit-lupapistetunnus
-  Wait until  Primary operation is  kerrostalo-rivitalo
-  Submit application
+Submit the base apps
+  Submit foreman base app  0
+  Submit foreman base app  1
+  [Teardown]  Logout
 
-Foreman sees his other foreman jobs
+Foreman fills personal information and submits the first foreman application 
   Foreman logs in
   Foreman applies personal information to the foreman application  0
+  
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Positive indicator should be visible
+  Submit application
 
-Foreman submits the second application
+Foreman cannot see related projects
   Foreman applies personal information to the foreman application  1
-  Foreman can see the first related construction info on the second foreman application
-
+  No such test id  'muutHankkeet.1.luvanNumero'
+  
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
   Select from list by value  permitSubtypeSelect  tyonjohtaja-ilmoitus
   Open tab  requiredFieldSummary
@@ -46,10 +50,25 @@ Foreman application can be submitted
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
   Submit application
+  [Teardown]  Logout
+
+Sonja logs in and gets verdict for the first foreman application
+  Sonja logs in
+  Verdict for foreman application  0
+  [Teardown]  Logout
+
+Foreman logs in and checks related projects on the second foreman application
+  Foreman logs in
+  Open foreman application  1
+  Open tab  parties
+  Open foreman accordions
+  Scroll and click test id  fill-info-button
+  Wait for jQuery
+  Check related project  0  
 
 Can not link base app to foreman application
   Open project application
-  Click by test id  accept-invite-button
+  Confirm yes no dialog
 
   Open linking dialog
 

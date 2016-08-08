@@ -760,6 +760,9 @@
 
 (defquery calendars-enabled
   {:user-roles #{:authority :authorityAdmin :applicant}
-   :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :authorityAdmin :applicant})]
+   :pre-checks [(fn [_]
+                  (when-not (and (env/value :ajanvaraus :host) (env/value :ajanvaraus :username) (env/value :ajanvaraus :password))
+                    unauthorized))
+                (partial cal/calendars-enabled-api-pre-check #{:authority :authorityAdmin :applicant})]
    :feature    :ajanvaraus}
   [_])

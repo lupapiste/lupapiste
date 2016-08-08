@@ -158,7 +158,11 @@
        [["muistomerkin-rauhoittaminen" :muistomerkin-rauhoittaminen]]]
 
       ; permit/YM
-      ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]])])
+      ["maastoliikennelaki-kilpailut-ja-harjoitukset" :maastoliikennelaki-kilpailut-ja-harjoitukset]
+
+      ["puiden-kaataminen"
+       [["ilmoitus-puiden-kaatamisesta-asemakaava-alueella" :yl-puiden-kaataminen]]]
+      ])])
 
 (def operation-tree-for-KT ; aka kiinteistotoimitus aka maanmittaustoimitukset
   ["maanmittaustoimitukset"
@@ -340,6 +344,15 @@
                                    :add-operation-allowed false
                                    :min-outgoing-link-permits 0
                                    :asianhallinta false}
+   :yl-puiden-kaataminen           {:schema "maisematyo"
+                                    :permit-type permit/YL
+                                    :applicant-doc-schema applicant-doc-schema-name-R
+                                    :required mini-rakval-schemas
+                                    :optional optional-mini-rakval-schemas
+                                    :attachments [:paapiirustus [:asemapiirros]]
+                                    :add-operation-allowed false
+                                    :min-outgoing-link-permits 0
+                                    :asianhallinta true}
    })
 
 (def- yi-operations
