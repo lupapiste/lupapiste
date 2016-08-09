@@ -468,37 +468,32 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application user attachment options]
-    {:pre [(map? options)]}
-    (set-attachment-version! application user attachment options 5))
-  ([application user {attachment-id :id :as attachment} options retry-limit]
+  ([application {attachment-id :id :as attachment} {:keys [stamped] :as options}]
     {:pre [(map? application) (map? attachment) (map? options)]}
-    (if (pos? retry-limit)
-      (let [latest-version  (get-in attachment [:latestVersion :version])
-            version-model   (make-version attachment user options)
-            comment-updates (attachment-comment-updates application user attachment options)]
-        ; Check return value and try again with new version number
-        (if (pos? (update-application
-                   (application->command application)
-                   {:attachments {$elemMatch {:id attachment-id
-                                              :latestVersion.version.fileId (:fileId latest-version)}}}
-                   (merge
-                     comment-updates
-                     (build-version-updates user attachment version-model options))
-                   true))
-          (do
-            (remove-old-files! attachment version-model)
-            (assoc version-model :id attachment-id))
-          (do
-            (errorf
-              "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
-              attachment-id retry-limit)
-            (let [application (mongo/by-id :applications (:id application) [:attachments :state])
-                  attachment  (get-attachment-info application attachment-id)]
-              (set-attachment-version! application user attachment options (dec retry-limit))))))
-      (do
-        (error "Concurrency issue: Could not save attachment version meta data.")
-        nil))))
+   (loop [application application attachment attachment retries-left 5]
+     (let [version-model (make-version attachment options)
+           mongo-query   {:attachments {$elemMatch {:id attachment-id
+                                                    :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
+           mongo-updates (merge (attachment-comment-updates application attachment version-model options)
+                                (build-version-updates attachment version-model options))
+           update-result (update-application (application->command application) mongo-query mongo-updates true)]
+
+       (cond (pos? update-result)
+             (do (remove-old-files! attachment version-model)
+                 (assoc version-model :id attachment-id))
+
+             (pos? retries-left)
+             (do (errorf
+                  "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
+                  attachment-id retries-left)
+                 (let [application (mongo/by-id :applications (:id application) [:attachments :state])
+                       attachment  (get-attachment-info application attachment-id)]
+                   (recur application attachment (dec retries-left))))
+
+             :else
+             (do (error
+                  "Concurrency issue: Could not save attachment version meta data.")
+                 nil))))))
 
 (defn meta->attachment-data [{group :group :as meta}]
   (merge (select-keys meta [:contents :size :scale])
