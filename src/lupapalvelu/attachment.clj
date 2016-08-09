@@ -536,7 +536,8 @@
              :attachments.$.latestVersion.user user-summary
              :attachments.$.latestVersion.fileId file-id
              :attachments.$.latestVersion.size size
-             :attachments.$.latestVersion.created now}})))
+             :attachments.$.latestVersion.created now}})
+    {:fileId file-id}))
 
 (defn get-or-create-attachment!
   "If the attachment-id matches any old attachment, it is returned.

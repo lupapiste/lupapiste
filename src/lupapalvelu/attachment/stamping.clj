@@ -38,17 +38,17 @@
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
     (debug "uploading stamped file: " (.getAbsolutePath file))
-    (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-      (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
-      (att/upload-and-attach-new! {:application application :user user}
-                                  {:attachment-id attachment-id
-                                   :comment-text nil :created created
-                                   :stamped true :comment? false :state :ok}
-                                  {:filename filename :content file
-                                   :contentType contentType :size (.length file)}))
+    (let [result (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
+                   (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
+                   (att/upload-and-attach-new! {:application application :user user}
+                                               {:attachment-id attachment-id
+                                                :comment-text nil :created created
+                                                :stamped true :comment? false :state :ok}
+                                               {:filename filename :content file
+                                                :contentType contentType :size (.length file)}))]
     (io/delete-file file :silently)
     (tos/mark-attachment-final! application created attachment-id)
-    new-file-id))
+    (:fileId result))))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
