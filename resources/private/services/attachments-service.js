@@ -230,16 +230,6 @@ LUPAPISTE.AttachmentsService = function() {
     };
   }
 
-  var filterFunctions = {
-    "hakemus": isPreVerdict,
-    "rakentaminen": isPostVerdict,
-    "ei-tarpeen": self.isNotNeeded,
-    "iv": isTypeId("iv_suunnitelma"),
-    "kvv": isTypeId("kvv_suunnitelma"),
-    "rakenne": isTypeId("rakennesuunnitelma"),
-    "paapiirustukset": isTypeGroup("paapiirustus")
-  };
-
   function showAll() {
     var filterValues = _.mapValues(filters, function(f) { return f(); });
     return _(filterValues).omit("ei-tarpeen").values()
@@ -248,12 +238,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   function notNeededForModel(attachment) {
     return attachment.notNeeded;
-  }
-
-  function unwrapValuePair(val, key) {
-    var res = {};
-    res[ko.utils.unwrapObservable(key)] = ko.utils.unwrapObservable(val);
-    return res;
   }
 
   self.isAttachmentFiltered = function (att) {
