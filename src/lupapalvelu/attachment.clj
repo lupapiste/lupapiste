@@ -682,16 +682,17 @@
         conversion-result  (conversion/archivability-conversion application (assoc initial-filedata
                                                                               :attachment-type (:attachment-type attachment-options)
                                                                               :content (:content file-options)))
-        conversion-result  (if (:autoConversion conversion-result)
-                             (merge conversion-result (file-upload/save-file (select-keys conversion-result [:content :filename])
-                                                                             {:application (:id application) :linked false}))
-                             conversion-result)
-        attachment         (get-or-create-attachment! application user attachment-options)
+        converted-filedata (when (:autoConversion conversion-result)
+                                 ;; when conversion was made, upload is needed, initial-filedata's fileId will be overwritten
+                                 (file-upload/save-file (select-keys conversion-result [:content :filename])
+                                                        {:application (:id application) :linked false}))
         options            (merge attachment-options
                                   initial-filedata
-                                  conversion-result ; when conversion (and thus upload) was made, initial-filedata's fileId will be overwritten
+                                  conversion-result
                                   {:original-file-id (or (:original-file-id attachment-options)
-                                                         (:fileId initial-filedata))})
+                                                         (:fileId initial-filedata))}
+                                  converted-filedata)
+        attachment         (get-or-create-attachment! application user attachment-options)
         linked-version     (set-attachment-version! application user attachment options)]
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     linked-version))
