@@ -11,7 +11,7 @@
   (:import (java.io File InputStream)))
 
 
-(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error})
+(def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error :not-validated})
 
 (def libre-conversion-file-types
   #{:application/vnd.openxmlformats-officedocument.presentationml.presentation
@@ -61,7 +61,7 @@
                                         :autoConversion (:autoConversion processing-result)}))
         (finally
           (io/delete-file temp :silently))))
-    {:archivable false :archivabilityError :invalid-mime-type}))
+    {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
   (let [valid? (tiff-validation/valid-tiff? content)]
