@@ -703,22 +703,18 @@
    :states           (lupapalvelu.states/all-application-states-but :draft)}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId filename user created stamped]} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")
-          upload-options (merge
-                           base-upload-options
-                           {:content temp-pdf
-                            :attachment-id attachmentId
-                            :upload-pdfa-only true
-                            :filename filename
-                            :content-type contentType
-                            :created created
-                            :user user
-                            :stamped stamped})]
+    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
+          temp-pdf (File/createTempFile fileId ".tmp")]
       (try
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
-          (upload! application (assoc upload-options :size (.length temp-pdf))))
+          (attachment/upload-and-attach-new! {:application application :user user}
+                                             {:attachment-id attachmentId
+                                              :comment-text nil
+                                              :required false
+                                              :created created
+                                              :stamped stamped}
+                                             {:content temp-pdf :filename filename}))
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))

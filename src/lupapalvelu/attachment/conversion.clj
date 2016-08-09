@@ -3,7 +3,6 @@
             [schema.core :as sc]
             [clojure.java.io :as io]
             [lupapalvelu.attachment.file :as file]
-            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
