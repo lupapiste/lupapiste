@@ -500,16 +500,16 @@ var attachment = (function() {
     ajax
       .query("attachment-groups", {id: applicationId})
       .success(function(resp) {
+        var currentGroup = _.pickBy({groupType: attachment.groupType,
+                                     id: util.getIn(attachment, ["op", "id"])},
+                                    _.isString);
         // We update group selection only if it has actually changed.
         if( !_.isEqual( resp.groups, model.selectableGroups()) ) {
-          var currentGroup = _.pickBy({groupType: attachment.groupType,
-                                       id: util.getIn(attachment, ["op", "id"])},
-                                      _.isString);
           model.selectableGroups(resp.groups);
-          if (!_.isEmpty(currentGroup)) {
-            model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
-          }
         }
+        model.selectedGroup( _.isEmpty(currentGroup)
+                             ? null
+                             : _.find(model.selectableGroups(), currentGroup));
       })
       .call();
 
