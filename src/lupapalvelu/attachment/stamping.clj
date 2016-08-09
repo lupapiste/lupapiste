@@ -38,28 +38,17 @@
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
     (debug "uploading stamped file: " (.getAbsolutePath file))
-    (let [is-pdf-a?              (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
-          {new-file-id :fileId}  (file-upload/save-file  {:filename filename
-                                                          :content-type contentType
-                                                          :content file}
-                                                         {:application (:id application)})]
-
-      (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
-        (att/set-attachment-version! application
-                                     user
-                                     (att/get-attachment-info application attachment-id)
-                                     {:attachment-id  attachment-id
-                                      :fileId new-file-id :original-file-id new-file-id
-                                      :filename filename
-                                      :contentType contentType :size (.length file)
-                                      :comment-text nil :created created
-                                      :archivable is-pdf-a?
-                                      :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-                                      :stamped true :comment? false :state :ok}))
-      (io/delete-file file :silently)
-      (tos/mark-attachment-final! application created attachment-id)
-      new-file-id)))
+    (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
+      (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
+      (att/upload-and-attach-new! {:application application :user user}
+                                  {:attachment-id attachment-id
+                                   :comment-text nil :created created
+                                   :stamped true :comment? false :state :ok}
+                                  {:filename filename :content file
+                                   :contentType contentType :size (.length file)}))
+    (io/delete-file file :silently)
+    (tos/mark-attachment-final! application created attachment-id)
+    new-file-id))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
