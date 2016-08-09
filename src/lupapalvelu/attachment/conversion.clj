@@ -86,5 +86,5 @@
   Returns ConversionResult map."
   [application filedata]
   {:pre  [(contains? filedata :contentType) (contains? filedata :content)]
-   :post [(sc/validate ConversionResult %)]}
+   :post [(nil? (sc/check ConversionResult %))]}
   (convert-file application filedata))
