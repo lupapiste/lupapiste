@@ -666,16 +666,16 @@
 
 (defn- preview-image!
   "Creates a preview image in own thread pool. Returns the given opts."
-  [application-id {:keys [fileId filename contentType] :as opts}]
-  (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*))
-  opts)
+  [application-id fileId filename contentType]
+  (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*)))
 
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
    2) Validates and converts for archivability, uploads converted file to GridFS if applicable
    3) Creates and saves attachment model for application, or fetches it if attachment-id is given
-   4) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
+   4) Creates preview image in separate thread
+   5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
   [{:keys [application user]} attachment-options file-options]
   (let [initial-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
@@ -694,6 +694,7 @@
                                   converted-filedata)
         attachment         (get-or-create-attachment! application user attachment-options)
         linked-version     (set-attachment-version! application user attachment options)]
+    (preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     linked-version))
 
