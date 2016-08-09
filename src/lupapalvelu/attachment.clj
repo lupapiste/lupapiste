@@ -475,7 +475,7 @@
      (let [version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
-           mongo-updates (merge (attachment-comment-updates application attachment version-model options)
+           mongo-updates (merge (attachment-comment-updates application user attachment options)
                                 (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates true)]
 
