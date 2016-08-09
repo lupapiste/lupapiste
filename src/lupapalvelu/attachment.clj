@@ -416,9 +416,9 @@
        ;; Conversion could be done here as well, but we don't want to lose information.
        :filename       filename
        :contentType    contentType
-       :size           size}
-      :stamped stamped
-      :archivable archivable
+       :size           size
+       :stamped        (boolean stamped)
+       :archivable     (boolean archivable)}
       :archivabilityError archivabilityError
       :missing-fonts missing-fonts
       :autoConversion autoConversion)))
