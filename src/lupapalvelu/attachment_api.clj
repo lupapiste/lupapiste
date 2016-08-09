@@ -10,7 +10,7 @@
             [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
-            [lupapalvelu.application :as a]
+            [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.file :as file]
@@ -22,7 +22,6 @@
             [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
-            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
@@ -32,11 +31,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus])
+            [lupapalvelu.tiedonohjaus :as tos])
   (:import [java.io File]))
 
 ;; Validators and pre-checks
@@ -119,7 +117,7 @@
 
 (defn- validate-operation-in-application [{data :data application :application}]
   (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
-    (when-not (util/find-by-id op-id (a/get-operations application))
+    (when-not (util/find-by-id op-id (app/get-operations application))
       (fail :error.illegal-attachment-operation))))
 
 ;;
@@ -182,13 +180,13 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [app/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (att-type/parse-attachment-type attachmentType)]
     (if (att-type/allowed-attachment-type-for-application? attachment-type application)
-      (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
-                         (tiedonohjaus/update-end-dates (:verdicts application)))]
+      (let [metadata (-> (tos/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
+                         (tos/update-end-dates (:verdicts application)))]
         (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
@@ -232,7 +230,7 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+   :pre-checks  [has-versions, app/validate-authority-in-drafts]}
   [command]
   (attachment/set-attachment-state! command fileId :ok))
 
@@ -242,7 +240,7 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+   :pre-checks  [has-versions, app/validate-authority-in-drafts]}
   [command]
   (attachment/set-attachment-state! command fileId :requires_user_action))
 
@@ -257,7 +255,7 @@
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                           (fail :error.unknown-attachment-type)))
-                      a/validate-authority-in-drafts]
+                      app/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles       #{:authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
@@ -299,7 +297,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered))
-   :pre-checks  [a/validate-authority-in-drafts
+   :pre-checks  [app/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
@@ -316,7 +314,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts
+   :pre-checks  [app/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-editable-by-application-state
                  attachment/ram-status-not-ok
@@ -385,7 +383,7 @@
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
-          application (a/with-masked-person-ids application user)]
+          application (app/with-masked-person-ids application user)]
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
@@ -460,7 +458,7 @@
                 statement/upload-attachment-allowed
                 (partial attachment-editable-by-application-state true)
                 validate-attachment-type
-                a/validate-authority-in-drafts
+                app/validate-authority-in-drafts
                 attachment-id-is-present-in-application-or-not-set
                 validate-operation-in-application
                 attachment-not-readOnly]
@@ -506,10 +504,10 @@
    :pre-checks  [(partial attachment/if-not-authority-state-must-not-be #{:sent})
                  attachment-editable-by-application-state
                  validate-attachment-type
-                 a/validate-authority-in-drafts
+                 app/validate-authority-in-drafts
                  attachment-id-is-present-in-application-or-not-set]
    :states      (conj (states/all-states-but states/terminal-states) :answered)
-   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
@@ -593,7 +591,7 @@
                 (fn [{application :application}]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))
-                a/validate-authority-in-drafts]
+                app/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -632,7 +630,7 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation validate-group]
-   :pre-checks [a/validate-authority-in-drafts
+   :pre-checks [app/validate-authority-in-drafts
                 attachment-editable-by-application-state
                 attachment-not-readOnly
                 validate-operation-in-application]}
@@ -647,7 +645,7 @@
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
    :states     #{:draft :open :submitted :complementNeeded}
-   :pre-checks [a/validate-authority-in-drafts]}
+   :pre-checks [app/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
@@ -679,7 +677,7 @@
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]
-   :pre-checks       [a/validate-authority-in-drafts
+   :pre-checks       [app/validate-authority-in-drafts
                       (fn [{{attachment-id :attachmentId} :data app :application}]
                         (when attachment-id
                           (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) (:attachments app))]

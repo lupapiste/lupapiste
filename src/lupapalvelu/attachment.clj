@@ -554,7 +554,7 @@
     (cond
       (ss/blank? attachment-id) (create-attachment! application attachment-options)
       @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
-      :else (create-attachment! application attachment-options))))
+      :else (create-attachment! application attachment-options)))) ; if given attachment-id didn't match, create new
 
 (defn- attachment-file-ids
   "Gets all file-ids from attachment."
