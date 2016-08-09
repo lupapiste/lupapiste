@@ -46,6 +46,8 @@
         return coerceValuesToSchemaType(v, inputTypeMap[k], uneditableFieldMap[k]);
       } else if(inputTypeMap[k] === "number") {
         return parseInt(v, 10);
+      } else if(inputTypeMap[k] === "checkbox" && v === null) {
+        return false;
       } else {
         return v;
       }
@@ -53,7 +55,9 @@
   };
 
   var isValid = function(value, requiredType) {
-    if (value !== undefined && value !== null) {
+    if (requiredType === "checkbox") {
+      return true;
+    } else if (value !== undefined && value !== null) {
       if (requiredType === "number") {
         return !isNaN(value) && _.isFinite(parseInt(value, 10));
       } else if (requiredType === "text") {
