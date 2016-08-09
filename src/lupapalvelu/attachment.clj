@@ -663,69 +663,12 @@
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
-(defn ->libre-pdfa!
-  "Converts content to PDF/A using Libre Office conversion client.
-  Replaces (!) original filename and content with Libre data.
-  Adds :archivable + :autoConversion / :archivabilityError key depending on conversion result.
-  Returns given options map with libre data merged (or if conversion failed, the original data).
-  If conversion not applicable, returns original given options map."
-  [{:keys [filename content skip-pdfa-conversion] :as options}]
-  (if (and (not skip-pdfa-conversion)
-           (conversion/libreoffice-conversion-required? options))
-    (merge options (libreoffice-client/convert-to-pdfa filename content))
-    options))
-
 
 (defn- preview-image!
   "Creates a preview image in own thread pool. Returns the given opts."
   [application-id {:keys [fileId filename contentType] :as opts}]
   (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*))
   opts)
-
-(defn- upload-file
-  "Uploads the file to MongoDB.
-   Content can be a file or input-stream.
-   Returns given attachment options, with file specific data added."
-  [{application-id :id :as application} options]
-  {:pre [(map? application)]}
-  (let [filedata (file-upload/save-file (select-keys options [:filename :content :size]) :application application-id)]
-    (merge options
-           filedata
-           {:original-file-id (or (:original-file-id options) (:fileId filedata))})))
-
-(defn upload-file-through-libre!
-  [application options]
-  (->> (->libre-pdfa! options)
-       (upload-file application)))
-
-(defn upload-and-attach-file!
-  "1) Uploads the original file to MongoDB if conversion is required and :keep-original-file? is true and
-   2) converts file to PDF/A, if the file format is convertable and
-   3) uploads the file to MongoDB and
-   4) creates a preview image and
-   5) creates a corresponding attachment structure to application
-   Content can be a file or input-stream.
-   Returns attachment version."
-  [application options]
-  (let [temp-file        (File/createTempFile "lupapiste-attach-file" ".pdf")
-        _                (io/copy (:content options) temp-file)
-        options          (assoc options :content temp-file)
-        original-file-id (when (and (:keep-original-file? options)
-                                    (conversion/libreoffice-conversion-required? options))
-                           (->> (assoc options :skip-pdfa-conversion true)
-                                (upload-file application)
-                                (preview-image! (:id application))
-                                :fileId))
-        user             (:user options)]
-    (try
-      (->> (cond-> options
-                   original-file-id (assoc :original-file-id original-file-id))
-           (upload-file-through-libre! application)
-           (preview-image! (:id application))
-           (merge options {:stamped (get options :stamped false)})
-           (set-attachment-version! application user (get-or-create-attachment! application (:user options) options)))
-      (finally
-        (io/delete-file temp-file :silently)))))
 
 
 (defn upload-and-attach-new!

@@ -396,60 +396,6 @@
 ;; Upload
 ;;
 
-(def- base-upload-options
-  {:comment-text nil
-   :required false
-   :archivable false
-   :archivabilityError :invalid-mime-type
-   :upload-pdfa-only false
-   :missing-fonts []})
-
-
-(defn- convert-pdf-and-upload! [application
-                                {:keys [pdfa? output-file missing-fonts autoConversion]}
-                                {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
-  (if pdfa?
-    (let [attach-file-result (or upload-pdfa-only (attachment/upload-and-attach-file! application attachment-data) (fail! :error.unknown))
-          new-filename (file/filename-for-pdfa filename)
-          new-id       (or (:id attach-file-result) attachment-id)
-          application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
-          pdfa-attachment-data (assoc attachment-data
-                                 :attachment-id new-id
-                                 :content output-file
-                                 :filename new-filename
-                                 :comment? false
-                                 :archivable true
-                                 :autoConversion autoConversion
-                                 :archivabilityError nil)]
-      (if (attachment/upload-and-attach-file! application pdfa-attachment-data)
-        (do (io/delete-file output-file :silently)
-            nil)
-        (fail :error.unknown)))
-    (let [missing-fonts (or missing-fonts [])]
-      (attachment/upload-and-attach-file! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
-
-(defn- upload! [application {:keys [filename content] :as attachment-data}]
-  (let [mt (keyword (mime/mime-type filename))]
-    (cond
-      (and (= mt :application/pdf)
-           (pdf-conversion/pdf-a-required?
-             (:organization application))) (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
-                                             (if (:already-valid-pdfa? processing-result)
-                                               (attachment/upload-and-attach-file! application (assoc attachment-data :archivable true :archivabilityError nil))
-                                               (convert-pdf-and-upload! application processing-result attachment-data)))
-
-      (= mt :image/tiff) (let [valid? (tiff-validation/valid-tiff? content)
-                               attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                           (attachment/upload-and-attach-file! application attachment-data))
-
-      (conversion/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
-                                                                         (attachment/upload-and-attach-file! application)
-                                                                         :id
-                                                                         (assoc attachment-data :attachment-id)
-                                                                         (attachment/upload-and-attach-file! application))
-
-      :else (attachment/upload-and-attach-file! application (assoc attachment-data :skip-pdfa-conversion true)))))
-
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
