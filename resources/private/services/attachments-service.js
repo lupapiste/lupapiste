@@ -19,13 +19,20 @@ LUPAPISTE.AttachmentsService = function() {
   self.tagGroups = ko.observableArray([]);
   self.filters = ko.observableArray([]);
 
+  // observables to be depended on in filters received later from the backend
+  // (preconstructed, because we need to know observables to depend on before 
+  //  we have information about filters and tags at hand)
+  self.freeObservables = [ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false)];
+
   self.activeFilters = ko.pureComputed(function() {
+    //_.map(self.internedObservables, function(v, k) { console.log("filter ", k, " = ", v()); })
     return _.filter(self.filtersArray(), function(f) {
       return f.filter() == true});
   });
 
   self.filteredAttachments = ko.pureComputed(
     function() {
+      //console.log("recomputing filteredAttachments");
       return applyFilters(self.attachments(), self.activeFilters());});
 
   self.queryAll = function queryAll() {
@@ -188,41 +195,36 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  var internedObservables = {};
+    
+  self.internedObservables = {};
 
   // keep track of filter toggles, since they are passed over to the UI, and
   // we need to keep using the same ones after tag updates
   function internFilterBoolean(key, def) {
-    if (!internedObservables[key]) {
-      internedObservables[key] = ko.observable(def);
+    if (!self.internedObservables[key]) {
+      var obs = self.freeObservables.pop();
+      //console.log("interning ", key, " = ", obs);
+      obs(def);
+      //console.log(" - value is now ", obs());
+      self.internedObservables[key] = obs;
     }
-    return internedObservables[key];
+    return self.internedObservables[key];
   }
 
   self.filtersArray = ko.observableArray([]);
-  // depends on self.filters(), updates self.filtersArray
+
   self.filtersArrayDep = ko.computed( function() {
+    var obsValues = _.map(self.freeObservables, function(f) { return f(); }); // cause a dependency on all free obs
+    //console.log("filtersArrayDep being recomputed. obsvalues are ", obsValues);
     self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
           function(filter, idx) {
-            //self.filtersArray[idx] = {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};
-            return {ltext: "filter." + filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
-
-  function isTypeId(typeId) {
-    return function(attachment) {
-      return attachment.type["type-id"] === typeId;
-    };
-  }
-
-  function isTypeGroup(typeGroup) {
-    return function(attachment) {
-      return attachment.type["type-group"] === typeGroup;
-    };
-  }
+           return {ltext: "filter." + filter.tag, tag: filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
 
   function showAll() {
-    var filterValues = _.mapValues(oldDummyFilters, function(f) { return f(); });
-    return _(filterValues).omit("ei-tarpeen").values()
-           .every(function(f) { return !f; });
+    return false;
+    //var filterValues = _.mapValues(internedObservables, function(f) { return f(); });
+    //return _(filterValues).omit("ei-tarpeen").values()
+    //       .every(function(f) { return !f; });
   }
 
   function notNeededForModel(attachment) {
@@ -240,13 +242,19 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.isAttachmentFiltered = function (att) {
-    return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
+    //console.log("isAttachmentFiltered: activeFilters is ", self.activeFilters());
+    //console.log("Checkig if attachment with tags", att().tags, "matches filters", 
+    //  _.map(self.activeFilters(), function (filter) { return filter.tag;}));
+    return _.first(_.intersection(att().tags, _.map(self.activeFilters(), function (filter) { return filter.tag; })));
   };
 
-  function applyFilters(attachments) {
+  function applyFilters(attachments, active) {
+    //console.log("applying new filters ", active, " to atachments");
     if (showAll()) {
+      //console.log("showing all, bypassing filters");
       return attachments;
     }
+    //console.log("actually running filters");
     return _.filter(attachments, self.isAttachmentFiltered);
   }
 
@@ -442,114 +450,6 @@ LUPAPISTE.AttachmentsService = function() {
     }
   });
 
-
-  //
-  // Automatically open relevant accordions when filters are toggled.
-  //
-
-  /*
-  function attachmentsToAmounts(val) {
-    if (_.isPlainObject(val)) {
-      return _.mapValues(val, attachmentsToAmounts);
-    } else if (_.isArray(val)) {
-      return val.length;
-    } else {
-      return _.clone(val);
-    }
-  }
-
-  function mergeAttachmentAmounts(newVal, oldVal) {
-    if (_.isPlainObject(newVal)) {
-      return _.mapValues(newVal, function(value, key) {
-        return mergeAttachmentAmounts(value, (oldVal && oldVal[key]) || null);
-      });
-    } else if (_.isNumber(newVal)) {
-      return newVal - (oldVal || 0);
-    } else {
-      return 0;
-    }
-  }
-
-  function objectToPaths(obj) {
-    if (!_.isPlainObject(obj)) {
-      return [obj];
-    } else {
-      return _(obj).mapValues(objectToPaths).toPairs().value();
-    }
-  }
-
-  function getTogglesInPaths(paths) {
-    function getToggles(paths, objectOrArray) {
-      if (_.isArray(objectOrArray)) {
-        return _.flatten(_.map(paths, function(path) {
-          var subPath = _.find(objectOrArray, function(x) {
-            return x.name === _.first(path);
-          });
-          return getToggles(_.tail(path), subPath);
-        }));
-      } else if (_.isPlainObject(objectOrArray)) {
-        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
-                        getToggles(_.first(paths), objectOrArray.accordions));
-      } else {
-        return [];
-      }
-    }
-    return getToggles(paths, self.layout);
-  }
-
-  // Track changes in filter values and visible attachments in the hierarchy
-  var previousAttachmentsHierarchy = self.attachmentsHierarchy();
-  self.attachmentsHierarchy.subscribe(function(oldValue) {
-    previousAttachmentsHierarchy = oldValue;
-  }, self, "beforeChange");
-
-  self.previousFilterValues = _.mapValues(oldDummyFilters, function() { return false; });
-  var filterValues = ko.pureComputed(function() {
-    return _.mapValues(oldDummyFilters, function(f) { return f(); });
-  });
-  filterValues.subscribe(function(oldValue) {
-    self.previousFilterValues = oldValue || self.previousFilterValues;
-  }, self, "beforeChange");
-
-  // Open relevant accordions on filter toggle
-  ko.computed(function() {
-    if (_.some(_.keys(filterValues()), function(k) {
-      return k !== "hakemus" && k !== "rakentaminen" &&
-        filterValues.peek()[k]  && !self.previousFilterValues[k];
-    })) {
-      var diff =  _.mergeWith(attachmentsToAmounts(self.attachmentsHierarchy.peek()),
-                              attachmentsToAmounts(previousAttachmentsHierarchy),
-                              mergeAttachmentAmounts);
-      var diffPaths = objectToPaths(diff);
-      var toggles = getTogglesInPaths(diffPaths, self.layout);
-      _.forEach(toggles, function(toggle) {
-        toggle(true);
-      });
-    }
-  }).extend({rateLimit: {timeout: 0}});
-
-  function getAccordionToggles(preOrPost) {
-    function getAllToggles(objectOrArray) {
-      if (_.isArray(objectOrArray)) {
-        return _.flatten(_.map(objectOrArray, getAllToggles));
-      } else if (_.isObject(objectOrArray)) {
-        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
-                        getAllToggles(objectOrArray.accordions));
-      } else {
-        return [];
-      }
-    }
-    return getAllToggles(self.layout[preOrPost].accordions);
-  }
-
-  function toggleAccordions(preOrPost) {
-    var toggles = getAccordionToggles(preOrPost);
-    if (_.every(toggles, function(t) { return t(); })) {
-      _.forEach(toggles, function(t) { t(false); });
-    } else {
-      _.forEach(toggles, function(t) { t(true); });
-    }
-  } */
 
   self.togglePreVerdictAccordions = function() {
     //toggleAccordions(0);
