@@ -398,10 +398,11 @@
        (last)))
 
 (defn make-version
-  [attachment user {:keys [fileId original-file-id filename contentType size created stamped archivable archivabilityError missing-fonts autoConversion]}]
+  [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
+                           stamped archivable archivabilityError missing-fonts autoConversion]}]
   {:post [(nil? (sc/check Version %))]}
   (let [version-number (or (->> (:versions attachment)
-                                (filter (comp #{original-file-id} :originalFileId))
+                                (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
@@ -428,13 +429,13 @@
    :timestamp timestamp
    :fileId file-id})
 
-(defn- build-version-updates [user attachment version-model {:keys [created target state stamped]
+(defn- build-version-updates [user attachment version-model {:keys [created target state stamped replaceable-original-file-id]
                                                              :or   {state :requires_authority_action} :as options}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user) (keyword? state)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
-                               (some [(:originalFileId version-model)]))
+                               (some [(or replaceable-original-file-id (:originalFileId version-model))]))
                            (count (:versions attachment)))
         user-role      (if stamped :stamper :uploader)]
     (util/deep-merge

@@ -25,27 +25,26 @@
   (let [versions   (-> attachment :versions reverse)
         re-stamp?  (:stamped (first versions))
         source     (if re-stamp? (second versions) (first versions))]
-    (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
-           :re-stamp? re-stamp?
+    (assoc (select-keys source [:contentType :fileId :filename :size])
+           :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
            :operation-id (get-in attachment [:op :id])
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
-  (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
+  (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
         file (File/createTempFile "lupapiste.stamp." ".tmp")]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
     (debug "uploading stamped file: " (.getAbsolutePath file))
-    (let [result (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-                   (att/update-latest-version-content! user application attachment-id new-file-id (.length file) created)
-                   (att/upload-and-attach-new! {:application application :user user}
-                                               {:attachment-id attachment-id
-                                                :comment-text nil :created created
-                                                :stamped true :comment? false :state :ok}
-                                               {:filename filename :content file
-                                                :contentType contentType :size (.length file)}))]
+    (let [result (att/upload-and-attach-new! {:application application :user user}
+                                             {:attachment-id attachment-id
+                                              :replaceable-original-file-id stamped-original-file-id
+                                              :comment-text nil :created created
+                                              :stamped true :comment? false :state :ok}
+                                             {:filename filename :content file
+                                              :size (.length file)})]
     (io/delete-file file :silently)
     (tos/mark-attachment-final! application created attachment-id)
     (:fileId result))))
@@ -88,7 +87,7 @@
 
 (defn- stamp-attachment! [stamp file-info context job-id application-id]
   (try
-    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
+    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
     (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
