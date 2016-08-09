@@ -468,14 +468,14 @@
 (defn set-attachment-version!
   "Creates a version from given attachment and options and saves that version to application.
   Returns version model with attachment-id (not file-id) as id."
-  ([application {attachment-id :id :as attachment} {:keys [stamped] :as options}]
+  ([application user {attachment-id :id :as attachment} options]
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
-     (let [version-model (make-version attachment options)
+     (let [version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application attachment version-model options)
-                                (build-version-updates attachment version-model options))
+                                (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates true)]
 
        (cond (pos? update-result)
