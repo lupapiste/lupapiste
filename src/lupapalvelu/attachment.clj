@@ -513,33 +513,6 @@
                                    (when set-app-modified? {:modified now})
                                    (when set-attachment-modified? {:attachments.$.modified now}))}))
 
-(defn update-latest-version-content!
-  "Updates latest version when version is stamped"
-  [user application attachment-id file-id size now]
-  (let [attachment (get-attachment-info application attachment-id)
-        latest-version-index (-> attachment :versions count dec)
-        latest-version-path (str "attachments.$.versions." latest-version-index ".")
-        old-file-id (get-in attachment [:latestVersion :fileId])
-        user-summary (usr/summary user)]
-
-    (when-not (= old-file-id file-id)
-      (delete-attachment-file-and-preview! old-file-id))
-
-    (update-application
-      (application->command application)
-      {:attachments {$elemMatch {:id attachment-id}}}
-      {$set {:modified now
-             :attachments.$.modified now
-             (str latest-version-path "user") user-summary
-             (str latest-version-path "fileId") file-id
-             (str latest-version-path "size") size
-             (str latest-version-path "created") now
-             :attachments.$.latestVersion.user user-summary
-             :attachments.$.latestVersion.fileId file-id
-             :attachments.$.latestVersion.size size
-             :attachments.$.latestVersion.created now}})
-    {:fileId file-id}))
-
 (defn get-or-create-attachment!
   "If the attachment-id matches any old attachment, it is returned.
    Otherwise a new attachment is created."
