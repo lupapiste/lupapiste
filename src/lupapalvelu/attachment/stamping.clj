@@ -15,12 +15,6 @@
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
 
-(defn- stampable? [attachment]
-  (let [latest       (-> attachment :versions last)
-        content-type (:contentType latest)
-        stamped      (:stamped latest)]
-    (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
-
 (defn- ->file-info [attachment]
   (let [versions   (-> attachment :versions reverse)
         re-stamp?  (:stamped (first versions))
