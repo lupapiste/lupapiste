@@ -4,12 +4,12 @@
     [lupapalvelu.pdf.pdf-export :as pdf-export]
     [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
     [sade.core :refer [def- now]]
+    [sade.strings :as ss]
     [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
     [clojure.pprint :refer [pprint]]
     [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
     [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
     [clojure.java.io :as io]
-    [clojure.string :as s]
     [sade.util :as util])
   (:import (java.io File FileOutputStream)))
 
@@ -26,7 +26,7 @@
                     :verdicts (i18n/localize lang (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
                     :tasks (i18n/localize lang "task-katselmus.rakennus.tila._group_label"))
         base-attachment-opts {:application        application
-                              :filename           (-> type-name (s/replace " " "_") (str ".pdf"))
+                              :filename           (-> type-name (ss/replace " " "_") (str ".pdf"))
                               :size               (.length file)
                               :content            file
                               :attachment-id      attachment-id
