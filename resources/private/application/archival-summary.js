@@ -143,6 +143,12 @@
     });
   };
 
+  var selectIfArchivable = function(attachment) {
+    if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+      attachment.sendToArchive(true);
+    }
+  };
+
   var model = function(params) {
     var self = this;
     self.attachments = params.application.attachments;
@@ -257,11 +263,6 @@
     });
 
     self.selectAll = function() {
-      var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
-          attachment.sendToArchive(true);
-        }
-      };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
@@ -272,20 +273,10 @@
     };
 
     self.selectAllPreAttachments = function() {
-      var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
-          attachment.sendToArchive(true);
-        }
-      };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
     };
 
     self.selectAllPostAttachments = function() {
-      var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
-          attachment.sendToArchive(true);
-        }
-      };
       _.forEach(archivedPostAttachments(), selectIfArchivable);
     };
 
