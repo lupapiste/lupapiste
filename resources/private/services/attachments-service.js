@@ -15,24 +15,28 @@ LUPAPISTE.AttachmentsService = function() {
     return ko.observable(array);
   }
 
+  // how many static observables to allocate to be assigned for dynamic filters received from backend
+  var nFilterObservables = 20; 
+
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
-  self.filters = ko.observableArray([]);
 
-  // observables to be depended on in filters received later from the backend
-  // (preconstructed, because we need to know observables to depend on before 
-  //  we have information about filters and tags at hand)
-  self.freeObservables = [ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false), ko.observable(false)];
+  // array of arrays of filters received from backend along with default values. 
+  // [[A B] [C D]] = (and (or A B) (or C D))
+  self.filters = ko.observableArray([]); 
+    
+  self.freeObservables = _.map(_.range(nFilterObservables), function() { return ko.observable(false); });
 
   self.activeFilters = ko.pureComputed(function() {
-    //_.map(self.internedObservables, function(v, k) { console.log("filter ", k, " = ", v()); })
     return _.filter(self.filtersArray(), function(f) {
       return f.filter() == true});
   });
 
+  // filter tag → observable toggles, shared between service and UI, updated in UI
+  self.filtersArray = ko.observableArray([]);
+
   self.filteredAttachments = ko.pureComputed(
     function() {
-      //console.log("recomputing filteredAttachments");
       return applyFilters(self.attachments(), self.activeFilters());});
 
   self.queryAll = function queryAll() {
@@ -203,19 +207,17 @@ LUPAPISTE.AttachmentsService = function() {
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
       var obs = self.freeObservables.pop();
-      //console.log("interning ", key, " = ", obs);
       obs(def);
-      //console.log(" - value is now ", obs());
       self.internedObservables[key] = obs;
     }
     return self.internedObservables[key];
   }
 
-  self.filtersArray = ko.observableArray([]);
-
+  // update self.filtersArray when self.filters changes
   self.filtersArrayDep = ko.computed( function() {
-    var obsValues = _.map(self.freeObservables, function(f) { return f(); }); // cause a dependency on all free obs
-    //console.log("filtersArrayDep being recomputed. obsvalues are ", obsValues);
+    // cause a dependency on first run 
+    var obsValues = _.map(self.freeObservables, function(f) { return f(); }); 
+
     self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
           function(filter, idx) {
            return {ltext: "filter." + filter.tag, tag: filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
@@ -242,19 +244,18 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.isAttachmentFiltered = function (att) {
-    //console.log("isAttachmentFiltered: activeFilters is ", self.activeFilters());
-    //console.log("Checkig if attachment with tags", att().tags, "matches filters", 
-    //  _.map(self.activeFilters(), function (filter) { return filter.tag;}));
-    return _.first(_.intersection(att().tags, _.map(self.activeFilters(), function (filter) { return filter.tag; })));
+    return _.reduce(self.filters(), function (ok, group) {
+          var group_tags = _.map(group, function(x) {return x.tag;});
+          var active_tags = _.map(self.activeFilters(), function(x) {return x.tag;});
+          var enabled = _.intersection(group_tags, active_tags);
+          var tags = att().tags;
+          return (ok && (!(_.first(enabled)) || _.first(_.intersection(enabled, tags)))); },  true);
   };
 
   function applyFilters(attachments, active) {
-    //console.log("applying new filters ", active, " to atachments");
     if (showAll()) {
-      //console.log("showing all, bypassing filters");
       return attachments;
     }
-    //console.log("actually running filters");
     return _.filter(attachments, self.isAttachmentFiltered);
   }
 
