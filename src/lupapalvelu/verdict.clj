@@ -216,15 +216,15 @@
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (if (= 200 (:status resp))
-           (attachment/upload-and-attach-new! {:application current-application :user user}
-                                              {:attachment-id attachment-id
+           (attachment/upload-and-attach! {:application current-application :user user}
+                                          {:attachment-id attachment-id
                                                :attachment-type attachment-type
                                                :target target
                                                :required false
                                                :locked true
                                                :created (or attachment-time timestamp)
                                                :state :ok}
-                                              {:filename (or header-filename filename)
+                                          {:filename (or header-filename filename)
                                                :size content-length
                                                :content (:body resp)})
            (error (str (:status resp) " - unable to download " url ": " resp)))))

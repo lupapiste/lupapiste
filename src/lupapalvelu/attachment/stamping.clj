@@ -32,12 +32,12 @@
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
     (debug "uploading stamped file: " (.getAbsolutePath file))
-    (let [result (att/upload-and-attach-new! {:application application :user user}
-                                             {:attachment-id attachment-id
+    (let [result (att/upload-and-attach! {:application application :user user}
+                                         {:attachment-id attachment-id
                                               :replaceable-original-file-id stamped-original-file-id
                                               :comment-text nil :created created
                                               :stamped true :comment? false :state :ok}
-                                             {:filename filename :content file
+                                         {:filename filename :content file
                                               :size (.length file)})]
     (io/delete-file file :silently)
     (tos/mark-attachment-final! application created attachment-id)

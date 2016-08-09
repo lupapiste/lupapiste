@@ -60,15 +60,15 @@
         batchrun-user (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (mongo/create-id)]
-    (attachment/upload-and-attach-new! {:application application :user batchrun-user}
-                                       {:attachment-id attachment-id
+    (attachment/upload-and-attach! {:application application :user batchrun-user}
+                                   {:attachment-id attachment-id
                                         :attachment-type {:type-group "muut" :type-id "muu"}
                                         :target target
                                         :required false
                                         :locked true
                                         :created timestamp
                                         :state :ok}
-                                       {:filename filename
+                                   {:filename filename
                                         :size file-size
                                         :content file})))
 

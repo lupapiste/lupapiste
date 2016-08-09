@@ -81,9 +81,9 @@
         file-options       (select-keys attachment-options [:filename :size :content])
         file (:content attachment-options)]
     (try
-      (attachment/upload-and-attach-new! {:application application :user user}
-                                         attachment-options
-                                         file-options)
+      (attachment/upload-and-attach! {:application application :user user}
+                                     attachment-options
+                                     file-options)
       (finally
         (io/delete-file file :silently)))))
 

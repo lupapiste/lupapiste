@@ -434,7 +434,7 @@
                             :locked locked
                             :required false
                             :comment-text text}]
-    (when-not (:id (attachment/upload-and-attach-new! command attachment-options file-options))
+    (when-not (:id (attachment/upload-and-attach! command attachment-options file-options))
       (fail! :error.unknown))))
 
 ;;
@@ -470,9 +470,9 @@
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
-          (attachment/upload-and-attach-new! {:application application :user user} ; NOTE: user is user from attachment version
-                                             attachment-options
-                                             {:content temp-pdf
+          (attachment/upload-and-attach! {:application application :user user} ; NOTE: user is user from attachment version
+                                         attachment-options
+                                         {:content temp-pdf
                                               :filename filename
                                               :content-type contentType
                                               :size (.length temp-pdf)}))
@@ -654,13 +654,13 @@
       (try
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
-          (attachment/upload-and-attach-new! {:application application :user user}
-                                             {:attachment-id attachmentId
+          (attachment/upload-and-attach! {:application application :user user}
+                                         {:attachment-id attachmentId
                                               :comment-text nil
                                               :required false
                                               :created created
                                               :stamped stamped}
-                                             {:content temp-pdf :filename filename}))
+                                         {:content temp-pdf :filename filename}))
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))

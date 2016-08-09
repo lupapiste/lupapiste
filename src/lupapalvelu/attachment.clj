@@ -671,7 +671,7 @@
   opts)
 
 
-(defn upload-and-attach-new!
+(defn upload-and-attach!
   "1) Uploads original file to GridFS
    2) Validates and converts for archivability, uploads converted file to GridFS if applicable
    3) Creates and saves attachment model for application, or fetches it if attachment-id is given
