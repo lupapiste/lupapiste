@@ -482,7 +482,7 @@
     ;; (debug "from-update first type" (get-in (first from-update) [:schema-info :name]))
     ;; (debug "from-update first has-new-id?" (has-new-id? (first from-update)))
 
-    ;; (debug "from-update types" (doall (map :type from-update)))
+    ;; (debug "from-update types" (doall (mapv :type from-update)))
     (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s" (count existing) (count existing-without-empties-matching-updates) (count from-update) (count from-update-with-new-id))
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
@@ -500,7 +500,8 @@
                               (building-mongo-updates (assoc application :buildings [])))
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
-        review-tasks (map review-to-task reviews)
+        final-review? (fn [review] (contains? #{"lopullinen" "pidetty"} (:osittainen review)))
+        review-tasks (map review-to-task (filter final-review? reviews))
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
@@ -508,7 +509,6 @@
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
-
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
       (if-not (= (count buildings-summary)
@@ -531,7 +531,6 @@
       ;; else
       (let [update-result (update-application command (util/deep-merge task-updates building-updates))
             updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
-            ;; updated-application (domain/get-application-as (:id application) (:user command)) ;; returns nil?
             ]
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
