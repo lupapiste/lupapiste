@@ -177,18 +177,6 @@ LUPAPISTE.AttachmentsService = function() {
     return resolveTagGrouping(attachments, self.tagGroups());
   }
 
-  var preVerdictStates = [
-    "draft", "info", "answered", "open", "submitted", "complementNeeded", "sent"
-  ];
-
-  function isPreVerdict(attachment) {
-    return _.includes(preVerdictStates, attachment.applicationState);
-  }
-
-  function isPostVerdict(attachment) {
-    return !isPreVerdict(attachment);
-  }
-
   //
   // Filter manipulation
   //
@@ -217,18 +205,6 @@ LUPAPISTE.AttachmentsService = function() {
              return {ltext: "filter." + s,
                      filter: filters[s]};
            }));
-
-  function isTypeId(typeId) {
-    return function(attachment) {
-      return attachment.type["type-id"] === typeId;
-    };
-  }
-
-  function isTypeGroup(typeGroup) {
-    return function(attachment) {
-      return attachment.type["type-group"] === typeGroup;
-    };
-  }
 
   function showAll() {
     var filterValues = _.mapValues(filters, function(f) { return f(); });
