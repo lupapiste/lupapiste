@@ -33,7 +33,7 @@ LUPAPISTE.AttachmentsService = function() {
     });
   });
 
-  // filter tag → observable toggles, shared between service and UI, updated in UI
+  // filter tag -> observable toggles, shared between service and UI, updated in UI
   self.filtersArray = ko.observableArray([]);
 
   self.filteredAttachments = ko.pureComputed(
