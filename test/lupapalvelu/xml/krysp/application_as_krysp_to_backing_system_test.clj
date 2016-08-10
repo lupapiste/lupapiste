@@ -60,7 +60,7 @@
 
 (defonce application-id (str "Foobar-" (now)))
 
-(facts "Deprecated messages cleanup"
+#_(facts "Deprecated messages cleanup"
        (let [app {:id application-id :organization "753-R" :permitType "R"}
              dir (resolve-output-directory (org/get-organization (:organization app)) (:permitType app))]
          (fact "Output directory exists"
