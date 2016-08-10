@@ -25,6 +25,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
     .join("<br>");
 
   self.service = lupapisteApp.services.attachmentsService;
+  self.disposedComputed(function() {
+    console.log("AttachmentListingModel applicationId computed called");
+    var id = self.service.applicationId(); // create dependency
+    if (id)
+      self.service.queryAll();
+    else
+      console.log("skipping queryAll, application id=", id);
+  });
 
   self.groups = self.service.layout;
   self.togglePreVerdictGroups = self.service.togglePreVerdictAccordions;

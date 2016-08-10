@@ -33,11 +33,12 @@ LUPAPISTE.AttachmentsService = function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
+  self.applicationId = lupapisteApp.models.application.id;
 
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
       if (self.authModel.ok(commandName)) {
-        ajax.query(commandName, {"id": self.applicationId})
+        ajax.query(commandName, {"id": self.applicationId()})
           .success(function(data) {
             dataSetter(data[responseJsonKey]);
           })
@@ -63,10 +64,11 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
-  lupapisteApp.models.application.id.subscribe(function(newId) {
-    self.applicationId = newId;
-    self.queryAll();
-  });
+  // lupapisteApp.models.application.id.subscribe(function(newId) {
+
+  //   self.applicationId = newId;
+  //   self.queryAll();
+  // });
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
