@@ -39,6 +39,7 @@ jQuery(document).ready(function() {
     {name: "ok-dialog"},
     {name: "ok-button-group"},
     {name: "company-edit"},
+    {name: "organization-name-editor"},
     {name: "tags-editor"},
     {name: "upload"},
     {name: "openlayers-map"},

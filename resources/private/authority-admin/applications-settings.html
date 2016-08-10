@@ -12,6 +12,13 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: 'organization-name-editor'"></div>
+        <!-- /ko -->
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.tags'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'tags-editor'"></div>
