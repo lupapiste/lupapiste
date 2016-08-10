@@ -509,7 +509,7 @@
     (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) (ss/trim val)}})))
 
 (defcommand update-organization-name
-  {:description "Updates organization name for different languages. 'name' should be a map from localization key to name."
+  {:description "Updates organization name for different languages. 'name' should be a map with lang-id as key and name as value."
    :parameters       [org-id name]
    :user-roles       #{:authorityAdmin :admin}
    :pre-checks       [(fn [{{org-id :org-id} :data user :user}]
