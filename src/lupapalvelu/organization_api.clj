@@ -117,9 +117,9 @@
   {:description "Lists organization names for all languages."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok :name (->> (user/authority-admins-organization-id user)
-                 o/get-organization
-                 :name)))
+  (ok (-> (user/authority-admins-organization-id user)
+          o/get-organization
+          (select-keys [:id :name]))))
 
 (defquery user-organizations-for-permit-type
   {:parameters [permitType]

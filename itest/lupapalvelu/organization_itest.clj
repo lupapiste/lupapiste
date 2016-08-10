@@ -832,5 +832,5 @@
   (command admin :update-organization-name :org-id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}) => ok?
 
   (fact "query returns organization names for all languages"
-    (query sipoo :organization-name-by-user) => {:ok true :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}})
+    (query sipoo :organization-name-by-user) => {:ok true :id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}})
   )
