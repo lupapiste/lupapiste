@@ -18,8 +18,8 @@
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
+            [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
-            [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
@@ -204,7 +204,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{{attachments :attachments} :application}]
-  (->> (attachment/resolve-ram-links attachments attachmentId)
+  (->> (ram/resolve-ram-links attachments attachmentId)
        (map #(select-keys % [:id :latestVersion :approved :ramLink]))
        (ok :ram-links)))
 
@@ -273,14 +273,14 @@
                       (fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when (some (comp #{attachment-id} :ramLink) attachments)
                           (fail :error.ram-link-already-exists)))
-                      attachment/ram-status-ok]
+                      ram/ram-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
    :states           states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
-  (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
-    (do (att-notifications/notify-new-ram-attachment! application attachment-id created)
+  (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
+    (do (ram/notify-new-ram-attachment! application attachment-id created)
         (ok :applicationId id :attachmentId attachment-id))
     (fail :error.attachment-placeholder)))
 
@@ -301,8 +301,8 @@
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
-                 attachment/ram-status-not-ok
-                 attachment/ram-not-root-attachment]}
+                 ram/ram-status-not-ok
+                 ram/ram-not-root-attachment]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
   (ok))
@@ -317,8 +317,8 @@
    :pre-checks  [app/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-editable-by-application-state
-                 attachment/ram-status-not-ok
-                 attachment/ram-not-root-attachment]}
+                 ram/ram-status-not-ok
+                 ram/ram-not-root-attachment]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)

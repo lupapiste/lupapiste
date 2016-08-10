@@ -6,7 +6,6 @@
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.util :refer [=as-kw not=as-kw] :as util]
-            [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
             [sade.http :as http]
@@ -25,11 +24,9 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File FilterInputStream]
-           [java.util.concurrent Executors ThreadFactory]))
+           [java.io File FilterInputStream]))
 
 
 ;;
@@ -294,72 +291,6 @@
        $push {:attachments {$each attachments}}})
     (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
-
-;; -------------------------------------------------------------------
-;; RAM
-;; -------------------------------------------------------------------
-
-(defn ram-status-ok
-  "Pre-checker that fails only if the attachment is unapproved RAM attachment."
-  [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
-    (when (and (ss/not-blank? ramLink)
-               (util/not=as-kw state :ok))
-      (fail :error.ram-not-approved))))
-
-(defn ram-status-not-ok
-  "Pre-checker that fails only if the attachment is approved RAM attachment."
-  [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
-    (when (and (ss/not-blank? ramLink)
-               (util/=as-kw state :ok))
-      (fail :error.ram-approved))))
-
-(defn- find-by-ram-link [link attachments]
-  (util/find-first (comp #{link} :ramLink) attachments))
-
-(defn ram-not-root-attachment
-  "Pre-checker that fails if the attachment is the root for RAM
-  attachments and the user is applicant (authority can delete the
-  root)."
-  [{user :user {attachment-id :attachmentId} :data {:keys [attachments]} :application}]
-  (when (and (-> attachment-id (util/find-by-id attachments) :ramLink ss/blank?)
-             (find-by-ram-link attachment-id attachments)
-             (usr/applicant? user))
-    (fail :error.ram-cannot-delete-root)))
-
-
-(defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application created]
-  (->> (default-tos-metadata-for-attachment-type type application)
-       (make-attachment created (when target (attachment-target-coercer target)) false false false (-> application :state keyword) op (attachment-type-coercer type))
-       (#(merge {:ramLink id}
-                %
-                (when contents {:contents contents})
-                (when scale    {:scale scale})
-                (when size     {:size size})))))
-
-(defn create-ram-attachment! [{attachments :attachments :as application} attachment-id created]
-  {:pre [(map? application)]}
-  (let [ram-attachment (make-ram-attachment (util/find-by-id attachment-id attachments) application created)]
-    (update-application
-     (application->command application)
-     {$set {:modified created}
-      $push {:attachments ram-attachment}})
-    (tos/update-process-retention-period (:id application) created)
-    (:id ram-attachment)))
-
-(defn resolve-ram-links [attachments attachment-id]
-  (-> []
-      (#(loop [res % id attachment-id] ; Backward linking
-           (if-let [attachment (and id (not (util/find-by-id id res)) (util/find-by-id id attachments))]
-             (recur (cons attachment res) (:ramLink attachment))
-             (vec res))))
-      (#(loop [res % id attachment-id] ; Forward linking
-           (if-let [attachment (and id (not (find-by-ram-link id res)) (find-by-ram-link id attachments))]
-             (recur (conj res attachment) (:id attachment))
-             (vec res))))))
-
-;; -------------------------------------------------------------------
 
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
