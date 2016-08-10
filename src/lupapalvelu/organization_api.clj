@@ -513,7 +513,6 @@
    :parameters       [org-id name]
    :user-roles       #{:authorityAdmin :admin}
    :pre-checks       [(fn [{{org-id :org-id} :data user :user}]
-                        (println user)
                         (when-not (or (user/admin? user)
                                       (= org-id (user/authority-admins-organization-id user)))
                           (fail :error.unauthorized)))]
