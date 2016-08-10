@@ -218,15 +218,15 @@
          (if (= 200 (:status resp))
            (attachment/upload-and-attach! {:application current-application :user user}
                                           {:attachment-id attachment-id
-                                               :attachment-type attachment-type
-                                               :target target
-                                               :required false
-                                               :locked true
-                                               :created (or attachment-time timestamp)
-                                               :state :ok}
+                                           :attachment-type attachment-type
+                                           :target target
+                                           :required false
+                                           :locked true
+                                           :created (or attachment-time timestamp)
+                                           :state :ok}
                                           {:filename (or header-filename filename)
-                                               :size content-length
-                                               :content (:body resp)})
+                                           :size content-length
+                                           :content (:body resp)})
            (error (str (:status resp) " - unable to download " url ": " resp)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))

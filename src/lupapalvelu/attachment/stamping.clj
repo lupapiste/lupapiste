@@ -34,11 +34,11 @@
     (debug "uploading stamped file: " (.getAbsolutePath file))
     (let [result (att/upload-and-attach! {:application application :user user}
                                          {:attachment-id attachment-id
-                                              :replaceable-original-file-id stamped-original-file-id
-                                              :comment-text nil :created created
-                                              :stamped true :comment? false :state :ok}
+                                          :replaceable-original-file-id stamped-original-file-id
+                                          :comment-text nil :created created
+                                          :stamped true :comment? false :state :ok}
                                          {:filename filename :content file
-                                              :size (.length file)})]
+                                          :size (.length file)})]
     (io/delete-file file :silently)
     (tos/mark-attachment-final! application created attachment-id)
     (:fileId result))))

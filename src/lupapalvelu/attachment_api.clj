@@ -469,9 +469,9 @@
           (attachment/upload-and-attach! {:application application :user user} ; NOTE: user is user from attachment version
                                          attachment-options
                                          {:content temp-pdf
-                                              :filename filename
-                                              :content-type contentType
-                                              :size (.length temp-pdf)}))
+                                          :filename filename
+                                          :content-type contentType
+                                          :size (.length temp-pdf)}))
         (ok)
         (finally
           (io/delete-file temp-pdf :silently))))
@@ -662,10 +662,10 @@
           (io/copy content temp-pdf)
           (attachment/upload-and-attach! {:application application :user user}
                                          {:attachment-id attachmentId
-                                              :comment-text nil
-                                              :required false
-                                              :created created
-                                              :stamped stamped}
+                                          :comment-text nil
+                                          :required false
+                                          :created created
+                                          :stamped stamped}
                                          {:content temp-pdf :filename filename}))
         (finally
           (io/delete-file temp-pdf :silently))))

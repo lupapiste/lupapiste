@@ -712,14 +712,14 @@
                                                                          :latestVersion.type attachment-type}}}))
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
-                                     :attachment-type attachment-type
-                                     :created created
-                                     :required false
-                                     :locked false}
+                                 :attachment-type attachment-type
+                                 :created created
+                                 :required false
+                                 :locked false}
                                 {:content ((:content attachment))
-                                     :filename file-name
-                                     :content-type content-type
-                                     :size size}))))
+                                 :filename file-name
+                                 :content-type content-type
+                                 :size size}))))
   (ok))
 
 (defquery email-in-use

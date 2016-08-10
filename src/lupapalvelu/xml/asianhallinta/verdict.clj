@@ -62,15 +62,15 @@
         attachment-id (mongo/create-id)]
     (attachment/upload-and-attach! {:application application :user batchrun-user}
                                    {:attachment-id attachment-id
-                                        :attachment-type {:type-group "muut" :type-id "muu"}
-                                        :target target
-                                        :required false
-                                        :locked true
-                                        :created timestamp
-                                        :state :ok}
+                                    :attachment-type {:type-group "muut" :type-id "muu"}
+                                    :target target
+                                    :required false
+                                    :locked true
+                                    :created timestamp
+                                    :state :ok}
                                    {:filename filename
-                                        :size file-size
-                                        :content file})))
+                                    :size file-size
+                                    :content file})))
 
 (defn process-ah-verdict [path-to-zip ftp-user system-user]
   (let [tmp-dir (fs/temp-dir (str "ah"))]
