@@ -7,7 +7,8 @@ LUPAPISTE.SutiDisplayModel = function() {
   var service = lupapisteApp.services.sutiService;
 
   self.showSuti = service.sutiEnabled;
-  self.open = ko.observable( true );
+  self.open = ko.observable( features.enabled("suti")
+                             && lupapisteApp.models.applicationAuthModel.ok( "suti-pre-sent-state"));
   self.suti = service.sutiDetails;
   self.waiting = ko.observable();
   self.sutiTitle = ko.observable();
