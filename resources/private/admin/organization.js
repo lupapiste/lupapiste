@@ -106,7 +106,12 @@
       var names = _(self.names()).map(unWrapName).fromPairs().value();
       ajax.command("update-organization-name", {"org-id": self.organization().id(),
                                                 "name": names})
-        .success(util.showSavedIndicator)
+        .success(function(res) {
+          util.showSavedIndicator(res);
+          _.forEach(names, function(n, l) {
+            self.organization().name[l](n);
+          });
+        })
         .call();
     };
 
