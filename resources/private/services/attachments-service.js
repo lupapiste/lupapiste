@@ -187,32 +187,25 @@ LUPAPISTE.AttachmentsService = function() {
   // Filter manipulation
   //
 
-  // returns an observable
-  var oldDummyFilters = {
-        "hakemus": ko.observable(false),
-        "rakentaminen": ko.observable(false),
-        "ei-tarpeen": ko.observable(false),
-        "iv": ko.observable(false),
-        "kvv": ko.observable(false),
-        "rakenne": ko.observable(false),
-        "paapiirustukset": ko.observable(false)
-  };
+  self.internedObservables = {};
 
   self.disableAllFilters = function() {
-    _.forEach(_.values(oldDummyFilters), function(filter) {
+    _.forEach(_.values(self.internedObservables), function(filter) {
       filter(false);
     });
   };
-
-  self.internedObservables = {};
 
   // keep track of filter toggles, since they are passed over to the UI, and
   // we need to keep using the same ones after tag updates
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
       var obs = self.freeObservables.pop();
-      obs(def);
-      self.internedObservables[key] = obs;
+      if (obs) {
+        obs(def);
+        self.internedObservables[key] = obs;
+      } else {
+        // fail
+      }
     }
     return self.internedObservables[key];
   }
@@ -263,6 +256,7 @@ LUPAPISTE.AttachmentsService = function() {
   //
 
   // Return attachment ids grouped first by type-groups and then by type ids.
+
   self.getAttachmentsHierarchy = function() {
     var attachments = _.map(self.filteredAttachments(), ko.utils.unwrapObservable);
     return groupAttachmentsByTags(attachments);
@@ -288,7 +282,6 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   function modelForSubAccordion(subGroup) {
-    _.forEach(_.values(oldDummyFilters), function(f) { f(); });
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -454,6 +447,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.togglePreVerdictAccordions = function() {
     //toggleAccordions(0);
   };
+
   self.togglePostVerdictAccordions = function() {
     //toggleAccordions(1);
   };
