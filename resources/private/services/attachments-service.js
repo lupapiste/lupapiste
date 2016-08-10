@@ -33,9 +33,6 @@ LUPAPISTE.AttachmentsService = function() {
     });
   });
 
-  // filter tag → observable toggles, shared between service and UI, updated in UI
-  self.filtersArray = ko.observableArray([]);
-
   self.filteredAttachments = ko.pureComputed(
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
@@ -197,30 +194,31 @@ LUPAPISTE.AttachmentsService = function() {
 
   // keep track of filter toggles, since they are passed over to the UI, and
   // we need to keep using the same ones after tag updates
+
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
       var obs = self.freeObservables.pop();
       if (obs) {
+        console.log("interning ", key, " = ", obs());
         obs(def);
+        console.log(" - value is now ", obs());
         self.internedObservables[key] = obs;
       } else {
+        console.log("no obs. fail?");
         // fail
       }
     }
     return self.internedObservables[key];
   }
 
-  // update self.filtersArray when self.filters changes
-  self.filtersArrayDep = ko.computed( function() {
-    // cause a dependency on first run
-    _.map(self.freeObservables, function(f) { return f(); });
-
-    self.filtersArray(
-      _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+  // filter tag -> observable toggles, shared between service and UI, updated in UI
+  self.filtersArray = ko.computed( function() {
+    return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
                       function(filter /*, idx // unused */) {
+                        console.log("making filtersArray entry for tag", filter.tag);
                         return {ltext: "filter." + filter.tag,
                                 tag: filter.tag,
-                                filter: internFilterBoolean(filter.tag, filter["default"])};})));
+                                filter: internFilterBoolean(filter.tag, filter["default"])};}));
   });
 
 
