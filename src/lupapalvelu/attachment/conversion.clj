@@ -24,11 +24,14 @@
 
 
 (defn libreoffice-conversion-required? [{:keys [filename attachment-type]}]
+  "Check if libre office conversion is required.
+  Attachment type deprecation warning: attachment-type check is not needed after convert-all-attachments
+  feature is enabled in production."
   {:pre [(map? attachment-type)]}
   (let [mime-type (mime/mime-type (mime/sanitize-filename filename))
         {:keys [type-group type-id]} attachment-type]
     (and (libre-conversion/enabled?)
-         (or (env/feature? :convert-all-attachments)
+         (or (env/feature? :convert-all-attachments)        ;; TODO remove attachment-type check when feature is used in prod
              (and (= :paatoksenteko (keyword type-group))
                   (#{:paatos :paatosote} (keyword type-id))))
          (libre-conversion-file-types (keyword mime-type)))))
@@ -82,9 +85,9 @@
    (sc/optional-key :filename)       sc/Str})
 
 (defn archivability-conversion
-  "Validates file for archivability, and converts content if needed.
+  "Validates file for archivability, and converts content if needed. Content type must be defined correctly.
   Returns ConversionResult map."
   [application filedata]
-  {:pre  [(contains? filedata :contentType) (contains? filedata :content)]
+  {:pre  [(every? (partial contains? filedata) [:filename :contentType :content])]
    :post [(nil? (sc/check ConversionResult %))]}
   (convert-file application filedata))
