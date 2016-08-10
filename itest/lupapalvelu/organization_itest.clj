@@ -788,3 +788,39 @@
 
   (fact "trying to update with invalid ip address"
     (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ["inv.val.id.ip"]) => (partial expected-failure? :error.invalid-ip)))
+
+
+(facts update-organization-name
+
+  (fact "admin is authorized"
+    (command admin :update-organization-name :org-id "753-R" :name {:fi "modified"}) => ok?)
+
+  (fact "authorityAdmin of the same organization is authorized"
+    (command sipoo :update-organization-name :org-id "753-R" :name {:fi "modified"}) => ok?)
+
+  (fact "authorityAdmin of different organization is not authorized"
+    (command sipoo :update-organization-name :org-id "186-R" :name {:fi "modified"}) => unauthorized?)
+
+  (fact "authority is not authorized"
+    (command sonja :update-organization-name :org-id "753-R" :name {:fi "modified"}) => unauthorized?)
+
+  (fact "applicant is not authorized"
+    (command pena :update-organization-name :org-id "753-R" :name {:fi "modified"}) => unauthorized?)
+
+  (fact "illegal name map"
+    (command admin :update-organization-name :org-id "753-R" :name "modified") => (partial expected-failure? :error.invalid-type))
+
+  (fact "illegal name key"
+    (command admin :update-organization-name :org-id "753-R" :name {:suomi "modified"}) => (partial expected-failure? :error.illegal-key))
+
+  (fact "illegal name value type"
+    (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.invalid-type))
+
+  (facts "organization name is changed only for languages that are specified in command data"
+    (fact "fi + sv + en"
+      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified" :sv "sv modified" :en "en modified"}) => ok?
+      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified" :sv "sv modified" :en "en modified"})
+
+    (fact "fi + sv"
+      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified again" :sv "sv modified again"}) => ok?
+      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified again" :sv "sv modified again" :en "en modified"})))
