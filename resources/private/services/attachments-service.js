@@ -15,17 +15,12 @@ LUPAPISTE.AttachmentsService = function() {
     return ko.observable(array);
   }
 
-  // how many static observables to allocate to be assigned for dynamic filters received from backend
-  var nFilterObservables = 20;
-
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
   // array of arrays of filters received from backend along with default values.
   // [[A B] [C D]] = (and (or A B) (or C D))
   self.filters = ko.observableArray([]);
-
-  self.freeObservables = _.map(_.range(nFilterObservables), function() { return ko.observable(false); });
 
   self.activeFilters = ko.pureComputed(function() {
     return _.filter(self.filtersArray(), function(f) {
@@ -197,22 +192,13 @@ LUPAPISTE.AttachmentsService = function() {
 
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
-      var obs = self.freeObservables.pop();
-      if (obs) {
-        console.log("interning ", key, " = ", obs());
-        obs(def);
-        console.log(" - value is now ", obs());
-        self.internedObservables[key] = obs;
-      } else {
-        console.log("no obs. fail?");
-        // fail
-      }
+      self.internedObservables[key] = ko.observable(def);
     }
     return self.internedObservables[key];
   }
 
   // filter tag -> observable toggles, shared between service and UI, updated in UI
-  self.filtersArray = ko.computed( function() {
+  self.filtersArray = ko.pureComputed( function() {
     return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
                       function(filter /*, idx // unused */) {
                         console.log("making filtersArray entry for tag", filter.tag);
