@@ -5,6 +5,7 @@
     var self = this;
     var isLoading = false;
     self.organization = ko.observable();
+    self.names = ko.observableArray();
     self.permanentArchiveEnabled = ko.observable(false);
     self.calendarsEnabled = ko.observable(false);
     self.indicator = ko.observable(false).extend({notify: "always"});
@@ -33,6 +34,14 @@
         .call();
     }
 
+    function wrapName(name, lang) {
+      return {lang: lang, name: ko.observable(name)};
+    }
+
+    function unWrapName(o) {
+      return [o.lang, util.getIn(o, ["name"])];
+    }
+
     self.open = function(orgId) {
       ajax
         .query("organization-by-id", {organizationId: orgId})
@@ -40,6 +49,7 @@
         .success(function(result) {
           self.organization(ko.mapping.fromJS(result.data));
           isLoading = true;
+          self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.calendarsEnabled(result.data["calendars-enabled"]);
           isLoading = false;
@@ -90,6 +100,14 @@
         .error(util.showSavedIndicator)
         .call();
       return false;
+    };
+
+    self.updateOrganizationName = function() {
+      var names = _(self.names()).map(unWrapName).fromPairs().value();
+      ajax.command("update-organization-name", {"org-id": self.organization().id(),
+                                                "name": names})
+        .success(util.showSavedIndicator)
+        .call();
     };
 
     self.newScope = function(model) {
