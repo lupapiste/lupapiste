@@ -542,6 +542,8 @@
 "foreman.newForeman" "sv" "Ny arbetsledare"
 "foreman.requiredForemen" "fi" "Vaaditut työnjohtajat"
 "foreman.requiredForemen" "sv" "Obligatoriska arbetsledare"
+"foreman.allForemen" "fi" "Kaikki työnjohtajat"
+"foreman.allForemen" "sv" "Alla arbetsledare"
 "foreman.role" "fi" "Työnjohtajan rooli"
 "foreman.role" "sv" "Rollen av arbetsledare"
 "foreman.selectForeman" "fi" "Valitse työnjohtaja"
