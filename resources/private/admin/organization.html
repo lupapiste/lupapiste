@@ -13,8 +13,8 @@
           <table data-test-id="organization-name-table">
             <thead>
               <tr>
-                <th>Kieli</th>
-                <th>Nimi</th>
+                <th data-bind="ltext: 'userinfo.language'"></th>
+                <th data-bind="ltext: 'organization.name'"></th>
               </tr>
             </thead>
             <tbody data-bind="foreach: names">
@@ -23,7 +23,8 @@
                 <td><input type="text" data-bind="value: $data.name" class="form-input"></td>
               </tr>
             </tbody>
-            <button data-bind="click: updateOrganizationName" class="btn positive">Tallenna</button>
+          </table>
+          <button data-bind="ltext: 'save', click: updateOrganizationName" class="btn positive"></button>
 
           <h2>Asetukset</h2>
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
