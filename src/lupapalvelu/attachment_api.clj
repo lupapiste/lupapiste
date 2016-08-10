@@ -12,8 +12,6 @@
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.attachment.conversion :as conversion]
-            [lupapalvelu.attachment.file :as file]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
@@ -31,9 +29,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.tiff-validation :as tiff-validation]
             [lupapalvelu.tiedonohjaus :as tos])
   (:import [java.io File]))
 
