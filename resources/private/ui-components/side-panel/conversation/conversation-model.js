@@ -118,13 +118,15 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.isCalendarComment = function(comment) {
     return _.startsWith(util.getIn(comment, ["target", "type"]), "reservation");
-  }
+  };
 
   self.reservationForComment = function(comment) {
     return _.find(lupapisteApp.models.application._js.reservations, function(r) { return r.id === comment.target.id; });
-  }
+  };
 
-  self.showCalendarComments = function() { return lupapisteApp.models.applicationAuthModel.ok("calendars-enabled"); };
+  self.showCalendarComments = function() {
+    return lupapisteApp.models.applicationAuthModel.ok("calendars-enabled");
+  };
 
   function commentVisibilityCheck(comment) {
     if (self.isForAttachment(comment)) {

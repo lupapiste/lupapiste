@@ -324,7 +324,6 @@
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
    :calendar-fn                  (fn [{application :application result :result}]
-                                   (println result "!!#!")
                                    (let [reservations (group-by :id (:reservations application))
                                          reservation  (get-in reservations [(:reservationId result)])]
                                      (ical/create-calendar-event reservation)))
