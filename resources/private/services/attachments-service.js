@@ -29,7 +29,8 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.activeFilters = ko.pureComputed(function() {
     return _.filter(self.filtersArray(), function(f) {
-      return f.filter() == true});
+      return f.filter() === true;
+    });
   });
 
   // filter tag → observable toggles, shared between service and UI, updated in UI
@@ -219,11 +220,16 @@ LUPAPISTE.AttachmentsService = function() {
   // update self.filtersArray when self.filters changes
   self.filtersArrayDep = ko.computed( function() {
     // cause a dependency on first run
-    var obsValues = _.map(self.freeObservables, function(f) { return f(); });
+    _.map(self.freeObservables, function(f) { return f(); });
 
-    self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
-          function(filter, idx) {
-           return {ltext: "filter." + filter.tag, tag: filter.tag, filter: internFilterBoolean(filter.tag, filter.default)};})))});
+    self.filtersArray(
+      _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+                      function(filter /*, idx // unused */) {
+                        return {ltext: "filter." + filter.tag,
+                                tag: filter.tag,
+                                filter: internFilterBoolean(filter.tag, filter["default"])};})));
+  });
+
 
   function showAll() {
     return false;
@@ -236,16 +242,6 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment.notNeeded;
   }
 
-  function unwrapArrayValues(arr) {
-    return _.mapValues(arr, ko.utils.unwrapObservable);
-  }
-
-  function unwrapValuePair(val, key) {
-    var res = {};
-    res[ko.utils.unwrapObservable(key)] = ko.utils.unwrapObservable(val);
-    return res;
-  }
-
   self.isAttachmentFiltered = function (att) {
     return _.reduce(self.filters(), function (ok, group) {
           var group_tags = _.map(group, function(x) {return x.tag;});
@@ -255,7 +251,7 @@ LUPAPISTE.AttachmentsService = function() {
           return (ok && (!(_.first(enabled)) || _.first(_.intersection(enabled, tags)))); },  true);
   };
 
-  function applyFilters(attachments, active) {
+  function applyFilters(attachments /* , active // unused */) {
     if (showAll()) {
       return attachments;
     }
