@@ -653,7 +653,7 @@
                                :whitelist {:roles [:authority]
                                            :otherwise :hidden}
                                :body [tyonjohtajan-historia
-                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :layout :full-width :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
                       tayta-omat-tiedot-button
