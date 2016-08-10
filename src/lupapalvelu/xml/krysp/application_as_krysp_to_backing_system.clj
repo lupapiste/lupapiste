@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [clojure.java.io :as io]
             [me.raynes.fs :as fs]
             [swiss.arrows :refer :all]
             [sade.xml :as xml]
