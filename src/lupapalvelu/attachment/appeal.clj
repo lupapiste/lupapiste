@@ -37,6 +37,7 @@
                                      :stamped false}
                                     archivability-result)
         version-model        (att/make-version attachment-data user version-data)]
+    (att/preview-image! (:id app) (:fileId version-data) (:filename version-data) (:contentType version-data))
     (-> attachment-data
         (update :versions conj version-model)
         (assoc :latestVersion version-model))))

@@ -664,7 +664,7 @@
       not-found)))
 
 
-(defn- preview-image!
+(defn preview-image!
   "Creates a preview image in own thread pool. Returns the given opts."
   [application-id fileId filename contentType]
   (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*)))
