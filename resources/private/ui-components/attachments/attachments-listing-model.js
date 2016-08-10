@@ -41,6 +41,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   var dispose = self.dispose;
   self.dispose = function() {
     self.service.changeScheduledNotNeeded();
+    self.service.clearData();
     dispose();
   };
 };

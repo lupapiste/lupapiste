@@ -35,6 +35,23 @@ LUPAPISTE.AttachmentsService = function() {
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.applicationId = lupapisteApp.models.application.id;
 
+  self.applicationId.subscribe(function() {
+    // to avoid retaining old filter states when going to different application
+    console.log("clearing internedObservables");
+    self.internedObservables = {};
+  });
+
+  self.clearData = function() {
+    // to avoid showing stale data before ajax queries return, after switching views or applications
+    console.log("clearing server data");
+    console.log("before clearings, peek filters", self.filters.peek());
+    self.attachments([]);
+    self.filters([]);
+    self.tagGroups([]);
+    console.log("after clearings, peek filters", self.filters.peek());
+    console.log("after clearings, peek attachments", self.attachments.peek());
+  };
+
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
       if (self.authModel.ok(commandName)) {
