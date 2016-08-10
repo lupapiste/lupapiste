@@ -113,6 +113,14 @@
                         (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
+(defquery organization-names-by-user
+  {:description "Lists organization names for all languages."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (ok :name (->> (user/authority-admins-organization-id user)
+                 o/get-organization
+                 :name)))
+
 (defquery user-organizations-for-permit-type
   {:parameters [permitType]
    :user-roles #{:authority}

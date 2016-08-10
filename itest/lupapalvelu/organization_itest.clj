@@ -817,6 +817,7 @@
     (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.invalid-type))
 
   (facts "organization name is changed only for languages that are specified in command data"
+
     (fact "fi + sv + en"
       (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified" :sv "sv modified" :en "en modified"}) => ok?
       (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified" :sv "sv modified" :en "en modified"})
@@ -824,3 +825,11 @@
     (fact "fi + sv"
       (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified again" :sv "sv modified again"}) => ok?
       (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified again" :sv "sv modified again" :en "en modified"})))
+
+
+(facts organization-names-by-user
+
+  (command admin :update-organization-name :org-id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}) => ok?
+
+  (fact "query returns organization names for all languages"
+    (query sipoo :organization-names-by-user) => {:ok true :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}}))
