@@ -11,19 +11,30 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-  //
-  // Attachments
-  //
-
-  function createArrayModel(attachment) {
-    return ko.observable(attachment);
+  function createArrayModel(array) {
+    return ko.observable(array);
   }
+
+  // how many static observables to allocate to be assigned for dynamic filters received from backend
+  var nFilterObservables = 20;
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
+  // array of arrays of filters received from backend along with default values.
+  // [[A B] [C D]] = (and (or A B) (or C D))
   self.filters = ko.observableArray([]);
-  self.activeFilters = ko.pureComputed(function() {return self.filters();});
+
+  self.freeObservables = _.map(_.range(nFilterObservables), function() { return ko.observable(false); });
+
+  self.activeFilters = ko.pureComputed(function() {
+    return _.filter(self.filtersArray(), function(f) {
+      return f.filter() === true;
+    });
+  });
+
+  // filter tag → observable toggles, shared between service and UI, updated in UI
+  self.filtersArray = ko.observableArray([]);
 
   self.filteredAttachments = ko.pureComputed(
     function() {
@@ -122,13 +133,8 @@ LUPAPISTE.AttachmentsService = function() {
     return attachment && attachment.notNeeded === true;
   };
 
-  function getUnwrappedAttachment(attachmentId) {
-    var attachment = self.getAttachment(attachmentId);
-    if (attachment) {
-      return attachment();
-    } else {
-      return null;
-    }
+  function getUnwrappedAttachmentById(attachmentId) {
+    return ko.utils.unwrapObservable(self.getAttachment(attachmentId));
   }
 
   // returns a function for use in computed
@@ -137,11 +143,11 @@ LUPAPISTE.AttachmentsService = function() {
   // Else null
   self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      if (_.every(_.map(attachmentIds, getUnwrappedAttachment),
+      if (_.every(_.map(attachmentIds, getUnwrappedAttachmentById),
                   self.isApproved)) {
         return self.APPROVED;
       } else {
-        return _.some(_.map(attachmentIds, getUnwrappedAttachment),
+        return _.some(_.map(attachmentIds, getUnwrappedAttachmentById),
                       self.isRejected) ? self.REJECTED : null;
       }
     };
@@ -182,7 +188,7 @@ LUPAPISTE.AttachmentsService = function() {
   //
 
   // returns an observable
-  var filters = {
+  var oldDummyFilters = {
         "hakemus": ko.observable(false),
         "rakentaminen": ko.observable(false),
         "ei-tarpeen": ko.observable(false),
@@ -193,23 +199,43 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.disableAllFilters = function() {
-    _.forEach(_.values(filters), function(filter) {
+    _.forEach(_.values(oldDummyFilters), function(filter) {
       filter(false);
     });
   };
 
-  self.filtersArray = ko.observableArray(
-    _.map( ["hakemus", "rakentaminen", "paapiirustukset", "iv", "kvv",
-            "rakenne", "ei-tarpeen"],
-           function( s ) {
-             return {ltext: "filter." + s,
-                     filter: filters[s]};
-           }));
+  self.internedObservables = {};
+
+  // keep track of filter toggles, since they are passed over to the UI, and
+  // we need to keep using the same ones after tag updates
+  function internFilterBoolean(key, def) {
+    if (!self.internedObservables[key]) {
+      var obs = self.freeObservables.pop();
+      obs(def);
+      self.internedObservables[key] = obs;
+    }
+    return self.internedObservables[key];
+  }
+
+  // update self.filtersArray when self.filters changes
+  self.filtersArrayDep = ko.computed( function() {
+    // cause a dependency on first run
+    _.map(self.freeObservables, function(f) { return f(); });
+
+    self.filtersArray(
+      _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+                      function(filter /*, idx // unused */) {
+                        return {ltext: "filter." + filter.tag,
+                                tag: filter.tag,
+                                filter: internFilterBoolean(filter.tag, filter["default"])};})));
+  });
+
 
   function showAll() {
-    var filterValues = _.mapValues(filters, function(f) { return f(); });
-    return _(filterValues).omit("ei-tarpeen").values()
-           .every(function(f) { return !f; });
+    return false;
+    //var filterValues = _.mapValues(internedObservables, function(f) { return f(); });
+    //return _(filterValues).omit("ei-tarpeen").values()
+    //       .every(function(f) { return !f; });
   }
 
   function notNeededForModel(attachment) {
@@ -217,10 +243,15 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.isAttachmentFiltered = function (att) {
-    return _.first(_.intersection(att().tags, _.map(self.activeFilters()[0], function (filter) { return filter.tag; })));
+    return _.reduce(self.filters(), function (ok, group) {
+          var group_tags = _.map(group, function(x) {return x.tag;});
+          var active_tags = _.map(self.activeFilters(), function(x) {return x.tag;});
+          var enabled = _.intersection(group_tags, active_tags);
+          var tags = att().tags;
+          return (ok && (!(_.first(enabled)) || _.first(_.intersection(enabled, tags)))); },  true);
   };
 
-  function applyFilters(attachments) {
+  function applyFilters(attachments /* , active // unused */) {
     if (showAll()) {
       return attachments;
     }
@@ -257,7 +288,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   function modelForSubAccordion(subGroup) {
-    _.forEach(_.values(filters), function(f) { f(); });
+    _.forEach(_.values(oldDummyFilters), function(f) { f(); });
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -420,118 +451,11 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
 
-  //
-  // Automatically open relevant accordions when filters are toggled.
-  //
-
-  function attachmentsToAmounts(val) {
-    if (_.isPlainObject(val)) {
-      return _.mapValues(val, attachmentsToAmounts);
-    } else if (_.isArray(val)) {
-      return val.length;
-    } else {
-      return _.clone(val);
-    }
-  }
-
-  function mergeAttachmentAmounts(newVal, oldVal) {
-    if (_.isPlainObject(newVal)) {
-      return _.mapValues(newVal, function(value, key) {
-        return mergeAttachmentAmounts(value, (oldVal && oldVal[key]) || null);
-      });
-    } else if (_.isNumber(newVal)) {
-      return newVal - (oldVal || 0);
-    } else {
-      return 0;
-    }
-  }
-
-  function objectToPaths(obj) {
-    if (!_.isPlainObject(obj)) {
-      return [obj];
-    } else {
-      return _(obj).mapValues(objectToPaths).toPairs().value();
-    }
-  }
-
-  function getTogglesInPaths(paths) {
-    function getToggles(paths, objectOrArray) {
-      if (_.isArray(objectOrArray)) {
-        return _.flatten(_.map(paths, function(path) {
-          var subPath = _.find(objectOrArray, function(x) {
-            return x.name === _.first(path);
-          });
-          return getToggles(_.tail(path), subPath);
-        }));
-      } else if (_.isPlainObject(objectOrArray)) {
-        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
-                        getToggles(_.first(paths), objectOrArray.accordions));
-      } else {
-        return [];
-      }
-    }
-    return getToggles(paths, self.layout);
-  }
-
-  // Track changes in filter values and visible attachments in the hierarchy
-  var previousAttachmentsHierarchy = self.attachmentsHierarchy();
-  self.attachmentsHierarchy.subscribe(function(oldValue) {
-    previousAttachmentsHierarchy = oldValue;
-  }, self, "beforeChange");
-
-  self.previousFilterValues = _.mapValues(filters, function() { return false; });
-  var filterValues = ko.pureComputed(function() {
-    return _.mapValues(filters, function(f) { return f(); });
-  });
-  filterValues.subscribe(function(oldValue) {
-    self.previousFilterValues = oldValue || self.previousFilterValues;
-  }, self, "beforeChange");
-
-  // Open relevant accordions on filter toggle
-  ko.computed(function() {
-    if (_.some(_.keys(filterValues()), function(k) {
-      return k !== "hakemus" && k !== "rakentaminen" &&
-        filterValues.peek()[k]  && !self.previousFilterValues[k];
-    })) {
-      var diff =  _.mergeWith(attachmentsToAmounts(self.attachmentsHierarchy.peek()),
-                              attachmentsToAmounts(previousAttachmentsHierarchy),
-                              mergeAttachmentAmounts);
-      var diffPaths = objectToPaths(diff);
-      var toggles = getTogglesInPaths(diffPaths, self.layout);
-      _.forEach(toggles, function(toggle) {
-        toggle(true);
-      });
-    }
-  }).extend({rateLimit: {timeout: 0}});
-
-  function getAccordionToggles(preOrPost) {
-    function getAllToggles(objectOrArray) {
-      if (_.isArray(objectOrArray)) {
-        return _.flatten(_.map(objectOrArray, getAllToggles));
-      } else if (_.isObject(objectOrArray)) {
-        return _.concat(objectOrArray.open ? [objectOrArray.open] : [],
-                        getAllToggles(objectOrArray.accordions));
-      } else {
-        return [];
-      }
-    }
-    return getAllToggles(self.layout[preOrPost].accordions);
-  }
-
-  function toggleAccordions(preOrPost) {
-    var toggles = getAccordionToggles(preOrPost);
-    if (_.every(toggles, function(t) { return t(); })) {
-      _.forEach(toggles, function(t) { t(false); });
-    } else {
-      _.forEach(toggles, function(t) { t(true); });
-    }
-  }
-
   self.togglePreVerdictAccordions = function() {
-    toggleAccordions(0);
+    //toggleAccordions(0);
   };
   self.togglePostVerdictAccordions = function() {
-    toggleAccordions(1);
+    //toggleAccordions(1);
   };
   ko.options.deferUpdates = false;
 };
