@@ -400,28 +400,28 @@
 (defn make-version
   [attachment user {:keys [fileId original-file-id replaceable-original-file-id filename contentType size created
                            stamped archivable archivabilityError missing-fonts autoConversion]}]
-  {:post [(nil? (sc/check Version %))]}
   (let [version-number (or (->> (:versions attachment)
                                 (filter (comp (hash-set original-file-id replaceable-original-file-id) :originalFileId))
                                 last
                                 :version)
                            (next-attachment-version (get-in attachment [:latestVersion :version]) user))]
-    (util/assoc-when
-      {:version        version-number
-       :fileId         fileId
-       :originalFileId (or original-file-id fileId)
-       :created        created
-       :user           (usr/summary user)
-       ;; File name will be presented in ASCII when the file is downloaded.
-       ;; Conversion could be done here as well, but we don't want to lose information.
-       :filename       filename
-       :contentType    contentType
-       :size           size
-       :stamped        (boolean stamped)
-       :archivable     (boolean archivable)}
-      :archivabilityError archivabilityError
-      :missing-fonts missing-fonts
-      :autoConversion autoConversion)))
+    (sc/validate Version
+      (util/assoc-when
+        {:version        version-number
+         :fileId         fileId
+         :originalFileId (or original-file-id fileId)
+         :created        created
+         :user           (usr/summary user)
+         ;; File name will be presented in ASCII when the file is downloaded.
+         ;; Conversion could be done here as well, but we don't want to lose information.
+         :filename       filename
+         :contentType    contentType
+         :size           size
+         :stamped        (boolean stamped)
+         :archivable     (boolean archivable)}
+        :archivabilityError archivabilityError
+        :missing-fonts missing-fonts
+        :autoConversion autoConversion))))
 
 (defn- ->approval [state user timestamp file-id]
   {:value (if (= :ok state) :approved :rejected)
