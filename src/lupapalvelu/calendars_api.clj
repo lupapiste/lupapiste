@@ -316,16 +316,23 @@
       :reservationTypes (reservation-types organization)
       :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
 
+(defn- get-reservation [id]
+  (->FrontendReservation (api-query (str "reservations/" id))))
+
 (notifications/defemail
   :suggest-appointment
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
-   :calendar-fn                  (fn [{application :application}]
-                                   (let [reservation (last (:reservations application))]
+   :calendar-fn                  (fn [{application :application result :result}]
+                                   (println result "!!#!")
+                                   (let [reservations (group-by :id (:reservations application))
+                                         reservation  (get-in reservations [(:reservationId result)])]
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
-   :recipients-fn                (fn [{application :application}]
-                                   (map usr/get-user-by-id (:calendar-recipients (last (:reservations application)))))
+   :recipients-fn                (fn [{application :application result :result}]
+                                   (let [reservations (group-by :id (:reservations application))
+                                         reservation  (get-in reservations [(:reservationId result)])]
+                                     (map usr/get-user-by-id (:calendar-recipients reservation))))
    :model-fn                     (fn [{application :application} _ recipient]
                                    {:link-fi (notifications/get-application-link application nil "fi" recipient)
                                     :link-sv (notifications/get-application-link application nil "sv" recipient)
@@ -352,7 +359,7 @@
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
     (when (and (usr/authority? user) (not (domain/owner-or-write-access? application clientId)))
-      (error "authority trying to invite " clientId " not satisfying the owner-or-write-access rule, failing reservation")
+      (error "authority trying to invite " clientId "  not satisfying the owner-or-write-access rule, failing reservation")
       (fail! :error.unauthorized))
     (when (not (= (:organizationCode slot) organization))
       (fail! :error.illegal-organization))
@@ -360,11 +367,11 @@
                                       {:clientId clientId :reservationSlotId slotId
                                        :reservationTypeId reservationTypeId :comment comment
                                        :location location :contextId id :reservedBy userId})
-          reservation (->FrontendReservation (api-query (str "reservations/" reservationId)))
-          reservation (assoc reservation :calendar-recipients [clientId userId])
+          reservation (get-reservation reservationId)
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
-                    (usr/authority? user) (usr/get-user-by-id clientId))]
+                    (usr/authority? user) (usr/get-user-by-id clientId))
+          reservation (assoc reservation :calendar-recipients (map :id [user to-user]))]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 

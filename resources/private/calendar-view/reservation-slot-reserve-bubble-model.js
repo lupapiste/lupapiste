@@ -39,7 +39,6 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
         applicationId: lupapisteApp.models.application.id,
         weekObservable: params.weekdays});
     self.bubbleVisible(false);
-    repository.load(ko.unwrap(lupapisteApp.models.application.id));
   };
 
   self.init = _.noop();
