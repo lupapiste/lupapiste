@@ -800,7 +800,8 @@ It is possible to add operation
 
 Submit application
   Open tab  requiredFieldSummary
-  Click enabled by test id  application-submit-btn
+  Test id enabled  application-submit-btn
+  Scroll and click test id  application-submit-btn
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
@@ -1272,7 +1273,7 @@ Test id disabled
 Test id enabled
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Element should be enabled  jquery=[data-test-id=${id}]
+  Wait Until  Element should be enabled  jquery=[data-test-id=${id}]
 
 Fill test id
   [Arguments]  ${id}  ${text}
