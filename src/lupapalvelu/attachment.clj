@@ -1,6 +1,5 @@
 (ns lupapalvelu.attachment
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
-            [com.netflix.hystrix.core :as hystrix]
             [clojure.java.io :as io]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -17,6 +16,7 @@
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.metadata :as metadata]
+            [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.states :as states]
             [lupapalvelu.comment :as comment]
@@ -26,27 +26,10 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libreoffice-client]
-            [lupapiste-commons.preview :as preview]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
-           [org.apache.commons.io FilenameUtils]
-           [java.util.concurrent Executors ThreadFactory]
-           [com.netflix.hystrix HystrixCommandProperties]))
-
-(defn thread-factory []
-  (let [security-manager (System/getSecurityManager)
-        thread-group (if security-manager
-                       (.getThreadGroup security-manager)
-                       (.getThreadGroup (Thread/currentThread)))]
-    (reify
-      ThreadFactory
-      (newThread [this runnable]
-        (doto (Thread. thread-group runnable "preview-worker")
-          (.setDaemon true)
-          (.setPriority Thread/NORM_PRIORITY))))))
-
-(defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
+           [java.util.concurrent Executors ThreadFactory]))
 
 
 ;;
@@ -621,34 +604,6 @@
   ([file-id download? attachment-fn]
    (output-attachment (attachment-fn file-id) download?)))
 
-(hystrix/defcommand create-preview!
-  {:hystrix/group-key   "Attachment"
-   :hystrix/command-key "Create preview"
-   :hystrix/init-fn     (fn fetch-request-init [_ setter] (.andCommandPropertiesDefaults setter (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000))) setter)
-   :hystrix/fallback-fn  (constantly nil)}
-  [file-id filename content-type application-id & [db-name]]
-  (try
-    (when (preview/converter content-type)
-      (let [preview-file-id  (str file-id "-preview")
-            preview-filename (str (FilenameUtils/getBaseName filename) ".jpg")]
-        (mongo/with-db (or db-name mongo/default-db-name)
-                       (file-upload/save-file {:fileId preview-file-id
-                                               :filename preview-filename
-                                               :content (preview/placeholder-image)}
-                                              :application application-id)
-                       (if-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                                             (with-open [content ((:content (mongo/download file-id)))]
-                                                               (preview/create-preview content content-type)))]
-                         (do (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-                             (file-upload/save-file {:fileId preview-file-id
-                                                     :filename preview-filename
-                                                     :content preview-content}
-                                                    :application application-id))
-                         (error "Preview generation failed: id=%s, type=%s file=%s" file-id content-type filename)))))
-    (catch Throwable t
-      (error "Preview generation failed" t))))
-
-
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
@@ -659,16 +614,9 @@
           (let [file-name (:file-name attachment)
                 content-type (:content-type attachment)
                 application-id (:application attachment)]
-            (create-preview! file-id file-name content-type application-id)))
+            (preview/create-preview! file-id file-name content-type application-id mongo/*db-name*)))
         (output-attachment preview-id false attachment-fn))
       not-found)))
-
-
-(defn preview-image!
-  "Creates a preview image in own thread pool. Returns the given opts."
-  [application-id fileId filename contentType]
-  (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*)))
-
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
@@ -694,7 +642,7 @@
                                   converted-filedata)
         attachment         (get-or-create-attachment! application user attachment-options)
         linked-version     (set-attachment-version! application user attachment options)]
-    (preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
+    (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
     linked-version))
 

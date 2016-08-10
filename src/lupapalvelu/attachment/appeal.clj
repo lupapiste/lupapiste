@@ -1,11 +1,12 @@
 (ns lupapalvelu.attachment.appeal
   (:require [sade.core :refer :all]
             [monger.operators :refer :all]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.preview :as preview]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.file-upload :as file-upload]
-            [lupapalvelu.attachment.conversion :as conversion]))
+            [lupapalvelu.file-upload :as file-upload]))
 
 
 (defn- create-appeal-attachment-data!
@@ -37,7 +38,7 @@
                                      :stamped false}
                                     archivability-result)
         version-model        (att/make-version attachment-data user version-data)]
-    (att/preview-image! (:id app) (:fileId version-data) (:filename version-data) (:contentType version-data))
+    (preview/preview-image! (:id app) (:fileId version-data) (:filename version-data) (:contentType version-data))
     (-> attachment-data
         (update :versions conj version-model)
         (assoc :latestVersion version-model))))
