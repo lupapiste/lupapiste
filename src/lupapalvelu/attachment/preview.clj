@@ -58,4 +58,4 @@
 (defn preview-image!
   "Creates a preview image in own thread pool."
   [application-id fileId filename contentType]
-  (.submit preview-threadpool #(create-preview! fileId filename contentType application-id mongo/*db-name*)))
+  (.submit preview-threadpool (bound-fn [] (create-preview! fileId filename contentType application-id mongo/*db-name*))))

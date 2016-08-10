@@ -476,7 +476,10 @@
 
       (fact "Latest version should be 0.1 after conversion"
         (get-in attachment [:latestVersion :version :major]) => 0
-        (get-in attachment [:latestVersion :version :minor]) => 1))
+        (get-in attachment [:latestVersion :version :minor]) => 1)
+
+      (fact "Preview image is created"
+        (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
 
     (fact "Invalid mime not converted with Libre"
       (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
