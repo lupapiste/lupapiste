@@ -128,7 +128,7 @@
       (some-<>> (org/get-organization organization)
                 (resolve-output-directory <> permit-type)
                 io/file
-                file-seq
+                .listFiles
                 (map str)
                 (filter #(re-find pattern %))))))
 
