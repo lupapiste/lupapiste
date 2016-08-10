@@ -1,8 +1,12 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [me.raynes.fs :as fs]
+            [swiss.arrows :refer :all]
+            [sade.xml :as xml]
+            [sade.common-reader :refer [strip-xml-namespaces]]
             [sade.env :as env]
             [sade.core :refer [fail!]]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
             ;; Make sure all the mappers are registered
@@ -86,7 +90,7 @@
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
-    (when (organization/krysp-integration? organization permit-type)
+    (when (org/krysp-integration? organization permit-type)
       (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
       (krysp-fn filtered-app task user lang krysp-version output-dir begin-of-link))))
 
@@ -113,3 +117,43 @@
     (assert (= permit/R permit-type)
       (str "Sending aloitusilmoitus to backing system is not supported for " (name permit-type) " type of permits."))
     (rl-mapping/save-aloitusilmoitus-as-krysp filtered-app lang output-dir timestamp building user krysp-version)))
+
+(defn krysp-xml-files
+  "Returns list of file paths that have XML extension and match the
+  given application."
+  [{:keys [id organization] :as application}]
+  (let [pattern     (re-pattern (str "(?i)" id "_.*\\.xml$"))
+        permit-type (permit/permit-type application)]
+    (when (permit/valid-permit-type? permit-type)
+      (some-<>> (org/get-organization organization)
+                (resolve-output-directory <> permit-type)
+                (fs/find-files <> pattern)
+                (map str)))))
+
+(defn cleanup-output-dir
+  "Removes the old KRYSP message files from the output folder. Only
+  the messages with the removable kayttotapaus value will be removed."
+  [application]
+  (let [removable #{"Rakentamisen aikainen muutos"
+                    "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                    "Uuden suunnittelijan nime\u00e4minen"
+                    "Jatkoaikahakemus"
+                    "Uusi aloitusoikeus"
+                    "Uusi maisematy\u00f6hakemus"
+                    "Uusi hakemus"
+                    "Uusi poikkeamisasia"
+                    "Uusi suunnittelutarveasia"}
+        content-fn  (fn [path]
+                      (try
+                        (-> path
+                            slurp
+                            (xml/parse-string "utf-8")
+                            strip-xml-namespaces
+                            (xml/select1 [:RakennusvalvontaAsia :kayttotapaus])
+                            :content
+                            first)
+                        (catch Exception _)))]
+    (doseq [file (krysp-xml-files application)
+            :when (contains? removable (content-fn file)) ]
+      (debugf "Remove deprecated %s" file)
+      (io/delete-file file true))))

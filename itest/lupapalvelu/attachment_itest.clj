@@ -136,15 +136,18 @@
 
           (fact "Metadata is set"
             (let [application (query-application pena application-id)
-                  attachment (get-attachment-info application (first attachment-ids))
-                  op (:op attachment)
-                  contents (:contents attachment)
-                  size (:size attachment)
-                  scale (:scale attachment)]
+                  {:keys [op groupType contents size scale]} (get-attachment-info application (first attachment-ids))]
               (:id op) => op-id
+              groupType => "operation"
               contents => "foobart"
               size => "A4"
               scale => "1:500"))
+
+          (fact "Pena resets attachment group to nil"
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group nil}) => ok?
+            (let [application (query-application pena application-id)
+                  {:keys [groupType]} (get-attachment-info application (first attachment-ids))]
+              groupType => nil))
 
           (fact "Operation id must exist in application"
             (command pena :set-attachment-meta

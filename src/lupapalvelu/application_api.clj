@@ -31,7 +31,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.suti :as suti]))
+            [lupapalvelu.suti :as suti]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
 
 ;; Notifications
 
@@ -208,7 +209,8 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
-  [{:keys [created user] :as command}]
+  [{:keys [created user application] :as command}]
+  (krysp-output/cleanup-output-dir application)
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
 
 ;; Submit

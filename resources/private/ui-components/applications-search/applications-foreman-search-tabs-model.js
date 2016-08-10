@@ -11,4 +11,8 @@ LUPAPISTE.ApplicationsForemanSearchTabsModel = function(params) {
                                   "inforequest",
                                   "verdict",
                                   "canceled"]);
+
+  if (lupapisteApp.models.globalAuthModel.ok("archiving-operations-enabled")) {
+    self.tabs.push("readyForArchival");
+  }
 };

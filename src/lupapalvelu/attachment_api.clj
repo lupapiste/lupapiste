@@ -145,8 +145,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :attachments-filters (att-tags/attachments-filters attachments)))
+  [{application :application}]
+  (ok :attachmentsFilters (att-tags/attachments-filters application)))
 
 (defquery attachments-tag-groups
   {:description "Get hierarchical attachment grouping by attachment tags."
@@ -154,8 +154,8 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :tag-groups (att-tags/attachment-tag-groups attachments)))
+  [{application :application}]
+  (ok :tagGroups (att-tags/attachment-tag-groups application)))
 
 ;;
 ;; Types
@@ -579,6 +579,16 @@
   [{:keys [created] :as command}]
   (let [data (attachment/meta->attachment-data meta)]
     (attachment/update-attachment-data! command attachmentId data created))
+  (ok))
+
+(defcommand set-attachment-contents
+  {:parameters [id attachmentId contents]
+   :user-roles #{:authority}
+   :org-authz-roles #{:archivist}
+   :states     states/all-application-states
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
+  [{:keys [created] :as command}]
+  (attachment/update-attachment-data! command attachmentId {:contents contents} created)
   (ok))
 
 (defcommand set-attachment-not-needed

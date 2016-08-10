@@ -101,7 +101,7 @@
   (fact "meluilmoitus"
     (let [filtering-fn (fn [node] (= "YI" (permit-type-of-operation node)))]
       (operations-filtered filtering-fn false) => [["Ymp\u00e4rist\u00f6luvat"
-                                                    [["ymparistonsuojelulain-mukaiset-ilmoitukset" 
+                                                    [["ymparistonsuojelulain-mukaiset-ilmoitukset"
                                                       [["Meluilmoitus" :meluilmoitus]]]]]]))
 
   (fact "ymparistolupa"
@@ -110,4 +110,5 @@
                                                     [["Pima" :pima]
                                                      ["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
                                                                                         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-                                                                                        ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
+                                                                                        ["toiminnan-muutos" :yl-toiminnan-muutos]]]
+                                                     ["puiden-kaataminen" [["ilmoitus-puiden-kaatamisesta-asemakaava-alueella" :yl-puiden-kaataminen]]]]]])))

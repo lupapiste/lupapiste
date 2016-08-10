@@ -130,7 +130,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :groupType)          (apply sc/enum att-tags/attachment-groups)
+   (sc/optional-key :groupType)          (sc/maybe (apply sc/enum att-tags/attachment-groups))
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -409,9 +409,9 @@
                   "Concurrency issue: Could not save attachment version meta data.")
                  nil))))))
 
-(defn meta->attachment-data [{group :group :as meta}]
+(defn meta->attachment-data [meta]
   (merge (select-keys meta [:contents :size :scale])
-         (when (:group meta)
+         (when (contains? meta :group)
            {:op (not-empty (select-keys (:group meta) [:id :name]))
             :groupType (get-in meta [:group :groupType])})))
 
