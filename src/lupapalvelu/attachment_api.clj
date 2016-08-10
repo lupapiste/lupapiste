@@ -218,7 +218,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
-  (ok :operations (get-operations application)))
+  (ok :operations (app/get-operations application)))
 
 ;;
 ;; States
