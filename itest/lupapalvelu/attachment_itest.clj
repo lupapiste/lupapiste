@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
             [midje.sweet :refer :all]
@@ -381,31 +382,33 @@
       (command sonja :rotate-pdf :id application-id :attachmentId (:id attachment2) :rotation 90) => fail?)))
 
 (facts "Rotate PDF - versions and files"
-  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
         attachment-id (:id attachment)]
 
-    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
+    (upload-attachment pena application-id attachment true :filename "dev-resources/test-pdf.pdf")
 
-    (let [v1 (-> (get-attachment-by-id sonja application-id attachment-id)
-                 :versions
-                 first)]
+    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+          v1 (first v1-versions)]
+      (fact "one version" (count v1-versions) => 1)
       (fact "fileID is set" (:fileId v1) => truthy)
       (fact "fileID is set" (:originalFileId v1) => truthy)
       (fact "File is original before rotation" (:fileId v1) => (:originalFileId v1))
+      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
 
-      (fact "version number is set" (:version v1) => {:major 0 :minor 1})
+      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
 
       (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-      (let [v2 (->> (get-attachment-by-id sonja application-id  attachment-id)
-                    :versions
-                    first)]
+      (let [v2-versions (:versions (get-attachment-by-id sonja application-id  attachment-id))
+            v2          (first v2-versions)]
+        (fact "No new version" (count v2-versions) => 1)
         (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
-        (fact "Original file is the same" (:originalFileId v1) => (:originalFileId v1))
+        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
 
-        (fact "version number is not changed" (:version v1) => {:major 0 :minor 1})
+        (fact "version number is not changed" (:version v2) => (:version v1))
 
         (command sonja :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
@@ -415,39 +418,115 @@
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
-(facts "Convert attachment to PDF/A"
-       (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
-             application-id (:id application)
-             attachment (first (:attachments application))
-             attachment-id (:id attachment)]
+(facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
+  (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+        application-id (:id application)
+        type {:type-group "paapiirustus" :type-id "asemapiirros"}
+        resp (command raktark-jarvenpaa
+                 :create-attachments
+                 :id application-id
+                 :attachmentTypes [type]) => ok?
+        attachment {:id (first (:attachmentIds resp))
+                    :type type}
+        attachment-id (:id attachment)]
 
-       (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+    (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
 
-       (let [attachment (first (:attachments (query-application sonja application-id)))]
-           (fact "Auto conversion should be done to txt -file"
-                 (get-in attachment [:latestVersion :autoConversion]) => true)
+    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+          v1 (first v1-versions)]
+      (fact "one version" (count v1-versions) => 1)
+      (fact "fileID is set" (:fileId v1) => truthy)
+      (fact "fileID is set" (:originalFileId v1) => truthy)
+      (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
+      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
+      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
+      (fact "Auto conversion flag is set" (:autoConversion v1) => true)
 
-           (fact "File should be converted to PDF/A"
-                 (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-                 (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
+      (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-           (fact "Latest version should be 0.2 after conversion"
-                 (get-in attachment [:latestVersion :version :major]) => 0
-                 (get-in attachment [:latestVersion :version :minor]) => 2)
+      (let [v2-versions (:versions (get-attachment-by-id raktark-jarvenpaa application-id  attachment-id))
+            v2          (first v2-versions)]
+        (fact "No new version" (count v2-versions) => 1)
+        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
+        (fact "version number is not changed" (:version v2) => (:version v1))
+        (fact "Auto conversion flag is preserved" (:autoConversion v2) => true)))))
 
-           (fact "After deleting converted version, original version should exists"
-                (command sonja
-                         :delete-attachment-version
-                         :id application-id
-                         :attachmentId attachment-id
-                         :fileId (get-in attachment [:latestVersion :fileId])
-                         :originalFileId (get-in attachment [:latestVersion :originalFileId])) => ok?
-                (let [original-attachment (get-attachment-by-id sonja application-id (:id attachment))]
-                     (get-in original-attachment [:latestVersion :version :major]) => 0
-                     (get-in original-attachment [:latestVersion :version :minor]) => 1
-                     (get-in original-attachment [:latestVersion :contentType]) => "text/plain"
-                     (get-in original-attachment [:latestVersion :filename]) => "test-attachment.txt")))))
+(facts "Convert attachment to PDF/A with Libre"
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (first (:attachments application))]
 
+    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+
+    (let [attachment (first (:attachments (query-application sonja application-id)))]
+      (fact "One version, but original file id points to original file"
+        (count (:versions attachment)) => 1
+        (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
+
+      (fact "Conversion flags"
+        (fact "Auto conversion to PDF/A should be done to txt -file"
+          (get-in attachment [:latestVersion :autoConversion]) => true
+          (get-in attachment [:latestVersion :archivable]) => true
+          (get-in attachment [:latestVersion :archivabilityError]) => nil
+          (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+          (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
+
+
+      (fact "Latest version should be 0.1 after conversion"
+        (get-in attachment [:latestVersion :version :major]) => 0
+        (get-in attachment [:latestVersion :version :minor]) => 1)
+
+      (fact "Preview image is created"
+        (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
+
+    (fact "Invalid mime not converted with Libre"
+      (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
+
+      (let [attachment (second (:attachments (query-application sonja application-id)))]
+        (fact "One version, but original file id points to original file"
+          (count (:versions attachment)) => 1
+          (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
+
+        (fact "Conversion flags for invalid-mime-type"
+          (get-in attachment [:latestVersion :autoConversion]) => falsey
+          (get-in attachment [:latestVersion :archivable]) => falsey
+          (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
+          (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+
+(when (or pdfa/pdf2pdf-enabled? dev-env?)
+  (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
+    (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+          application-id (:id application)
+          type {:type-group "paapiirustus" :type-id "asemapiirros"}
+          resp (command raktark-jarvenpaa
+                        :create-attachments
+                        :id application-id
+                        :attachmentTypes [type]) => ok?
+          attachment {:id (first (:attachmentIds resp))
+                      :type type}
+          attachment-id (:id attachment)]
+
+      (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
+
+      (let [attachment (first (:attachments (query-application raktark-jarvenpaa application-id)))]
+        (fact "One version, but original file id points to original file"
+          (count (:versions attachment)) => 1
+          (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
+
+        (fact "Conversion flags"
+          (fact "Auto conversion to PDF/A should be done to txt -file"
+            (get-in attachment [:latestVersion :autoConversion]) => true
+            (get-in attachment [:latestVersion :archivable]) => true
+            (get-in attachment [:latestVersion :archivabilityError]) => nil
+            (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa-PDFA.pdf"))
+
+
+        (fact "Latest version should be 1.0 after conversion"
+          (get-in attachment [:latestVersion :version :major]) => 1
+          (get-in attachment [:latestVersion :version :minor]) => 0)))))
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
@@ -658,12 +737,11 @@
     (fact "is PDF"
       (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
 
-    (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
-      (facts "PDF/A conversion"
-        (fact "Original version and PDF/A version exists"
-          (count (:versions pdf-attachment)) => 2)
-        (fact "Is archivable"
-          (-> pdf-attachment :latestVersion :archivable) => true)))
+    (when (or pdfa/pdf2pdf-enabled? dev-env?) ; test PDF/A when pdf2pdf converter is enabled
+      (facts "Is archivable after PDF/A conversion"
+        (count (:versions pdf-attachment)) => 1             ; only one version
+        (get-in pdf-attachment [:latestVersion :fileId]) =not=> (get-in pdf-attachment [:latestVersion :originalFileId]) ; original file is known
+        (-> pdf-attachment :latestVersion :archivable) => true))
 
     (fact "After upload comments count is + 1"
       (count (:comments application)) => 0 ; before upload

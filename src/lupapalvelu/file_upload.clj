@@ -14,7 +14,7 @@
    (sc/optional-key :fileId)        sc/Str})
 
 (defn save-file
-  "Saves file or input stream to mongo GridFS, with metadata (map or kvs).
+  "Saves file or input stream to mongo GridFS, with metadata (map or kvs). If input stream, caller must close stream.
    Filedata is map (see FileData schema).
    Map of file specific data (fileId, metadata, contentType...) is returned."
   [filedata & metadata]

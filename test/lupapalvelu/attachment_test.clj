@@ -3,10 +3,10 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [sade.strings :refer [encode-filename]]
-            [sade.env :as env]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.metadata :refer :all]
             [lupapalvelu.i18n :as i18n]
@@ -239,23 +239,23 @@
 (defspec make-version-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment      (ssg/generator Attachment {Version nil  [Version] (gen/elements [[]])})
                  file-id         (ssg/generator ssc/ObjectIdStr)
-                 archivability   (ssg/generator (sc/maybe {:archivable sc/Bool
-                                                           :archivabilityError (apply sc/enum nil archivability-errors)
-                                                           :missing-fonts (sc/eq ["Arial"])}))
+                 archivability   (ssg/generator (sc/maybe {:archivable         sc/Bool
+                                                           :archivabilityError (apply sc/enum nil conversion/archivability-errors)
+                                                           :missing-fonts      (sc/eq ["Arial"])}))
+                 user            (ssg/generator user/SummaryUser)
                  general-options (ssg/generator {:filename sc/Str
                                                  :contentType sc/Str
                                                  :size sc/Int
-                                                 :now ssc/Timestamp
-                                                 :user user/SummaryUser
+                                                 :created ssc/Timestamp
                                                  :stamped (sc/maybe sc/Bool)})]
                 (let [options (merge {:fileId file-id :original-file-id file-id} archivability general-options)
-                      version (make-version attachment options)]
+                      version (make-version attachment user options)]
                   (is (not (nil? (get-in version [:version :minor]))))
                   (is (not (nil? (get-in version [:version :major]))))
                   (is (= (:fileId version)         file-id))
                   (is (= (:originalFileId version) file-id))
-                  (is (= (:created version) (:now options)))
-                  (is (= (:user version) (:user options)))
+                  (is (= (:created version) (:created options)))
+                  (is (= (:user version) user))
                   (is (= (:filename version) (:filename options)))
                   (is (= (:contentType version) (:contentType options)))
                   (is (= (:size version) (:size options)))
@@ -274,37 +274,42 @@
                                                            (ssg/generator {:filename sc/Str
                                                                            :contentType sc/Str
                                                                            :size sc/Int
-                                                                           :now ssc/Timestamp
-                                                                           :user user/SummaryUser})))]
-                (let [version (make-version attachment options)]
-                  (and (= (:version version) (get-in attachment [:latestVersion :version]))
-                       (= (:fileId version) (:fileId options))
-                       (= (:originalFileId version) (:original-file-id options))
-                       (= (:created version) (:now options))
-                       (= (:user version) (:user options))
-                       (= (:filename version) (:filename options))
-                       (= (:contentType version) (:contentType options))
-                       (= (:size version) (:size options))))))
+                                                                           :created ssc/Timestamp})))
+                 user (ssg/generator user/SummaryUser)]
+                (let [version (make-version attachment user options)]
+                  (is (= (:version version) (get-in attachment [:latestVersion :version])))
+                  (is (= (:fileId version) (:fileId options)))
+                  (is (= (:originalFileId version) (:original-file-id options)))
+                  (is (= (:created version) (:created options)))
+                  (is (= (:user version) user))
+                  (is (= (:filename version) (:filename options)))
+                  (is (= (:contentType version) (:contentType options)))
+                  (is (= (:size version) (:size options))))))
 
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
-                 options        (ssg/generator {:now ssc/Timestamp
+                 user           (ssg/generator user/SummaryUser)
+                 options        (ssg/generator {:created ssc/Timestamp
                                                 :target (sc/maybe Target)
-                                                :user user/SummaryUser
                                                 :stamped (sc/maybe sc/Bool)
                                                 :comment? sc/Bool
-                                                :comment-text sc/Str})]
-                (let [updates (build-version-updates attachment version-model options)]
-                  (and (= (get-in updates [$addToSet :attachments.$.auth :role]) (if (:stamped options) :stamper :uploader))
-                       (= (get-in updates [$set :modified] (:now options)))
-                       (= (get-in updates [$set :attachments.$.modified] (:now options)))
-                       (= (get-in updates [$set :attachments.$.state] (:state options)))
-                       (if (:target options)
-                         (= (get-in updates [$set :attachments.$.target] (:target options)))
-                         (not (contains? (get updates $set) :attachments.$.target)))
-                       (= (get-in updates [$set :attachments.$.latestVersion] version-model))
-                       (= (get-in updates [$set "attachments.$.versions.0"] version-model))))))
+                                                :comment-text sc/Str
+                                                :state (:state Attachment)})]
+                (let [updates (build-version-updates user attachment version-model options)]
+                  (is (= (get-in updates [$addToSet :attachments.$.auth :role])
+                         (if (:stamped options) :stamper :uploader)))
+                  (is (= (get-in updates [$set :modified]) (:created options)))
+                  (is (= (get-in updates [$set :attachments.$.modified]) (:created options)))
+                  (is (= (get-in updates [$set :attachments.$.state])
+                         (if (:state options)
+                           (:state options)
+                           :requires_authority_action)))
+                  (is (if (:target options)
+                        (= (get-in updates [$set :attachments.$.target]) (:target options))
+                        (not (contains? (get updates $set) :attachments.$.target))))
+                  (is (= (get-in updates [$set :attachments.$.latestVersion]) version-model))
+                  (is (= (get-in updates [$set "attachments.$.versions.0"]) version-model)))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}
   (prop/for-all [[attachment version-model] (gen/fmap (fn [[att fids]]
@@ -315,140 +320,8 @@
                                                       (gen/tuple (ssg/generator Attachment {Version   nil
                                                                                             [Version] (gen/vector-distinct (ssg/generator Version) {:min-elements 3})})
                                                                  (gen/vector-distinct ssg/object-id {:num-elements 2})))
-                 options (ssg/generator {:now ssc/Timestamp
-                                         :user user/SummaryUser})]
-                (let [updates (build-version-updates attachment version-model options)]
+                 options (ssg/generator {:created ssc/Timestamp})
+                 user (ssg/generator user/SummaryUser)]
+                (let [updates (build-version-updates user attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
-                       (= (get-in updates [$set "attachments.$.versions.1"] version-model))))))
-
-(facts make-ram-attachment
-
-  (let [application {:tosFunction  nil
-                     :verdicts     []
-                     :organization "753-R"
-                     :state        :verdictGiven}
-        base-attachment (ssg/generate Attachment)
-        ram-attachment (make-ram-attachment base-attachment application 12345)]
-    (fact "attachment type is copied"
-      (:type ram-attachment) => (:type base-attachment))
-
-    (fact "ram-link is created"
-      (:ramLink ram-attachment) => (:id base-attachment))
-
-    (fact "ram-attachment is valid"
-      (sc/check Attachment ram-attachment) => nil))
-
-  (let [application {:tosFunction  nil
-                     :verdicts     []
-                     :organization "753-R"
-                     :state        :constructionStarted}
-        base-attachment (assoc (ssg/generate Attachment) :contents "foo content" :size :A0 :scale :1:10)
-        ram-attachment (make-ram-attachment base-attachment application 12345)]
-    (fact "attachment meta is copied"
-      (:contents ram-attachment) => "foo content"
-      (:size ram-attachment) =>  :A0
-      (:scale ram-attachment) => :1:10)))
-
-(facts resolve-ram-linked-attachments
-  (fact "backward ram link"
-    (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
-          attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
-      (resolve-ram-links [attachment1 attachment2] (:id attachment2)) => [attachment1 attachment2]))
-
-  (fact "forward ram link"
-    (let [attachment1 (assoc (ssg/generate Attachment) :ramLink nil)
-          attachment2 (assoc (ssg/generate Attachment) :ramLink (:id attachment1))]
-      (resolve-ram-links [attachment1 attachment2] (:id attachment1)) => [attachment1 attachment2]))
-
-  (fact "no linking"
-    (let [ids         (gen/sample ssg/object-id 5)
-          attachments (mapv (fn [id] {:id id :ramLink nil}) ids)]
-      (resolve-ram-links attachments (:id (nth attachments 2))) => [(nth attachments 2)]))
-
-  (fact "complete ram link chain"
-    (let [ids         (gen/sample ssg/object-id 5)
-          attachments (map (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids))]
-      (resolve-ram-links attachments (nth ids 2)) => attachments))
-
-  (fact "inclomplete ram link chain"
-    (let [ids         (gen/sample ssg/object-id 5)
-          attachments (-> (mapv (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids))
-                          (assoc-in [3 :ramLink] nil))]
-      (resolve-ram-links attachments (nth ids 1)) => (take 3 attachments)))
-
-  (fact "self-linked - should not get in endless loop"
-    (let [id          (ssg/generate ssc/ObjectIdStr)
-          attachment  {:id id :ramLink id}]
-      (resolve-ram-links [attachment] id) => [attachment]))
-
-  (fact "link ring - should not get in endless loop"
-    (let [ids         (gen/sample ssg/object-id 5)
-          attachments (map (fn [[link id]] {:id id :ramLink link}) (partition 2 1 ids ids)) ; padded with first id
-          result      (resolve-ram-links attachments (nth ids 2))]
-      (count result) => (count attachments)
-      (set result)   => (just attachments))))
-
-(facts "RAM pre-checkers"
-       (defn ram-fail [code] {:ok false :text (name code)})
-
-       (let [att1 (dissoc (ssg/generate Attachment) :ramLink)
-             att2 (assoc (ssg/generate Attachment) :ramLink (:id att1))
-             att3 (assoc (ssg/generate Attachment) :ramLink (:id att2))]
-         (fact "ram-status-ok"
-               (ram-status-ok {:data {:attachmentId (:id att1)}
-                               :application {:attachments [att1 att2]}}
-                              ) => nil?
-               (ram-status-ok {:data {:attachmentId (:id att2)}
-                               :application {:attachments [att1 (dissoc att2 :state)]}}
-                              ) => (contains (ram-fail :error.ram-not-approved))
-               (ram-status-ok {:data {:attachmentId (:id att2)}
-                               :application {:attachments [att1 (assoc att2 :state :ok)]}}
-                              ) => nil?)
-
-         (fact "ram-status-not-ok"
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}
-                                   :application {:attachments [att1 att2]}}
-                                  ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}
-                                   :application {:attachments [(assoc att1 :state :ok) att2]}}
-                                  ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}
-                                   :application {:attachments [att1 (dissoc att2 :state)]}}
-                                  ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}
-                                   :application {:attachments [att1 (assoc att2 :state :ok)]}}
-                                  ) => (contains (ram-fail :error.ram-approved)))
-
-         (fact "ram-not-root-attachment"
-               (ram-not-root-attachment {:user {:role :authority}
-                                         :data {:attachmentId (:id att1)}
-                                         :application {:attachments [att1]}}
-                                        ) => nil?
-               (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att1)}
-                                          :application {:attachments [att1]}}
-                                         ) => nil?
-               (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}
-                                          :application {:attachments [att1]}}
-                                         ) => nil?
-               (ram-not-root-attachment {:user {:role :authority}
-                                         :data {:attachmentId (:id att2)}
-                                         :application {:attachments [att1]}}
-                                        ) => nil?
-               (ram-not-root-attachment  {:user {:role :authority}
-                                          :data {:attachmentId (:id att1)}
-                                          :application {:attachments [att1 att2]}}
-                                         ) => nil?
-               (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att1)}
-                                          :application {:attachments [att1 att2]}}
-                                         )=> (ram-fail :error.ram-cannot-delete-root)
-               (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}
-                                          :application {:attachments [att1 att2]}}
-                                         )= nil?
-               (ram-not-root-attachment  {:user {:role :applicant}
-                                          :data {:attachmentId (:id att2)}
-                                          :application {:attachments [att1 att2 att3]}}
-                                         ))))
+                       (= (get-in updates [$set "attachments.$.versions.1"]) version-model)))))
