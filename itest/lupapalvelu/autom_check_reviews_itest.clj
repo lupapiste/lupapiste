@@ -72,27 +72,30 @@
             (let [app-before (query-application local-query sonja application-id-verdict-given)
                   review-count-before (count-reviews sonja application-id-verdict-given) => 3
                   poll-result (batchrun/poll-verdicts-for-reviews)
-                  app-after (query-application local-query sonja application-id-verdict-given)
-                  task-summary (fn [application]
-                                 (let [without-schema #(dissoc % :schema-info)
-                                       pruned (map #(-> % without-schema tools/unwrapped) (:tasks application))
-                                       rakennukset (map #(get-in % [:data :rakennus]) pruned)
-                                       ]
-                                   pruned))]
+                  last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))
+                  app-after (query-application local-query sonja application-id-verdict-given)]
+
               (count-reviews sonja application-id-submitted) => 0
               (count poll-result) => pos?
 
-              (:state (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))) => "sent"
+              (:state last-review) => "sent"
               (count-reviews sonja application-id-submitted) => 0
-              (count-reviews sonja application-id-verdict-given) => 4)))
+              (count-reviews sonja application-id-verdict-given) => 4
+              )))
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
           (count-reviews sonja application-id-verdict-given) => 4
           (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given))
                 reviews (filter task-is-review? tasks)
-                review-types (map #(-> % :data :katselmuksenLaji) reviews)]
-            (count (filter  (partial = "aloituskokous") review-types)) => 2))))))
+                review-types (map #(-> % :data :katselmuksenLaji) reviews)
+                final-review? (fn [review]
+                                (= (get-in review [:data :katselmus :tila]) "lopullinen"))]
+            (fact "no validation errors"
+              (not-any? :validationErrors reviews))
+            (count (filter  (partial = "aloituskokous") review-types)) => 2
+            (count (filter final-review? reviews)) => 1
+            (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
 
 (facts "Imported review PDF generation"
   (mongo/with-db db-name
@@ -111,6 +114,7 @@
         (try
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
+          (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
+          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy
           (finally
-            io/delete-file temp-pdf-path :silently))
-        (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty))))
+            (io/delete-file temp-pdf-path :silently)))))))

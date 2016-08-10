@@ -16,15 +16,15 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // how many static observables to allocate to be assigned for dynamic filters received from backend
-  var nFilterObservables = 20; 
+  var nFilterObservables = 20;
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
-  // array of arrays of filters received from backend along with default values. 
+  // array of arrays of filters received from backend along with default values.
   // [[A B] [C D]] = (and (or A B) (or C D))
-  self.filters = ko.observableArray([]); 
-    
+  self.filters = ko.observableArray([]);
+
   self.freeObservables = _.map(_.range(nFilterObservables), function() { return ko.observable(false); });
 
   self.activeFilters = ko.pureComputed(function() {
@@ -39,14 +39,18 @@ LUPAPISTE.AttachmentsService = function() {
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
+  self.authModel = lupapisteApp.models.applicationAuthModel;
+
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
-      ajax.query(commandName, {"id": self.applicationId})
-        .success(function(data) {
-          dataSetter(data[responseJsonKey]);
-        })
-        .onError("error.unauthorized", notify.ajaxError)
-        .call();
+      if (self.authModel.ok(commandName)) {
+        ajax.query(commandName, {"id": self.applicationId})
+          .success(function(data) {
+            dataSetter(data[responseJsonKey]);
+          })
+          .onError("error.unauthorized", notify.ajaxError)
+          .call();
+      }
     };
 
     fireQuery("attachments", "attachments", self.setAttachments);
@@ -199,7 +203,6 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-    
   self.internedObservables = {};
 
   // keep track of filter toggles, since they are passed over to the UI, and
@@ -215,8 +218,8 @@ LUPAPISTE.AttachmentsService = function() {
 
   // update self.filtersArray when self.filters changes
   self.filtersArrayDep = ko.computed( function() {
-    // cause a dependency on first run 
-    var obsValues = _.map(self.freeObservables, function(f) { return f(); }); 
+    // cause a dependency on first run
+    var obsValues = _.map(self.freeObservables, function(f) { return f(); });
 
     self.filtersArray(_.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
           function(filter, idx) {

@@ -33,8 +33,8 @@ Foreman sets his information to several applications
 
 Foreman history is not visible to applicant
   Page Should Not Contain Element  xpath=//foreman-history
-  Page Should Not Contain  Työnjohtajan historia
-  Page Should Not Contain  TYÖNJOHTAJAN HISTORIA
+  Page Should Not Contain  Kooste työnjohtajan historiasta Lupapisteessä
+  Page Should Not Contain  KOOSTE TYÖNJOHTAJAN HISTORIASTA LUPAPISTEESSÄ
   [Teardown]  logout
 
 Switch to authority

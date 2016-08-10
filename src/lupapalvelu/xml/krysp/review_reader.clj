@@ -16,10 +16,6 @@
             [lupapalvelu.building :as building]))
 
 
-(defn spy [x]
-  (clojure.pprint/pprint (first  x))
-  x)
-
 (defn xml->reviews [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (enlive/select xml-no-ns common/case-elem-selector)]
@@ -33,13 +29,14 @@
                       (-> katselmus
                           (util/ensure-sequential :muuTunnustieto)
                           (util/ensure-sequential :huomautukset)
+                          (util/ensure-sequential :katselmuksenRakennustieto)
                           (cr/convert-keys-to-timestamps [:pitoPvm])
                           cr/convert-booleans
                           cr/cleanup))]
         (map massage katselmukset)))))
 
 
-(defn review-xml-validator [xml ]
+(defn review-xml-validator [xml]
   (let [reviews (xml->reviews xml)
         pvm-valid-or-absent #(> (util/get-timestamp-ago :day 1)
                                 (sade.common-reader/to-timestamp (:pitoPvm % "2011-11-11Z")))]
