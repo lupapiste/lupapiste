@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
+            [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
             [midje.sweet :refer :all]
@@ -449,7 +450,7 @@
         (fact "version number is not changed" (:version v2) => (:version v1))
         (fact "Auto conversion flag is preserved" (:autoConversion v2) => true)))))
 
-(facts "Convert attachment to PDF/A"
+(facts "Convert attachment to PDF/A with Libre"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))]
@@ -461,16 +462,65 @@
         (count (:versions attachment)) => 1
         (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
 
-      (fact "Auto conversion should be done to txt -file"
-        (get-in attachment [:latestVersion :autoConversion]) => true)
+      (fact "Conversion flags"
+        (fact "Auto conversion to PDF/A should be done to txt -file"
+          (get-in attachment [:latestVersion :autoConversion]) => true
+          (get-in attachment [:latestVersion :archivable]) => true
+          (get-in attachment [:latestVersion :archivabilityError]) => nil
+          (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+          (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
 
-      (fact "File should be converted to PDF/A"
-        (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-        (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf")
 
       (fact "Latest version should be 0.1 after conversion"
         (get-in attachment [:latestVersion :version :major]) => 0
-        (get-in attachment [:latestVersion :version :minor]) => 1))))
+        (get-in attachment [:latestVersion :version :minor]) => 1))
+
+    (fact "Invalid mime not converted with Libre"
+      (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
+
+      (let [attachment (second (:attachments (query-application sonja application-id)))]
+        (fact "One version, but original file id points to original file"
+          (count (:versions attachment)) => 1
+          (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
+
+        (fact "Conversion flags for invalid-mime-type"
+          (get-in attachment [:latestVersion :autoConversion]) => falsey
+          (get-in attachment [:latestVersion :archivable]) => falsey
+          (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
+          (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+
+(when (or pdfa/pdf2pdf-enabled? dev-env?)
+  (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
+    (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+          application-id (:id application)
+          type {:type-group "paapiirustus" :type-id "asemapiirros"}
+          resp (command raktark-jarvenpaa
+                        :create-attachments
+                        :id application-id
+                        :attachmentTypes [type]) => ok?
+          attachment {:id (first (:attachmentIds resp))
+                      :type type}
+          attachment-id (:id attachment)]
+
+      (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
+
+      (let [attachment (first (:attachments (query-application raktark-jarvenpaa application-id)))]
+        (fact "One version, but original file id points to original file"
+          (count (:versions attachment)) => 1
+          (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
+
+        (fact "Conversion flags"
+          (fact "Auto conversion to PDF/A should be done to txt -file"
+            (get-in attachment [:latestVersion :autoConversion]) => true
+            (get-in attachment [:latestVersion :archivable]) => true
+            (get-in attachment [:latestVersion :archivabilityError]) => nil
+            (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa-PDFA.pdf"))
+
+
+        (fact "Latest version should be 1.0 after conversion"
+          (get-in attachment [:latestVersion :version :major]) => 1
+          (get-in attachment [:latestVersion :version :minor]) => 0)))))
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
@@ -681,7 +731,7 @@
     (fact "is PDF"
       (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
 
-    (when (string? (env/value :pdf2pdf :license-key)) ; test PDF/A when pdf2pdf converter is enabled
+    (when (or pdfa/pdf2pdf-enabled? dev-env?) ; test PDF/A when pdf2pdf converter is enabled
       (facts "Is archivable after PDF/A conversion"
         (count (:versions pdf-attachment)) => 1             ; only one version
         (get-in pdf-attachment [:latestVersion :fileId]) =not=> (get-in pdf-attachment [:latestVersion :originalFileId]) ; original file is known
