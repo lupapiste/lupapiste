@@ -364,6 +364,11 @@
             (validate-required-fields info [] data [])
             (validate-document document info)))))))
 
+(defn validate-pertinent
+  "Like validate but weeds out the results with :ignore flag."
+  [application document]
+  (remove :ignore (validate application document)))
+
 (defn has-errors?
   [results]
   (->>

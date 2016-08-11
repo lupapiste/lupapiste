@@ -145,8 +145,7 @@
    :org-authz-roles  auth/reader-org-authz-roles
    :states           states/all-states}
   [{app :application}]
-  (let [results (for [doc (:documents app)] (model/validate app doc))]
-    (ok :results results)))
+  (ok :results (application/pertinent-validation-errors app)))
 
 ;;
 ;; Document approvals

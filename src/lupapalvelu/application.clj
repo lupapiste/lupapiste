@@ -177,8 +177,11 @@
 
 ; Process
 
+(defn pertinent-validation-errors [{:keys [documents] :as  application}]
+  (map (partial model/validate-pertinent application) documents))
+
 (defn- validate [application document]
-  (let [all-results   (model/validate application document)
+  (let [all-results   (model/validate-pertinent application document)
         create-result (fn [document result]
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))

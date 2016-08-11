@@ -116,7 +116,7 @@
         {:keys [mongo-query mongo-updates post-results]} (apply validated-model-updates application collection document
                                                                 (transform document model-updates) timestamp meta-data)]
     (update-application command mongo-query mongo-updates)
-    (ok :results post-results)))
+    (ok :results (remove :ignore post-results))))
 
 (defn validate-collection [{{collection :collection} :data}]
   (when-not (#{"documents" "tasks"} collection)
