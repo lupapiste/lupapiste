@@ -37,6 +37,11 @@
     (command mikko :add-operation :id application-id :operation "pientalo") => ok?
     (:secondaryOperations (query-application mikko application-id)) => seq
 
+    (fact "Required fields for external LupapisteApi exists"
+      (keys (get-in (search "") [:data :applications 0])) => (contains [:id :location
+                                                                        :address :municipality
+                                                                        :applicant :permitType] :gaps-ok :in-any-order))
+
     (facts "by applicant"
       (fact "no matches" (search "Pena") => no-results?)
       (fact "one match" (search "Mikko") => id-matches?))
