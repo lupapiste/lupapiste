@@ -331,6 +331,31 @@
       (let [query-resp (query mikko :attachments :id application-id)]
        query-resp => (partial expected-failure? "error.application-not-accessible")))))
 
+(facts "Single attachment query"
+  (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
+        {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
+    (facts "initialization"
+      (fact "verdict" verdict-resp => ok?)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true)
+      (let [{attachments :attachments :as attachments-resp} (query sonja :attachments :id application-id)
+            attachment-id (->> attachments (filter (comp #{"verdict"} :type :target)) first :id)]
+        (fact "all attachments" attachments-resp => ok?)
+        (fact "attachment id" attachment-id => string?)
+
+        (facts "Authority"
+          (let [{attachment :attachment :as query-resp} (query sonja :attachment :id application-id :attachmentId attachment-id)]
+            query-resp => ok?
+            attachment => map?))
+
+        (facts "Applicant does not see the verdict attachment"
+          (let [{attachment :attachment :as query-resp} (query pena :attachment :id application-id :attachmentId attachment-id)]
+            query-resp => ok?
+            attachment => nil?))
+
+        (fact "Unauthorized"
+          (let [query-resp (query mikko :attachment :id application-id :attachmentId attachment-id)]
+            query-resp => (partial expected-failure? "error.application-not-accessible")))))))
+
 (facts "Attachment-groups query"
   (let [{application-id :id :as create-resp} (create-and-submit-application pena :propertyId sipoo-property-id)
         {groups :groups :as query-resp} (query sonja :attachment-groups :id application-id)]

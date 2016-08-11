@@ -129,6 +129,19 @@
   [{{attachments :attachments :as application} :application}]
   (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
 
+(defquery attachment
+  {:description "Get single attachment"
+   :parameters [id attachmentId]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
+  [{{attachments :attachments :as application} :application}]
+  (ok :attachment (some-> (attachment/get-attachment-info application attachmentId)
+                          (#(doto % println))
+                          (#(assoc % :tags (att-tags/attachment-tags %)))
+                          (#(doto % println)))))
+
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
    :parameters [:id]
