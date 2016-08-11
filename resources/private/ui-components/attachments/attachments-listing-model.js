@@ -266,13 +266,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   }
 
   self.openAll = function() { 
-    if (self.groups) {
-      toggleOpen(self.groups(), true); 
-    }
-  }
-
-  self.closeAll = function() {
-    if (self.groups) {
+    if (self.groups && self.groups().open) {
       toggleOpen(self.groups(), true); 
     }
   }
