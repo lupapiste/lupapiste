@@ -136,7 +136,6 @@
 "auth-admin.operations-attachments.operation" "sv" "Åtgärd"
 "auth-admin.organization-name" "fi" "Organisaation nimi"
 "auth-admin.organization-name" "sv" "Namnet av organisation"
-"auth-admin.organization-name" "en" "Organisation name"
 "auth-admin.otherParameters" "fi" "Muut tiedot"
 "auth-admin.otherParameters" "sv" "Övriga uppgifter"
 "auth-admin.parameter" "fi" "Tieto"
