@@ -165,6 +165,12 @@ div.search {
     @include disable-select;
     white-space: nowrap;
     padding-right: 16px;
+    &.sorting {
+      &:hover {
+        color: $orange-hover;
+        text-decoration: underline;
+      }
+    }
     span, i {
       vertical-align: middle;
     }
