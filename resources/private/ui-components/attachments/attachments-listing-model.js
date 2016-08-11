@@ -266,17 +266,27 @@ LUPAPISTE.AttachmentsListingModel = function() {
   }
 
   self.openAll = function() { 
-    console.log("ollaan avaamassa");
-    toggleOpen(self.groups(), true); 
+    if (self.groups) {
+      toggleOpen(self.groups(), true); 
+    }
   }
 
   self.closeAll = function() {
-    toggleOpen(self.groups(), true); 
+    if (self.groups) {
+      toggleOpen(self.groups(), true); 
+    }
   }
 
   self.toggleAll = function() {
-    toggleOpen(self.groups(), !(self.groups().open()));
+    if (self.groups && self.groups().open) {
+      toggleOpen(self.groups(), !(self.groups().open()));
+    }
   }
+
+  // auto-open all accordions when filtered results change
+  self.autoOpener = ko.computed(function() { 
+    self.service.filteredAttachments() && self.openAll(); 
+  });
 
   // entry point for templates to access model data
   self.groups = ko.computed(function() {
