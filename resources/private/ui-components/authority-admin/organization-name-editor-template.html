@@ -10,7 +10,11 @@
       <tbody data-bind="foreach: names">
         <tr>
           <td data-bind="ltext: 'lang.'+$data.lang"></td>
-          <td><input type="text" data-bind="value: $data.name" class="form-input"></td>
+          <td>
+            <input type="text" data-bind="value: $data.name,
+                                          attr: {'data-test-id': 'organization-name.'+$data.lang}"
+                   class="form-input">
+          </td>
         </tr>
       </tbody>
     </table>
