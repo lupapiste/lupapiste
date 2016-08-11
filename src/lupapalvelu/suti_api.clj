@@ -106,3 +106,11 @@
    :feature :suti}
   [command]
   (action/update-application command {$set {:suti.added added}}))
+
+(defquery suti-pre-sent-state
+  {:description "Pseudo query for checking the application state."
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority :applicant}
+   :states states/pre-sent-application-states
+   :feature :suti})

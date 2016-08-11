@@ -3,7 +3,7 @@
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
-Suite Setup     Initialize
+Suite Setup     Initialize foreman
 Suite Teardown  Logout
 
 *** Keywords ***
@@ -27,10 +27,10 @@ Submit the base apps
   Submit foreman base app  1
   [Teardown]  Logout
 
-Foreman fills personal information and submits the first foreman application 
+Foreman fills personal information and submits the first foreman application
   Foreman logs in
   Foreman applies personal information to the foreman application  0
-  
+
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
   Submit application
@@ -38,7 +38,7 @@ Foreman fills personal information and submits the first foreman application
 Foreman cannot see related projects
   Foreman applies personal information to the foreman application  1
   No such test id  'muutHankkeet.1.luvanNumero'
-  
+
 Foreman gets error message when trying to submit foreman notice before link permit has verdict
   Select from list by value  permitSubtypeSelect  tyonjohtaja-ilmoitus
   Open tab  requiredFieldSummary
@@ -64,7 +64,7 @@ Foreman logs in and checks related projects on the second foreman application
   Open foreman accordions
   Scroll and click test id  fill-info-button
   Wait for jQuery
-  Check related project  0  
+  Check related project  0
 
 Can not link base app to foreman application
   Open project application

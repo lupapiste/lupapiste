@@ -1,19 +1,15 @@
 (ns lupapalvelu.child-to-attachment-test
-  (:require [clojure.string :as str]
-            [lupapalvelu.child-to-attachment :as child-to-attachment]
+  (:require [lupapalvelu.child-to-attachment :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
-            [sade.env :as env]
             [midje.sweet :refer :all]
-            [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
-            [pdfboxing.text :as pdfbox]
-            [clojure.java.io :as io]
-            [lupapalvelu.organization :as organization])
+            [midje.util :refer [testable-privates]]
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:import (java.io File)))
 
-(def build-attachment-options #'lupapalvelu.child-to-attachment/build-attachment-options)
+(testable-privates lupapalvelu.child-to-attachment build-attachment-options)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"

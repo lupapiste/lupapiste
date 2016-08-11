@@ -3,7 +3,7 @@
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        keywords.robot
-Suite Setup     Initialize
+Suite Setup     Initialize foreman
 
 *** Keywords ***
 Sonja invites foreman and goes back to application
@@ -72,7 +72,7 @@ Foreman submits applications
   Foreman submit application  0
   Foreman submit application  1
   Foreman submit application  2
-  Foreman submit application  3  
+  Foreman submit application  3
   [Teardown]  Logout
 
 Sonja gives verdicts to foreman applications
@@ -81,7 +81,7 @@ Sonja gives verdicts to foreman applications
   Verdict for foreman application  1
   Verdict for foreman application  2
   Verdict for foreman application  3
-  
+
 Authority sees foreman history
   Open foreman application  4
   Open tab  parties

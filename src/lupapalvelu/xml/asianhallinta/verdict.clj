@@ -60,18 +60,17 @@
         batchrun-user (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (mongo/create-id)]
-    (attachment/attach-file! application
-                             {:filename filename
-                              :size file-size
-                              :content file
-                              :attachment-id attachment-id
-                              :attachment-type {:type-group "muut" :type-id "muu"}
-                              :target target
-                              :required false
-                              :locked true
-                              :user batchrun-user
-                              :created timestamp
-                              :state :ok})))
+    (attachment/upload-and-attach! {:application application :user batchrun-user}
+                                   {:attachment-id attachment-id
+                                    :attachment-type {:type-group "muut" :type-id "muu"}
+                                    :target target
+                                    :required false
+                                    :locked true
+                                    :created timestamp
+                                    :state :ok}
+                                   {:filename filename
+                                    :size file-size
+                                    :content file})))
 
 (defn process-ah-verdict [path-to-zip ftp-user system-user]
   (let [tmp-dir (fs/temp-dir (str "ah"))]

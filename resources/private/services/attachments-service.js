@@ -15,9 +15,6 @@ LUPAPISTE.AttachmentsService = function() {
     return ko.observable(array);
   }
 
-  // how many static observables to allocate to be assigned for dynamic filters received from backend
-  var nFilterObservables = 20;
-
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
@@ -25,27 +22,35 @@ LUPAPISTE.AttachmentsService = function() {
   // [[A B] [C D]] = (and (or A B) (or C D))
   self.filters = ko.observableArray([]);
 
-  self.freeObservables = _.map(_.range(nFilterObservables), function() { return ko.observable(false); });
-
   self.activeFilters = ko.pureComputed(function() {
     return _.filter(self.filtersArray(), function(f) {
       return f.filter() === true;
     });
   });
 
-  // filter tag -> observable toggles, shared between service and UI, updated in UI
-  self.filtersArray = ko.observableArray([]);
-
   self.filteredAttachments = ko.pureComputed(
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
+  self.applicationId = lupapisteApp.models.application.id;
+
+  self.applicationId.subscribe(function() {
+    // to avoid retaining old filter states when going to different application
+    self.internedObservables = {};
+  });
+
+  self.clearData = function() {
+    // to avoid showing stale data before ajax queries return, after switching views or applications
+    self.attachments([]);
+    self.filters([]);
+    self.tagGroups([]);
+  };
 
   self.queryAll = function queryAll() {
     var fireQuery = function(commandName, responseJsonKey, dataSetter) {
       if (self.authModel.ok(commandName)) {
-        ajax.query(commandName, {"id": self.applicationId})
+        ajax.query(commandName, {"id": self.applicationId()})
           .success(function(data) {
             dataSetter(data[responseJsonKey]);
           })
@@ -71,10 +76,11 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
-  lupapisteApp.models.application.id.subscribe(function(newId) {
-    self.applicationId = newId;
-    self.queryAll();
-  });
+  // lupapisteApp.models.application.id.subscribe(function(newId) {
+
+  //   self.applicationId = newId;
+  //   self.queryAll();
+  // });
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
@@ -155,92 +161,30 @@ LUPAPISTE.AttachmentsService = function() {
 
 
   //
-  // Attachment hierarchy
-  //
-
-  function findMatchingTag(tags, attachment) {
-    return _.find(tags, function(tag) {
-      return _.includes(attachment.tags, tag);
-    }) || "default";
-  }
-
-  function resolveTagGrouping(attachments, tagGroups) {
-    if (!tagGroups || !tagGroups.length) {
-      return _.map(attachments, "id");
-    }
-    return _(attachments)
-      .groupBy(_.partial(findMatchingTag, _.map(tagGroups, _.head)))
-      .mapValues(function (attachmentsInGroup, tagGroupName) {
-        var tagGroup = _.find(tagGroups, function(tagGroup) {
-          return _.head(tagGroup) === tagGroupName;
-        });
-        return resolveTagGrouping(attachmentsInGroup, _.tail(tagGroup));
-      })
-      .value();
-  }
-
-  function groupAttachmentsByTags(attachments) {
-    return resolveTagGrouping(attachments, self.tagGroups());
-  }
-
-  //
   // Filter manipulation
   //
-
-  // returns an observable
-  var oldDummyFilters = {
-        "hakemus": ko.observable(false),
-        "rakentaminen": ko.observable(false),
-        "ei-tarpeen": ko.observable(false),
-        "iv": ko.observable(false),
-        "kvv": ko.observable(false),
-        "rakenne": ko.observable(false),
-        "paapiirustukset": ko.observable(false)
-  };
-
-  self.disableAllFilters = function() {
-    _.forEach(_.values(oldDummyFilters), function(filter) {
-      filter(false);
-    });
-  };
 
   self.internedObservables = {};
 
   // keep track of filter toggles, since they are passed over to the UI, and
   // we need to keep using the same ones after tag updates
+
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
-      var obs = self.freeObservables.pop();
-      obs(def);
-      self.internedObservables[key] = obs;
+      self.internedObservables[key] = ko.observable(def);
     }
     return self.internedObservables[key];
   }
 
-  // update self.filtersArray when self.filters changes
-  self.filtersArrayDep = ko.computed( function() {
-    // cause a dependency on first run
-    _.map(self.freeObservables, function(f) { return f(); });
-
-    self.filtersArray(
-      _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+  // filter tag -> observable toggles, shared between service and UI, updated in UI
+  self.filtersArray = ko.pureComputed( function() {
+    return _.map(_.flatten(self.filters()),
                       function(filter /*, idx // unused */) {
                         return {ltext: "filter." + filter.tag,
                                 tag: filter.tag,
-                                filter: internFilterBoolean(filter.tag, filter["default"])};})));
+                                filter: internFilterBoolean(filter.tag, filter["default"])};});
   });
 
-
-  function showAll() {
-    return false;
-    //var filterValues = _.mapValues(internedObservables, function(f) { return f(); });
-    //return _(filterValues).omit("ei-tarpeen").values()
-    //       .every(function(f) { return !f; });
-  }
-
-  function notNeededForModel(attachment) {
-    return attachment.notNeeded;
-  }
 
   self.isAttachmentFiltered = function (att) {
     return _.reduce(self.filters(), function (ok, group) {
@@ -252,210 +196,8 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   function applyFilters(attachments /* , active // unused */) {
-    if (showAll()) {
-      return attachments;
-    }
     return _.filter(attachments, self.isAttachmentFiltered);
   }
 
-  //
-  // Attachments hierarchy
-  //
-
-  // Return attachment ids grouped first by type-groups and then by type ids.
-  self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.filteredAttachments(), ko.utils.unwrapObservable);
-    return groupAttachmentsByTags(attachments);
-  };
-
-  self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
-
-  self.modelForAttachmentInfo = function(attachmentIds) {
-    var attachments = _(attachmentIds)
-          .map(self.getAttachment)
-          .filter(_.identity)
-          .value();
-    return {
-      approve:      self.approveAttachment,
-      reject:       self.rejectAttachment,
-      remove:       self.removeAttachment,
-      setNotNeeded: self.setNotNeeded,
-      isApproved:   self.isApproved,
-      isRejected:   self.isRejected,
-      isNotNeeded:  notNeededForModel,
-      attachments:  attachments
-    };
-  };
-
-  function modelForSubAccordion(subGroup) {
-    _.forEach(_.values(oldDummyFilters), function(f) { f(); });
-    var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
-    return {
-      type: "sub",
-      ltitle: subGroup.name, // TODO
-      attachmentInfos: attachmentInfos,
-      // all approved or some rejected
-      status: ko.pureComputed(self.attachmentsStatus(subGroup.attachmentIds)),
-      hasContent: ko.pureComputed(function() {
-        return attachmentInfos && attachmentInfos.attachments &&
-          attachmentInfos.attachments.length > 0;
-      })
-    };
-  }
-
-  // If all of the subgroups in the main group are approved -> approved
-  // If some of the subgroups in the main group are rejected -> rejected
-  // Else null
-  function subGroupsStatus(subGroups) {
-    return ko.pureComputed(function() {
-      if (_.every(_.values(subGroups),
-                  function(sg) {
-                    return sg.status() === self.APPROVED;
-                 }))
-      {
-        return self.APPROVED;
-      } else {
-        return _.some(_.values(subGroups),
-                      function(sg) {
-                        return sg.status() === self.REJECTED;
-                     }) ? self.REJECTED : null;
-      }
-    });
-  }
-
-  function someSubGroupsHaveContent(subGroups) {
-    return ko.pureComputed(function() {
-      return _.some(_.values(subGroups),
-                    function(sg) { return sg.hasContent(); });
-    });
-  }
-
-  function modelForMainAccordion(mainGroup) {
-    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
-    return _.merge({
-      type: "main",
-      ltitle: mainGroup.name, // TODO
-      status: subGroupsStatus(subGroups),
-      hasContent: someSubGroupsHaveContent(subGroups)
-    }, subGroups);
-  }
-
-  function hierarchyToGroups(hierarchy) {
-    return _.mapValues(hierarchy, function(group, name) {
-      if (_.isPlainObject(group)) {
-        return {
-          type: "main",
-          name: name,
-          subGroups: hierarchyToGroups(group)
-        };
-      } else {
-        return {
-          type: "sub",
-          name: name,
-          attachmentIds: group
-        };
-      }
-    });
-  }
-
-  function groupToModel(group) {
-    if (group.type === "main") {
-      return modelForMainAccordion(group);
-    } else {
-      return modelForSubAccordion(group);
-    }
-  }
-
-  self.attachmentGroups = ko.pureComputed(function() {
-    return _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
-                       groupToModel);
-  });
-
-  function getAttachmentsForGroup(groupPath) {
-    function getAttachments(group) {
-      if (_.isPlainObject(group)) {
-        return _.flatten(_.map(_.values(group), getAttachments));
-      } else {
-        return group;
-      }
-    }
-    var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
-    return getAttachments(group);
-  }
-
-  function getDataForGroup(groupPath) {
-    return ko.pureComputed(function() {
-      return util.getIn(self.attachmentGroups(), groupPath);
-    });
-  }
-
-  function getOperationLocalization(operationId) {
-    var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
-    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
-  }
-
-  function getLocalizationForDefaultGroup(groupPath) {
-    if (groupPath.length === 1) {
-      return loc("application.attachments.general");
-    } else {
-      return loc("application.attachments.other");
-    }
-  }
-
-  function groupToAccordionName(groupPath) {
-    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
-        key = _.last(groupPath);
-    if (opIdRegExp.test(key)) {
-      return getOperationLocalization(opIdRegExp.exec(key)[1]);
-    } else if (_.last(groupPath) === "default") {
-      return getLocalizationForDefaultGroup(groupPath);
-    } else {
-      return loc(["application", "attachments", key]);
-    }
-  }
-
-  function getDataForAccordion(groupPath) {
-    return {
-      lname: groupToAccordionName(groupPath),
-      open: ko.observable(),
-      data: ko.pureComputed(function() {
-        return modelForSubAccordion({
-          lname: groupToAccordionName(groupPath),
-          attachmentIds: getAttachmentsForGroup(groupPath)
-        });
-      })
-    };
-  }
-
-  function attachmentTypeLayout(groupPath, tagGroups) {
-    if (tagGroups.length) {
-      return {
-        lname: groupToAccordionName(groupPath),
-        open: ko.observable(),
-        data: getDataForGroup(groupPath),
-        accordions: _.map(tagGroups, function(tagGroup) {
-          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup));
-        })
-      };
-    } else {
-      return getDataForAccordion(groupPath);
-    }
-  }
-
-  self.layout = ko.computed(function() {
-    if (self.tagGroups().length) {
-      return attachmentTypeLayout([], self.tagGroups());
-    } else {
-      return {};
-    }
-  });
-
-
-  self.togglePreVerdictAccordions = function() {
-    //toggleAccordions(0);
-  };
-  self.togglePostVerdictAccordions = function() {
-    //toggleAccordions(1);
-  };
   ko.options.deferUpdates = false;
 };

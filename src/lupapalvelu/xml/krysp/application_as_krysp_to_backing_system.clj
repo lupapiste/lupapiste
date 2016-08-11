@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.java.io :as io]
+            [me.raynes.fs :as fs]
             [swiss.arrows :refer :all]
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
@@ -122,15 +123,13 @@
   "Returns list of file paths that have XML extension and match the
   given application."
   [{:keys [id organization] :as application}]
-  (let [pattern     (re-pattern (str "(?i)/" id "_.*\\.xml$"))
+  (let [pattern     (re-pattern (str "(?i)" id "_.*\\.xml$"))
         permit-type (permit/permit-type application)]
     (when (permit/valid-permit-type? permit-type)
       (some-<>> (org/get-organization organization)
                 (resolve-output-directory <> permit-type)
-                io/file
-                .listFiles
-                (map str)
-                (filter #(re-find pattern %))))))
+                (fs/find-files <> pattern)
+                (map str)))))
 
 (defn cleanup-output-dir
   "Removes the old KRYSP message files from the output folder. Only
