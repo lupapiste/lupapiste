@@ -26,12 +26,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.service = lupapisteApp.services.attachmentsService;
   self.disposedComputed(function() {
-    console.log("AttachmentListingModel applicationId computed called");
     var id = self.service.applicationId(); // create dependency
     if (id) {
       self.service.queryAll();
-    } else {
-      console.log("skipping queryAll, application id=", id);
     }
   });
 
@@ -249,7 +246,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   }
 
   function attachmentTypeLayout(groupPath, tagGroups) {
-    console.log("attachmentTypeLayout: groupPath", groupPath);
     if (tagGroups.length) {
       return {
         lname: groupToAccordionName(groupPath),
