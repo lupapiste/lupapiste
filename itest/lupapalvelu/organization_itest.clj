@@ -816,6 +816,9 @@
   (fact "illegal name value type"
     (command admin :update-organization-name :org-id "753-R" :name {:fi {}}) => (partial expected-failure? :error.invalid-type))
 
+  (fact "empty name value"
+    (command admin :update-organization-name :org-id "753-R" :name {:fi ""}) => (partial expected-failure? :error.empty-organization-name))
+
   (facts "organization name is changed only for languages that are specified in command data"
 
     (fact "fi + sv + en"

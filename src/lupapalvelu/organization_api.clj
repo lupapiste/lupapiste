@@ -532,7 +532,10 @@
                           (fail :error.illegal-key)))
                       (fn [{{name :name} :data}]
                         (when-not (every? string? (vals name))
-                          (fail :error.invalid-type)))]}
+                          (fail :error.invalid-type)))
+                      (fn [{{name :name} :data}]
+                        (when (some ss/blank? (vals name))
+                          (fail :error.empty-organization-name)))]}
   [_]
   (->> (util/map-keys (fn->> clojure.core/name (str "name.")) name)
        (hash-map $set)

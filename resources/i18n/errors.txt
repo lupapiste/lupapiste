@@ -492,3 +492,4 @@
 "error.latest-state-not-canceled" "sv" "Ansökan kan inte aktiveras igen eftersom ansökans senaste läge inte är återtaget"
 "error.undo-only-for-canceler" "fi" "Hakemuksen voi palauttaa aktiiviseksi ainoastaan peruuttaja tai viranomainen"
 "error.undo-only-for-canceler" "sv" "Endast personen som återtog ansökan eller en myndighet kan återaktivera ansökan"
+"error.empty-organization-name" "fi" "Organisaation nimi ei voi olla tyhjä."
