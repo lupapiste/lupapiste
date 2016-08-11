@@ -109,7 +109,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     var attachmentInfos = modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
-      ltitle: subGroup.name, // TODO
       attachmentInfos: attachmentInfos,
       // all approved or some rejected
       status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
@@ -151,7 +150,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     return _.merge({
       type: "main",
-      ltitle: mainGroup.name, // TODO
       status: subGroupsStatus(subGroups),
       hasContent: someSubGroupsHaveContent(subGroups)
     }, subGroups);
