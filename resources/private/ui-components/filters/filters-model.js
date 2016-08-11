@@ -27,7 +27,6 @@ LUPAPISTE.FiltersModel = function() {
   });
 
   self.clickGroupState = function() {
-    console.log("filters-model: clickGroupState called");
     var state = self.groupState();
     _.each( self.filters(), function( m ) {
       m.filter( state !== "all");
