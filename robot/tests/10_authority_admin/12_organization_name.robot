@@ -1,7 +1,7 @@
 *** Settings ***
 
 Documentation   Authority admin creates users
-#Suite Setup     Apply minimal fixture now
+Suite Setup     Apply minimal fixture now
 Resource       ../../common_resource.robot
 
 *** Test Cases ***
