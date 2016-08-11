@@ -4,12 +4,13 @@
     [lupapalvelu.pdf.pdf-export :as pdf-export]
     [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
     [sade.core :refer [def- now]]
+    [sade.strings :as ss]
     [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
     [clojure.pprint :refer [pprint]]
     [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
     [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
     [clojure.java.io :as io]
-    [clojure.string :as s])
+    [sade.util :as util])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -25,7 +26,7 @@
                     :verdicts (i18n/localize lang (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
                     :tasks (i18n/localize lang "task-katselmus.rakennus.tila._group_label"))
         base-attachment-opts {:application        application
-                              :filename           (-> type-name (s/replace " " "_") (str ".pdf"))
+                              :filename           (-> type-name (ss/replace " " "_") (str ".pdf"))
                               :size               (.length file)
                               :content            file
                               :attachment-id      attachment-id
@@ -54,9 +55,9 @@
             (= :tasks type) (assoc :target {:type :task :id id}))))
 
 (defn- get-child-attachment-id [app child-type id]
-  (let [attachment (filter #(= {:type (name child-type) :id id} (:source %)) (:attachments app))
-        attachment-id (:id (first attachment))]
-    attachment-id))
+  (:id (util/find-first
+         #(= {:type (name child-type) :id id} (:source %))
+         (:attachments app))))
 
 (defn- generate-attachment-from-child!
   "Builds attachment and return attachment data as map"
@@ -77,9 +78,12 @@
   "Generates attachment from child and saves it. Returns created attachment version."
   [user application child-type child-id lang]
   (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang)
+        file-options       (select-keys attachment-options [:filename :size :content])
         file (:content attachment-options)]
     (try
-      (attachment/attach-file! application attachment-options)
+      (attachment/upload-and-attach! {:application application :user user}
+                                     attachment-options
+                                     file-options)
       (finally
         (io/delete-file file :silently)))))
 

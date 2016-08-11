@@ -6,7 +6,8 @@
             [sade.core :refer [now]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [me.raynes.fs :as fs]))
 
 (testable-privates lupapalvelu.xml.krysp.application-as-krysp-to-backing-system remove-unsupported-attachments remove-non-approved-designers)
 
@@ -59,11 +60,13 @@
     file))
 
 (defonce application-id (str "Foobar-" (now)))
+(defonce foo-org  {:krysp {:R {:ftpUser "test_foo"}}})
 
 (facts "Deprecated messages cleanup"
-       (let [app {:id application-id :organization "753-R" :permitType "R"}
-             dir (resolve-output-directory (org/get-organization (:organization app)) (:permitType app))]
+       (let [app {:id application-id :organization "FOO-R" :permitType "R"}
+             dir (resolve-output-directory foo-org (:permitType app))]
          (fact "Output directory exists"
+               (fs/mkdirs dir)
                (.isDirectory (io/file dir)) => true)
          (let [rm1   (write-xml dir (str (:id app) "_first.xml") "Rakentamisen aikainen muutos")
                rm2   (write-xml dir (str (:id app) "_second.XML") "Uusi hakemus")
@@ -80,9 +83,12 @@
               "<bar:baz>Uusi hakemus</bar:baz>"
               "</rakval:RakennusvalvontaAsia></hii:TopLevel>"))
            (fact "KRYSP file count before cleanup" (count (krysp-xml-files app)) => 5) ;; rm + stay
+
            (fact "Cleanup does not throw exceptions"
-                 (cleanup-output-dir app) => nil)
+                 (cleanup-output-dir app) => nil
+                 (provided (org/get-organization "FOO-R") => foo-org))
            (fact "KRYSP file count after cleanup" (count (krysp-xml-files app)) => 3) ;; stay
+
            (fact "Correct files have been deleted"
                  (.exists rm1) => false
                  (.exists rm2) => false)
@@ -94,4 +100,7 @@
                  (cleanup-output-dir (assoc app :permitType "XYZ")) => nil)
            (fact "No messages for the application"
                  (krysp-xml-files (assoc app :id "Meiyou")) => empty?
-                 (cleanup-output-dir (assoc app :id "Meiyou")) => nil))))
+                 (cleanup-output-dir (assoc app :id "Meiyou")) => nil)))
+       (against-background
+        (org/get-organization "FOO-R") => foo-org
+        (org/get-organization "Unknown") => nil))

@@ -10,10 +10,11 @@
 
 (facts "appeal attachment updates"
        (against-background
-         [(lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false]
+         [(lupapalvelu.attachment.conversion/archivability-conversion anything anything) => {:archivable false
+                                                                                             :archivabilityError :not-validated}]
          (fact "appeal-attachment-data"
                (let [file-id  (mongo/create-id)
-                     file-obj {:content nil,
+                     file-obj {:content (constantly nil),
                                :content-type "application/pdf",
                                :size 123,
                                :file-name "test-pdf.pdf",

@@ -101,7 +101,9 @@
 ;; use in place of server-address to use loopback interface over configured hostname in testing, eg autologin
 (defn target-server-or-localhost-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
-(def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
+(def dev-env? (= (s/upper-case env/target-env) "DEV"))
+
+(def get-files-from-sftp-server? dev-env?)
 
 (defn decode-response [resp]
   (update-in resp [:body] (comp keywordize-keys json/decode)))
