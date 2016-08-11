@@ -210,6 +210,9 @@ Positive indicator should be visible
 Positive indicator should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-positive"]
 
+Negative indicator should be visible
+  Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-negative"]
+
 Negative indicator should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-negative"]
 
