@@ -35,8 +35,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   });
 
   self.groups = self.service.layout;
-  self.togglePreVerdictGroups = self.service.togglePreVerdictAccordions;
-  self.togglePostVerdictGroups = self.service.togglePostVerdictAccordions;
 
   var dispose = self.dispose;
   self.dispose = function() {

@@ -37,19 +37,14 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.applicationId.subscribe(function() {
     // to avoid retaining old filter states when going to different application
-    console.log("clearing internedObservables");
     self.internedObservables = {};
   });
 
   self.clearData = function() {
     // to avoid showing stale data before ajax queries return, after switching views or applications
-    console.log("clearing server data");
-    console.log("before clearings, peek filters", self.filters.peek());
     self.attachments([]);
     self.filters([]);
     self.tagGroups([]);
-    console.log("after clearings, peek filters", self.filters.peek());
-    console.log("after clearings, peek attachments", self.attachments.peek());
   };
 
   self.queryAll = function queryAll() {
@@ -220,7 +215,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.filtersArray = ko.pureComputed( function() {
     return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
                       function(filter /*, idx // unused */) {
-                        console.log("making filtersArray entry for tag", filter.tag);
                         return {ltext: "filter." + filter.tag,
                                 tag: filter.tag,
                                 filter: internFilterBoolean(filter.tag, filter["default"])};}));
@@ -229,9 +223,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   function showAll() {
     return false;
-    //var filterValues = _.mapValues(internedObservables, function(f) { return f(); });
-    //return _(filterValues).omit("ei-tarpeen").values()
-    //       .every(function(f) { return !f; });
   }
 
   function notNeededForModel(attachment) {
@@ -447,12 +438,5 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
 
-  self.togglePreVerdictAccordions = function() {
-    //toggleAccordions(0);
-  };
-
-  self.togglePostVerdictAccordions = function() {
-    //toggleAccordions(1);
-  };
   ko.options.deferUpdates = false;
 };
