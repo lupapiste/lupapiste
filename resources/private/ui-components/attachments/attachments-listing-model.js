@@ -31,7 +31,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
       self.service.queryAll();
     }
   });
-
   var dispose = self.dispose;
   self.dispose = function() {
     self.service.changeScheduledNotNeeded();
@@ -256,6 +255,27 @@ LUPAPISTE.AttachmentsListingModel = function() {
     } else {
       return getDataForAccordion(groupPath);
     }
+  }
+
+  function toggleOpen(groups, bool) {
+    groups.open(bool);
+    if (groups.accordions) {
+      _.map(groups.accordions, 
+        function(group) {toggleOpen(group, bool);})
+    }
+  }
+
+  self.openAll = function() { 
+    console.log("ollaan avaamassa");
+    toggleOpen(self.groups(), true); 
+  }
+
+  self.closeAll = function() {
+    toggleOpen(self.groups(), true); 
+  }
+
+  self.toggleAll = function() {
+    toggleOpen(self.groups(), !(self.groups().open()));
   }
 
   // entry point for templates to access model data
