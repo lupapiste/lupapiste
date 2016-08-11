@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 Suti server
   [Arguments]  ${url}  ${username}  ${password}
   Go to page  backends
-  Scroll to test id  suti-password  
+  Scroll to test id  suti-password
   Fill test id  suti-url  ${url}
   Fill test id  suti-username  ${username}
   Fill test id  suti-password  ${password}
@@ -26,13 +26,13 @@ Toggle Suti
 Toggle Suti operation
   [Arguments]  ${operation}
   Go to page  operations
-  Click label  suti-${operation}  
+  Click label  suti-${operation}
 
 Set Suti id
   [Arguments]  ${id}
   Fill test id  suti-display-id  ${id}
   Focus  jquery=label[for=suti-display-added]
-  
+
 Clear Suti id
   Set Suti id  ${EMPTY}
   Test id disabled  suti-display-link
@@ -43,7 +43,7 @@ Suti id and note
   Set Suti id  ${id}
   Wait Until  Test id text is  suti-display-note  ${note}
   Run Keyword If  ${error}  With error style  suti-display-note
-  
+
 With error style
   [Arguments]  ${id}
   Element should be visible  jquery=.suti-display--error[data-test-id=${id}]
@@ -60,7 +60,7 @@ Check row
   Test id text is  suti-display-expirydate-${index}  ${expirydate}
   Run Keyword If  '${state}' == 'Vanhentunut'  With error style  suti-display-expirydate-${index}
   Test id text is  suti-display-downloaded-${index}  ${downloaded}
-  
+
 Check default products
   Check row  0  One  Voimassa  ${EMPTY}  ${EMPTY}
   Check row  1  Two  Vanhentunut  5.7.2016  1.7.2016
@@ -69,9 +69,12 @@ Check default products
 Readonly Suti
   Open application  ${appname}  ${propertyid}
   Open tab  attachments
+  ${sutiClosed} =  Run Keyword And Return Status  Element should be visible  xpath=//div[@data-test-id='suti-display']//div[contains(@class,'rollup--closed')]
+  Run Keyword If  ${sutiClosed}  Click element  xpath=//div[@data-test-id='suti-display']//rollup-button/button
+
   Test id disabled  suti-display-id
   Test id input is  suti-display-id  1234
   Test id disabled  suti-display-link
-  Checkbox wrapper disabled  suti-display-added 
-  Check default products  
+  Checkbox wrapper disabled  suti-display-added
+  Check default products
 
