@@ -9,9 +9,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.mongo :as mongo]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -323,21 +322,21 @@
   :suggest-appointment
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
+   :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result}]
                                    (let [reservations (group-by :id (:reservations application))
-                                         reservation  (get-in reservations [(:reservationId result)])]
+                                         reservation (first (get-in reservations [(:reservationId result)]))]
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application result :result}]
                                    (let [reservations (group-by :id (:reservations application))
-                                         reservation  (get-in reservations [(:reservationId result)])]
+                                         reservation (first (get reservations (:reservationId result)))]
                                      (map usr/get-user-by-id (:calendar-recipients reservation))))
    :model-fn                     (fn [{application :application} _ recipient]
                                    {:link-fi (notifications/get-application-link application nil "fi" recipient)
                                     :link-sv (notifications/get-application-link application nil "sv" recipient)
                                     :info-fi (str (env/value :host) "/ohjeet")
-                                    :info-sv (str (env/value :host) "/ohjeet")})
-   })
+                                    :info-sv (str (env/value :host) "/ohjeet")})})
 
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authority :applicant}
@@ -354,6 +353,7 @@
   (let [slot (get-calendar-slot slotId)
         calendar (get-calendar-for-resource (:resourceId slot))
         authorityId (:externalRef calendar)]
+    ; validation
     (when (and (usr/applicant? user) (not (= clientId userId)))
       (error "applicant trying to impersonate as " clientId " , failing reservation")
       (fail! :error.unauthorized))
@@ -362,6 +362,7 @@
       (fail! :error.unauthorized))
     (when (not (= (:organizationCode slot) organization))
       (fail! :error.illegal-organization))
+
     (let [reservationId (post-command "reservation/"
                                       {:clientId clientId :reservationSlotId slotId
                                        :reservationTypeId reservationTypeId :comment comment

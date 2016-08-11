@@ -37,7 +37,6 @@
 (defn- send-mail-to-recipient! [recipient subject msg]
   {:pre [(map? recipient) (:email recipient)]}
   (let [to (->to recipient)]
-    (println "--------" recipient subject msg)
     (if (env/value :email :dummy)
      (email/send-email-message to subject msg)
      (future*
@@ -143,7 +142,7 @@
   (or (ss/blank? (:email rec))
       (contains? non-notified-roles (:role rec))))
 
-(defn notify! [template-name command result]
+(defn notify! [template-name command & [result]]
   {:pre [template-name (map? command) (template-name @mail-config)]}
   (let [conf (template-name @mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
@@ -166,6 +165,6 @@
                            (calendar-fn command))
                 msg     (email/apply-template template-file model)
                 msg     (if (some? calendar)
-                          (conj msg (:calendar model))
+                          (conj msg calendar)
                           msg)]
             (send-mail-to-recipient! recipient subject msg)))))))

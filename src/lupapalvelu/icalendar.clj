@@ -67,7 +67,7 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [startTime endTime location]}]
+(defn create-calendar-event [{:keys [startTime endTime location] :as data}]
   (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
@@ -79,17 +79,3 @@
                              :organizer-name "lupapiste")
         _ (add-event! cal event)]
     (output-calendar cal)))
-
-(defn send-calendar-event [{:keys [to start end title description url location organizer]}]
-  (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
-        event (create-event  (Date. start)
-                             (Date. end)
-                             title
-                             :description description
-                             :url url
-                             :location location
-                             :organizer-email (:email organizer)
-                             :organizer-name (:name organizer))
-        _ (add-event! cal event)]
-    (info "Sending calendar event:" (output-calendar cal))
-    (email/send-mail to title :html description :plain "" :calendar (output-calendar cal))))
