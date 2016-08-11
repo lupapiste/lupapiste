@@ -5,13 +5,11 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Sipoo admin sets email address for neighbor hearing notification
-  ${save_indicator} =  Set Variable  xpath=//section[@id="applications"]//span[contains(@class, "save-indicator")]
   Set Suite Variable  ${email}  kirjaamo@sipoo.example.com
   Sipoo logs in
   Go to page  applications
-  Element should not be visible  ${save_indicator}
   Input text by test id  neighborOrderEmails  ${email}
-  Wait Until  Element should be visible  ${save_indicator}
+  Wait until  Positive indicator should be visible
   Logout
 
 Mikko asks municipality to hear neighbors
