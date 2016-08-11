@@ -3,7 +3,7 @@
 Resource        ../../common_resource.robot
 Resource        ../common_keywords/approve_helpers.robot
 Resource        keywords.robot
-Suite Setup     Initialize
+Suite Setup     Initialize foreman
 
 *** Test Cases ***
 

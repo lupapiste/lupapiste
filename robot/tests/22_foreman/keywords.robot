@@ -4,7 +4,8 @@ Library        Collections
 
 *** Keywords ***
 
-Initialize
+Initialize foreman
+  Apply minimal fixture now
   ${applicationIds} =  Create List
   Set Suite Variable  ${applicationIds}
   ${applications} =  Create List
@@ -28,7 +29,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Wait Until  Page should contain  Työnjohtajan nimeäminen
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Open foreman accordions
   Open accordions  parties
@@ -98,7 +99,7 @@ Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Wait until  Element Should Be Visible  xpath=//section[@id='application']
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
 Project application is open
   ${appId} =   Get From List  ${applicationIds}  0
