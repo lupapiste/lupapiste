@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.attachment.conversion :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [clojure.java.io :as io])
   (:import (java.io InputStream File)))
 
@@ -18,16 +19,19 @@
        :attachment-type {:foo :faa}}) => {:archivable false
                                           :archivabilityError :invalid-mime-type})
   (fact "TXT conversion"
-    (archivability-conversion
-      nil
-      {:attachment-type {:foo :faa}
-       :filename "foo.txt"
-       :contentType "text/plain"
-       :content (io/file "dev-resources/test-attachment.txt")}) => (just {:archivabilityError nil
-                                                                          :archivable         true
-                                                                          :autoConversion     true
-                                                                          :content            (partial instance? InputStream)
-                                                                          :filename "foo.pdf"}))
+    (let [result (archivability-conversion
+                   nil
+                   {:attachment-type {:foo :faa}
+                    :filename "foo.txt"
+                    :contentType "text/plain"
+                    :content (io/file "dev-resources/test-attachment.txt")})]
+      (if libre/enabled?
+        result => (just {:archivabilityError nil
+                         :archivable         true
+                         :autoConversion     true
+                         :content            (partial instance? InputStream)
+                         :filename "foo.pdf"})
+        result => (just {:archivabilityError :invalid-mime-type :archivable false}))))
 
   (fact "PDF conversion - no archive => not-validated"
     (archivability-conversion nil {:attachment-type {:foo :faa}
