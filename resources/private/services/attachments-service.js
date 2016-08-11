@@ -213,11 +213,11 @@ LUPAPISTE.AttachmentsService = function() {
 
   // filter tag -> observable toggles, shared between service and UI, updated in UI
   self.filtersArray = ko.pureComputed( function() {
-    return _.reverse(_.map(_.reduceRight(self.filters(), function (a, b) { return a.concat(b);}, []),
+    return _.map(_.flatten(self.filters()),
                       function(filter /*, idx // unused */) {
                         return {ltext: "filter." + filter.tag,
                                 tag: filter.tag,
-                                filter: internFilterBoolean(filter.tag, filter["default"])};}));
+                                filter: internFilterBoolean(filter.tag, filter["default"])};});
   });
 
 
@@ -275,7 +275,7 @@ LUPAPISTE.AttachmentsService = function() {
     };
   };
 
-  function modelForSubAccordion(subGroup) {
+  self.modelForSubAccordion = function (subGroup) {
     var attachmentInfos = self.modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
@@ -288,7 +288,7 @@ LUPAPISTE.AttachmentsService = function() {
           attachmentInfos.attachments.length > 0;
       })
     };
-  }
+  };
 
   // If all of the subgroups in the main group are approved -> approved
   // If some of the subgroups in the main group are rejected -> rejected
@@ -349,7 +349,7 @@ LUPAPISTE.AttachmentsService = function() {
     if (group.type === "main") {
       return modelForMainAccordion(group);
     } else {
-      return modelForSubAccordion(group);
+      return self.modelForSubAccordion(group);
     }
   }
 
@@ -358,7 +358,7 @@ LUPAPISTE.AttachmentsService = function() {
                        groupToModel);
   });
 
-  function getAttachmentsForGroup(groupPath) {
+  self.getAttachmentsForGroup = function (groupPath) {
     function getAttachments(group) {
       if (_.isPlainObject(group)) {
         return _.flatten(_.map(_.values(group), getAttachments));
@@ -368,75 +368,13 @@ LUPAPISTE.AttachmentsService = function() {
     }
     var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
     return getAttachments(group);
-  }
+  };
 
-  function getDataForGroup(groupPath) {
+  self.getDataForGroup = function (groupPath) {
     return ko.pureComputed(function() {
       return util.getIn(self.attachmentGroups(), groupPath);
     });
-  }
-
-  function getOperationLocalization(operationId) {
-    var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
-    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
-  }
-
-  function getLocalizationForDefaultGroup(groupPath) {
-    if (groupPath.length === 1) {
-      return loc("application.attachments.general");
-    } else {
-      return loc("application.attachments.other");
-    }
-  }
-
-  function groupToAccordionName(groupPath) {
-    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
-        key = _.last(groupPath);
-    if (opIdRegExp.test(key)) {
-      return getOperationLocalization(opIdRegExp.exec(key)[1]);
-    } else if (_.last(groupPath) === "default") {
-      return getLocalizationForDefaultGroup(groupPath);
-    } else {
-      return loc(["application", "attachments", key]);
-    }
-  }
-
-  function getDataForAccordion(groupPath) {
-    return {
-      lname: groupToAccordionName(groupPath),
-      open: ko.observable(),
-      data: ko.pureComputed(function() {
-        return modelForSubAccordion({
-          lname: groupToAccordionName(groupPath),
-          attachmentIds: getAttachmentsForGroup(groupPath)
-        });
-      })
-    };
-  }
-
-  function attachmentTypeLayout(groupPath, tagGroups) {
-    if (tagGroups.length) {
-      return {
-        lname: groupToAccordionName(groupPath),
-        open: ko.observable(),
-        data: getDataForGroup(groupPath),
-        accordions: _.map(tagGroups, function(tagGroup) {
-          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup));
-        })
-      };
-    } else {
-      return getDataForAccordion(groupPath);
-    }
-  }
-
-  self.layout = ko.computed(function() {
-    if (self.tagGroups().length) {
-      return attachmentTypeLayout([], self.tagGroups());
-    } else {
-      return {};
-    }
-  });
-
+  };
 
   ko.options.deferUpdates = false;
 };
