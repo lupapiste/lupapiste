@@ -76,22 +76,35 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
-  // lupapisteApp.models.application.id.subscribe(function(newId) {
-
-  //   self.applicationId = newId;
-  //   self.queryAll();
-  // });
-
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
       return attachment.peek().id === attachmentId;
     });
   };
 
-  self.removeAttachment = function(attachmentId) {
-    self.attachments.remove(function(attachment) {
-      return attachment().id === attachmentId;
-    });
+
+
+  self.removeAttachment = function(attachmentId) { // use as reference for new attachment remove dialog, also put track-clicks in
+    var versions = ko.unwrap(self.getAttachment(attachmentId)).versions;
+    var removeSuccessCallback = function() {
+      self.attachments.remove(function(attachment) {
+        return attachment().id === attachmentId;
+      });
+      hub.send("indicator-icon", {style: "positive"});
+    };
+    var doDelete = function() {
+      ajax.command("delete-attachment", {id: self.applicationId(), attachmentId: attachmentId})
+        .success(removeSuccessCallback)
+        .processing(lupapisteApp.models.application.processing)
+        .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
+      return false;
+    };
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: doDelete}});
   };
 
   self.updateAttachment = function(attachmentId, updates) {
