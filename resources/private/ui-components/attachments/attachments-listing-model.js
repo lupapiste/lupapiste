@@ -42,6 +42,174 @@ LUPAPISTE.AttachmentsListingModel = function() {
     dispose();
   };
 
+  //
+  // Attachment hierarchy
+  //
+
+  function findMatchingTag(tags, attachment) {
+    return _.find(tags, function(tag) {
+      return _.includes(attachment.tags, tag);
+    }) || "default";
+  }
+
+  function resolveTagGrouping(attachments, tagGroups) {
+    if (!tagGroups || !tagGroups.length) {
+      return _.map(attachments, "id");
+    }
+    return _(attachments)
+      .groupBy(_.partial(findMatchingTag, _.map(tagGroups, _.head)))
+      .mapValues(function (attachmentsInGroup, tagGroupName) {
+        var tagGroup = _.find(tagGroups, function(tagGroup) {
+          return _.head(tagGroup) === tagGroupName;
+        });
+        return resolveTagGrouping(attachmentsInGroup, _.tail(tagGroup));
+      })
+      .value();
+  }
+
+
+  function notNeededForModel(attachment) {
+    return attachment.notNeeded;
+  }
+
+  //
+  // Attachments hierarchy
+  //
+
+  // Return attachment ids grouped first by type-groups and then by type ids.
+
+  self.getAttachmentsHierarchy = function() {
+    var attachments = _.map(self.service.filteredAttachments(), ko.utils.unwrapObservable);
+    return groupAttachmentsByTags(attachments);
+  };
+
+  function groupAttachmentsByTags(attachments) {
+    return resolveTagGrouping(attachments, self.service.tagGroups());
+  }
+
+  self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
+
+
+  function modelForAttachmentInfo(attachmentIds) {
+    var attachments = _(attachmentIds)
+          .map(self.service.getAttachment)
+          .filter(_.identity)
+          .value();
+    return {
+      approve:      self.service.approveAttachment,
+      reject:       self.service.rejectAttachment,
+      remove:       self.service.removeAttachment,
+      setNotNeeded: self.service.setNotNeeded,
+      isApproved:   self.service.isApproved,
+      isRejected:   self.service.isRejected,
+      isNotNeeded:  notNeededForModel,
+      attachments:  attachments
+    };
+  }
+
+
+  function modelForSubAccordion(subGroup) {
+    var attachmentInfos = modelForAttachmentInfo(subGroup.attachmentIds);
+    return {
+      type: "sub",
+      ltitle: subGroup.name, // TODO
+      attachmentInfos: attachmentInfos,
+      // all approved or some rejected
+      status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
+      hasContent: ko.pureComputed(function() {
+        return attachmentInfos && attachmentInfos.attachments &&
+          attachmentInfos.attachments.length > 0;
+      })
+    };
+  }
+
+  // If all of the subgroups in the main group are approved -> approved
+  // If some of the subgroups in the main group are rejected -> rejected
+  // Else null
+  function subGroupsStatus(subGroups) {
+    return ko.pureComputed(function() {
+      if (_.every(_.values(subGroups),
+                  function(sg) {
+                    return sg.status() === self.APPROVED;
+                 }))
+      {
+        return self.APPROVED;
+      } else {
+        return _.some(_.values(subGroups),
+                      function(sg) {
+                        return sg.status() === self.REJECTED;
+                     }) ? self.REJECTED : null;
+      }
+    });
+  }
+
+  function someSubGroupsHaveContent(subGroups) {
+    return ko.pureComputed(function() {
+      return _.some(_.values(subGroups),
+                    function(sg) { return sg.hasContent(); });
+    });
+  }
+
+  function modelForMainAccordion(mainGroup) {
+    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
+    return _.merge({
+      type: "main",
+      ltitle: mainGroup.name, // TODO
+      status: subGroupsStatus(subGroups),
+      hasContent: someSubGroupsHaveContent(subGroups)
+    }, subGroups);
+  }
+
+  function hierarchyToGroups(hierarchy) {
+    return _.mapValues(hierarchy, function(group, name) {
+      if (_.isPlainObject(group)) {
+        return {
+          type: "main",
+          name: name,
+          subGroups: hierarchyToGroups(group)
+        };
+      } else {
+        return {
+          type: "sub",
+          name: name,
+          attachmentIds: group
+        };
+      }
+    });
+  }
+
+  function groupToModel(group) {
+    if (group.type === "main") {
+      return modelForMainAccordion(group);
+    } else {
+      return modelForSubAccordion(group);
+    }
+  }
+
+  self.attachmentGroups = ko.pureComputed(function() {
+    return _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
+                       groupToModel);
+  });
+
+   function getAttachmentsForGroup(groupPath) {
+    function getAttachments(group) {
+      if (_.isPlainObject(group)) {
+        return _.flatten(_.map(_.values(group), getAttachments));
+      } else {
+        return group;
+      }
+    }
+    var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
+    return getAttachments(group);
+  }
+
+   function getDataForGroup(groupPath) {
+    return ko.pureComputed(function() {
+      return util.getIn(self.attachmentGroups(), groupPath);
+    });
+  }
+
+
   function getOperationLocalization(operationId) {
     var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
     return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
@@ -72,9 +240,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
       lname: groupToAccordionName(groupPath),
       open: ko.observable(),
       data: ko.pureComputed(function() {
-        return self.service.modelForSubAccordion({
+        return modelForSubAccordion({
           lname: groupToAccordionName(groupPath),
-          attachmentIds: self.service.getAttachmentsForGroup(groupPath)
+          attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
     };
@@ -86,7 +254,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       return {
         lname: groupToAccordionName(groupPath),
         open: ko.observable(),
-        data: self.service.getDataForGroup(groupPath),
+        data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {
           return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup));
         })
