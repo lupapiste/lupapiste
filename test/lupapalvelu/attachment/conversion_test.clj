@@ -25,7 +25,7 @@
                     :filename "foo.txt"
                     :contentType "text/plain"
                     :content (io/file "dev-resources/test-attachment.txt")})]
-      (if libre/enabled?
+      (if (libre/enabled?)
         result => (just {:archivabilityError nil
                          :archivable         true
                          :autoConversion     true
