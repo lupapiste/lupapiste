@@ -330,7 +330,7 @@
       (fact (:number body) => "80")
       (fact (:fi (:name body)) => "Turku"))))
 
-#_(facts "Get address from Helsinki test service"
+(facts "Get address from Helsinki test service"
   (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://212.213.116.162/geos_facta/wfs?request"})
   (fact "get-addresses-proxy"
     (let [response (get-addresses-proxy {:params {:query "Liljankuja 6, helsinki" :lang "fi"}})
