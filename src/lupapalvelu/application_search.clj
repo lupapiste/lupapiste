@@ -170,7 +170,7 @@
    :_attachment_indicator_reset :address :applicant :attachments
    :auth :authority :authorityNotice :comments :created :documents
    :foreman :foremanRole :infoRequest :location :modified :municipality
-   :neighbors :permitSubtype :primaryOperation :state :statements
+   :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
    :submitted :tasks :urgency :verdicts])
 
@@ -181,7 +181,7 @@
   [:id :address :applicant :authority :authorityNotice
    :infoRequest :kind :location :modified :municipality
    :primaryOperation :state :submitted :urgency :verdicts
-   :foreman :foremanRole])
+   :foreman :foremanRole :permitType])
 
 (defn- select-fields [application]
   (select-keys
