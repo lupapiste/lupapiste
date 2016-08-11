@@ -323,9 +323,10 @@
   {:template                     "suggest-appointment.html"
    :subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result}]
+   :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservations (group-by :id (:reservations application))
-                                         reservation (first (get-in reservations [(:reservationId result)]))]
+                                         reservation (first (get-in reservations [(:reservationId result)]))
+                                         reservation (assoc reservation :attendee recipient)]
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application result :result}]

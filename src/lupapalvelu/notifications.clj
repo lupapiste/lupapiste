@@ -154,7 +154,7 @@
             recipients     (remove invalid-recipient? (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))
-            calendar-fn    (get conf :calendar-fn identity)]
+            calendar-fn    (get conf :calendar-fn)]
         (doseq [recipient recipients]
           (let [model   (model-fn command conf recipient)
                 subject (get-email-subject application
@@ -162,7 +162,7 @@
                                            (get conf :subject-key (name template-name))
                                            (get conf :show-municipality-in-subject false))
                 calendar (when (some? calendar-fn)
-                           (calendar-fn command))
+                           (calendar-fn command recipient))
                 msg     (email/apply-template template-file model)
                 msg     (if (some? calendar)
                           (conj msg calendar)

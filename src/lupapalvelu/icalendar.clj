@@ -6,22 +6,25 @@
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
            (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description)
-           (net.fortuna.ical4j.model.parameter Cn Role)
+           (net.fortuna.ical4j.model.parameter Cn Role Rsvp)
            (net.fortuna.ical4j.model.component VEvent)
            (net.fortuna.ical4j.data CalendarOutputter)
-           (java.io StringWriter)))
+           (java.io StringWriter)
+           (clojure.lang PersistentArrayMap)))
 
 (defn- create-attendee
-  [{:keys [url role name]}]
+  [{:keys [url role name rsvp]}]
   (let [att (Attendee. (java.net.URI/create url))]
     (.add (.getParameters att) role)
+    (.add (.getParameters att) rsvp)
     (.add (.getParameters att) (Cn. name))
     att))
 
 (defn- add-properties
   "take a vevent and add properties to it.
   the supported properties are url description location organizer-email and organizer-name."
-  [vevent {:keys [^String description ^String url ^String location ^String organizer-email ^String organizer-name]}]
+  [vevent {:keys [^String description ^String url ^String location ^String organizer-email
+                  ^String organizer-name ^PersistentArrayMap attendee]}]
   (let [u (str (java.util.UUID/randomUUID) (.toString (to-local-date-time (local-now))) "@lupapiste.fi")
         props (.getProperties vevent)
         organizer-url (str "mailto:" organizer-email)]
@@ -30,9 +33,11 @@
     (when (seq url) (.add props (Url. (java.net.URI. url))))
     (when (seq location) (.add props (Location. location)))
     (when (seq description) (.add props (Description. description)))
-    (.add props (create-attendee {:url organizer-url
-                                  :role Role/REQ_PARTICIPANT
-                                  :name organizer-name}))
+    (when (map? attendee)
+      (.add props (create-attendee {:url  (str "mailto:" (:email attendee))
+                                    :rsvp Rsvp/FALSE
+                                    :role Role/REQ_PARTICIPANT
+                                    :name (str (:firstName attendee) " " (:lastName attendee))})))
     vevent))
 
 (defn- create-cal
@@ -46,7 +51,8 @@
     (.add props CalScale/GREGORIAN) c))
 
 (defn- create-event [^Date start ^Date end ^String title & {:keys [^String description ^String url ^String location
-                                                                   ^String organizer-email ^String organizer-name] :as all}]
+                                                                   ^String organizer-email ^String organizer-name
+                                                                   ^PersistentArrayMap attendee] :as all}]
   (let [st (doto  (DateTime. start) (.setUtc true))
         et (doto  (DateTime. end) (.setUtc true))
         vevent (VEvent. st et title)]
@@ -67,7 +73,7 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [startTime endTime location] :as data}]
+(defn create-calendar-event [{:keys [startTime endTime location attendee] :as data}]
   (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
@@ -75,7 +81,8 @@
                              :description "description"
                              :url "url"
                              :location location
-                             :organizer-email "lupapiste@solita.fi"
-                             :organizer-name "lupapiste")
+                             :attendee attendee
+                             :organizer-email "no-reply@lupapiste.fi"
+                             :organizer-name "Lupapiste-asiointipalvelu")
         _ (add-event! cal event)]
     (output-calendar cal)))
