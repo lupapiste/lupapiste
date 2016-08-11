@@ -6,12 +6,28 @@ LUPAPISTE.OrganizationNameEditorModel = function() {
   self.id = ko.observable();
   self.names = ko.observableArray([]);
 
-  function wrapName(name, lang) {
-    return {lang: lang, name: ko.observable(name)};
+  function unWrapName(nameObj) {
+    return _.set({}, nameObj.lang, util.getIn(nameObj, ["name"]));
   }
 
-  function unWrapName(o) {
-    return [o.lang, util.getIn(o, ["name"])];
+  function saveName(nameObj) {
+    ajax.command("update-organization-name", {"org-id": self.id(),
+                                              "name": unWrapName(nameObj)})
+      .success(util.showSavedIndicator)
+      .error(util.showSavedIndicator)
+      .call();
+  }
+
+  function wrapName(name, lang) {
+    var nameObj = {
+      lang: lang,
+      name: ko.observable(name),
+      indicator: ko.observable().extend({notify: "always"})
+    };
+    nameObj.name.subscribe(function() {
+      _.debounce(saveName, 500)(nameObj);
+    });
+    return nameObj;
   }
 
   function queryNames() {
@@ -22,14 +38,6 @@ LUPAPISTE.OrganizationNameEditorModel = function() {
       })
       .call();
   }
-
-  self.updateOrganizationName = function() {
-    var names = _(self.names()).map(unWrapName).fromPairs().value();
-    ajax.command("update-organization-name", {"org-id": self.id(),
-                                              "name": names})
-      .success(util.showSavedIndicator)
-      .call();
-  };
 
   queryNames();
 };
