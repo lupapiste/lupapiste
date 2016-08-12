@@ -5414,6 +5414,11 @@ button:focus {
   margin-right: 12px;
 }
 
+/* line 615, ../../../private/common-html/sass/partials/_buttons.scss */
+.no-events {
+  pointer-events: none;
+}
+
 /* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
 label.arrow-label {
   width: 100%;
@@ -10228,19 +10233,4 @@ ul.tabs {
 /* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble .deleted {
   text-decoration: line-through;
-}
-
-/* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
-.comment-bubble-authority {
-  position: relative;
-  color: #333333;
-  background: #f6f6f6;
-  width: 100%;
-  border-radius: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 5px;
-  padding-top: 5px;
-  margin-bottom: 15px;
-  border: 1px solid #bbbbbb;
 }

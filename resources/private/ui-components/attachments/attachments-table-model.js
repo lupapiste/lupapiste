@@ -7,7 +7,12 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   function canVouch( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    return hasFile( data ) || params.isNotNeeded( data );
+    return hasFile( data ) && !params.isNotNeeded( data );
+  }
+
+  function openAttachment(data) {
+    var applicationId = lupapisteApp.models.application._js.id;
+    pageutil.openPage("attachment", applicationId + "/" + data.id);
   }
 
   function stateIcons( $data ) {
@@ -30,7 +35,6 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
       .value();
   }
 
-
   var idPrefix = _.uniqueId("at-input-");
 
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
@@ -46,6 +50,8 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     isRejected: params.isRejected,
     reject: idFun(params.reject),
     remove: idFun(params.remove),
+    appModel: lupapisteApp.models.application,
+    authModel: lupapisteApp.models.applicationAuthModel,
     canDownload: _.some(params.attachments, function(a) {
       return hasFile(a());
     }),
@@ -53,6 +59,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     toggleNotNeeded: function( data  ) {
       params.setNotNeeded( data.id, !data.notNeeded);
     },
-    canVouch: canVouch
+    canVouch: canVouch,
+    openAttachment: openAttachment
   };
 };

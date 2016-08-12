@@ -25,6 +25,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
     .join("<br>");
 
   self.service = lupapisteApp.services.attachmentsService;
+  self.appModel = lupapisteApp.models.application;
   self.disposedComputed(function() {
     var id = self.service.applicationId(); // create dependency
     if (id) {
@@ -231,11 +232,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   function getDataForAccordion(groupPath) {
     return {
-      lname: groupToAccordionName(groupPath),
+      name: groupToAccordionName(groupPath),
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
-          lname: groupToAccordionName(groupPath),
+          name: groupToAccordionName(groupPath),
           attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
@@ -245,7 +246,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function attachmentTypeLayout(groupPath, tagGroups) {
     if (tagGroups.length) {
       return {
-        lname: groupToAccordionName(groupPath),
+        name: groupToAccordionName(groupPath),
         open: ko.observable(),
         data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {
@@ -260,26 +261,28 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function toggleOpen(groups, bool) {
     groups.open(bool);
     if (groups.accordions) {
-      _.map(groups.accordions, 
-        function(group) {toggleOpen(group, bool);})
+      _.map(groups.accordions,
+        function(group) {toggleOpen(group, bool);});
     }
   }
 
-  self.openAll = function() { 
+  self.openAll = function() {
     if (self.groups && self.groups().open) {
-      toggleOpen(self.groups(), true); 
+      toggleOpen(self.groups(), true);
     }
-  }
+  };
 
   self.toggleAll = function() {
     if (self.groups && self.groups().open) {
       toggleOpen(self.groups(), !(self.groups().open()));
     }
-  }
+  };
 
-  // auto-open all accordions when filtered results change
-  self.autoOpener = ko.computed(function() { 
-    self.service.filteredAttachments() && self.openAll(); 
+  // auto-open all accordions when new filtered results are available
+  self.autoOpener = ko.computed(function() {
+    if(self.service.filteredAttachments()) {
+      self.openAll();
+    }
   });
 
   // entry point for templates to access model data
@@ -292,4 +295,71 @@ LUPAPISTE.AttachmentsListingModel = function() {
   });
 
 
+
+  self.newAttachment = function() {
+    attachment.initFileUpload({
+      applicationId: self.appModel.id(),
+      attachmentId: null,
+      attachmentType: null,
+      typeSelector: true,
+      opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
+      archiveEnabled: lupapisteApp.models.applicationAuthModel.ok("permanent-archive-enabled")
+    });
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
+  };
+
+  self.onUploadDone = function() {
+    self.service.queryAll();
+  };
+  hub.subscribe("upload-done", self.onUploadDone);
+
+  self.onTemplateCreateDone = function() {
+    self.service.queryAll();
+  };
+
+  function AttachmentTemplatesModel() {
+    var templateModel = this;
+
+    templateModel.ok = function(ids) {
+      ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
+        .success(self.onTemplateCreateDone)
+        .complete(LUPAPISTE.ModalDialog.close)
+        .call();
+    };
+
+    templateModel.init = function() {
+      templateModel.initDone = true;
+      templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
+      templateModel.selectm
+        .allowDuplicates(true)
+        .ok(templateModel.ok)
+        .cancel(LUPAPISTE.ModalDialog.close);
+      return templateModel;
+    };
+
+    templateModel.show = function() {
+      if (!templateModel.initDone) {
+        templateModel.init();
+      }
+
+      var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
+        var groupId = g[0];
+        var groupText = loc(["attachmentType", groupId, "_group_label"]);
+        var attachmentIds = g[1];
+        var attachments = _.map(attachmentIds, function(a) {
+          var id = {"type-group": groupId, "type-id": a};
+          var text = loc(["attachmentType", groupId, a]);
+          return {id: id, text: text};
+        });
+        return [groupText, attachments];
+      });
+      templateModel.selectm.reset(data);
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates-v2");
+      return templateModel;
+    };
+  }
+  self.attachmentTemplatesModel = new AttachmentTemplatesModel();
+  self.attachmentTemplatesAdd = function() {
+    self.attachmentTemplatesModel.show();
+  };
 };

@@ -9,11 +9,13 @@
   <div class="clear"></div>
 
   <div class="inner-margins">
-    <button class="positive caps">
+    <button class="positive caps" data-bind="click: $data.newAttachment,
+                                             enabled: $data.authModel.ok('upload-attachment')">
       <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+      <span data-bind="ltext: 'application.attachmentsAdd' "></span>
     </button>
-    <button class="positive caps">
+    <button class="positive caps" data-bind="click: $data.attachmentTemplatesAdd,
+                                             enabled: $data.authModel.ok('create-attachments')">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
     </button>
@@ -62,4 +64,17 @@
     </div>
     <!-- /ko -->
   </div>
+
+
+  <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
+    <div class="dialog-header">
+      <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
+      <p class="dialog-close close lupicon-remove"></p>
+    </div>
+    <div class="dialog-content">
+      <div class="attachment-templates"></div>
+    </div>
+  </div>
+
+
 </script>

@@ -159,19 +159,36 @@
     });
   };
 
+  var selectIfArchivable = function(attachment) {
+    if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+      attachment.sendToArchive(true);
+    }
+  };
+
+  var filteredDocs = function(params) {
+    var applicationState = params.application.state();
+    var appDocId = params.application.id() + "-application";
+    var caseFileDocId = params.application.id() + "-case-file";
+    var docs = [
+      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export"}
+    ];
+
+    if (applicationState === "extinct" || applicationState === "closed") {
+      docs.push({documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile"});
+    }
+    return docs;
+  };
+
   var model = function(params) {
     var self = this;
     self.attachments = params.application.attachments;
     var appDocId = params.application.id() + "-application";
     var caseFileDocId = params.application.id() + "-case-file";
 
-    var docs = [
-      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export"},
-      {documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile"}
-    ];
+    var docs = filteredDocs(params);
 
     var mainDocuments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(docs);
+      return addAdditionalFieldsToAttachments(filteredDocs(params));
     });
     self.stateMap = ko.pureComputed(function() {
       var getState = function(doc) {
@@ -272,11 +289,6 @@
     });
 
     self.selectAll = function() {
-      var selectIfArchivable = function(attachment) {
-        if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
-          attachment.sendToArchive(true);
-        }
-      };
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
@@ -284,6 +296,14 @@
           doc.sendToArchive(true);
         }
       });
+    };
+
+    self.selectAllPreAttachments = function() {
+      _.forEach(archivedPreAttachments(), selectIfArchivable);
+    };
+
+    self.selectAllPostAttachments = function() {
+      _.forEach(archivedPostAttachments(), selectIfArchivable);
     };
 
     var updateState = function(docs, newStateMap) {
