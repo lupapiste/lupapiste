@@ -108,8 +108,6 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
-
-
   // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId) {
     var attachment = self.getAttachment(attachmentId);
@@ -121,10 +119,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
   };
 
-  self.setNotNeeded = function(attachmentId, flag ) {
-    self.updateAttachment(attachmentId, {notNeeded: !flag ?
-                                                    flag :
-                                                    self.SCHEDULED_FOR_NOT_NEEDED});
+  self.setNotNeeded = function(attachmentId, flag) {
+    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
 
   // When an attachment is set to "not needed" with self.setNotNeeded, it
