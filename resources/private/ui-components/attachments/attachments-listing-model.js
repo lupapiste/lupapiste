@@ -231,7 +231,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   function getDataForAccordion(groupPath) {
     return {
-      lname: groupToAccordionName(groupPath),
+      name: groupToAccordionName(groupPath),
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
@@ -245,7 +245,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function attachmentTypeLayout(groupPath, tagGroups) {
     if (tagGroups.length) {
       return {
-        lname: groupToAccordionName(groupPath),
+        name: groupToAccordionName(groupPath),
         open: ko.observable(),
         data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {
