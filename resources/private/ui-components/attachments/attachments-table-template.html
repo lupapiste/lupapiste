@@ -57,16 +57,22 @@
           </td>
           <!-- /ko -->
           <td>
-            <button class="positive btn-icon-only"
-                    data-bind="disable: $parent.isApproved( $data ) || !$parent.canVouch( $data ),
+            <button class="btn-icon-only"
+                    data-bind="disable: !$parent.canVouch( $data ),
+                               css: { positive: $parent.isApproved( $data ),
+                                      'no-events': $parent.isApproved( $data ),
+                                      secondary: !$parent.isApproved( $data ) },
                                click: $parent.approve,
                                clickBubble: false">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
-            <button class="negative btn-icon-only"
-                    data-bind="disable: $parent.isRejected( $data ) || !$parent.canVouch( $data ),
+            <button class="btn-icon-only"
+                    data-bind="disable: !$parent.canVouch( $data ),
+                               css: { negative: $parent.isRejected( $data ),
+                                      'no-events': $parent.isRejected( $data ),
+                                      secondary: !$parent.isRejected( $data ) },
                                click: $parent.reject,
                                clickBubble: false">
               <i class="lupicon-circle-attention"></i>
