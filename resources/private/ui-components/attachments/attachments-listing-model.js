@@ -261,7 +261,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
     groups.open(bool);
     if (groups.accordions) {
       _.map(groups.accordions, 
-        function(group) {toggleOpen(group, bool);})
+        function(group) {toggleOpen(group, bool);});
     }
   }
 
@@ -269,17 +269,19 @@ LUPAPISTE.AttachmentsListingModel = function() {
     if (self.groups && self.groups().open) {
       toggleOpen(self.groups(), true); 
     }
-  }
+  };
 
   self.toggleAll = function() {
     if (self.groups && self.groups().open) {
       toggleOpen(self.groups(), !(self.groups().open()));
     }
-  }
+  };
 
-  // auto-open all accordions when filtered results change
+  // auto-open all accordions when new filtered results are available
   self.autoOpener = ko.computed(function() { 
-    self.service.filteredAttachments() && self.openAll(); 
+    if(self.service.filteredAttachments()) {
+      self.openAll(); 
+    }
   });
 
   // entry point for templates to access model data
