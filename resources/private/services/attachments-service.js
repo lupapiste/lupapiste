@@ -28,6 +28,8 @@ LUPAPISTE.AttachmentsService = function() {
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
+  var forceVisibleIds = ko.observableArray();
+
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.applicationId = lupapisteApp.models.application.id;
 
@@ -73,6 +75,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryAll = function() {
+    forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
@@ -137,6 +140,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setNotNeeded = function(attachmentId, flag) {
+    forceVisibleIds.push(attachmentId);
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
 
@@ -196,7 +200,11 @@ LUPAPISTE.AttachmentsService = function() {
 
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
-      self.internedObservables[key] = ko.observable(def);
+      var filterValue = ko.observable(def);
+      self.internedObservables[key] = filterValue;
+      filterValue.subscribe(function() {
+        forceVisibleIds([]);
+      });
     }
     return self.internedObservables[key];
   }
@@ -210,8 +218,10 @@ LUPAPISTE.AttachmentsService = function() {
                                 filter: internFilterBoolean(filter.tag, filter["default"])};});
   });
 
-
   self.isAttachmentFiltered = function (att) {
+    if (_.includes(forceVisibleIds(), att().id)) {
+      return true;
+    }
     return _.reduce(self.filters(), function (ok, group) {
           var group_tags = _.map(group, function(x) {return x.tag;});
           var active_tags = _.map(self.activeFilters(), function(x) {return x.tag;});
