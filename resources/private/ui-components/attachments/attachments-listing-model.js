@@ -329,7 +329,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
     templateModel.init = function() {
       templateModel.initDone = true;
-      templateModel.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
+      templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
       templateModel.selectm
         .allowDuplicates(true)
         .ok(templateModel.ok)
@@ -339,10 +339,12 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
     templateModel.show = function() {
       if (!templateModel.initDone) {
+        console.log("manually calling init");
         templateModel.init();
       }
 
       var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
+        console.log("AttachmentTemplatesModel: gathering attachment types");
         var groupId = g[0];
         var groupText = loc(["attachmentType", groupId, "_group_label"]);
         var attachemntIds = g[1];
