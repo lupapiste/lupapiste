@@ -10,6 +10,11 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     return hasFile( data ) && !params.isNotNeeded( data );
   }
 
+  function openAttachment(data) {
+    var applicationId = lupapisteApp.models.application._js.id;
+    pageutil.openPage("attachment", applicationId + "/" + data.id);
+  }
+
   function stateIcons( $data ) {
     var data = ko.utils.unwrapObservable( $data );
     var notNeeded = params.isNotNeeded( data );
@@ -54,6 +59,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     toggleNotNeeded: function( data  ) {
       params.setNotNeeded( data.id, !data.notNeeded);
     },
-    canVouch: canVouch
+    canVouch: canVouch,
+    openAttachment: openAttachment
   };
 };
