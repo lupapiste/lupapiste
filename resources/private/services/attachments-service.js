@@ -11,10 +11,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-  function createArrayModel(array) {
-    return ko.observable(array);
-  }
-
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
@@ -60,7 +56,7 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.setAttachments = function(data) {
-    self.attachments(_.map(data, createArrayModel));
+    self.attachments(_.map(data, ko.observable));
   };
 
   self.setAttachment = function(attachment) {
