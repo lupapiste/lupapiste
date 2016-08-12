@@ -47,25 +47,25 @@ LUPAPISTE.AttachmentsService = function() {
     self.tagGroups([]);
   };
 
-  self.queryAll = function queryAll() {
-    var fireQuery = function(commandName, responseJsonKey, dataSetter) {
-      if (self.authModel.ok(commandName)) {
-        ajax.query(commandName, {"id": self.applicationId()})
-          .success(function(data) {
-            dataSetter(data[responseJsonKey]);
-          })
-          .onError("error.unauthorized", notify.ajaxError)
-          .call();
-      }
-    };
-
-    fireQuery("attachments", "attachments", self.setAttachments);
-    fireQuery("attachments-tag-groups", "tagGroups", self.setTagGroups);
-    fireQuery("attachments-filters", "attachmentsFilters", self.setFilters);
-  };
+  function queryData(queryName, responseJsonKey, dataSetter, params) {
+    if (self.authModel.ok(queryName)) {
+      var queryParams = _.assign({"id": self.applicationId}, params);
+      ajax.query(queryName, queryParams)
+        .success(function(data) {
+          dataSetter(data[responseJsonKey]);
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .call();
+    }
+  }
 
   self.setAttachments = function(data) {
     self.attachments(_.map(data, createArrayModel));
+  };
+
+  self.setAttachment = function(attachment) {
+    var replaceableAttachment = self.getAttachment(attachment.id);
+    replaceableAttachment(attachment);
   };
 
   self.setTagGroups = function(data) {
@@ -76,11 +76,17 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
-  // lupapisteApp.models.application.id.subscribe(function(newId) {
+  self.queryAll = function() {
+    queryData("attachments", "attachments", self.setAttachments);
+    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+  };
 
-  //   self.applicationId = newId;
-  //   self.queryAll();
-  // });
+  self.queryOne = function(attachmentId) {
+    queryData("attachment", "attachment", self.setAttachment, {"attachmentId": attachmentId});
+    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+  };
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
