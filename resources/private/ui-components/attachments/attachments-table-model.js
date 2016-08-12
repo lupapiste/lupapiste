@@ -1,4 +1,4 @@
-LUPAPISTE.AttachmentsTableModel = function( params ) {
+LUPAPISTE.AttachmentsTableModel = function(service) {
   "use strict";
 
   function hasFile(data) {
@@ -7,15 +7,15 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   function canVouch( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    return hasFile( data ) && !params.isNotNeeded( data );
+    return hasFile( data ) && !service.isNotNeeded( data );
   }
 
   function stateIcons( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    var notNeeded = params.isNotNeeded( data );
+    var notNeeded = service.isNotNeeded( data );
     var file = hasFile( data );
-    var approved = params.isApproved( data ) && canVouch( data );
-    var rejected = params.isRejected( data ) && canVouch( data );
+    var approved = service.isApproved( data ) && canVouch( data );
+    var rejected = service.isRejected( data ) && canVouch( data );
 
     return  _( [[approved, "lupicon-circle-check positive"],
                 [rejected || (!file && !notNeeded),
@@ -35,24 +35,24 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
   return {
-    attachments: params.attachments,
+    attachments: service.attachments,
     idPrefix: idPrefix,
     hasFile: hasFile,
     stateIcons: stateIcons,
     inputId: function(index) { return idPrefix + index; },
-    isApproved: params.isApproved,
-    approve: idFun(params.approve),
-    isRejected: params.isRejected,
-    reject: idFun(params.reject),
-    remove: idFun(params.remove),
+    isApproved: service.isApproved,
+    approve: idFun(service.approve),
+    isRejected: service.isRejected,
+    reject: idFun(service.reject),
+    remove: idFun(service.remove),
     appModel: lupapisteApp.models.application,
     authModel: lupapisteApp.models.applicationAuthModel,
-    canDownload: _.some(params.attachments, function(a) {
+    canDownload: _.some(service.attachments, function(a) {
       return hasFile(a());
     }),
-    isNotNeeded: params.isNotNeeded,
+    isNotNeeded: service.isNotNeeded,
     toggleNotNeeded: function( data  ) {
-      params.setNotNeeded( data.id, !data.notNeeded);
+      service.setNotNeeded( data.id, !data.notNeeded);
     },
     canVouch: canVouch
   };
