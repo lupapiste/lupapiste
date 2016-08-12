@@ -28,6 +28,7 @@ LUPAPISTE.AttachmentsService = function() {
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
+  // Ids for attachments that are visible despite of active filters
   var forceVisibleIds = ko.observableArray();
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
