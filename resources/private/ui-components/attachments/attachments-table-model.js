@@ -7,7 +7,7 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   function canVouch( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    return hasFile( data ) || params.isNotNeeded( data );
+    return hasFile( data ) && !params.isNotNeeded( data );
   }
 
   function stateIcons( $data ) {
@@ -29,7 +29,6 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
       .filter()
       .value();
   }
-
 
   var idPrefix = _.uniqueId("at-input-");
 
