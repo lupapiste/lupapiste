@@ -137,10 +137,10 @@
    :states states/all-application-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
   [{{attachments :attachments :as application} :application}]
-  (ok :attachment (some-> (attachment/get-attachment-info application attachmentId)
-                          (#(doto % println))
-                          (#(assoc % :tags (att-tags/attachment-tags %)))
-                          (#(doto % println)))))
+  (let [attachment (attachment/get-attachment-info application attachmentId)]
+    (if attachment
+      (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
+      (fail :error.not-found))))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
