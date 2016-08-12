@@ -260,14 +260,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function toggleOpen(groups, bool) {
     groups.open(bool);
     if (groups.accordions) {
-      _.map(groups.accordions, 
+      _.map(groups.accordions,
         function(group) {toggleOpen(group, bool);});
     }
   }
 
-  self.openAll = function() { 
+  self.openAll = function() {
     if (self.groups && self.groups().open) {
-      toggleOpen(self.groups(), true); 
+      toggleOpen(self.groups(), true);
     }
   };
 
@@ -278,9 +278,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   // auto-open all accordions when new filtered results are available
-  self.autoOpener = ko.computed(function() { 
+  self.autoOpener = ko.computed(function() {
     if(self.service.filteredAttachments()) {
-      self.openAll(); 
+      self.openAll();
     }
   });
 
@@ -292,6 +292,18 @@ LUPAPISTE.AttachmentsListingModel = function() {
       return {};
     }
   });
+
+  self.newAttachment = function() {
+    attachment.initFileUpload({
+      applicationId: lupapisteApp.models.application.id(),
+      attachmentId: null,
+      attachmentType: null,
+      typeSelector: true,
+      opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
+      archiveEnabled: lupapisteApp.models.applicationAuthModel.ok("permanent-archive-enabled")
+    });
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
+  };
 
 
 };
