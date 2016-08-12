@@ -9,11 +9,13 @@
   <div class="clear"></div>
 
   <div class="inner-margins">
-    <button class="positive caps" data-bind="click: $data.newAttachment">
+    <button class="positive caps" data-bind="click: $data.newAttachment,
+                                             enabled: $data.authModel.ok('upload-attachment')">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.attachmentsAdd' "></span>
     </button>
-    <button class="positive caps">
+    <button class="positive caps" data-bind="click: $data.attachmentTemplatesAdd,
+                                             enabled: $data.authModel.ok('create-attachments')">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
     </button>

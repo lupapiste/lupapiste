@@ -25,6 +25,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
     .join("<br>");
 
   self.service = lupapisteApp.services.attachmentsService;
+  self.appModel = lupapisteApp.models.application;
   self.disposedComputed(function() {
     var id = self.service.applicationId(); // create dependency
     if (id) {
@@ -293,9 +294,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
     }
   });
 
+
+
   self.newAttachment = function() {
     attachment.initFileUpload({
-      applicationId: lupapisteApp.models.application.id(),
+      applicationId: self.appModel.id(),
       attachmentId: null,
       attachmentType: null,
       typeSelector: true,
@@ -305,5 +308,58 @@ LUPAPISTE.AttachmentsListingModel = function() {
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 
+  self.onUploadDone = function() {
+    self.service.queryAll();
+  };
+  hub.subscribe("upload-done", self.onUploadDone);
 
+  self.onTemplateCreateDone = function() {
+    self.service.queryAll();
+  };
+
+  function AttachmentTemplatesModel() {
+    var templateModel = this;
+
+    templateModel.ok = function(ids) {
+      ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
+        .success(self.onTemplateCreateDone)
+        .complete(LUPAPISTE.ModalDialog.close)
+        .call();
+    };
+
+    templateModel.init = function() {
+      templateModel.initDone = true;
+      templateModel.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
+      templateModel.selectm
+        .allowDuplicates(true)
+        .ok(templateModel.ok)
+        .cancel(LUPAPISTE.ModalDialog.close);
+      return templateModel;
+    };
+
+    templateModel.show = function() {
+      if (!templateModel.initDone) {
+        templateModel.init();
+      }
+
+      var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
+        var groupId = g[0];
+        var groupText = loc(["attachmentType", groupId, "_group_label"]);
+        var attachemntIds = g[1];
+        var attachments = _.map(attachemntIds, function(a) {
+          var id = {"type-group": groupId, "type-id": a};
+          var text = loc(["attachmentType", groupId, a]);
+          return {id: id, text: text};
+        });
+        return [groupText, attachments];
+      });
+      templateModel.selectm.reset(data);
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      return templateModel;
+    };
+  }
+  self.attachmentTemplatesModel = new AttachmentTemplatesModel();
+  self.attachmentTemplatesAdd = function() {
+    self.attachmentTemplatesModel.show();
+  };
 };
