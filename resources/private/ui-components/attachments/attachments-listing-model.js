@@ -235,7 +235,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
-          lname: groupToAccordionName(groupPath),
+          name: groupToAccordionName(groupPath),
           attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
