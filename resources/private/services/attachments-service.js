@@ -11,10 +11,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
-  function createArrayModel(array) {
-    return ko.observable(array);
-  }
-
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
 
@@ -32,6 +28,9 @@ LUPAPISTE.AttachmentsService = function() {
     function() {
       return applyFilters(self.attachments(), self.activeFilters());});
 
+  // Ids for attachments that are visible despite of active filters
+  var forceVisibleIds = ko.observableArray();
+
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.applicationId = lupapisteApp.models.application.id;
 
@@ -47,25 +46,25 @@ LUPAPISTE.AttachmentsService = function() {
     self.tagGroups([]);
   };
 
-  self.queryAll = function queryAll() {
-    var fireQuery = function(commandName, responseJsonKey, dataSetter) {
-      if (self.authModel.ok(commandName)) {
-        ajax.query(commandName, {"id": self.applicationId()})
-          .success(function(data) {
-            dataSetter(data[responseJsonKey]);
-          })
-          .onError("error.unauthorized", notify.ajaxError)
-          .call();
-      }
-    };
-
-    fireQuery("attachments", "attachments", self.setAttachments);
-    fireQuery("attachments-tag-groups", "tagGroups", self.setTagGroups);
-    fireQuery("attachments-filters", "attachmentsFilters", self.setFilters);
-  };
+  function queryData(queryName, responseJsonKey, dataSetter, params) {
+    if (self.authModel.ok(queryName)) {
+      var queryParams = _.assign({"id": self.applicationId}, params);
+      ajax.query(queryName, queryParams)
+        .success(function(data) {
+          dataSetter(data[responseJsonKey]);
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .call();
+    }
+  }
 
   self.setAttachments = function(data) {
-    self.attachments(_.map(data, createArrayModel));
+    self.attachments(_.map(data, ko.observable));
+  };
+
+  self.setAttachment = function(attachment) {
+    var replaceableAttachment = self.getAttachment(attachment.id);
+    replaceableAttachment(attachment);
   };
 
   self.setTagGroups = function(data) {
@@ -76,13 +75,24 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
+  self.queryAll = function() {
+    forceVisibleIds([]);
+    queryData("attachments", "attachments", self.setAttachments);
+    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+  };
+
+  self.queryOne = function(attachmentId) {
+    queryData("attachment", "attachment", self.setAttachment, {"attachmentId": attachmentId});
+    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+  };
+
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
       return attachment.peek().id === attachmentId;
     });
   };
-
-
 
   self.removeAttachment = function(attachmentId) { // use as reference for new attachment remove dialog, also put track-clicks in
     var versions = ko.unwrap(self.getAttachment(attachmentId)).versions;
@@ -107,25 +117,32 @@ LUPAPISTE.AttachmentsService = function() {
                                                yesFn: doDelete}});
   };
 
-  self.updateAttachment = function(attachmentId, updates) {
-    var oldAttachment = self.getAttachment(attachmentId);
-    if (oldAttachment) {
-      self.getAttachment(attachmentId)(_.merge(oldAttachment(), updates));
-    }
+  self.updateAttachment = function(attachmentId, commandName, params) {
+    var commandParams = _.assign({"id": self.applicationId(),
+                                  "attachmentId": attachmentId},
+                                 params);
+    ajax.command(commandName, commandParams)
+      .success(function(res) {
+        self.queryOne(attachmentId);
+        util.showSavedIndicator(res);
+      })
+      .call();
   };
 
   // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: self.APPROVED});
-  };
-  self.rejectAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: self.REJECTED});
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
   };
 
-  self.setNotNeeded = function(attachmentId, flag ) {
-    self.updateAttachment(attachmentId, {notNeeded: !flag ?
-                                                    flag :
-                                                    self.SCHEDULED_FOR_NOT_NEEDED});
+  self.rejectAttachment = function(attachmentId) {
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
+  };
+
+  self.setNotNeeded = function(attachmentId, flag) {
+    forceVisibleIds.push(attachmentId);
+    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
 
   // When an attachment is set to "not needed" with self.setNotNeeded, it
@@ -184,7 +201,11 @@ LUPAPISTE.AttachmentsService = function() {
 
   function internFilterBoolean(key, def) {
     if (!self.internedObservables[key]) {
-      self.internedObservables[key] = ko.observable(def);
+      var filterValue = ko.observable(def);
+      self.internedObservables[key] = filterValue;
+      filterValue.subscribe(function() {
+        forceVisibleIds([]);
+      });
     }
     return self.internedObservables[key];
   }
@@ -198,8 +219,10 @@ LUPAPISTE.AttachmentsService = function() {
                                 filter: internFilterBoolean(filter.tag, filter["default"])};});
   });
 
-
   self.isAttachmentFiltered = function (att) {
+    if (_.includes(forceVisibleIds(), att().id)) {
+      return true;
+    }
     return _.reduce(self.filters(), function (ok, group) {
           var group_tags = _.map(group, function(x) {return x.tag;});
           var active_tags = _.map(self.activeFilters(), function(x) {return x.tag;});
