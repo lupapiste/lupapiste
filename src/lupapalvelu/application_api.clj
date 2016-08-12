@@ -253,17 +253,7 @@
   (remove nil? (conj []
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
-                     (when (and (some-> application
-                                        :organization
-                                        org/get-organization
-                                        :app-required-fields-filling-obligatory)
-                                (or (->> (app/pertinent-validation-errors application)
-                                         flatten
-                                         (some #(-> % :element :required)))
-                                    (some (fn [{:keys [required notNeeded versions]}]
-                                             (and required (not notNeeded) (empty? versions)))
-                                           (:attachments application))))
-                       (fail :application.requiredDataDesc))
+                     (app/validate-fully-formed application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
                      (when (env/feature? :suti)
