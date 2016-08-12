@@ -347,8 +347,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
         console.log("AttachmentTemplatesModel: gathering attachment types");
         var groupId = g[0];
         var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var attachemntIds = g[1];
-        var attachments = _.map(attachemntIds, function(a) {
+        var attachmentIds = g[1];
+        var attachments = _.map(attachmentIds, function(a) {
           var id = {"type-group": groupId, "type-id": a};
           var text = loc(["attachmentType", groupId, a]);
           return {id: id, text: text};
@@ -356,7 +356,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         return [groupText, attachments];
       });
       templateModel.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
+      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates-v2");
       return templateModel;
     };
   }
