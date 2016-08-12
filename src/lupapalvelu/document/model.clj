@@ -272,15 +272,23 @@
   (let [current-path (if k (conj path (name k)) path)
         element (if (not-empty current-path)
                   (keywordize-keys (find-by-name (:schema-body info) current-path))
-                  {})]
-    (if (contains? data :value)
-      (let [result  (validate-field application element (:value data))]
-        (->validation-result info data current-path element result))
-      (filter
-        seq
-        (concat (flatten [(validate-element info data current-path element)])
-                (map (fn [[k2 v2]]
-                       (validate-fields application info k2 v2 current-path)) data))))))
+                  {})
+        selected (get-in data [(keyword schemas/select-one-of-key) :value])
+        selected-path (when selected (vec (map keyword (conj path selected))))
+        results (if (contains? data :value)
+                  (let [result  (validate-field application element (:value data))]
+                    (->validation-result info data current-path element result))
+                  (filter
+                   seq
+                   (concat (flatten [(validate-element info data current-path element)])
+                           (map (fn [[k2 v2]]
+                                  (validate-fields application info k2 v2 current-path)) data))))]
+    (if selected
+      (map #(if (not= selected-path (take (count selected-path) (:path %)))
+              (assoc % :ignore true)
+              %)
+           (flatten [results]))
+      results)))
 
 (defn- sub-schema-by-name [sub-schemas name]
   (some (fn [schema] (when (= (:name schema) name) schema)) sub-schemas))
@@ -355,6 +363,11 @@
             (validate-fields application info nil data [])
             (validate-required-fields info [] data [])
             (validate-document document info)))))))
+
+(defn validate-pertinent
+  "Like validate but weeds out the results with :ignore flag."
+  [application document]
+  (remove :ignore (validate application document)))
 
 (defn has-errors?
   [results]
