@@ -96,19 +96,29 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.updateAttachment = function(attachmentId, updates) {
-    var oldAttachment = self.getAttachment(attachmentId);
-    if (oldAttachment) {
-      self.getAttachment(attachmentId)(_.merge(oldAttachment(), updates));
-    }
+  self.updateAttachment = function(attachmentId, commandName, params) {
+    var commandParams = _.assign({"id": self.applicationId(),
+                                  "attachmentId": attachmentId},
+                                 params);
+    ajax.command(commandName, commandParams)
+      .success(function(res) {
+        self.queryOne(attachmentId);
+        util.showSavedIndicator(res);
+      })
+      .call();
   };
+
+
 
   // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: self.APPROVED});
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
   };
+
   self.rejectAttachment = function(attachmentId) {
-    self.updateAttachment(attachmentId, {state: self.REJECTED});
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
   };
 
   self.setNotNeeded = function(attachmentId, flag ) {
