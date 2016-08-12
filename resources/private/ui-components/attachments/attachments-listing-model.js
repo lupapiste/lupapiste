@@ -31,7 +31,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
       self.service.queryAll();
     }
   });
-
   var dispose = self.dispose;
   self.dispose = function() {
     self.service.changeScheduledNotNeeded();
@@ -109,7 +108,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     var attachmentInfos = modelForAttachmentInfo(subGroup.attachmentIds);
     return {
       type: "sub",
-      ltitle: subGroup.name, // TODO
       attachmentInfos: attachmentInfos,
       // all approved or some rejected
       status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
@@ -151,7 +149,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     return _.merge({
       type: "main",
-      ltitle: mainGroup.name, // TODO
       status: subGroupsStatus(subGroups),
       hasContent: someSubGroupsHaveContent(subGroups)
     }, subGroups);
@@ -259,6 +256,31 @@ LUPAPISTE.AttachmentsListingModel = function() {
       return getDataForAccordion(groupPath);
     }
   }
+
+  function toggleOpen(groups, bool) {
+    groups.open(bool);
+    if (groups.accordions) {
+      _.map(groups.accordions, 
+        function(group) {toggleOpen(group, bool);})
+    }
+  }
+
+  self.openAll = function() { 
+    if (self.groups && self.groups().open) {
+      toggleOpen(self.groups(), true); 
+    }
+  }
+
+  self.toggleAll = function() {
+    if (self.groups && self.groups().open) {
+      toggleOpen(self.groups(), !(self.groups().open()));
+    }
+  }
+
+  // auto-open all accordions when filtered results change
+  self.autoOpener = ko.computed(function() { 
+    self.service.filteredAttachments() && self.openAll(); 
+  });
 
   // entry point for templates to access model data
   self.groups = ko.computed(function() {
