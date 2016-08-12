@@ -339,12 +339,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
     templateModel.show = function() {
       if (!templateModel.initDone) {
-        console.log("manually calling init");
         templateModel.init();
       }
 
       var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
-        console.log("AttachmentTemplatesModel: gathering attachment types");
         var groupId = g[0];
         var groupText = loc(["attachmentType", groupId, "_group_label"]);
         var attachmentIds = g[1];
