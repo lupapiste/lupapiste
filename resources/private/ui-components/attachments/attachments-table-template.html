@@ -71,7 +71,7 @@
           <td>
             <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove,
-                               enable: $root.authorization.ok('delete-attachment')">
+                               enable: $parent.authModel.ok('delete-attachment')">
               <i class="lupicon-remove"></i>
             </button>
           </td>

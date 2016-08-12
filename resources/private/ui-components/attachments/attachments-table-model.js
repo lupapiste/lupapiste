@@ -46,6 +46,8 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
     isRejected: params.isRejected,
     reject: idFun(params.reject),
     remove: idFun(params.remove),
+    appModel: lupapisteApp.models.application,
+    authModel: lupapisteApp.models.applicationAuthModel,
     canDownload: _.some(params.attachments, function(a) {
       return hasFile(a());
     }),
