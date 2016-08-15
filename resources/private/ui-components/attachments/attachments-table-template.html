@@ -47,6 +47,7 @@
             <div class="checkbox-wrapper">
               <input type="checkbox"
                      data-bind="attr: {id: $parent.inputId( $index() ),
+                                enable: $data.authModel.ok('set-attachment-not-needed'),
                                 checked: $parent.isNotNeeded( $data )}">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index())},
@@ -58,7 +59,7 @@
           <!-- /ko -->
           <td>
             <button class="btn-icon-only"
-                    data-bind="disable: !$parent.canVouch( $data ),
+                    data-bind="enable: $data.authModel.ok('approve-attachment'),
                                css: { positive: $parent.isApproved( $data ),
                                       'no-events': $parent.isApproved( $data ),
                                       secondary: !$parent.isApproved( $data ) },
@@ -69,7 +70,7 @@
           </td>
           <td>
             <button class="btn-icon-only"
-                    data-bind="disable: !$parent.canVouch( $data ),
+                    data-bind="enable: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
                                       'no-events': $parent.isRejected( $data ),
                                       secondary: !$parent.isRejected( $data ) },
@@ -82,7 +83,7 @@
             <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove,
                                clickBubble: false,
-                               enable: $root.authorization.ok('delete-attachment')">
+                               enable: $data.authModel.ok('delete-attachment')">
               <i class="lupicon-remove"></i>
             </button>
           </td>
