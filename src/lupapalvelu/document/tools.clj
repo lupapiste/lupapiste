@@ -23,6 +23,13 @@
     :foremanHistory   nil
     nil))
 
+(defn dummy-vrk-address
+  "For some (historical?) reason the dummy value for vrk-address is
+  not a valid address. This function can be overridden in midje
+  tests."
+  []
+  "Ranta\"tie\" 66:*")
+
 (defn dummy-values [user-id {:keys [type subtype case name body dummy-test max-len] :as element}]
   (condp = (keyword dummy-test)
     :postal-code "12345"
@@ -50,7 +57,7 @@
                           :digit            "1"
                           :kiinteistotunnus "09100200990013"
                           :zip              "33800"
-                          :vrk-address      "Ranta\"tie\" 66:*"
+                          :vrk-address      (dummy-vrk-address)
                           :vrk-name         "Ilkka"
                           :y-tunnus         "2341528-4"
                           :rakennusnumero   "001"

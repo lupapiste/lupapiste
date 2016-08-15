@@ -253,6 +253,7 @@
   (remove nil? (conj []
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
+                     (app/validate-fully-formed application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
                      (when (env/feature? :suti)

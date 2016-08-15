@@ -1,5 +1,20 @@
-@import url('main-blessed1.css?z=1470918095985');
+@import url('main-blessed1.css?z=1471001692608');
 
+
+/* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority {
+  position: relative;
+  color: #333333;
+  background: #f6f6f6;
+  width: 100%;
+  border-radius: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bbbbbb;
+}
 /* line 177, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   top: 100%;

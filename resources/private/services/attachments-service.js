@@ -42,6 +42,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.clearData = function() {
     // to avoid showing stale data before ajax queries return, after switching views or applications
     self.attachments([]);
+    forceVisibleIds([]);
     self.filters([]);
     self.tagGroups([]);
   };
@@ -58,13 +59,24 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
+  function assignAuthModel(attachment) {
+    var application = lupapisteApp.models.application._js,
+        authModel = authorization.create();
+    authModel.refresh(application,
+                      {"attachmentId": util.getIn(attachment, ["id"]),
+                       "fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
+    return _.assign(attachment, {authModel: authModel});
+  }
+
   self.setAttachments = function(data) {
-    self.attachments(_.map(data, ko.observable));
+    self.attachments(_.map(data, _.flow([assignAuthModel, ko.observable])));
   };
 
   self.setAttachment = function(attachment) {
-    var replaceableAttachment = self.getAttachment(attachment.id);
-    replaceableAttachment(attachment);
+    var replaceAttachment = self.getAttachment(attachment.id);
+    if (replaceAttachment) {
+      _.flow([assignAuthModel, replaceAttachment])(attachment);
+    }
   };
 
   self.setTagGroups = function(data) {
