@@ -22,7 +22,8 @@
   </div>
 
   <div class="attachment-operations">
-    <button class="ghost">
+    <button class="ghost" data-bind="click: $data.startStamping,
+                                     visible: $data.canStamp()">
       <i class="lupicon-circle-stamp"></i>
       <span data-bind="ltext: 'application.stampAttachments'"></span>
     </button>

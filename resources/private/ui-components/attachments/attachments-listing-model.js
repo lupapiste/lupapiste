@@ -26,6 +26,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.service = lupapisteApp.services.attachmentsService;
   self.appModel = lupapisteApp.models.application;
+  self.authModel = lupapisteApp.models.applicationAuthModel;
+
   self.disposedComputed(function() {
     var id = self.service.applicationId(); // create dependency
     if (id) {
@@ -303,7 +305,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       attachmentType: null,
       typeSelector: true,
       opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
-      archiveEnabled: lupapisteApp.models.applicationAuthModel.ok("permanent-archive-enabled")
+      archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
@@ -362,4 +364,13 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.attachmentTemplatesAdd = function() {
     self.attachmentTemplatesModel.show();
   };
+
+  self.startStamping = function() {
+    hub.send("start-stamping", {application: self.appModel});
+  };
+
+  self.canStamp = function() {
+    return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
+  };
+
 };

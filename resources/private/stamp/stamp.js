@@ -67,7 +67,6 @@ var stamping = (function() {
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
-
     pageutil.openPage("stamping", model.appModel.id());
   }
 
