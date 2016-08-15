@@ -75,8 +75,6 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
     remove: idFun(service.remove),
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
-    isEditable: statePermitsAttachmentEditing,
-    canRemove: canRemove,
     readOnly: readOnly,
     canDownload: _.some(service.attachments, function(a) {
       return hasFile(a());
