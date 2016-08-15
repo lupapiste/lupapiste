@@ -56,7 +56,7 @@ Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as e
 
 Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary
-  Wait Until  Element Should Be Visible  xpath=//i[@class='error-text']
+  Wait test id visible  submit-error-0
   Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-required-fields']
@@ -140,7 +140,8 @@ The filled-up warning field and party info plus the added attachment cause corre
   Open tab  requiredFieldSummary
   Wait for jQuery
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
-  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 8
+  # The reducution includes filled fields and the no longer obligatory requirement.
+  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 9
   Wait Until  Xpath Should Match X Times  //*[contains(@class,'info-line')]  ${missingRequiredCountAfter}
   Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[contains(@class,'info-line')]  2
 

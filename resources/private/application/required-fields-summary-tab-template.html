@@ -17,7 +17,7 @@
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">
                   <i class="lupicon-circle-attention"></i>
-                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index, 'data-submit-error': $data}"></span>
+                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data}"></span>
               </div>
             </div>
           </div>
