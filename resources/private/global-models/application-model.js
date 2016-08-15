@@ -265,6 +265,9 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
 
+  self.submitButtonVisible = ko.observable( true );
+
+
   self.reload = function() {
     self.submitErrors([]);
     repository.load(self.id());
@@ -316,13 +319,16 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
-              .success(self.reload)
-              .onError("error.cannot-submit-application", cannotSubmitResponse)
-              .processing(self.processing)
-              .call();
-            hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-            return false;
-          }},
+           .success( function() {
+             self.submitButtonVisible( false );
+             self.reload();
+           })
+           .onError("error.cannot-submit-application", cannotSubmitResponse)
+           .processing(self.processing)
+           .call();
+         hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+         return false;
+       }},
       {title: loc("no")}
     );
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
