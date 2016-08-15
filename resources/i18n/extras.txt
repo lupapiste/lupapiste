@@ -1,2 +1,4 @@
 "extra.1" "fi" "Hakemusta voi muokata, kunnes se siirretään käsittelyyn. Jos sen jälkeen hakemusta tulee vielä korjata, hakemus pitää palauttaa täydennettäväksi."
+"extra.1" "sv" "Ansökan kan ändras ända tills den överförs till behandling. Om ansökan bör ändras ännu efter det, måste ansökan returneras för komplettering."
 "extra.2" "fi" "Tämä tarkoittaa, että aikaisemmin peruutettu hakemus on palautettu aktiiviseksi peruutusta edeltävään tilaan."
+"extra.2" "sv" "Detta betyder att en tidigare återtagen ansökan är återaktiverad till läget den var före återtagandet."

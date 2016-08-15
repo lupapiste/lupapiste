@@ -493,3 +493,4 @@
 "error.undo-only-for-canceler" "fi" "Hakemuksen voi palauttaa aktiiviseksi ainoastaan peruuttaja tai viranomainen"
 "error.undo-only-for-canceler" "sv" "Endast personen som återtog ansökan eller en myndighet kan återaktivera ansökan"
 "error.empty-organization-name" "fi" "Organisaation nimi ei voi olla tyhjä."
+"error.empty-organization-name" "sv" "Organisationens namn kan inte vara tomt."
