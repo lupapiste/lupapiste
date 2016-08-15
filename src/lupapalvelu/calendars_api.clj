@@ -320,8 +320,7 @@
 
 (notifications/defemail
   :suggest-appointment
-  {:template                     "suggest-appointment.html"
-   :subject-key                  "application.calendar.appointment.suggestion"
+  {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservations (group-by :id (:reservations application))
@@ -372,7 +371,8 @@
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
                     (usr/authority? user) (usr/get-user-by-id clientId))
-          reservation (assoc reservation :calendar-recipients (map :id [user to-user]))]
+          reservation (assoc reservation :calendar-recipients (map :id [user to-user])
+                                         :action-required-by [(:id to-user)])]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
