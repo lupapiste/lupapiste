@@ -87,6 +87,14 @@
 
 ; -- Second level helpers
 
+(defn get-calendar-for-resource
+  ([resourceId]
+   (api-query (str "resources/" resourceId))))
+
+(defn get-calendar-user-id
+  [calendarId]
+  (:externalRef (get-calendar-for-resource calendarId)))
+
 (defn calendar-belongs-to-user?
   [calendar userId]
   (.endsWith (:externalRef calendar) userId))
@@ -121,6 +129,10 @@
   (->> (find-calendars-for-user userId)
        (filter #(= (:organizationCode %) orgId))
        first))
+
+(defn authority-reservations
+  [authorityId {:keys [year week]}]
+  (api-query (str "reservations/by-external-ref/" authorityId) {:year year :week week}))
 
 (defn available-calendar-slots-for-appointment
   [opts]

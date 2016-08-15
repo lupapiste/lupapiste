@@ -21,13 +21,6 @@
    :organization (:organizationCode calendar)
    :active       (:active calendar)})
 
-(defn- ->FrontendReservationSlots [backend-slots]
-  (map (fn [s] {:id        (:id s)
-                :status    (if (:fullyBooked s) :booked :available)
-                :reservationTypes (map #(select-keys % [:id :name]) (:reservationTypes s))
-                :startTime (util/to-millis-from-local-datetime-string (-> s :time :start))
-                :endTime   (util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
-
 (defn- ->FrontendReservation [r]
   {:id        (:id r)
    :status    :booked
@@ -38,6 +31,24 @@
    :comment   (:comment r)
    :location  (:location r)
    :applicationId (:contextId r)})
+
+(defn ->FrontendReservationSlots
+  ([backend-slots]
+    (map (fn [s] {:id        (:id s)
+                  :status    (if (:fullyBooked s) :booked :available)
+                  :reservationTypes (map #(select-keys % [:id :name]) (:reservationTypes s))
+                  :startTime (util/to-millis-from-local-datetime-string (-> s :time :start))
+                  :endTime   (util/to-millis-from-local-datetime-string (-> s :time :end))}) backend-slots))
+  ([backend-slots reservations]
+   ; associate reservation data to the slots when exists
+   (reduce
+     (fn [acc {slotId :id :as slot}]
+       (let [res-for-slot (util/find-by-key :slotId slotId reservations)]
+        (conj acc (if res-for-slot
+                    (assoc slot :reservation (->FrontendReservation res-for-slot))
+                    slot))))
+     []
+     (->FrontendReservationSlots backend-slots))))
 
 (defn- ->FrontendReservations [backend-reservations]
   (map ->FrontendReservation backend-reservations))
@@ -54,16 +65,12 @@
 
 ; -- calendar API functions
 
-(defn- get-calendar-for-resource
-  ([resourceId]
-   (api-query (str "resources/" resourceId))))
-
-(defn- get-calendar
+(defn get-calendar
   [calendarId userId]
-  (let [calendar (get-calendar-for-resource calendarId)
+  (let [calendar (cal/get-calendar-for-resource calendarId)
         user     (usr/get-user-by-id userId)]
-   (when (cal/calendar-belongs-to-user? calendar userId)
-     (->FrontendCalendar calendar user))))
+    (when (cal/calendar-belongs-to-user? calendar userId)
+      (->FrontendCalendar calendar user))))
 
 (defn- get-calendar-slot
   [slotId]
@@ -198,7 +205,11 @@
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authorityAdmin :authority})]}
   [_]
-  (->> (api-query (str "reservationslots/calendar/" calendarId) {:year year :week week})
+  (let [slots        (api-query (str "reservationslots/calendar/" calendarId) {:year year :week week})
+        userId       (cal/get-calendar-user-id calendarId)
+        reservations (cal/authority-reservations userId {:year year :week week})]
+    (ok :slots (->FrontendReservationSlots slots reservations)))
+  #_(->> slots
        ->FrontendReservationSlots
        (ok :slots)))
 
@@ -323,8 +334,7 @@
   {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservations (group-by :id (:reservations application))
-                                         reservation (first (get-in reservations [(:reservationId result)]))
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          reservation (assoc reservation :attendee recipient)]
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
@@ -351,7 +361,7 @@
   ; Authority: authorityId must be the same as user id
   ; Organization of application must be the same as the organization in reservation slot
   (let [slot (get-calendar-slot slotId)
-        calendar (get-calendar-for-resource (:resourceId slot))
+        calendar (cal/get-calendar-for-resource (:resourceId slot))
         authorityId (:externalRef calendar)]
     ; validation
     (when (and (usr/applicant? user) (not (= clientId userId)))
@@ -384,7 +394,7 @@
   [{{:keys [id] :as user} :user}]
   (->>
     (cond
-      (usr/authority? user) (api-query (str "reservations/by-external-ref/" id) {:year year :week week})
+      (usr/authority? user) (cal/authority-reservations user {:year year :week week})
       (usr/applicant? user) (api-query (str "reservations/for-client/" id) {:year year :week week}))
     ->FrontendReservations
     (ok :reservations)))
