@@ -62,7 +62,7 @@
 "verdict.maaraykset.toteutusHetki" "sv" "Genomförandetidpunkt"
 "verdict.muutMaaraykset" "fi" "Muut lupamääräykset"
 "verdict.muutMaaraykset" "sv" "Andra tillståndsålägganden"
-"verdict.muutoksenhaku"  "fi" "Muutoksenhaku"
+"verdict.muutoksenhaku" "fi" "Muutoksenhaku"
 "verdict.muutoksenhaku" "sv" "Ändringssökan"
 "verdict.muutoksenhaku.kirjaa" "fi" "Kirjaa muutoksenhaku"
 "verdict.muutoksenhaku.kirjaa" "sv" "Fyll i ändringssökan"

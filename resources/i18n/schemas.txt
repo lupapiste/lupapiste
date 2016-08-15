@@ -215,7 +215,7 @@
 "huoneistot.copyLabel" "fi" "Kopioi viimeinen rivi"
 "huoneistot.copyLabel" "sv" "Kopiera den sista raden"
 "huoneistot.groupHelpText" "fi" "Täytä taulukon huoneistoista kohteena olevien huoneistojen tiedot ja merkitse huoneiston riville viimeiseen kenttään muutos. Lisäohjeita saat viemällä hiiren kyseisen kentän päälle."
-"huoneistot.groupHelpText" "sv" "Fyll i lägenhetens/lägenheternas uppgifter i fälten och välj "Ändring" i sista fältet. Du får tilläggsanvisningar genom att föra muspekaren över ifrågavarande fält."
+"huoneistot.groupHelpText" "sv" "Fyll i lägenhetens/lägenheternas uppgifter i fälten och välj \"Ändring\" i sista fältet. Du får tilläggsanvisningar genom att föra muspekaren över ifrågavarande fält."
 "huoneistot.huoneistoala" "fi" "Huoneistoala m2"
 "huoneistot.huoneistoala" "sv" "Lägenhetsyta m2"
 "huoneistot.huoneistoala.help" "fi" "Huoneistoala on ala, jota rajaavat toisaalta huoneistoa ympäröivien seinien, toisaalta huoneiston sisällä olevien kantavien ja  muiden koko rakennukselle välttämättömien rakennusosien huoneiston puoleiset pinnat."
