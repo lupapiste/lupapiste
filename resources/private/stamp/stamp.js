@@ -67,15 +67,12 @@ var stamping = (function() {
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
-    console.log("going to openPage stamping1");
     pageutil.openPage("stamping", model.appModel.id());
   }
 
   hub.onPageLoad("stamping", function() {
-    console.log(" onPageLoad stamping 2");
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
-    console.log(" onPageLoad stamping 3");
         // refresh
         model.stampingMode(false);
 
@@ -96,12 +93,10 @@ var stamping = (function() {
           model.stampingMode(true);
         });
       } else { // appModel already initialized, show stamping
-    console.log(" onPageLoad stamping 4");
         model.stampingMode(true);
         lupapisteApp.setTitle(model.appModel.title());
       }
     } else {
-    console.log(" onPageLoad stamping 5");
       error("No application ID provided for stamping");
       LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
     }
@@ -114,9 +109,7 @@ var stamping = (function() {
     model.authorization = null;
   });
 
-  console.log("stamp subscribing to start-stamping event");
   hub.subscribe("start-stamping", function(param) {
-    console.log("start-stamping received");
     initStamp(param.application);
   });
 

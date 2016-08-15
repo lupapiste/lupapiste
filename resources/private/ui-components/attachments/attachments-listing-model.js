@@ -366,12 +366,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.startStamping = function() {
-    console.log("in startStamping, doing hub send");
     hub.send("start-stamping", {application: self.appModel});
   };
 
   self.canStamp = function() {
-    console.log("canStamp: authmodel says", self.authModel.ok);
     return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
   };
 
