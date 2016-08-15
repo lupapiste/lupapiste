@@ -16,22 +16,9 @@
   <help-toggle params="html: legendHtml,
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
-  <div>
-    <!-- ko if: groups() && !_.isEmpty(groups().accordions) -->
-    <h2 data-bind="ltext: 'application.attachments'"
-        class="help-adjacent-title" />
-    <button class="ghost right" data-bind="click: $data.toggleAll">
-      <i class="lupicon-menu"></i>
-      <span data-bind="ltext: 'accordions.toggle-all'"></span>
-    </button>
-    <div class="attachments-accordions"
-         data-bind="foreach: groups().accordions">
-      <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                      data: _.merge($data, {level: 0})}"></div>
-    </div>
-    <!-- /ko -->
-  </div>
 
+  <div data-bind="template: {name: 'attachments-accordions-template',
+                             data: $data}"></div>
 
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">
