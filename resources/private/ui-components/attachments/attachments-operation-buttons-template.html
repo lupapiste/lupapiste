@@ -1,0 +1,38 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-operation-buttons-template">
+  <div class="inner-margins">
+    <button class="positive caps" data-bind="click: $data.newAttachment,
+                                             enabled: $data.authModel.ok('upload-attachment')">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.attachmentsAdd' "></span>
+    </button>
+    <button class="positive caps" data-bind="click: $data.attachmentTemplatesAdd,
+                                             enabled: $data.authModel.ok('create-attachments')">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
+    </button>
+  </div>
+
+  <div class="attachment-operations">
+    <button class="ghost">
+      <i class="lupicon-circle-stamp"></i>
+      <span data-bind="ltext: 'application.stampAttachments'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-pen"></i>
+      <span data-bind="ltext: 'signAttachment.select'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-arrow-up"></i>
+      <span data-bind="ltext: 'task.send'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-circle-section-sign"></i>
+      <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
+    </button>
+    <button class="ghost">
+      <i class="lupicon-envelope"></i>
+      <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+    </button>
+  </div>
+</script>
