@@ -339,10 +339,16 @@
           appeal-attachment (util/find-first (fn [{target :target}]
                                                (and (= "appeal" (:type target))
                                                     (= aid (:id target))))
-                                             attachments)]
+                                             attachments)
+          converted-file-id-1 (-> appeal-attachment :latestVersion :fileId)]
       (fact "new attachment has been created"
         (count attachments) => (+ expected-att-cnt 1)
-        (-> appeal-attachment :latestVersion :fileId) => file-id-1)
+        (count (:versions appeal-attachment)) => 1          ; only one version, even if PDF/A converted
+        (fact "txt is converted to pdf/a"
+          (-> appeal-attachment :latestVersion :fileId) =not=> file-id-1
+          (-> appeal-attachment :latestVersion :originalFileId) => file-id-1
+          (-> appeal-attachment :latestVersion :contentType) => "application/pdf"
+          (-> appeal-attachment :latestVersion :archivable) => true))
       (fact "attachment type is correct"
         (:type appeal-attachment) => {:type-group "muutoksenhaku"
                                       :type-id    "valitus"})
@@ -359,34 +365,28 @@
                  :datestamp created
                  :text "foo"
                  :appealId aid
-                 :fileIds [file-id-1 file-id-2]) => ok?
+                 :fileIds [converted-file-id-1 file-id-2]) => ok?
         (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)
               {pdf-versions :versions :as pdf-attachment} (last appeal-attachments)]
           (count appeals) => 1
           (count attachments) => (+ expected-att-cnt 2)
           (count appeal-attachments) => 2
-          (if pdfa-conversion?
-            (count pdf-versions) => 2
-            (count pdf-versions) => 1)
+          (count pdf-versions) => 1
           (if pdfa-conversion?
             (facts "PDF/A converted"
               (-> pdf-attachment :latestVersion) => (contains {:version {:major 0
-                                                                         :minor 2}
+                                                                         :minor 1}
                                                                :archivable true})
               (-> pdf-attachment :latestVersion :fileId) =not=> file-id-2
-              (-> pdf-versions first :fileId) => file-id-2
-              (-> pdf-versions first :archivabilityError) => "invalid-mime-type"
-              (-> pdf-versions first :version) => {:major 0
-                                                   :minor 1}
+              (-> pdf-attachment :latestVersion :originalFileId) => file-id-2
               (last pdf-versions) => (-> pdf-attachment :latestVersion)
-              (count pdf-versions) => 2
               (fact "Conversion has content"
                 (-> pdf-attachment :latestVersion :size) => pos?))
             (facts "No PDF/A conversion"
               (count pdf-versions) => 1
               (-> pdf-versions first :fileId) => file-id-2
-              (-> pdf-versions first :archivabilityError) => "invalid-pdfa"))))
+              (-> pdf-versions first :archivabilityError) => "not-validated"))))
 
       (fact "removing second attachment from appeal"
         (command raktark-jarvenpaa :upsert-appeal
@@ -397,13 +397,14 @@
                  :datestamp created
                  :text "foo"
                  :appealId aid
-                 :fileIds [file-id-1]) => ok?
+                 :fileIds [converted-file-id-1]) => ok?
         (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
               appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
           (count appeals) => 1
           (count attachments) => (+ expected-att-cnt 1)
           (count appeal-attachments) => 1
-          (-> appeal-attachments first :latestVersion :fileId) => file-id-1
+          (-> appeal-attachments first :latestVersion :originalFileId) => file-id-1
+          (-> appeal-attachments first :latestVersion :fileId) => converted-file-id-1
           (count (-> appeal-attachments first :versions)) => 1)
 
         (fact "file doesn't exist"

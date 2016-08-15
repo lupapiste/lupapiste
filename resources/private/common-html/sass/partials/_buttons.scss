@@ -331,7 +331,7 @@ button.function {
 @include button-div-a-i-span( ghost ) {
   @include function($orange-dark, $orange-hover, $orange-active,
                     $orange-dark, $orange-hover, $orange-active );
-  
+
 }
 
 .ghost:disabled, ghost.disabled, .ghost.waiting {
@@ -364,7 +364,7 @@ a.link-btn {
   &:hover, &:active {
              span {
                text-decoration: underline;
-             }             
+             }
   }
 }
 
@@ -610,4 +610,8 @@ button {
   :last-child {
     margin-right: 0;
   }
+}
+
+.no-events {
+   pointer-events: none;
 }

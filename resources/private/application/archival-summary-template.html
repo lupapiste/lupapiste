@@ -26,6 +26,8 @@
           <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
         </button>
         <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
+        <a href="#" data-bind="click: selectAllPreAttachments, ltext: 'stamp.preAttachments'"></a>
+        <a href="#" data-bind="click: selectAllPostAttachments, ltext: 'stamp.postAttachments'"></a>
       </div>
     </div>
 
@@ -146,13 +148,18 @@
           <div class="left">
             <!-- ko if: _.isFunction($data.readOnly) && !$data.readOnly() -->
             <div class="additional-data-container">
-              <div class="header" data-bind="ltext: 'attachment.changeType'"></div>
+              <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
               <div class="contents">
+              <label class="label" data-bind="ltext: 'attachment.chooseType'"></label><br>
                 <select class="attachment-type-select" class="long" data-bind="foreach: $parents[1].attachmentTypes, value: attachmentType">
                   <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
                     <option data-bind="text: typeLabel, value: typeValue"></option>
                   </optgroup>
                 </select>
+                <label class="label" data-bind="ltext: 'attachment.label.contents'"></label><br>
+                <input class="attachment-contents-edit" type="text"
+                       data-test-id="attachment-contents-update"
+                       data-bind="value: contents"/>
               </div>
             </div>
             <!-- /ko -->

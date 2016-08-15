@@ -202,7 +202,7 @@
   (str type-group "." type-id))
 
 (defn- generate-archive-metadata
-  [{:keys [id propertyId applicant address organization municipality location location-wgs84] :as application}
+  [{:keys [id propertyId _applicantIndex address organization municipality location location-wgs84] :as application}
    user
    & [attachment]]
   (let [s2-metadata (or (:metadata attachment) (:metadata application))
@@ -211,7 +211,7 @@
                        :buildingIds           (get-building-ids :localId application (get-in attachment [:op :id]))
                        :nationalBuildingIds   (get-building-ids :nationalId application (get-in attachment [:op :id]))
                        :propertyId            propertyId
-                       :applicant             applicant
+                       :applicants            _applicantIndex
                        :operations            (find-op application (get-in attachment [:op :id]))
                        :tosFunction           (first (filter #(= (:tosFunction application) (:code %)) (tiedonohjaus/available-tos-functions (:organization application))))
                        :address               address

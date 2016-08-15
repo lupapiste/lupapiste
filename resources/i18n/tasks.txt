@@ -94,7 +94,7 @@
 "task-katselmus.rakennus.tila.tila._group_label" "sv" "Status"
 "task-katselmus.katselmus.tila" "fi" "Koko katselmuksen tila"
 "task-katselmus.katselmus.tila" "sv" "Hela syneförrättningens status"
-"task-katselmus.katselmus.tiedoksianto"  "fi"  "Tiedoksianto verottajalle laiminlyöty"
+"task-katselmus.katselmus.tiedoksianto" "fi" "Tiedoksianto verottajalle laiminlyöty"
 "task-katselmus.katselmus.tiedoksianto" "sv" "Tillkännagivande till skattemyndigheten har underlåtits"
 "task-katselmus.rakennus.tila.tila.lopullinen" "fi" "Lopullinen"
 "task-katselmus.rakennus.tila.tila.lopullinen" "sv" "Slutlig"

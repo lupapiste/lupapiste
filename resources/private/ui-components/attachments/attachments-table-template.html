@@ -21,7 +21,8 @@
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></a><br>
+            <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']]),
+                          click: $parent.openAttachment"></a><br>
             <span data-bind="text: contents"></span>
           </td>
           <td data-bind="attachmentVersion: latestVersion"></td>
@@ -46,31 +47,43 @@
             <div class="checkbox-wrapper">
               <input type="checkbox"
                      data-bind="attr: {id: $parent.inputId( $index() ),
+                                enable: $data.authModel.ok('set-attachment-not-needed'),
                                 checked: $parent.isNotNeeded( $data )}">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index())},
                                 ltext: 'application.attachmentNotNeeded',
-                                click: $parent.toggleNotNeeded"></label>
+                                click: $parent.toggleNotNeeded,
+                                clickBubble: false"></label>
             </div>
           </td>
           <!-- /ko -->
           <td>
-            <button class="positive btn-icon-only"
-                    data-bind="disable: $parent.isApproved( $data ) || !$parent.canVouch( $data ),
-                               click: $parent.approve">
+            <button class="btn-icon-only"
+                    data-bind="enable: $data.authModel.ok('approve-attachment'),
+                               css: { positive: $parent.isApproved( $data ),
+                                      'no-events': $parent.isApproved( $data ),
+                                      secondary: !$parent.isApproved( $data ) },
+                               click: $parent.approve,
+                               clickBubble: false">
               <i class="lupicon-check"></i>
             </button>
           </td>
           <td>
-            <button class="negative btn-icon-only"
-                    data-bind="disable: $parent.isRejected( $data ) || !$parent.canVouch( $data ),
-                               click: $parent.reject">
+            <button class="btn-icon-only"
+                    data-bind="enable: $data.authModel.ok('reject-attachment'),
+                               css: { negative: $parent.isRejected( $data ),
+                                      'no-events': $parent.isRejected( $data ),
+                                      secondary: !$parent.isRejected( $data ) },
+                               click: $parent.reject,
+                               clickBubble: false">
               <i class="lupicon-circle-attention"></i>
             </button>
           </td>
           <td>
             <button class="secondary btn-icon-only"
-                    data-bind="click: $parent.remove">
+                    data-bind="click: $parent.remove,
+                               clickBubble: false,
+                               enable: $data.authModel.ok('delete-attachment')">
               <i class="lupicon-remove"></i>
             </button>
           </td>

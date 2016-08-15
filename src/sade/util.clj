@@ -63,6 +63,18 @@
 
 ; from clojure.contrib/core
 
+(defn map-keys
+  "Applies function f to hash-map m keys. Returns hash-map."
+  [f m]
+  (->> (map (fn [[k v]] [(f k) v]) m)
+       (into {})))
+
+(defn map-values
+  "Applies function f to hash-map m values. Returns hash-map."
+  [f m]
+  (->> (map (fn [[k v]] [k (f v)]) m)
+       (into {})))
+
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
   nested structure. keys is a sequence of keys. Any empty maps that result

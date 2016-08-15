@@ -98,37 +98,34 @@ LUPAPISTE.OrganizationModel = function () {
   }
 
   self.neighborOrderEmails = ko.observable("");
-  self.neighborOrderEmailsIndicator = ko.observable().extend({notify: "always"});
   ko.computed(function() {
     var emails = self.neighborOrderEmails();
     if (self.initialized) {
       ajax.command("set-organization-neighbor-order-email", {emails: emails})
-        .success(_.partial(self.neighborOrderEmailsIndicator, {type: "saved"}))
-        .error(_.partial(self.neighborOrderEmailsIndicator, {type: "err"}))
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
         .call();
     }
   });
 
   self.submitNotificationEmails = ko.observable("");
-  self.submitNotificationEmailsIndicator = ko.observable().extend({notify: "always"});
   ko.computed(function() {
     var emails = self.submitNotificationEmails();
     if (self.initialized) {
       ajax.command("set-organization-submit-notification-email", {emails: emails})
-        .success(_.partial(self.submitNotificationEmailsIndicator, {type: "saved"}))
-        .error(_.partial(self.submitNotificationEmailsIndicator, {type: "err"}))
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
         .call();
     }
   });
 
   self.infoRequestNotificationEmails = ko.observable("");
-  self.infoRequestNotificationEmailsIndicator = ko.observable().extend({notify: "always"});
   ko.computed(function() {
     var emails = self.infoRequestNotificationEmails();
     if (self.initialized) {
       ajax.command("set-organization-inforequest-notification-email", {emails: emails})
-        .success(_.partial(self.infoRequestNotificationEmailsIndicator, {type: "saved"}))
-        .error(_.partial(self.infoRequestNotificationEmailsIndicator, {type: "err"}))
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
         .call();
     }
   });

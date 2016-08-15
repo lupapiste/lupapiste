@@ -503,10 +503,13 @@ var attachment = (function() {
         var currentGroup = _.pickBy({groupType: attachment.groupType,
                                      id: util.getIn(attachment, ["op", "id"])},
                                     _.isString);
-        model.selectableGroups(resp.groups);
-        if (!_.isEmpty(currentGroup)) {
-          model.selectedGroup(_.find(model.selectableGroups(), currentGroup));
+        // We update group selection only if it has actually changed.
+        if( !_.isEqual( resp.groups, model.selectableGroups()) ) {
+          model.selectableGroups(resp.groups);
         }
+        model.selectedGroup( _.isEmpty(currentGroup)
+                             ? null
+                             : _.find(model.selectableGroups(), currentGroup));
       })
       .call();
 

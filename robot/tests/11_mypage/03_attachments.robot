@@ -22,6 +22,7 @@ Mikko uploads attachment with invalid mime
   [Tags]  firefox
   Element should be visible by test id  test-add-architect-attachment
   Click enabled by test id  test-add-architect-attachment
+  Wait Until  Element should be visible  jquery=select[name=attachmentType]
   Select From List  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${XML_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
@@ -42,7 +43,7 @@ Copy own attachments button is not shown to non-architect
   [Tags]  firefox
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
-  Wait until  Click Element  architect
+  Wait until  Click Label  architect
   Save User Data
   Reload Page
   Wait for Page to Load  Mikko  Intonen

@@ -1,0 +1,22 @@
+<script type="text/x-jquery-tmpl" id="organization-name-editor-template" class="ko-template">
+  <div>
+    <table data-test-id="organization-name-table">
+      <thead>
+        <tr>
+          <th data-bind="ltext: 'userinfo.language'"></th>
+          <th data-bind="ltext: 'organization.name'"></th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: names">
+        <tr>
+          <td data-bind="ltext: 'lang.'+$data.lang"></td>
+          <td>
+            <input type="text" data-bind="value: $data.name,
+                                          attr: {'data-test-id': 'organization-name.'+$data.lang}"
+                   class="form-input">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</script>

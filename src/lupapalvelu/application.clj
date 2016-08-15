@@ -179,8 +179,31 @@
 
 ; Process
 
+(defn pertinent-validation-errors [{:keys [documents] :as  application}]
+  (map (partial model/validate-pertinent application) documents))
+
+(defn validate-fully-formed
+ "If the application's organization requires fully-formed
+  applications, the following checks are enforced:
+  1. All the required fields are valid
+  2. Every required attachment is either filled or marked not needed
+  This function is called from submit-validation-errors on the api side.
+  Returns nil on success and fail map if the application is not fully formed."
+  [application]
+  (when (and (some-> application
+                     :organization
+                     org/get-organization
+                     :app-required-fields-filling-obligatory)
+             (or (->> (pertinent-validation-errors application)
+                      flatten
+                      (some #(-> % :element :required)))
+                 (some (fn [{:keys [required notNeeded versions]}]
+                         (and required (not notNeeded) (empty? versions)))
+                       (:attachments application))))
+    (fail :application.requiredDataDesc)))
+
 (defn- validate [application document]
-  (let [all-results   (model/validate application document)
+  (let [all-results   (model/validate-pertinent application document)
         create-result (fn [document result]
                         (assoc-in document (flatten [:data (:path result) :validationResult]) (:result result)))]
     (assoc (reduce create-result document all-results) :validationErrors all-results)))

@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [lupapalvelu.attachment :as att]
+            [lupapalvelu.file-upload :as file-upload]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
@@ -15,47 +15,33 @@
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
 
-(defn- stampable? [attachment]
-  (let [latest       (-> attachment :versions last)
-        content-type (:contentType latest)
-        stamped      (:stamped latest)]
-    (and (not stamped) (or (= "application/pdf" content-type) (ss/starts-with content-type "image/")))))
-
 (defn- ->file-info [attachment]
   (let [versions   (-> attachment :versions reverse)
         re-stamp?  (:stamped (first versions))
         source     (if re-stamp? (second versions) (first versions))]
-    (assoc (select-keys source [:contentType :fileId :filename :size :archivable])
-           :re-stamp? re-stamp?
+    (assoc (select-keys source [:contentType :fileId :filename :size])
+           :stamped-original-file-id (when re-stamp? (:originalFileId (first versions)))
            :operation-id (get-in attachment [:op :id])
            :attachment-id (:id attachment)
            :attachment-type (:type attachment))))
 
-(defn- update-stamp-to-attachment! [stamp file-info {:keys [application user now] :as context}]
-  (let [{:keys [attachment-id contentType fileId filename re-stamp?]} file-info
+(defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
+  (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (File/createTempFile "lupapiste.stamp." ".tmp")
-        new-file-id (mongo/create-id)]
+        file (File/createTempFile "lupapiste.stamp." ".tmp")]
     (with-open [out (io/output-stream file)]
       (stamper/stamp stamp fileId out options))
-    (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))]
-      (debug "uploading stamped file: " (.getAbsolutePath file))
-      (mongo/upload new-file-id filename contentType file :application (:id application))
-      (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-        (att/update-latest-version-content! user application attachment-id new-file-id (.length file) now)
-        (att/set-attachment-version! application
-                                           (att/get-attachment-info application attachment-id)
-                                           {:attachment-id  attachment-id
-                                            :fileId new-file-id :original-file-id new-file-id
-                                            :filename filename
-                                            :contentType contentType :size (.length file)
-                                            :comment-text nil :now now :user user
-                                            :archivable is-pdf-a?
-                                            :archivabilityError (when-not is-pdf-a? :invalid-pdfa)
-                                            :stamped true :comment? false :state :ok}))
-      (io/delete-file file :silently)
-      (tos/mark-attachment-final! application now attachment-id))
-    new-file-id))
+    (debug "uploading stamped file: " (.getAbsolutePath file))
+    (let [result (att/upload-and-attach! {:application application :user user}
+                                         {:attachment-id attachment-id
+                                          :replaceable-original-file-id stamped-original-file-id
+                                          :comment-text nil :created created
+                                          :stamped true :comment? false :state :ok}
+                                         {:filename filename :content file
+                                          :size (.length file)})]
+    (io/delete-file file :silently)
+    (tos/mark-attachment-final! application created attachment-id)
+    (:fileId result))))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))
@@ -71,13 +57,13 @@
                            [short-id ":" national-id]
                            [national-id]))))))
 
-(defn- info-fields->stamp [{:keys [text created transparency lang]} fields]
-  {:pre [text (pos? created)]}
+(defn- info-fields->stamp [{:keys [text stamp-created transparency lang]} fields]
+  {:pre [text (pos? stamp-created)]}
   (->> (update fields :buildings (fn->> (map (partial building->str lang)) sort))
        ((juxt :backend-id :section :extra-info :buildings :organization))
        flatten
        (map (fn-> str (ss/limit 100)))
-       (stamper/make-stamp (ss/limit text 100) created transparency)))
+       (stamper/make-stamp (ss/limit text 100) stamp-created transparency)))
 
 (defn- make-stamp-without-buildings [context info-fields]
   (->> (dissoc info-fields :buildings)
@@ -95,7 +81,7 @@
 
 (defn- stamp-attachment! [stamp file-info context job-id application-id]
   (try
-    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
+    (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :stamped-original-file-id]))
     (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
     (->> (update-stamp-to-attachment! stamp file-info context)
          (hash-map :status :done :fileId)
