@@ -1,5 +1,23 @@
-@import url('main-blessed1.css?z=1471001692608');
+@import url('main-blessed1.css?z=1471250728861');
 
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:link, .comment-bubble a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .deleted {
+  text-decoration: line-through;
+}
 
 /* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority {
