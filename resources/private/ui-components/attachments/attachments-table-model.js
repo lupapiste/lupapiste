@@ -41,21 +41,6 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
 
-  function statePermitsAttachmentEditing() {
-    // restrict post-verdict editing to authorities only
-    var appState = appModel.state();
-    var stateIsPostVerdict = _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(appState));
-    if (stateIsPostVerdict) {
-      return lupapisteApp.models.currentUser.isAuthority();
-    } else {
-      return true;
-    }
-  }
-
-  function canRemove(attachment) {
-    return attachment.required ? lupapisteApp.models.currentUser.isAuthority() : true;
-  }
-
   function readOnly(attachmentId) {
     var service = lupapisteApp.services.attachmentsService;
     var attachment = ko.unwrap(service.getAttachment(attachmentId));
