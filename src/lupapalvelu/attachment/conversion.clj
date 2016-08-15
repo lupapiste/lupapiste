@@ -7,8 +7,10 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [sade.env :as env])
-  (:import (java.io File InputStream)))
+            [sade.env :as env]
+            [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper])
+  (:import (java.io File InputStream))
+  (:import (org.apache.commons.io FilenameUtils)))
 
 
 (def archivability-errors #{:invalid-mime-type :invalid-pdfa :invalid-tiff :libre-conversion-error :not-validated})
@@ -69,6 +71,21 @@
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
   (let [valid? (tiff-validation/valid-tiff? content)]
     {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
+
+(defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
+  (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
+        pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
+        pdf-title filename]
+    (try
+      (io/copy content tmp-file)
+      (pdf-wrapper/wrap! tmp-file pdf-file pdf-title)
+      {:archivable true
+       :archivabilityError nil
+       :autoConversion true
+       :content pdf-file
+       :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+      (finally
+        (io/delete-file tmp-file :silently)))))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]
   (if (libreoffice-conversion-required? filedata)
