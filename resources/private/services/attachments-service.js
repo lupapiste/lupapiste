@@ -42,6 +42,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.clearData = function() {
     // to avoid showing stale data before ajax queries return, after switching views or applications
     self.attachments([]);
+    forceVisibleIds([]);
     self.filters([]);
     self.tagGroups([]);
   };
