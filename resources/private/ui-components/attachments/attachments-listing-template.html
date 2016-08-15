@@ -7,65 +7,17 @@
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
   <div class="clear"></div>
-
-  <div class="inner-margins">
-    <button class="positive caps" data-bind="click: $data.newAttachment,
-                                             enabled: $data.authModel.ok('upload-attachment')">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.attachmentsAdd' "></span>
-    </button>
-    <button class="positive caps" data-bind="click: $data.attachmentTemplatesAdd,
-                                             enabled: $data.authModel.ok('create-attachments')">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
-    </button>
-  </div>
-
-  <div class="attachment-operations">
-    <button class="ghost" data-bind="click: $data.startStamping,
-                                     visible: $data.canStamp()">
-      <i class="lupicon-circle-stamp"></i>
-      <span data-bind="ltext: 'application.stampAttachments'"></span>
-    </button>
-    <button class="ghost">
-      <i class="lupicon-circle-pen"></i>
-      <span data-bind="ltext: 'signAttachment.select'"></span>
-    </button>
-    <button class="ghost">
-      <i class="lupicon-circle-arrow-up"></i>
-      <span data-bind="ltext: 'task.send'"></span>
-    </button>
-    <button class="ghost">
-      <i class="lupicon-circle-section-sign"></i>
-      <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
-    </button>
-    <button class="ghost">
-      <i class="lupicon-envelope"></i>
-      <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
-    </button>
-  </div>
+  <div data-bind="template: {name: 'attachments-operation-buttons-template',
+                             data: $data}"></div>
 
   <filters></filters>
 
   <help-toggle params="html: legendHtml,
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
-  <div>
-    <!-- ko if: groups() && !_.isEmpty(groups().accordions) -->
-    <h2 data-bind="ltext: 'application.attachments'"
-        class="help-adjacent-title" />
-    <button class="ghost right" data-bind="click: $data.toggleAll">
-      <i class="lupicon-menu"></i>
-      <span data-bind="ltext: 'accordions.toggle-all'"></span>
-    </button>
-    <div class="attachments-accordions"
-         data-bind="foreach: groups().accordions">
-      <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                      data: _.merge($data, {level: 0})}"></div>
-    </div>
-    <!-- /ko -->
-  </div>
 
+  <div data-bind="template: {name: 'attachments-accordions-template',
+                             data: $data}"></div>
 
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">
