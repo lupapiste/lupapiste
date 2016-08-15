@@ -130,9 +130,16 @@
        (filter #(= (:organizationCode %) orgId))
        first))
 
+(defn new-reservation [args]
+  (post-command "reservation/" args))
+
 (defn authority-reservations
   [authorityId {:keys [year week]}]
   (api-query (str "reservations/by-external-ref/" authorityId) {:year year :week week}))
+
+(defn applicant-reservations
+  [applicantId {:keys [year week]}]
+  (api-query (str "reservations/for-client/" applicantId) {:year year :week week}))
 
 (defn available-calendar-slots-for-appointment
   [opts]

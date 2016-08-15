@@ -373,10 +373,10 @@
     (when (not (= (:organizationCode slot) organization))
       (fail! :error.illegal-organization))
 
-    (let [reservationId (post-command "reservation/"
-                                      {:clientId clientId :reservationSlotId slotId
-                                       :reservationTypeId reservationTypeId :comment comment
-                                       :location location :contextId id :reservedBy userId})
+    (let [reservationId (cal/new-reservation
+                          {:clientId clientId :reservationSlotId slotId
+                           :reservationTypeId reservationTypeId :comment comment
+                           :location location :contextId id :reservedBy userId})
           reservation (get-reservation reservationId)
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
@@ -394,8 +394,8 @@
   [{{:keys [id] :as user} :user}]
   (->>
     (cond
-      (usr/authority? user) (cal/authority-reservations user {:year year :week week})
-      (usr/applicant? user) (api-query (str "reservations/for-client/" id) {:year year :week week}))
+      (usr/authority? user) (cal/authority-reservations id {:year year :week week})
+      (usr/applicant? user) (cal/applicant-reservations id {:year year :week week}))
     ->FrontendReservations
     (ok :reservations)))
 
