@@ -101,7 +101,7 @@ Ronja doesn't have grouping in tags component, as she belongs only to one organi
 *** Keywords ***
 
 Saved
-  Element Should Be Visible  xpath=//div[@data-bind="component: 'tags-editor'"]//span[@data-bind="saveIndicator: indicator"]
+  Positive indicator should be visible
 
 Saved gone
-  Element Should Not Be Visible  xpath=//div[@data-bind="component: 'tags-editor'"]//span[@data-bind="saveIndicator: indicator"]
+  Positive indicator should not be visible

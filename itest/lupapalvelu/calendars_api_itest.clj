@@ -119,6 +119,13 @@
                                         :location "paikka")
                         reservation-id (:reservationId result)]
                     result => ok?
+                    (fact "Email notifications with calendar event have been sent"
+                      (let [emails (sent-emails)]
+                        (count emails) => 2
+                        (:to (first emails)) => (contains "Sonja Sibbo")
+                        (:calendar (:body (first emails))) => (contains "BEGIN:VCALENDAR")
+                        (:to (last emails)) => (contains "Pena Panaani")
+                        (:calendar (:body (last emails))) => (contains "BEGIN:VCALENDAR")))
                     (fact "my-reservations for authority includes the new reservation"
                       (->> (query authority :my-reservations :year current-year :week current-week)
                            :reservations

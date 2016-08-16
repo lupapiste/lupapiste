@@ -108,6 +108,7 @@
 
 (def Email {(sc/optional-key :template)        sc/Str
             (sc/optional-key :subject-key)     sc/Str
+            (sc/optional-key :calendar-fn)     util/Fn
 
             ; Recipients function takes command map as parameter and
             ; returs a sequence of recipients.
@@ -141,22 +142,29 @@
   (or (ss/blank? (:email rec))
       (contains? non-notified-roles (:role rec))))
 
-(defn notify! [template-name command]
+(defn notify! [template-name command & [result]]
   {:pre [template-name (map? command) (template-name @mail-config)]}
   (let [conf (template-name @mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
       (let [application-fn (get conf :application-fn identity)
             application    (application-fn (:application command))
             command        (assoc command :application application)
+            command        (assoc command :result result)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
             recipients     (remove invalid-recipient? (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
-            template-file  (get conf :template (str (name template-name) ".md"))]
+            template-file  (get conf :template (str (name template-name) ".md"))
+            calendar-fn    (get conf :calendar-fn)]
         (doseq [recipient recipients]
           (let [model   (model-fn command conf recipient)
                 subject (get-email-subject application
                                            (:language recipient)
                                            (get conf :subject-key (name template-name))
                                            (get conf :show-municipality-in-subject false))
-                msg     (email/apply-template template-file model)]
+                calendar (when (some? calendar-fn)
+                           (calendar-fn command recipient))
+                msg     (email/apply-template template-file model)
+                msg     (if (some? calendar)
+                          (conj msg calendar)
+                          msg)]
             (send-mail-to-recipient! recipient subject msg)))))))
