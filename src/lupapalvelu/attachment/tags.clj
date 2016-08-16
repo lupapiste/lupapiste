@@ -36,6 +36,10 @@
 (defn- tag-by-operation [{{op-id :id} :op :as attachment}]
   (op-id->tag op-id))
 
+(defn- tag-by-type [{{op-id :id} :op :as attachment}]
+  (or (att-type/tag-by-type attachment)
+      (when op-id att-type/other-type-group)))
+
 (defn attachment-tags
   "Returns tags for a single attachment for filtering and grouping attachments of an application"
   [attachment]
@@ -43,7 +47,7 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              att-type/tag-by-type)
+              tag-by-type)
         attachment)
        (remove nil?)))
 
@@ -62,7 +66,7 @@
   "Returns attachment type based grouping, used inside operation groups."
   [attachments operation-id]
   (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map att-type/tag-by-type)))
+       (map tag-by-type)))
 
 (defn- operation-grouping
   "Creates subgrouping for operations attachments if needed."
@@ -98,7 +102,7 @@
   [{attachments :attachments}]
   [[{:tag :preVerdict :default false}
     {:tag :postVerdict :default false}]
-   (->> (map att-type/tag-by-type attachments)
+   (->> (map tag-by-type attachments)
         (remove nil?)
         distinct
         (map (partial hash-map :default false :tag)))

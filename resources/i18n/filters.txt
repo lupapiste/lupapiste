@@ -16,5 +16,7 @@
 "filter.rakennesuunnitelma" "sv" "Strukturplaner"
 "filter.rakentaminen" "fi" "Rakentamisen aikaiset"
 "filter.rakentaminen" "sv" "Under byggnadstiden"
+"filter.other" "fi" "Muut suunnitelmat"
+"filter.other" "sv" "Övriga planer"
 "filter.show-all" "fi" "Näytä kaikki liitteet"
 "filter.show-all" "sv" "Visa alla bilagor"
