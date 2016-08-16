@@ -7,6 +7,7 @@
             [sade.common-reader :refer [strip-xml-namespaces]]
             [sade.env :as env]
             [sade.core :refer [fail!]]
+            [sade.util :as util]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
@@ -128,7 +129,7 @@
     (when (permit/valid-permit-type? permit-type)
       (some-<>> (org/get-organization organization)
                 (resolve-output-directory <> permit-type)
-                (fs/find-files <> pattern)
+                (util/get-files-by-regex <> pattern)
                 (map str)))))
 
 (defn cleanup-output-dir
