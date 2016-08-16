@@ -63,12 +63,13 @@ Appeal can contain multiple files
   Add file  0-0-0  ${PNG_TESTFILE_PATH}
   OK bubble 0-0-0
   Appeals row file check  0-0  0  ${PNG_TESTFILE_NAME}  1
-  Appeals row file check  0-0  0  ${TXT_TESTFILE_NAME}  0
+  # Originally TXT file was uploaded, but it is converted to PDF/A by Libre Office
+  Appeals row file check  0-0  0  ${PDF_TESTFILE_NAME}  0
 
 Both files are shown in the Attachments tab
   Open tab  attachments
   Page should contain  ${PNG_TESTFILE_NAME}
-  Page should contain  ${TXT_TESTFILE_NAME}
+  Page should contain  ${PDF_TESTFILE_NAME}
   Open tab  verdict
 
 Sonja removes the image file from appeal
@@ -80,7 +81,7 @@ Sonja removes the image file from appeal
 The image file has also been removed from the Attachments tab
   Open tab  attachments
   Page should not contain  ${PNG_TESTFILE_NAME}
-  Page should contain  ${TXT_TESTFILE_NAME}
+  Page should contain  ${PDF_TESTFILE_NAME}
   Open tab  verdict
 
 Sonja deletes appeal
@@ -90,6 +91,7 @@ Sonja deletes appeal
 No appeal attachments
   Open tab  attachments
   Page should not contain  ${TXT_TESTFILE_NAME}
+  Page should not contain  ${PDF_TESTFILE_NAME}
   Open tab  verdict
 
 Sonja adds appeal and rectification

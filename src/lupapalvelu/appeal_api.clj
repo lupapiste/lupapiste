@@ -118,13 +118,17 @@
                                 (fn [{{target-id :id} :target}]
                                   (= target-id appeal-id))
                                 attachments)
-          appeal-file-ids     (map (util/fn-> :latestVersion :fileId) appeal-attachments)
-          new-file-ids     (difference (set file-ids) (set appeal-file-ids))
-          new-attachment-updates (att-appeal/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
-          removable-file-ids (difference (set appeal-file-ids) (set file-ids))
-          removable-attachments (filter
-                                  (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
-                                  appeal-attachments)]
+          ;; Note, new files might be converted to PDF/A. After conversion initial file id is saved to originalFileId.
+          ;; Converted file is given new fileId. After frontend has upserted appeal, next time in editing it will use
+          ;; fileIds of the converted versions. Thus we are interested only in fileIds here. OriginalFileId is saved
+          ;; in attachment's version data.
+          appeal-file-ids         (map (util/fn-> :latestVersion :fileId) appeal-attachments)
+          new-file-ids            (difference (set file-ids) (set appeal-file-ids))
+          new-attachment-updates  (att-appeal/new-appeal-attachment-updates! command appeal-id appeal-type new-file-ids)
+          removable-file-ids      (difference (set appeal-file-ids) (set file-ids))
+          removable-attachments   (filter
+                                    (fn [{versions :versions}] (some removable-file-ids (map :fileId versions)))
+                                    appeal-attachments)]
       {:new-updates new-attachment-updates
        :new-file-ids new-file-ids
        :removable-attachment-ids (remove nil? (map :id removable-attachments))})))
@@ -155,7 +159,8 @@
       (run! (partial att/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
     (when (seq new-file-ids)
       ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
-      (run! (partial att/link-file-to-application (:id app)) new-file-ids))))
+      (att/link-files-to-application (:id app) new-file-ids))
+    (ok)))
 
 (defcommand upsert-appeal
   {:description "Creates new appeal if appealId is not given. Updates appeal with given parameters if appealId is given"

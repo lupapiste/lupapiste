@@ -9,6 +9,22 @@
         <div data-bind="with: organizationModel">
           <h1 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h1>
 
+          <h2>Organisaation nimi</h2>
+          <table data-test-id="organization-name-table">
+            <thead>
+              <tr>
+                <th data-bind="ltext: 'userinfo.language'"></th>
+                <th data-bind="ltext: 'organization.name'"></th>
+              </tr>
+            </thead>
+            <tbody data-bind="foreach: names">
+              <tr>
+                <td data-bind="ltext: 'lang.'+$data.lang"></td>
+                <td><input type="text" data-bind="value: $data.name" class="form-input"></td>
+              </tr>
+            </tbody>
+          </table>
+          <button data-bind="ltext: 'save', click: updateOrganizationName" class="btn positive"></button>
 
           <h2>Asetukset</h2>
           <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">

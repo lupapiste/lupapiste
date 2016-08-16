@@ -17,7 +17,7 @@
             <div data-bind="foreach: submitErrors">
               <div class="info-line like-btn">
                   <i class="lupicon-circle-attention"></i>
-                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index, 'data-submit-error': $data}"></span>
+                  <span data-bind="ltext: $data, attr: {'data-test-id': 'submit-error-' + $index(), 'data-submit-error': $data}"></span>
               </div>
             </div>
           </div>
@@ -25,19 +25,12 @@
           <!-- ko ifnot: missingSomeInfo -->
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <!-- /ko -->
-
-          <!-- show error text before buttons if fields missing -->
-          <!-- ko if: missingSomeInfo -->
-          <i class="error-text" data-bind="ltext: 'application.requiredDataDesc',
-                                           visible: requiredFieldsFillingObligatory() && missingSomeInfo()">
-          </i>
-          <br>
-          <!-- /ko -->
-          <button class="positive"
+          
+          <button class="positive top-marginM"
                   data-test-id="application-submit-btn"
                   data-bind="click: submitApplication,
-                             visible: $root.authorization.ok('submit-application'),
-                             enable: submitButtonEnabled()">
+                             visible: $root.authorization.ok( 'submit-application' ),
+                             enable: submitButtonEnabled">
               <i class="lupicon-download"></i>
               <span data-bind="ltext: 'application.submitApplication'"></span>
           </button>

@@ -207,6 +207,8 @@
               (command pena :add-operation :id application-id :operation "purkaminen")
               (command pena :add-operation :id application-id :operation "aita")
               (command pena :add-operation :id application-id :operation "puun-kaataminen"))
+          yl-kaataminen (when (= "yl-puiden-kaataminen" operation-name)
+              (command pena :add-operation :id application-id :operation "yl-puiden-kaataminen"))
           application (query-application pena application-id)
           _ (add-drawings application)
           application (query-application pena application-id)
@@ -263,7 +265,7 @@
       (let [approved-application (query-application pena application-id)
             email (last-email)
             autogenarated-attachment-count 2 ; Two generated application pdf attachments
-            expected-attachment-count 3 ; see generate-attachment, generate-statement+1
+            expected-attachment-count (if yl-kaataminen 2 3) ; see generate-attachment, generate-statement+1
             expected-sent-attachment-count expected-attachment-count]
         (fact "application is sent" (:state approved-application) => "sent")
         (final-xml-validation approved-application autogenarated-attachment-count expected-attachment-count expected-sent-attachment-count)
@@ -292,6 +294,7 @@
               "aloitusoikeus"
               "meluilmoitus"
               "yl-uusi-toiminta"
+              "yl-puiden-kaataminen"
               "maa-aineslupa"
               "vvvl-vesijohdosta"]]
 

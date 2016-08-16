@@ -29,13 +29,11 @@ LUPAPISTE.TagsEditorModel = function() {
     var tags = _(self.tags()).map(function(t) { return _.pick(ko.toJS(t), "id", "label"); }).uniq("label").value();
     ajax
       .command("save-organization-tags", {tags: tags})
-      .success(function() {
-        self.indicator({type: "saved"});
+      .success(function(res) {
+        util.showSavedIndicator(res);
         self.refresh();
       })
-      .error(function() {
-        self.indicator({type: "err"});
-      })
+      .error(util.showSavedIndicator)
       .call();
   }, 500);
 

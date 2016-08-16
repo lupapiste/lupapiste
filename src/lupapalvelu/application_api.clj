@@ -31,7 +31,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.suti :as suti]))
+            [lupapalvelu.suti :as suti]
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
 
 ;; Notifications
 
@@ -208,8 +209,18 @@
    :notified         true
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
-  [{:keys [created user] :as command}]
+  [{:keys [created user application] :as command}]
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
+
+(defcommand cleanup-krysp
+  {:description      "Removes application KRYSP messages. The cleanup
+  criteria depends on the message contents."
+   :parameters       [:id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :states           #{:complementNeeded}}
+  [{:keys [application]}]
+  (krysp-output/cleanup-output-dir application))
 
 ;; Submit
 
@@ -251,10 +262,10 @@
   (remove nil? (conj []
                      (foreman/validate-application application)
                      (app/validate-link-permits application)
+                     (app/validate-fully-formed application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
-                     (when (env/feature? :suti)
-                       (suti/suti-submit-validation command)))))
+                     (suti/suti-submit-validation command))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"

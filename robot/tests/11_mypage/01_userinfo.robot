@@ -6,8 +6,6 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-## For some strange reason, firstName and lastName fields are left blank.
-
 Mikko goes to own page
   [Tags]  firefox
   Mikko logs in
@@ -21,15 +19,16 @@ There is no company info
 
 Mikko changes his name and experience
   [Tags]  firefox
-  Change Textfield Value  firstName  Mikko  Mika
-  Change Textfield Value  lastName  Intonen  Intola
+  Fill test id  firstName  Mika
+  Fill test id  lastName  Intola
+  Scroll to  div#pw-form
   Select From List  architect-degree-select  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
   Select From List  architect-fiseKelpoisuus-select  tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)
-  Checkbox Should Not Be Selected  allowDirectMarketing
-  Select Checkbox  allowDirectMarketing
-
+  Checkbox wrapper not selected  allowDirectMarketing
+  Click label  allowDirectMarketing
+  
   Save User Data
   Positive indicator should be visible
   User should be logged in  Mika Intola

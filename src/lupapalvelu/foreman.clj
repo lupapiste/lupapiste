@@ -53,7 +53,7 @@
     (when-not (ss/blank? foreman-hetu)
       (mongo/select :applications
                     {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
-                     :state {$nin ["canceled"]}
+                     :state {$in ["acknowledged" "foremanVerdictGiven" "appealed"]}
                      :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
                                              "data.henkilotiedot.hetu.value" foreman-hetu}}}
                     [:created :documents :municipality]))))

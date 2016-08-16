@@ -91,6 +91,11 @@
         .contents {
           padding: 0 15px 15px 15px;
         }
+        .label {
+          display: inline-block;
+          margin: 5px 0 5px 0;
+          font-weight: 700;
+        }
         .preview-image {
           text-align: center;
           img {
@@ -101,6 +106,11 @@
         .attachment-type-select {
           margin: 0;
           width: 100%;
+        }
+        .attachment-contents-edit {
+          margin: 0;
+          width: 98%;
+          height: 30px;
         }
       }
       .metadata-editor-container {

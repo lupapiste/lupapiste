@@ -10,13 +10,14 @@
             [schema.core :as sc]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
-            [lupapalvelu.application :as a]
+            [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
+            [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
-            [lupapalvelu.attachment.notifications :as att-notifications]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
@@ -28,12 +29,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.application :refer [get-operations]]
-            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdftk :as pdftk]
-            [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [sade.env :as env])
+            [lupapalvelu.tiedonohjaus :as tos])
   (:import [java.io File]))
 
 ;; Validators and pre-checks
@@ -88,7 +85,7 @@
 
 (defn- validate-group-type [group]
   (when-let [group-type (keyword (:groupType group))]
-    (when-not ((set attachment/attachment-groups) group-type)
+    (when-not ((set att-tags/attachment-groups) group-type)
       (fail :error.illegal-attachment-group-type))))
 
 (defn- validate-group [{{{group :group} :meta} :data}]
@@ -116,7 +113,7 @@
 
 (defn- validate-operation-in-application [{data :data application :application}]
   (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
-    (when-not (util/find-by-id op-id (a/get-operations application))
+    (when-not (util/find-by-id op-id (app/get-operations application))
       (fail :error.illegal-attachment-operation))))
 
 ;;
@@ -129,8 +126,21 @@
    :user-authz-roles auth/all-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
-  [{{attachments :attachments} :application}]
-  (ok :attachments (map #(assoc % :group (attachment/attachment-grouping %)) attachments)))
+  [{{attachments :attachments :as application} :application}]
+  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
+
+(defquery attachment
+  {:description "Get single attachment"
+   :parameters [id attachmentId]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
+  [{{attachments :attachments :as application} :application}]
+  (let [attachment (attachment/get-attachment-info application attachmentId)]
+    (if attachment
+      (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
+      (fail :error.not-found))))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"
@@ -140,7 +150,25 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
-  (ok :groups (attachment/attachment-groups-for-application application)))
+  (ok :groups (att-tags/attachment-groups-for-application application)))
+
+(defquery attachments-filters
+  {:description "Get all attachments filters for application"
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{application :application}]
+  (ok :attachmentsFilters (att-tags/attachments-filters application)))
+
+(defquery attachments-tag-groups
+  {:description "Get hierarchical attachment grouping by attachment tags."
+   :parameters [:id]
+   :user-authz-roles auth/all-authz-roles
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-application-states}
+  [{application :application}]
+  (ok :tagGroups (att-tags/attachment-tag-groups application)))
 
 ;;
 ;; Types
@@ -161,13 +189,13 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [a/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [app/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (att-type/parse-attachment-type attachmentType)]
     (if (att-type/allowed-attachment-type-for-application? attachment-type application)
-      (let [metadata (-> (tiedonohjaus/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
-                         (tiedonohjaus/update-end-dates (:verdicts application)))]
+      (let [metadata (-> (tos/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
+                         (tos/update-end-dates (:verdicts application)))]
         (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
@@ -185,7 +213,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{{attachments :attachments} :application}]
-  (->> (attachment/resolve-ram-links attachments attachmentId)
+  (->> (ram/resolve-ram-links attachments attachmentId)
        (map #(select-keys % [:id :latestVersion :approved :ramLink]))
        (ok :ram-links)))
 
@@ -199,7 +227,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
   [{application :application}]
-  (ok :operations (get-operations application)))
+  (ok :operations (app/get-operations application)))
 
 ;;
 ;; States
@@ -211,7 +239,7 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+   :pre-checks  [has-versions, app/validate-authority-in-drafts]}
   [command]
   (attachment/set-attachment-state! command fileId :ok))
 
@@ -221,7 +249,7 @@
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [has-versions, a/validate-authority-in-drafts]}
+   :pre-checks  [has-versions, app/validate-authority-in-drafts]}
   [command]
   (attachment/set-attachment-state! command fileId :requires_user_action))
 
@@ -236,7 +264,7 @@
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                           (fail :error.unknown-attachment-type)))
-                      a/validate-authority-in-drafts]
+                      app/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles       #{:authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
@@ -254,14 +282,14 @@
                       (fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when (some (comp #{attachment-id} :ramLink) attachments)
                           (fail :error.ram-link-already-exists)))
-                      attachment/ram-status-ok]
+                      ram/ram-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
    :states           states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
-  (if-let [attachment-id (attachment/create-ram-attachment! application attachment-id created)]
-    (do (att-notifications/notify-new-ram-attachment! application attachment-id created)
+  (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
+    (do (ram/notify-new-ram-attachment! application attachment-id created)
         (ok :applicationId id :attachmentId attachment-id))
     (fail :error.attachment-placeholder)))
 
@@ -278,12 +306,12 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered))
-   :pre-checks  [a/validate-authority-in-drafts
+   :pre-checks  [app/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
-                 attachment/ram-status-not-ok
-                 attachment/ram-not-root-attachment]}
+                 ram/ram-status-not-ok
+                 ram/ram-not-root-attachment]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
   (ok))
@@ -295,11 +323,11 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks  [a/validate-authority-in-drafts
+   :pre-checks  [app/validate-authority-in-drafts
                  attachment-not-readOnly
                  attachment-editable-by-application-state
-                 attachment/ram-status-not-ok
-                 attachment/ram-not-root-attachment]}
+                 ram/ram-status-not-ok
+                 ram/ram-not-root-attachment]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)
@@ -364,7 +392,7 @@
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
-          application (a/with-masked-person-ids application user)]
+          application (app/with-masked-person-ids application user)]
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
@@ -377,63 +405,6 @@
 ;; Upload
 ;;
 
-(def- base-upload-options
-  {:comment-text nil
-   :required false
-   :archivable false
-   :archivabilityError :invalid-mime-type
-   :upload-pdfa-only false
-   :missing-fonts []})
-
-(defn- attach-or-fail! [application attachment-data]
-  (when-not (attachment/attach-file! application attachment-data)
-    (fail :error.unknown)))
-
-(defn- convert-pdf-and-upload! [application
-                                {:keys [pdfa? output-file missing-fonts autoConversion]}
-                                {:keys [attachment-id filename upload-pdfa-only] :as attachment-data}]
-  (if pdfa?
-    (let [attach-file-result (or upload-pdfa-only (attachment/attach-file! application attachment-data) (fail! :error.unknown))
-          new-filename (attachment/filename-for-pdfa filename)
-          new-id       (or (:id attach-file-result) attachment-id)
-          application  (domain/get-application-no-access-checking (:id application)) ; Refresh attachment versions
-          pdfa-attachment-data (assoc attachment-data
-                                 :attachment-id new-id
-                                 :content output-file
-                                 :filename new-filename
-                                 :comment? false
-                                 :archivable true
-                                 :autoConversion autoConversion
-                                 :archivabilityError nil)]
-      (if (attachment/attach-file! application pdfa-attachment-data)
-        (do (io/delete-file output-file :silently)
-            nil)
-        (fail :error.unknown)))
-    (let [missing-fonts (or missing-fonts [])]
-      (attach-or-fail! application (assoc attachment-data :missing-fonts missing-fonts :archivabilityError :invalid-pdfa)))))
-
-(defn- upload! [application {:keys [filename content] :as attachment-data}]
-  (let [mt (keyword (mime/mime-type filename))]
-    (cond
-      (and (= mt :application/pdf)
-           (pdf-conversion/pdf-a-required?
-             (:organization application))) (let [processing-result (pdf-conversion/convert-to-pdf-a content {:application application :filename filename})]
-                                             (if (:already-valid-pdfa? processing-result)
-                                               (attach-or-fail! application (assoc attachment-data :archivable true :archivabilityError nil))
-                                               (convert-pdf-and-upload! application processing-result attachment-data)))
-
-      (= mt :image/tiff) (let [valid? (tiff-validation/valid-tiff? content)
-                               attachment-data (assoc attachment-data :archivable valid? :archivabilityError (when-not valid? :invalid-tiff))]
-                           (attach-or-fail! application attachment-data))
-
-      (attachment/libreoffice-conversion-required? attachment-data) (->> (assoc attachment-data :skip-pdfa-conversion true)
-                                                                         (attachment/attach-file! application)
-                                                                         :id
-                                                                         (assoc attachment-data :attachment-id)
-                                                                         (attach-or-fail! application))
-
-      :else (attach-or-fail! application (assoc attachment-data :skip-pdfa-conversion true)))))
-
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
    :user-roles #{:applicant :authority :oirAuthority}
@@ -442,7 +413,7 @@
                 statement/upload-attachment-allowed
                 (partial attachment-editable-by-application-state true)
                 validate-attachment-type
-                a/validate-authority-in-drafts
+                app/validate-authority-in-drafts
                 attachment-id-is-present-in-application-or-not-set
                 validate-operation-in-application
                 attachment-not-readOnly]
@@ -463,20 +434,17 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)))]
       (fail! (:text validation-error))))
 
-  (upload! application
-           (merge
-             base-upload-options
-             {:filename filename
-              :size size
-              :content tempfile
-              :attachment-id attachmentId
-              :attachment-type attachmentType
-              :group group
-              :comment-text text
-              :target target
-              :locked locked
-              :user user
-              :created created})))
+  (let [file-options       {:filename filename :size size :content tempfile}
+        attachment-options {:attachment-id attachmentId     ; options for attachment creation (not version)
+                            :attachment-type  attachmentType
+                            :group group
+                            :created created
+                            :target target
+                            :locked locked
+                            :required false
+                            :comment-text text}]
+    (when-not (:id (attachment/upload-and-attach! command attachment-options file-options))
+      (fail! :error.unknown))))
 
 ;;
 ;; Rotate
@@ -491,29 +459,33 @@
    :pre-checks  [(partial attachment/if-not-authority-state-must-not-be #{:sent})
                  attachment-editable-by-application-state
                  validate-attachment-type
-                 a/validate-authority-in-drafts
+                 app/validate-authority-in-drafts
                  attachment-id-is-present-in-application-or-not-set]
    :states      (conj (states/all-states-but states/terminal-states) :answered)
-   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise)."}
+   :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId originalFileId filename user created] :as latest-version} (last (:versions attachment))
+    (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
           temp-pdf (File/createTempFile fileId ".tmp")
-          upload-options (merge
-                           base-upload-options
-                           {:content temp-pdf
-                            :original-file-id originalFileId
-                            :upload-pdfa-only true
-                            :attachment-id attachmentId
-                            :filename filename
-                            :content-type contentType
-                            :created created
-                            :user user})]
+          attachment-options (util/assoc-when {:comment-text nil
+                                               :required false
+                                               :original-file-id originalFileId
+                                               :attachment-id attachmentId
+                                               :attachment-type (:type attachment)
+                                               :created created
+                                               :user user}
+                                              :autoConversion autoConversion)]
       (try
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
-          (upload! application (assoc upload-options :size (.length temp-pdf))))
+          (attachment/upload-and-attach! {:application application :user user} ; NOTE: user is user from attachment version
+                                         attachment-options
+                                         {:content temp-pdf
+                                          :filename filename
+                                          :content-type contentType
+                                          :size (.length temp-pdf)}))
+        (ok)
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))
@@ -541,8 +513,8 @@
                           :user (:user command)
                           :lang lang
                           :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-                          :created  stamp-timestamp
-                          :now      (:created command)
+                          :stamp-created stamp-timestamp
+                          :created  (:created command)
                           :x-margin (util/->long xMargin)
                           :y-margin (util/->long yMargin)
                           :page     (keyword page)
@@ -574,7 +546,7 @@
                 (fn [{application :application}]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))
-                a/validate-authority-in-drafts]
+                app/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -613,7 +585,7 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation validate-group]
-   :pre-checks [a/validate-authority-in-drafts
+   :pre-checks [app/validate-authority-in-drafts
                 attachment-editable-by-application-state
                 attachment-not-readOnly
                 validate-operation-in-application]}
@@ -622,13 +594,23 @@
     (attachment/update-attachment-data! command attachmentId data created))
   (ok))
 
+(defcommand set-attachment-contents
+  {:parameters [id attachmentId contents]
+   :user-roles #{:authority}
+   :org-authz-roles #{:archivist}
+   :states     states/all-application-states
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]}
+  [{:keys [created] :as command}]
+  (attachment/update-attachment-data! command attachmentId {:contents contents} created)
+  (ok))
+
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
    :states     #{:draft :open :submitted :complementNeeded}
-   :pre-checks [a/validate-authority-in-drafts]}
+   :pre-checks [app/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
@@ -660,7 +642,7 @@
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]
-   :pre-checks       [a/validate-authority-in-drafts
+   :pre-checks       [app/validate-authority-in-drafts
                       (fn [{{attachment-id :attachmentId} :data app :application}]
                         (when attachment-id
                           (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
@@ -686,22 +668,18 @@
    :states           (lupapalvelu.states/all-application-states-but :draft)}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId filename user created stamped]} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")
-          upload-options (merge
-                           base-upload-options
-                           {:content temp-pdf
-                            :attachment-id attachmentId
-                            :upload-pdfa-only true
-                            :filename filename
-                            :content-type contentType
-                            :created created
-                            :user user
-                            :stamped stamped})]
+    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
+          temp-pdf (File/createTempFile fileId ".tmp")]
       (try
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
-          (upload! application (assoc upload-options :size (.length temp-pdf))))
+          (attachment/upload-and-attach! {:application application :user user}
+                                         {:attachment-id attachmentId
+                                          :comment-text nil
+                                          :required false
+                                          :created created
+                                          :stamped stamped}
+                                         {:content temp-pdf :filename filename}))
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))

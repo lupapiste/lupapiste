@@ -1,3 +1,17 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-list-template">
+  <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
+    <li class="foreman">
+      <span class="foreman-role" data-bind="text: $data.displayRole"></span>
+      <span class="foreman-name" data-bind="fullName: $data"></span>
+      <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
+      <a data-bind="attr: {href: '#!/application/' + $data.id}">
+        <span class="foreman-application" data-bind="text: $data.id"></span>
+      </a>
+      <span class="foreman-state" data-bind="ltext: $data.state"></span>
+    </li>
+  </ul>
+</script>
+
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-template">
   <div>
     <div class="foreman-info" data-bind="lhtml: 'help.AddForeman'"></div>
@@ -7,20 +21,11 @@
     <div class="foreman-info" data-bind="visible: !lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'),
                                          lhtml: 'help.AddForeman.authorityInfo'"
          data-test-id="invite-foreman-authority-info"></div>
-    <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
-      <li class="foreman">
-        <span class="foreman-role" data-bind="text: $data.displayRole"></span>
-        <span class="foreman-name" data-bind="fullName: $data"></span>
-        <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
-        <a data-bind="attr: {href: '#!/application/' + $data.id}">
-          <span class="foreman-application" data-bind="text: $data.id"></span>
-        </a>
-        <span class="foreman-state" data-bind="ltext: $data.state"></span>
-      </li>
-    </ul>
+    <div data-bind="template: {name: 'application-foreman-list-template', data: $data}"></div>   
     <button class="positive margins-s" data-bind="visible: lupapisteApp.models.applicationAuthModel.ok('create-foreman-application'), click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
   </div>
 </script>
+
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-tasks-template">
   <div>

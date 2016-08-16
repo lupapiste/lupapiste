@@ -2316,7 +2316,7 @@
 ;; generoidut pdf:t eivat olleet valideja.
 #_(defmigration verdict-polling-pdf-failure-removal
   {:apply-when (pos? (mongo/count :applications {:tasks.source.type "background"}))}
-  (println "PDF korjausmigraatio: background-sourcellisia hakemuksia on " 
+  (println "PDF korjausmigraatio: background-sourcellisia hakemuksia on "
     (mongo/count :applications {:tasks.source.type "background"}))
   (doseq [failed (mongo/select :applications {:tasks.source.type "background"})]
     (doseq [task (:tasks failed)]
@@ -2327,11 +2327,11 @@
             (if (= (:id task) (:id (:source att)))
               (try
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
-                (attachment/delete-attachment! (:id failed) (:id att))
+                (attachment/delete-attachment! failed (:id att))
                 (catch Exception e
                   (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
-          (action/update-application 
+          (action/update-application
             (action/application->command failed)
             {$pull {:tasks {:id (:id task)}}})
           (println " - taski poistettu"))))))
@@ -2355,7 +2355,7 @@
 (defmigration remove-old-foreman-operation-from-organization-selected-operations
   {:apply-when (pos? (mongo/count :organizations {:selected-operations "tyonjohtajan-nimeaminen"}))}
   (mongo/update :organizations {} {$pull {:selected-operations "tyonjohtajan-nimeaminen"}} :multi true))
- 
+
 ; schema change results: changed document title and no more hankkeestaIlmoitettu element inside document
 (defn- change-rakennuspaikka-to-toiminnan-sijainti [doc]
   (if (= "rakennuspaikka" (get-in doc [:schema-info :name]))

@@ -50,6 +50,9 @@
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
 
+                 ; iCalendar
+                 [org.mnode.ical4j/ical4j "1.0.2"]
+
                  ; Apache Commons
                  [org.apache.commons/commons-lang3 "3.4"]
                  [commons-io/commons-io "2.4"]
@@ -110,7 +113,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.37"]
+                 [lupapiste/commons "0.7.39"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)

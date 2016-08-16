@@ -1,4 +1,4 @@
-LUPAPISTE.AttachmentsTableModel = function( params ) {
+LUPAPISTE.AttachmentsTableModel = function(service) {
   "use strict";
 
   function hasFile(data) {
@@ -7,15 +7,20 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
 
   function canVouch( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    return hasFile( data ) || params.isNotNeeded( data );
+    return hasFile( data ) && !service.isNotNeeded( data );
+  }
+
+  function openAttachment(data) {
+    var applicationId = lupapisteApp.models.application._js.id;
+    pageutil.openPage("attachment", applicationId + "/" + data.id);
   }
 
   function stateIcons( $data ) {
     var data = ko.utils.unwrapObservable( $data );
-    var notNeeded = params.isNotNeeded( data );
+    var notNeeded = service.isNotNeeded( data );
     var file = hasFile( data );
-    var approved = params.isApproved( data ) && canVouch( data );
-    var rejected = params.isRejected( data ) && canVouch( data );
+    var approved = service.isApproved( data ) && canVouch( data );
+    var rejected = service.isRejected( data ) && canVouch( data );
 
     return  _( [[approved, "lupicon-circle-check positive"],
                 [rejected || (!file && !notNeeded),
@@ -30,29 +35,40 @@ LUPAPISTE.AttachmentsTableModel = function( params ) {
       .value();
   }
 
-
   var idPrefix = _.uniqueId("at-input-");
+  var appModel = lupapisteApp.models.application;
 
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
+
+  function readOnly(attachmentId) {
+    var service = lupapisteApp.services.attachmentsService;
+    var attachment = ko.unwrap(service.getAttachment(attachmentId));
+    return attachment.readOnly;
+  }
+
   return {
-    attachments: params.attachments,
+    attachments: service.attachments,
     idPrefix: idPrefix,
     hasFile: hasFile,
     stateIcons: stateIcons,
     inputId: function(index) { return idPrefix + index; },
-    isApproved: params.isApproved,
-    approve: idFun(params.approve),
-    isRejected: params.isRejected,
-    reject: idFun(params.reject),
-    remove: idFun(params.remove),
-    canDownload: _.some(params.attachments, function(a) {
+    isApproved: service.isApproved,
+    approve: idFun(service.approve),
+    isRejected: service.isRejected,
+    reject: idFun(service.reject),
+    remove: idFun(service.remove),
+    appModel: appModel,
+    authModel: lupapisteApp.models.applicationAuthModel,
+    readOnly: readOnly,
+    canDownload: _.some(service.attachments, function(a) {
       return hasFile(a());
     }),
-    isNotNeeded: params.isNotNeeded,
+    isNotNeeded: service.isNotNeeded,
     toggleNotNeeded: function( data  ) {
-      params.setNotNeeded( data.id, !data.notNeeded);
+      service.setNotNeeded( data.id, !data.notNeeded);
     },
-    canVouch: canVouch
+    canVouch: canVouch,
+    openAttachment: openAttachment
   };
 };

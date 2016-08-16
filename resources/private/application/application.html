@@ -474,9 +474,7 @@
 
                         <div data-bind="component: {name: 'export-attachments'}"></div>
                         <!-- /ko -->
-                        <!-- ko if: features.enabled("suti") -->
                         <suti-display></suti-display>
-                        <!-- /ko -->
 
                         <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
                             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
@@ -1083,6 +1081,8 @@
 
                         <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
+                        <h2 class="top-marginM" data-bind="ltext: 'foreman.allForemen'"></h2>
+                        <div data-bind="template: {name: 'application-foreman-list-template', data: $root.foreman}"></div>
                         <!-- /ko -->
 
                         <review-tasks params="openTask: openTask"></review-tasks>

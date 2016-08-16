@@ -257,17 +257,21 @@
       (assoc original-process-metadata :sailytysaika max-retention)
       original-process-metadata)))
 
+(defn process-retention-period-updates [{:keys [metadata attachments processMetadata]} modified-ts]
+  (let [new-process-md (calculate-process-metadata processMetadata metadata attachments)]
+    (when-not (= processMetadata new-process-md)
+      {$set {:modified modified-ts
+             :processMetadata new-process-md}})))
+
 (defn update-process-retention-period
   "Update retention period of the process report to match the longest retention time of actionEvents document
    as per SAHKE2 operative system certification requirement 6.3"
   [app-id modified-ts]
-  (let [{:keys [metadata attachments processMetadata] :as application} (domain/get-application-no-access-checking app-id)
-        new-process-md (calculate-process-metadata processMetadata metadata attachments)]
-    (when-not (= processMetadata new-process-md)
+  (let [application    (domain/get-application-no-access-checking app-id)]
+    (when-let [updates (process-retention-period-updates application modified-ts)]
       (action/update-application
         (action/application->command application)
-        {$set {:modified modified-ts
-               :processMetadata new-process-md}}))))
+        updates))))
 
 (defn- classification-xml [organization tos-function]
   (if-let [xml-str (get-from-toj-api organization false tos-function "/classification")]

@@ -12,6 +12,13 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
+        <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
+        <div data-bind="component: 'organization-name-editor'"></div>
+        <!-- /ko -->
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.tags'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'tags-editor'"></div>
@@ -34,21 +41,18 @@
               <td data-bind="ltext: 'auth-admin.email-notifications.neighbor'"></td>
               <td class="value">
                 <input data-test-id="neighborOrderEmails" type="text" data-bind="value: organization.neighborOrderEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-neighbor-order-email')" />
-                <span class="save-indicator" data-bind="saveIndicator: organization.neighborOrderEmailsIndicator, label: false"></span>
               </td>
             </tr>
             <tr data-test-id="onSubmitEmails-row">
               <td data-bind="ltext: 'auth-admin.email-notifications.submit'"></td>
               <td class="value">
                 <input data-test-id="onSubmitEmails" type="text" data-bind="value: organization.submitNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-submit-notification-email')" />
-                <span class="save-indicator" data-bind="saveIndicator: organization.submitNotificationEmailsIndicator, label: false"></span>
               </td>
             </tr>
             <tr>
               <td data-bind="ltext: 'auth-admin.email-notifications.inforequest'"></td>
               <td class="value">
                 <input type="text" data-bind="value: organization.infoRequestNotificationEmails, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-inforequest-notification-email')" />
-                <span class="save-indicator" data-bind="saveIndicator: organization.infoRequestNotificationEmailsIndicator, label: false"></span>
               </td>
             </tr>
           </tbody>

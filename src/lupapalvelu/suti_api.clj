@@ -14,8 +14,7 @@
   {:description "Enable/disable Suti support."
    :parameters [flag]
    :input-validators [(partial action/boolean-parameters [:flag])]
-   :user-roles #{:authorityAdmin}
-   :feature :suti}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (suti/toggle-enable (usr/authority-admins-organization-id user) flag))
 
@@ -24,8 +23,7 @@
    :parameters [operationId flag]
    :input-validators [(partial op/visible-operation :operationId)
                       (partial action/boolean-parameters [:flag])]
-   :user-roles #{:authorityAdmin}
-   :feature :suti}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (suti/toggle-operation (suti/admin-org user) (ss/trim operationId) flag))
 
@@ -40,15 +38,13 @@
 
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."
-   :user-roles #{:authorityAdmin}
-   :feature :suti}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (ok :suti (suti/organization-details (suti/admin-org user))))
 
 (defquery suti-operations
   {:description "Suti operations for the current authority admin's organization."
-   :user-roles #{:authorityAdmin}
-   :feature :suti}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (ok :operations (-> user suti/admin-org :suti :operations)))
 
@@ -56,8 +52,7 @@
   {:description "Public Suti URL. Not to be confused with the Suti backend."
    :parameters [www]
    :input-validators [(partial action/validate-optional-url :www)]
-   :user-roles #{:authorityAdmin}
-   :feature :suti}
+   :user-roles #{:authorityAdmin}}
   [{user :user}]
   (suti/set-www (suti/admin-org user) (ss/trim www)))
 
@@ -68,8 +63,7 @@
    :user-roles #{:authority :applicant}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
-   :states states/all-application-states
-   :feature :suti}
+   :states states/all-application-states}
   [{application :application organization :organization}]
   (ok :data (suti/application-data application @organization)))
 
@@ -80,8 +74,7 @@
    :user-roles #{:authority :applicant}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
-   :states states/all-application-states
-   :feature :suti}
+   :states states/all-application-states}
   [{application :application organization :organization}]
   (ok :data (suti/application-products application @organization)))
 
@@ -91,8 +84,7 @@
    :input-validators [(partial action/non-blank-parameters [:id])
                       (partial action/string-parameters [:sutiId])]
    :user-roles #{:authority :applicant}
-   :states states/all-application-states
-   :feature :suti}
+   :states states/all-application-states}
   [command]
   (action/update-application command {$set {:suti.id (ss/trim sutiId)}}))
 
@@ -102,7 +94,13 @@
    :input-validators [(partial action/non-blank-parameters [:id])
                       (partial action/boolean-parameters [:added])]
    :user-roles #{:authority :applicant}
-   :states states/all-application-states
-   :feature :suti}
+   :states states/all-application-states}
   [command]
   (action/update-application command {$set {:suti.added added}}))
+
+(defquery suti-pre-sent-state
+  {:description "Pseudo query for checking the application state."
+   :parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles #{:authority :applicant}
+   :states states/pre-sent-application-states})

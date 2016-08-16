@@ -1,5 +1,49 @@
-@import url('main-blessed1.css?z=1470122347557');
+@import url('main-blessed1.css?z=1471250728861');
 
+/* line 10, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:link, .comment-bubble a:visited {
+  color: #f39129;
+}
+/* line 13, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 17, ../../../private/common-html/sass/partials/_links.scss */
+.comment-bubble a:active {
+  color: #fbc732;
+  text-decoration: underline;
+}
+/* line 241, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .deleted {
+  text-decoration: line-through;
+}
+
+/* line 251, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority {
+  position: relative;
+  color: #333333;
+  background: #f6f6f6;
+  width: 100%;
+  border-radius: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bbbbbb;
+}
+/* line 177, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble-authority:after, .comment-bubble-authority:before {
+  top: 100%;
+  left: 95%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
 /* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
 .comment-bubble-authority:after, .comment-bubble-authority:before {
   left: 95%;
@@ -1721,110 +1765,122 @@ ul.no-bullets {
   padding: 0 15px 15px 15px;
 }
 /* line 94, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .additional-controls .additional-data-container .label {
+  display: inline-block;
+  margin: 5px 0 5px 0;
+  font-weight: 700;
+}
+/* line 99, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .additional-data-container .preview-image {
   text-align: center;
 }
-/* line 96, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 101, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .additional-data-container .preview-image img {
   border: 1px solid #4f4f4f;
   max-width: 100%;
 }
-/* line 101, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 106, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .additional-data-container .attachment-type-select {
   margin: 0;
   width: 100%;
 }
-/* line 106, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 110, ../../../private/common-html/sass/partials/_archival-summary.scss */
+.archival-summary-table .attachment-row .additional-controls .additional-data-container .attachment-contents-edit {
+  margin: 0;
+  width: 98%;
+  height: 30px;
+}
+/* line 116, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .metadata-editor-container {
   margin: 0;
   border: 1px solid #4f4f4f;
 }
-/* line 109, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 119, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .metadata-editor-container .editor-header {
   min-height: 0;
   padding: 10px 15px;
   font-size: 16px;
 }
-/* line 113, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 123, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-row .additional-controls .metadata-editor-container .editor-header i {
   font-size: 18px;
 }
-/* line 120, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 130, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .archival-status {
   float: left;
   width: 28px;
   padding: 6px 0 0 6px;
   text-align: center;
 }
-/* line 125, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 135, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .archival-status input {
   margin: 0;
 }
-/* line 129, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 139, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .archival-status-header {
   float: left;
   width: 28px;
   padding-left: 6px;
   text-align: center;
 }
-/* line 135, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 145, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-type {
   margin-right: 545px;
   padding: 0 6px;
 }
-/* line 139, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 149, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .small-columns {
   width: 545px;
   float: right;
 }
-/* line 142, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 152, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .small-columns div {
   display: inline-block;
   padding: 0 6px;
 }
-/* line 147, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 157, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .retention-period {
   width: 160px;
 }
-/* line 150, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 160, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .personal-data {
   width: 170px;
 }
-/* line 153, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 163, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .will-publish {
   width: 111px;
   text-align: right;
 }
-/* line 157, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 167, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .stamped {
   width: 92px;
   text-align: center;
 }
-/* line 161, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 171, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .attachment-group-header {
   margin: 25px 0 15px;
   height: auto;
 }
-/* line 166, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 176, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .archival-summary-table .metadata-editor-container .editor-header {
   border-collapse: separate;
 }
 
-/* line 172, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction {
   margin-top: 3em;
 }
-/* line 174, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 184, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction p {
   margin-bottom: 0.5em;
 }
-/* line 177, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 187, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction .form-part {
   display: inline-block;
   vertical-align: bottom;
   line-height: normal;
 }
-/* line 182, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 192, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .tos-function-correction select, .tos-function-correction input {
   width: 350px;
   min-height: 40px;
@@ -1833,11 +1889,11 @@ ul.no-bullets {
   margin: 0;
 }
 
-/* line 191, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 201, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .mark-as-archived {
   margin-top: 3em;
 }
-/* line 193, ../../../private/common-html/sass/partials/_archival-summary.scss */
+/* line 203, ../../../private/common-html/sass/partials/_archival-summary.scss */
 .mark-as-archived p {
   margin-bottom: 0.5em;
 }
@@ -2036,61 +2092,66 @@ div.search i {
   white-space: nowrap;
   padding-right: 16px;
 }
-/* line 168, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 169, ../../../private/common-html/sass/partials/_applications_search.scss */
+.application-search-result__table th.sorting:hover, .application-foreman-search-result__table th.sorting:hover {
+  color: #f7ac2e;
+  text-decoration: underline;
+}
+/* line 174, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th span, .application-search-result__table th i, .application-foreman-search-result__table th span, .application-foreman-search-result__table th i {
   vertical-align: middle;
 }
-/* line 171, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 177, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th i, .application-foreman-search-result__table th i {
   position: absolute;
 }
 
-/* line 191, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 197, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.fifth {
   width: 10%;
 }
-/* line 194, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 200, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.sixth {
   width: 5%;
 }
-/* line 197, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 203, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.seventh {
   width: 5%;
 }
-/* line 200, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 206, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.eight {
   width: 10%;
 }
-/* line 203, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 209, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.ninth {
   width: 10%;
 }
 
-/* line 213, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 219, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.second {
   width: 15%;
 }
-/* line 216, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 222, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.third {
   width: 5%;
 }
-/* line 219, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 225, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.fourth {
   width: 20%;
 }
-/* line 222, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 228, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.fifth {
   width: 15%;
 }
-/* line 225, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 231, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.sixth {
   width: 15%;
 }
-/* line 228, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 234, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.seventh {
   width: 5%;
 }
-/* line 231, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 237, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.eight {
   width: 15%;
 }
@@ -5077,38 +5138,38 @@ ul.appeals-files li span.appeals-files__size {
   text-align: right;
 }
 
-/* line 226, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 237, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table td.appeals-table--action {
   text-align: right;
 }
-/* line 228, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 239, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table td.appeals-table--action a {
   padding-right: 2em;
 }
-/* line 232, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 243, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table td.appeals-table--icons {
   text-align: center;
   color: #f39129;
 }
-/* line 236, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 247, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table tr.appeals-table__note {
   padding-left: 2em;
   padding-right: 2em;
   background-color: white;
 }
-/* line 241, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table tr.appeals-table__note:active {
   background-color: initial;
 }
-/* line 245, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 256, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table tr.appeals-table__note td.appeals-table--extra {
   white-space: pre-wrap;
 }
-/* line 248, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 259, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table tr.appeals-table__note td.appeals-table--no-extra {
   color: #bbbbbb;
 }
-/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 263, ../../../private/common-html/sass/partials/_tables.scss */
 .appeals-table div.bubble-dialog {
   border: none;
 }

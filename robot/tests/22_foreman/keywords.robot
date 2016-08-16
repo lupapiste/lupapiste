@@ -4,7 +4,8 @@ Library        Collections
 
 *** Keywords ***
 
-Initialize
+Initialize foreman
+  Apply minimal fixture now
   ${applicationIds} =  Create List
   Set Suite Variable  ${applicationIds}
   ${applications} =  Create List
@@ -28,7 +29,7 @@ Open foreman application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Wait Until  Page should contain  Työnjohtajan nimeäminen
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Open foreman accordions
   Open accordions  parties
@@ -55,6 +56,14 @@ Foreman applies personal information to the foreman application
   Wait until  Click by test id  fill-info-button
   Wait for jQuery
 
+Submit foreman base app
+  [Arguments]  ${index}
+  Open foreman application  ${index}
+  Click by test id  test-application-link-permit-lupapistetunnus
+  Wait until  Primary operation is  kerrostalo-rivitalo
+  Submit application
+
+
 Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//section[@id='application']//button[@data-test-id='accept-invite-button']
@@ -74,11 +83,24 @@ Foreman sets role and difficulty to foreman application
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}
 
+Foreman submit application
+  [Arguments]  ${index}
+  Open foreman application  ${index}
+  Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
+  Positive indicator should be visible
+  Submit application
+
+Verdict for foreman application
+  [Arguments]  ${index}
+  Open foreman application  ${index}
+  Submit empty verdict  foremanVerdictGiven
+
 Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Wait until  Element Should Be Visible  xpath=//section[@id='application']
+  Reload page
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
 Project application is open
   ${appId} =   Get From List  ${applicationIds}  0
@@ -92,6 +114,11 @@ Open project application
 Foreman history should have text X times
   [Arguments]  ${text}  ${times}
   Xpath Should Match X Times  //foreman-history//td[contains(., '${text}')]  ${times}
+
+Check related project
+  [Arguments]  ${foreman-app-index}
+  ${permitId} =   Get From List  ${applicationIds}  ${foreman-app-index}
+  Test id input is  'muutHankkeet.0.luvanNumero'  ${permitId}
 
 Foreman can see the first related construction info on the second foreman application
   Open foreman application  1

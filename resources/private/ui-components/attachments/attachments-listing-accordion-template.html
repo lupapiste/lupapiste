@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-accordion-template">
-  <!-- ko if: $data.data && $data.data().hasContent -->
+  <!-- ko if: $data.data && $data.data() && $data.data().hasContent -->
     <rollup params="open: $data.open">
       <rollup-status-button
          params="open: $parent.open,
@@ -8,7 +8,7 @@
                          'tertiary': $parent.level > 0,
                          'attachments-accordion': true},
                  status: $parent.data().status,
-                 ltext: 'application.attachments.' + $parent.name">
+                 text: $parent.name">
       </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
         <!-- ko if: $parent.data().type === "main" -->

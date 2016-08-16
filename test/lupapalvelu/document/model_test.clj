@@ -299,6 +299,51 @@
       (-> document
         (apply-update [:yritys :osoite :postitoimipaikannimi])) => missing-required-fields?)))
 
+(facts "Pertinent validation"
+       (with-timestamp some-time
+         (let [schema    (schemas/get-schema (schemas/get-latest-schema-version) "hakija")
+               document  (-> (new-document schema ..now..)
+                             (apply-update [:_selected] "henkilo")
+                             ;; etunimi missing
+                             (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                             (apply-update [:henkilo :henkilotiedot :hetu] "bad-hetu")
+                             (apply-update [:henkilo :osoite :katu] "katu")
+                             (apply-update [:henkilo :osoite :postinumero] "12345")
+                             (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                             (apply-update [:henkilo :osoite :maa] "FIN")
+                             (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
+                             (apply-update [:henkilo :yhteystiedot :puhelin] "050")
+                             ;; yritysnimi missing
+                             (apply-update [:yritys :liikeJaYhteisoTunnus] "bad-y")
+                             (apply-update [:yritys :osoite :katu] "Satakunnankatu 18 A")
+                             (apply-update [:yritys :osoite :postinumero] "33720")
+                             (apply-update [:yritys :osoite :postitoimipaikannimi] "Tampere")
+                             (apply-update [:yritys :osoite :maa] "FIN")
+                             (apply-update [:yritys :yhteyshenkilo :henkilotiedot :etunimi] "Tauno")
+                             (apply-update [:yritys :yhteyshenkilo :henkilotiedot :sukunimi] "Palo")
+                             (apply-update [:yritys :yhteyshenkilo :yhteystiedot :email] "tauno@example.com")
+                             (apply-update [:yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050"))
+               all       (validate {} document)
+               pertinent (validate-pertinent {} document)]
+           (fact "Result counts"
+                 [(count all) (count pertinent)] => [3 2])
+           (fact "All contains ytunnus with ignore"
+                 all => (contains [(contains {:ignore true
+                                              :path [:yritys :liikeJaYhteisoTunnus]})]))
+           (fact "Pertinent does not contain ytunnus"
+                 pertinent =not=> (contains [(contains {:path [:yritys :liikeJaYhteisoTunnus]})]))
+           (facts "Change _selected"
+                  (let [document  (apply-update document [:_selected] "yritys")
+                        all       (validate {} document)
+                        pertinent (validate-pertinent {} document)]
+                    (fact "Result counts"
+                          [(count all) (count pertinent)] => [3 2])
+                    (fact "All contains hetu with ignore"
+                          all => (contains [(contains {:ignore true
+                                                       :path [:henkilo :henkilotiedot :hetu]})]))
+                    (fact "Pertinent does not contain hetu"
+                          pertinent =not=> (contains [(contains {:path [:henkilo :henkilotiedot :hetu]})])))))))
+
 (fact "Rakennuksen omistaja: omistajalaji"
   (with-timestamp some-time
     (let [schema {:info {:name "rakennuksen-omistajat"} :body schemas/rakennuksen-omistajat}

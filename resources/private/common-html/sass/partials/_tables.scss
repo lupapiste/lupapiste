@@ -30,6 +30,17 @@ tr {
       background-color: $gray221;
     }
   }
+  &.application-row {
+    &:hover {
+      background-color: $orange-hover;
+      &:active {
+        background-color: $orange-active;
+      }
+    i {
+        color: $gray246;
+      }
+    }
+  }
   &.attachment-row {
     cursor: pointer;
 

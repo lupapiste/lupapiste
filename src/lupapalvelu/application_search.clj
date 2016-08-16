@@ -107,11 +107,11 @@
 (defn- archival-query [user]
   (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
                      (organization/earliest-archive-enabled-ts))
-        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse"]}} {:archived.application nil}]}
-                         {$and [{:state {$in ["closed" "extinct"]}} {:archived.completed nil}]}]}]
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven"]}} {:archived.application nil}]}
+                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven"]}} {:archived.completed nil}]}]}]
     (if from-ts
       {$and [base-query
-             {:created {$gte from-ts}}]}
+             {:submitted {$gte from-ts}}]}
       base-query)))
 
 (defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter]} user]
@@ -153,11 +153,12 @@
         {:tags {$in tags}})
       (when-not (empty? organizations)
         {:organization {$in organizations}})
-      (if-not (empty? operations)
-        {:primaryOperation.name {$in operations}}
-        (when (and (user/authority? user) (not= applicationType "unlimited"))
-          ; Hide foreman applications in default search, see LPK-923
-          {:primaryOperation.name {$ne "tyonjohtajan-nimeaminen-v2"}}))
+      (cond
+        (seq operations) {:primaryOperation.name {$in operations}}
+        (and (user/authority? user) (not= applicationType "unlimited"))
+        ; Hide foreman applications in default search, see LPK-923
+        {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
+                                              (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
       (when-not (empty? areas)
         (make-area-query areas user))])})
 
@@ -221,6 +222,7 @@
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
+        _ (println "QUERY: " query)
         query-total (mongo/count :applications query)
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)

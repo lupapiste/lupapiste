@@ -113,6 +113,14 @@
                         (update-in [:suti :server] select-keys [:url :username]))
         :attachmentTypes (organization-attachments organization))))
 
+(defquery organization-name-by-user
+  {:description "Lists organization names for all languages."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (ok (-> (user/authority-admins-organization-id user)
+          o/get-organization
+          (select-keys [:id :name]))))
+
 (defquery user-organizations-for-permit-type
   {:parameters [permitType]
    :user-roles #{:authority}
@@ -507,6 +515,31 @@
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
     (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) (ss/trim val)}})))
+
+(defcommand update-organization-name
+  {:description "Updates organization name for different languages. 'name' should be a map with lang-id as key and name as value."
+   :parameters       [org-id name]
+   :user-roles       #{:authorityAdmin :admin}
+   :pre-checks       [(fn [{{org-id :org-id} :data user :user}]
+                        (when-not (or (user/admin? user)
+                                      (= org-id (user/authority-admins-organization-id user)))
+                          (fail :error.unauthorized)))]
+   :input-validators [(fn [{{name :name} :data}]
+                        (when-not (map? name)
+                          (fail :error.invalid-type)))
+                      (fn [{{name :name} :data}]
+                        (when-not (every? (set i18n/supported-langs) (keys name))
+                          (fail :error.illegal-key)))
+                      (fn [{{name :name} :data}]
+                        (when-not (every? string? (vals name))
+                          (fail :error.invalid-type)))
+                      (fn [{{name :name} :data}]
+                        (when (some ss/blank? (vals name))
+                          (fail :error.empty-organization-name)))]}
+  [_]
+  (->> (util/map-keys (fn->> clojure.core/name (str "name.")) name)
+       (hash-map $set)
+       (o/update-organization org-id)))
 
 (defcommand save-organization-tags
   {:parameters [tags]
