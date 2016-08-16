@@ -12,12 +12,12 @@
 
 (defn- foreach-action [web user application data]
   (map
-    #(let [{type :type action-parameters :parameters} (action/get-meta %)]
+    #(let [{type :type par :parameters opt-par :optional-parameters} (action/get-meta %)]
       (assoc
         (action/action % :type type :data data :user user)
         :application application
         :web web
-        :action-parameters action-parameters))
+        :action-parameters (concat par opt-par)))
     (remove nil? (keys (action/get-actions)))))
 
 (defn- validated [command]

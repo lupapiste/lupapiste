@@ -34,7 +34,7 @@
 
     (fact "authority can comment with to"
       (command sonja :can-target-comment-to-authority :id id) => ok?
-      sonja => (allowed? :add-comment :id id :target sonja-id))
+      sonja => (allowed? :add-comment :id id :to sonja-id))
 
     (fact "when sonja adds comment, both pena and ronja will receive email"
       (comment-application sonja id false ronja-id) => ok?
