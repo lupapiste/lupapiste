@@ -104,6 +104,11 @@
         (apply some-key m (rest ks))
         (m k)))))
 
+(defn find-by-key
+  "Return item from sequence col of maps where element k (keyword) matches value v."
+  [k v col]
+  (some (fn [m] (when (= v (get m k)) m)) col))
+
 (defn find-by-id
   "Return item from sequence col of maps where :id matches id."
   [id col]
