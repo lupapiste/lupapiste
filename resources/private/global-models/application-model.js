@@ -265,10 +265,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
 
-  self.submitButtonVisible = ko.observable( true );
-
-
-  self.reload = function() {
+    self.reload = function() {
     self.submitErrors([]);
     repository.load(self.id());
   };
@@ -319,10 +316,7 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
-           .success( function() {
-             self.submitButtonVisible( false );
-             self.reload();
-           })
+           .success( self.reload)
            .onError("error.cannot-submit-application", cannotSubmitResponse)
            .processing(self.processing)
            .call();
