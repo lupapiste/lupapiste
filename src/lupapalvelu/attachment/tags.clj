@@ -58,18 +58,11 @@
        (remove nil?)
        distinct))
 
-(def type-grouping-stresshold 1)
-
 (defn- type-groups-for-operation
-  "Returns attachment type based grouping. Type group is created only if amount of attachments
-  of same type exceeds type-grouping-stresshold value."
+  "Returns attachment type based grouping, used inside operation groups."
   [attachments operation-id]
   (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map att-type/tag-by-type)
-       (remove nil?)
-       frequencies
-       (filter (comp (partial < type-grouping-stresshold) val))
-       keys))
+       (map att-type/tag-by-type)))
 
 (defn- operation-grouping
   "Creates subgrouping for operations attachments if needed."
