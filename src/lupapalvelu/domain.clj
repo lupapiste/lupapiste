@@ -354,7 +354,8 @@
    :appeals                  []
    :appealVerdicts           []
    :archived                 {:application nil
-                              :completed   nil}})
+                              :completed   nil}
+   :reservations             []})
 
 (def operation-skeleton
   {:name ""

@@ -184,6 +184,9 @@ LUPAPISTE.CalendarService = function() {
                                           comment: event.comment(), location: event.location(), id: event.applicationId() })
       .success(function() {
         hub.send("indicator", { style: "positive" });
+        if (lupapisteApp.models.application.id() === event.applicationId()) {
+          repository.load(ko.unwrap(lupapisteApp.models.application.id));
+        }
         doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
                                          reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
