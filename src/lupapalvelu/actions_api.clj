@@ -12,11 +12,12 @@
 
 (defn- foreach-action [web user application data]
   (map
-    #(let [{type :type} (action/get-meta %)]
+    #(let [{type :type action-parameters :parameters} (action/get-meta %)]
       (assoc
         (action/action % :type type :data data :user user)
         :application application
-        :web web))
+        :web web
+        :action-parameters action-parameters))
     (remove nil? (keys (action/get-actions)))))
 
 (defn- validated [command]
@@ -27,8 +28,15 @@
    :description "List of all actions and their meta-data."} [_]
   (ok :actions (action/serializable-actions)))
 
+(defn- contains-parameters?
+  "Checks parameters that are included in query data covers required parameters for action."
+  [data {:keys [action-parameters] :as action}]
+  (-> (difference (set action-parameters) (set (keys data)))
+      empty?))
+
 (defn- get-allowed-actions [web user application data]
   (let [results  (->> (foreach-action web user application data)
+                      (filter (partial contains-parameters? data))
                       (map validated))
         filtered (if (env/dev-mode?)
                    results

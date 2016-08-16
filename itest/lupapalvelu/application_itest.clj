@@ -530,7 +530,7 @@
                   result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
         (when (denied-actions action)
-          result => unauthorized?)))))
+          result => (some-fn nil? unauthorized?))))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]
