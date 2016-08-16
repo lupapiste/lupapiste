@@ -210,8 +210,17 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
-  (krysp-output/cleanup-output-dir application)
   (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
+
+(defcommand cleanup-krysp
+  {:description      "Removes application KRYSP messages. The cleanup
+  criteria depends on the message contents."
+   :parameters       [:id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:authority}
+   :states           #{:complementNeeded}}
+  [{:keys [application]}]
+  (krysp-output/cleanup-output-dir application))
 
 ;; Submit
 
