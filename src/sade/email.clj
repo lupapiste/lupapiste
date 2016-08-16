@@ -57,15 +57,15 @@
 
 (defn send-mail
   "Send raw email message. Consider using send-email-message instead."
-  [to subject & {:keys [plain html calendar attachments]}]
+  [to subject & {:keys [plain html calendar attachments] :as args}]
   (assert (or plain html calendar) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         calendar-body (when calendar {:content calendar :type "text/calendar; charset=utf-8; method=REQUEST"})
         body       (remove nil? [:alternative plain-body html-body calendar-body])
         body       (if (= (count body) 2)
-                     (second body)
-                     body)
+                     [(second body)]
+                     (vec body))
         attachments (when attachments
                       (for [attachment attachments]
                         (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
