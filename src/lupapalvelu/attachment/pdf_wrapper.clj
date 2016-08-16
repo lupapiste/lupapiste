@@ -5,36 +5,22 @@
            [java.io File ByteArrayOutputStream]
            [org.apache.pdfbox.pdmodel.common PDRectangle PDMetadata]
            [javax.imageio.stream FileImageInputStream]
-           [javax.imageio ImageIO ImageReader]
+           [javax.imageio ImageIO]
            [com.twelvemonkeys.imageio.plugins.jpeg JPEGImageReader]
-           [com.sun.imageio.plugins.jpeg JPEGMetadata]
            [org.apache.xmpbox XMPMetadata]
            [org.apache.xmpbox.xml XmpSerializer]
            [org.apache.pdfbox.pdmodel.graphics.color PDOutputIntent]))
 
-(def width-field 256)
-(def length-field 257)
-(def x-resolution 282)
-(def y-resolution 283)
-(def pdf-ppi 72)
 (def color-profile "sRGB Color Space Profile.icm")
 (def color-space "sRGB IEC61966-2.1")
 (def color-registry "http://www.color.org")
 
-(defn- tag-value [ifd tag]
-  (-> (.getTIFFField ifd tag) (.getAsInt 0)))
-
 (defn- read-images [reader index images]
   (try
-    (let [image (.read reader index)
-          ^JPEGMetadata metadata (.getImageMetadata reader index)
-          ;ifd (.getRootIFD metadata)
-          ]
+    (let [image (.read reader index)]
       (->> {:content image
             :width (.getWidth reader index)
             :length (.getHeight reader index)
-            ;:width-ppi (tag-value ifd x-resolution)
-            ;:length-ppi (tag-value ifd y-resolution)
             }
            (conj images)
            (read-images reader (inc index))))
@@ -44,7 +30,7 @@
 (defn- read-jpeg [^File file]
   (let [readers (ImageIO/getImageReadersByFormatName "jpeg")
         ^JPEGImageReader reader (.next readers)]
-    (.setInput reader (FileImageInputStream. file))
+    (.setInput reader (FileImageInputStream. file) false false)
     (read-images reader 0 [])))
 
 (defn wrap! [^File jpeg-file ^File output-file pdf-title]
