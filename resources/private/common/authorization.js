@@ -29,15 +29,37 @@ var authorization = (function() {
       self.refreshWithCallback(params, callback);
     };
 
+    self.setData = function(data) {
+      self.data(data);
+    };
+
     return {
       ok: self.ok,
       refreshWithCallback: self.refreshWithCallback,
-      refresh: self.refresh
+      refresh: self.refresh,
+      setData: self.setData
     };
   }
 
+  function refreshModelsForCategory(authModels, applicationId, category) {
+    ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
+      .success(function(d) {
+        _.forEach(authModels, function(authModel, id) {
+          authModel.setData(d.actionsById[id] || {});
+        });
+      })
+      .error(function(e) {
+        _.forEach(authModels, function(authModel) {
+          authModel.setData({});
+        });
+        error(e);
+      })
+      .call();
+  }
+
   return {
-    create: function() { return new AuthorizationModel(); }
+    create: function() { return new AuthorizationModel(); },
+    refreshModelsForCategory: refreshModelsForCategory
   };
 
 })();
