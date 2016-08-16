@@ -265,8 +265,7 @@
                      (app/validate-fully-formed application)
                      (when-not (company/cannot-submit command)
                        (fail :company.user.cannot.submit))
-                     (when (env/feature? :suti)
-                       (suti/suti-submit-validation command)))))
+                     (suti/suti-submit-validation command))))
 
 (defquery application-submittable
   {:description "Query for frontend, to display possible errors regarding application submit"
