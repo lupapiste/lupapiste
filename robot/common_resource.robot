@@ -668,14 +668,13 @@ Set attachment type for upload
   Select From List  attachmentType  ${type}
 
 Open attachment details
-  [Arguments]  ${type}  ${nth}=1
+  [Arguments]  ${type}
   Open tab  attachments
-  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//td[@class='attachment-type-id']//a[@data-test-type="${type}"][${nth}]
-  Wait Until  Page Should Contain Element  ${path}
+  ${path} =  Set Variable  div#application-attachments-tab a[data-test-type='${type}']:first
+  Wait Until  Element should be visible  jquery=${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Wait Until  Focus  ${path}
-  Wait Until  Click element  ${path}
+  Scroll to  ${path}
+  Wait Until  Click element  jquery=${path}
   Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
 
 Assert file latest version

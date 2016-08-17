@@ -22,7 +22,8 @@
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
             <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']]),
-                          click: $parent.openAttachment"></a><br>
+                          click: $parent.openAttachment,
+                          attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id']}"></a><br>
             <span data-bind="text: contents"></span>
           </td>
           <td data-bind="attachmentVersion: latestVersion"></td>
@@ -39,7 +40,8 @@
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
-               data-bind="click: $parent.openAttachment">
+               data-bind="click: $parent.openAttachment,
+                          attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id']}">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'attachment.addFile'"></span>
             </a>
