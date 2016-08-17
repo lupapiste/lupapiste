@@ -334,7 +334,7 @@ Attachment state should be
 Sign all attachments
   [Arguments]  ${password}
   Tab should be visible  attachments
-  Select attachment operation option from dropdown  signAttachments
+  Click by test id  sign-attachments
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  ${password}
   Click enabled by test id  do-sign-attachments

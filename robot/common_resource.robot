@@ -619,15 +619,9 @@ Do prepare new request
   Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
-
-Select attachment operation option from dropdown
-  [Arguments]  ${optionName}
-  Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
-
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Select attachment operation option from dropdown  newAttachmentTemplates
+  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment-templates
   Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
   Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
   List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
@@ -639,7 +633,7 @@ Add empty attachment template
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
-  Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
+  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
 

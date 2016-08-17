@@ -42,7 +42,7 @@ Sonja sets contents description for the attachment
   Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
 Sonja disables verdict attachment using multiselect view
-  Select attachment operation option from dropdown  markVerdictAttachments
+  Click by test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
@@ -52,7 +52,7 @@ There should be no verdict attachments
   Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
 
 Sonja marks one attachment as verdict attachment using multiselect view
-  Select attachment operation option from dropdown  markVerdictAttachments
+  Click by test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
@@ -77,7 +77,7 @@ An option to order verdict attachments has appeared into the Toiminnot dropdown 
   Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
 The print order dialog can be opened by selecting from the dropdown
-  Select attachment operation option from dropdown  orderVerdictAttachments
+  Click by test id  order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
   Click Link  xpath=//*[@data-test-id='test-order-verdict-attachment-prints-cancel']
   Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
@@ -144,4 +144,3 @@ Mikko still does not see the prints history link
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Wait Until  Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
-

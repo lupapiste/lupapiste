@@ -65,7 +65,7 @@ Sonja sees stamping button
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
 
 Sonja clicks stamp button, stamping page opens
-  Select attachment operation option from dropdown  stampAttachments
+  Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
@@ -95,7 +95,7 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Execute Javascript  window.scrollTo(0, 0);
   Wait until  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
   Element should be visible  application-attachments-tab
-  Select attachment operation option from dropdown  stampAttachments
+  Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
@@ -142,4 +142,3 @@ Return from stamping to attachments tab
 Attachment has stamped icon
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
-

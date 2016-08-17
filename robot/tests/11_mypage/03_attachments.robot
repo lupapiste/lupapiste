@@ -35,7 +35,7 @@ Mikko copies his attachments to application
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
   Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
   Wait Until  Table Should Contain  css=table.attachments-template-table  ${PDF_TESTFILE_NAME}
 
@@ -81,7 +81,7 @@ Mikko logs in and sets himself architect
 Mikko copies own CV to application
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
 
 Mikko's CV should be uploaded to placeholder requested by Sonja
@@ -101,7 +101,7 @@ Mikko can add his attachments in post verdict state
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
 
