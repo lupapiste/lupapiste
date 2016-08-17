@@ -73,19 +73,21 @@
     {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
 
 (defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
-  (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-        pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
-        pdf-title filename]
-    (try
-      (io/copy content tmp-file)
-      (pdf-wrapper/wrap! tmp-file pdf-file pdf-title)
-      {:archivable true
-       :archivabilityError nil
-       :autoConversion true
-       :content pdf-file
-       :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
-      (finally
-        (io/delete-file tmp-file :silently)))))
+  (if (env/feature? :convert-all-attachments)
+    (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
+          pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
+          pdf-title filename]
+      (try
+        (io/copy content tmp-file)
+        (pdf-wrapper/wrap! tmp-file pdf-file pdf-title)
+        {:archivable true
+         :archivabilityError nil
+         :autoConversion true
+         :content pdf-file
+         :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+        (finally
+          (io/delete-file tmp-file :silently))))
+    {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]
   (if (libreoffice-conversion-required? filedata)
