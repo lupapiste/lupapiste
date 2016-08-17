@@ -16,25 +16,23 @@
       usr/authority-admins-organization-id
       org/get-organization))
 
-(defn toggle-enable [organization-id flag]
-  (org/update-organization organization-id
-                           {$set {:suti.enabled flag}}))
+(defn kw-path
+  "a b c -> :a.b.c"
+  [& kw]
+  (->> kw
+       (map name)
+       (ss/join ".")
+       keyword))
 
-(defn toggle-operation [organization operation-id flag]
-  (let [already (contains? (-> organization :suti :operations set) operation-id)]
+(defn toggle-enable [organization-id group flag]
+  (org/update-organization organization-id
+                           {$set {(kw-path group :enabled) flag}}))
+
+(defn toggle-operation [organization group operation-id flag]
+  (let [already (contains? (-> organization group :operations set) operation-id)]
     (when (not= (boolean already) (boolean flag))
       (org/update-organization (:id organization)
-                               {(if flag $push $pull) {:suti.operations operation-id}}))))
-
-(defn toggle-section-enable [organization-id flag]
-  (org/update-organization organization-id
-                           {$set {:section.enabled flag}}))
-
-(defn toggle-section-operation [organization operation-id flag]
-  (let [already (contains? (-> organization :section :operations set) operation-id)]
-    (when (not= (boolean already) (boolean flag))
-      (org/update-organization (:id organization)
-                               {(if flag $push $pull) {:section.operations operation-id}}))))
+                               {(if flag $push $pull) {(kw-path group :operations) operation-id}}))))
 
 (defn organization-details [{{server :server :as suti} :suti}]
   (-> suti

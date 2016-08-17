@@ -1,4 +1,5 @@
 (ns lupapalvelu.suti-api
+  "Suti is an external service that provides prerequisite documents/products."
   (:require [sade.core :refer :all]
             [sade.strings :as ss]
             [monger.operators :refer :all]
@@ -16,7 +17,7 @@
    :input-validators [(partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-enable (usr/authority-admins-organization-id user) flag))
+  (suti/toggle-enable (usr/authority-admins-organization-id user) :suti flag))
 
 (defcommand suti-toggle-operation
   {:description "Toggles operation either requiring Suti or not."
@@ -25,7 +26,7 @@
                       (partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-operation (suti/admin-org user) (ss/trim operationId) flag))
+  (suti/toggle-operation (suti/admin-org user) :suti (ss/trim operationId) flag))
 
 (defcommand section-toggle-enabled
   {:description      "Enable/disable section requirement for fetched
@@ -34,7 +35,7 @@
    :input-validators [(partial action/boolean-parameters [:flag])]
    :user-roles       #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-section-enable (usr/authority-admins-organization-id user) flag))
+  (suti/toggle-enable (usr/authority-admins-organization-id user) :section flag))
 
 (defcommand section-toggle-operation
   {:description "Toggles operation either requiring section or not."
@@ -43,7 +44,7 @@
                       (partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-section-operation (suti/admin-org user) (ss/trim operationId) flag))
+  (suti/toggle-operation (suti/admin-org user) :section (ss/trim operationId) flag))
 
 (defquery section-operations
   {:description "Operations that require verdicts with section."
