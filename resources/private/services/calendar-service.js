@@ -53,8 +53,10 @@ LUPAPISTE.CalendarService = function() {
   var doFetchApplicationCalendarWeek = function(event) {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
     var slots = [];
+    var _week = startOfWeekMoment.isoWeek();
+    var _year = startOfWeekMoment.year();
 
-    ajax.query("my-reservations", { week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+    ajax.query("my-reservations", { week: _week, year: _year })
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
@@ -65,7 +67,15 @@ LUPAPISTE.CalendarService = function() {
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
                                                    id: lupapisteApp.models.application.id() })
             .success(function(data) {
-              slots = slots.concat(data.slots);
+              slots = slots.concat(data.availableSlots);
+              console.log(_.map(slots, "id"));
+              slots = slots.concat(
+                _.map(
+                   _.filter(data.readOnlyReservations, function(r) { return !_.includes(_.map(slots, "id"), r.id); }),
+                   function(r) { return _.set(r, "status", "read-only") }));
+
+              console.log(_.map(data.readOnlyReservations, "id"));
+              console.log(_.map(slots, "id"));
 
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })

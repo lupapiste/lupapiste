@@ -23,7 +23,7 @@
 
   (fact "calendars-for-authority-admin returns the users in the appropriate organization"
     (let [result   (:users (query sipoo :calendars-for-authority-admin))]
-      (map :id result) => (just #{authority-id})))
+      (map :id result) => (just #{authority-id ronja-id})))
 
   (fact "create calendar for bogus user fails"
     (command sipoo :set-calendar-enabled-for-authority :userId "123akuankka" :enabled true) => fail?)
@@ -91,6 +91,12 @@
 
       (fact "With application"
         (let [app-id (create-app-id pena)]
+          ; Invite & approve Teppo
+          (command pena :invite-with-role :id app-id :email (email-for-key teppo) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+          (command teppo :approve-invite :id app-id) => ok?
+          ;clear inbox
+          (sent-emails)
+
           (fact "Application calendar config"
             (let [result (query pena :application-calendar-config
                                      :id app-id)]
@@ -105,7 +111,7 @@
                                   :id   app-id
                                   :year current-year
                                   :week current-week)
-                    available-slots (:slots result)]
+                    available-slots (:availableSlots result)]
                 result => ok?
                 (count available-slots) => 3
                 (fact "Authority invites the applicant"
@@ -129,10 +135,20 @@
                     (fact "my-reservations for authority includes the new reservation"
                       (->> (query authority :my-reservations :year current-year :week current-week)
                            :reservations
-                           (map :id)) => (just #{reservation-id})))
-                    (fact "Calendar can not be disabled if it has reservations in the future"
-                      (command sipoo :set-calendar-enabled-for-authority
-                                     :userId authority-id :enabled false) => fail?))))
+                           (map :id)) => (just #{reservation-id}))
+                    (fact "another authority in the same organization sees the reservation as a 'read-only' slot"
+                      (->> (query ronja :available-calendar-slots
+                             :authorityId ronja-id
+                             :clientId pena-id
+                             :reservationTypeId (get varaustyypit :Testityyppi)
+                             :id   app-id
+                             :year current-year
+                             :week current-week)
+                           :readOnlySlots
+                           (map #(get-in % [:reservation :id]))) => (just #{reservation-id})))
+                  (fact "Calendar can not be disabled if it has reservations in the future"
+                    (command sipoo :set-calendar-enabled-for-authority
+                                   :userId authority-id :enabled false) => fail?))))
             (fact "Find available slots as applicant"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
@@ -142,7 +158,7 @@
                                   :year current-year
                                   :week current-week)]
                 result => ok?
-                (count (:slots result)) => 2))
+                (count (:availableSlots result)) => 2))
             (fact "Find available slots as applicant without the correct application in context should fail"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
