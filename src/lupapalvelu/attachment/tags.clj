@@ -70,7 +70,8 @@
   "Returns attachment type based grouping, used inside operation groups."
   [attachments operation-id]
   (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map tag-by-type)))
+       (map tag-by-type)
+       distinct))
 
 (defn- operation-grouping
   "Creates subgrouping for operations attachments if needed."
