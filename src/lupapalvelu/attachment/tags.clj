@@ -3,6 +3,8 @@
             [lupapalvelu.attachment.type :as att-type]))
 
 (def attachment-groups [:parties :building-site :operation])
+(def general-group-tag :general)
+(def all-group-tags (cons general-group-tag attachment-groups))
 
 (defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
 
@@ -31,7 +33,9 @@
     (str "op-id-" op-id)))
 
 (defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
-  (or (keyword group-type) (when op-id :operation)))
+  (or (keyword group-type)
+      (when op-id :operation)
+      general-group-tag))
 
 (defn- tag-by-operation [{{op-id :id} :op :as attachment}]
   (op-id->tag op-id))
@@ -52,7 +56,7 @@
        (remove nil?)))
 
 (defn- attachments-group-types [attachments]
-  (->> (map #(if ((comp :id :op) %) :operation (:groupType %)) attachments)
+  (->> (map tag-by-group-type attachments)
        (remove nil?)
        (map keyword)
        distinct))
@@ -73,8 +77,7 @@
   [type-groups operation-id]
   (if (empty? type-groups)
     [(op-id->tag operation-id)]
-    (->> (conj (vec type-groups) :default)
-         (map vector)
+    (->> (map vector type-groups)
          (cons (op-id->tag operation-id)))))
 
 (defmulti tag-grouping-for-group-type (fn [application group-type] group-type))
@@ -93,18 +96,20 @@
   There are one and two level groups in tag hierarchy (operations are two level groups).
   eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
   [{attachments :attachments :as application}]
-  (->> (filter (set (attachments-group-types attachments)) attachment-groups) ; keep sorted
-       (cons :default)
+  (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
   [{attachments :attachments}]
-  [[{:tag :preVerdict :default false}
-    {:tag :postVerdict :default false}]
-   (->> (map tag-by-type attachments)
-        (remove nil?)
-        distinct
-        (map (partial hash-map :default false :tag)))
-   [{:tag :needed :default true}
-    {:tag :notNeeded :default false}]])
+  (let [existing-groups-and-types (->> (map (some-fn tag-by-type tag-by-group-type) attachments)
+                                       (remove nil?)
+                                       (remove #{:operation})
+                                       set)]
+    [[{:tag :preVerdict :default false}
+      {:tag :postVerdict :default false}]
+     (->> (concat all-group-tags att-type/type-groups)
+          (filter existing-groups-and-types)
+          (map (partial hash-map :default false :tag) ))
+     [{:tag :needed :default true}
+      {:tag :notNeeded :default false}]]))
