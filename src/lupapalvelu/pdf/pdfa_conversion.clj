@@ -198,7 +198,7 @@
           (:pdfa? conversion-result) (do
                                        (io/copy temp-file src-file)
                                        (debug "File converted to PDF/A"))
-          :else (error "PDF/A conversion failed, file is not PDF/A" ))
+          :else (warn "PDF/A conversion failed, file is not PDF/A" ))
         (:pdfa? conversion-result))
       (catch Exception e
         (do
