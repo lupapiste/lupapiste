@@ -12,7 +12,7 @@
               <tr>
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
-                <!-- ko if: $root.organization.validateVerdictSection -->
+                <!-- ko if: $root.organization.verdictSectionEnabled -->
                 <th data-bind="ltext: 'section.column'"></th>
                 <!-- /ko -->
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
@@ -23,7 +23,7 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
-                <!-- ko if: $root.organization.validateVerdictSection -->
+                <!-- ko if: $root.organization.verdictSectionEnabled -->
                 <td class="sot--center">
                   <div class="sectionbox-wrapper">
                     <input type="checkbox"

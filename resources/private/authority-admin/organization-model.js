@@ -141,7 +141,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   var sectionEnabled = ko.observable();
 
-  self.validateVerdictSection = ko.computed( {
+  self.verdictSectionEnabled = ko.computed( {
       read: function() {
         return sectionEnabled();
       },
