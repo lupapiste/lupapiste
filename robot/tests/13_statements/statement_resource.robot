@@ -42,10 +42,10 @@ Invite 'manual' statement giver
   Wait Until  Test id enabled  statement-giver-role-text-${index}
   Input text  xpath=//*[@data-test-id='statement-giver-role-text-${index}']  ${roletext}
   Input text  xpath=//*[@data-test-id='statement-giver-name-${index}']  ${name}
-  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   Element should be disabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  something@
-  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait Until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   Element should be disabled  xpath=//*[@data-test-id='statement-giver-checkbox-${index}']
   Input text  xpath=//*[@data-test-id='statement-giver-email-${index}']  ${email}
   # Statement giver's checkbox can be selected only when all his info fields have content and the email field has a valid email address.
