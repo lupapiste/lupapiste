@@ -232,7 +232,7 @@
                             <li data-bind="feature: 'attachments-poc',
                                            css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
                                 <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
-                                    <span>Suunnitelmat ja liitteet POC</span>
+                                    <span>Suunnitelmat ja liitteet, Vanha sivu</span>
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
@@ -418,8 +418,9 @@
                     </div>
 
                     <!-- Attachments tab -->
-                    <!-- ko if: selectedTabName() === 'attachments' -->
-                    <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
+                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
+                    <div id="application-attachmentsPOC-tab" class="tab-content"
+                         data-bind="with: $root.attachmentsTab, feature: 'attachments-poc'">
                         <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
@@ -514,10 +515,9 @@
                     </div>
                     <!-- /ko -->
 
-                    <!-- AttachmentsPOC tab -->
-                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
-                    <div id="application-attachmentsPOC-tab" class="tab-content feature--no-border"
-                         data-bind="feature: 'attachments-poc'">
+                    <!-- Attachments tab -->
+                    <!-- ko if: selectedTabName() === 'attachments' -->
+                    <div id="application-attachments-tab" class="tab-content feature--no-border">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->

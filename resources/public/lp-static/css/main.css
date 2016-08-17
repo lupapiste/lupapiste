@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1471250728861');
+@import url('main-blessed1.css?z=1471419005000');
 
 /* line 10, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:link, .comment-bubble a:visited {
@@ -3206,24 +3206,6 @@ span.icon_clear:before {
 .application_summary_info > div.state-indication,
 .application_summary_info > div.summary-help {
   border-bottom: none;
-}
-
-/* line 467, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-check,
-#application-attachments-tab i.lupicon-circle-pen,
-#application-attachments-tab i.lupicon-circle-arrow-up,
-#application-attachments-tab i.lupicon-circle-stamp,
-#application-attachments-tab i.lupicon-circle-section-sign {
-  color: #2ca92c;
-}
-/* line 474, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-star,
-#application-attachments-tab i.lupicon-lock {
-  color: #f39129;
-}
-/* line 478, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-attention {
-  color: #df3215;
 }
 
 /* line 467, ../../../private/common-html/sass/views/_application.scss */
