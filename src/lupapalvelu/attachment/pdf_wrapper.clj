@@ -47,7 +47,7 @@
               color-is (io/input-stream (io/resource color-profile))]
 
     ;; Add the metadata and output intent to make the file PDF/A-1b compliant
-    ;; Note that we don't copy any existing XMP data (if any) from the TIFF file here
+    ;; Note that we don't copy any existing XMP data (if any) from the original file here
     (let [xmp (XMPMetadata/createXMPMetadata)
           dc (.createAndAddDublinCoreSchema xmp)
           id (.createAndAddPFAIdentificationSchema xmp)
