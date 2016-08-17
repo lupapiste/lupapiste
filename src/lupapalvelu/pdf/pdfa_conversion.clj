@@ -2,7 +2,7 @@
   (:require [clojure.java.shell :as shell]
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
-            [taoensso.timbre :refer [trace debug debugf info infof warn error errorf fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
             [clojure.java.io :as io]
@@ -111,7 +111,7 @@
       (= exit 10) (do
                     (error "pdf2pdf - not a valid license")
                     {:pdfa? false})
-      :else (do (warn "pdf2pdf error:" err "exit status:" exit)
+      :else (do (warnf "pdf2pdf failed with exit status %s, stderr: %s" exit err)
                 (warn (parse-errors-from-log-lines log-lines))
                 {:pdfa? false}))))
 
