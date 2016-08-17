@@ -27,6 +27,15 @@
   [{user :user}]
   (suti/toggle-operation (suti/admin-org user) (ss/trim operationId) flag))
 
+(defcommand section-toggle-enabled
+  {:description      "Enable/disable section requirement for fetched
+  verdicts support."
+   :parameters       [flag]
+   :input-validators [(partial action/boolean-parameters [:flag])]
+   :user-roles       #{:authorityAdmin}}
+  [{user :user}]
+  (suti/toggle-section-enable (usr/authority-admins-organization-id user) flag))
+
 (defcommand section-toggle-operation
   {:description "Toggles operation either requiring section or not."
    :parameters [operationId flag]
@@ -35,6 +44,12 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (suti/toggle-section-operation (suti/admin-org user) (ss/trim operationId) flag))
+
+(defquery section-operations
+  {:description "Operations that require verdicts with section."
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (ok :operations (-> user suti/admin-org :section :operations)))
 
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."

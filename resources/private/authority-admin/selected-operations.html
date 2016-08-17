@@ -12,8 +12,9 @@
               <tr>
                 <th data-bind="ltext: permitType"
                     class="sot--full-width"></th>
-                <th data-bind="ltext: 'section.column',
-                               feature: 'section'"></th>
+                <!-- ko if: $root.organization.validateVerdictSection -->
+                <th data-bind="ltext: 'section.column'"></th>
+                <!-- /ko -->
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <th data-bind="ltext: 'suti.column'"></th>
                 <!-- /ko -->
@@ -22,8 +23,8 @@
             <tbody data-bind="foreach: operations">
               <tr data-bind="attr: {'data-test-op-id': id}" class="sel-op-row">                
                 <td data-bind="text: text"></td>
-                <td data-bind="feature: 'section'"
-                    class="sot--center">
+                <!-- ko if: $root.organization.validateVerdictSection -->
+                <td class="sot--center">
                   <div class="sectionbox-wrapper">
                     <input type="checkbox"
                            data-bind="attr: {id: 'section-' + id},
@@ -33,6 +34,7 @@
                                       click: $root.organization.toggleSectionOperation"></label>
                   </div>
                 </td>
+                <!-- /ko -->
                 <!-- ko if: lupapisteApp.services.sutiService.sutiEnabled -->
                 <td class="sot--center">
                   <div class="checkbox-wrapper">
