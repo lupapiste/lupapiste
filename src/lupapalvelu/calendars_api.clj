@@ -10,7 +10,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [clj-time.local :refer [to-local-date-time local-now]]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -335,7 +336,11 @@
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :attendee recipient)]
+                                         reservation (assoc reservation :attendee recipient)
+                                         reservation (assoc reservation :unique-id (str (.toString (to-local-date-time (local-now))) "/"
+                                                                                        (java.util.UUID/randomUUID)
+                                                                                        "@lupapiste.fi"))]
+                                     (cal/update-reservation-unique-id application (:reservationId result) (:unique-id reservation))
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application result :result}]
