@@ -12,7 +12,7 @@
         <label class="form-label tip" data-bind="ltext: 'application.calendar.select-authority'"></label>
         <select class="form-input combobox tip"
                 data-bind="options: authorities,
-                           optionsText: function(item) { return partyFullName(item); },
+                           optionsText: function(item) { return util.partyFullName(item); },
                            optionsCaption: loc('choose'),
                            value: selectedParty">
         </select>
