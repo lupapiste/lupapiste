@@ -40,6 +40,8 @@
   "Creates a new ISO-8859-1 CharsetEncoder instance, which is not thread safe."
   [] (.newEncoder latin1))
 
+(def other-value "other")
+
 ;;
 ;; Field validation
 ;;
@@ -96,7 +98,7 @@
 
 (defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
-        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+        accepted-values (if other-key (conj accepted-values other-value) accepted-values)]
     (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
@@ -108,7 +110,7 @@
 (defmethod validate-field :buildingSelector [_ elem v]
   (cond
     (ss/blank? v) nil
-    (= "other" v) nil
+    (= other-value v) nil
     (v/rakennusnumero? v) nil
     (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
