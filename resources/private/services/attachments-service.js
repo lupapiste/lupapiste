@@ -9,7 +9,6 @@ LUPAPISTE.AttachmentsService = function() {
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
-  self.SCHEDULED_FOR_NOT_NEEDED = "scheduled_for_not_needed";
 
   self.attachments = ko.observableArray([]);
   self.tagGroups = ko.observableArray([]);
@@ -59,6 +58,21 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
+  function buildAttachmentModel(attachment, attachmentObs) {
+    var notNeeded;
+    if (ko.isObservable(attachmentObs)) {
+      notNeeded = attachmentObs().notNeeded;
+      notNeeded(attachment.notNeeded);
+      attachmentObs(_.assign(attachment, {notNeeded: notNeeded}));
+      return attachmentObs;
+    } else {
+      notNeeded = ko.observable(attachment.notNeeded);
+      notNeeded.subscribe(_.partial(self.setNotNeeded, attachment.id));
+      attachmentObs = ko.observable(_.assign(attachment, {"notNeeded": notNeeded}));
+      return attachmentObs;
+    }
+  }
+
   function assignAuthModel(attachment) {
     var application = lupapisteApp.models.application._js,
         authModel = authorization.create();
@@ -69,13 +83,13 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   self.setAttachments = function(data) {
-    self.attachments(_.map(data, _.flow([assignAuthModel, ko.observable])));
+    self.attachments(_.map(data, _.flow([assignAuthModel, buildAttachmentModel])));
   };
 
   self.setAttachment = function(attachment) {
     var replaceAttachment = self.getAttachment(attachment.id);
     if (replaceAttachment) {
-      _.flow([assignAuthModel, replaceAttachment])(attachment);
+      _.flow([assignAuthModel, _.partialRight(buildAttachmentModel, replaceAttachment)])(attachment);
     }
   };
 
@@ -157,28 +171,15 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
 
-  // When an attachment is set to "not needed" with self.setNotNeeded, it
-  // is actually first scheduled for the change. Calling this function
-  // will change the state from "scheduled" to "not needed".
-  self.changeScheduledNotNeeded = function() {
-    var attachmentIds = _(self.attachments.peek()).map(function(attachment) {
-      return attachment();
-    }).filter({notNeeded: self.SCHEDULED_FOR_NOT_NEEDED}).map("id").value();
-    _.forEach(attachmentIds, function(attachmentId) {
-      self.updateAttachment(attachmentId, {notNeeded: true});
-    });
-    self.attachments.valueHasMutated();
-  };
-
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return attachment && attachment.state === self.APPROVED;
+    return util.getIn(attachment, ["state"]) === self.APPROVED;
   };
   self.isRejected = function(attachment) {
-    return attachment && attachment.state === self.REJECTED;
+    return util.getIn(attachment, ["state"]) === self.REJECTED;
   };
   self.isNotNeeded = function(attachment) {
-    return attachment && attachment.notNeeded === true;
+    return util.getIn(attachment, ["notNeeded"]) === true;
   };
 
   function getUnwrappedAttachmentById(attachmentId) {

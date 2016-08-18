@@ -3,6 +3,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  self.APPROVED = "ok";
+  self.REJECTED = "requires_user_action";
+
   var legendTemplate = _.template( "<div class='like-btn'>"
                                    + "<i class='<%- icon %>'></i>"
                                    + "<span><%- text %></span>"
@@ -36,7 +39,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   });
   var dispose = self.dispose;
   self.dispose = function() {
-    self.service.changeScheduledNotNeeded();
     self.service.clearData();
     dispose();
   };
@@ -66,11 +68,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
       .value();
   }
 
-
-  function notNeededForModel(attachment) {
-    return attachment.notNeeded;
-  }
-
   //
   // Attachments hierarchy
   //
@@ -89,37 +86,26 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
 
 
-  function modelForAttachmentInfo(attachmentIds) {
-    var attachments = _(attachmentIds)
+  function getAttachmentInfos(attachmentIds) {
+    return _(attachmentIds)
           .map(self.service.getAttachment)
-          .filter(_.identity)
+          .filter()
           .value();
-    return {
-      approve:      self.service.approveAttachment,
-      reject:       self.service.rejectAttachment,
-      remove:       self.service.removeAttachment,
-      setNotNeeded: self.service.setNotNeeded,
-      isApproved:   self.service.isApproved,
-      isRejected:   self.service.isRejected,
-      isNotNeeded:  notNeededForModel,
-      attachments:  attachments
-    };
   }
 
-
   function modelForSubAccordion(subGroup) {
-    var attachmentInfos = modelForAttachmentInfo(subGroup.attachmentIds);
+    var attachmentInfos = getAttachmentInfos(subGroup.attachmentIds);
     return {
       type: "sub",
       attachmentInfos: attachmentInfos,
       // all approved or some rejected
       status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
       hasContent: ko.pureComputed(function() {
-        return attachmentInfos && attachmentInfos.attachments &&
-          attachmentInfos.attachments.length > 0;
+        return attachmentInfos &&
+          attachmentInfos.length > 0;
       }),
       hasFile: ko.pureComputed(function() {
-        return _.some(attachmentInfos.attachments, function(attachment) {
+        return _.some(attachmentInfos, function(attachment) {
           return !!util.getIn(attachment, ["latestVersion", "fileId"]);
         });
       })

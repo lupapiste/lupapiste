@@ -1,30 +1,31 @@
-LUPAPISTE.AttachmentsTableModel = function(service) {
+LUPAPISTE.AttachmentsTableModel = function(attachments) {
   "use strict";
 
-  function hasFile(data) {
-    return _.get(ko.utils.unwrapObservable(data), "latestVersion.fileId");
+  var service = lupapisteApp.services.attachmentsService;
+
+  function hasFile(attachment) {
+    return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
   }
 
-  function canVouch( $data ) {
-    var data = ko.utils.unwrapObservable( $data );
-    return hasFile( data ) && !service.isNotNeeded( data );
+  function canVouch(attachment) {
+    var att = ko.utils.unwrapObservable(attachment);
+    return hasFile(att) && !service.isNotNeeded(attachment);
   }
 
-  function openAttachment(data) {
+  function openAttachment(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
-    pageutil.openPage("attachment", applicationId + "/" + data.id);
+    pageutil.openPage("attachment", applicationId + "/" + attachment.id);
   }
 
-  function stateIcons( $data ) {
-    var data = ko.utils.unwrapObservable( $data );
-    var notNeeded = service.isNotNeeded( data );
-    var file = hasFile( data );
-    var approved = service.isApproved( data ) && canVouch( data );
-    var rejected = service.isRejected( data ) && canVouch( data );
+  function stateIcons(attachment) {
+    var data = ko.utils.unwrapObservable(attachment);
+    var notNeeded = attachment.notNeeded();
+    var file = hasFile(data);
+    var approved = service.isApproved(data) && canVouch(data);
+    var rejected = service.isRejected(data) && canVouch(data);
 
     return  _( [[approved, "lupicon-circle-check positive"],
-                [rejected || (!file && !notNeeded),
-                 "lupicon-circle-attention negative"],
+                [rejected || (!file && !notNeeded), "lupicon-circle-attention negative"],
                 [ _.get( data, "signed.0"), "lupicon-circle-pen positive"],
                 [data.state === "requires_authority_action", "lupicon-circle-star primary"],
                 [data.stamped, "lupicon-circle-stamp positive"]])
@@ -35,40 +36,26 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
       .value();
   }
 
-  function toggleNotNeeded(data) {
-    if (data.authModel.ok("set-attachment-not-needed")) {
-      service.setNotNeeded( data.id, !data.notNeeded);
-    }
-  }
-
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
 
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
 
-  function readOnly(attachmentId) {
-    var service = lupapisteApp.services.attachmentsService;
-    var attachment = ko.unwrap(service.getAttachment(attachmentId));
-    return attachment.readOnly;
-  }
-
   return {
-    attachments: service.attachments,
+    attachments: attachments,
     idPrefix: idPrefix,
     hasFile: hasFile,
     stateIcons: stateIcons,
     inputId: function(index) { return idPrefix + index; },
     isApproved: service.isApproved,
-    approve: idFun(service.approve),
+    approve: idFun(service.approveAttachment),
     isRejected: service.isRejected,
-    reject: idFun(service.reject),
-    remove: idFun(service.remove),
+    reject: idFun(service.rejectAttachment),
+    isNotNeeded: service.isNotNeeded,
+    remove: idFun(service.removeAttachment),
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
-    readOnly: readOnly,
-    isNotNeeded: service.isNotNeeded,
-    toggleNotNeeded: toggleNotNeeded,
     canVouch: canVouch,
     openAttachment: openAttachment
   };
