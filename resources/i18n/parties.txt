@@ -108,6 +108,8 @@
 "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label.työnjohtaja" "sv" "Arbetsledare"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label.ei tiedossa" "fi" "Ei tiedossa"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label.ei tiedossa" "sv" "Okänd"
+"osapuoli.tyonjohtaja.kuntaRoolikoodi.ei tiedossa" "fi" "Ei tiedossa"
+"osapuoli.tyonjohtaja.kuntaRoolikoodi.ei tiedossa" "sv" "Okänd"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen työnjohtaja" "fi" "Erityisalojen työnjohtaja"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen työnjohtaja" "sv" "Arbetsledare på specialområden"
 "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-työnjohtaja" "fi" "IV-työnjohtaja"
