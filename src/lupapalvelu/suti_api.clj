@@ -46,12 +46,6 @@
   [{user :user}]
   (suti/toggle-operation (suti/admin-org user) :section (ss/trim operationId) flag))
 
-(defquery section-operations
-  {:description "Operations that require verdicts with section."
-   :user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (ok :operations (-> user suti/admin-org :section :operations)))
-
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."
    :user-roles #{:authorityAdmin}}

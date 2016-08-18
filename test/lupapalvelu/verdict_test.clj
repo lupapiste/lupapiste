@@ -131,3 +131,60 @@
     (verdict-attachment-type {:permitType "R"} anything) => {:type-group "paatoksenteko" :type-id anything})
   (fact "YA - with type"
     (verdict-attachment-type {:permitType "YA"} anything) => {:type-group "muut" :type-id anything}))
+
+(defn ->xml [m]
+  (for [[k v] m]
+    {:tag (keyword k)
+     :attrs nil
+     :content (cond
+                (string? v)     [v]
+                (map? v)        (->xml v)
+                (sequential? v) (apply concat (map ->xml v))
+                :default        (throw "bad!"))}))
+
+(facts "Section requirement for verdicts"
+       (let [org        {:section {:operations ["pool" "house"]
+                                   :enabled    true}}
+             pool       {:name "pool"}
+             no-xml1    (->xml {:root {:foo {:bar "nope"}}})
+             no-xml2    (->xml {:root {:foo {:bar "nope"}
+                                       :paatostieto {:hii "hoo"}}})
+             blank-xml1 (->xml {:root {:foo {:bar "nope"}
+                                       :paatostieto {:pykala ""}}})
+             blank-xml2 (->xml {:root {:foo {:bar "nope"}
+                                       :paatostieto {:doh {:pykala ""}}}})
+             wrong-path (->xml {:root {:pykala "22"}})
+             incomplete (->xml {:root {:paatostieto {:pykala "22"}
+                                       :another {:paatostieto {:pykala ""}}}})
+             good1 (->xml {:root {:paatostieto {:pykala "22"}
+                                       :another {:paatostieto {:pykala "33"}}}})
+             good2 (->xml {:root {:paatostieto {:between [{:foo "hello"}
+                                                               {:foo "hui"
+                                                                :pykala "22"}]}
+                                       :another {:paatostieto {:pykala "33"}}}})
+             good3      (->xml {:root {:paatostieto {:between {:pykala "33"}}}})
+             fail-check (partial expected-failure? :info.section-required-in-verdict)]
+         (fact "No paatostieto element"
+               (validate-section-requirement pool no-xml1 org) => fail-check)
+         (fact "No pykala element"
+               (validate-section-requirement pool no-xml2 org) => fail-check)
+         (fact "Blank section 1"
+               (validate-section-requirement pool blank-xml1 org) => fail-check)
+         (fact "Blank section 2"
+               (validate-section-requirement pool blank-xml2 org) => fail-check)
+         (fact "Pykala outside of paatostieto element"
+               (validate-section-requirement pool wrong-path org) => fail-check)
+         (fact "One paatostieto is bad"
+               (validate-section-requirement pool incomplete org) => fail-check)
+         (fact "Good sections 1"
+               (validate-section-requirement pool good1 org) => nil)
+         (fact "Good sections 2"
+               (validate-section-requirement pool good2 org) => nil)
+         (fact "Good section 3"
+               (validate-section-requirement pool good3 org) => nil)
+         (fact "Organization does not require section"
+               (validate-section-requirement pool no-xml1 {:section {:operations ["pool" "house"]
+                                                                     :enabled    false}}) => nil)
+         (fact "Section not required for the operation"
+               (validate-section-requirement pool no-xml1 {:section {:operations ["sauna" "house"]
+                                                                     :enabled    true}}) => nil)))
