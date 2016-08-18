@@ -120,7 +120,7 @@
     (with-open [reader (PdfReader. ^String input-file-path)]
       (.getNumberOfPages reader))
     (catch Exception e
-      (error "Error occurred when trying to read page count from PDF file" e)
+      (warn "Failed to read page count from PDF file - " e)
       0)))
 
 (defn- store-converted-page-count [{:keys [already-valid-pdfa? pdfa? output-file]} original-file-path]
