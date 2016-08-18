@@ -154,6 +154,11 @@
         white-space: nowrap;
         color: $orange-dark; // This is needed because of text ellipsis
 
+        #triangle-topright {
+          margin-right: 0px !important;
+          margin-top: $marginS;
+        }
+
         &.booked {
           color: white;
           background: $green-dark;

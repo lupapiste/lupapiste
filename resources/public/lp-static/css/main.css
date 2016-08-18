@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1471516059633');
+@import url('main-blessed1.css?z=1471516731892');
 
 /* line 10, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:link, .comment-bubble a:visited {
@@ -6065,24 +6065,29 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   color: #f39129;
 }
 /* line 157, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot #triangle-topright {
+  margin-right: 0px !important;
+  margin-top: 6px;
+}
+/* line 162, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked {
   color: white;
   background: #2ca92c;
 }
-/* line 161, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 166, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked a {
   color: white;
 }
-/* line 166, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 171, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.accepted {
   color: white;
   background: #f39129;
 }
-/* line 170, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 175, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.accepted a {
   color: white;
 }
-/* line 175, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 180, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot {
   background: inherit;
   width: 100%;
@@ -6092,18 +6097,18 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   text-align: center;
   display: table;
 }
-/* line 185, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 190, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot div {
   display: inline;
   margin-right: auto;
   margin-left: auto;
 }
-/* line 191, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 196, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot div i, .calendar-table table td div.calendar-slot button.reserve-slot div span {
   display: table-cell;
   vertical-align: middle;
 }
-/* line 196, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 201, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation {
   padding-top: 0;
   padding-bottom: 0;
@@ -6111,25 +6116,25 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   color: white;
   background: #2ca92c;
 }
-/* line 203, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 208, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation.read-only {
   background: none;
 }
-/* line 206, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 211, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation.read-only div {
   color: grey;
 }
-/* line 211, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 216, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation div {
   height: 20px;
 }
 
-/* line 222, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 227, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
   margin-top: 24px;
 }
 
-/* line 226, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 231, ../../../private/common-html/sass/views/_calendars.scss */
 #application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
