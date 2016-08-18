@@ -344,7 +344,7 @@
                     (fact "Pertinent does not contain hetu"
                           pertinent =not=> (contains [(contains {:path [:henkilo :henkilotiedot :hetu]})])))))))
 
-(fact "Rakennuksen omistaja: omistajalaji"
+(facts "Rakennuksen omistaja: omistajalaji"
   (with-timestamp some-time
     (let [schema {:info {:name "rakennuksen-omistajat"} :body schemas/rakennuksen-omistajat}
           document (-> (new-document schema ..now..)
@@ -361,10 +361,20 @@
                      (apply-update [:rakennuksenOmistajat :0 :yritys :yhteyshenkilo  :yhteystiedot :puhelin] "050")
                      (apply-update [:rakennuksenOmistajat :0 :muu-omistajalaji] "jotain muuta"))]
 
-      document => (invalid-with? schema [:tip "illegal-value:required"])
-      (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "jotain muuta") => (invalid-with? schema [:warn "illegal-value:select"])
-      (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "ei tiedossa") => (valid-against? schema))))
+      (facts "content and required value are checked"
+        document => (invalid-with? schema [:tip "illegal-value:required"])
+        (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "jotain muuta") => (invalid-with? schema [:warn "illegal-value:select"])
+        (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "ei tiedossa") => (valid-against? schema))
 
+      (fact "other value (LPK-1945)"
+        (fact
+          "valid when the other key field muu-omistajalaji is filled"
+          (apply-update document [:rakennuksenOmistajat :0 :omistajalaji] "other") => (valid-against? schema))
+        (fact "invalid when the other key field is empty"
+          (->
+            document
+            (apply-update [:rakennuksenOmistajat :0 :omistajalaji] "other")
+            (apply-update [:rakennuksenOmistajat :0 :muu-omistajalaji] "")) => (invalid-with? schema [:tip "illegal-value:required"]))))))
 
 (fact "apply-approval"
   (apply-approval {} nil ..status.. {:id ..id.. :firstName ..fn.. :lastName ..ln..} ..now..)
