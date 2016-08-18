@@ -35,6 +35,12 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
       .value();
   }
 
+  function toggleNotNeeded(data) {
+    if (data.authModel.ok("set-attachment-not-needed")) {
+      service.setNotNeeded( data.id, !data.notNeeded);
+    }
+  }
+
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
 
@@ -62,9 +68,7 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
     authModel: lupapisteApp.models.applicationAuthModel,
     readOnly: readOnly,
     isNotNeeded: service.isNotNeeded,
-    toggleNotNeeded: function( data  ) {
-      service.setNotNeeded( data.id, !data.notNeeded);
-    },
+    toggleNotNeeded: toggleNotNeeded,
     canVouch: canVouch,
     openAttachment: openAttachment
   };

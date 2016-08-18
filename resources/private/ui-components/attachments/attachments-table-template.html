@@ -49,9 +49,9 @@
           <td>
             <div class="checkbox-wrapper">
               <input type="checkbox"
-                     data-bind="attr: {id: $parent.inputId( $index() ),
+                     data-bind="attr: {id: $parent.inputId( $index() )},
                                 enable: $data.authModel.ok('set-attachment-not-needed'),
-                                checked: $parent.isNotNeeded( $data )}">
+                                checked: $parent.isNotNeeded( $data )">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index())},
                                 ltext: 'application.attachmentNotNeeded',

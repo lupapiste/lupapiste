@@ -46,13 +46,19 @@
 (defn attachment-not-readOnly [{{attachmentId :attachmentId} :data application :application}]
   (when (-> (attachment/get-attachment-info application attachmentId) attachment/attachment-is-readOnly?)
     (fail :error.unauthorized
-          :desc "Read-only attachments cannot be modified.")))
+          :desc "Attachments is read only.")))
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user application :application}]
-  (when (and (-> (attachment/get-attachment-info application attachmentId) :required true?)
-             (not (usr/authority? user)))
+  (when (and (not (usr/authority? user))
+             (:required (attachment/get-attachment-info application attachmentId)))
     (fail :error.unauthorized
-          :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority.")))
+          :desc "Attachment template is originally bound to the application by operations in application, or have been manually added by authority.")))
+
+(defn- attachment-not-requested-by-authority [{{attachmentId :attachmentId} :data user :user application :application}]
+  (when (and (not (usr/authority? user))
+             (:requestedByAuthority (attachment/get-attachment-info application attachmentId)))
+    (fail :error.unauthorized
+          :desc "Attachment is requested by authority.")))
 
 (defn- has-versions [{{attachmentId :attachmentId} :data application :application}]
   (when (and (ss/not-blank? attachmentId)
@@ -610,7 +616,8 @@
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
    :states     #{:draft :open :submitted :complementNeeded}
-   :pre-checks [app/validate-authority-in-drafts]}
+   :pre-checks [app/validate-authority-in-drafts
+                attachment-not-requested-by-authority]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
