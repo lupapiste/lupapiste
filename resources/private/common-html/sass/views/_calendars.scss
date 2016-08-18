@@ -43,6 +43,14 @@
   }
 }
 
+#triangle-topright {
+  width: 0;
+  height: 0;
+  float: right;
+  border-top: 15px solid grey;
+  border-left: 15px solid transparent;
+}
+
 .calendar-table {
   width:100%;
   min-height: $baseline * 6;
@@ -180,6 +188,14 @@
           padding-left: $baseline / 4;
           color: white;
           background: $green-dark;
+
+          &.read-only {
+            background: none;
+
+            div {
+              color: grey;
+            }
+          }
 
           div {
             height: 20px;

@@ -67,16 +67,11 @@ LUPAPISTE.CalendarService = function() {
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
                                                    id: lupapisteApp.models.application.id() })
             .success(function(data) {
-              slots = slots.concat(data.availableSlots);
-              console.log(_.map(slots, "id"));
-              slots = slots.concat(
+              slots = _.concat(slots, data.availableSlots);
+              slots = _.concat(slots,
                 _.map(
-                   _.filter(data.readOnlyReservations, function(r) { return !_.includes(_.map(slots, "id"), r.id); }),
+                   _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
                    function(r) { return _.set(r, "status", "read-only") }));
-
-              console.log(_.map(data.readOnlyReservations, "id"));
-              console.log(_.map(slots, "id"));
-
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })
             .error(function(e) {

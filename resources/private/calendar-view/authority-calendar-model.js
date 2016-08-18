@@ -59,8 +59,4 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     }
   });
 
-  self.partyFullName = function(party) {
-    return party.firstName + " " + party.lastName;
-  };
-
 };
