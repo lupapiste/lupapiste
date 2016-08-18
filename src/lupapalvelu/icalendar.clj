@@ -40,12 +40,12 @@
 
 (defn- create-cal
   "create an empty calendar container. it is assumed to be Gregorian ical 2.0 and a published calendar "
-  [^String org-name ^String product ^String version ^String lang]
+  [^Method method ^String org-name ^String product ^String version ^String lang]
   (let [c (Calendar.)
         props (.getProperties c)]
     (.add props (ProdId. (str "-//" org-name " //" product " " version "//" lang)))
     (.add props Version/VERSION_2_0)
-    (.add props Method/REQUEST)
+    (.add props method)
     (.add props CalScale/GREGORIAN) c))
 
 (defn- create-event [^Date start ^Date end ^String title & {:keys [^String description ^String url ^String location
@@ -72,8 +72,8 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [startTime endTime location attendee unique-id sequence] :as data}]
-  (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
+(defn create-calendar-event [{:keys [method startTime endTime location attendee unique-id sequence] :as data}]
+  (let [cal  (create-cal method "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
                              "title"

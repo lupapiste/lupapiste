@@ -12,7 +12,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
             [clj-time.local :refer [to-local-date-time local-now]]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all])
+  (:import (net.fortuna.ical4j.model.property Method)))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -332,6 +333,9 @@
 (defn- get-reservation [id]
   (->FrontendReservation (api-query (str "reservations/" id))))
 
+(defn- generate-unique-id
+  (str (.toString (to-local-date-time (local-now))) "/" (java.util.UUID/randomUUID) "@lupapiste.fi"))
+
 (notifications/defemail
   :suggest-appointment
   {:subject-key                  "application.calendar.appointment.suggestion"
@@ -339,10 +343,9 @@
    :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          reservation (assoc reservation :attendee recipient
-                                                                        :unique-id (str (.toString (to-local-date-time (local-now))) "/"
-                                                                                        (java.util.UUID/randomUUID)
-                                                                                        "@lupapiste.fi")
-                                                                        :sequence 0)]
+                                                                        :unique-id (generate-unique-id)
+                                                                        :sequence 0
+                                                                        :method Method/REQUEST)]
                                      (cal/update-reservation application
                                                              (:reservationId result)
                                                              {$set {:reservations.$.unique-id (:unique-id reservation)
