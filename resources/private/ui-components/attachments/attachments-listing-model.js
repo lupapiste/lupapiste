@@ -212,7 +212,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     });
   }
 
-
   function getOperationLocalization(operationId) {
     var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
     return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
@@ -368,5 +367,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.canStamp = function() {
     return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
   };
+
+  self.hasFile = ko.pureComputed(function() {
+    return _(self.attachmentGroups()).invokeMap("hasFile").some();
+  });
 
 };
