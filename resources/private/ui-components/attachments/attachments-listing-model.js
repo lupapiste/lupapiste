@@ -48,7 +48,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function findMatchingTag(tags, attachment) {
     return _.find(tags, function(tag) {
       return _.includes(attachment.tags, tag);
-    }) || "default";
+    });
   }
 
   function resolveTagGrouping(attachments, tagGroups) {
@@ -196,7 +196,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         return group;
       }
     }
-    var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
+    var group = util.getIn(self.attachmentsHierarchy(), groupPath);
     return getAttachments(group);
   }
 
@@ -212,21 +212,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
   }
 
-  function getLocalizationForDefaultGroup(groupPath) {
-    if (groupPath.length === 1) {
-      return loc("application.attachments.general");
-    } else {
-      return loc("application.attachments.other");
-    }
-  }
-
   function groupToAccordionName(groupPath) {
     var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
         key = _.last(groupPath);
     if (opIdRegExp.test(key)) {
       return getOperationLocalization(opIdRegExp.exec(key)[1]);
-    } else if (_.last(groupPath) === "default") {
-      return getLocalizationForDefaultGroup(groupPath);
     } else {
       return loc(["application", "attachments", key]);
     }

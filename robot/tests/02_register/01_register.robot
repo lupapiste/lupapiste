@@ -32,7 +32,7 @@ VTJ-data should be populated from Osuuspankki
 
 Filling register form2
   [Tags]  integration  ie8
-  Fill registration  Rambokuja 7  33800  sipoo  +358554433221  ${email}  vetuma69      
+  Fill registration  Rambokuja 7  33800  sipoo  +358554433221  ${email}  vetuma69
 
 Can not login before activation
   [Tags]  integration  ie8
@@ -42,17 +42,17 @@ Can not login before activation
 Vetuma-guy activates his account
   [Tags]  integration  ie8
   Activate account  ${email}
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Benny registers and sets the user language to Swedish
   [Tags]  integration  ie8
-  Fill registration  Benny Lane  12345  sipoo  +358500400  benny@example.com  benny123  sv  
+  Fill registration  Benny Lane  12345  sipoo  +358500400  Benny@example.com  benny123  sv
 
 Benny's mail link refers to the Swedish applications page
   [Tags]  integration  ie8
   Activate account  benny@example.com
   Language is  SV
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 *** Keywords ***
 
@@ -88,9 +88,9 @@ Fill registration
   Input text by test id  register-phone  ${phone}
   Submit is disabled
 
-  Select from test id  register-language  ${lang}  
+  Select from test id  register-language  ${lang}
   Submit is disabled
-  
+
   Input text by test id  register-email  ${mail}
   Submit is disabled
 

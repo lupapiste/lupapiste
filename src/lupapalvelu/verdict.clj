@@ -485,8 +485,6 @@
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
 
-
-
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
@@ -498,14 +496,15 @@
                               (building-mongo-updates (assoc application :buildings [])))
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
-        final-review? (fn [review] (contains? #{"lopullinen" "pidetty"} (:osittainen review)))
-        review-tasks (map review-to-task (filter final-review? reviews))
+        historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
+                                                            (< pvm (now))))
+        review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
-        validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
+        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]

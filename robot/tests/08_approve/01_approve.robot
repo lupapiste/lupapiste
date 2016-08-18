@@ -116,8 +116,15 @@ Integration message monotor button is not enabled
 Sonja approves application
   Approve application
 
-Integration message monotor button is enabled
+Integration message monitor button is enabled
   Test id enabled  show-integration-messages
+
+Authority opens integration message monitor
+  Click enabled by test id  show-integration-messages
+
+At least one message is displayed in the monitor
+  Wait Until  Page Should Contain Element  //div[@data-test-id="integration-message-monitor"]/ul/li
+  Close message monitor
 
 Sonja cant re-approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
@@ -138,13 +145,7 @@ Building selector keeps its value
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
-
-Authority opens integration message monitor
-  Click enabled by test id  show-integration-messages
-
-At least one message is displayed in the monitor
-  Wait Until  Page Should Contain Element  //div[@data-test-id="integration-message-monitor"]/ul/li
-
+  
 Mikko comes back, fills in missing parts and no submit button enabled
   Kill session
   Mikko logs in
@@ -281,6 +282,10 @@ Reject group
   [Arguments]  ${name}
   Click reject  ${name}
   Sonja group rejected  ${name}
+
+Close message monitor
+  Click Element  jquery=div.integration-message-monitor span.close
+  
 
 # Quick'n'dirty: wipe out current session and go to
 # login page

@@ -355,7 +355,7 @@ Seurantakatselmus pidetään 11.12.2011 klo 11:11.</rakval:kuvaus>
               <yht:sovellus>Facta</yht:sovellus>
             </rakval:MuuTunnus>
           </rakval:muuTunnustieto>
-          <rakval:pitoPvm>2011-11-11Z</rakval:pitoPvm>
+          <!-- pitoPvm puuttuu joten ei lasketa -->
           <rakval:osittainen>osittainen</rakval:osittainen>
           <rakval:pitaja>Erkki Everest</rakval:pitaja>
           <rakval:katselmuksenLaji>rakennekatselmus</rakval:katselmuksenLaji>
