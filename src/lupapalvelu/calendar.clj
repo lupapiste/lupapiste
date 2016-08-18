@@ -167,12 +167,12 @@
       (application->command application)
       (util/deep-merge comment-update reservation-push state-change))))
 
-(defn update-reservation-unique-id
-  [application reservation-id unique-id]
+(defn update-reservation
+  [application reservation-id changes]
   (update-application
     (application->command application)
     {:reservations {$elemMatch {:id reservation-id}}}
-    {$set {:reservations.$.unique-id unique-id}}))
+    changes))
 
 ; -- Configuration
 

@@ -11,7 +11,8 @@
             [lupapalvelu.organization :as o]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
-            [clj-time.local :refer [to-local-date-time local-now]]))
+            [clj-time.local :refer [to-local-date-time local-now]]
+            [monger.operators :refer :all]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -31,7 +32,8 @@
    :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
    :comment   (:comment r)
    :location  (:location r)
-   :applicationId (:contextId r)})
+   :applicationId (:contextId r)
+   :reservedBy (:reservedBy r)})
 
 (defn ->FrontendReservationSlots
   ([backend-slots]
@@ -336,11 +338,15 @@
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :attendee recipient)
-                                         reservation (assoc reservation :unique-id (str (.toString (to-local-date-time (local-now))) "/"
+                                         reservation (assoc reservation :attendee recipient
+                                                                        :unique-id (str (.toString (to-local-date-time (local-now))) "/"
                                                                                         (java.util.UUID/randomUUID)
-                                                                                        "@lupapiste.fi"))]
-                                     (cal/update-reservation-unique-id application (:reservationId result) (:unique-id reservation))
+                                                                                        "@lupapiste.fi")
+                                                                        :sequence 0)]
+                                     (cal/update-reservation application
+                                                             (:reservationId result)
+                                                             {$set {:reservations.$.unique-id (:unique-id reservation)
+                                                                    :reservations.$.sequence (:sequence reservation)}})
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application result :result}]

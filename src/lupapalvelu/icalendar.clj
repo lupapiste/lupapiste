@@ -3,7 +3,7 @@
   (:require [taoensso.timbre :as timbre :refer [info error]])
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
-           (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description)
+           (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description Sequence)
            (net.fortuna.ical4j.model.parameter Cn Role Rsvp)
            (net.fortuna.ical4j.model.component VEvent)
            (net.fortuna.ical4j.data CalendarOutputter)
@@ -22,11 +22,12 @@
   "take a vevent and add properties to it.
   the supported properties are url description location organizer-email and organizer-name."
   [vevent {:keys [^String description ^String url ^String location ^String organizer-email
-                  ^PersistentArrayMap attendee ^String unique-id]}]
+                  ^PersistentArrayMap attendee ^String unique-id ^Number sequence]}]
   (let [props (.getProperties vevent)
         organizer-url (str "mailto:" organizer-email)]
     (.add props (Uid. unique-id))
     (.add props (Organizer. organizer-url))
+    (.add props (Sequence. sequence))
     (when (seq url) (.add props (Url. (java.net.URI. url))))
     (when (seq location) (.add props (Location. location)))
     (when (seq description) (.add props (Description. description)))
@@ -49,7 +50,8 @@
 
 (defn- create-event [^Date start ^Date end ^String title & {:keys [^String description ^String url ^String location
                                                                    ^String organizer-email ^String organizer-name
-                                                                   ^PersistentArrayMap attendee ^String unique-id] :as all}]
+                                                                   ^PersistentArrayMap attendee ^String unique-id
+                                                                   ^Number sequence] :as all}]
   (let [st (doto  (DateTime. start) (.setUtc true))
         et (doto  (DateTime. end) (.setUtc true))
         vevent (VEvent. st et title)]
@@ -70,7 +72,7 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [startTime endTime location attendee unique-id] :as data}]
+(defn create-calendar-event [{:keys [startTime endTime location attendee unique-id sequence] :as data}]
   (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
@@ -81,6 +83,7 @@
                              :attendee attendee
                              :organizer-email "no-reply@lupapiste.fi"
                              :organizer-name "Lupapiste-asiointipalvelu"
-                             :unique-id unique-id)
+                             :unique-id unique-id
+                             :sequence sequence)
         _ (add-event! cal event)]
     (output-calendar cal)))
