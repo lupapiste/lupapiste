@@ -37,9 +37,15 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     self.defaultLocation(event.defaultLocation);
   });
 
+  function isGuest( p ) {
+    return _.includes( ["reader", "guestAuthority"], p.role() );
+  }
+
   self.disposedComputed(function() {
     var parties = lupapisteApp.models.application.roles();
     var partyDocs = _.filter(lupapisteApp.models.application._js.documents, util.isPartyDoc);
+
+    parties = _.filter(parties, function(p) { return !isGuest(p); });
 
     self.authorizedParties(
       _.map(parties, function (p) {
