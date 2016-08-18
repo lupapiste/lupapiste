@@ -397,6 +397,22 @@
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
+(defcommand decline-reservation
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
+   :on-success       (notify :decline-reservation)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (get-reservation reservationId)]
+    (info "Declining reservation" reservationId)
+    (post-command (str "reservations/" reservationId "/decline"))
+    (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "DECLINED"}})
+    (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
+    (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
+    (ok)))
+
 (defquery my-reservations
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
