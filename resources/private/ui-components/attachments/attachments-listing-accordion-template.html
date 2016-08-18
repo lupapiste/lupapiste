@@ -27,6 +27,11 @@
                            data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
         </div>
         <!-- /ko -->
+        <button data-bind="enable: $parent.data && $parent.data() && $parent.data().hasFile"
+                class="secondary">
+          <i class="lupicon-download"></i>
+          <span data-bind="ltext: 'download-all'"></span>
+        </button>
       </div>
     </rollup>
   <!-- /ko -->

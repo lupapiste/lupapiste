@@ -117,6 +117,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
       hasContent: ko.pureComputed(function() {
         return attachmentInfos && attachmentInfos.attachments &&
           attachmentInfos.attachments.length > 0;
+      }),
+      hasFile: ko.pureComputed(function() {
+        return _.some(attachmentInfos.attachments, function(attachment) {
+          return !!util.getIn(attachment, ["latestVersion", "fileId"]);
+        });
       })
     };
   }
@@ -141,10 +146,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
     });
   }
 
-  function someSubGroupsHaveContent(subGroups) {
+  function someSubGroupsField(subGroups, fieldName) {
     return ko.pureComputed(function() {
       return _.some(_.values(subGroups),
-                    function(sg) { return sg.hasContent(); });
+                    function(sg) { return util.getIn(sg, [fieldName]); });
     });
   }
 
@@ -153,7 +158,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
-      hasContent: someSubGroupsHaveContent(subGroups)
+      hasContent: someSubGroupsField(subGroups, "hasContent"),
+      hasFile: someSubGroupsField(subGroups, "hasFile")
     }, subGroups);
   }
 

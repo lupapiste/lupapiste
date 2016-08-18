@@ -61,9 +61,6 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     readOnly: readOnly,
-    canDownload: _.some(service.attachments, function(a) {
-      return hasFile(a());
-    }),
     isNotNeeded: service.isNotNeeded,
     toggleNotNeeded: function( data  ) {
       service.setNotNeeded( data.id, !data.notNeeded);
