@@ -40,6 +40,8 @@
   "Creates a new ISO-8859-1 CharsetEncoder instance, which is not thread safe."
   [] (.newEncoder latin1))
 
+(def other-value "other")
+
 ;;
 ;; Field validation
 ;;
@@ -96,7 +98,7 @@
 
 (defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
-        accepted-values (if other-key (conj accepted-values "other") accepted-values)]
+        accepted-values (if other-key (conj accepted-values other-value) accepted-values)]
     (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
@@ -108,7 +110,7 @@
 (defmethod validate-field :buildingSelector [_ elem v]
   (cond
     (ss/blank? v) nil
-    (= "other" v) nil
+    (= other-value v) nil
     (v/rakennusnumero? v) nil
     (v/rakennustunnus? v) nil
     :else [:warn "illegal-rakennusnumero"]))
@@ -300,6 +302,23 @@
   (when-let [one-of (seq (one-of-many-options sub-schemas))]
     (or (get-in data (conj path :_selected :value)) (first one-of))))
 
+(defn- with-required-other-fields [sub-schemas path data]
+  (let [schemas-with-other-keys (reduce
+                                  (fn [acc m]
+                                    (if (and (:required m) (:other-key m))
+                                      (assoc acc (:name m) (:other-key m))
+                                      acc))
+                                  {}
+                                  sub-schemas)
+        required-other-keys (reduce
+                              (fn [acc [k v]]
+                                (if (= other-value (get-in data (conj path (keyword k) :value)))
+                                  (conj acc v)
+                                  acc))
+                              #{}
+                              schemas-with-other-keys)]
+    (map (fn [m] (if (required-other-keys (:name m)) (assoc m :required true) m)) sub-schemas)))
+
 (defn- validate-required-fields [info path data validation-errors]
   (let [check (fn [{:keys [name required body repeating] :as element}]
                 (let [kw (keyword name)
@@ -315,7 +334,7 @@
                           (validate-required-fields newInfo current-path data [])))
                       []))))
 
-        schema-body (:schema-body info)
+        schema-body (with-required-other-fields (:schema-body info) path data)
         selected (one-of-many-selection schema-body path data)
         sub-schemas-to-validate (-> (set (map :name schema-body))
                                   (difference (set (one-of-many-options schema-body)) #{schemas/select-one-of-key})
