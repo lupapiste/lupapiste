@@ -43,12 +43,23 @@
   }
 }
 
+#legend-greenbox {
+  height: 15px;
+  width: 15px;
+  background-color: $green-dark;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
 #triangle-topright {
   width: 0;
   height: 0;
   float: right;
   border-top: 15px solid grey;
   border-left: 15px solid transparent;
+  margin-left: 30px;
+  margin-right: 5px;
 }
 
 .calendar-table {

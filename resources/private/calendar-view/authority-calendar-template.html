@@ -42,11 +42,15 @@
                              participant: selectedParty,
                              defaultLocation: defaultLocation">
       </calendar-view>
+
       <div>
-        <div style="height: 15px; width: 15px; background-color: green; display: inline-block;"></div>Odottaa hyväksymistä
+        <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
+
         <!-- ko if: selectedParty -->
-        <div style="width: 15px; display: inline-block;"><div id="triangle-topright"></div></div>
-        <span data-bind="text: util.partyFullName(selectedParty())"></span> (tapaaminen toisen viranomaisen kanssa)
+        <div style="display: inline-block;">
+          <div id="triangle-topright"></div>
+        </div>
+        <span data-bind="text: util.partyFullName(selectedParty())"></span> <span data-bind="ltext: 'application.calendar.legend.appointment-with-another-authority'"></span>
         <!-- /ko -->
       </div>
     <!-- /ko -->
