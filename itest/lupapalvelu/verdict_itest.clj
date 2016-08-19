@@ -395,9 +395,9 @@
                (command sonja :check-for-verdict :id p-id) => ok?)
          (fact "Enable section requirement for Sipoo"
                (command sipoo :section-toggle-enabled :flag true) => ok?)
-         (fact "Section requirement for aita prevents verdict"
+         (fact "Section requirement for aita does not prevent verdict, since verdict XML contains section."
                (command sipoo :section-toggle-operation :operationId "aita" :flag true) => ok?
-               (command sonja :check-for-verdict :id r-id) => section-fail)
+               (command sonja :check-for-verdict :id r-id) => ok?)
          (fact "Aita setting does not affect kiinteistonmuodostus"
                (command sonja :check-for-verdict :id kt-id) => ok?)
          (fact "Section requirement for kiinteistonmuodostus prevents verdict"

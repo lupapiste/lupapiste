@@ -17,7 +17,7 @@
    :input-validators [(partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-enable (usr/authority-admins-organization-id user) :suti flag))
+  (org/toggle-group-enabled (usr/authority-admins-organization-id user) :suti flag))
 
 (defcommand suti-toggle-operation
   {:description "Toggles operation either requiring Suti or not."
@@ -26,37 +26,22 @@
                       (partial action/boolean-parameters [:flag])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/toggle-operation (suti/admin-org user) :suti (ss/trim operationId) flag))
-
-(defcommand section-toggle-enabled
-  {:description      "Enable/disable section requirement for fetched
-  verdicts support."
-   :parameters       [flag]
-   :input-validators [(partial action/boolean-parameters [:flag])]
-   :user-roles       #{:authorityAdmin}}
-  [{user :user}]
-  (suti/toggle-enable (usr/authority-admins-organization-id user) :section flag))
-
-(defcommand section-toggle-operation
-  {:description "Toggles operation either requiring section or not."
-   :parameters [operationId flag]
-   :input-validators [(partial action/non-blank-parameters [:operationId])
-                      (partial action/boolean-parameters [:flag])]
-   :user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (suti/toggle-operation (suti/admin-org user) :section (ss/trim operationId) flag))
+  (org/toggle-group-operation (usr/authority-admins-organization user)
+                              :suti
+                              (ss/trim operationId)
+                              flag))
 
 (defquery suti-admin-details
   {:description "Suti details for the current authority admin's organization."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok :suti (suti/organization-details (suti/admin-org user))))
+  (ok :suti (suti/organization-details (usr/authority-admins-organization user))))
 
 (defquery suti-operations
   {:description "Suti operations for the current authority admin's organization."
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (ok :operations (-> user suti/admin-org :suti :operations)))
+  (ok :operations (-> user usr/authority-admins-organization :suti :operations)))
 
 (defcommand suti-www
   {:description "Public Suti URL. Not to be confused with the Suti backend."
@@ -64,7 +49,7 @@
    :input-validators [(partial action/validate-optional-url :www)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (suti/set-www (suti/admin-org user) (ss/trim www)))
+  (suti/set-www (usr/authority-admins-organization user) (ss/trim www)))
 
 (defquery suti-application-data
   {:description "Fetches the Suti results for the given application."

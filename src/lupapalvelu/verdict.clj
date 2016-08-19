@@ -399,20 +399,17 @@
   "Validator that fails if the organization requires section (pykala)
   in verdicts and app-xml is missing one. Note: besides organization,
   the requirement is also operation-specific. The requirement is
-  fulfilled if every paatostieto element contains at least one
+  fulfilled if _any_ paatostieto element contains at least one
   non-blank pykala."
   [{operation :name} app-xml {section :section}]
-  (let [{:keys [enabled operations]} section
-        has-section? (fn [xml]
-                       (some #(-> % :content first ss/not-blank?)
-                             (xml/select xml [:pykala])))]
+  (let [{:keys [enabled operations]} section]
     (when (and enabled
                (contains? (set operations) operation)
                (not (some-<> app-xml
                              cr/strip-xml-namespaces
-                             (xml/select [:paatostieto])
+                             (xml/select [:paatostieto :pykala])
                              not-empty
-                             (every? has-section? <>))))
+                             (some (util/fn-> :content first ss/not-blank?) <>))))
       (fail :info.section-required-in-verdict))))
 
 (defn do-check-for-verdict [{:keys [application organization] :as command}]

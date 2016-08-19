@@ -11,28 +11,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.states :as states]))
 
-(defn admin-org [admin]
-  (-> admin
-      usr/authority-admins-organization-id
-      org/get-organization))
 
-(defn kw-path
-  "a b c -> :a.b.c"
-  [& kw]
-  (->> kw
-       (map name)
-       (ss/join ".")
-       keyword))
-
-(defn toggle-enable [organization-id group flag]
-  (org/update-organization organization-id
-                           {$set {(kw-path group :enabled) flag}}))
-
-(defn toggle-operation [organization group operation-id flag]
-  (let [already (contains? (-> organization group :operations set) operation-id)]
-    (when (not= (boolean already) (boolean flag))
-      (org/update-organization (:id organization)
-                               {(if flag $push $pull) {(kw-path group :operations) operation-id}}))))
 
 (defn organization-details [{{server :server :as suti} :suti}]
   (-> suti
