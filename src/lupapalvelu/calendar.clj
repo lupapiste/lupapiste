@@ -143,7 +143,7 @@
 
 (defn reservations-for-application
   [applicationId {:keys [year week]}]
-  (api-query (str "reservations/for-context/" applicationId) {:year year :week week}))
+  (api-query (str "reservations/by-context/" applicationId) {:year year :week week}))
 
 (defn available-calendar-slots-for-appointment
   [opts]
