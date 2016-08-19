@@ -679,7 +679,8 @@
                                           :required false
                                           :created created
                                           :stamped stamped}
-                                         {:content temp-pdf :filename filename}))
+                                         {:content temp-pdf :filename filename})
+          (ok))
         (finally
           (io/delete-file temp-pdf :silently))))
     (fail :error.unknown)))
