@@ -71,7 +71,7 @@ LUPAPISTE.CalendarService = function() {
               slots = _.concat(slots,
                 _.map(
                    _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
-                   function(r) { return _.set(r, "status", "read-only") }));
+                   function(r) { return _.set(r, "status", "read-only"); }));
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })
             .error(function(e) {

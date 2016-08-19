@@ -371,7 +371,7 @@ var util = (function($) {
 
   function partyFullName(party) {
     return getIn(party, ["firstName"], "") + " " + getIn(party, ["lastName"], "");
-  };
+  }
 
 
   return {
@@ -414,7 +414,7 @@ var util = (function($) {
     elementInViewport: elementInViewport,
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
-    partyFullName: partyFullName,
+    partyFullName: partyFullName
   };
 
 })(jQuery);
