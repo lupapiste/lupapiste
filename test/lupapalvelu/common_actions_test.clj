@@ -10,6 +10,7 @@
             [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
+(testable-privates lupapalvelu.actions-api foreach-action)
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
@@ -18,6 +19,7 @@
                           :get-possible-statement-statuses
                           :application
                           :allowed-actions
+                          :allowed-actions-for-category
                           :validate-doc
                           :fetch-validation-errors
                           :add-comment
@@ -62,7 +64,7 @@
                           :suti-application-products}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (ca/foreach-action {} user {} application)
+    (doseq [command (foreach-action {} user application {})
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
@@ -104,7 +106,7 @@
                                         ; raw
                            :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]
-    (doseq [command (ca/foreach-action {} user {} application)
+    (doseq [command (foreach-action {} user application {})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
       (when (and user-roles (not (user-roles :anonymous)))
