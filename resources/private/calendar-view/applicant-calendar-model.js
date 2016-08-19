@@ -29,8 +29,4 @@ LUPAPISTE.ApplicantCalendarModel = function () {
     self.defaultLocation(event.defaultLocation);
   });
 
-  self.partyFullName = function(party) {
-    return _.get(party, "firstName", "") + " " + _.get(party, "lastName", "");
-  };
-
 };

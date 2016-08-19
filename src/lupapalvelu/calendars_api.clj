@@ -32,6 +32,15 @@
    :location  (:location r)
    :applicationId (:contextId r)})
 
+(defn Reservations->FrontendSlots
+  [status reservations]
+  (map (fn [r] {:id        (:slotId r)
+                :status    status
+                :reservationTypes [(:reservationType r)]
+                :startTime (util/to-millis-from-local-datetime-string (-> r :time :start))
+                :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
+                :reservation (assoc (->FrontendReservation r) :status status)}) reservations))
+
 (defn ->FrontendReservationSlots
   ([backend-slots]
     (map (fn [s] {:id        (:id s)
@@ -49,9 +58,6 @@
                     slot))))
      []
      (->FrontendReservationSlots backend-slots))))
-
-(defn- ->FrontendReservations [backend-reservations]
-  (map ->FrontendReservation backend-reservations))
 
 (defn- ->BackendReservationSlots [slots]
   (map (fn [s]
@@ -309,12 +315,17 @@
    :parameters       [authorityId clientId reservationTypeId year week]
    :input-validators [(partial action/non-blank-parameters [:authorityId :clientId :reservationTypeId :year :week])]
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
-  [_]
-  (ok :slots (->FrontendReservationSlots
+  [{user :user {applicationId :id} :application}]
+  (ok :availableSlots (->FrontendReservationSlots
                (cal/available-calendar-slots-for-appointment {:year year :week week
                                                               :authority authorityId
                                                               :clientId clientId
-                                                              :reservationTypeId reservationTypeId}))))
+                                                              :reservationTypeId reservationTypeId}))
+      :readOnlySlots (Reservations->FrontendSlots :read-only
+                        (filter (fn [r] (= applicationId (:contextId r)))
+                          (cond
+                            (usr/authority? user) (cal/applicant-reservations clientId {:year year :week week})
+                            (usr/applicant? user) [])))))
 
 (defquery application-calendar-config
   {:user-roles #{:applicant :authority}
@@ -386,7 +397,7 @@
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
-(defquery my-reservations
+(defquery my-reserved-slots
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [year week]
@@ -396,7 +407,7 @@
     (cond
       (usr/authority? user) (cal/authority-reservations id {:year year :week week})
       (usr/applicant? user) (cal/applicant-reservations id {:year year :week week}))
-    ->FrontendReservations
+    (Reservations->FrontendSlots :booked)
     (ok :reservations)))
 
 ; For integration tests in dev

@@ -70,6 +70,41 @@
                                    :organizations []
                                    :areas []}}]}
 
+   ;; Ronja Sibbo - Sipoon lupa-arkkitehti:  ronja / sonja
+   {:id "777777777777777777000024"
+    :username "ronja"
+    :role "authority"
+    :enabled true
+    :language "fi"
+    :email "ronja.sibbo@sipoo.fi"
+    :orgAuthz {:753-R #{:authority}}
+    :firstName "Ronja"
+    :lastName "Sibbo"
+    :phone "03121991"
+    :street "Katuosoite 1 a 1"
+    :zip "33456"
+    :city "Sipoo"
+    :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
+              :apikey "5056e6d3aa24a1c901e6b9dd"}}
+
+   ;; Hakija: Mikko's neighbour - teppo@example.com / teppo69
+   {:lastName "Nieminen"
+    :firstName "Teppo"
+    :enabled true
+    :language "fi"
+    :username "teppo@example.com"
+    :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
+              :apikey "502cb9e58426c613c8b85abb"}
+    :phone "0505503171"
+    :email "teppo@example.com"
+    :personId "210281-0002"
+    :role "applicant"
+    :id "5073c0a1c2e6c470aef589a5"
+    :allowDirectMarketing true
+    :street "Mutakatu 7"
+    :zip "33560"
+    :city "Tampere"}
+
    ;; Veikko Viranomainen - tamperelainen Lupa-arkkitehti:  veikko / veikko
    {:id "777777777777777777000016"
     :email "veikko.viranomainen@tampere.fi"
