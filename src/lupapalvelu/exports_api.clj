@@ -160,7 +160,9 @@
 (defn- resolve-price-class
   "priceClass = legacy price class, which is mapped in .csv in dw.
    priceCode = new price codes for 'puitesopimus'
-   use = for some price classes, description of usage (kayttotarkoitus)
+   use = usage code for some price classes (kayttotarkoitus)
+   useFi = usage code in Finnish
+   useSv = usage code in Svedish
    usagePriceCode = mapping from legacy priceClass to new price code (called 'kayttotarkoitushinnasto')"
   [application op]
   (let [op-name  (keyword (:name op))
@@ -173,6 +175,8 @@
         :priceClass price-class
         :priceCode nil
         :use nil
+        :useFi nil
+        :useSv nil
         :usagePriceCode (get usage-price-codes price-class))
 
       ; new buildings: fixed price code, but usage price code is determined from the building data
@@ -182,6 +186,8 @@
           :priceClass price-class
           :priceCode 900
           :use kayttotarkoitus
+          :useFi (when-not (ss/blank? kayttotarkoitus) (i18n/localize :fi :kayttotarkoitus kayttotarkoitus))
+          :useSv (when-not (ss/blank? kayttotarkoitus) (i18n/localize :sv :kayttotarkoitus kayttotarkoitus))
           :usagePriceCode (get usage-price-codes price-class)))
 
        ; In other cases the price code is determined from permit type
@@ -190,6 +196,8 @@
          :priceClass price-class
          :priceCode (get permit-type-price-codes (:permitType application))
          :use nil
+         :useFi nil
+         :useSv nil
          :usagePriceCode (get usage-price-codes price-class)))))
 
 (defn- operation-mapper [application op]
@@ -217,8 +225,8 @@
                                        (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)
         applications (map
-                       (fn [a] (->
-                                 (update-in a [:operations] #(map (partial operation-mapper a) %))
+                       (fn [a] (-> a
+                                 (update :operations #(map (partial operation-mapper a) %))
                                  (dissoc :documents))) ; documents not needed in DW
                        applications-with-operations)]
     (ok :applications applications)))

@@ -33,6 +33,9 @@
       (let [op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "B"
         (:priceCode op) => 900
+        (:use op) => "021 rivitalot"
+        (:useFi op) => "021 rivitalot"
+        (:useSv op) => "021 radhus"
         (:usagePriceCode op) => 906))
 
     (fact "Missing value defaults to C"
