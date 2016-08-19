@@ -325,7 +325,7 @@
                         (filter (fn [r] (= applicationId (:contextId r)))
                           (cond
                             (usr/authority? user) (cal/applicant-reservations clientId {:year year :week week})
-                            (usr/applicant? user) [])))))
+                            (usr/applicant? user) (cal/reservations-for-application applicationId {:year year :week week}))))))
 
 (defquery application-calendar-config
   {:user-roles #{:applicant :authority}
