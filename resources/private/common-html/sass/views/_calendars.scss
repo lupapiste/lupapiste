@@ -43,6 +43,25 @@
   }
 }
 
+#legend-greenbox {
+  height: 15px;
+  width: 15px;
+  background-color: $green-dark;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
+#triangle-topright {
+  width: 0;
+  height: 0;
+  float: right;
+  border-top: 15px solid grey;
+  border-left: 15px solid transparent;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
 .calendar-table {
   width:100%;
   min-height: $baseline * 6;
@@ -135,6 +154,11 @@
         white-space: nowrap;
         color: $orange-dark; // This is needed because of text ellipsis
 
+        #triangle-topright {
+          margin-right: 0px !important;
+          margin-top: $marginS;
+        }
+
         &.booked {
           color: white;
           background: $green-dark;
@@ -180,6 +204,14 @@
           padding-left: $baseline / 4;
           color: white;
           background: $green-dark;
+
+          &.read-only {
+            background: none;
+
+            div {
+              color: grey;
+            }
+          }
 
           div {
             height: 20px;
