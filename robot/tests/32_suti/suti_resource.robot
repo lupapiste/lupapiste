@@ -31,7 +31,7 @@ Toggle Suti operation
 Set Suti id
   [Arguments]  ${id}
   Fill test id  suti-display-id  ${id}
-  Focus  jquery=label[for=suti-display-added]
+  Wait Until  Focus  jquery=label[for=suti-display-added]
 
 Clear Suti id
   Set Suti id  ${EMPTY}
@@ -39,7 +39,7 @@ Clear Suti id
 
 Suti id and note
   [Arguments]  ${id}  ${note}  ${error}=False
-  Focus test id  suti-display-id
+  Wait Until  Focus test id  suti-display-id
   Set Suti id  ${id}
   Wait Until  Test id text is  suti-display-note  ${note}
   Run Keyword If  ${error}  With error style  suti-display-note

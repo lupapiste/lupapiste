@@ -8,7 +8,11 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
             [sade.util :as util]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.action :refer [application->command update-application]]
+            [lupapalvelu.application :as app]
+            [lupapalvelu.comment :as comment]
+            [monger.operators :refer :all]
+            [lupapalvelu.application :as application]))
 
 ; -- API Call helpers
 
@@ -83,6 +87,14 @@
 
 ; -- Second level helpers
 
+(defn get-calendar-for-resource
+  ([resourceId]
+   (api-query (str "resources/" resourceId))))
+
+(defn get-calendar-user-id
+  [calendarId]
+  (:externalRef (get-calendar-for-resource calendarId)))
+
 (defn calendar-belongs-to-user?
   [calendar userId]
   (.endsWith (:externalRef calendar) userId))
@@ -118,12 +130,42 @@
        (filter #(= (:organizationCode %) orgId))
        first))
 
+(defn new-reservation [args]
+  (post-command "reservation/" args))
+
+(defn authority-reservations
+  [authorityId {:keys [year week]}]
+  (api-query (str "reservations/by-external-ref/" authorityId) {:year year :week week}))
+
+(defn applicant-reservations
+  [applicantId {:keys [year week]}]
+  (api-query (str "reservations/for-client/" applicantId) {:year year :week week}))
+
 (defn available-calendar-slots-for-appointment
   [opts]
   (let [calendar-external-ref (:authority opts)
         query-params (select-keys opts [:year :week :clientId :reservationTypeId])
         query-params (merge query-params {:externalRef calendar-external-ref})]
     (api-query "reservationslots/available-slots" query-params)))
+
+(defn update-mongo-for-new-reservation
+  [application reservation user to-user timestamp]
+  (let [comment-update (comment/comment-mongo-update (:state application)
+                                                     (:comment reservation)
+                                                     {:type "reservation-new"
+                                                      :id (:id reservation)}
+                                                     "system"
+                                                     false ; mark-answered
+                                                     user
+                                                     to-user
+                                                     timestamp)
+        reservation-push {$push {:reservations reservation}}
+        state-change (case (keyword (:state application))
+                       :draft (application/state-transition-update :open timestamp user)
+                       nil)]
+    (update-application
+      (application->command application)
+      (util/deep-merge comment-update reservation-push state-change))))
 
 ; -- Configuration
 

@@ -7,7 +7,12 @@ var authorization = (function() {
     self.data = ko.observable({});
 
     self.ok = function(command) {
-      return self.data && self.data()[command] && self.data()[command].ok;
+      var authz = self.data()[command];
+      return authz && authz.ok;
+    };
+
+    self.clear = function() {
+      self.data({});
     };
 
     self.refreshWithCallback = function(queryParams, callback) {
@@ -17,7 +22,7 @@ var authorization = (function() {
           if (callback) { callback(); }
         })
         .error(function(e) {
-          self.data({});
+          self.clear();
           error(e);
         })
         .call();
@@ -29,15 +34,38 @@ var authorization = (function() {
       self.refreshWithCallback(params, callback);
     };
 
+    self.setData = function(data) {
+      self.data(data);
+    };
+
     return {
       ok: self.ok,
+      clear: self.clear,
       refreshWithCallback: self.refreshWithCallback,
-      refresh: self.refresh
+      refresh: self.refresh,
+      setData: self.setData
     };
   }
 
+  function refreshModelsForCategory(authModels, applicationId, category) {
+    ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
+      .success(function(d) {
+        _.forEach(authModels, function(authModel, id) {
+          authModel.setData(d.actionsById[id] || {});
+        });
+      })
+      .error(function(e) {
+        _.forEach(authModels, function(authModel) {
+          authModel.setData({});
+        });
+        error(e);
+      })
+      .call();
+  }
+
   return {
-    create: function() { return new AuthorizationModel(); }
+    create: function() { return new AuthorizationModel(); },
+    refreshModelsForCategory: refreshModelsForCategory
   };
 
 })();

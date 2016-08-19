@@ -64,6 +64,13 @@ $lupicon-size: 22px;
   cursor: default;
 }
 
+:disabled, .disabled {
+  [class^="lupicon-"],
+  [class*=" lupicon-"] {
+    cursor: default;
+  }
+}
+
 .lupicon-arrows-left-right:before {
     content: "\e91a";
 }

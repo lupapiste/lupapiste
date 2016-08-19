@@ -85,6 +85,7 @@
       })
       .call();
   }
+  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
 
   var updateMetadataFields = function(application) {
     if (!_.isEmpty(application.metadata)) {
@@ -99,21 +100,20 @@
     }
   };
 
-  function updateTosFunction(value) {
-    if (!isInitializing) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
+  ko.computed(function() {
+    var value = applicationModel.tosFunction();
+    var functions = tosFunctions.peek();
+    if (!isInitializing && value && !_.isEmpty(functions) && authorizationModel.ok("set-tos-function-for-application")) {
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
           repository.load(currentId, applicationModel.pending, updateMetadataFields);
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
         })
         .call();
     }
-  }
+  });
 
-  applicationModel.permitSubtype.subscribe(function(v) { updatePermitSubtype(v); });
-
-  applicationModel.tosFunction.subscribe(updateTosFunction);
 
   ko.computed(function(){
     var enabled = applicationModel.optionMunicipalityHearsNeighbors();
@@ -138,6 +138,7 @@
   }
 
   function initAvailableTosFunctions(organizationId) {
+    tosFunctions([]);
     if (authorizationModel.ok("available-tos-functions")) {
       ajax
         .query("available-tos-functions", {organizationId: organizationId})
@@ -266,8 +267,17 @@
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
+      function sumCalendarIndicators() {
+        var res = _.filter(app.reservations,
+          function (r) {
+            return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
+          });
+        return res.length;
+      }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
+
+      applicationModel.calendarNotificationIndicator(sumCalendarIndicators());
 
       isInitializing = false;
       pageutil.hideAjaxWait();

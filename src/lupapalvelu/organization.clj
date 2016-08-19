@@ -109,7 +109,8 @@
    (sc/optional-key :vendor-backend-redirect) {(sc/optional-key :vendor-backend-url-for-backend-id) ssc/OptionalHttpUrl
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
-   (sc/optional-key :section-operations) [sc/Str]})
+   (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
+                               (sc/optional-key :operations) [sc/Str]}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -575,3 +576,22 @@
                                        :areas-wgs84 ensured-areas-wgs84}})
     (.dispose data-store)
     ensured-areas))
+
+;; Group denotes organization property that has enabled and operations keys.
+;; Suti and section are groups.
+
+
+
+(defn toggle-group-enabled
+  "Toggles enabled flag of a group (e.g., suti, section)."
+  [organization-id group flag]
+  (update-organization organization-id
+                       {$set {(util/kw-path group :enabled) flag}}))
+
+(defn toggle-group-operation
+  "Toggles (either adds or removes) an operation of a group (e.g., suti, section)."
+  [organization group operation-id flag]
+  (let [already (contains? (-> organization group :operations set) operation-id)]
+    (when (not= (boolean already) (boolean flag))
+      (update-organization (:id organization)
+                           {(if flag $push $pull) {(util/kw-path group :operations) operation-id}}))))

@@ -64,11 +64,18 @@
             [lupapalvelu.appeal-api]
             [lupapalvelu.calendars-api]
             [lupapalvelu.suti-api])
-  (:import [javax.imageio ImageIO]))
+  (:import [javax.imageio ImageIO]
+           [javax.activation MailcapCommandMap]))
 
 (defonce jetty (atom nil))
 
+(defn- calendar-mime-type-setup []
+  (let [mc (MailcapCommandMap/getDefaultCommandMap)]
+      (.addMailcap mc "text/calendar;; x-java-content-handler=com.sun.mail.handlers.text_plain")
+      (MailcapCommandMap/setDefaultCommandMap mc)))
+
 (defn- init! []
+  (calendar-mime-type-setup)
   (mongo/connect!)
 
   (migration/update!)

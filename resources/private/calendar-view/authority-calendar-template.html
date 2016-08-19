@@ -17,7 +17,7 @@
           <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
           <select class="form-input combobox tip"
                   data-bind="options: authorizedParties,
-                             optionsText: function(item) { return partyFullName(item); },
+                             optionsText: util.partyFullName,
                              optionsCaption: loc('choose'),
                              value: selectedParty">
           </select>
@@ -39,9 +39,19 @@
                                                  reservationTypeId: selectedReservationType },
                              view: 'applicationView',
                              reservationTypes: reservationTypes,
-                             participant: selectedParty,
                              defaultLocation: defaultLocation">
       </calendar-view>
+
+      <div>
+        <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
+
+        <!-- ko if: selectedParty -->
+        <div style="display: inline-block;">
+          <div id="triangle-topright"></div>
+        </div>
+        <span data-bind="text: util.partyFullName(selectedParty)"></span> <span data-bind="ltext: 'application.calendar.legend.appointment-with-another-authority'"></span>
+        <!-- /ko -->
+      </div>
     <!-- /ko -->
   </div>
 

@@ -64,9 +64,10 @@
 
 ;; Notificator
 
-(defn notify [notification]
-  (fn [command status]
-    (notifications/notify! notification command)))
+(defn notify
+  [notification]
+   (fn [command status]
+     (notifications/notify! notification command status)))
 
 (defn with-application [command function]
   (if-let [id (-> command :data :id)]

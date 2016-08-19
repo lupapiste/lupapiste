@@ -265,7 +265,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
 
-  self.reload = function() {
+    self.reload = function() {
     self.submitErrors([]);
     repository.load(self.id());
   };
@@ -316,13 +316,13 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
             ajax.command("submit-application", {id: self.id()})
-              .success(self.reload)
-              .onError("error.cannot-submit-application", cannotSubmitResponse)
-              .processing(self.processing)
-              .call();
-            hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-            return false;
-          }},
+           .success( self.reload)
+           .onError("error.cannot-submit-application", cannotSubmitResponse)
+           .processing(self.processing)
+           .call();
+         hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+         return false;
+       }},
       {title: loc("no")}
     );
     hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
@@ -331,7 +331,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requestForComplement = function() {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(self.reload)
+      .success(function() {
+        ajax.command( "cleanup-krysp", {id: self.id()})
+          .onError(_.noop)
+          .call();
+        self.reload();
+      })
       .processing(self.processing)
       .call();
     return false;

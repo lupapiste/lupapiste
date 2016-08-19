@@ -379,3 +379,36 @@
             :name) => "rakennusjateselvitys")))
 
   (against-background (after :facts (remove-krysp-xml-overrides sipoo "753-R" :R))))
+
+(facts "Section requirements for verdict"
+       (let [r-id         (create-app-id pena :operation "aita" :propertyId sipoo-property-id)
+             kt-id        (create-app-id pena :operation "kiinteistonmuodostus" :propertyId sipoo-property-id)
+             p-id         (create-app-id pena :operation "poikkeamis" :propertyId sipoo-property-id)
+             section-fail (partial expected-failure? :info.section-required-in-verdict)]
+         (fact "Submit applications"
+               (command pena :submit-application :id r-id) => ok?
+               (command pena :submit-application :id kt-id) => ok?
+               (command pena :submit-application :id p-id) => ok?)
+         (fact "Verdicts for all"
+               (command sonja :check-for-verdict :id r-id) => ok?
+               (command sonja :check-for-verdict :id kt-id) => ok?
+               (command sonja :check-for-verdict :id p-id) => ok?)
+         (fact "Enable section requirement for Sipoo"
+               (command sipoo :section-toggle-enabled :flag true) => ok?)
+         (fact "Section requirement for aita does not prevent verdict, since verdict XML contains section."
+               (command sipoo :section-toggle-operation :operationId "aita" :flag true) => ok?
+               (command sonja :check-for-verdict :id r-id) => ok?)
+         (fact "Aita setting does not affect kiinteistonmuodostus"
+               (command sonja :check-for-verdict :id kt-id) => ok?)
+         (fact "Section requirement for kiinteistonmuodostus prevents verdict"
+               (command sipoo :section-toggle-operation :operationId "kiinteistonmuodostus" :flag true) => ok?
+               (command sonja :check-for-verdict :id kt-id) => section-fail)
+         (fact "Section requirement for poikkeamis does not prevent verdict, since verdict XML contains section."
+               (command sipoo :section-toggle-operation :operationId "poikkeamis" :flag true) => ok?
+               (command sonja :check-for-verdict :id p-id) => ok?)
+         (fact "Disable section requirement for aita"
+               (command sipoo :section-toggle-operation :operationId "aita" :flag false) => ok?
+               (command sonja :check-for-verdict :id r-id) => ok?)
+         (fact "Disable section requirement for Sipoo"
+               (command sipoo :section-toggle-enabled :flag false) => ok?
+               (command sonja :check-for-verdict :id kt-id) => ok?)))

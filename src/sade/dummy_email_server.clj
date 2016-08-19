@@ -42,6 +42,7 @@
         (assoc body (condp = content-type
                       "text/plain; charset=utf-8" :plain
                       "text/html; charset=utf-8"  :html
+                      "text/calendar; charset=utf-8; method=REQUEST"  :calendar
                       content-type) content))
       body))
 
@@ -93,7 +94,8 @@
       (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
                       (enlive/transform [:body] (enlive/prepend [(msg-header msg)
-                                                                 {:tag :hr}]))))
+                                                                 {:tag :hr}]))
+                      (enlive/transform [:body] (enlive/append [{:tag :hr} {:tag :pre :content (get-in msg [:body :calendar])}]))))
       {:status 404 :body "No emails"}))
 
 
@@ -103,7 +105,7 @@
       (enlive/emit*
         {:tag :html
          :content [{:tag :head :content [{:tag :title, :content "Latest emails"}
-                                         {:tag :style, :content "* {font-family: sans-serif}\ndl {background-color: #eee}"}]}
+                                         {:tag :style, :content "* {font-family: sans-serif}\npre {font-family: courier; font-size: 10pt}\ndl {background-color: #eee}"}]}
                    {:tag :body
                     :content (map (fn [msg]
                                     {:tag :div
@@ -111,7 +113,8 @@
                                      :content
                                      (vector
                                        (msg-header msg)
-                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body]))
+                                       {:tag :pre :content (get-in msg [:body :calendar])})}
                                    ) msgs)}]
          })
       {:status 404 :body "No emails"}))

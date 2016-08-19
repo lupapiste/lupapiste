@@ -7,8 +7,23 @@ LUPAPISTE.SutiDisplayModel = function() {
   var service = lupapisteApp.services.sutiService;
 
   self.showSuti = service.sutiEnabled;
-  self.open = ko.observable( features.enabled("suti")
-                             && lupapisteApp.models.applicationAuthModel.ok( "suti-pre-sent-state"));
+
+  // Computable, since the component might have been initialized
+  // before the auth model.
+  self.open = (function() {
+    var flag = ko.observable();
+    return self.disposedComputed( {
+      read: function() {
+        return _.isUndefined( flag() )
+          ? lupapisteApp.models.applicationAuthModel.ok( "suti-pre-sent-state")
+          : flag();
+      },
+      write: function( isOpen ) {
+        flag( Boolean( isOpen ));
+      }
+    });
+  }());
+
   self.suti = service.sutiDetails;
   self.waiting = ko.observable();
   self.sutiTitle = ko.observable();
@@ -66,7 +81,7 @@ LUPAPISTE.SutiDisplayModel = function() {
   });
 
   self.enabled = self.disposedPureComputed( function() {
-    var user = features.enabled("suti") && lupapisteApp.models.applicationAuthModel.ok( "suti-update-id");
+    var user = lupapisteApp.models.applicationAuthModel.ok( "suti-update-id");
     var idEnabled = user && !self.sutiAdded();
     return { id: idEnabled,
              link: idEnabled && self.suti().www,

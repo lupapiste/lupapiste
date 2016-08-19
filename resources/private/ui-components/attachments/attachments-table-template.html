@@ -23,7 +23,7 @@
           <td>
             <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']]),
                           click: $parent.openAttachment"></a><br>
-            <span data-bind="text: contents"></span>
+            <span data-bind="text: $data.contents || ''"></span>
           </td>
           <td data-bind="attachmentVersion: latestVersion"></td>
           <td>

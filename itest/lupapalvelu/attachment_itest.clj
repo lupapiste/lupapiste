@@ -442,40 +442,41 @@
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
-(facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
-  (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
-        application-id (:id application)
-        type {:type-group "paapiirustus" :type-id "asemapiirros"}
-        resp (command raktark-jarvenpaa
-                 :create-attachments
-                 :id application-id
-                 :attachmentTypes [type]) => ok?
-        attachment {:id (first (:attachmentIds resp))
-                    :type type}
-        attachment-id (:id attachment)]
+(when (or pdfa/pdf2pdf-enabled? dev-env?)
+  (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
+          (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                application-id (:id application)
+                type {:type-group "paapiirustus" :type-id "asemapiirros"}
+                resp (command raktark-jarvenpaa
+                              :create-attachments
+                              :id application-id
+                              :attachmentTypes [type]) => ok?
+                attachment {:id (first (:attachmentIds resp))
+                            :type type}
+                attachment-id (:id attachment)]
 
-    (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
+            (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
 
-    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
-          v1 (first v1-versions)]
-      (fact "one version" (count v1-versions) => 1)
-      (fact "fileID is set" (:fileId v1) => truthy)
-      (fact "fileID is set" (:originalFileId v1) => truthy)
-      (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
-      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
-      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
-      (fact "Auto conversion flag is set" (:autoConversion v1) => true)
+            (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+                  v1 (first v1-versions)]
+              (fact "one version" (count v1-versions) => 1)
+              (fact "fileID is set" (:fileId v1) => truthy)
+              (fact "fileID is set" (:originalFileId v1) => truthy)
+              (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
+              (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
+              (fact "version number is set" (:version v1) => {:major 1 :minor 0})
+              (fact "Auto conversion flag is set" (:autoConversion v1) => true)
 
-      (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+              (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-      (let [v2-versions (:versions (get-attachment-by-id raktark-jarvenpaa application-id  attachment-id))
-            v2          (first v2-versions)]
-        (fact "No new version" (count v2-versions) => 1)
-        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
-        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
-        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
-        (fact "version number is not changed" (:version v2) => (:version v1))
-        (fact "Auto conversion flag is preserved" (:autoConversion v2) => true)))))
+              (let [v2-versions (:versions (get-attachment-by-id raktark-jarvenpaa application-id  attachment-id))
+                    v2          (first v2-versions)]
+                (fact "No new version" (count v2-versions) => 1)
+                (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+                (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+                (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
+                (fact "version number is not changed" (:version v2) => (:version v1))
+                (fact "Auto conversion flag is preserved" (:autoConversion v2) => true))))))
 
 (facts "Convert attachment to PDF/A with Libre"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)

@@ -816,3 +816,14 @@
   (-> (query apikey :appeals :id app-id)
       :data
       (get (keyword verdict-id))))
+
+(defn ->xml
+  "Transforms map into XML structure."
+  [m]
+  (for [[k v] m]
+    {:tag (keyword k)
+     :attrs nil
+     :content (cond
+                (map? v)        (->xml v)
+                (sequential? v) (apply concat (map ->xml v))
+                :default        [(str v)])}))

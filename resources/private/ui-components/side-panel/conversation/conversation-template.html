@@ -119,6 +119,13 @@
                 <!-- /ko -->
               </span>
               <!-- /ko -->
+              <!-- ko if: $parent.isCalendarComment($data) -->
+              <span class="target" data-bind="with: $parent.reservationForComment($data)">
+                <span data-bind="ltext: 'application.calendar.comment.' + $parent.target.type"></span>
+                <span data-bind="text: reservationType.name"></span>
+                <span data-bind="dateTimeString: startTime"></span>
+              </span>
+              <!-- /ko -->
               <span data-bind="text: text"></span>
             </div>
           </div>

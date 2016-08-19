@@ -303,6 +303,10 @@ var attachment = (function() {
           hub.send("indicator-icon", {style: "positive"});
           model.dirty = true;
         })
+        .error(function(e) {
+          error("Unable to set attachment-meta", data, e.text);
+          notify.ajaxError(e);
+        })
         .call();
     }
   }
@@ -514,7 +518,8 @@ var attachment = (function() {
       .call();
 
     pageutil.hideAjaxWait();
-    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
+    authorizationModel.clear();
+    authorizationModel.refresh(application, {attachmentId: attachmentId, fileId: util.getIn(model, ["latestVersion", "fileId"])}, function() {
       model.initialized(true);
       if (!model.latestVersion()) {
         setTimeout(function() {

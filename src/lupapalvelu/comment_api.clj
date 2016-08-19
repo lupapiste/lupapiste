@@ -86,6 +86,7 @@
 
 (defcommand add-comment
   {:parameters [id text target roles]
+   :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
    :user-authz-roles auth/all-authz-writer-roles

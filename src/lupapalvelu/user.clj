@@ -14,7 +14,7 @@
             [sade.validators :as v]
             [sade.schemas :as ssc]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
             [lupapalvelu.i18n :as i18n]))
@@ -193,6 +193,13 @@
 
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))
+
+(defn authority-admins-organization
+  "Organization for the authority admin user."
+  [user]
+  (-> user
+      authority-admins-organization-id
+      org/get-organization))
 
 (defn user-is-authority-in-organization? [user organization-id]
   (let [org-set (organization-ids-by-roles user #{:authority})]
@@ -430,7 +437,7 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :error.password.minlengt :desc "password specified, but it's not valid"))
 
-    (when (and organization-id (not (organization/get-organization organization-id)))
+    (when (and organization-id (not (org/get-organization organization-id)))
       (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
@@ -619,13 +626,14 @@
 ;; ==============================================================================
 ;;
 
-(defn update-user-language
+(defn update-user-language!
   "Sets user's language if given and missing. Returns user that is
   augmented with indicatorNote and language if the language has been set."
   [{:keys [id language] :as user} ui-lang]
   (if (and (not language)
+           (not (virtual-user? user))
            (not (sc/check i18n/supported-language-schema ui-lang)) )
-    (do (mongo/update :users {:_id id} {$set {:language ui-lang}})
+    (do (mongo/update-by-id :users id {$set {:language ui-lang}})
         (assoc user
                :indicatorNote :user.language.note
                :language ui-lang))

@@ -1,8 +1,10 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
             [net.cgrand.enlive-html :as enlive]
+            [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.common-reader :as cr]
@@ -21,6 +23,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]
@@ -38,7 +41,8 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
-  (:import [java.net URL]))
+  (:import [java.net URL]
+           [java.io File]))
 
 (notifications/defemail :application-verdict
                         {:subject-key    "verdict"
@@ -199,12 +203,13 @@
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
-                   filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+                   url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (try
                                      (http/get url :as :stream :throw-exceptions false)
                                      (catch Exception e {:status -1 :body (str e)}))
                    header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
                                       (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                   filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
@@ -212,22 +217,30 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)]]
+                   current-application (domain/get-application-as (:id application) user)
+                   temp-file       (File/createTempFile filename "-verdict-attachment.tmp")]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (if (= 200 (:status resp))
-           (attachment/upload-and-attach! {:application current-application :user user}
-                                          {:attachment-id attachment-id
-                                           :attachment-type attachment-type
-                                           :target target
-                                           :required false
-                                           :locked true
-                                           :created (or attachment-time timestamp)
-                                           :state :ok}
-                                          {:filename (or header-filename filename)
-                                           :size content-length
-                                           :content (:body resp)})
-           (error (str (:status resp) " - unable to download " url ": " resp)))))
+         (try
+           (if (= 200 (:status resp))
+             (with-open [in (:body resp)]
+               ; Copy content to a temp file to keep the content close at hand
+               ; during upload and conversion processing.
+               (io/copy in temp-file)
+               (attachment/upload-and-attach! {:application current-application :user user}
+                                              {:attachment-id attachment-id
+                                               :attachment-type attachment-type
+                                               :target target
+                                               :required false
+                                               :locked true
+                                               :created (or attachment-time timestamp)
+                                               :state :ok}
+                                              {:filename filename
+                                               :size content-length
+                                               :content temp-file}))
+             (error (str (:status resp) " - unable to download " url ": " resp)))
+           (finally
+             (io/delete-file temp-file :silently)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 
@@ -393,23 +406,44 @@
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
 
+
+(defn validate-section-requirement
+  "Validator that fails if the organization requires section (pykala)
+  in verdicts and app-xml is missing one. Note: besides organization,
+  the requirement is also operation-specific. The requirement is
+  fulfilled if _any_ paatostieto element contains at least one
+  non-blank pykala."
+  [{operation :name} app-xml {section :section}]
+  (let [{:keys [enabled operations]} section]
+    (when (and enabled
+               (contains? (set operations) operation)
+               (not (some-<> app-xml
+                             cr/strip-xml-namespaces
+                             (xml/select [:paatostieto :pykala])
+                             not-empty
+                             (some (util/fn-> :content first ss/not-blank?) <>))))
+      (fail :info.section-required-in-verdict))))
+
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
-    (let [app-xml (normalize-special-verdict application app-xml)
-          validator-fn (permit/get-verdict-validator (permit/permit-type application))
-          organization (if organization @organization (org/get-organization (:organization application)))
-          validation-errors (validator-fn app-xml organization)]
-      (if-not validation-errors
+    (let [app-xml          (normalize-special-verdict application app-xml)
+          validator-fn     (permit/get-verdict-validator (permit/permit-type application))
+          organization     (if organization @organization (org/get-organization (:organization application)))
+          validation-error (or (validator-fn app-xml organization)
+                               (validate-section-requirement (:primaryOperation application)
+                                                             app-xml
+                                                             organization))]
+      (if-not validation-error
         (save-verdicts-from-xml command app-xml)
         (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
                                       (building-mongo-updates application))
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]
           (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
-          validation-errors)))))
+          validation-error)))))
 
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.
@@ -485,8 +519,6 @@
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
 
-
-
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
@@ -498,14 +530,15 @@
                               (building-mongo-updates (assoc application :buildings [])))
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
-        final-review? (fn [review] (contains? #{"lopullinen" "pidetty"} (:osittainen review)))
-        review-tasks (map review-to-task (filter final-review? reviews))
+        historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
+                                                            (< pvm (now))))
+        review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
         updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
-        validation-errors (doall  (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
+        validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
         task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]

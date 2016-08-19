@@ -53,8 +53,10 @@ LUPAPISTE.CalendarService = function() {
   var doFetchApplicationCalendarWeek = function(event) {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
     var slots = [];
+    var _week = startOfWeekMoment.isoWeek();
+    var _year = startOfWeekMoment.year();
 
-    ajax.query("my-reservations", { week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+    ajax.query("my-reserved-slots", { week: _week, year: _year })
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
@@ -65,8 +67,11 @@ LUPAPISTE.CalendarService = function() {
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
                                                    id: lupapisteApp.models.application.id() })
             .success(function(data) {
-              slots = slots.concat(data.slots);
-
+              slots = _.concat(slots, data.availableSlots);
+              slots = _.concat(slots,
+                _.map(
+                   _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
+                   function(r) { return _.set(r, "status", "read-only"); }));
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })
             .error(function(e) {
@@ -184,6 +189,9 @@ LUPAPISTE.CalendarService = function() {
                                           comment: event.comment(), location: event.location(), id: event.applicationId() })
       .success(function() {
         hub.send("indicator", { style: "positive" });
+        if (lupapisteApp.models.application.id() === event.applicationId()) {
+          repository.load(ko.unwrap(lupapisteApp.models.application.id));
+        }
         doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
                                          reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
