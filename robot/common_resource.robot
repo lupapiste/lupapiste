@@ -621,15 +621,15 @@ Do prepare new request
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment-templates
-  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
-  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
-  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
+  Click enabled by test id  add-attachment-templates
+  Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${subCategory}
+  List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates-v2"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
+  Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
@@ -653,7 +653,7 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Run Keyword If  '${kind}' == 'application'  Wait until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='${type}']
+  Run Keyword If  '${kind}' == 'application'  Wait until  Scroll to  table[class='attachments-table'] tr[data-test-type='${type}']
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
 Set attachment type for upload
@@ -664,12 +664,12 @@ Set attachment type for upload
 Open attachment details
   [Arguments]  ${type}
   Open tab  attachments
-  ${path} =  Set Variable  div#application-attachments-tab a[data-test-type='${type}']:first
+  ${path} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:first
   Wait Until  Element should be visible  jquery=${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   Scroll to  ${path}
   Wait Until  Click element  jquery=${path}
-  Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}

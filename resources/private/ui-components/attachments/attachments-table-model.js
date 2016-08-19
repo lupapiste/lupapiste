@@ -24,15 +24,13 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     var approved = service.isApproved(data) && canVouch(data);
     var rejected = service.isRejected(data) && canVouch(data);
 
-    return  _( [[approved, "lupicon-circle-check positive"],
-                [rejected || (!file && !notNeeded), "lupicon-circle-attention negative"],
-                [ _.get( data, "signed.0"), "lupicon-circle-pen positive"],
-                [data.state === "requires_authority_action", "lupicon-circle-star primary"],
-                [data.stamped, "lupicon-circle-stamp positive"]])
-      .map( function( xs ) {
-        return _.first( xs ) ? _.last( xs ) : false;
-      })
-      .filter()
+    return  _( [[approved, {icon: "lupicon-circle-check positive", type: "approved"}],
+                [rejected || (!file && !notNeeded), {icon: "lupicon-circle-attention negative", type: "rejected"}],
+                [ _.get( data, "signed.0"), {icon: "lupicon-circle-pen positive", type: "signed"}],
+                [data.state === "requires_authority_action", {icon: "lupicon-circle-star primary", type: "state"}],
+                [data.stamped, {icon: "lupicon-circle-stamp positive", type: "stamped"}]])
+      .filter(_.first)
+      .map(_.last)
       .value();
   }
 
