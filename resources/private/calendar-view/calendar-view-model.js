@@ -22,7 +22,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.reservationTypes = params.reservationTypes; // observable from parent
   self.client = params.searchConditions.client; // observable from parent
   self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
-  self.participant = params.participant; // observable from parent
   self.defaultLocation = params.defaultLocation;
 
   self.view = params.view;

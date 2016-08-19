@@ -103,3 +103,7 @@
 "application.calendar.appointment.suggestion" "sv" ""
 "application.calendar.comment.reservation-new" "fi" "Varaus tapaamiseen"
 "application.calendar.comment.reservation-new" "sv" ""
+"application.calendar.legend.waiting-for-acceptance" "fi" "Odottaa hyväksymistä"
+"application.calendar.legend.waiting-for-acceptance" "sv" ""
+"application.calendar.legend.appointment-with-another-authority" "fi" "(tapaaminen toisen viranomaisen kanssa)"
+"application.calendar.legend.appointment-with-another-authority" "sv" ""

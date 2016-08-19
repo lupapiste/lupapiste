@@ -519,7 +519,7 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     authorizationModel.clear();
-    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
+    authorizationModel.refresh(application, {attachmentId: attachmentId, fileId: util.getIn(model, ["latestVersion", "fileId"])}, function() {
       model.initialized(true);
       if (!model.latestVersion()) {
         setTimeout(function() {

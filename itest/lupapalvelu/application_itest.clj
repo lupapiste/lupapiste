@@ -1,5 +1,6 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
@@ -10,6 +11,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
+
+(testable-privates lupapalvelu.actions-api foreach-action)
 
 (apply-remote-minimal)
 
@@ -522,12 +525,12 @@
                          :change-application-state :change-application-state-targets}
         user (find-user-from-minimal-by-apikey sonja)]
     app => map?
-    (doseq [command (ca/foreach-action {} user {} app)
+    (doseq [command (foreach-action {} user {} app)
             :let [action (keyword (:action command))
                   result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
         (when (denied-actions action)
-          result => unauthorized?)))))
+          result => (some-fn nil? unauthorized?))))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]

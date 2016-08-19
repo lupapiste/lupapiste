@@ -83,18 +83,21 @@
                 </button>
               </div>
               <!-- /ko -->
-              <!--ko if: $component.view === "applicationView" && $data.status === 'booked' -->
-              <div class="calendar-slot reservation" data-bind="style: { top: $component.slotPositionTop($data),
-                                                                         height: $component.slotHeight($data) }">
-                <div data-bind="text: $data.reservationType.name, attr: {'title': $data.reservationType.name}"></div>
-                <div data-bind="text: $data.location, attr: {'title': $data.location}"></div>
-                <div data-bind="text: $data.applicationId, attr: {'title': $data.applicationId}"></div>
-              </div>
-              <!-- /ko -->
-              <!--ko if: $component.view !== "applicationView" && $data.status === 'booked' -->
+              <!--ko if: $data.status === 'booked' -->
               <div class="calendar-slot reservation" data-bind="style: { top: $component.slotPositionTop($data),
                                                                          height: $component.slotHeight($data) },
                                                                 with: $data.reservation">
+                <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
+                <div data-bind="text: location, attr: {'title': location}"></div>
+                <div data-bind="text: applicationId, attr: {'title': applicationId}"></div>
+              </div>
+              <!-- /ko -->
+              <!--ko if: $component.view === "applicationView" && $data.status === 'read-only' -->
+              <div class="calendar-slot reservation read-only"
+                   data-bind="style: { top: $component.slotPositionTop($data),
+                                       height: $component.slotHeight($data) },
+                              with: $data.reservation">
+                <div id="triangle-topright"></div>
                 <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
                 <div data-bind="text: location, attr: {'title': location}"></div>
                 <div data-bind="text: applicationId, attr: {'title': applicationId}"></div>
