@@ -66,10 +66,13 @@ Sonja clicks RAM link and opens old attachment details
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
   [Teardown]  Logout
 
-Mikko logs in and can see the RAM links but cannot delete the attachment
+Mikko logs in and can sees the RAM attachment in attachments tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] span[data-test-id=ram-indicator]:visible
+
+Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
   Open attachment details  muut.muu  1
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo

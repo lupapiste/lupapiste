@@ -23,9 +23,12 @@
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']]),
-                          click: $parent.openAttachment"
-               data-test-id="open-attachment"></a><br>
+            <a data-bind="click: $parent.openAttachment"
+               data-test-id="open-attachment">
+              <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+              <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+            </a>
+            <br>
             <span data-bind="text: $data.contents || ''"
                   data-test-id="attachment-contents"></span>
           </td>
@@ -38,6 +41,7 @@
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
             <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+            <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             <br>
             <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
           </td>
