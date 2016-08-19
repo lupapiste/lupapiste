@@ -59,28 +59,15 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  function buildAttachmentModel(attachment, attachmentObs) {
-    var notNeeded;
-    if (ko.isObservable(attachmentObs)) {
-      notNeeded = attachmentObs().notNeeded;
-      notNeeded(attachment.notNeeded);
-      attachmentObs(_.assign(attachment, {notNeeded: notNeeded}));
-      return attachmentObs;
-    } else {
-      notNeeded = ko.observable(attachment.notNeeded);
-      notNeeded.subscribe(_.partial(self.setNotNeeded, attachment.id));
-      attachmentObs = ko.observable(_.assign(attachment, {"notNeeded": notNeeded}));
-      return attachmentObs;
-    }
-  }
 
-  function getAuthModels(attachments) {
-    return _(attachments)
-      .keyBy("id")
-      .mapValues(function(attachment, id) {
-        return self.authModels()[id] || authorization.create();
-      })
-      .value();
+  // Initialize self.authModels for attachments. Creates new authorization models or reuses previously created ones.
+  function initAuthModels(attachments) {
+    self.authModels(_(attachments)
+                    .keyBy("id")
+                    .mapValues(function(attachment, id) {
+                      return self.authModels()[id] || authorization.create();
+                    })
+                    .value());
   }
 
   // Refresh all authModels at once.
@@ -100,26 +87,41 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  // Assigns authorization model in attachment from self.authModels or creates new authModel.
-  function assignAuthModel(attachment) {
+  // Returns authorization model for attachment from self.authModels or creates new authModel and stores it in self.authModels.
+  function getAuthModel(attachment) {
     var authModel = self.authModels()[attachment.id];
     if (!authModel) {
       authModel = authorization.create();
       self.authModels(_.set(self.authModels(), attachment.id, authModel));
     }
-    return _.assign(attachment, {authModel: authModel});
+    return authModel;
+  }
+
+  function buildAttachmentModel(attachment, attachmentObs) {
+    var notNeeded = false,
+        authModel = getAuthModel(attachment);
+    if (ko.isObservable(attachmentObs)) {
+      notNeeded = attachmentObs().notNeeded;
+      notNeeded(attachment.notNeeded);
+    } else {
+      notNeeded = ko.observable(attachment.notNeeded);
+      notNeeded.subscribe(_.partial(self.setNotNeeded, attachment.id));
+      attachmentObs = ko.observable();
+    }
+    attachmentObs(_.assign(attachment, {authModel: authModel, notNeeded: notNeeded}));
+    return attachmentObs;
   }
 
   self.setAttachments = function(attachments) {
-    self.authModels(getAuthModels(attachments));
+    initAuthModels(attachments);
     refreshAllAuthModels();
-    self.attachments(_.map(attachments, _.flow([assignAuthModel, buildAttachmentModel])));
+    self.attachments(_.map(attachments, buildAttachmentModel));
   };
 
   self.setAttachmentData = function(attachment) {
     var attachmentObs = self.getAttachment(attachment.id);
     if (attachmentObs) {
-      _.flow([assignAuthModel, _.partialRight(buildAttachmentModel, attachmentObs)])(attachment);
+      buildAttachmentModel(attachment, attachmentObs);
       refreshAuthModel(attachment);
     }
   };
