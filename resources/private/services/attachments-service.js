@@ -182,8 +182,10 @@ LUPAPISTE.AttachmentsService = function() {
                                  params);
     ajax.command(commandName, commandParams)
       .success(function(res) {
-        self.queryOne(attachmentId);
         util.showSavedIndicator(res);
+      })
+      .complete(function() {
+        self.queryOne(attachmentId);
       })
       .call();
   };
