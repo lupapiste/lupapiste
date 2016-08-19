@@ -665,7 +665,7 @@
                               {:keys [archivable contentType]} (last (:versions attachment))]
                           (when (or archivable (not= "application/pdf" contentType))
                             (fail :error.attachment.id))))]
-   :states           (lupapalvelu.states/all-application-states-but :draft)}
+   :states           (states/all-application-states-but :draft)}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
