@@ -90,5 +90,4 @@
   [application filedata]
   {:pre  [(every? (partial contains? filedata) [:filename :contentType :content])]
    :post [(nil? (sc/check ConversionResult %))]}
-  (println "in archivability-conversion")
   (convert-file application filedata))
