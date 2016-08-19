@@ -1310,6 +1310,18 @@ Click label
   Scroll to  label[for=${for}]
   Click element  jquery=label[for=${for}]
 
+Checkbox wrapper selected by jquery selector
+  [Arguments]  ${selector}
+  Javascript?  $("${selector}:checked").length === 1
+
+Checkbox wrapper not selected by jquery selector
+  [Arguments]  ${selector}
+  Javascript?  $("${selector}:checked").length === 0
+
+Checkbox wrapper disabled by jquery selector
+  [Arguments]  ${selector}
+  Javascript?  $("${selector}:disabled").length === 1
+
 Checkbox wrapper selected
   [Arguments]  ${id}
   Javascript?  $("input#${id}:checked").length === 1

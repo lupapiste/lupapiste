@@ -16,6 +16,14 @@ Mikko goes to empty attachments tab
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
 
+Mikko sees all "not needed" checkboxes as enabled and not selected
+  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
+  Xpath Should Match X Times  //div[@id='application-attachments-tab']//input[@data-test-id='not-needed-checkbox']  4
+  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='hakija.valtakirja'] input[data-test-id=not-needed-checkbox]
+  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='paapiirustus.asemapiirros'] input[data-test-id=not-needed-checkbox]
+  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma'] input[data-test-id=not-needed-checkbox]
+  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='paapiirustus.pohjapiirustus'] input[data-test-id=not-needed-checkbox]
+
 "Download all attachments" should be disabled
   [Tags]  attachments
   Element should be disabled  jquery=button[data-test-id='download-all-attachments-button']

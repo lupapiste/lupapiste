@@ -43,16 +43,9 @@ Sipoo marks required fields obligatory
   Wait Until  Checkbox Should Be Selected  required-fields-obligatory-enabled
   Logout
 
-Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as enabled and not selected
+Mikko logs in
   Mikko logs in
   Open application  ${appname}  ${propertyId}
-  Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//td[contains(text(), 'Yleiset hankkeen liitteet')]
-  Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//td[contains(@class, 'attachment-not-needed')]//input  4
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-hakija-valtakirja']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-asemapiirros']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-pelastusviranomaiselle_esitettavat_suunnitelmat-vaestonsuojasuunnitelma']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-pohjapiirustus']
 
 Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary
