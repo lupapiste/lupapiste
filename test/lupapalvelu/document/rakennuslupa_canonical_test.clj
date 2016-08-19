@@ -1321,7 +1321,7 @@
                     application
                     "sv"
                     "123"
-                    "Aloitusilmoitus 1"
+                    "Aloitusilmoitus 1 "
                     1354532324658
                     [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}
                      {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}]
@@ -1371,8 +1371,10 @@
 
     (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
     (:katselmuksenLaji Katselmus)  => "ei tiedossa"
-    (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
     (:pitoPvm Katselmus) => "2012-12-03"
+
+    (fact "tarkastuksenTaiKatselmuksenNimi is trimmed (LPK-2082)"
+      (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1")
 
     (fact "KRYSP 2.1.3 data is present"
       (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}

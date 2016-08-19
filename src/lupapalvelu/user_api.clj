@@ -52,7 +52,7 @@
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user (usr/update-user-language full-user (ss/lower-case lang)))
+    (ok :user (usr/update-user-language! full-user (ss/lower-case lang)))
     (fail)))
 
 (defquery users

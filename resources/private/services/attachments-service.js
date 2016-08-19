@@ -11,6 +11,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
 
   self.attachments = ko.observableArray([]);
+  self.authModels = ko.observable({});
   self.tagGroups = ko.observableArray([]);
 
   // array of arrays of filters received from backend along with default values.
@@ -73,23 +74,53 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
+  function getAuthModels(attachments) {
+    return _(attachments)
+      .keyBy("id")
+      .mapValues(function(attachment, id) {
+        return self.authModels()[id] || authorization.create();
+      })
+      .value();
+  }
+
+  // Refresh all authModels at once.
+  function refreshAllAuthModels() {
+    authorization.refreshModelsForCategory(self.authModels(), self.applicationId(), "attachments");
+  }
+
+  // Refresh authModel for single attachment.
+  // This function should NOT be used for refreshing entire set of authModels since
+  // one query is produced for each authModel.
+  function refreshAuthModel(attachment) {
+    var authModel = self.authModels[attachment.id];
+    if (authModel) {
+      authModel.refresh({id: self.applicationId(),
+                         attachmentId: attachment.id,
+                         fileId: util.getIn(attachment, ["latestVersion", "fileId"])});
+    }
+  }
+
+  // Assigns authorization model in attachment from self.authModels or creates new authModel.
   function assignAuthModel(attachment) {
-    var application = lupapisteApp.models.application._js,
-        authModel = authorization.create();
-    authModel.refresh(application,
-                      {"attachmentId": util.getIn(attachment, ["id"]),
-                       "fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
+    var authModel = self.authModels()[attachment.id];
+    if (!authModel) {
+      authModel = authorization.create();
+      self.authModels(_.set(self.authModels(), attachment.id, authModel));
+    }
     return _.assign(attachment, {authModel: authModel});
   }
 
-  self.setAttachments = function(data) {
-    self.attachments(_.map(data, _.flow([assignAuthModel, buildAttachmentModel])));
+  self.setAttachments = function(attachments) {
+    self.authModels(getAuthModels(attachments));
+    refreshAllAuthModels();
+    self.attachments(_.map(attachments, _.flow([assignAuthModel, buildAttachmentModel])));
   };
 
-  self.setAttachment = function(attachment) {
-    var replaceAttachment = self.getAttachment(attachment.id);
-    if (replaceAttachment) {
-      _.flow([assignAuthModel, _.partialRight(buildAttachmentModel, replaceAttachment)])(attachment);
+  self.setAttachmentData = function(attachment) {
+    var attachmentObs = self.getAttachment(attachment.id);
+    if (attachmentObs) {
+      _.flow([assignAuthModel, _.partialRight(buildAttachmentModel, attachmentObs)])(attachment);
+      refreshAuthModel(attachment);
     }
   };
 
@@ -109,7 +140,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryOne = function(attachmentId) {
-    queryData("attachment", "attachment", self.setAttachment, {"attachmentId": attachmentId});
+    queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId});
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
   };
