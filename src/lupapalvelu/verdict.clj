@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
             [net.cgrand.enlive-html :as enlive]
@@ -21,6 +22,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]
@@ -38,7 +40,8 @@
             [lupapalvelu.xml.krysp.building-reader :as building-reader]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
-  (:import [java.net URL]))
+  (:import [java.net URL]
+           [java.io File]))
 
 (notifications/defemail :application-verdict
                         {:subject-key    "verdict"
@@ -199,12 +202,13 @@
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
-                   filename        (-> url (URL.) (.getPath) (ss/suffix "/"))
+                   url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (try
                                      (http/get url :as :stream :throw-exceptions false)
                                      (catch Exception e {:status -1 :body (str e)}))
                    header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
                                       (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                   filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
@@ -212,22 +216,30 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)]]
+                   current-application (domain/get-application-as (:id application) user)
+                   temp-file       (File/createTempFile filename "-verdict-attachment.tmp")]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (if (= 200 (:status resp))
-           (attachment/upload-and-attach! {:application current-application :user user}
-                                          {:attachment-id attachment-id
-                                           :attachment-type attachment-type
-                                           :target target
-                                           :required false
-                                           :locked true
-                                           :created (or attachment-time timestamp)
-                                           :state :ok}
-                                          {:filename (or header-filename filename)
-                                           :size content-length
-                                           :content (:body resp)})
-           (error (str (:status resp) " - unable to download " url ": " resp)))))
+         (try
+           (if (= 200 (:status resp))
+             (with-open [in (:body resp)]
+               ; Copy content to a temp file to keep the content close at hand
+               ; during upload and conversion processing.
+               (io/copy in temp-file)
+               (attachment/upload-and-attach! {:application current-application :user user}
+                                              {:attachment-id attachment-id
+                                               :attachment-type attachment-type
+                                               :target target
+                                               :required false
+                                               :locked true
+                                               :created (or attachment-time timestamp)
+                                               :state :ok}
+                                              {:filename filename
+                                               :size content-length
+                                               :content temp-file}))
+             (error (str (:status resp) " - unable to download " url ": " resp)))
+           (finally
+             (io/delete-file temp-file :silently)))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 
