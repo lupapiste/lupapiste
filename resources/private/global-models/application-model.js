@@ -331,7 +331,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requestForComplement = function() {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(self.reload)
+      .success(function() {
+        ajax.command( "cleanup-krysp", {id: self.id()})
+          .onError(_.noop)
+          .call();
+        self.reload();
+      })
       .processing(self.processing)
       .call();
     return false;

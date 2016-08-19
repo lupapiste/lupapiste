@@ -44,7 +44,9 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     };
 
     function json() {
-      return _.pick(ko.mapping.toJS(self), keys);
+      var data = _.pick(ko.mapping.toJS(self), keys);
+      data.email = _.trim(data.email).toLowerCase();
+      return data;
     }
 
     self.setData = function(data) {

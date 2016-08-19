@@ -3,7 +3,7 @@ Cancel via vetuma
   [Arguments]  ${initButton}=vetuma-init
   Wait Until  Click element   ${initButton}
   Wait Until  Click link  << Palaa palveluun
-  Click button  Palaa palveluun
+  Wait Until  Click button  Palaa palveluun
 
 Authenticate via Osuuspankki via Vetuma
   [Arguments]  ${initButton}

@@ -1708,7 +1708,7 @@
 "proposalApproved" "sv" "Tomtdelningen godkänd"
 "purkaminen._group_label" "fi" "Rakennuksen purkaminen"
 "purkaminen._group_label" "sv" "Byggnadsrivning"
-"puun-kaataminen._group_label" "fi" "Puun kaataminen"
+"puun-kaataminen._group_label" "fi" "Puiden kaataminen"
 "puun-kaataminen._group_label" "sv" "Trädfällning"
 "puiden-kaataminen._group_label" "fi" "Puiden kaataminen"
 "puiden-kaataminen._group_label" "sv" "Trädfällning"

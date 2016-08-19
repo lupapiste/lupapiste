@@ -325,7 +325,7 @@
           :lasnaolijat lasnaolijat
           :pitaja pitaja
           :poikkeamat poikkeamat
-          :tarkastuksenTaiKatselmuksenNimi task-name)
+          :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name))
         (when task-id
           {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}})
         (when (:kuvaus huomautukset)

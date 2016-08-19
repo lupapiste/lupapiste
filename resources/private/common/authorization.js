@@ -7,7 +7,12 @@ var authorization = (function() {
     self.data = ko.observable({});
 
     self.ok = function(command) {
-      return self.data && self.data()[command] && self.data()[command].ok;
+      var authz = self.data()[command];
+      return authz && authz.ok;
+    };
+
+    self.clear = function() {
+      self.data({});
     };
 
     self.refreshWithCallback = function(queryParams, callback) {
@@ -17,7 +22,7 @@ var authorization = (function() {
           if (callback) { callback(); }
         })
         .error(function(e) {
-          self.data({});
+          self.clear();
           error(e);
         })
         .call();
@@ -35,6 +40,7 @@ var authorization = (function() {
 
     return {
       ok: self.ok,
+      clear: self.clear,
       refreshWithCallback: self.refreshWithCallback,
       refresh: self.refresh,
       setData: self.setData

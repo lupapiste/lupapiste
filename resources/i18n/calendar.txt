@@ -99,3 +99,7 @@
 "application.calendar.reservation.participants" "sv" "Deltagare"
 "application.calendar.reservation.additional.information" "fi" "Lisätietoa"
 "application.calendar.reservation.additional.information" "sv" "Tilläggsuppgifter"
+"application.calendar.appointment.suggestion" "fi" "Sinulle on ehdotettu tapaamista"
+"application.calendar.appointment.suggestion" "sv" ""
+"application.calendar.comment.reservation-new" "fi" "Varaus tapaamiseen"
+"application.calendar.comment.reservation-new" "sv" ""

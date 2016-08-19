@@ -145,16 +145,17 @@
                    {:type-id :tutkintotodistus      :type-group :osapuolet}
                    {:type-id :suunnittelijan_tiedot :type-group :osapuolet}]})
 
-(def- type-grouping
-  {{:type-id :iv_suunnitelma     :type-group :erityissuunnitelmat} :iv_suunnitelma
-   {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat} :kvv_suunnitelma
-   {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma
-   {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
-   {:type-id :leikkauspiirustus  :type-group :paapiirustus}        :paapiirustus
-   {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
-   {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus})
+(def- type-grouping ; Force array-map to ensure fixed order of the type groups
+  (array-map {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
+             {:type-id :leikkauspiirustus  :type-group :paapiirustus}        :paapiirustus
+             {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
+             {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus
+             {:type-id :iv_suunnitelma     :type-group :erityissuunnitelmat} :iv_suunnitelma
+             {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat} :kvv_suunnitelma
+             {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma))
 
-(def type-groups (-> (vals type-grouping) distinct))
+(def other-type-group :other)
+(def type-groups (-> (vals type-grouping) distinct (concat [other-type-group])))
 
 (defn attachment-type
   ([{type-group :type-group type-id :type-id :as attachment-type}]

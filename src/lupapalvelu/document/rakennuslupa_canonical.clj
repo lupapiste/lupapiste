@@ -322,7 +322,7 @@
                        :pitaja pitaja
                        :poikkeamat poikkeamat
                        :verottajanTvLlKytkin tiedoksianto
-                       :tarkastuksenTaiKatselmuksenNimi task-name}
+                       :tarkastuksenTaiKatselmuksenNimi (ss/trim task-name)}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]
