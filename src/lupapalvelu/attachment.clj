@@ -557,9 +557,13 @@
    Returns attached version."
   [{:keys [application user]} attachment-options file-options]
   (let [initial-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
+        content            (if (instance? File (:content file-options))
+                             (:content file-options)
+                             ; stream is consumed at this point, load from mongo
+                             ((-> initial-filedata :fileId mongo/download :content)))
         conversion-result  (conversion/archivability-conversion application (assoc initial-filedata
                                                                               :attachment-type (:attachment-type attachment-options)
-                                                                              :content (:content file-options)))
+                                                                              :content content))
         converted-filedata (when (:autoConversion conversion-result)
                                  ;; when conversion was made, upload is needed, initial-filedata's fileId will be overwritten
                                  (file-upload/save-file (select-keys conversion-result [:content :filename])
