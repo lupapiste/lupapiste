@@ -3,4 +3,4 @@
 
 (defn filename-for-pdfa [filename]
   {:pre [(string? filename)]}
-  (ss/replace filename #"(-PDFA)?\.(?i)pdf$" "-PDFA.pdf"))
+  (ss/replace filename #"(-PDFA)?\.(?i)pdf$" ".pdf"))
