@@ -109,6 +109,13 @@
 ;; Helpers
 ;;
 
+(defn user-role
+  "User role within the application."
+  [user {:keys [organization]}]
+  (if (usr/user-is-authority-in-organization? user organization)
+    :authority
+    :applicant))
+
 (defn insert-application [application]
   {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))

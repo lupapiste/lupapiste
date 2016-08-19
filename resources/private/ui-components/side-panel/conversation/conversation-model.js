@@ -104,7 +104,7 @@ LUPAPISTE.ConversationModel = function(params) {
   }).extend({ rateLimit: 100 });
 
   self.isAuthorityComment = function(comment) {
-    return util.getIn(comment, ["user", "role"]) === "authority";
+    return util.getIn(comment, ["type"]) === "authority";
   };
 
   self.isForAttachment = function(comment) {

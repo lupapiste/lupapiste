@@ -47,11 +47,11 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   function isOutsideAuthority() {
-    // Hash is not cleared when returned to the application list.
+    // Hash is cleared when returned to the application list.
     var hash = _.get( window, "location.hash", "");
     var app = lupapisteApp.models.application;
     return self.role() === "authority"
-      && app && hash.indexOf( app.id())
+      && app && _.includes( hash, app.id())
       && !_.find( self.orgAuthz(), app.organization());
   }
 

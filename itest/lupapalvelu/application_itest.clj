@@ -4,6 +4,7 @@
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
@@ -578,10 +579,24 @@
                         luukas => (allowed? cmd :id application-id))))
          (fact "Owner submits application"
                (command luukas :submit-application :id application-id) => ok?)
+         (fact "Outside authority cannot use authority commands"
+               (command luukas :approve-application :id application-id :lang "fi") => unauthorized?
+               (command luukas :cancel-application-authority :id application-id :lang "fi" :text "") => unauthorized?)
          (facts "Local authority cannot use applicant commands"
                 (command olli :cancel-application :id application-id :lang "fi" :text "")=> unauthorized?)
          (fact "(Outside) authority cannot access the application"
                (query sonja :application :id application-id) => not-accessible?)
+         (fact "Outside authority's comments are applicant comments"
+               (command luukas :add-comment :id application-id :text "Zao!" :target {:type "application"}
+                        :roles #{:applicant :authority}) => ok?
+               (query-application luukas application-id) => (util/fn-> :comments first ((contains {:type "applicant"
+                                                                                                   :text "Zao!"}))))
+         (fact "Local authority's comments are authority comments"
+               (command olli :add-comment :id application-id :text "Zaoshang hao!" :target {:type "application"}
+                        :roles #{:applicant :authority}) => ok?
+               (query-application olli application-id) => (util/fn-> :comments last ((contains {:type "authority"
+                                                                                                :text "Zaoshang hao!"}))))
+
          (facts "Applications search result contains correct applications"
                 (let [sipoo-draft     (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
                       luukas-canceled (create-app-id luukas
