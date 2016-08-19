@@ -133,9 +133,9 @@
                         (:to (last emails)) => (contains "Pena Panaani")
                         (:calendar (:body (last emails))) => (contains "BEGIN:VCALENDAR")))
                     (fact "my-reservations for authority includes the new reservation"
-                      (->> (query authority :my-reservations :year current-year :week current-week)
+                      (->> (query authority :my-reserved-slots :year current-year :week current-week)
                            :reservations
-                           (map :id)) => (just #{reservation-id}))
+                           (map #(get-in % [:reservation :id]))) => (contains #{reservation-id}))
                     (fact "another authority in the same organization sees the reservation as a 'read-only' slot"
                       (->> (query ronja :available-calendar-slots
                              :authorityId ronja-id

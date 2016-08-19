@@ -370,7 +370,7 @@ var util = (function($) {
   }
 
   function partyFullName(party) {
-    return _.get(party, "firstName", "") + " " + _.get(party, "lastName", "");
+    return getIn(party, ["firstName"], "") + " " + getIn(party, ["lastName"], "");
   };
 
 
