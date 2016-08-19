@@ -664,9 +664,10 @@ Set attachment type for upload
 Open attachment details
   [Arguments]  ${type}  ${nth}=0
   Open tab  attachments
-  ${path} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]
-  Wait Until  Element should be visible  jquery=${path}
-  Execute javascript  $("${path}")[${nth}].click()
+  ${selector} =  Set Variable  $("div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length>0;  10
+  Execute Javascript  ${selector}[${nth}].click();
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Assert file latest version
