@@ -662,13 +662,11 @@ Set attachment type for upload
   Select From List  attachmentType  ${type}
 
 Open attachment details
-  [Arguments]  ${type}
+  [Arguments]  ${type}  ${nth}=0
   Open tab  attachments
-  ${path} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:first
+  ${path} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]
   Wait Until  Element should be visible  jquery=${path}
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  Scroll to  ${path}
-  Wait Until  Click element  jquery=${path}
+  Execute javascript  $("${path}")[${nth}].click()
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Assert file latest version
