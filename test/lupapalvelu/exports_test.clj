@@ -9,7 +9,7 @@
             [lupapalvelu.permit :as permit]
             [lupapiste-commons.usage-types :as usages]))
 
-(testable-privates lupapalvelu.exports-api resolve-price-class)
+(testable-privates lupapalvelu.exports-api resolve-price-class exported-application)
 
 (def keyset (comp set keys))
 
@@ -95,3 +95,17 @@
     (:priceCode op) => nil
     (:usagePriceCode op) => 908
     (:use op) => nil))
+
+(fact "verdict"
+  (let [application {:verdicts [(domain/->paatos {:verdictId 1 :backendId "kuntalupatunnus1" :text "paatosteksti" :timestamp 10 :name "Viranomainen" :given 9 :status :1 :official 11})]}
+        {verdics :verdicts} (exported-application application)
+        verdict (first verdics)]
+    (count verdics) => 1
+    verdict => {:id 1
+                :kuntalupatunnus "kuntalupatunnus1"
+                :timestamp 10
+                :paatokset [{:paatoksentekija "Viranomainen"
+                             :paatos "paatosteksti"
+                             :paatospvm 9
+                             :anto 9
+                             :lainvoimainen 11}]}))

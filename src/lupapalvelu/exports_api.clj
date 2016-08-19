@@ -206,6 +206,19 @@
     :displayNameSv (i18n/localize "sv" "operations" (:name op))
     :submitted     (when (= "aiemmalla-luvalla-hakeminen" (:name op)) (:created application))))
 
+(defn- verdict-mapper [verdict]
+  (-> verdict
+    (select-keys [:id :kuntalupatunnus :timestamp :paatokset])
+    (update :paatokset #(map (fn [paatos] (merge (:paivamaarat paatos) (select-keys (-> paatos :poytakirjat first) [:paatos :paatoksentekija :paatospvm]))) %))
+    ))
+
+(defn- exported-application [application]
+  (-> application
+    (update :operations #(map (partial operation-mapper application) %))
+    (update :verdicts #(map verdict-mapper %))
+    ; documents not needed in DW
+    (dissoc :documents)))
+
 (defexport export-applications
   {:user-roles #{:trusted-etl}}
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
@@ -218,18 +231,14 @@
                 :infoRequest 1 :modified 1 :municipality 1 :opened 1 :openInfoRequest 1
                 :primaryOperation 1 :secondaryOperations 1 :organization 1 :propertyId 1
                 :permitSubtype 1 :permitType 1 :sent 1 :started 1 :state 1 :submitted 1
+                :verdicts 1
                 :documents.data.kaytto.kayttotarkoitus.value 1
                 :documents.schema-info.op.id 1}
         raw-applications (mongo/select :applications query fields)
         applications-with-operations (map
                                        (fn [a] (assoc a :operations (application/get-operations a)))
-                                       raw-applications)
-        applications (map
-                       (fn [a] (-> a
-                                 (update :operations #(map (partial operation-mapper a) %))
-                                 (dissoc :documents))) ; documents not needed in DW
-                       applications-with-operations)]
-    (ok :applications applications)))
+                                       raw-applications)]
+    (ok :applications (map exported-application applications-with-operations))))
 
 (defexport export-organizations
   {:user-roles #{:trusted-etl}}
