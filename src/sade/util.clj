@@ -518,3 +518,11 @@
   ([x] false)
   ([x y] (not= (keyword x) (keyword y)))
   ([x y & more] (apply not= (keyword x) (keyword y) (map keyword more))))
+
+(defn kw-path
+  "a b c -> :a.b.c"
+  [& kw]
+  (->> kw
+       (map name)
+       (ss/join ".")
+       keyword))
