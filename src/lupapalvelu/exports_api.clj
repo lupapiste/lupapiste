@@ -209,8 +209,10 @@
 (defn- verdict-mapper [verdict]
   (-> verdict
     (select-keys [:id :kuntalupatunnus :timestamp :paatokset])
-    (update :paatokset #(map (fn [paatos] (merge (:paivamaarat paatos) (select-keys (-> paatos :poytakirjat first) [:paatos :paatoksentekija :paatospvm]))) %))
-    ))
+    (update :paatokset #(map (fn [paatos]
+                               (merge
+                                 (select-keys (:paivamaarat paatos) [:anto :lainvoimainen])
+                                 (select-keys (-> paatos :poytakirjat first) [:paatos :paatoksentekija :paatospvm]))) %))))
 
 (defn- exported-application [application]
   (-> application
