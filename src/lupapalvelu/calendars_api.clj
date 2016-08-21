@@ -10,7 +10,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.strings :as str]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -312,15 +313,18 @@
 (defquery available-calendar-slots
   {:user-roles #{:authority :applicant}
    :feature    :ajanvaraus
-   :parameters       [authorityId clientId reservationTypeId year week]
-   :input-validators [(partial action/non-blank-parameters [:authorityId :clientId :reservationTypeId :year :week])]
+   :parameters       [clientId year week]
+   :input-validators [(partial action/non-blank-parameters [:clientId :year :week])]
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]}
-  [{user :user {applicationId :id} :application}]
-  (ok :availableSlots (->FrontendReservationSlots
-               (cal/available-calendar-slots-for-appointment {:year year :week week
-                                                              :authority authorityId
-                                                              :clientId clientId
-                                                              :reservationTypeId reservationTypeId}))
+  [{user :user {applicationId :id} :application {authorityId :authorityId reservationTypeId :reservationTypeId} :data}]
+  (ok :availableSlots
+      (if (not-any? str/empty? [reservationTypeId authorityId])
+        (->FrontendReservationSlots
+          (cal/available-calendar-slots-for-appointment {:year year :week week
+                                                        :authority authorityId
+                                                        :clientId clientId
+                                                        :reservationTypeId reservationTypeId}))
+        [])
       :readOnlySlots (Reservations->FrontendSlots :read-only
                         (filter (fn [r] (= applicationId (:contextId r)))
                           (cond

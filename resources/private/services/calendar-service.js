@@ -62,8 +62,9 @@ LUPAPISTE.CalendarService = function() {
 
         notifyView(event, _weekdays(event, slots, startOfWeekMoment));
 
-        if (event.clientId && event.authorityId && event.reservationTypeId) {
-          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId, reservationTypeId: event.reservationTypeId,
+        if (event.clientId) {
+          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId,
+                                                   reservationTypeId: event.reservationTypeId,
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
                                                    id: lupapisteApp.models.application.id() })
             .success(function(data) {
