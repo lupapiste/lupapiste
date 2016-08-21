@@ -354,9 +354,9 @@
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (fn [{application :application result :result}]
-                                   (let [reservations (group-by :id (:reservations application))
-                                         reservation (first (get reservations (:reservationId result)))]
-                                     (map usr/get-user-by-id (:calendar-recipients reservation))))
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
+                                         recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
+                                     (map usr/get-user-by-id recipient-ids)))
    :model-fn                     (fn [{application :application} _ recipient]
                                    {:link-fi (notifications/get-application-link application nil "fi" recipient)
                                     :link-sv (notifications/get-application-link application nil "sv" recipient)
@@ -396,7 +396,8 @@
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
                     (usr/authority? user) (usr/get-user-by-id clientId))
-          reservation (assoc reservation :calendar-recipients (map :id [user to-user])
+          reservation (assoc reservation :from (:id user)
+                                         :to [(:id to-user)]
                                          :action-required-by [(:id to-user)])]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))

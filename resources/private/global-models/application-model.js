@@ -179,6 +179,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.partyDocumentIndicator = ko.observable(0);
 
   self.calendarNotificationIndicator = ko.observable(0);
+  self.calendarNotificationsPending = ko.observableArray([]);
 
   self.linkPermitData = ko.observable(null);
   self.appsLinkingToUs = ko.observable(null);

@@ -267,17 +267,14 @@
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
-      function sumCalendarIndicators() {
-        var res = _.filter(app.reservations,
-          function (r) {
-            return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
-          });
-        return res.length;
-      }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      applicationModel.calendarNotificationIndicator(sumCalendarIndicators());
+      applicationModel.calendarNotificationsPending(_.filter(app.reservations,
+        function (r) {
+          return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
+        }));
+      applicationModel.calendarNotificationIndicator(applicationModel.calendarNotificationsPending().length);
 
       isInitializing = false;
       pageutil.hideAjaxWait();

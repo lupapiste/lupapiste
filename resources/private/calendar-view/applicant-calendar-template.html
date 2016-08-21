@@ -4,6 +4,47 @@
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
       <span data-bind="component: {name: 'help-toggle',
                        params: {lhtml: 'application.calendar.applicant.helpText'}}"></span>
+    </div>
+
+    <!-- ko if: lupapisteApp.models.application.calendarNotificationsPending().length > 0 -->
+    <div style="margin-bottom: 36px">
+      <div>
+        <p><b><i class="lupicon-circle-attention"></i> Sinulla on hyväksymätön tapaamiskutsu.</b></p>
+      </div>
+
+      <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
+        <div style="width: 96%">
+          <h3 style="margin-top: 12px; font-weight: bold;" data-bind="dateString: startTime"></h3>
+          <div style="border: 1px solid #ccc; margin-top: 12px; ">
+            <div style="display: inline-block; font-weight: bold; font-size: 20px; margin: 6px 12px; vertical-align: top" data-bind="timeString: startTime">
+            </div>
+            <div style="display: inline-block; border-left: 1px solid #ccc; padding-left: 6px; margin: 6px 0px; height: 48px">
+              <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
+              <br />Osallistujat: ...
+            </div>
+            <div style="float:right; border-left: 1px solid #ccc; padding: 2px 6px; margin: 6px 0px; height: 48px">
+              <button class="positive">
+                <i class="lupicon-save" style="display: inline;"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                Hyväksy
+              </button>
+              <button class="negative">
+                <i class="lupicon-remove" style="display: inline;"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                Hylkää
+              </button>
+            </div>
+          </div>
+          <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px;">
+            <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <!-- book-appointment -->
+    <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
     </div>
 

@@ -149,6 +149,14 @@
     }
   };
 
+  ko.bindingHandlers.timeString = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? moment(value).format("HH:mm") : "";
+      $(element).text(dateStr);
+    }
+  };
+
   function localized(fnName, element, valueAccessor) {
     var e$ = $(element);
     var fn = e$[fnName];
