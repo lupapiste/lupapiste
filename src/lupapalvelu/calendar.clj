@@ -141,6 +141,10 @@
   [applicantId {:keys [year week]}]
   (api-query (str "reservations/for-client/" applicantId) {:year year :week week}))
 
+(defn reservations-for-application
+  [applicationId {:keys [year week]}]
+  (api-query (str "reservations/by-context/" applicationId) {:year year :week week}))
+
 (defn available-calendar-slots-for-appointment
   [opts]
   (let [calendar-external-ref (:authority opts)
@@ -173,4 +177,5 @@
   (let [m (get (env/get-config) :calendar)]
     ; convert keys to camel-case-keywords
     (zipmap (map (comp keyword str/to-camel-case name) (keys m)) (vals m))))
+
 
