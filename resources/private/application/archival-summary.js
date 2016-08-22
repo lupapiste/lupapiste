@@ -398,7 +398,6 @@
       return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
     });
     self.updateTosFunction = function() {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       var data = {
         id: ko.unwrap(params.application.id),
         functionCode: self.newTosFunction(),
@@ -407,10 +406,17 @@
       ajax
         .command("force-fix-tos-function-for-application", data)
         .success(function() {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
           self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
-            docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
-            docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            // FIXME added ifs to fix LPK-2110, but why are only docs 0 and 1 updated,
+            // and the values differ???
+            if (util.getIn(docs, [0, "metadata"])) {
+              docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
+            }
+            if (util.getIn(docs, [1, "metadata"])) {
+              docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            }
           });
         })
         .call();
