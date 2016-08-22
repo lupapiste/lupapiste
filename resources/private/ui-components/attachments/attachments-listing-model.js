@@ -356,6 +356,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
   };
 
+  self.signAttachments = function() {
+    hub.send("sign-attachments", {application: self.appModel});
+  };
+
+  self.canSign = function() {
+    return self.authModel.ok("sign-attachments") && self.appModel.hasAttachment();
+  };
+
   self.hasFile = ko.pureComputed(function() {
     return _(self.attachmentGroups()).invokeMap("hasFile").some();
   });

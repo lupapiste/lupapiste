@@ -67,4 +67,6 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
 
+  hub.subscribe( "sign-attachments", _.flow( _.partialRight( _.get, "application"), self.init ) );
+
 };
