@@ -414,6 +414,8 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
+(def categories [:attachments])
+
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -422,6 +424,8 @@
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
+   ;; Array of categories for use of allowed-actions-for-cateory
+   (sc/optional-key :categories)   [(apply sc/enum categories)]
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
