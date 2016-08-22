@@ -625,7 +625,7 @@ Add empty attachment template
   Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
   Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
   List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates-v2"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list] option:contains('${templateName}')
   Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
   Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
   Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
@@ -655,6 +655,12 @@ Add attachment
   Wait until  Element should not be visible  upload-dialog
   Run Keyword If  '${kind}' == 'application'  Wait until  Scroll to  table[class='attachments-table'] tr[data-test-type='${type}']
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
+
+Delete attachment
+  [Arguments]  ${type}
+  Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Confirm yes no dialog
 
 Set attachment type for upload
   [Arguments]  ${type}

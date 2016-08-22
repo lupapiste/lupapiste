@@ -396,12 +396,6 @@ Sign all attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
 
-Delete attachment
-  [Arguments]  ${type}
-  Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']
-  Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
-  Confirm yes no dialog
-
 Not needed matches
   # Helper for matching not needed properties
   [Arguments]  ${type}  ${nth}  ${property}  ${times}
