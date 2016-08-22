@@ -109,3 +109,5 @@
 "application.calendar.legend.appointment-with-another-authority" "sv" ""
 "application.calendar.legend.other-appointments-in-this-application" "fi" "Muiden osapuolten tähän hankkeeseen liittyvät tapaamiset"
 "application.calendar.legend.other-appointments-in-this-application" "sv" ""
+"application.calendar.appointment.decline" "fi" "Tapaaminen peruttu"
+"application.calendar.appointment.decline" "sv" ""

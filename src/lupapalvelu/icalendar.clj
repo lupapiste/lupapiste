@@ -1,11 +1,9 @@
 ; Source: https://github.com/jeffmad/clj-icalendar/blob/master/src/clj_icalendar/core.clj
 (ns lupapalvelu.icalendar
-  (:require [sade.email :as email]
-            [taoensso.timbre :as timbre :refer [info error]]
-            [clj-time.local :refer [to-local-date-time local-now]])
+  (:require [taoensso.timbre :as timbre :refer [info error]])
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
-           (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description)
+           (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description Sequence)
            (net.fortuna.ical4j.model.parameter Cn Role Rsvp)
            (net.fortuna.ical4j.model.component VEvent)
            (net.fortuna.ical4j.data CalendarOutputter)
@@ -24,12 +22,12 @@
   "take a vevent and add properties to it.
   the supported properties are url description location organizer-email and organizer-name."
   [vevent {:keys [^String description ^String url ^String location ^String organizer-email
-                  ^String organizer-name ^PersistentArrayMap attendee]}]
-  (let [u (str (java.util.UUID/randomUUID) (.toString (to-local-date-time (local-now))) "@lupapiste.fi")
-        props (.getProperties vevent)
+                  ^PersistentArrayMap attendee ^String unique-id ^Number sequence]}]
+  (let [props (.getProperties vevent)
         organizer-url (str "mailto:" organizer-email)]
-    (.add props (Uid. u))
+    (.add props (Uid. unique-id))
     (.add props (Organizer. organizer-url))
+    (.add props (Sequence. sequence))
     (when (seq url) (.add props (Url. (java.net.URI. url))))
     (when (seq location) (.add props (Location. location)))
     (when (seq description) (.add props (Description. description)))
@@ -42,17 +40,18 @@
 
 (defn- create-cal
   "create an empty calendar container. it is assumed to be Gregorian ical 2.0 and a published calendar "
-  [^String org-name ^String product ^String version ^String lang]
+  [^Method method ^String org-name ^String product ^String version ^String lang]
   (let [c (Calendar.)
         props (.getProperties c)]
     (.add props (ProdId. (str "-//" org-name " //" product " " version "//" lang)))
     (.add props Version/VERSION_2_0)
-    (.add props Method/REQUEST)
+    (.add props method)
     (.add props CalScale/GREGORIAN) c))
 
 (defn- create-event [^Date start ^Date end ^String title & {:keys [^String description ^String url ^String location
                                                                    ^String organizer-email ^String organizer-name
-                                                                   ^PersistentArrayMap attendee] :as all}]
+                                                                   ^PersistentArrayMap attendee ^String unique-id
+                                                                   ^Number sequence] :as all}]
   (let [st (doto  (DateTime. start) (.setUtc true))
         et (doto  (DateTime. end) (.setUtc true))
         vevent (VEvent. st et title)]
@@ -73,8 +72,8 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [startTime endTime location attendee] :as data}]
-  (let [cal  (create-cal "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
+(defn create-calendar-event [{:keys [method startTime endTime location attendee unique-id sequence] :as data}]
+  (let [cal  (create-cal method "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
                              "title"
@@ -83,6 +82,8 @@
                              :location location
                              :attendee attendee
                              :organizer-email "no-reply@lupapiste.fi"
-                             :organizer-name "Lupapiste-asiointipalvelu")
+                             :organizer-name "Lupapiste-asiointipalvelu"
+                             :unique-id unique-id
+                             :sequence sequence)
         _ (add-event! cal event)]
     (output-calendar cal)))

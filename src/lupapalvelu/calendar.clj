@@ -171,6 +171,13 @@
       (application->command application)
       (util/deep-merge comment-update reservation-push state-change))))
 
+(defn update-reservation
+  [application reservation-id changes]
+  (update-application
+    (application->command application)
+    {:reservations {$elemMatch {:id reservation-id}}}
+    changes))
+
 ; -- Configuration
 
 (defn ui-params []
