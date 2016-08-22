@@ -96,8 +96,8 @@ createFile(PDF_TESTFILE_PATH2, PDF_TESTFILE_CONTENT)
 createFile(PDF_TESTFILE_PATH3, PDF_TESTFILE_CONTENT)
 createFile(PDF_TESTFILE_PATH4, PDF_TESTFILE_CONTENT)
 
-PDF_TESTFILE_NAME1_PDFA = 'robotframework-testfile-21_stamping_01v2-PDFA.pdf'
-PDF_TESTFILE_NAME2_PDFA = 'robotframework-testfile-21_stamping_02v2-PDFA.pdf'
-PDF_TESTFILE_NAME3_PDFA = 'robotframework-testfile-21_stamping_03v2-PDFA.pdf'
-PDF_TESTFILE_NAME4_PDFA = 'robotframework-testfile-21_stamping_04v2-PDFA.pdf'
+PDF_TESTFILE_NAME1_PDFA = 'robotframework-testfile-21_stamping_01v2.pdf'
+PDF_TESTFILE_NAME2_PDFA = 'robotframework-testfile-21_stamping_02v2.pdf'
+PDF_TESTFILE_NAME3_PDFA = 'robotframework-testfile-21_stamping_03v2.pdf'
+PDF_TESTFILE_NAME4_PDFA = 'robotframework-testfile-21_stamping_04v2.pdf'
 PDF_TXT_TESTFILE_NAME = 'robotframework-testfile-21_stamping.pdf'

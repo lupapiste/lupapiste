@@ -1,5 +1,5 @@
 (ns lupapalvelu.application-search
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :as timbre :refer [debug info warn error errorf]]
             [clojure.string :as s]
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
@@ -220,6 +220,18 @@
       (sequential? sort-field) (apply array-map (interleave sort-field (repeat (dir asc))))
       :else (array-map sort-field (dir asc)))))
 
+(defn search [query db-fields sort skip limit]
+  (try
+    (mongo/with-collection "applications"
+      (query/find query)
+      (query/fields db-fields)
+      (query/sort sort)
+      (query/skip skip)
+      (query/limit limit))
+    (catch com.mongodb.MongoException e
+      (errorf "Application search query=%s, sort=%s failed: %s" query sort e)
+      (fail! :error.unknown))))
+
 (defn applications-for-user [user params]
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
@@ -227,12 +239,7 @@
         query-total (mongo/count :applications query)
         skip        (or (util/->long (:skip params)) 0)
         limit       (or (util/->long (:limit params)) 10)
-        apps        (mongo/with-collection "applications"
-                      (query/find query)
-                      (query/fields db-fields)
-                      (query/sort (make-sort params))
-                      (query/skip skip)
-                      (query/limit limit))
+        apps        (search query db-fields (make-sort params) skip limit)
         rows        (map
                       (comp
                         select-fields
