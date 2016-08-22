@@ -38,8 +38,8 @@
 
   var filterByArchiveStatus = function(attachments, keepArchived) {
     return _.filter(attachments, function(attachment) {
-      if (!attachment.metadata() || !attachment.metadata().sailytysaika || !attachment.metadata().sailytysaika.arkistointi()
-        || attachment.metadata().sailytysaika.arkistointi() === "ei") {
+      var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
+      if (!arkistointi || arkistointi === "ei") {
         return !keepArchived;
       } else {
         return keepArchived;
@@ -160,7 +160,8 @@
   };
 
   var selectIfArchivable = function(attachment) {
-    if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+    var tila = util.getIn(attachment, ["metadata", "tila"]);
+    if (attachment.archivable && tila !== "arkistoitu") {
       attachment.sendToArchive(true);
     }
   };
@@ -192,8 +193,9 @@
     });
     self.stateMap = ko.pureComputed(function() {
       var getState = function(doc) {
-        if (util.getIn(doc, ["metadata", "tila"])) {
-          return ko.unwrap(ko.unwrap(doc.metadata).tila);
+        var tila = util.getIn(doc, ["metadata", "tila"]);
+        if (tila) {
+          return tila;
         } else {
           return "valmis";
         }
@@ -293,7 +295,8 @@
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        if (!doc.metadata().tila || doc.metadata().tila() !== "arkistoitu") {
+        var tila = util.getIn(doc, ["metadata", "tila"]);
+        if (tila !== "arkistoitu") {
           doc.sendToArchive(true);
         }
       });
