@@ -197,7 +197,7 @@ Mikko signs all attachments
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature icon is visible
   [Tags]  attachments  fail
-  Wait Until  Element should be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta'] [data-test-icon='signed-icon']
+  Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature is visible
@@ -348,7 +348,7 @@ Authority adds png attachment without comment
 
 Signature icon is not visible to authority
   [Tags]  attachments
-  Element should not be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should not be visible  signed  muut.muu
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Authority signs the attachment
@@ -358,7 +358,7 @@ Authority signs the attachment
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature icon is visible to authority
   [Tags]  attachments  fail
-  Wait Until  Element should be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should be visible  signed  muut.muu
   Logout
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
@@ -371,9 +371,10 @@ Mikko signs the final attachment
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Mikko signs everything blindly
   [Tags]  attachments  fail
-  Element should not be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Attachment indicator icon should be visible  signed  muut.muu
   Sign all attachments  mikko123
-  Wait Until  Element should be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should be visible  signed  muut.muu
+
 
 
 *** Keywords ***
