@@ -546,7 +546,7 @@
             (get-in attachment [:latestVersion :archivable]) => true
             (get-in attachment [:latestVersion :archivabilityError]) => nil
             (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa-PDFA.pdf"))
+            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa.pdf"))
 
 
         (fact "Latest version should be 1.0 after conversion"

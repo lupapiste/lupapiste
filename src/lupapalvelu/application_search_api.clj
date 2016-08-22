@@ -77,12 +77,7 @@
         skip        (or (util/->long (:skip data)) 0)
         limit       (or (util/->long (:limit data)) Integer/MAX_VALUE)
 
-        apps        (mongo/with-collection "applications"
-                      (query/find query)
-                      (query/fields fields)
-                      (query/sort (search/make-sort data))
-                      (query/skip skip)
-                      (query/limit limit))
+        apps        (search/search query fields (search/make-sort data) skip limit)
 
         rows (map #(-> (mongo/with-id %)
                      (domain/filter-application-content-for user)
@@ -99,12 +94,10 @@
    :user-roles #{:anonymous}}
   [_]
   (let [query {:submitted {$ne nil}}
+        fields [:municipality :submitted :primaryOperation]
+        sort {:submitted -1}
+        skip 0
         limit 5
-        apps (mongo/with-collection "applications"
-               (query/find query)
-               (query/fields [:municipality :submitted :primaryOperation])
-               (query/sort {:submitted -1})
-               (query/limit limit))]
-    (ok :applications (->> apps
-                           (filter :primaryOperation)
+        apps (search/search query fields sort skip limit)]
+    (ok :applications (->> (filter :primaryOperation apps)
                            (map search/public-fields)))))

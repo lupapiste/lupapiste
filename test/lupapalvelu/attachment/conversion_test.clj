@@ -49,7 +49,7 @@
                                      :content (io/file "dev-resources/invalid-pdfa.pdf")}) => (contains {:archivabilityError nil
                                                                                                          :archivable         true
                                                                                                          :content            (partial instance? File)
-                                                                                                         :filename           "foo-PDFA.pdf"})
+                                                                                                         :filename           "foo.pdf"})
       (provided
         (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => true))))
 
