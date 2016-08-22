@@ -35,7 +35,8 @@
    :comment   (:comment r)
    :location  (:location r)
    :applicationId (:contextId r)
-   :reservedBy (:reservedBy r)})
+   :reservedBy (:reservedBy r)
+   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to]))))})
 
 (defn Reservations->FrontendSlots
   [status reservations]
@@ -416,7 +417,7 @@
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
-(notifications/defemail
+#_(notifications/defemail
   :decline-appointment
   {:subject-key                  "application.calendar.appointment.decline"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
@@ -441,13 +442,29 @@
                                     :info-fi (str (env/value :host) "/ohjeet")
                                     :info-sv (str (env/value :host) "/ohjeet")})})
 
+(defcommand accept-reservation
+  {:user-roles       #{:applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
+   #_:on-success       #_(notify :decline-appointment)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (get-reservation reservationId)]
+    (info "Accepting reservation" reservationId)
+    (post-command (str "reservations/" reservationId "/accept"))
+    (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "ACCEPTED"}})
+    (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
+    (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
+    (ok)))
+
 (defcommand decline-reservation
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
-   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
-   :on-success       (notify :decline-appointment)}
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
+   #_:on-success       #_(notify :decline-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (get-reservation reservationId)]
     (info "Declining reservation" reservationId)
@@ -456,6 +473,16 @@
     (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
     (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
     (ok)))
+
+(defcommand mark-reservation-update-seen
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
+  (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
+  (ok))
 
 (defquery my-reserved-slots
   {:user-roles       #{:authority :applicant}

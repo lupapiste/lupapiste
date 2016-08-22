@@ -29,4 +29,18 @@ LUPAPISTE.ApplicantCalendarModel = function () {
     self.defaultLocation(event.defaultLocation);
   });
 
+  self.acceptReservation = function(r) {
+    ajax
+      .command("accept-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id})
+      .success(function() {
+        hub.send("indicator", {style: "positive"});
+        repository.load(ko.unwrap(lupapisteApp.models.application.id));
+      })
+      .call();
+  };
+
+  self.appointmentParticipants = function(r) {
+    return _.map(r.participants, function (p) { return util.partyFullName(p); }).join(", ");
+  };
+
 };

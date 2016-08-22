@@ -15,16 +15,23 @@
       <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
         <div style="width: 96%">
           <h3 style="margin-top: 12px; font-weight: bold;" data-bind="dateString: startTime"></h3>
-          <div style="border: 1px solid #ccc; margin-top: 12px; ">
-            <div style="display: inline-block; font-weight: bold; font-size: 20px; margin: 6px 12px; vertical-align: top" data-bind="timeString: startTime">
+          <div style="border: 1px solid #ccc; margin-top: 12px">
+            <div style="margin: 6px 12px; display: inline-block; text-align: center">
+              <div style="display: inline-block; font-weight: bold; font-size: 20px; vertical-align: top"
+                   data-bind="timeString: startTime">
+              </div><br />
+              <div style="display: inline-block; font-weight: bold; font-size: 12px; vertical-align: top"
+                   data-bind="timeString: endTime">
+              </div>
             </div>
             <div style="display: inline-block; border-left: 1px solid #ccc; padding-left: 6px; margin: 6px 0px; height: 48px">
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
-              <br />Osallistujat: ...
+              <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
             </div>
             <div style="float:right; border-left: 1px solid #ccc; padding: 2px 6px; margin: 6px 0px; height: 48px">
-              <button class="positive">
-                <i class="lupicon-save" style="display: inline;"></i>
+              <button class="positive"
+                      data-bind="click: $component.acceptReservation.bind($data)">
+                <i class="lupicon-check" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
                 Hyväksy
               </button>
@@ -35,7 +42,7 @@
               </button>
             </div>
           </div>
-          <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px;">
+          <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
             <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
           </div>
         </div>
@@ -79,6 +86,7 @@
     </calendar-view>
 
     <div>
+      <div id="legend-orangebox"></div><span data-bind="ltext: 'application.calendar.legend.accepted-appointment'"></span>
       <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
 
       <div style="display: inline-block;">
