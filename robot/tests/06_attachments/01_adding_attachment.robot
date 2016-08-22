@@ -19,10 +19,22 @@ Mikko goes to empty attachments tab
 Mikko sees all "not needed" checkboxes as enabled and not selected
   Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
   Xpath Should Match X Times  //div[@id='application-attachments-tab']//input[@data-test-id='not-needed-checkbox']  4
-  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='hakija.valtakirja'] input[data-test-id=not-needed-checkbox]
-  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='paapiirustus.asemapiirros'] input[data-test-id=not-needed-checkbox]
-  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma'] input[data-test-id=not-needed-checkbox]
-  Checkbox wrapper not selected by jquery selector  div#application-attachments-tab tr[data-test-type='paapiirustus.pohjapiirustus'] input[data-test-id=not-needed-checkbox]
+  Not needed should not be selected  hakija.valtakirja
+  Not needed should not be selected  paapiirustus.asemapiirros
+  Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
+  Not needed should not be selected  paapiirustus.pohjapiirustus
+
+Mikko sets asemapiirros not needed
+  Click not needed  paapiirustus.asemapiirros
+  Not needed should be selected  paapiirustus.asemapiirros
+  Positive indicator should be visible
+  Not needed should be selected  paapiirustus.asemapiirros
+
+Mikko unsets asemapiirros not needed
+  Click not needed  paapiirustus.asemapiirros
+  Not needed should not be selected  paapiirustus.asemapiirros
+  Positive indicator should be visible
+  Not needed should not be selected  paapiirustus.asemapiirros
 
 "Download all attachments" should be disabled
   [Tags]  attachments
@@ -370,3 +382,31 @@ Delete Muu liite
   Scroll to  tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
   Click element  jquery=tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
   Confirm yes no dialog
+
+Click not needed
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  Scroll to  ${selector}
+  Click element  jquery=${selector}
+
+Not needed matches
+  # Helper for matching not needed properties
+  [Arguments]  ${type}  ${nth}  ${property}  ${times}
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) input[data-test-id=not-needed-checkbox]
+  Javascript?  $("${selector}:${property}").length === ${times}
+
+Not needed should be selected
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  checked  1
+
+Not needed should not be selected
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  checked  0
+
+Not needed should be visible
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  visible  1
+
+Not needed should not be visible
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  visible  0

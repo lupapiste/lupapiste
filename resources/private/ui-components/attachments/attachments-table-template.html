@@ -61,7 +61,8 @@
                                 enable: $data.authModel.ok('set-attachment-not-needed'),
                                 checked: $data.notNeeded">
               <label class="checkbox-label"
-                     data-bind="attr: {'for': $parent.inputId( $index())},
+                     data-bind="attr: {'for': $parent.inputId( $index()),
+                                       'data-test-id': 'not-needed-label'},
                                 ltext: 'application.attachmentNotNeeded'"></label>
             </div>
           </td>
