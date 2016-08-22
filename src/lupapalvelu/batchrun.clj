@@ -119,12 +119,13 @@
                     (< requested timestamp-1-week-ago)
                     (or (nil? reminder-sent) (< reminder-sent timestamp-1-week-ago))
                     (or (nil? due-date) (> due-date timestamp-now)))]
-      (notifications/notify! :reminder-request-statement {:application app
-                                                          :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                          :data {:created-date (util/to-local-date requested)}})
-      (update-application (application->command app)
-        {:statements {$elemMatch {:id (:id statement)}}}
-        {$set {:statements.$.reminder-sent timestamp-now}}))))
+      (logging/with-logging-context {:applicationId (:id app)}
+        (notifications/notify! :reminder-request-statement {:application app
+                                                            :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
+                                                            :data {:created-date (util/to-local-date requested)}})
+        (update-application (application->command app)
+          {:statements {$elemMatch {:id (:id statement)}}}
+          {$set {:statements.$.reminder-sent timestamp-now}})))))
 
 
 
@@ -150,12 +151,13 @@
                     (number? due-date)
                     (< due-date timestamp-now)
                     (or (nil? duedate-reminder-sent) (< duedate-reminder-sent timestamp-1-week-ago)))]
-      (notifications/notify! :reminder-statement-due-date {:application app
-                                                           :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
-                                                           :data {:due-date (util/to-local-date due-date)}})
-      (update-application (application->command app)
-        {:statements {$elemMatch {:id (:id statement)}}}
-        {$set {:statements.$.duedate-reminder-sent (now)}}))))
+      (logging/with-logging-context {:applicationId (:id app)}
+        (notifications/notify! :reminder-statement-due-date {:application app
+                                                             :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
+                                                             :data {:due-date (util/to-local-date due-date)}})
+        (update-application (application->command app)
+          {:statements {$elemMatch {:id (:id statement)}}}
+          {$set {:statements.$.duedate-reminder-sent (now)}})))))
 
 
 
@@ -169,13 +171,14 @@
                                                          {:reminder-sent (older-than timestamp-1-week-ago)}]})]
     (doseq [oir oirs]
       (let [application (mongo/by-id :applications (:application-id oir) [:state :modified :title :address :municipality])]
-        (when (= "info" (:state application))
-          (notifications/notify! :reminder-open-inforequest {:application application
-                                                             :data {:email (:email oir)
-                                                                    :token-id (:id oir)
-                                                                    :created-date (util/to-local-date (:created oir))}})
-          (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}})
-          )))))
+        (logging/with-logging-context {:applicationId (:id application)}
+          (when (= "info" (:state application))
+            (notifications/notify! :reminder-open-inforequest {:application application
+                                                               :data {:email (:email oir)
+                                                                      :token-id (:id oir)
+                                                                      :created-date (util/to-local-date (:created oir))}})
+            (mongo/update-by-id :open-inforequest-token (:id oir) {$set {:reminder-sent (now)}})
+            ))))))
 
 
 ;; "Naapurin kuuleminen: Kuulemisen tila on "Sahkoposti lahetetty", eika allekirjoitusta ole tehty viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Muistutus lahetetaan kerran."
@@ -190,27 +193,27 @@
     (doseq [app apps
             neighbor (:neighbors app)
             :let [statuses (:status neighbor)]]
+      (logging/with-logging-context {:applicationId (:id app)}
+        (when (not-any? #(or
+                           (= "reminder-sent" (:state %))
+                           (= "response-given-ok" (:state %))
+                           (= "response-given-comments" (:state %))
+                           (= "mark-done" (:state %))) statuses)
 
-      (when (not-any? #(or
-                         (= "reminder-sent" (:state %))
-                         (= "response-given-ok" (:state %))
-                         (= "response-given-comments" (:state %))
-                         (= "mark-done" (:state %))) statuses)
+          (doseq [status statuses]
 
-        (doseq [status statuses]
-
-          (when (and
-                  (= "email-sent" (:state status))
-                  (< (:created status) timestamp-1-week-ago))
-            (notifications/notify! :reminder-neighbor {:application app
-                                                       :data {:email (:email status)
-                                                              :token (:token status)
-                                                              :neighborId (:id neighbor)}})
-            (update-application (application->command app)
-              {:neighbors {$elemMatch {:id (:id neighbor)}}}
-              {$push {:neighbors.$.status {:state    "reminder-sent"
-                                           :token    (:token status)
-                                           :created  (now)}}})))))))
+            (when (and
+                    (= "email-sent" (:state status))
+                    (< (:created status) timestamp-1-week-ago))
+              (notifications/notify! :reminder-neighbor {:application app
+                                                         :data {:email (:email status)
+                                                                :token (:token status)
+                                                                :neighborId (:id neighbor)}})
+              (update-application (application->command app)
+                {:neighbors {$elemMatch {:id (:id neighbor)}}}
+                {$push {:neighbors.$.status {:state    "reminder-sent"
+                                             :token    (:token status)
+                                             :created  (now)}}}))))))))
 
 
 
@@ -235,11 +238,12 @@
                     work-time-expires-timestamp
                     (> work-time-expires-timestamp (now))
                     (< work-time-expires-timestamp timestamp-1-week-in-future))]
-      (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
-                                                                 :user (get-app-owner app)
-                                                                 :data {:work-time-expires-date work-time-expires-str}})
-      (update-application (application->command app)
-        {$set {:work-time-expiring-reminder-sent (now)}}))))
+      (logging/with-logging-context {:applicationId (:id app)}
+        (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
+                                                                   :user (get-app-owner app)
+                                                                   :data {:work-time-expires-date work-time-expires-str}})
+        (update-application (application->command app)
+          {$set {:work-time-expiring-reminder-sent (now)}})))))
 
 
 
@@ -254,10 +258,11 @@
                                  {:reminder-sent (older-than timestamp-1-month-ago)}]}
                            [:auth :state :modified :title :address :municipality :infoRequest])]
     (doseq [app apps]
-      (notifications/notify! :reminder-application-state {:application app
-                                                          :user (get-app-owner app)})
-      (update-application (application->command app)
-        {$set {:reminder-sent (now)}}))))
+      (logging/with-logging-context {:applicationId (:id app)}
+        (notifications/notify! :reminder-application-state {:application app
+                                                            :user (get-app-owner app)})
+        (update-application (application->command app)
+          {$set {:reminder-sent (now)}})))))
 
 
 (defn send-reminder-emails [& args]
@@ -289,9 +294,9 @@
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-          (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-            (try
-              (logging/with-logging-context {:applicationId id}
+          (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+              (try
                 (if-not (s/blank? url)
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
                         result (verdict/do-check-for-verdict command)]
@@ -304,19 +309,18 @@
                                                  :event "Failed to check verdict"
                                                  :failure result
                                                  :organization {:id organization :permit-type permitType}
-                                                 }))
-                    )
+                                                 })))
 
                   (logging/log-event :info {:run-by "Automatic verdicts checking"
                                             :event "No Krysp WFS url defined for organization"
-                                            :organization {:id organization :permit-type permitType}})))
-              (catch Throwable t
-                (logging/log-event :error {:run-by "Automatic verdicts checking"
-                                           :event "Unable to get verdict from backend"
-                                           :exception-message (.getMessage t)
-                                           :application-id id
-                                           :organization {:id organization :permit-type permitType}}))
-              ))) apps))))
+                                            :organization {:id organization :permit-type permitType}}))
+                (catch Throwable t
+                  (logging/log-event :error {:run-by "Automatic verdicts checking"
+                                             :event "Unable to get verdict from backend"
+                                             :exception-message (.getMessage t)
+                                             :application-id id
+                                             :organization {:id organization :permit-type permitType}}))))))
+          apps))))
 
 (defn check-for-verdicts [& args]
   (mongo/connect!)
@@ -380,17 +384,18 @@
     orgs-by-id))
 
 (defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
-  (try
-    (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-      (debugf "fetch-reviews-for-application: processing application id %s" id)
-      (logging/with-logging-context {:applicationId id}
-      (if-not (s/blank? url)
-        ;; url means there's a defined location (eg sftp) for polling xml verdicts
-        (let [command (assoc (application->command app) :user eraajo-user :created (now))
-              result (verdict/do-check-for-reviews command)]
-          result))))
-    (catch Throwable t
-      (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t)))))
+  (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+    (try
+      (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+        (debugf "fetch-reviews-for-application: processing application id %s" id)
+        (logging/with-logging-context {:applicationId id}
+        (if-not (s/blank? url)
+          ;; url means there's a defined location (eg sftp) for polling xml verdicts
+          (let [command (assoc (application->command app) :user eraajo-user :created (now))
+                result (verdict/do-check-for-reviews command)]
+            result))))
+      (catch Throwable t
+        (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))))))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (orgs-for-review-fetch)
