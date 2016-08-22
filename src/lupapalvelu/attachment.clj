@@ -26,7 +26,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File FilterInputStream]))
+           [java.io File FilterInputStream InputStream]))
 
 ;;
 ;; Metadata
@@ -548,6 +548,10 @@
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
+(defn- cleanup-temp-file [conversion-result]
+  (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
+    (io/delete-file (:content conversion-result) :silently)))
+
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
    2) Validates and converts for archivability, uploads converted file to GridFS if applicable
@@ -578,6 +582,7 @@
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (cleanup-temp-file conversion-result)
     linked-version))
 
 (defn- append-stream [zip file-name in]

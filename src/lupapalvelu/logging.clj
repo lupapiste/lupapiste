@@ -54,7 +54,8 @@
   ([level event opts]
    (.write event-log-out (str (output-fn {:level level
                                           :timestamp_ (delay (.print time-fmt (System/currentTimeMillis)))
-                                          :?ns-str (:ns opts)})
+                                          :?ns-str (:ns opts)
+                                          :context timbre/*context*})
                               event
                               \newline))
    (.flush event-log-out)))

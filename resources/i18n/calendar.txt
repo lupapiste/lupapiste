@@ -107,3 +107,5 @@
 "application.calendar.legend.waiting-for-acceptance" "sv" ""
 "application.calendar.legend.appointment-with-another-authority" "fi" "(tapaaminen toisen viranomaisen kanssa)"
 "application.calendar.legend.appointment-with-another-authority" "sv" ""
+"application.calendar.legend.other-appointments-in-this-application" "fi" "Muiden osapuolten tähän hankkeeseen liittyvät tapaamiset"
+"application.calendar.legend.other-appointments-in-this-application" "sv" ""
