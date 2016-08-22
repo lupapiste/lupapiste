@@ -284,7 +284,8 @@
     self.archivingInProgressIds = ko.observableArray();
 
     self.archiveButtonEnabled = ko.pureComputed(function() {
-      return _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
+      return  lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
+        _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
         _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
