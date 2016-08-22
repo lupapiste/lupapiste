@@ -35,7 +35,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
     return  _( [[approved, {css: "lupicon-circle-check positive", icon: "approved"}],
                 [rejected || (!file && !notNeeded), {css: "lupicon-circle-attention negative", icon: "rejected"}],
-                [ _.get( data, "signatories.0"), {css: "lupicon-circle-pen positive", icon: "signed"}],
+                [ _.get( data, "signatures.0"), {css: "lupicon-circle-pen positive", icon: "signed"}],
                 [data.state === "requires_authority_action", {css: "lupicon-circle-star primary", icon: "state"}],
                 [data.stamped, {css: "lupicon-circle-stamp positive", icon: "stamped"}],
                 [showSentIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent"}],
