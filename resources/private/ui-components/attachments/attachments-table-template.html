@@ -90,7 +90,8 @@
         </tr>
       </tbody>
     </table>
-    <button data-bind="enable: canDownload"
+    <button data-bind="enable: canDownload,
+                       click: $data.downloadAll"
             class="secondary">
       <i class="lupicon-download"></i>
       <span data-bind="ltext: 'download-all'"></span>

@@ -47,6 +47,14 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
     return attachment.readOnly;
   }
 
+  function getAttachmentId(obs) {
+    return ko.utils.unwrapObservable(obs).id;
+  }
+
+  function downloadAll () {
+    console.log("Ladattaisiin uudella kutsulla", _.map(service.attachments, getAttachmentId));
+  }
+        
   return {
     attachments: service.attachments,
     idPrefix: idPrefix,
@@ -61,6 +69,7 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     readOnly: readOnly,
+    downloadAll: downloadAll, 
     canDownload: _.some(service.attachments, function(a) {
       return hasFile(a());
     }),

@@ -401,6 +401,20 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defraw "download-attachments"
+  {:parameters [:ids]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-states
+   :user-authz-roles auth/all-authz-roles
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:ids])]
+   :org-authz-roles auth/reader-org-authz-roles}
+  [{{attachments :attachments :as application} :application}]
+  (do
+    (println "download-attachments kutsuttu")
+    {:status 200
+     :headers {"Content-Type" "text/plain"}
+     :body (str "Saisi ladata")}))
+
 ;;
 ;; Upload
 ;;
