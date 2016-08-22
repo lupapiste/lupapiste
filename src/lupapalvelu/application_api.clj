@@ -158,11 +158,12 @@
 (defcommand cancel-application
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :user-roles       #{:applicant}
+   :user-roles       #{:applicant :authority}
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
-   :pre-checks       [(partial sm/validate-state-transition :canceled)]}
+   :pre-checks       [(partial sm/validate-state-transition :canceled)
+                      action/outside-authority-only]}
   [command]
   (app/cancel-application command))
 
