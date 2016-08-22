@@ -12,7 +12,7 @@
 
 (defn- foreach-action [web user application data]
   (map
-    #(let [{type :type categories :categories} (action/get-meta %)]
+   #(let [{type :type categories :categories} (action/get-meta %)]
       (assoc
         (action/action % :type type :data data :user user)
         :application application
@@ -34,7 +34,8 @@
     (fn->> (map validated) (filter (comp :ok first vals)) (into {}))))
 
 (defn- action-has-category-fn [category]
-  (fn [action] (->> action :categories (some #{category}) boolean)))
+  (fn [action]
+    (->> action :categories (some #{category}) boolean)))
 
 (defn- filter-actions-by-category [actions]
   (filter (action-has-category-fn :attachments) actions))
@@ -51,12 +52,13 @@
    :fileId       latest-version})
 
 (defmethod allowed-actions-for-category :attachments
-  [{:keys [web user {attachments :attachments :as application}]}]
-  (->> (map (partial build-attachment-query-params application) attachments)
-       (map (partial foreach-action web user application))
-       (map filter-actions-by-category)
-       (map validate-actions)
-       (zipmap (map :id attachments))))
+  [{:keys [web user application]}]
+  (let [{:keys [attachments]} application]
+    (->> (map (partial build-attachment-query-params application) attachments)
+         (map (partial foreach-action web user application))
+         (map filter-actions-by-category)
+         (map validate-actions)
+         (zipmap (map :id attachments)))))
 
 (defquery allowed-actions
   {:user-roles       #{:anonymous}
