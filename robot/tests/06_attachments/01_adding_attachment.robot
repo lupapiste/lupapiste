@@ -55,7 +55,7 @@ Mikko adds txt attachment without comment
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
-  Wait Until  Delete Muu liite
+  Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds txt attachment without comment again
@@ -74,7 +74,7 @@ Mikko deletes attachment version
 
 Mikko deletes also the attachment template
   Click by test id  back-to-application-from-attachment
-  Wait Until  Delete Muu liite
+  Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds again txt attachment with comment
@@ -245,16 +245,33 @@ Sonja goes to attachments tab
 
 Sonja adds new attachment template
   [Tags]  attachments
-  Add empty attachment template  Muu liite  muut  muu
+  Add empty attachment template  Muu pääpiirustus  paapiirustus  muu_paapiirustus
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until Element Is Visible  jquery=tr[data-test-type='muut.muu'] a[data-test-id=open-attachment]
+  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
+  Logout
+
+Mikko logs back in and browses to the Attachments tab
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
+
+For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
+  Not needed should be visible  paapiirustus.muu_paapiirustus
+  Not needed should be disabled  paapiirustus.muu_paapiirustus
+  Not needed should not be selected  paapiirustus.muu_paapiirustus
+  Logout
+
+Sonja logs back in and browses to the Attachments tab
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
 
 Sonja deletes the newly created attachment template
   [Tags]  attachments
-  Wait Until  Delete Muu liite
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='muut.muu'] a[data-test-id=open-attachment]
+  Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
@@ -378,9 +395,10 @@ Sign all attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
 
-Delete Muu liite
-  Scroll to  tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
-  Click element  jquery=tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
+Delete attachment
+  [Arguments]  ${type}
+  Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
   Confirm yes no dialog
 
 Click not needed
@@ -392,7 +410,7 @@ Click not needed
 Not needed matches
   # Helper for matching not needed properties
   [Arguments]  ${type}  ${nth}  ${property}  ${times}
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) input[data-test-id=not-needed-checkbox]
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] input[data-test-id=not-needed-checkbox]
   Javascript?  $("${selector}:${property}").length === ${times}
 
 Not needed should be selected
@@ -410,3 +428,8 @@ Not needed should be visible
 Not needed should not be visible
   [Arguments]  ${type}  ${nth}=1
   Not needed matches  ${type}  ${nth}  visible  0
+
+Not needed should be disabled
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] label[data-test-id=not-needed-label]
+  Javascript?  $("${selector}:visible").length === 1

@@ -623,7 +623,7 @@ Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
   Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${subCategory}
+  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
   List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
   Click Element  xpath=//div[@id="dialog-add-attachment-templates-v2"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
   Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
