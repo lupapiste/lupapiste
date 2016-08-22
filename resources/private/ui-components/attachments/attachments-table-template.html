@@ -18,8 +18,8 @@
                               'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachments-table__state-icons">
-            <i data-bind="attr: {'class': $data.icon,
-                                 'data-test-icon':  $data.type + '-icon'}"></i>
+            <i data-bind="attr: {'class': $data.css,
+                                 'data-test-icon':  $data.icon + '-icon'}"></i>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
