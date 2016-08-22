@@ -78,7 +78,8 @@
 (facts "Actions with id and state 'draft' are not allowed for authority"
        (let [allowed-actions #{:invite-guest :delete-guest-application
                                :toggle-guest-subscription :application-guests :decline-invitation
-                               :suti-update-id :suti-update-added :set-attachment-contents}]
+                               :suti-update-id :suti-update-added :set-attachment-contents
+                               :cancel-application}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
