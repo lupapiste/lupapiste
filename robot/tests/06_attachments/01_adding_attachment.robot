@@ -189,19 +189,16 @@ Signature icon is not visible
   [Tags]  attachments
   Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta'] [data-test-icon='signed-icon']
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Mikko signs all attachments
-  [Tags]  attachments  fail
+  [Tags]  attachments
   Sign all attachments  mikko123
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature icon is visible
-  [Tags]  attachments  fail
+  [Tags]  attachments
   Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature is visible
-  [Tags]  attachments  fail
+  [Tags]  attachments
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
@@ -209,18 +206,18 @@ Signature is visible
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-bind="dateTimeString: created"]
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
+# FIXME: attachment auth model
 Sign single attachment
-  [Tags]  attachments  fail
+  [Tags]  attachments fail
   Click enabled by test id  signLatestAttachmentVersion
   Wait Until   Element should be visible  signSingleAttachmentPassword
   Input text by test id  signSingleAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachment
   Wait Until   Element should not be visible  signSingleAttachmentPassword
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
+# FIXME: attachment auth model
 Two signatures are visible
-  [Tags]  attachments  fail
+  [Tags]  attachments fail
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  2
 
 Switch to authority
@@ -350,25 +347,23 @@ Signature icon is not visible to authority
   [Tags]  attachments
   Wait Until  Attachment indicator icon should not be visible  signed  muut.muu
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Authority signs the attachment
-  [Tags]  attachments  fail
+  [Tags]  attachments
   Sign all attachments  sonja
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
+# FIXME: attachment auth model
 Signature icon is visible to authority
-  [Tags]  attachments  fail
+  [Tags]  attachments fail
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
   Logout
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
+# FIXME: attachment auth model
 Mikko signs the final attachment
-  [Tags]  attachments  fail
+  [Tags]  attachments fail
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
 
-# FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Mikko signs everything blindly
   [Tags]  attachments  fail
   Attachment indicator icon should be visible  signed  muut.muu
