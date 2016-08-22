@@ -107,24 +107,18 @@ Scroll to muut muu
 
 Attachment not-needed checkbox should not be visible
   [Tags]  attachments
-  Element should not be visible  jquery=tr[data-test-type='muut.muu'] input[data-test-id=not-needed-checkbox]
+  Not needed should not be visible  muut.muu
 
-# FIXME: Next test cases cannot be repeated with new attachment tab
 Mikko checks Not needed for the attachment
-  [Tags]  attachments  fail
-  Scroll to  td.attachment-not-needed input
-  Wait until  Select checkbox  jquery=td.attachment-not-needed input
-  Sleep  0.5s
-  Wait for jQuery
+  [Tags]  attachments  
+  Execute Javascript  $("label[data-test-id=not-needed-label]")[0].click()
 
-# FIXME: Next test cases cannot be repeated with new attachment tab
-Not needed should be checked after reload
-  [Tags]  attachments  fail
+Not needed should be checked after reload with correct filters
+  [Tags]  attachments  
   Reload Page
   Wait Until Page Contains  ${propertyId}
-  Scroll to  td.attachment-not-needed input
-  Wait Until  Element should be visible  jquery=td.attachment-not-needed input
-  Checkbox Should Be Selected  jquery=td.attachment-not-needed input
+  Click element  jquery=div.filter-wrapper:last-child label.filter-label
+  Not needed should be selected  paapiirustus.asemapiirros
 
 Mikko opens attachment details again
   [Tags]  attachments
@@ -187,7 +181,7 @@ Change attachment type
 
 Signature icon is not visible
   [Tags]  attachments
-  Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta'] [data-test-icon='signed-icon']
+  Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
 Mikko signs all attachments
   [Tags]  attachments
@@ -195,7 +189,7 @@ Mikko signs all attachments
 
 Signature icon is visible
   [Tags]  attachments
-  Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
+  Wait Until  Attachment indicator icon should be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
 Signature is visible
   [Tags]  attachments
@@ -206,18 +200,16 @@ Signature is visible
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-bind="dateTimeString: created"]
 
-# FIXME: attachment auth model
 Sign single attachment
-  [Tags]  attachments fail
+  [Tags]  attachments
   Click enabled by test id  signLatestAttachmentVersion
   Wait Until   Element should be visible  signSingleAttachmentPassword
   Input text by test id  signSingleAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachment
   Wait Until   Element should not be visible  signSingleAttachmentPassword
 
-# FIXME: attachment auth model
 Two signatures are visible
-  [Tags]  attachments fail
+  [Tags]  attachments
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  2
 
 Switch to authority
@@ -321,9 +313,9 @@ Attachment state should be ok
   Tab should be visible  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
-"Sign attachments" should not be visible in the attachment actions dropdown
+Sign attachments button should not be visible
   [Tags]  attachments
-  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='signAttachments']
+  No such test id  sign-attachments
 
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments
@@ -351,22 +343,20 @@ Authority signs the attachment
   [Tags]  attachments
   Sign all attachments  sonja
 
-# FIXME: attachment auth model
 Signature icon is visible to authority
-  [Tags]  attachments fail
+  [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
   Logout
 
-# FIXME: attachment auth model
 Mikko signs the final attachment
-  [Tags]  attachments fail
+  [Tags]  attachments
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
 
 Mikko signs everything blindly
-  [Tags]  attachments  fail
-  Attachment indicator icon should be visible  signed  muut.muu
+  [Tags]  attachments 
+  Attachment indicator icon should not be visible  signed  muut.muu
   Sign all attachments  mikko123
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
 
@@ -393,27 +383,28 @@ Sign all attachments
 
 Not needed matches
   # Helper for matching not needed properties
-  [Arguments]  ${type}  ${nth}  ${property}  ${times}
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] input[data-test-id=not-needed-checkbox]
+  [Arguments]  ${type}  ${property}  ${times}
+  ${selector} =  Set Variable  table.attachments-table tr[data-test-type='${type}'] input[data-test-id=not-needed-checkbox]
   Javascript?  $("${selector}:${property}").length === ${times}
 
 Not needed should be selected
-  [Arguments]  ${type}  ${nth}=1
-  Not needed matches  ${type}  ${nth}  checked  1
+  [Arguments]  ${type}
+  Not needed matches  ${type}  checked  1
 
 Not needed should not be selected
-  [Arguments]  ${type}  ${nth}=1
-  Not needed matches  ${type}  ${nth}  checked  0
+  [Arguments]  ${type}
+  Not needed matches  ${type}  checked  0
 
 Not needed should be visible
-  [Arguments]  ${type}  ${nth}=1
-  Not needed matches  ${type}  ${nth}  visible  1
+  [Arguments]  ${type}
+  Not needed matches  ${type}  visible  1
 
 Not needed should not be visible
-  [Arguments]  ${type}  ${nth}=1
-  Not needed matches  ${type}  ${nth}  visible  0
+  [Arguments]  ${type}
+  Not needed matches  ${type}  visible  0
 
 Not needed should be disabled
-  [Arguments]  ${type}  ${nth}=1
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] label[data-test-id=not-needed-label]
-  Javascript?  $("${selector}:visible").length === 1
+  [Arguments]  ${type} 
+  Not needed matches  ${type}  disabled  1
+
+  

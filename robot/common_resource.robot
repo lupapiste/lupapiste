@@ -683,12 +683,12 @@ Click not needed
   Click element  jquery=${selector}
 
 Attachment indicator icon should be visible
-  [Arguments]  ${icon}  ${type}  ${nth}=1
-  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) i[data-test-icon=${icon}-icon]
+  [Arguments]  ${icon}  ${type}
+  Element should be visible  jquery=table.attachments-table tr[data-test-type='${type}'] i[data-test-icon=${icon}-icon]
 
 Attachment indicator icon should not be visible
-  [Arguments]  ${icon}  ${type}  ${nth}=1
-  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) i[data-test-icon=${icon}-icon]
+  [Arguments]  ${icon}  ${type}
+  Element should not be visible  jquery=table.attachments-table tr[data-test-type='${type}'] i[data-test-icon=${icon}-icon]
 
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
