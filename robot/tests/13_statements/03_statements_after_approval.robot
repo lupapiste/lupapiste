@@ -46,7 +46,7 @@ Sonja logs in and adds statement giver to application
   Wait Until  Textarea Value Should Be  //*[@id='invite-statement-giver-saateText']  Tama on saateteksti.
 
   Statement count is  1
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Ronja logs in and adds attachment to statement draft
   Ronja logs in
@@ -63,7 +63,7 @@ Mikko logs in and submits application
   Mikko logs in
   Open application  ${appname}  ${appPropertyId}
   Submit application
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Sonja logs in and approves application
   Sonja logs in
@@ -93,7 +93,7 @@ Ronja can delete and add attachment
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  New information
 
 Ronja submits statement
-  Wait and click  statement-submit  
+  Wait and click  statement-submit
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-statement-tab']//table[@data-test-id='application-statements']
   Open statement  ronja.sibbo@sipoo.fi
@@ -153,4 +153,3 @@ Sonja removes Vainamoinen
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  1
   [Teardown]  Logout
-  

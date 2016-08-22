@@ -126,5 +126,5 @@ Finalize review
   Return from review
 
 Has review attachment
-  [Arguments]  ${row-selector}  ${regex}
-  Javascript?  $("${row-selector} td.attachment-file-info a").text().match( ${regex})
+  [Arguments]  ${type}  ${regex}  ${nth}=0
+  Javascript?  $("tr[data-test-type='${row-selector}'] td[data-test-id=file-info]:nth-child(${nth}) a").text().match( ${regex})

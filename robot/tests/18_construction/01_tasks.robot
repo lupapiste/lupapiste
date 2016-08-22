@@ -145,7 +145,7 @@ Add attachment to loppukatselmus
 
 Check that loppukatselmus attachment is listed
   Open tab  attachments
-  Has review attachment  tr#attachment-row-muut-tutkimus  /robot.*pdf/
+  Has review attachment  muut.tutkimus  /robot.*pdf/
 
 Delete loppukatselmus
   Open tab  tasks
@@ -222,9 +222,9 @@ Sonja adds an end review
   Return from review
 
 Verify post-verdict attachments - Aloituskokous
-  Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
+  Wait until  Element should be visible  jquery=a[data-test-id=application-open-attachments-tab]
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Katselmus task created in an YA application does not include any Rakennus information (LPK-719)
   Open application  ${appname-ya}  ${propertyId}
@@ -265,8 +265,8 @@ Mikko can add attachments though
 Mikko checks that review attachments are correctly listed
   Open tab  attachments
   Javascript?  $("tr#attachment-row-muut-muu").length === 2
-  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*pdf/
-  Has review attachment  tr#attachment-row-muut-muu:last  /robot.*png/
+  Has review attachment  muut.muu  /robot.*pdf/
+  Has review attachment  muut.muu  /robot.*png/  1
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
@@ -301,7 +301,7 @@ Attachments have been updated
   Open tab  attachments
   Javascript?  $("tr#attachment-row-katselmukset_ja_tarkastukset-katselmuksen_tai_tarkastuksen_poytakirja").length === 3
   Javascript?  $("tr#attachment-row-muut-muu").length === 1
-  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*pdf/
+  Has review attachment  muut.muu  /robot.*pdf/
   [Teardown]  Logout
 
 
