@@ -407,6 +407,9 @@
                           {:clientId clientId :reservationSlotId slotId
                            :reservationTypeId reservationTypeId :comment comment
                            :location location :contextId id :reservedBy userId})
+          ; Reservations made by applicants are auto-accepted
+          _ (if (usr/applicant? user)
+              (post-command (str "reservations/" reservationId "/accept")))
           reservation (get-reservation reservationId)
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
