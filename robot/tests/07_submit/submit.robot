@@ -76,18 +76,22 @@ Sonja logs in and adds new attachment template
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Add empty attachment template  Muu liite  muut  muu
+  Logout
 
 Mikko logs back in and browses to the Attachments tab
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
 
+Mikko selects not needed for valtakirja attachment
+  Click not needed  hakija.valtakirja
+  Positive indicator should be visible
+
 Mikko adds pdf attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
   Add attachment version  ${PDF_TESTFILE_PATH}
-  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Scroll and click test id  back-to-application-from-attachment
   Wait Until  Tab should be visible  attachments
-  Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 Mikko fills up a field marked with a VRK warning
   Open tab  info

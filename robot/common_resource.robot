@@ -670,6 +670,12 @@ Open attachment details
   Execute Javascript  ${selector}[${nth}].click();
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
+Click not needed
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  Scroll to  ${selector}
+  Click element  jquery=${selector}
+
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name

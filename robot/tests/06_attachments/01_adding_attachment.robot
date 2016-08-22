@@ -401,12 +401,6 @@ Delete attachment
   Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
   Confirm yes no dialog
 
-Click not needed
-  [Arguments]  ${type}  ${nth}=1
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
-  Scroll to  ${selector}
-  Click element  jquery=${selector}
-
 Not needed matches
   # Helper for matching not needed properties
   [Arguments]  ${type}  ${nth}  ${property}  ${times}
