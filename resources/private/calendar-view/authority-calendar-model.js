@@ -65,4 +65,16 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     }
   });
 
+  self.markSeen = function(r) {
+    ajax
+      .command("mark-reservation-update-seen", {id: lupapisteApp.models.application.id(), reservationId: r.id})
+      .success(function() {})
+      .call();
+  };
+
+  self.appointmentParticipants = function(r) {
+    return _.map(r.participants, function (p) { return util.partyFullName(p); }).join(", ");
+  };
+
+
 };

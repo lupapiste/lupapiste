@@ -4,6 +4,44 @@
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
       <span data-bind="component: {name: 'help-toggle',
                        params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
+    </div>
+
+    <!-- ko if: lupapisteApp.models.application.calendarNotificationsPending().length > 0 -->
+    <div style="margin-bottom: 36px">
+      <div>
+        <p><b><i class="lupicon-circle-attention"></i> Sinulle on varattu uusia tapaamisia.</b></p>
+      </div>
+
+      <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
+        <div class="calendar-pending-action">
+          <h3 data-bind="weekdayAndDate: startTime"></h3>
+          <div class="calendar-pending-action-item">
+            <div class="times">
+              <div class="startTime" data-bind="timeString: startTime"></div><br />
+              <div class="endTime" data-bind="timeString: endTime"></div>
+            </div>
+            <div class="titlebar">
+              <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
+              <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
+            </div>
+            <div class="titlebar buttons-box">
+              <button class="positive"
+                      data-bind="click: $component.markSeen.bind($data)">
+                <i class="lupicon-check" style="display: inline;"></i>
+                <i class="wait spin lupicon-refresh"></i>
+                OK
+              </button>
+            </div>
+          </div>
+          <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
+            <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /ko -->
+
+    <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
     </div>
 
