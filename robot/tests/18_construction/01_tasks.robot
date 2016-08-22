@@ -51,6 +51,24 @@ Tyonjohtajat
 Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
+  Task state count is  task-lupamaarays  requires_user_action  3
+  
+Valaistussuunnitelma requires action
+  Open task  Valaistussuunnitelma
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
+
+Reject Valaistussuunnitelma
+  Click enabled by test id  reject-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
+
+Approve Valaistussuunnitelma
+  Click enabled by test id  approve-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+  Return from review
+
+Lupaamaarays states updated
+  Task state count is  task-lupamaarays  requires_user_action  2
+  Task state count is  task-lupamaarays  ok  1
 
 Add attachment to Aloituskokous
   Open task  Aloituskokous
@@ -65,21 +83,6 @@ Add attachment to Aloituskokous
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
-
-# FIXME check on another type of task
-Aloituskokous requires action
-  [Tags]  fail
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
-
-Reject Aloituskokous
-  [Tags]  fail
-  Click enabled by test id  reject-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
-
-Approve Aloituskokous
-  [Tags]  fail
-  Click enabled by test id  approve-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
@@ -264,7 +267,7 @@ Mikko can add attachments though
 
 Mikko checks that review attachments are correctly listed
   Open tab  attachments
-  Javascript?  $("tr#attachment-row-muut-muu").length === 2
+  Javascript?  $("tr[data-test-type='muut.muu']").length === 2
   Has review attachment  muut.muu  /robot.*pdf/
   Has review attachment  muut.muu  /robot.*png/  1
 
@@ -299,8 +302,8 @@ Deleting R verdict does not delete its done reviews
 
 Attachments have been updated
   Open tab  attachments
-  Javascript?  $("tr#attachment-row-katselmukset_ja_tarkastukset-katselmuksen_tai_tarkastuksen_poytakirja").length === 3
-  Javascript?  $("tr#attachment-row-muut-muu").length === 1
+  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja']").length === 3
+  Javascript?  $("tr[data-test-type='muut.muu']").length === 1
   Has review attachment  muut.muu  /robot.*pdf/
   [Teardown]  Logout
 

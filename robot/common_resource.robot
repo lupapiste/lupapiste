@@ -1023,6 +1023,10 @@ Task count is
   [Arguments]  ${type}  ${amount}
   Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]  ${amount}
 
+Task state count is
+  [Arguments]  ${type}  ${state}  ${amount}
+  Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]//i[@data-test-state="${state}"]  ${amount}
+
 Foreman count is
   [Arguments]  ${amount}
   Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
