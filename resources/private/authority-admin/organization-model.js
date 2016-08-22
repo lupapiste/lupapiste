@@ -48,7 +48,6 @@ LUPAPISTE.OrganizationModel = function () {
   self.features = ko.observable();
   self.allowedRoles = ko.observable([]);
   self.permitTypes = ko.observable([]);
-  self.suti = ko.observable();
   self.useAttachmentLinksIntegration = ko.observable(false);
 
   self.sectionOperations = ko.observableArray();
@@ -139,6 +138,25 @@ LUPAPISTE.OrganizationModel = function () {
         .call();
     }
   });
+
+  var sectionEnabled = ko.observable();
+
+  self.verdictSectionEnabled = ko.computed( {
+      read: function() {
+        return sectionEnabled();
+      },
+      write: function( enabled ) {
+        sectionEnabled( Boolean( enabled ));
+        if( self.initialized ) {
+          ajax.command( "section-toggle-enabled",
+                        {flag: sectionEnabled()})
+            .success( util.showSavedIndicator)
+            .error( util.showSavedIndicator)
+            .call();
+        }
+      }
+    });
+
 
   self.init = function(data) {
     self.initialized = false;
@@ -248,6 +266,11 @@ LUPAPISTE.OrganizationModel = function () {
     self.allowedRoles(organization.allowedRoles);
 
     self.permitTypes(_(organization.scope).map("permitType").uniq().value());
+
+    // Section requirement for verdicts.
+    sectionEnabled( _.get( organization, "section.enabled"));
+
+    self.sectionOperations(_.get( organization, "section.operations", []));
 
     self.initialized = true;
   };

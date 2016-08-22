@@ -98,9 +98,10 @@
                 <i class="lupicon-eye"></i>
                 <span data-bind="ltext: 'application.reset-indicators'"></span>
             </button>
-            <!-- Link to organization's backing system URL if given and valid -->
+            <!-- Link to organization's backing system URL if given and valid,
+                 and we are not in frame. -->
             <button class="function"
-                    data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')">
+                    data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend') && (!window.parent || window.parent === window)">
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.showInBackingSystem'"></span>
             </button>

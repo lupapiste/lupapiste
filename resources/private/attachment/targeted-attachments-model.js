@@ -40,7 +40,7 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, 
       attachmentType: self.attachmentType,
       typeSelector: self.typeSelector,
       target: self.target,
-      locked: true
+      locked: lupapisteApp.models.currentUser.isAuthority()
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };

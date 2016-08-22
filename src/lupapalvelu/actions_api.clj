@@ -28,17 +28,8 @@
    :description "List of all actions and their meta-data."} [_]
   (ok :actions (action/serializable-actions)))
 
-(defn- contains-parameter?
-  "Checks that some of the parameters in query data (other than id), is included in required params list of the action.
-  Always returns true if query data has only id."
-  [data {:keys [action-parameters] :as action}]
-  (let [query-params (remove #{:_ :id} (keys data))]
-    (or (empty? query-params)
-        (boolean (some (set action-parameters) query-params)))))
-
 (defn- get-allowed-actions [web user application data]
   (let [results  (->> (foreach-action web user application data)
-                      (filter (partial contains-parameter? data))
                       (map validated))
         filtered (if (env/dev-mode?)
                    results
