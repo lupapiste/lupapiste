@@ -369,6 +369,11 @@ var util = (function($) {
     return ko.unwrap(previous.state);
   }
 
+  function partyFullName(party) {
+    return getIn(party, ["firstName"], "") + " " + getIn(party, ["lastName"], "");
+  }
+
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -408,7 +413,8 @@ var util = (function($) {
     createSortableColumn: createSortableColumn,
     elementInViewport: elementInViewport,
     verdictsWithTasks: verdictsWithTasks,
-    getPreviousState: getPreviousState
+    getPreviousState: getPreviousState,
+    partyFullName: partyFullName
   };
 
 })(jQuery);

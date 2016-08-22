@@ -16,6 +16,26 @@ Mikko goes to empty attachments tab
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
 
+Mikko sees all "not needed" checkboxes as enabled and not selected
+  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
+  Xpath Should Match X Times  //div[@id='application-attachments-tab']//input[@data-test-id='not-needed-checkbox']  4
+  Not needed should not be selected  hakija.valtakirja
+  Not needed should not be selected  paapiirustus.asemapiirros
+  Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
+  Not needed should not be selected  paapiirustus.pohjapiirustus
+
+Mikko sets asemapiirros not needed
+  Click not needed  paapiirustus.asemapiirros
+  Not needed should be selected  paapiirustus.asemapiirros
+  Positive indicator should be visible
+  Not needed should be selected  paapiirustus.asemapiirros
+
+Mikko unsets asemapiirros not needed
+  Click not needed  paapiirustus.asemapiirros
+  Not needed should not be selected  paapiirustus.asemapiirros
+  Positive indicator should be visible
+  Not needed should not be selected  paapiirustus.asemapiirros
+
 "Download all attachments" should be disabled
   [Tags]  attachments
   Element should be disabled  jquery=button[data-test-id='download-all-attachments-button']
@@ -35,7 +55,7 @@ Mikko adds txt attachment without comment
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
-  Wait Until  Delete Muu liite
+  Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds txt attachment without comment again
@@ -54,7 +74,7 @@ Mikko deletes attachment version
 
 Mikko deletes also the attachment template
   Click by test id  back-to-application-from-attachment
-  Wait Until  Delete Muu liite
+  Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko adds again txt attachment with comment
@@ -177,7 +197,7 @@ Mikko signs all attachments
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature icon is visible
   [Tags]  attachments  fail
-  Wait Until  Element should be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta'] [data-test-icon='signed-icon']
+  Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature is visible
@@ -225,16 +245,33 @@ Sonja goes to attachments tab
 
 Sonja adds new attachment template
   [Tags]  attachments
-  Add empty attachment template  Muu liite  muut  muu
+  Add empty attachment template  Muu pääpiirustus  paapiirustus  muu_paapiirustus
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until Element Is Visible  jquery=tr[data-test-type='muut.muu'] a[data-test-id=open-attachment]
+  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
+  Logout
+
+Mikko logs back in and browses to the Attachments tab
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
+
+For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
+  Not needed should be visible  paapiirustus.muu_paapiirustus
+  Not needed should be disabled  paapiirustus.muu_paapiirustus
+  Not needed should not be selected  paapiirustus.muu_paapiirustus
+  Logout
+
+Sonja logs back in and browses to the Attachments tab
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
 
 Sonja deletes the newly created attachment template
   [Tags]  attachments
-  Wait Until  Delete Muu liite
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='muut.muu'] a[data-test-id=open-attachment]
+  Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
@@ -311,7 +348,7 @@ Authority adds png attachment without comment
 
 Signature icon is not visible to authority
   [Tags]  attachments
-  Element should not be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should not be visible  signed  muut.muu
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Authority signs the attachment
@@ -321,7 +358,7 @@ Authority signs the attachment
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Signature icon is visible to authority
   [Tags]  attachments  fail
-  Wait Until  Element should be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should be visible  signed  muut.muu
   Logout
 
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
@@ -334,9 +371,10 @@ Mikko signs the final attachment
 # FIXME: These test are broken since signing does not work as result of introducing new attachments tab
 Mikko signs everything blindly
   [Tags]  attachments  fail
-  Element should not be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Attachment indicator icon should be visible  signed  muut.muu
   Sign all attachments  mikko123
-  Wait Until  Element should be visible  jquery=tr[data-test-id='muut.muu'] [data-test-icon=signed-icon]
+  Wait Until  Attachment indicator icon should be visible  signed  muut.muu
+
 
 
 *** Keywords ***
@@ -358,7 +396,35 @@ Sign all attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
 
-Delete Muu liite
-  Scroll to  tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
-  Click element  jquery=tr[data-test-type='muut.muu'] button[data-test-icon='delete-button']
+Delete attachment
+  [Arguments]  ${type}
+  Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
   Confirm yes no dialog
+
+Not needed matches
+  # Helper for matching not needed properties
+  [Arguments]  ${type}  ${nth}  ${property}  ${times}
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] input[data-test-id=not-needed-checkbox]
+  Javascript?  $("${selector}:${property}").length === ${times}
+
+Not needed should be selected
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  checked  1
+
+Not needed should not be selected
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  checked  0
+
+Not needed should be visible
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  visible  1
+
+Not needed should not be visible
+  [Arguments]  ${type}  ${nth}=1
+  Not needed matches  ${type}  ${nth}  visible  0
+
+Not needed should be disabled
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] label[data-test-id=not-needed-label]
+  Javascript?  $("${selector}:visible").length === 1

@@ -56,7 +56,7 @@
         (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
           (cond
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
-            (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError :invalid-pdfa}
+            (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
             (:pdfa? processing-result) {:archivable true
                                         :filename (file/filename-for-pdfa filename)
                                         :archivabilityError nil

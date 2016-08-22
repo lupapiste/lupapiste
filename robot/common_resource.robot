@@ -623,7 +623,7 @@ Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
   Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${subCategory}
+  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
   List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
   Click Element  xpath=//div[@id="dialog-add-attachment-templates-v2"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
   Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
@@ -669,6 +669,20 @@ Open attachment details
   Wait For Condition  return ${selector}.length>0;  10
   Execute Javascript  ${selector}[${nth}].click();
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
+
+Click not needed
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  Scroll to  ${selector}
+  Click element  jquery=${selector}
+
+Attachment indicator icon should be visible
+  [Arguments]  ${icon}  ${type}  ${nth}=1
+  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) i[data-test-icon=${icon}-icon]
+
+Attachment indicator icon should not be visible
+  [Arguments]  ${icon}  ${type}  ${nth}=1
+  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) i[data-test-icon=${icon}-icon]
 
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}

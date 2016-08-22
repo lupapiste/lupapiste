@@ -18,8 +18,8 @@
                               'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachments-table__state-icons">
-            <i data-bind="attr: {'class': $data.icon,
-                                 'data-test-icon':  $data.type + '-icon'}"></i>
+            <i data-bind="attr: {'class': $data.css,
+                                 'data-test-icon':  $data.icon + '-icon'}"></i>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
@@ -50,7 +50,8 @@
                data-bind="click: $parent.openAttachment"
                data-test-id="open-attachment">
               <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addFile'"></span>
+              <span data-bind="ltext: 'attachment.addFile'"
+                    data-test-id="add-file-link"></span>
             </a>
           </td>
           <td>
@@ -61,7 +62,8 @@
                                 enable: $data.authModel.ok('set-attachment-not-needed'),
                                 checked: $data.notNeeded">
               <label class="checkbox-label"
-                     data-bind="attr: {'for': $parent.inputId( $index())},
+                     data-bind="attr: {'for': $parent.inputId( $index()),
+                                       'data-test-id': 'not-needed-label'},
                                 ltext: 'application.attachmentNotNeeded'"></label>
             </div>
           </td>
