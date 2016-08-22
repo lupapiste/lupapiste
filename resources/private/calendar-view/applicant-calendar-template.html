@@ -13,22 +13,18 @@
       </div>
 
       <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
-        <div style="width: 96%">
-          <h3 style="margin-top: 12px; font-weight: bold;" data-bind="dateString: startTime"></h3>
-          <div style="border: 1px solid #ccc; margin-top: 12px">
-            <div style="margin: 6px 12px; display: inline-block; text-align: center">
-              <div style="display: inline-block; font-weight: bold; font-size: 20px; vertical-align: top"
-                   data-bind="timeString: startTime">
-              </div><br />
-              <div style="display: inline-block; font-weight: bold; font-size: 12px; vertical-align: top"
-                   data-bind="timeString: endTime">
-              </div>
+        <div class="calendar-pending-action">
+          <h3 data-bind="weekdayAndDate: startTime"></h3>
+          <div class="calendar-pending-action-item">
+            <div class="times">
+              <div class="startTime" data-bind="timeString: startTime"></div><br />
+              <div class="endTime" data-bind="timeString: endTime"></div>
             </div>
-            <div style="display: inline-block; border-left: 1px solid #ccc; padding-left: 6px; margin: 6px 0px; height: 48px">
+            <div class="titlebar">
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
               <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
             </div>
-            <div style="float:right; border-left: 1px solid #ccc; padding: 2px 6px; margin: 6px 0px; height: 48px">
+            <div class="titlebar buttons-box">
               <button class="positive"
                       data-bind="click: $component.acceptReservation.bind($data)">
                 <i class="lupicon-check" style="display: inline;"></i>

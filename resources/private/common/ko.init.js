@@ -605,6 +605,14 @@
     }
   };
 
+  ko.bindingHandlers.weekdayAndDate = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? dayName(value) + ", " + moment(value).format("D.M.YYYY") : "" ;
+      $(element).html(dateStr);
+    }
+  };
+
   ko.observable.fn.increment = function () {
     this(this() + 1);
   };
