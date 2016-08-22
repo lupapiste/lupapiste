@@ -103,3 +103,5 @@
 "application.calendar.appointment.suggestion" "sv" ""
 "application.calendar.comment.reservation-new" "fi" "Varaus tapaamiseen"
 "application.calendar.comment.reservation-new" "sv" ""
+"application.calendar.appointment.decline" "fi" "Tapaaminen peruttu"
+"application.calendar.appointment.decline" "sv" ""
