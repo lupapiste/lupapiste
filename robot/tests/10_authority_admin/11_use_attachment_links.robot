@@ -17,7 +17,7 @@ Authority admin enables attachment links
 Authority admin sees attachment links enabled
   Reload page
   Go to page  backends
-  Checkbox should be selected  attachments-as-links-enabled
+  Checkbox wrapper selected  attachments-as-links-enabled
 
 Authority admin disables attachment links
   Go to page  backends
@@ -26,14 +26,13 @@ Authority admin disables attachment links
 Authority admin sees attachment links disabled
   Reload page
   Go to page  backends
-  Checkbox should not be selected  attachments-as-links-enabled
+  Checkbox wrapper not selected  attachments-as-links-enabled
   Logout
 
 *** Keywords ***
 
 Toggle links
-  [Arguments]
-  Wait and click  attachments-as-links-enabled
+  Click label  attachments-as-links-enabled
   Positive indicator should be visible
 
 

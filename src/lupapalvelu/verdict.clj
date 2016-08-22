@@ -4,6 +4,7 @@
             [monger.operators :refer :all]
             [pandect.core :as pandect]
             [net.cgrand.enlive-html :as enlive]
+            [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.common-reader :as cr]
@@ -405,23 +406,44 @@
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
 
+
+(defn validate-section-requirement
+  "Validator that fails if the organization requires section (pykala)
+  in verdicts and app-xml is missing one. Note: besides organization,
+  the requirement is also operation-specific. The requirement is
+  fulfilled if _any_ paatostieto element contains at least one
+  non-blank pykala."
+  [{operation :name} app-xml {section :section}]
+  (let [{:keys [enabled operations]} section]
+    (when (and enabled
+               (contains? (set operations) operation)
+               (not (some-<> app-xml
+                             cr/strip-xml-namespaces
+                             (xml/select [:paatostieto :pykala])
+                             not-empty
+                             (some (util/fn-> :content first ss/not-blank?) <>))))
+      (fail :info.section-required-in-verdict))))
+
 (defn do-check-for-verdict [{:keys [application organization] :as command}]
   {:pre [(every? command [:application :user :created])]}
   (when-let [app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
-    (let [app-xml (normalize-special-verdict application app-xml)
-          validator-fn (permit/get-verdict-validator (permit/permit-type application))
-          organization (if organization @organization (org/get-organization (:organization application)))
-          validation-errors (validator-fn app-xml organization)]
-      (if-not validation-errors
+    (let [app-xml          (normalize-special-verdict application app-xml)
+          validator-fn     (permit/get-verdict-validator (permit/permit-type application))
+          organization     (if organization @organization (org/get-organization (:organization application)))
+          validation-error (or (validator-fn app-xml organization)
+                               (validate-section-requirement (:primaryOperation application)
+                                                             app-xml
+                                                             organization))]
+      (if-not validation-error
         (save-verdicts-from-xml command app-xml)
         (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
                                       (building-mongo-updates application))
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]
           (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
-          validation-errors)))))
+          validation-error)))))
 
 (defn- verdict-task?
   "True if given task is 'rooted' via source chain to the verdict.

@@ -68,17 +68,38 @@
       <section>
         <h2 data-bind="ltext: 'authorityAdmin.attachmentLinks.title'"></h2>
         <div style="margin-bottom: 0.7em;" data-bind="ltext: 'authorityAdmin.attachmentLinks.guide'"></div>
-        <input type="checkbox" class="form-input" id="attachments-as-links-enabled"
-               data-bind="checked: organization.useAttachmentLinksIntegration, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-use-attachment-links-integration')" />
-        <label for="attachments-as-links-enabled" class="form-label" data-bind="ltext: 'authorityAdmin.attachmentLinks.label'"></label>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="attachments-as-links-enabled"
+                 data-bind="checked: organization.useAttachmentLinksIntegration, 
+                            enable: lupapisteApp.models.globalAuthModel.ok('set-organization-use-attachment-links-integration')" />
+          <label for="attachments-as-links-enabled" class="checkbox-label"
+                 data-bind="ltext: 'authorityAdmin.attachmentLinks.label'"></label>
+        </div>
       </section>
 
-      <section data-bind="if: organization.validateVerdictGivenDateVisible">
+      <section>
         <h2 data-bind="ltext: 'auth-admin.validate-verdict.title'"></h2>
-        <span data-bind="ltext: 'auth-admin.validate-verdict.rp.info'"></span><br/>
-        <input type="checkbox" class="form-input" id="validate-verdict-given-date-enabled"
-               data-bind="checked: organization.validateVerdictGivenDate, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
-        <label for="validate-verdict-given-date-enabled" class="form-label" data-bind="ltext: 'auth-admin.validate-verdict-given-date.enabled'"></label>
+        <div data-bind="if: organization.validateVerdictGivenDateVisible"
+             class="bottom-marginM">
+          <span data-bind="ltext: 'auth-admin.validate-verdict.rp.info'"></span>
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="validate-verdict-given-date-enabled"
+                   data-bind="checked: organization.validateVerdictGivenDate, 
+                              enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
+            <label for="validate-verdict-given-date-enabled" class="checkbox-label"
+                   data-bind="ltext: 'auth-admin.validate-verdict-given-date.enabled'"></label>
+          </div>
+        </div>
+        <div>
+          <span data-bind="lhtml: 'auth-admin.validate-verdict.section.info'"></span>
+          <div class="sectionbox-wrapper">
+            <input type="checkbox" id="verdict-section-enabled"
+                   data-bind="checked: organization.verdictSectionEnabled, 
+                              enable: lupapisteApp.models.globalAuthModel.ok('section-toggle-enabled')" />
+            <label for="verdict-section-enabled" class="sectionbox-label"
+                   data-bind="ltext: 'auth-admin.validate-verdict.section.enabled'"></label>
+          </div>
+        </div>
       </section>
 
 
