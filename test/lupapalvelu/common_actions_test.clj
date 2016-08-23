@@ -41,6 +41,7 @@
                           :submitted-application-pdf-export
                           :download-all-attachments
                           :download-attachment
+                          :download-attachments
                           :delete-attachment-version
                           :change-urgency
                           :add-authority-notice
@@ -104,8 +105,9 @@
                            :get-building-info-from-wfs :tasks-tab-visible
                            :pdfa-casefile :suti-application-data :suti-application-products
                            :ram-linked-attachments :attachment-groups
-                                        ; raw
-                           :preview-attachment :view-attachment :download-attachment :download-all-attachments :pdf-export
+                           ; raw
+                           :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
+                           :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export}]
     (doseq [command (foreach-action {} user application {})
             :let [action (keyword (:action command))
