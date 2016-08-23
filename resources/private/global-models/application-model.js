@@ -708,8 +708,8 @@ LUPAPISTE.ApplicationModel = function() {
     var missingAttachments = _.filter(attachments, function(a) {
       var required = a.required ? a.required() : false;
       var notNeeded = a.notNeeded ? a.notNeeded() : false;
-      var versionsExist = a.versions() && a.versions().length;
-      return required && !notNeeded && !versionsExist;
+      var noVersions = _.isEmpty(ko.unwrap(a.versions));
+      return required && !notNeeded && noVersions;
     });
     missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
     missingAttachments = _.map(_.keys(missingAttachments), function(k) {
