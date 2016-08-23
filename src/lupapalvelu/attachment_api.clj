@@ -65,6 +65,10 @@
              (empty? (:versions (attachment/get-attachment-info application attachmentId))))
     (fail :error.attachment.no-versions)))
 
+(defn any-attachment-has-version [{{attachments :attachments} :application}]
+  (when (every? (comp empty? :versions) attachments)
+    (fail :error.attachment.no-versions)))
+
 (defn- attachment-editable-by-application-state
   ([command]
    (attachment-editable-by-application-state false command))
@@ -516,6 +520,7 @@
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/number-parameters [:xMargin :yMargin])
                       (partial action/non-blank-parameters [:page])]
+   :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
    :states     (conj states/post-submitted-states :submitted)
    :description "Stamps all attachments of given application"}
@@ -569,7 +574,8 @@
                 (fn [{application :application}]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))
-                app/validate-authority-in-drafts]
+                app/validate-authority-in-drafts
+                any-attachment-has-version]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -652,7 +658,8 @@
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
                           (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
                           (fail :error.select-verdict-attachments.overlapping-ids)))]
-   :pre-checks [attachment-not-readOnly]}
+   :pre-checks [attachment-not-readOnly
+                any-attachment-has-version]}
   [{:keys [application created] :as command}]
   (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
         updates-fn      (fn [ids k v] (mongo/generate-array-updates :attachments all-attachments #((set ids) (:id %)) k v))]

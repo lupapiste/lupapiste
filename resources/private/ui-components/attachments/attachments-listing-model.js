@@ -353,7 +353,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.canStamp = function() {
-    return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
+    return self.authModel.ok("stamp-attachments");
   };
 
   self.signAttachments = function() {
@@ -361,7 +361,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.canSign = function() {
-    return self.authModel.ok("sign-attachments") && self.appModel.hasAttachment();
+    return self.authModel.ok("sign-attachments");
   };
 
   self.hasFile = ko.pureComputed(function() {
