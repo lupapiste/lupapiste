@@ -349,11 +349,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.copyUserAttachments = function() {
+    var onSuccess = function() {
+      hub.send("indicator-icon", {style: "positive"});
+    };
     hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
                              size: "medium",
                              component: "yes-no-dialog",
                              componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
-                                               yesFn: self.service.copyUserAttachments }});
+                                               yesFn: _.partial(self.service.copyUserAttachments, { onSuccess: onSuccess })}});
   };
 
   self.canCopyUserAttachments = function() {

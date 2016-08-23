@@ -213,7 +213,12 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.copyUserAttachments = function(options) {
     ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
-      .success(self.queryAll)
+      .success(function(res) {
+        self.queryAll();
+        if (_.isFunction(options.onSuccess)) {
+          options.onSuccess(res);
+        }
+      })
       .processing(self.processing)
       .call();
   };
