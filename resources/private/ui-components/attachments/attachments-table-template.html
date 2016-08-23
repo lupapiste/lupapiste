@@ -5,7 +5,8 @@
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
-          <th data-bind="ltext: 'attachment.th-type'"></th>
+          <th data-bind="ltext: 'attachment.th-type'"
+              class="attachments-table--widest"></th>
           <th data-bind="ltext: 'application.attachmentFile'"></th>
           <th data-bind="ltext: 'attachment.th-not-needed'"></th>
           <th data-bind="ltext: 'ok'"></th>
@@ -73,7 +74,7 @@
                     data-bind="enable: $data.authModel.ok('approve-attachment'),
                                css: { positive: $parent.isApproved( $data ),
                                       'no-events': $parent.isApproved( $data ),
-                                      secondary: !$parent.isApproved( $data ) },
+                                      approve: !$parent.isApproved( $data ) },
                                click: $parent.approve,
                                clickBubble: false">
               <i class="lupicon-check"></i>
@@ -84,7 +85,7 @@
                     data-bind="enable: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
                                       'no-events': $parent.isRejected( $data ),
-                                      secondary: !$parent.isRejected( $data ) },
+                                      reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,
                                clickBubble: false">
               <i class="lupicon-circle-attention"></i>
