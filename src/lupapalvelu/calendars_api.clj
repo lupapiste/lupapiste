@@ -5,16 +5,11 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
-            [lupapalvelu.icalendar :as ical]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.notifications :as notifications]
             [sade.strings :as str]
-            [lupapalvelu.mongo :as mongo]
-            [clj-time.local :refer [to-local-date-time local-now]]
-            [monger.operators :refer :all])
-  (:import (net.fortuna.ical4j.model.property Method)))
+            [monger.operators :refer :all]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
@@ -349,35 +344,6 @@
 (defn- get-reservation [id]
   (->FrontendReservation (api-query (str "reservations/" id))))
 
-(defn- generate-unique-id []
-  (str (.toString (to-local-date-time (local-now))) "/" (java.util.UUID/randomUUID) "@lupapiste.fi"))
-
-(notifications/defemail
-  :suggest-appointment
-  {:subject-key                  "application.calendar.appointment.suggestion"
-   :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :attendee recipient
-                                                                        :unique-id (generate-unique-id)
-                                                                        :sequence 0
-                                                                        :method Method/REQUEST)]
-                                     (cal/update-reservation application
-                                                             (:reservationId result)
-                                                             {$set {:reservations.$.unique-id (:unique-id reservation)
-                                                                    :reservations.$.sequence (:sequence reservation)}})
-                                     (ical/create-calendar-event reservation)))
-   :show-municipality-in-subject true
-   :recipients-fn                (fn [{application :application result :result}]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
-                                     (map usr/get-user-by-id recipient-ids)))
-   :model-fn                     (fn [{application :application} _ recipient]
-                                   {:link-fi (notifications/get-application-link application nil "fi" recipient)
-                                    :link-sv (notifications/get-application-link application nil "sv" recipient)
-                                    :info-fi (str (env/value :host) "/ohjeet")
-                                    :info-sv (str (env/value :host) "/ohjeet")})})
-
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
@@ -419,31 +385,6 @@
                                          :action-required-by [(:id to-user)])]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
-
-(notifications/defemail
-  :decline-appointment
-  {:subject-key                  "application.calendar.appointment.decline"
-   :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :attendee recipient
-                                                                        :unique-id (:unique-id reservation)
-                                                                        :sequence (inc (:sequence reservation))
-                                                                        :method Method/CANCEL)]
-                                     (cal/update-reservation application
-                                                             (:reservationId result)
-                                                             {$set {:reservations.$.sequence (:sequence reservation)}})
-                                     (ical/create-calendar-event reservation)))
-   :show-municipality-in-subject true
-   :recipients-fn                (fn [{application :application result :result}]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
-                                     (map usr/get-user-by-id recipient-ids)))
-   :model-fn                     (fn [{application :application} _ recipient]
-                                   {:link-fi (notifications/get-application-link application nil "fi" recipient)
-                                    :link-sv (notifications/get-application-link application nil "sv" recipient)
-                                    :info-fi (str (env/value :host) "/ohjeet")
-                                    :info-sv (str (env/value :host) "/ohjeet")})})
 
 (defcommand accept-reservation
   {:user-roles       #{:applicant}
