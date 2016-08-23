@@ -246,11 +246,10 @@ Mikko logs back in and browses to the Attachments tab
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
 
-For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
-  Not needed should be visible  paapiirustus.muu_paapiirustus
-  Not needed should be disabled  paapiirustus.muu_paapiirustus
+For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox missing
+  Not needed should not be visible  paapiirustus.muu_paapiirustus
   Not needed should not be selected  paapiirustus.muu_paapiirustus
-  Logout
+  [Teardown]  Logout
 
 Sonja logs back in and browses to the Attachments tab
   Sonja logs in

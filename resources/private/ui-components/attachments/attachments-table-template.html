@@ -55,12 +55,11 @@
                     data-test-id="add-file-link"></span>
             </a>
           </td>
-          <td>
+          <td data-bind="if: $data.authModel.ok('set-attachment-not-needed')">
             <div class="checkbox-wrapper">
               <input type="checkbox"
                      data-bind="attr: {'id': $parent.inputId( $index() ),
                                        'data-test-id': 'not-needed-checkbox' },
-                                enable: $data.authModel.ok('set-attachment-not-needed'),
                                 checked: $data.notNeeded">
               <label class="checkbox-label"
                      data-bind="attr: {'for': $parent.inputId( $index()),
