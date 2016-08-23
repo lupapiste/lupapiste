@@ -39,6 +39,9 @@
                 <span data-bind="ltext: 'button.ok'"></span>
               <!-- /ko -->
             </div>
+            <!-- ko if: reservationStatus() === 'ACCEPTED' && from() === lupapisteApp.models.currentUser.id() -->
+            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
+            <!-- /ko -->
             <!-- ko if: reservationStatus() === 'DECLINED' && from() === lupapisteApp.models.currentUser.id() -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
             <!-- /ko -->
