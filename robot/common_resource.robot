@@ -1261,6 +1261,11 @@ Scroll to test id
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
+  Click Element  jquery=${selector}
+
+Scroll and click input
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
   Element should be enabled  jquery=${selector}
   Click Element  jquery=${selector}
 

@@ -106,15 +106,15 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
 
 Sonja can toggle selection of attachments by group/all/none
   # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-select"]
+  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  2
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-deselect"]
+  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="attachments.general"]//a[@data-test-id="attachments-group-select"]
+  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-none"]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Status of stamping is ready
