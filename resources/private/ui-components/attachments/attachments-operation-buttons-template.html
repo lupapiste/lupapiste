@@ -48,15 +48,15 @@
       <span data-bind="ltext: 'task.send'"></span>
     </button>
     <button class="ghost"
-            data-bind="click: _.noop,
-                       visible: true"
+            data-bind="click: $data.markVerdictAttachments,
+                       visible: $data.canMarkVerdictAttachments()"
             data-test-id="mark-verdict-attachments">
       <i class="lupicon-circle-section-sign"></i>
       <span data-bind="ltext: 'application.markVerdictAttachments'"></span>
     </button>
     <button class="ghost"
-            data-bind="click: _.noop,
-                       visible: true"
+            data-bind="click: $data.orderAttachmentPrints,
+                       visible: $data.canOrderAttachmentPrints()"
             data-test-id="order-attachment-prints">
       <i class="lupicon-envelope"></i>
       <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>

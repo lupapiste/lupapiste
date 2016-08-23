@@ -17,4 +17,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel = function() {
   // Open the Prints order history dialog
   self.openPrintsOrderHistoryDialog = _.partial(LUPAPISTE.ModalDialog.open, self.dialogSelector);
 
+  var hubId = hub.subscribe("refresh-verdict-attchments-orders", self.refresh);
+
+  self.dispose = _.partial(hub.unsubscribe, hubId);
+
 };

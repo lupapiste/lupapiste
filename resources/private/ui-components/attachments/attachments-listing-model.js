@@ -364,6 +364,22 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return self.authModel.ok("sign-attachments");
   };
 
+  self.markVerdictAttachments = function() {
+    hub.send("start-marking-verdict-attachments", {application: self.appModel});
+  };
+
+  self.canMarkVerdictAttachments = function() {
+    return self.authModel.ok("set-attachments-as-verdict-attachment");
+  };
+
+  self.orderAttachmentPrints = function() {
+    hub.send("order-attachment-prints", {application: self.appModel});
+  };
+
+  self.canOrderAttachmentPrints = function() {
+    return self.authModel.ok("order-verdict-attachment-prints");
+  };
+
   self.hasFile = ko.pureComputed(function() {
     return _(self.attachmentGroups()).invokeMap("hasFile").some();
   });

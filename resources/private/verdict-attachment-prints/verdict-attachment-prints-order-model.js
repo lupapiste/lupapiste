@@ -9,11 +9,18 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.applicantName = lupapisteApp.models.application.applicant;
   self.lupapisteId = lupapisteApp.models.application.id;
   self.address = lupapisteApp.models.application.address;
+  self.attachmentsService = lupapisteApp.services.attachmentsService;
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
   self.errorMessage = ko.observable();
-  self.attachments = ko.observable([]);
+  self.attachments = self.disposedPureComputed(function() {
+    return _(self.attachmentsService.attachments() || [])
+      .map(ko.unwrap)
+      .filter(printableAttachment)
+      .map(enrichAttachment)
+      .value();
+  });
 
   self.kopiolaitosEmail = ko.observable("");
   self.ordererOrganization = ko.observable("");
@@ -62,24 +69,24 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   // Helper functions
 
-  var enrichAttachment = function(a) {
+  function  enrichAttachment(a) {
     a.filename = a.latestVersion.filename;
     a.fileId = a.latestVersion.fileId;
     a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]);
     a.orderAmount = ko.observable("2");
     return a;
-  };
+  }
 
-  var printableAttachment = function(a) {
+  function printableAttachment(a) {
     return a.forPrinting && a.versions && a.versions.length;
-  };
+  }
 
-  var normalizeAttachments = function(attachments) {
+  function normalizeAttachments(attachments) {
     return _.map(attachments, function(a) {
       a.amount = parseInt(a.orderAmount(), 10);
       return _.pick(a, ["id", "amount"]);
     });
-  };
+  }
 
   // Open the dialog
 
@@ -88,12 +95,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.processing(false);
     self.pending(false);
     self.errorMessage(null);
-
-    var attachments = _(application.attachments || [])
-                      .filter(printableAttachment)
-                      .map(enrichAttachment)
-                      .value();
-    self.attachments(attachments);
 
     var kopiolaitosMeta = application.organizationMeta.kopiolaitos;
     var currentUserName = lupapisteApp.models.currentUser.firstName() + " " + lupapisteApp.models.currentUser.lastName();
@@ -152,5 +153,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       })
       .call();
   };
+
+  var hubIds = [hub.subscribe("refresh-verdict-attachments-orders", self.refresh),
+                hub.subscribe("order-attachment-prints", self.openDialog)];
+
+  self.dispose = _.partial(_.map, hubIds, hub.unsubscribe);
 
 };
