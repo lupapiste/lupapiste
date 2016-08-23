@@ -26,14 +26,14 @@ Mikko creates & submits application and goes to empty attachments tab
 
 Mikko adds PDF attachment without comment
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME1}')
   Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME2}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME2}')
   Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  operation=Yleisesti hankkeeseen
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME3}')
 
 Mikko does not see stamping button
-  Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
+  Wait until  Element should not be visible  jquery=button[data-test-id=stamp-attachments]
 
 Mikko previews file
   [Tags]  attachments
@@ -58,11 +58,11 @@ Sonja goes to attachments tab
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
-Attachment is not stamped
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
+Sonja sees that attachment is not stamped
+  Attachment should not be stamped  muut.muu
 
 Sonja sees stamping button
-  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
+  Wait until  Page should contain element  jquery=div#application-attachments-tab button[data-test-id=stamp-attachments]
 
 Sonja clicks stamp button, stamping page opens
   Click by test id  stamp-attachments
@@ -91,11 +91,10 @@ Sonja inputs new stamping info values
   Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
   Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
-Sonja can go to attachments tab. When she returns, stamp info fields are persistent.
-  Execute Javascript  window.scrollTo(0, 0);
-  Wait until  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
-  Element should be visible  application-attachments-tab
-  Click by test id  stamp-attachments
+Sonja can go to attachments tab. When she returns, stamp info fields are persistent
+  Wait until  Scroll and click test id  back-to-application-from-stamping
+  Wait until  Element should be visible  application-attachments-tab
+  Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
@@ -140,5 +139,15 @@ Return from stamping to attachments tab
   Element should be visible  application-attachments-tab
 
 Attachment has stamped icon
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
+  Wait until  Attachment should be stamped  muut.muu
+
+
+*** Keywords ***
+
+Attachment should be stamped
+  [Arguments]  ${type}
+  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] i[data-test-icon=stamped-icon]
+
+Attachment should not be stamped
+  [Arguments]  ${type}
+  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] i[data-test-icon=stamped-icon]
