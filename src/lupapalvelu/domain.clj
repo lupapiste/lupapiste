@@ -111,7 +111,6 @@
 
 (defn with-participants-info
   [reservation]
-  (println reservation)
   (let [ids (flatten (vals (select-keys reservation [:from :to])))]
     (assoc reservation :participants (map user/get-user-by-id (remove nil? ids)))))
 

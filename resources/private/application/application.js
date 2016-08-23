@@ -270,11 +270,18 @@
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      applicationModel.calendarNotificationsPending(_.filter(app.reservations,
+      var pendingCalendarNotifications = _.filter(app.reservations,
         function (r) {
-          return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
-        }));
-      applicationModel.calendarNotificationIndicator(applicationModel.calendarNotificationsPending().length);
+         return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
+        });
+
+      pendingCalendarNotifications = _.map(pendingCalendarNotifications,
+        function(n) {
+         n.acknowledged = "none";
+         return ko.mapping.fromJS(n);
+        });
+
+      applicationModel.calendarNotificationsPending(pendingCalendarNotifications);
 
       isInitializing = false;
       pageutil.hideAjaxWait();

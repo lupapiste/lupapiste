@@ -6,13 +6,13 @@
                        params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
     </div>
 
-    <!-- ko if: lupapisteApp.models.application.calendarNotificationsPending().length > 0 -->
+    <!-- ko if: pendingNotifications().length > 0 -->
     <div style="margin-bottom: 36px">
       <div>
-        <p><b><i class="lupicon-circle-attention"></i> Sinulle on varattu uusia tapaamisia.</b></p>
+        <p><b><i class="lupicon-circle-attention"></i> Sinulle on saapunut uusia kalenteriviestejä.</b></p>
       </div>
 
-      <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
+      <div data-bind="foreach: pendingNotifications">
         <div class="calendar-pending-action">
           <h3 data-bind="weekdayAndDate: startTime"></h3>
           <div class="calendar-pending-action-item">
@@ -24,14 +24,27 @@
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
               <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
             </div>
-            <div class="titlebar buttons-box">
+            <div class="titlebar"
+                 data-bind="css: { 'buttons-box': acknowledged() === 'none',
+                                   'undo-link': acknowledged() !== 'none' }">
+              <!-- ko if: acknowledged() === 'none' -->
               <button class="positive"
                       data-bind="click: $component.markSeen.bind($data)">
                 <i class="lupicon-check" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
-                OK
+                <span data-bind="ltext: 'button.ok'"></span>
               </button>
+              <!-- /ko -->
+              <!-- ko if: acknowledged() === 'seen' -->
+                <span data-bind="ltext: 'button.ok'"></span>
+              <!-- /ko -->
             </div>
+            <!-- ko if: reservationStatus() === 'DECLINED' && from() === lupapisteApp.models.currentUser.id() -->
+            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
+            <!-- /ko -->
+            <!-- ko if: reservationStatus() === 'ACCEPTED' && from() !== lupapisteApp.models.currentUser.id() -->
+            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
+            <!-- /ko -->
           </div>
           <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
             <div style="display: inline-block;"><span data-bind="text: comment"></span></div>

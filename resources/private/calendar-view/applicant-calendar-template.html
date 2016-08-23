@@ -6,13 +6,13 @@
                        params: {lhtml: 'application.calendar.applicant.helpText'}}"></span>
     </div>
 
-    <!-- ko if: lupapisteApp.models.application.calendarNotificationsPending().length > 0 -->
+    <!-- ko if: pendingNotifications().length > 0 -->
     <div style="margin-bottom: 36px">
       <div>
         <p><b><i class="lupicon-circle-attention"></i> Sinulla on hyväksymätön tapaamiskutsu.</b></p>
       </div>
 
-      <div data-bind="foreach: lupapisteApp.models.application.calendarNotificationsPending">
+      <div data-bind="foreach: pendingNotifications">
         <div class="calendar-pending-action">
           <h3 data-bind="weekdayAndDate: startTime"></h3>
           <div class="calendar-pending-action-item">
@@ -24,19 +24,29 @@
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
               <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
             </div>
-            <div class="titlebar buttons-box">
+            <div class="titlebar"
+                 data-bind="css: { 'buttons-box': acknowledged() === 'none',
+                                   'undo-link': acknowledged() !== 'none' }">
+              <!-- ko if: acknowledged() === 'none' -->
               <button class="positive"
-                      data-bind="click: $component.acceptOrDeclineReservation.bind($data, 'accept')">
+                      data-bind="click: $component.acceptReservation.bind($data)">
                 <i class="lupicon-check" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
                 Hyväksy
               </button>
               <button class="negative"
-                      data-bind="click: $component.acceptOrDeclineReservation.bind($data, 'decline')">
+                      data-bind="click: $component.declineReservation.bind($data)">
                 <i class="lupicon-remove" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
                 Hylkää
               </button>
+              <!-- /ko -->
+              <!-- ko if: acknowledged() === 'accepted' -->
+                <span data-bind="ltext: 'calendar.accepted'"></span>
+              <!-- /ko -->
+              <!-- ko if: acknowledged() === 'declined' -->
+                <span data-bind="ltext: 'calendar.declined'"></span>
+              <!-- /ko -->
             </div>
           </div>
           <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">

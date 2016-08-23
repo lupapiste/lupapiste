@@ -97,11 +97,24 @@
       padding-left: 6px;
       margin: $marginS 0px;
       height: $baseline * 2;
-    }
 
-    .buttons-box {
-      float: right;
-      padding: 6px;
+      button span {
+        display: inherit;
+      }
+
+      &.buttons-box {
+        float: right;
+        padding: $marginS;
+      }
+
+      &.undo-link, &.status {
+        float: right;
+        padding: $marginM;
+      }
+
+      &.status {
+        font-weight: bold;
+      }
     }
 
     .startTime {
