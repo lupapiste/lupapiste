@@ -40,13 +40,7 @@
       <i class="lupicon-circle-pen"></i>
       <span data-bind="ltext: 'signAttachment.select'"></span>
     </button>
-    <button class="ghost"
-            data-bind="click: _.noop,
-                       visible: true"
-            data-test-id="send-attachments">
-      <i class="lupicon-circle-arrow-up"></i>
-      <span data-bind="ltext: 'task.send'"></span>
-    </button>
+    <export-attachments params="css: 'ghost'"></export-attachments>
     <button class="ghost"
             data-bind="click: $data.markVerdictAttachments,
                        visible: $data.canMarkVerdictAttachments()"

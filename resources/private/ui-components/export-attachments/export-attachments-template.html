@@ -3,24 +3,20 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="export-attachments-template">
-      <div>
-        <button class="positive"
-                data-test-id="export-attachments-to-backing-system"
-                data-bind="visible: exportAttachmentsToBackingSystem,
-                           click: startExportingAttachmentsToBackingSystem,
-                           attr: {title: loc('application.attachmentsMoveToBackingSystem')}">
-            <i class="lupicon-circle-arrow-right"></i>
-            <span data-bind="ltext: 'application.exportAttachments'"></span>
-        </button>
-        <button class="positive"
-                data-test-id="export-attachments-to-asianhallinta"
-                data-bind="visible: exportAttachmentsToAsianhallinta,
-                           click: startExportingAttachmentsToAsianhallinta,
-                           attr: {title: loc('application.attachmentsMoveToCaseManagement')}">
-            <i class="lupicon-circle-arrow-right"></i>
-            <span data-bind="ltext: 'application.exportAttachments'"></span>
-        </button>
-      </div>
+      <button data-bind="click: backing.send,
+                         visible: backing.show,
+                         css: buttonCss"
+              data-test-id="export-attachments-to-backing-system">
+        <i class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'application.exportAttachments'"></span>
+      </button>
+      <button data-bind="click: cm.send,
+                         visible: cm.show,
+                         css: buttonCss"
+              data-test-id="export-attachments-to-asianhallinta">
+        <i class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'application.exportAttachments'"></span>
+      </button>
     </script>
   </section>
 </body>

@@ -130,13 +130,26 @@
         (when-not (= (keyword (:type (last filtered-transfers))) type)
           (fail :error.application-not-exported))))))
 
+(defn- has-unsent-attachments
+  "Attachment is unsent, if a) it has a file, b) the file has not been
+  sent, c) attachment type is neither statement nor verdict."
+  [{{attachments :attachments} :application}]
+  (when-not (some (fn [{:keys [sent versions target]}]
+                    (and (not-empty versions)
+                         (not (#{:statement :verdict} (-> target :type keyword)))
+                         (or (not sent) (> (-> versions last :created) sent))))
+                  attachments)
+    (fail :error.no-unsent-attachments)))
+
+
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
    :input-validators [(partial action/non-blank-parameters [:id :lang])
                       (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)
-                (application-already-exported :exported-to-backing-system)]
+                (application-already-exported :exported-to-backing-system)
+                has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user organization] :as command}]
@@ -309,7 +322,9 @@
    :input-validators [(partial action/non-blank-parameters [:id :lang])
                       (partial action/vector-parameter-of :attachmentIds string?)]
    :user-roles #{:authority}
-   :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
+   :pre-checks [has-asianhallinta-operation
+                (application-already-exported :exported-to-asianhallinta)
+                has-unsent-attachments]
    :states     (conj states/post-verdict-states :sent)
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
