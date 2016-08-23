@@ -401,6 +401,22 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defraw "download-attachments"
+  {:parameters [:id ids]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states states/all-states
+   :user-authz-roles auth/all-authz-roles
+   :input-validators [(partial action/non-blank-parameters [:ids])]
+   :org-authz-roles auth/reader-org-authz-roles}
+  [{:keys [application user lang]}]
+  (let [attachments (:attachments application)
+        ids (ss/split ids #",")
+        atts (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
+      {:status 200
+       :headers {"Content-Type" "application/octet-stream"
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (attachment/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+
 ;;
 ;; Upload
 ;;
