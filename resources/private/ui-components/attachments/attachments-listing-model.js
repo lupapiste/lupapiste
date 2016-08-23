@@ -348,6 +348,18 @@ LUPAPISTE.AttachmentsListingModel = function() {
     self.attachmentTemplatesModel.show();
   };
 
+  self.copyUserAttachments = function() {
+    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
+                                               yesFn: self.service.copyUserAttachments }});
+  };
+
+  self.canCopyUserAttachments = function() {
+    return self.authModel.ok("copy-user-attachments-to-application");
+  };
+
   self.startStamping = function() {
     hub.send("start-stamping", {application: self.appModel});
   };

@@ -20,8 +20,8 @@
   <div class="attachment-operations">
 
     <button class="ghost"
-            data-bind="click: _.noop,
-                       visible: $data.authModel.ok('copy-user-attachments-to-application')"
+            data-bind="click: $data.copyUserAttachments,
+                       visible: $data.canCopyUserAttachments()"
             data-test-id="copy-user-attachments">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.attachmentsCopyOwn'"></span>
