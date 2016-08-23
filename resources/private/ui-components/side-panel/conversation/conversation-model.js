@@ -158,4 +158,15 @@ LUPAPISTE.ConversationModel = function(params) {
       self.to("");
     }
   });
+
+  // Fallback for system type is the user role. The fallback does not
+  // handle outside authorities correctly. The more robust approach
+  // would be to resolve the role in the backend.
+  self.commentRole = function( data ) {
+    var role = data.type;
+    if( role === "system" ) {
+      role = _.get( data, "user.role" );
+    }
+    return role;
+  };
 };
