@@ -211,14 +211,16 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
 
+  self.createAttachmentTempaltes = function(types, options) {
+    ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: types})
+      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
+      .complete(options.onComplete || _.noop)
+      .call();
+  };
+
   self.copyUserAttachments = function(options) {
     ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
-      .success(function(res) {
-        self.queryAll();
-        if (_.isFunction(options.onSuccess)) {
-          options.onSuccess(res);
-        }
-      })
+      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
       .processing(self.processing)
       .call();
   };

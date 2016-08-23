@@ -279,8 +279,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     }
   });
 
-
-
   self.newAttachment = function() {
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
@@ -298,26 +296,23 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
   hub.subscribe("upload-done", self.onUploadDone);
 
-  self.onTemplateCreateDone = function() {
-    self.service.queryAll();
-  };
+  function onSuccess() {
+    hub.send("indicator-icon", {style: "positive"});
+  }
 
   function AttachmentTemplatesModel() {
     var templateModel = this;
-
-    templateModel.ok = function(ids) {
-      ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
-        .success(self.onTemplateCreateDone)
-        .complete(LUPAPISTE.ModalDialog.close)
-        .call();
-    };
-
     templateModel.init = function() {
       templateModel.initDone = true;
       templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
       templateModel.selectm
         .allowDuplicates(true)
-        .ok(templateModel.ok)
+        .ok(function(types) {
+          self.service.createAttachmentTempaltes(types, {
+            onSuccess: onSuccess,
+            onComplete: LUPAPISTE.ModalDialog.close
+          });
+        })
         .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
@@ -349,9 +344,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.copyUserAttachments = function() {
-    var onSuccess = function() {
-      hub.send("indicator-icon", {style: "positive"});
-    };
     hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
                              size: "medium",
                              component: "yes-no-dialog",
