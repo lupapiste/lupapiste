@@ -52,7 +52,10 @@ LUPAPISTE.AttachmentsTableModel = function(service) {
   }
 
   function downloadAll () {
-    console.log("Ladattaisiin uudella kutsulla", _.map(service.attachments, getAttachmentId));
+    var attIds = _.map(service.attachments, getAttachmentId);
+    var applicationId = lupapisteApp.models.application._js.id;
+    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + attIds.join(",") + "&lang=" + loc.getCurrentLanguage();   
+    window.open(uri);
   }
         
   return {

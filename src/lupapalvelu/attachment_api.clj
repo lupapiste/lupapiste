@@ -402,18 +402,20 @@
      :body "404"}))
 
 (defraw "download-attachments"
-  {:parameters [:ids]
+  {:parameters [:id ids]
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :user-authz-roles auth/all-authz-roles
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:ids])]
+   :input-validators [(partial action/non-blank-parameters [:ids])]
    :org-authz-roles auth/reader-org-authz-roles}
-  [{{attachments :attachments :as application} :application}]
-  (do
-    (println "download-attachments kutsuttu")
-    {:status 200
-     :headers {"Content-Type" "text/plain"}
-     :body (str "Saisi ladata")}))
+  [{:keys [application user lang]}]
+  (let [attachments (:attachments application)
+        ids (clojure.string/split ids #",")
+        atts (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
+      {:status 200
+       :headers {"Content-Type" "application/octet-stream"
+                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+       :body (attachment/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
 
 ;;
 ;; Upload
