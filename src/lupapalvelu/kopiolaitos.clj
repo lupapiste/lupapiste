@@ -129,9 +129,9 @@
                                    (assoc attachment :amount amount)
                                    (select-keys (-> attachment :versions last) [:fileId :filename])))))
                         (filter :forPrinting)
-                        (filter (comp pos? count :versions)))]
+                        (filter (comp not-empty :versions)))]
 
-      (if (pos? (count attachments))
+      (if (not-empty attachments)
         (let [order {:type "verdict-attachment-print-order"
                      :user (select-keys user [:id :role :firstName :lastName])
                      :timestamp created
