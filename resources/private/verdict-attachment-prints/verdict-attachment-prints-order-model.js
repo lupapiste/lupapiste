@@ -112,7 +112,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.kuntalupatunnus(util.getIn(application, ["verdicts", 0, "kuntalupatunnus"], ""));
   };
 
-  self.openDialog = _.partial(LUPAPISTE.ModalDialog.open, self.dialogSelector);
+  self.openDialog = function() {
+    self.attachmentsService.queryAll();
+    LUPAPISTE.ModalDialog.open(self.dialogSelector);
+  };
 
   // Send the prints order
 
