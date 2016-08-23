@@ -17,7 +17,6 @@ Mikko creates an application
 Mikko adds an attachment
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//td[@class='attachment-file-info']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko submits application
   Submit application
@@ -27,19 +26,21 @@ Sonja logs in
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
-Sonja sets attachment to be a verdict attachment
+Sonja goes to attachments tab
   Open tab  attachments
-  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
-  Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
+  Wait until  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
+
+Sonja sets attachment to be a verdict attachment
   Open attachment details  muut.muu
-  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
-  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
+  Checkbox should not be selected  jquery=section#attachment input[data-test-id=is-verdict-attachment]
+  Select checkbox  jquery=section#attachment input[data-test-id=is-verdict-attachment]
 
 Sonja sets contents description for the attachment
   Input text by test id  attachment-contents-input  Muu muu muu liite
   Click by test id  back-to-application-from-attachment
-  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
-  Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 Sonja disables verdict attachment using multiselect view
   Click by test id  mark-verdict-attachments
@@ -49,7 +50,7 @@ Sonja disables verdict attachment using multiselect view
   Click by test id  multiselect-action-button
 
 There should be no verdict attachments
-  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] i[data-test-icon=for-printing-icon]
 
 Sonja marks one attachment as verdict attachment using multiselect view
   Click by test id  mark-verdict-attachments
@@ -66,7 +67,7 @@ Sonja marks one attachment as verdict attachment using multiselect view
   Wait for jQuery
 
 There should be now one verdict attachment
-  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="verdict-attachment-muut.muu"]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] i[data-test-icon=for-printing-icon]
 
 Sonja gives verdict
   Open tab  verdict
@@ -74,7 +75,7 @@ Sonja gives verdict
 
 An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
   Open tab  attachments
-  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
+  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 The print order dialog can be opened by selecting from the dropdown
   Click by test id  order-attachment-prints
