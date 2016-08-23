@@ -157,9 +157,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       .call();
   };
 
-  var hubIds = [hub.subscribe("refresh-verdict-attachments-orders", self.refresh),
-                hub.subscribe("order-attachment-prints", self.openDialog)];
-
-  self.dispose = _.partial(_.map, hubIds, hub.unsubscribe);
+  self.addHubListener("refresh-verdict-attachments-orders", self.refresh);
+  self.addHubListener("order-attachment-prints", self.openDialog);
 
 };
