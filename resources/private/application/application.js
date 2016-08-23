@@ -270,18 +270,24 @@
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      var pendingCalendarNotifications = _.filter(app.reservations,
+      var pendingCalendarNotifications = _.sortBy(_.filter(app.reservations,
         function (r) {
          return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
-        });
+        }), "startTime");
 
       pendingCalendarNotifications = _.map(pendingCalendarNotifications,
         function(n) {
-         n.acknowledged = "none";
-         return ko.mapping.fromJS(n);
+          n.acknowledged = "none";
+          return ko.mapping.fromJS(n);
         });
 
-      applicationModel.calendarNotificationsPending(pendingCalendarNotifications);
+      applicationModel.calendarNotificationsPending(
+        _.transform(
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf('day').valueOf(); }),
+          function (result, value, key) {
+            return result.push({ day: _.parseInt(key), notifications: value })
+          }, []));
+      applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length || 0);
 
       isInitializing = false;
       pageutil.hideAjaxWait();
