@@ -410,7 +410,7 @@
    :org-authz-roles auth/reader-org-authz-roles}
   [{:keys [application user lang]}]
   (let [attachments (:attachments application)
-        ids (clojure.string/split ids #",")
+        ids (ss/split ids #",")
         atts (filter (fn [att] (some (partial = (:id att)) ids)) attachments)]
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
