@@ -49,6 +49,9 @@
                   <span data-bind="ltext: 'calendar.declined'"></span>
                 <!-- /ko -->
               </div>
+              <!-- ko if: reservationStatus() === 'PENDING' -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.invited'"></div>
+              <!-- /ko -->
             </div>
             <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
               <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
