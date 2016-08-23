@@ -420,7 +420,7 @@
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
 
-#_(notifications/defemail
+(notifications/defemail
   :decline-appointment
   {:subject-key                  "application.calendar.appointment.decline"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
@@ -459,15 +459,15 @@
     (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "ACCEPTED"}})
     (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
     (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
-    (ok)))
+    (ok :reservationId reservationId)))
 
 (defcommand decline-reservation
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
-   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
-   #_:on-success       #_(notify :decline-appointment)}
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
+   :on-success       (notify :decline-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (get-reservation reservationId)]
     (info "Declining reservation" reservationId)
@@ -475,7 +475,7 @@
     (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "DECLINED"}})
     (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
     (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
-    (ok)))
+    (ok :reservationId reservationId)))
 
 (defcommand mark-reservation-update-seen
   {:user-roles       #{:authority :applicant}

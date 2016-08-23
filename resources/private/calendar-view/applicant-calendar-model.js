@@ -29,9 +29,9 @@ LUPAPISTE.ApplicantCalendarModel = function () {
     self.defaultLocation(event.defaultLocation);
   });
 
-  self.acceptReservation = function(r) {
+  self.acceptOrDeclineReservation = function(acceptOrDecline, r) {
     ajax
-      .command("accept-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id})
+      .command(acceptOrDecline + "-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id})
       .success(function() {
         hub.send("indicator", {style: "positive"});
         repository.load(ko.unwrap(lupapisteApp.models.application.id));

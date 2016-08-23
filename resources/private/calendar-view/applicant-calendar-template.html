@@ -26,12 +26,13 @@
             </div>
             <div class="titlebar buttons-box">
               <button class="positive"
-                      data-bind="click: $component.acceptReservation.bind($data)">
+                      data-bind="click: $component.acceptOrDeclineReservation.bind($data, 'accept')">
                 <i class="lupicon-check" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
                 Hyväksy
               </button>
-              <button class="negative">
+              <button class="negative"
+                      data-bind="click: $component.acceptOrDeclineReservation.bind($data, 'decline')">
                 <i class="lupicon-remove" style="display: inline;"></i>
                 <i class="wait spin lupicon-refresh"></i>
                 Hylkää
