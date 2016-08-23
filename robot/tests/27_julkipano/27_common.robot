@@ -89,9 +89,7 @@ Create application with attachment and publish it as bulletin
   Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
   Open tab  attachments
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Koeluontoinen toiminta
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Koeluontoinen toiminta
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TXT_TESTFILE_NAME}')]
   Publish bulletin
   Logout
 

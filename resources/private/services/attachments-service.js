@@ -32,6 +32,7 @@ LUPAPISTE.AttachmentsService = function() {
   var forceVisibleIds = ko.observableArray();
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
+  self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
   self.applicationId.subscribe(function() {
@@ -134,6 +135,10 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
+  self.queryAttachments = function() {
+    queryData("attachments", "attachments", self.setAttachments);
+  };
+
   self.queryAll = function() {
     forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);
@@ -164,7 +169,7 @@ LUPAPISTE.AttachmentsService = function() {
     var doDelete = function() {
       ajax.command("delete-attachment", {id: self.applicationId(), attachmentId: attachmentId})
         .success(removeSuccessCallback)
-        .processing(lupapisteApp.models.application.processing)
+        .processing(self.processing)
         .call();
         hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
       return false;
@@ -205,6 +210,21 @@ LUPAPISTE.AttachmentsService = function() {
     forceVisibleIds.push(attachmentId);
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
   };
+
+  self.createAttachmentTempaltes = function(types, options) {
+    ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: types})
+      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
+      .complete(options.onComplete || _.noop)
+      .call();
+  };
+
+  self.copyUserAttachments = function(options) {
+    ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
+      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
+      .processing(self.processing)
+      .call();
+  };
+
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {

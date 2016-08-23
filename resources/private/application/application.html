@@ -623,7 +623,7 @@
                         </button>
 
                         <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                                           enable: !$root.verdictModel.processing() && $root.verdictAttachmentPrintsOrderModel.attachments().length,
+                                           enable: !$root.verdictModel.processing(),
                                            visible: $root.authorization.ok('order-verdict-attachment-prints'),
                                            attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
                                 class="positive"

@@ -112,7 +112,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.kuntalupatunnus(util.getIn(application, ["verdicts", 0, "kuntalupatunnus"], ""));
   };
 
-  self.openDialog = _.partial(LUPAPISTE.ModalDialog.open, self.dialogSelector);
+  self.openDialog = function() {
+    self.attachmentsService.queryAttachments();
+    LUPAPISTE.ModalDialog.open(self.dialogSelector);
+  };
 
   // Send the prints order
 
@@ -154,9 +157,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       .call();
   };
 
-  var hubIds = [hub.subscribe("refresh-verdict-attachments-orders", self.refresh),
-                hub.subscribe("order-attachment-prints", self.openDialog)];
-
-  self.dispose = _.partial(_.map, hubIds, hub.unsubscribe);
+  self.addHubListener("refresh-verdict-attachments-orders", self.refresh);
+  self.addHubListener("order-attachment-prints", self.openDialog);
 
 };
