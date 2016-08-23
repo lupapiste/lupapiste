@@ -134,6 +134,10 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
+  self.queryAttachments = function() {
+    queryData("attachments", "attachments", self.setAttachments);
+  };
+
   self.queryAll = function() {
     forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);

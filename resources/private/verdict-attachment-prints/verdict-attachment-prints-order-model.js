@@ -113,7 +113,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   };
 
   self.openDialog = function() {
-    self.attachmentsService.queryAll();
+    self.attachmentsService.queryAttachments();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
