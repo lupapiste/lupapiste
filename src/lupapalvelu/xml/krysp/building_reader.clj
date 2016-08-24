@@ -18,7 +18,7 @@
   ([server credentials property-id raw?]
    (let [url (common/wfs-krysp-url server common/building-type (common/property-equals common/rakennuksen-kiinteistotunnus property-id))]
      (trace "Get building: " url)
-     (or (cr/get-xml url credentials raw?) {}))))
+     (or (cr/get-xml url {} credentials raw?) {}))))
 
 
 (defn pysyva-rakennustunnus

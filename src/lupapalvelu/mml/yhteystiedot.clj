@@ -51,7 +51,7 @@
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" property-id)
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
-    (cr/get-xml uri [username password] raw?))))
+    (cr/get-xml uri {} [username password] raw?))))
 
 (defn get-owners [property-id]
   {:pre [(v/kiinteistotunnus? property-id)]}
