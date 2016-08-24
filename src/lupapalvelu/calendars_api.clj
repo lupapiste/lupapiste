@@ -352,7 +352,8 @@
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
-   :on-success       (notify :suggest-appointment)}
+   :on-success       [(notify :suggest-appointment-authority)
+                      (notify :suggest-appointment-applicant)]}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id

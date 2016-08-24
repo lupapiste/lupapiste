@@ -28,13 +28,15 @@
      :info-sv (str (env/value :host) "/ohjeet")}))
 
 (notifications/defemail
-  :suggest-appointment
+  :suggest-appointment-authority
   {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
    :calendar-fn                  (fn [{application :application result :result} recipient]
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          reservation (assoc reservation :attendee recipient
-                                                                        :unique-id (generate-unique-id)
+                                                                        :unique-id (if (:unique-id reservation)
+                                                                                     (:unique-id reservation)
+                                                                                     (generate-unique-id))
                                                                         :sequence 0
                                                                         :method Method/REQUEST)]
                                      (cal/update-reservation application
@@ -43,7 +45,34 @@
                                                                     :reservations.$.sequence  (:sequence reservation)}})
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
-   :recipients-fn                (recipients-fn)
+   :recipients-fn                (fn [{application :application result :result}]
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
+                                         recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
+                                     (filter (fn [recipient] (usr/authority? recipient)) (map usr/get-user-by-id recipient-ids))))
+   :model-fn                     (model-fn)})
+
+(notifications/defemail
+  :suggest-appointment-applicant
+  {:subject-key                  "application.calendar.appointment.suggestion"
+   :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
+   :calendar-fn                  (fn [{application :application result :result} recipient]
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
+                                         reservation (assoc reservation :attendee recipient
+                                                                        :unique-id (if (:unique-id reservation)
+                                                                                     (:unique-id reservation)
+                                                                                     (generate-unique-id))
+                                                                        :sequence 0
+                                                                        :method Method/REQUEST)]
+                                     (cal/update-reservation application
+                                                             (:reservationId result)
+                                                             {$set {:reservations.$.unique-id (:unique-id reservation)
+                                                                    :reservations.$.sequence  (:sequence reservation)}})
+                                     (ical/create-calendar-event reservation)))
+   :show-municipality-in-subject true
+   :recipients-fn                (fn [{application :application result :result}]
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
+                                         recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
+                                     (filter (fn [recipient] (usr/applicant? recipient)) (map usr/get-user-by-id recipient-ids))))
    :model-fn                     (model-fn)})
 
 (notifications/defemail
