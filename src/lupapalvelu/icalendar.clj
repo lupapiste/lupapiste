@@ -4,18 +4,20 @@
   (:import (java.util Date)
            (net.fortuna.ical4j.model Calendar DateTime)
            (net.fortuna.ical4j.model.property Method ProdId Version CalScale Attendee Uid Organizer Url Location Description Sequence)
-           (net.fortuna.ical4j.model.parameter Cn Role Rsvp)
+           (net.fortuna.ical4j.model.parameter Cn Role Rsvp PartStat)
            (net.fortuna.ical4j.model.component VEvent)
            (net.fortuna.ical4j.data CalendarOutputter)
            (java.io StringWriter)
            (clojure.lang PersistentArrayMap)))
 
 (defn- create-attendee
-  [{:keys [url role name rsvp]}]
+  [{:keys [url role name rsvp partstat]}]
   (let [att (Attendee. (java.net.URI/create url))]
     (.add (.getParameters att) role)
     (.add (.getParameters att) rsvp)
     (.add (.getParameters att) (Cn. name))
+    (when partstat
+      (.add (.getParameters att) partstat))
     att))
 
 (defn- add-properties
@@ -32,10 +34,12 @@
     (when (seq location) (.add props (Location. location)))
     (when (seq description) (.add props (Description. description)))
     (when (map? attendee)
-      (.add props (create-attendee {:url  (str "mailto:" (:email attendee))
-                                    :rsvp Rsvp/FALSE
-                                    :role Role/REQ_PARTICIPANT
-                                    :name (str (:firstName attendee) " " (:lastName attendee))})))
+      (clojure.pprint/pprint attendee)
+      (.add props (create-attendee {:url      (str "mailto:" (:email attendee))
+                                    :rsvp     Rsvp/FALSE
+                                    :role     Role/REQ_PARTICIPANT
+                                    :partstat (:partstat attendee)
+                                    :name     (str (:firstName attendee) " " (:lastName attendee))})))
     vevent))
 
 (defn- create-cal
@@ -86,4 +90,5 @@
                              :unique-id unique-id
                              :sequence sequence)
         _ (add-event! cal event)]
-    (output-calendar cal)))
+    {:method (.getValue method)
+     :content (output-calendar cal)}))

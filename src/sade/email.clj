@@ -61,7 +61,7 @@
   (assert (or plain html calendar) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
-        calendar-body (when calendar {:content calendar :type "text/calendar; charset=utf-8; method=REQUEST"})
+        calendar-body (when calendar {:content (:content calendar) :type (str "text/calendar; charset=utf-8; method=" (:method calendar))})
         body       (remove nil? [:alternative plain-body html-body calendar-body])
         body       (if (= (count body) 2)
                      [(second body)]
