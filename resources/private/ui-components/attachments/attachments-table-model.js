@@ -38,6 +38,14 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                                                yesFn: yesFn}});
   }
 
+  function approveAttachment(attachment) {
+    service.approveAttachment(attachment.id, { onComplete: _.partial(service.queryOne, attachment.id) });
+  }
+
+  function rejectAttachment(attachment) {
+    service.rejectAttachment(attachment.id, { onComplete: _.partial(service.queryOne, attachment.id) });
+  }
+
   function stateIcons(attachment) {
     var data = ko.utils.unwrapObservable(attachment);
     var notNeeded = attachment.notNeeded();
@@ -62,9 +70,6 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
 
-  // When foo = idFun( fun ), then foo(data) -> fun(data.id)
-  var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
-
   return {
     attachments: attachments,
     idPrefix: idPrefix,
@@ -72,9 +77,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     stateIcons: stateIcons,
     inputId: function(index) { return idPrefix + index; },
     isApproved: service.isApproved,
-    approve: idFun(service.approveAttachment),
+    approve: approveAttachment,
     isRejected: service.isRejected,
-    reject: idFun(service.rejectAttachment),
+    reject: rejectAttachment,
     isNotNeeded: service.isNotNeeded,
     remove: removeAttachment,
     appModel: appModel,
