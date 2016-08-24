@@ -35,7 +35,7 @@
         (log (str uri " - " (.getMessage e)) options)
         (cond
           throw-fail!               (fail! connection-error :cause (.getMessage e))
-          (false? throw-exceptions) {:status 502, :body (.getMessage e)}
+          (false? throw-exceptions) {:status 502, :body (str "I/O exception - " (.getMessage e))}
           :else                     (throw e))))))
 
 (defn get [uri & options]
