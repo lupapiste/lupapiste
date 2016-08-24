@@ -75,6 +75,10 @@
 
   var openAttachmentIds = [];
 
+  var isConvertableType = function (contentType) {
+    return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
+  }
+
   var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
     return _.map(attachments, function(attachment) {
       if (!_.isFunction(attachment.metadata)) {
@@ -154,7 +158,11 @@
       attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
       attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
-      attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() && lv.contentType() === "application/pdf" : false;
+      if (lv && _.isUndefined(lv.archivable) && isConvertableType(lv.contentType())) {
+        attachment.convertableToPdfA = true;
+      } else {
+        attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() : false;
+      }
       return attachment;
     });
   };

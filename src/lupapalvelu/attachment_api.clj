@@ -18,6 +18,7 @@
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
@@ -716,7 +717,7 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (let [attachment (util/find-first #(= (:id %) attachment-id) attachments)
                               {:keys [archivable contentType]} (last (:versions attachment))]
-                          (when (or archivable (not= "application/pdf" contentType))
+                          (when (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg) (keyword contentType))))
                             (fail :error.attachment.id))))]
    :states           (states/all-application-states-but :draft)}
   [{:keys [application]}]
@@ -731,9 +732,9 @@
                                           :comment-text nil
                                           :required false
                                           :created created
-                                          :stamped stamped}
-                                         {:content temp-pdf :filename filename})
-          (ok))
+                                          :stamped stamped
+                                          :original-file-id fileId}
+                                         {:content temp-pdf :filename filename}))
         (finally
-          (io/delete-file temp-pdf :silently))))
-    (fail :error.unknown)))
+          (io/delete-file temp-pdf :silently)))
+      (ok))))
