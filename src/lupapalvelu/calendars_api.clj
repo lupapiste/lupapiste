@@ -393,7 +393,7 @@
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
-   #_:on-success       #_(notify :decline-appointment)}
+   :on-success       (notify :accept-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (get-reservation reservationId)]
     (info "Accepting reservation" reservationId)
