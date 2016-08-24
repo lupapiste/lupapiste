@@ -110,7 +110,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
         });
       }),
       attachmentIds: subGroup.attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = attachmentInfos.length; 
+         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
     };
   }
 
@@ -150,7 +153,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
       hasContent: someSubGroupsField(subGroups, "hasContent"),
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
+      downloadAllText: function() { return loc("download-all"); } /* generic version not intended to be called */
     }, subGroups);
   }
 
