@@ -222,6 +222,12 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
+  self.downloadAttachments = function(attachmentIds) {
+    var ids = attachmentIds || _(self.attachments()).map(ko.unwrap).map("id");
+    var applicationId = self.applicationId();
+    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + ids.join(",") + "&lang=" + loc.getCurrentLanguage();
+    window.open(uri);
+  };
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {

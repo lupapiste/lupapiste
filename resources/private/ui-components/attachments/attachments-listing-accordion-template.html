@@ -26,7 +26,8 @@
                                       data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
         </div>
         <!-- /ko -->
-        <button data-bind="enable: $parent.data && $parent.data() && $parent.data().hasFile,
+        <button data-bind="click: $parent.data().downloadAll,
+                           enable: $parent.data && $parent.data() && $parent.data().hasFile,
                            attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($parent.path)}"
                 class="secondary">
           <i class="lupicon-download"></i>

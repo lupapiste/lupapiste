@@ -108,7 +108,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
         return _.some(attachmentInfos, function(attachment) {
           return !!util.getIn(attachment, ["latestVersion", "fileId"]);
         });
-      })
+      }),
+      attachmentIds: subGroup.attachmentIds,
+      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds)
     };
   }
 
@@ -141,11 +143,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   function modelForMainAccordion(mainGroup) {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
+    var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
       hasContent: someSubGroupsField(subGroups, "hasContent"),
-      hasFile: someSubGroupsField(subGroups, "hasFile")
+      hasFile: someSubGroupsField(subGroups, "hasFile"),
+      attachmentIds: attachmentIds,
+      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds)
     }, subGroups);
   }
 
