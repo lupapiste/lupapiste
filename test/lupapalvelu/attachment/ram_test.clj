@@ -83,10 +83,7 @@
        (let [att1 (dissoc (ssg/generate Attachment) :ramLink)
              att2 (assoc (ssg/generate Attachment) :ramLink (:id att1))
              att3 (assoc (ssg/generate Attachment) :ramLink (:id att2))]
-         (fact "ram-status-ok"
-               (attachment-status-ok {:data {:attachmentId (:id att1)}
-                                      :application {:attachments [att1 att2]}}
-                                     ) => nil?
+         (fact "attachment-status-ok"
                (attachment-status-ok {:data {:attachmentId (:id att2)}
                                       :application {:attachments [att1 (dissoc att2 :state)]}}
                                      ) => (ram-fail :error.attachment-not-approved)
@@ -96,7 +93,7 @@
 
          (fact "ram-status-not-ok"
                (ram-status-not-ok {:data {:attachmentId (:id att1)}
-                                   :application {:attachments [att1 att2]}}
+                                   :application {:attachments [(assoc att1 :state :bad) att2]}}
                                   ) => nil?
                (ram-status-not-ok {:data {:attachmentId (:id att1)}
                                    :application {:attachments [(assoc att1 :state :ok) att2]}}
