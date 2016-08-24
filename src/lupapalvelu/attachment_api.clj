@@ -296,10 +296,8 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when-not (util/find-by-id attachment-id attachments)
                           (fail :error.attachment.id)))
-                      (fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
-                        (when (some (comp #{attachment-id} :ramLink) attachments)
-                          (fail :error.ram-link-already-exists)))
-                      ram/ram-status-ok]
+                      ram/ram-not-linked
+                      ram/attachment-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
@@ -329,7 +327,7 @@
                  attachment-not-required
                  attachment-editable-by-application-state
                  ram/ram-status-not-ok
-                 ram/ram-not-root-attachment]}
+                 ram/ram-not-linked]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
   (ok))
@@ -346,7 +344,7 @@
                  attachment-not-readOnly
                  attachment-editable-by-application-state
                  ram/ram-status-not-ok
-                 ram/ram-not-root-attachment]}
+                 ram/ram-not-linked]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)
