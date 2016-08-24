@@ -59,7 +59,6 @@
                                      (cal/update-reservation application
                                                              (:reservationId result)
                                                              {$set {:reservations.$.sequence (:sequence reservation)}})
-                                     (clojure.pprint/pprint reservation)
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)

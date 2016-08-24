@@ -34,7 +34,6 @@
     (when (seq location) (.add props (Location. location)))
     (when (seq description) (.add props (Description. description)))
     (when (map? attendee)
-      (clojure.pprint/pprint attendee)
       (.add props (create-attendee {:url      (str "mailto:" (:email attendee))
                                     :rsvp     Rsvp/FALSE
                                     :role     Role/REQ_PARTICIPANT
