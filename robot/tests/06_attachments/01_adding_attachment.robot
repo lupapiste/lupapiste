@@ -118,6 +118,7 @@ Not needed should be checked after reload with correct filters
   Reload Page
   Wait Until  Not needed should be visible  hakija.valtakirja
   Not needed should not be visible  paapiirustus.asemapiirros
+  Scroll to  div.filter-wrapper:last-child label.filter-label
   Click element  jquery=div.filter-wrapper:last-child label.filter-label
   Not needed should be selected  paapiirustus.asemapiirros
 
