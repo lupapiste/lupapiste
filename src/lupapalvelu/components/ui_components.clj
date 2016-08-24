@@ -260,6 +260,7 @@
 
    :attachment   {:depends [:common-html :repository :signing]
                   :js ["attachment-multi-select.js"
+                       "attachment-model.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"

@@ -99,17 +99,11 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function buildAttachmentModel(attachment, attachmentObs) {
-    var notNeeded = false,
-        authModel = getAuthModel(attachment);
     if (ko.isObservable(attachmentObs)) {
-      notNeeded = attachmentObs().notNeeded;
-      notNeeded(attachment.notNeeded);
+      attachmentObs(attachmentObs().reset(attachment));
     } else {
-      notNeeded = ko.observable(attachment.notNeeded);
-      notNeeded.subscribe(_.partial(self.setNotNeeded, attachment.id));
-      attachmentObs = ko.observable();
+      attachmentObs = ko.observable(new LUPAPISTE.AttachmentModel(attachment, getAuthModel(attachment)));
     }
-    attachmentObs(_.assign(attachment, {authModel: authModel, notNeeded: notNeeded}));
     return attachmentObs;
   }
 
