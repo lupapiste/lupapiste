@@ -26,6 +26,15 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     pageutil.openPage("attachment", applicationId + "/" + attachment.id);
   }
 
+  function removeAttachment(attachment) {
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(attachment.versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: _.partial(service.removeAttachment, attachment.id) }});
+    hub.send("track-click", {category:"Attachments", label: "", event: "deleteAttachmentFromListing"});
+  }
+
   function stateIcons(attachment) {
     var data = ko.utils.unwrapObservable(attachment);
     var notNeeded = attachment.notNeeded();
@@ -64,7 +73,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     isRejected: service.isRejected,
     reject: idFun(service.rejectAttachment),
     isNotNeeded: service.isNotNeeded,
-    remove: idFun(service.removeAttachment),
+    remove: idFun(removeAttachment),
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     canVouch: canVouch,

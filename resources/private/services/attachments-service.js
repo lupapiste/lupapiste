@@ -158,69 +158,66 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.removeAttachment = function(attachmentId) { // use as reference for new attachment remove dialog, also put track-clicks in
-    var versions = ko.unwrap(self.getAttachment(attachmentId)).versions;
-    var removeSuccessCallback = function() {
-      self.attachments.remove(function(attachment) {
-        return attachment().id === attachmentId;
-      });
-      hub.send("indicator-icon", {style: "positive"});
-    };
-    var doDelete = function() {
-      ajax.command("delete-attachment", {id: self.applicationId(), attachmentId: attachmentId})
-        .success(removeSuccessCallback)
-        .processing(self.processing)
-        .call();
-        hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
-      return false;
-    };
-    hub.send("show-dialog", {ltitle: "attachment.delete.header",
-                             size: "medium",
-                             component: "yes-no-dialog",
-                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
-                                               yesFn: doDelete}});
+  self.removeAttachment = function(attachmentId, options) {
+    ajax.command("delete-attachment", {id: self.applicationId(), attachmentId: attachmentId})
+      .success(function(res) {
+        self.attachments.remove(function(attachment) {
+          return attachment().id === attachmentId;
+        });
+        (options.onSuccess || util.showSavedIndicator)(res);
+      })
+      .complete(options.onComplete || _.noop)
+      .processing(self.processing)
+      .call();
+    return false;
   };
 
-  self.updateAttachment = function(attachmentId, commandName, params) {
+  self.updateAttachment = function(attachmentId, commandName, params, options) {
     var commandParams = _.assign({"id": self.applicationId(),
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(function(res) {
-        util.showSavedIndicator(res);
-      })
-      .complete(function() {
+      .success(options.onSuccess || util.showSavedIndicator)
+      .complete(function(res) {
         self.queryOne(attachmentId);
+        (options.onComplete || _.noop)(res);
       })
       .call();
   };
 
   // Approving and rejecting attachments
-  self.approveAttachment = function(attachmentId) {
+  self.approveAttachment = function(attachmentId, options) {
     var attachment = self.getAttachment(attachmentId);
-    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
+    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
   };
 
-  self.rejectAttachment = function(attachmentId) {
+  self.rejectAttachment = function(attachmentId, options) {
     var attachment = self.getAttachment(attachmentId);
-    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])});
+    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
   };
 
-  self.setNotNeeded = function(attachmentId, flag) {
+  self.setNotNeeded = function(attachmentId, flag, options) {
     forceVisibleIds.push(attachmentId);
-    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag});
+    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag}, options);
   };
 
   self.createAttachmentTempaltes = function(types, options) {
     ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: types})
-      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
+      .success(function(res) {
+        self.queryAll();
+        (options.onSuccess || util.showSavedIndicator)(res);
+      })
       .complete(options.onComplete || _.noop)
       .call();
   };
 
   self.copyUserAttachments = function(options) {
     ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
-      .success(_.flow([options.onSuccess || _.noop, self.queryAll]))
+      .success(function(res) {
+        self.queryAll();
+        (options.onSuccess || util.showSavedIndicator)(res);
+      })
+      .complete(options.onComplete || _.noop)
       .processing(self.processing)
       .call();
   };
