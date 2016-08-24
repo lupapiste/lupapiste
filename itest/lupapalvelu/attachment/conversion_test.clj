@@ -39,7 +39,7 @@
                                    :contentType "application/pdf"
                                    :content (io/file "dev-resources/invalid-pdfa.pdf")}) => {:archivable false :archivabilityError :not-validated}
     (provided
-      (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false))
+      (pdfa/pdf-a-required? anything) => false))
 
   (when pdfa/pdf2pdf-enabled?
     (fact "PDF conversion - with archive => archivable"
@@ -51,6 +51,6 @@
                                                                                                          :content            (partial instance? File)
                                                                                                          :filename           "foo.pdf"})
       (provided
-        (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => true))))
+        (pdfa/pdf-a-required? anything) => true))))
 
 
