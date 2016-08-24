@@ -51,7 +51,7 @@ LUPAPISTE.SutiDisplayModel = function() {
     if( app.id() && app.state()) {
       self.sutiTitle( loc( "suti.display-title",
                            util.prop.toHumanFormat( app.propertyId())));
-      service.fetchApplicationData( app, self.waiting );
+      service.fetchApplicationData( app, self.waiting, true );
     }
   });
 

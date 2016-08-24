@@ -164,6 +164,22 @@ Default products
   Set Suti id  1234
   Check default products
 
+Pena creates other application to make sure that Suti id is not leaked
+  Set Suite Variable  ${otherapp}  Sutisi satisi
+  Create application the fast way  ${otherapp}  ${propertyid}    kerrostalo-rivitalo
+  Open tab  attachments
+  Wait test id visible  suti-display
+  Test id input is  suti-display-id  ${EMPTY}
+
+Pena toggles applications
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Test id input is  suti-display-id  1234
+  Open application  ${otherapp}  ${propertyid}
+  Open tab  attachments
+  Test id input is  suti-display-id  ${EMPTY}
+  Open application  ${appname}  ${propertyid}
+
 Application could be submitted as Suti ID is set
   Open tab  requiredFieldSummary
   Wait test id hidden  submit-errors-container
