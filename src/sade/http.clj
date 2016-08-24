@@ -18,23 +18,24 @@
 
 (defn- log [message {quiet :quiet :as options}]
   (when-not (false? (:quiet options))
-    (error message)))
+    (error "error.integration -" message)))
 
-(defn- logged-call [f uri options]
-  (try
-    (let [http-client-opts (update options :throw-exceptions (fn [t?] (if (:throw-fail! options) false t?)))
-          {:keys [status] :as resp} (f uri http-client-opts)]
-      (if (or (http/unexceptional-status? status) (not (:throw-fail! options)))
-        resp
-        (do
-          (log (str uri " returned " status) options)
-          (fail! :_ :status status))
-        ))
-    (catch java.io.IOException e
-      (log (str uri " - " (.getMessage e)) options)
-      (if (:throw-fail! options)
-        (fail! :_ :cause (.getMessage e))
-        (throw e)))))
+(defn- logged-call [f uri {:keys [throw-fail!] :as options}]
+  (let [http-client-opts (update options :throw-exceptions (fn [t?] (if throw-fail! false t?)))
+        connection-error (or (:connection-error options) :error.integration.connection)
+        http-error       (or (:http-error options) :error.integration.http)]
+    (try
+      (let [{:keys [status] :as resp} (f uri http-client-opts)]
+        (if (or (http/unexceptional-status? status) (not throw-fail!))
+          resp
+          (do
+            (log (str uri " returned " status) options)
+            (fail! http-error :status status))))
+      (catch java.io.IOException e
+        (log (str uri " - " (.getMessage e)) options)
+        (if (:throw-fail! options)
+          (fail! connection-error :cause (.getMessage e))
+          (throw e))))))
 
 (defn get [uri & options]
   (logged-call http/get uri (apply merge-to-defaults options)))
