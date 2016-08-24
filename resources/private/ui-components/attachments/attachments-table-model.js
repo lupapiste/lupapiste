@@ -65,6 +65,17 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   // When foo = idFun( fun ), then foo(data) -> fun(data.id)
   var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
 
+  function getAttachmentId(obs) {
+    return ko.utils.unwrapObservable(obs).id;
+  }
+
+  function downloadAll () {
+    var attIds = _.map(service.attachments, getAttachmentId);
+    var applicationId = lupapisteApp.models.application._js.id;
+    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + attIds.join(",") + "&lang=" + loc.getCurrentLanguage();
+    window.open(uri);
+  }
+
   return {
     attachments: attachments,
     idPrefix: idPrefix,
@@ -79,6 +90,10 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     remove: removeAttachment,
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
+    downloadAll: downloadAll,
+    canDownload: _.some(service.attachments, function(a) {
+      return hasFile(a());
+    }),
     canVouch: canVouch,
     openAttachment: openAttachment
   };

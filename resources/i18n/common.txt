@@ -1547,6 +1547,7 @@
 "notice.urgent" "sv" "brådskande ansökan"
 "not-known" "fi" "Ei tiedossa"
 "not-known" "sv" "Okänd"
+"not-validated" "fi" "Liitteen arkistokelpoisuutta ei ole tarkastettu"
 "notRegistered" "fi" "Ei vielä rekisteröitynyt"
 "notRegistered" "sv" "Är ännu inte registrerad"
 "notSelected" "fi" "Ei valittu"

@@ -104,7 +104,7 @@ LUPAPISTE.ConversationModel = function(params) {
   }).extend({ rateLimit: 100 });
 
   self.isAuthorityComment = function(comment) {
-    return util.getIn(comment, ["user", "role"]) === "authority";
+    return util.getIn(comment, ["type"]) === "authority";
   };
 
   self.isForAttachment = function(comment) {
@@ -158,4 +158,15 @@ LUPAPISTE.ConversationModel = function(params) {
       self.to("");
     }
   });
+
+  // Fallback for system type is the user role. The fallback does not
+  // handle outside authorities correctly. The more robust approach
+  // would be to resolve the role in the backend.
+  self.commentRole = function( data ) {
+    var role = data.type;
+    if( role === "system" ) {
+      role = _.get( data, "user.role" );
+    }
+    return role;
+  };
 };

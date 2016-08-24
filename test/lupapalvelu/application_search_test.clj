@@ -54,7 +54,9 @@
      :tags ["test1" "test2"]}
     {:role "authority"}) => {"$and"
                                [{:auth.id "123"}
-                                {:state {"$nin" ["draft" "canceled"]}}
+                                {"$and" [{:state {"$ne" "canceled"}}
+                                         {"$or" [{:state {"$ne" "draft"}}
+                                                 {:organization {"$nin" []}}]}]}
                                 {"$or" [{:auth.id {"$in" ["321"]}} {:authority.id  {"$in" ["321"]}}]}
                                 {:tags {"$in" ["test1" "test2"]}}
                                 {:primaryOperation.name {"$nin" ["tyonjohtajan-nimeaminen-v2"]}}]})

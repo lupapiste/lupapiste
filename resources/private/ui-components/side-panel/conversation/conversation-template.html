@@ -100,7 +100,7 @@
             <div class="header">
                 <span class="sender">
                     <span data-bind="fullName: user"></span>
-                    <span class="role" data-bind="ltext: user.role"></span>
+                    <span class="role" data-bind="ltext: $parent.commentRole( $data )"></span>
               <!-- ko with: $data.to -->
                 <span class="to" data-bind="fullName: $data"></span>
                 <!-- /ko -->

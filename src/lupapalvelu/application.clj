@@ -88,7 +88,9 @@
   "Validator: Restrict authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user application :application}]
-  (when (and (= :draft (keyword (:state application))) (usr/authority? user))
+  (when (and (= :draft (keyword (:state application)))
+             (usr/authority? user)
+             (not (domain/owner-or-write-access? application (:id user))))
     unauthorized))
 
 (defn validate-has-subtypes [{application :application}]
@@ -106,6 +108,13 @@
 ;;
 ;; Helpers
 ;;
+
+(defn user-role
+  "User role within the application."
+  [user {:keys [organization]}]
+  (if (usr/user-is-authority-in-organization? user organization)
+    :authority
+    :applicant))
 
 (defn insert-application [application]
   {:pre [(every? (partial contains? application)  (keys domain/application-skeleton))]}
@@ -359,7 +368,7 @@
         op (make-op operation-name created)
         state (cond
                 info-request? :info
-                (or (usr/authority? user) (usr/rest-user? user)) :open
+                (or (usr/user-is-authority-in-organization? user (:id organization)) (usr/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation-name)])
@@ -410,8 +419,6 @@
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not (or (usr/applicant? user) (usr/user-is-authority-in-organization? user organization-id))
-      (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
     (if info-request?
