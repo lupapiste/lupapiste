@@ -17,7 +17,7 @@ Mikko adds txt attachment without comment
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  submitted
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  xpath=//div[@id='application-attachments-tab']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko opens attachment details
   Open attachment details  muut.muu
@@ -66,11 +66,14 @@ Sonja clicks RAM link and opens old attachment details
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
   [Teardown]  Logout
 
-Mikko logs in and can see the RAM links but cannot delete the attachment
+Mikko logs in and can sees the RAM attachment in attachments tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Open attachment details  muut.muu
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] span[data-test-id=ram-indicator]:visible
+
+Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
+  Open attachment details  muut.muu  1
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
   Wait test id visible  ram-prefix
@@ -95,7 +98,7 @@ Sonja logs in and could delete base attachment
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Open attachment details  muut.muu
+  Open attachment details  muut.muu  1
   Wait test id visible  ram-link-type-0
   Click link  jquery=td[data-test-id=ram-link-type-0] a
   No such test id  ram-prefix
@@ -112,7 +115,7 @@ Mikko logs in and opens RAM
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Open attachment details  muut.muu
+  Open attachment details  muut.muu  1
   Wait test id visible  ram-prefix
 
 Mikko adds new RAM attachment and uploads file
@@ -137,7 +140,7 @@ RAM links table has been updated after delete
 Mikko deletes RAM
   Click by test id  delete-attachment
   Confirm yes no dialog
-  Open attachment details  muut.muu
+  Open attachment details  muut.muu  0
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   No such test id  ram-link-type-2
@@ -147,7 +150,7 @@ Sonja logs in and deletes base attachment
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Open attachment details  muut.muu
+  Open attachment details  muut.muu  1
   Click link  jquery=[data-test-id=ram-link-type-0] a
   Click by test id  delete-attachment
   Confirm yes no dialog

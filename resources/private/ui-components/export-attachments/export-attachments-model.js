@@ -1,37 +1,20 @@
-LUPAPISTE.ExportAttachmentsModel = function() {
+// [css]: class for buttons (default positive)
+LUPAPISTE.ExportAttachmentsModel = function( params ) {
   "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
-  self.appModel = lupapisteApp.models.application;
-
-  function unsentAttachmentFound(attachments) {
-    return _.some(attachments, function(a) {
-      var lastVersion = _.last(a.versions);
-      return lastVersion &&
-             (!a.sent || lastVersion.created > a.sent) &&
-             (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-    });
+  function bindSystem( cmd, msg ) {
+    return {show: self.disposedComputed( _.partial( lupapisteApp.models
+                                                    .applicationAuthModel.ok,
+                                                    cmd)),
+            send: _.partial( hub.send, msg)};
   }
 
-  self.exportAttachmentsToBackingSystem = self.disposedPureComputed(function() {
-    return self.authorizationModel.ok("move-attachments-to-backing-system") &&
-          self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
-  });
-
-  self.exportAttachmentsToAsianhallinta = self.disposedPureComputed(function() {
-    return self.authorizationModel.ok("attachments-to-asianhallinta") &&
-           self.appModel.hasAttachment() && unsentAttachmentFound(ko.mapping.toJS(lupapisteApp.models.application.attachments));
-  });
-
-  self.startExportingAttachmentsToBackingSystem = function() {
-    hub.send("start-moving-attachments-to-backing-system");
-  };
-
-  self.startExportingAttachmentsToAsianhallinta = function() {
-    hub.send("start-moving-attachments-to-case-management");
-  };
+  self.buttonCss = _.set( {}, _.get( params, "css", "positive" ), true );
+  self.backing = bindSystem( "move-attachments-to-backing-system",
+                             "start-moving-attachments-to-backing-system");
+  self.cm = bindSystem( "attachments-to-asianhallinta",
+                        "start-moving-attachments-to-case-management");
 };
-

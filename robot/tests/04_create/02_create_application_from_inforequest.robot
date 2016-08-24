@@ -26,7 +26,7 @@ Mikko creates new application from inforequest
 Proper attachment templates are present
   [Tags]  firefox
   Open tab  attachments
-  Wait until  Element should be visible  xpath=//tr[@class='attachment-group-header']
+  Wait until  Element should be visible  xpath=//rollup[@data-test-level='accordion-level-0']
 
 Mikko closes application
   [Tags]  firefox

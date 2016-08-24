@@ -4,7 +4,9 @@
   <section class="page container" id="mypage">
     <div id="own-info-form"  class="accordion-container">
       <div id="inner-margins">
-        <button class="secondary" data-bind="click: function() { history.go(-1); }">
+        <button class="secondary"
+                data-bind="click: function() { history.go(-1); }"
+                data-test-id="back-button">
           <i class="lupicon-chevron-start"></i>
           <span data-bind="ltext: 'back'"></span>
         </button>
@@ -268,7 +270,7 @@
 
     <div id="mypage-change-email"  class="accordion-container">
       <div data-test-id="mypage-change-email-accordion"
-           data-bind="component: {name: 'change-email', 
+           data-bind="component: {name: 'change-email',
                       params: {data: $data.userinfo, authorization: $data.authorization}}"></div>
     </div>
 

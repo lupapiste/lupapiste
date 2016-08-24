@@ -29,7 +29,7 @@ Sonja can not submit application
   Logout
 
 #
-# Testing the missing required fields and attachments, plus the "attachment not needed" functionality
+# Testing the missing required fields and attachments
 #
 
 Sipoo marks required fields obligatory
@@ -43,16 +43,9 @@ Sipoo marks required fields obligatory
   Wait Until  Checkbox Should Be Selected  required-fields-obligatory-enabled
   Logout
 
-Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as enabled and not selected
+Mikko logs in
   Mikko logs in
   Open application  ${appname}  ${propertyId}
-  Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//td[contains(text(), 'Yleiset hankkeen liitteet')]
-  Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//td[contains(@class, 'attachment-not-needed')]//input  4
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-hakija-valtakirja']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-asemapiirros']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-pelastusviranomaiselle_esitettavat_suunnitelmat-vaestonsuojasuunnitelma']
-  Checkbox Should Not Be Selected  //table[@data-test-id='attachments-template-table']//input[@data-test-id='attachment-not-needed-paapiirustus-pohjapiirustus']
 
 Mikko can not submit application because there are "missing required" items on the requiredFieldSummary tab
   Open tab  requiredFieldSummary
@@ -83,41 +76,22 @@ Sonja logs in and adds new attachment template
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
   Add empty attachment template  Muu liite  muut  muu
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
-
-For that template, the "not needed" checkbox is enabled and not selected
-  Checkbox Should Not Be Selected  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
-  Element should be enabled  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
   Logout
 
 Mikko logs back in and browses to the Attachments tab
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
 
-For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
-  ${checkbox-path-sonja} =  Set Variable  //div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
-  Wait Until  Xpath Should Match X Times  ${checkbox-path-sonja}  1
-  Element should be disabled  ${checkbox-path-sonja}
-  Checkbox Should Not Be Selected  ${checkbox-path-sonja}
-
-Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  ${checkbox-path-hakija-valtakirja} =  Set Variable  //div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
-  Wait Until  Xpath Should Match X Times  ${checkbox-path-hakija-valtakirja}  1
-  Wait Until  Element should be visible  ${checkbox-path-hakija-valtakirja}
-  Element should be enabled  ${checkbox-path-hakija-valtakirja}
-  Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
-  Select Checkbox  ${checkbox-path-hakija-valtakirja}
-  Wait Until  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
+Mikko selects not needed for valtakirja attachment
+  Click not needed  hakija.valtakirja
+  Positive indicator should be visible
 
 Mikko adds pdf attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
   Add attachment version  ${PDF_TESTFILE_PATH}
-  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  Scroll and click test id  back-to-application-from-attachment
   Wait Until  Tab should be visible  attachments
-  Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 Mikko fills up a field marked with a VRK warning
   Open tab  info

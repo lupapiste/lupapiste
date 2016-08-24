@@ -51,6 +51,24 @@ Tyonjohtajat
 Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
+  Task state count is  task-lupamaarays  requires_user_action  3
+  
+Valaistussuunnitelma requires action
+  Open task  Valaistussuunnitelma
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
+
+Reject Valaistussuunnitelma
+  Click enabled by test id  reject-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
+
+Approve Valaistussuunnitelma
+  Click enabled by test id  approve-task
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
+  Return from review
+
+Lupaamaarays states updated
+  Task state count is  task-lupamaarays  requires_user_action  2
+  Task state count is  task-lupamaarays  ok  1
 
 Add attachment to Aloituskokous
   Open task  Aloituskokous
@@ -65,21 +83,6 @@ Add attachment to Aloituskokous
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  ${PDF_TESTFILE_NAME}
-
-# FIXME check on another type of task
-Aloituskokous requires action
-  [Tags]  fail
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
-
-Reject Aloituskokous
-  [Tags]  fail
-  Click enabled by test id  reject-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
-
-Approve Aloituskokous
-  [Tags]  fail
-  Click enabled by test id  approve-task
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="ok"]  1
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
@@ -145,7 +148,7 @@ Add attachment to loppukatselmus
 
 Check that loppukatselmus attachment is listed
   Open tab  attachments
-  Has review attachment  tr#attachment-row-muut-tutkimus  /robot.*pdf/
+  Has review attachment  muut.tutkimus  /robot.*pdf/
 
 Delete loppukatselmus
   Open tab  tasks
@@ -163,32 +166,6 @@ Listing contains one less task
   Open tab  tasks
   Tab should be visible  tasks
   Task count is  task-katselmus  4
-
-Three buildings, all not started
-  [Tags]  fail
-  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  3
-
-Start constructing the first building
-  [Tags]  fail
-  Element text should be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]/td[@data-bind="text: util.buildingName($data)"]  1. 101 (039 muut asuinkerrostalot) - 2000 m²
-  Click Element  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//a
-  Wait Until  Element should be visible  modal-datepicker-date
-  Input text by test id  modal-datepicker-date  1.1.2014
-  ## Datepickers stays open when using Selenium
-  Execute JavaScript  $("#ui-datepicker-div").hide();
-  Click enabled by test id  modal-datepicker-continue
-  Wait Until  Element should not be visible  modal-datepicker-date
-  Confirm  dynamic-yes-no-confirm-dialog
-
-Construction of the first building should be started
-  [Tags]  fail
-  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//span[@class="ok icon"]  1
-  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="dateString: $data.constructionStarted"]  1.1.2014
-  Element Text Should Be  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr[1]//*[@data-bind="fullName: $data.startedBy"]  Sibbo Sonja
-
-Construction of the other buildings is not started
-  [Tags]  fail
-  Wait until  Xpath Should Match X Times  //div[@id="application-tasks-tab"]//tbody[@data-bind="foreach: buildings"]/tr//span[@class="missing icon"]  2
 
 Add katselmus
   Click enabled by test id  application-new-task
@@ -222,9 +199,9 @@ Sonja adds an end review
   Return from review
 
 Verify post-verdict attachments - Aloituskokous
-  Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
+  Wait until  Element should be visible  jquery=a[data-test-id=application-open-attachments-tab]
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Katselmus task created in an YA application does not include any Rakennus information (LPK-719)
   Open application  ${appname-ya}  ${propertyId}
@@ -264,9 +241,9 @@ Mikko can add attachments though
 
 Mikko checks that review attachments are correctly listed
   Open tab  attachments
-  Javascript?  $("tr#attachment-row-muut-muu").length === 2
-  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*pdf/
-  Has review attachment  tr#attachment-row-muut-muu:last  /robot.*png/
+  Javascript?  $("tr[data-test-type='muut.muu']").length === 2
+  Has review attachment  muut.muu  /robot.*pdf/
+  Has review attachment  muut.muu  /robot.*png/  1
 
 Mikko sets started past date for YA application (LPK-1054)
   Open application  ${appname-ya}  ${propertyId}
@@ -299,9 +276,9 @@ Deleting R verdict does not delete its done reviews
 
 Attachments have been updated
   Open tab  attachments
-  Javascript?  $("tr#attachment-row-katselmukset_ja_tarkastukset-katselmuksen_tai_tarkastuksen_poytakirja").length === 3
-  Javascript?  $("tr#attachment-row-muut-muu").length === 1
-  Has review attachment  tr#attachment-row-muut-muu:first  /robot.*pdf/
+  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja']").length === 3
+  Javascript?  $("tr[data-test-type='muut.muu']").length === 1
+  Has review attachment  muut.muu  /robot.*pdf/
   [Teardown]  Logout
 
 

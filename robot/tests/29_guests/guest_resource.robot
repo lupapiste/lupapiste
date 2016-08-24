@@ -183,7 +183,7 @@ Invite application guest start
   Wait test id hidden  guest-bubble-dialog-ok
   Scroll to test id  application-guest-add
   Wait test id visible  application-guest-add
-  Scroll and click  [data-test-id=application-guest-add]
+  Scroll and click input  [data-test-id=application-guest-add]
   Test id empty  application-guest-email
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
   Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
@@ -207,7 +207,7 @@ Bad guest email and cancel check
 Invite application guest authority
   [Arguments]  ${name}  ${email}  ${description}  ${message}
   Wait test id visible  application-guest-add
-  Scroll and click  [data-test-id=application-guest-add]
+  Scroll and click input  [data-test-id=application-guest-add]
   Wait test id visible  application-guest-authorities
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
   Element Should Be Disabled  jquery=.application-guests [data-test-id=guest-bubble-dialog-ok]
@@ -221,7 +221,7 @@ Invite application guest authority
 
 No more guest authorities
   Wait test id visible  application-guest-add
-  Scroll and click  [data-test-id=application-guest-add]
+  Scroll and click input  [data-test-id=application-guest-add]
   Wait test id visible  guest-bubble-dialog-error
   Guest bubble cancel
 
