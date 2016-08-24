@@ -250,13 +250,9 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
-    (try
-      (let [kryspxml    (building-reader/building-xml url credentials propertyId)
-            buildings   (building-reader/->buildings-summary kryspxml)]
-        (ok :data buildings))
-      (catch java.io.IOException e
-        (errorf "Unable to get building info from %s backend: %s" (i18n/loc "municipality" municipality) (.getMessage e))
-        (fail :error.unknown)))
+    (let [kryspxml    (building-reader/building-xml url credentials propertyId)
+          buildings   (building-reader/->buildings-summary kryspxml)]
+      (ok :data buildings))
     (ok)))
 
 ;;
