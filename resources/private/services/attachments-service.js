@@ -164,9 +164,9 @@ LUPAPISTE.AttachmentsService = function() {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
-        (options.onSuccess || util.showSavedIndicator)(res);
+        _.get(options, "onSuccess", util.showSavedIndicator)(res);
       })
-      .complete(options.onComplete || _.noop)
+      .complete(_.get(options, "onComplete", _.noop))
       .processing(self.processing)
       .call();
     return false;
@@ -177,10 +177,10 @@ LUPAPISTE.AttachmentsService = function() {
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(options.onSuccess || util.showSavedIndicator)
+      .success(_.get(options, "onSuccess", _.noop))
       .complete(function(res) {
         self.queryOne(attachmentId);
-        (options.onComplete || _.noop)(res);
+        _.get(options, "onComplete", _.noop)(res);
       })
       .call();
   };
@@ -205,9 +205,9 @@ LUPAPISTE.AttachmentsService = function() {
     ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: types})
       .success(function(res) {
         self.queryAll();
-        (options.onSuccess || util.showSavedIndicator)(res);
+        _.get(options, "onSuccess", util.showSavedIndicator)(res);
       })
-      .complete(options.onComplete || _.noop)
+      .complete(_.get(options, "onComplete", _.noop))
       .call();
   };
 
@@ -215,9 +215,9 @@ LUPAPISTE.AttachmentsService = function() {
     ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
       .success(function(res) {
         self.queryAll();
-        (options.onSuccess || util.showSavedIndicator)(res);
+        _.get(options, "onSuccess", util.showSavedIndicator)(res);
       })
-      .complete(options.onComplete || _.noop)
+      .complete(_.get(options, "onComplete", _.noop))
       .processing(self.processing)
       .call();
   };
