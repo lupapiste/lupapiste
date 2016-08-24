@@ -113,6 +113,8 @@
 "application.calendar.legend.other-appointments-in-this-application" "sv" ""
 "application.calendar.appointment.decline" "fi" "Tapaaminen peruttu"
 "application.calendar.appointment.decline" "sv" ""
+"application.calendar.appointment.accept" "fi" "Tapaaminen hyväksytty"
+"application.calendar.appointment.accept" "sv" ""
 "application.calendar.notification.applicant-reserved" "fi" "Sinulle on varattu uusi tapaaminen."
 "application.calendar.notification.applicant-reserved" "sv" ""
 "application.calendar.notification.applicant-accepted" "fi" "Tapaamiskutsu on hyväksytty."
