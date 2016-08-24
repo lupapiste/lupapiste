@@ -16,10 +16,9 @@
   ([server credentials property-id]
    (building-xml server credentials property-id false))
   ([server credentials property-id raw?]
-   (let [url (common/wfs-krysp-url server common/building-type (common/property-equals common/rakennuksen-kiinteistotunnus property-id))]
-     (trace "Get building: " url)
-     (or (cr/get-xml url {} credentials raw?) {}))))
-
+   (let [url (common/wfs-krysp-url server common/building-type (common/property-equals common/rakennuksen-kiinteistotunnus property-id))
+         options {:http-error :error.no-legacy-available, :connection-error :error.no-legacy-available}]
+     (or (cr/get-xml url options credentials raw?) {}))))
 
 (defn pysyva-rakennustunnus
   "Returns national building id or nil if the input was not valid"
