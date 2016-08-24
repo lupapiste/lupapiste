@@ -9,7 +9,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
             [sade.strings :as str]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.calendar-emails]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
