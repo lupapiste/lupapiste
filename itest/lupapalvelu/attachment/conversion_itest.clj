@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment.conversion-test
+(ns lupapalvelu.attachment.conversion-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.attachment.conversion :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
