@@ -29,16 +29,15 @@ Mikko uploads attachment with invalid mime
   Wait until  Element should be visible  xpath=//div[@id='dialog-userinfo-architect-upload']//div[@data-test-id='userinfo-upload-error']
   Click by test id  userinfo-upload-cancel
 
-# FIXME: copy user attachments not implemented
 Mikko copies his attachments to application
   [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
   Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  open
   Open tab  attachments
-  #Click by test id  copy-user-attachments
-  #Confirm yes no dialog
-  #Wait Until  Table Should Contain  css=table.attachments-template-table  ${PDF_TESTFILE_NAME}
+  Click by test id  copy-user-attachments
+  Confirm yes no dialog
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Copy own attachments button is not shown to non-architect
   [Tags]  firefox
@@ -50,9 +49,7 @@ Copy own attachments button is not shown to non-architect
   Wait until  Page should contain element  jquery=button[data-test-id=add-attachment]
   Page should not contain element  jquery=button[data-test-id=copy-own-attachments]
 
-# FIXME: copy user attachments not implemented, cv is not added
 Mikko deletes own attachment from application and submits
-  [Tags]  fail
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Delete attachment  osapuolet.cv
@@ -80,23 +77,16 @@ Mikko logs in and sets himself architect
   Reload Page
   Wait Until  Checkbox Should Be Selected  architect
 
-# FIXME: copy user attachments not implemented
 Mikko copies own CV to application
-  [Tags]  fail
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Click by test id  copy-user-attachments
   Confirm yes no dialog
 
-# FIXME: copy user attachments not implemented
 Mikko's CV should be uploaded to placeholder requested by Sonja
-  [Tags]  fail
-  Wait until  Element should contain  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']:nth-child(${cvIndex}) a  ${PDF_TESTFILE_NAME}
-  Logout
+  Wait until  Element should contain  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']:nth-child(${cvIndex}) td[data-test-id=file-info] a  ${PDF_TESTFILE_NAME}
 
-# FIXME: copy user attachments not implemented
 Application is given verdict
-  [Tags]  fail
   As Sonja
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
@@ -104,16 +94,14 @@ Application is given verdict
   Wait until  Application state should be  verdictGiven
   Logout
 
-# FIXME: copy user attachments not implemented
 Mikko can add his attachments in post verdict state
-  [Tags]  fail
   As Mikko
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=copy-user-attachments]
   Click by test id  copy-user-attachments
   Confirm yes no dialog
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 
 *** Keywords ***
