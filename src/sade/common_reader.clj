@@ -132,7 +132,7 @@
            (or (nil? options) (map? options))
            (or (nil? credentials) (= (count credentials) 2))
            (or (nil? raw?) (boolean? raw?))]}
-    (let [options (when credentials {:basic-auth credentials})]
+    (let [options (merge options (when credentials {:basic-auth credentials}))]
       (do-get-xml http/get url options raw?))))
 
 (defn get-xml-with-post
