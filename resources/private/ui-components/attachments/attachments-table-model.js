@@ -91,7 +91,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     downloadAll: downloadAll,
-    canDownload: _.some(service.attachments, function(a) {
+    canDownload: _.some(service.attachments(), function(a) {
       return hasFile(a());
     }),
     canVouch: canVouch,
