@@ -679,6 +679,7 @@ Open attachment details
 Click not needed
   [Arguments]  ${type}  ${nth}=1
   ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  Wait until  Element should be visible  jquery=${selector}
   Scroll to  ${selector}
   Click element  jquery=${selector}
 

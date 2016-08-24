@@ -18,7 +18,7 @@ Mikko goes to empty attachments tab
 
 Mikko sees all "not needed" checkboxes as enabled and not selected
   Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
-  Xpath Should Match X Times  //div[@id='application-attachments-tab']//input[@data-test-id='not-needed-checkbox']  4
+  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
   Not needed should not be selected  hakija.valtakirja
   Not needed should not be selected  paapiirustus.asemapiirros
   Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
@@ -110,13 +110,14 @@ Attachment not-needed checkbox should not be visible
   Not needed should not be visible  muut.muu
 
 Mikko checks Not needed for the attachment
-  [Tags]  attachments  
-  Execute Javascript  $("label[data-test-id=not-needed-label]")[0].click()
+  [Tags]  attachments
+  Click not needed  paapiirustus.asemapiirros
 
 Not needed should be checked after reload with correct filters
-  [Tags]  attachments  
+  [Tags]  attachments
   Reload Page
-  Wait Until Page Contains  ${propertyId}
+  Wait Until  Not needed should be visible  hakija.valtakirja
+  Not needed should not be visible  paapiirustus.asemapiirros
   Click element  jquery=div.filter-wrapper:last-child label.filter-label
   Not needed should be selected  paapiirustus.asemapiirros
 
@@ -354,7 +355,7 @@ Mikko signs the final attachment
   Open tab  attachments
 
 Mikko signs everything blindly
-  [Tags]  attachments 
+  [Tags]  attachments
   Attachment indicator icon should not be visible  signed  muut.muu
   Sign all attachments  mikko123
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
@@ -403,7 +404,5 @@ Not needed should not be visible
   Not needed matches  ${type}  visible  0
 
 Not needed should be disabled
-  [Arguments]  ${type} 
+  [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
-
-  
