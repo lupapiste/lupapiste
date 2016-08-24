@@ -46,7 +46,7 @@
 (defn attachment-not-readOnly [{{attachmentId :attachmentId} :data application :application}]
   (when (-> (attachment/get-attachment-info application attachmentId) attachment/attachment-is-readOnly?)
     (fail :error.unauthorized
-          :desc "Attachments is read only.")))
+          :desc "Attachment is read only.")))
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user application :application}]
   (when (and (not (usr/authority? user))
