@@ -84,7 +84,7 @@
                                          reservation (assoc reservation :attendee (assoc recipient :partstat PartStat/DECLINED)
                                                                         :unique-id (:unique-id reservation)
                                                                         :sequence (inc (:sequence reservation))
-                                                                        :method Method/REPLY)]
+                                                                        :method Method/REQUEST)]
                                      (cal/update-reservation application
                                                              (:reservationId result)
                                                              {$set {:reservations.$.sequence (:sequence reservation)}})
@@ -102,7 +102,7 @@
                                          reservation (assoc reservation :attendee (assoc recipient :partstat PartStat/ACCEPTED)
                                                                         :unique-id (:unique-id reservation)
                                                                         :sequence (inc (:sequence reservation))
-                                                                        :method Method/REPLY)]
+                                                                        :method Method/REQUEST)]
                                      (cal/update-reservation application
                                                              (:reservationId result)
                                                              {$set {:reservations.$.sequence (:sequence reservation)}})
