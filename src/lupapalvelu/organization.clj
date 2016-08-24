@@ -322,6 +322,7 @@
     (let [{:keys [url username password crypto-iv]} m
           base-request {:query-params params
                         :throw-exceptions false
+                        :quiet true
                         :headers (select-keys headers [:accept :accept-encoding])
                         :as :stream}
           request (if-not (ss/blank? crypto-iv)
@@ -331,7 +332,7 @@
       (if (= 200 (:status response))
         response
         (do
-          (debug "organization" org-id "wms server" url "returned" (:status response))
+          (error "error.integration - organization" org-id "wms server" url "returned" (:status response))
           response)))))
 
 (defn organization-map-layers-data [org-id]
