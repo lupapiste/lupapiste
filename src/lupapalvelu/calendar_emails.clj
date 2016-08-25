@@ -23,10 +23,8 @@
 
 (defn- model-fn []
   (fn [{application :application} _ recipient]
-    {:link-fi (notifications/get-application-link application nil "fi" recipient)
-     :link-sv (notifications/get-application-link application nil "sv" recipient)
-     :info-fi (str (env/value :host) "/ohjeet")
-     :info-sv (str (env/value :host) "/ohjeet")}))
+    {:link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
+     :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)}))
 
 (defn- display-names [users]
   (clojure.string/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
