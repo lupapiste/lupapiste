@@ -81,6 +81,8 @@
 "calendar.error.unauthorized-access" "sv" "Ingen användarrättighet"
 "calendar.error.cannot-create-slots-outside-calendar-day" "fi" "Voit lisätä varattavia aikoja korkeintaan saman päivän loppuun asti. Vähennä peräkkäisten aikojen määrää."
 "calendar.error.cannot-create-slots-outside-calendar-day" "sv" "Du kan lägga till bokningstider högst till slutet av samma dag. Minska antalet tider bokade efter varandra"
+"application.calendar.applicant.helpText" "fi" ""
+"application.calendar.applicant.helpText" "sv" ""
 "application.calendar.authority.helpText" "fi" ""
 "application.calendar.authority.helpText" "sv" ""
 "application.calendar.suggest-appointment.title" "fi" "Ehdota tapaamisaikaa"
