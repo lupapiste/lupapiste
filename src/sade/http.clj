@@ -17,7 +17,7 @@
     (merge (env/value :http-client) options-map)))
 
 (defn- log [message {quiet :quiet :as options}]
-  (when-not (false? (:quiet options))
+  (when-not (:quiet options)
     (error "error.integration -" message)))
 
 (defn- logged-call [f uri {:keys [throw-fail! throw-exceptions] :as options}]
