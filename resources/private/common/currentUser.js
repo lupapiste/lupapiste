@@ -51,9 +51,9 @@ LUPAPISTE.CurrentUser = function() {
   // isAuthority and isApplicant computeds.
   var hash = ko.observable();
 
-  $(window).on( "hashchange", function() {
-    hash( _.get( window, "location.hash", ""));
-  });
+  window.onhashchange = function() {
+    hash(location.hash);
+  };
 
   function isOutsideAuthority() {
     var app = lupapisteApp.models.application;
