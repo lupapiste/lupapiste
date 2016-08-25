@@ -13,6 +13,7 @@ LUPAPISTE.AttachmentsService = function() {
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
   self.tagGroups = ko.observableArray([]);
+  self.groupTypes = ko.observableArray([]);
 
   // array of arrays of filters received from backend along with default values.
   // [[A B] [C D]] = (and (or A B) (or C D))
@@ -59,7 +60,6 @@ LUPAPISTE.AttachmentsService = function() {
         .call();
     }
   }
-
 
   // Initialize self.authModels for attachments. Creates new authorization models or reuses previously created ones.
   function initAuthModels(attachments) {
@@ -129,6 +129,10 @@ LUPAPISTE.AttachmentsService = function() {
     self.filters(data);
   };
 
+  self.setGroupTypes = function(data) {
+    self.groupTypes(data);
+  };
+
   self.queryAttachments = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
@@ -150,6 +154,10 @@ LUPAPISTE.AttachmentsService = function() {
     return _.find(self.attachments(), function(attachment) {
       return attachment.peek().id === attachmentId;
     });
+  };
+
+  self.queryGroupTypes = function() {
+    queryData("attachment-groups", "groups", self.setGroupTypes);
   };
 
   self.removeAttachment = function(attachmentId, options) {
