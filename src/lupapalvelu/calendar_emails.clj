@@ -7,7 +7,8 @@
             [sade.util :as util]
             [sade.env :as env]
             [lupapalvelu.user :as usr]
-            [monger.operators :refer :all])
+            [monger.operators :refer :all]
+            [lupapalvelu.i18n :as i18n])
   (:import (net.fortuna.ical4j.model.property Method)
            (net.fortuna.ical4j.model.parameter PartStat)))
 
@@ -26,6 +27,12 @@
      :link-sv (notifications/get-application-link application nil "sv" recipient)
      :info-fi (str (env/value :host) "/ohjeet")
      :info-sv (str (env/value :host) "/ohjeet")}))
+
+(defn- display-names [users]
+  (clojure.string/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
+
+(defn- reservation-participants [reservation]
+  (map usr/get-user-by-id (flatten (vals (select-keys reservation [:from :to])))))
 
 (notifications/defemail
   :suggest-appointment-authority
@@ -49,7 +56,18 @@
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
                                      (filter (fn [recipient] (usr/authority? recipient)) (map usr/get-user-by-id recipient-ids))))
-   :model-fn                     (model-fn)})
+   :model-fn                     (fn [{application :application result :result user :user} _ recipient]
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))]
+                                     {:reservation      {:startTime       (util/to-local-datetime (:startTime reservation))
+                                                         :participants    (display-names (reservation-participants reservation))
+                                                         :reservationType (:reservationType reservation)
+                                                         :comment         (:comment reservation)
+                                                         :location        (:location reservation)}
+                                      :address          (:address application)
+                                      :municipality     (i18n/localize-fallback nil (str "municipality." (:municipality application)))
+                                      :link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
+                                      :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)
+                                      :user-first-name  (:firstName user)}))})
 
 (notifications/defemail
   :suggest-appointment-applicant

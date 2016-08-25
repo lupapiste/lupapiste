@@ -1,25 +1,27 @@
-# Hei,
+# Hei {{user-first-name}},
 
-Olet saanut uuden tapaamiskutsun.
+Rakennushankkeeseen osoitteessa {{address}}, {{municipality}} liittyen on varattu tapaaminen.
 
-{{link-fi}}
+Aika: {{reservation.startTime}}  
+Paikka: {{reservation.location}}  
+Tapaamisen aihe: {{reservation.reservationType.name}}  
+Osallistujat: {{reservation.participants}}  
+Lis&auml;tietoja: {{reservation.comment}}  
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+Jos allaoleva linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
+{{link-calendar-fi}}
 
 Terveisin,
 [Lupapiste](https://www.lupapiste.fi/)
 
 ---
 
-# Hei,
+# Hej {{user-first-name}},
 
-Olet saanut uuden tapaamiskutsun.
+Samma på svenska.
 
-{{link-fi}}
+{{link-calendar-sv}}
 
-Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
-
-
-Terveisin,
+Hälsningar,
 [Lupapiste](https://www.lupapiste.fi/)
