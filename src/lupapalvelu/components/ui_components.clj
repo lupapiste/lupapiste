@@ -165,8 +165,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
-                       "ko.init.js" "fuse.js"
-                       "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "authorization.js" "vetuma.js" "location-model-base.js"]}
 
    :common-html  {:depends [:selectm-html]

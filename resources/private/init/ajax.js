@@ -43,7 +43,7 @@ var ajax = (function($) {
           self.successHandler.call(self.savedThis, e);
         } else if (e) {
           if (self.fuseListener) {
-            self.fuseListener(null);
+            self.fuseListener(false);
           }
           var res = resolveErrorHandler(e).call(self.savedThis, e);
           if (res && res.ok === false) {
@@ -67,7 +67,7 @@ var ajax = (function($) {
     self.errorHandler = defaultError;
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
       if (self.fuseListener) {
-        self.fuseListener(null);
+        self.fuseListener(false);
       }
       if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
         switch (jqXHR.status) {
