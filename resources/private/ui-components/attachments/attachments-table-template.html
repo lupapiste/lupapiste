@@ -33,7 +33,7 @@
             <span data-bind="text: $data.contents || ''"
                   data-test-id="attachment-contents"></span>
           </td>
-          <td data-bind="attachmentVersion: latestVersion"
+          <td data-bind="viewWithDownload: latestVersion"
               data-test-id="file-info"></td>
           <td>
             <span data-bind="dateString: latestVersion.created"></span><br>

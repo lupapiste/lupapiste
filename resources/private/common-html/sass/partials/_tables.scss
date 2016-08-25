@@ -310,13 +310,11 @@ div.attachments-table-container {
       .checkbox-label {
         padding-top: 2px;
         padding-left: 0;
+        white-space: nowrap;
       }
     }
     td {
       vertical-align: top;
-      .fileinfo {
-        font-style: normal;
-      }
     }
     td.attachments-table__state-icons > i {
       margin-left: 1px;
@@ -354,5 +352,17 @@ div.suti-admin-container .serversettings--wide {
   }
   .suti-display--error {
     color: $negative;
+  }
+}
+
+.view-with-download {
+  .download {
+    white-space: nowrap;
+    a:hover {
+      text-decoration: none;
+    }
+    a:hover > span {
+      text-decoration: underline;
+    }
   }
 }

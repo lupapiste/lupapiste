@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1471967078276');
+@import url('main-blessed1.css?z=1472113410649');
 
 /* line 137, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table th {
@@ -1082,58 +1082,68 @@ div.attachments-table-container table.attachments-table .checkbox-wrapper {
 div.attachments-table-container table.attachments-table .checkbox-wrapper .checkbox-label {
   padding-top: 2px;
   padding-left: 0;
+  white-space: nowrap;
 }
-/* line 315, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 316, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table td {
   vertical-align: top;
 }
-/* line 317, ../../../private/common-html/sass/partials/_tables.scss */
-div.attachments-table-container table.attachments-table td .fileinfo {
-  font-style: normal;
-}
-/* line 321, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 319, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table td.attachments-table__state-icons > i {
   margin-left: 1px;
   magint-right: 1px;
 }
-/* line 325, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 323, ../../../private/common-html/sass/partials/_tables.scss */
 div.attachments-table-container table.attachments-table .attachments-table--widest {
   width: 80%;
 }
 
-/* line 331, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 329, ../../../private/common-html/sass/partials/_tables.scss */
 table.suti-admin-table {
   margin-top: 12px;
 }
-/* line 333, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 331, ../../../private/common-html/sass/partials/_tables.scss */
 table.suti-admin-table td:nth-child(even) {
   width: 50%;
 }
-/* line 335, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 333, ../../../private/common-html/sass/partials/_tables.scss */
 table.suti-admin-table td:nth-child(even) input {
   width: 90%;
 }
 
-/* line 341, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 339, ../../../private/common-html/sass/partials/_tables.scss */
 div.suti-admin-container .serversettings--wide {
   width: 50%;
 }
 
-/* line 345, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 343, ../../../private/common-html/sass/partials/_tables.scss */
 .suti-display {
   margin-bottom: 12px;
 }
-/* line 348, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 346, ../../../private/common-html/sass/partials/_tables.scss */
 .suti-display .rollup-button span {
   text-transform: uppercase;
 }
-/* line 352, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 350, ../../../private/common-html/sass/partials/_tables.scss */
 .suti-display .form-grid, .suti-display .checkbox-wrapper {
   border: none;
 }
-/* line 355, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 353, ../../../private/common-html/sass/partials/_tables.scss */
 .suti-display .suti-display--error {
   color: #df3215;
+}
+
+/* line 359, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download {
+  white-space: nowrap;
+}
+/* line 361, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download a:hover {
+  text-decoration: none;
+}
+/* line 364, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download a:hover > span {
+  text-decoration: underline;
 }
 
 /*Tab styles*/
