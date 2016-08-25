@@ -227,8 +227,8 @@ Authority can view draft foreman application, but can't use commands
 
 ...on attachments tab
   Open tab  attachments
-  Element should be disabled  jquery=div#application-attachments-tab button[data-test-id=add-attachment]
-  Element should be disabled  jquery=div#application-attachments-tab button[data-test-id=add-attachment-templates]
+  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=add-attachment]
+  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=add-attachment-templates]
   Page should not contain  jquery=div#application-attachments-tab div[data-test-id=attachment-operation-buttons] button:visible
 
 ...submit aplication
