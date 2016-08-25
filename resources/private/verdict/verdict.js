@@ -40,7 +40,9 @@ LUPAPISTE.verdictPageController = (function($) {
 
         self.backendId(verdict.kuntalupatunnus);
         self.draft(verdict.draft);
-        self.status(pk.status);
+        // LPK-1765: Unset status must be undefined,
+        // null triggers submit event during <select> initialization.
+        self.status(pk.status || undefined);
         self.name(pk.paatoksentekija);
         self.given(dates.anto && new Date(dates.anto));
         self.official(dates.lainvoimainen && new Date(dates.lainvoimainen));
