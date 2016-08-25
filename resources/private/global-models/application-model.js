@@ -23,6 +23,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.infoRequest = ko.observable();
   self.openInfoRequest = ko.observable();
   self.state = ko.observable();
+  self.stateChanged = ko.observable(false);
   self.submitted = ko.observable();
   self.location = ko.observable();
   self.municipality = ko.observable();
@@ -261,11 +262,11 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.submitButtonEnabled = ko.pureComputed(function() {
-    return !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
+    return !self.stateChanged() && !self.processing() && !self.hasInvites() && (!self.requiredFieldsFillingObligatory() || !self.missingSomeInfo()) && _.isEmpty(self.submitErrors());
   });
 
 
-    self.reload = function() {
+  self.reload = function() {
     self.submitErrors([]);
     repository.load(self.id());
   };
@@ -309,23 +310,26 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.submitApplication = function() {
-    hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.submit.areyousure.title"),
-      loc("application.submit.areyousure.message"),
-      {title: loc("yes"),
-       fn: function() {
-            ajax.command("submit-application", {id: self.id()})
-           .success( self.reload)
-           .onError("error.cannot-submit-application", cannotSubmitResponse)
-           .processing(self.processing)
-           .call();
-         hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
-         return false;
-       }},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
+    if (!self.stateChanged()) {
+      hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("application.submit.areyousure.title"),
+          loc("application.submit.areyousure.message"),
+          {title: loc("yes"),
+            fn: function() {
+              ajax.command("submit-application", {id: self.id()})
+              .success( self.reload)
+              .onError("error.cannot-submit-application", cannotSubmitResponse)
+              .fuse(self.stateChanged)
+              .processing(self.processing)
+              .call();
+              hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
+              return false;
+            }},
+            {title: loc("no")}
+      );
+      hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
+    }
     return false;
   };
 
@@ -337,6 +341,7 @@ LUPAPISTE.ApplicationModel = function() {
           .call();
         self.reload();
       })
+      .fuse(self.stateChanged)
       .processing(self.processing)
       .call();
     return false;
@@ -347,6 +352,7 @@ LUPAPISTE.ApplicationModel = function() {
       .success(function() {
         pageutil.openPage("application", self.id());
       })
+      .fuse(self.stateChanged)
       .processing(self.processing)
       .call();
       hub.send("track-click", {category:"Inforequest", label:"", event:"convertToApplication"});
@@ -354,6 +360,10 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.approveApplication = function() {
+    if (self.stateChanged()) {
+      return false;
+    }
+
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
@@ -369,6 +379,7 @@ LUPAPISTE.ApplicationModel = function() {
           }
         })
         .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
+        .fuse(self.stateChanged)
         .processing(self.processing)
         .call();
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
@@ -499,70 +510,79 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.cancelInforequest = function() {
-    hub.send("track-click", {category:"Inforequest", label:"", event:"cancelInforequest"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.cancel-inforequest"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax
-          .command("cancel-inforequest", {id: self.id()})
-          .success(function() {pageutil.openPage("applications");})
-          .processing(self.processing)
-          .call();
-        hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
-        return false;}},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCancelCanceled"});
+    if (!self.stateChanged()) {
+      hub.send("track-click", {category:"Inforequest", label:"", event:"cancelInforequest"});
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("areyousure"),
+        loc("areyousure.cancel-inforequest"),
+        {title: loc("yes"),
+         fn: function() {
+          ajax
+            .command("cancel-inforequest", {id: self.id()})
+            .success(function() {pageutil.openPage("applications");})
+            .fuse(self.stateChanged)
+            .processing(self.processing)
+            .call();
+          hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
+          return false;}},
+        {title: loc("no")}
+      );
+      hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCancelCanceled"});
+    }
     return false;
   };
 
   self.cancelText = ko.observable("");
 
   self.cancelApplication = function() {
-    var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
-          ? "cancel-application-authority"
-          : "cancel-application";
-    hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-    LUPAPISTE.ModalDialog.setDialogContent(
-      $("#dialog-cancel-application"),
-      loc("areyousure"),
-      loc("areyousure.cancel-application"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax
-          .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
-          .success(function() {
-            self.cancelText("");
-            if (command === "cancel-application") {
-              // regular user, can't undo cancellation so redirect to applications view
-              pageutil.openPage("applications");
-            } else { // authority, can undo so don't redirect, just reload application to canceled state
-              self.lightReload();
-            }
-          })
-          .processing(self.processing)
-          .call();
-        return false;}},
-      {title: loc("no")}
-    );
-    LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+    if (!self.stateChanged()) {
+      var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
+            ? "cancel-application-authority"
+            : "cancel-application";
+      hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
+      LUPAPISTE.ModalDialog.setDialogContent(
+        $("#dialog-cancel-application"),
+        loc("areyousure"),
+        loc("areyousure.cancel-application"),
+        {title: loc("yes"),
+         fn: function() {
+          ajax
+            .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
+            .success(function() {
+              self.cancelText("");
+              if (command === "cancel-application") {
+                // regular user, can't undo cancellation so redirect to applications view
+                pageutil.openPage("applications");
+              } else { // authority, can undo so don't redirect, just reload application to canceled state
+                self.lightReload();
+              }
+            })
+            .fuse(self.stateChanged)
+            .processing(self.processing)
+            .call();
+          return false;}},
+        {title: loc("no")}
+      );
+      LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+    }
   };
 
   self.undoCancellation = function() {
-    var sendCommand = ajax
-                        .command("undo-cancellation", {id: self.id()})
-                        .success(function() {
-                          repository.load(self.id());
-                        })
-                        .processing(self.processing);
+    if (!self.stateChanged()) {
+      var sendCommand = ajax
+                          .command("undo-cancellation", {id: self.id()})
+                          .success(function() {
+                            repository.load(self.id());
+                          })
+                          .fuse(self.stateChanged)
+                          .processing(self.processing);
 
-    hub.send("show-dialog", {ltitle: "application.undoCancellation",
-                             size: "medium",
-                             component: "yes-no-dialog",
-                             componentParams: {text: loc("application.undoCancellation.areyousure", loc(util.getPreviousState(self._js))),
-                                               yesFn: function() { sendCommand.call(); }}});
+      hub.send("show-dialog", {ltitle: "application.undoCancellation",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: loc("application.undoCancellation.areyousure", loc(util.getPreviousState(self._js))),
+                                                 yesFn: function() { sendCommand.call(); }}});
+    }
   };
 
   self.exportPdf = function() {

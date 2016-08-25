@@ -162,6 +162,7 @@
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
+      applicationModel.stateChanged(false);
 
       // Invite
       inviteModel.setApplicationId(app.id);
