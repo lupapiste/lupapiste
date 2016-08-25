@@ -174,7 +174,7 @@
 "error.integration.krysp-version-missing" "sv" "Flyttningen misslyckades. Krysp-versionen som definierats för din organisation saknas. Tag kontakt med tjänstens upprätthållare, tuki@lupapiste.fi."
 "error.integration.krysp-version-wrong-form" "fi" "Siirto epäonnistui. Organisaatiollesi määritelty Krysp-versio on vääränmuotoinen. Ota yhteyttä palvelun kehittäjiin, tuki@lupapiste.fi."
 "error.integration.krysp-version-wrong-form" "sv" "Flyttningen misslyckades. Krysp-versionen som definierats för din organisation är av fel form. Tag kontakt med tjänstens upprätthållare, tuki@lupapiste.fi."
-"error.integration.connection" "fi" "Taustajärjestelään ei saada yhteyttä. Ota yhteyttä taustajärjestelmätoimittajan tukeen."
+"error.integration.connection" "fi" "Taustajärjestelmään ei saada yhteyttä. Ota yhteyttä taustajärjestelmätoimittajan tukeen."
 "error.integration.http" "fi" "Taustajärjestelmässä tapahtui virhe. Ota yhteyttä taustajärjestelmätoimittajan tukeen."
 "error.integration.create-message" "fi" "Siirto epäonnistui. Tarkista että kaikki pakolliset tiedot on täytetty.<br><br>Tekninen virheilmoitus:"
 "error.integration.create-message" "sv" "Flyttningen misslyckades. Kontrollera att alla obligatoriska uppgifter har flyttats.<br><br>Teknisk felanmälan:"
