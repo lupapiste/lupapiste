@@ -3,14 +3,14 @@
   <div class="inner-margins">
     <button class="positive caps"
             data-bind="click: $data.newAttachment,
-                       enabled: $data.authModel.ok('upload-attachment')"
+                       enable: $data.authModel.ok('upload-attachment')"
             data-test-id="add-attachment">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.attachmentsAdd' "></span>
     </button>
     <button class="positive caps"
             data-bind="click: $data.attachmentTemplatesAdd,
-                       enabled: $data.authModel.ok('create-attachments')"
+                       enable: $data.authModel.ok('create-attachments')"
             data-test-id="add-attachment-templates">
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
