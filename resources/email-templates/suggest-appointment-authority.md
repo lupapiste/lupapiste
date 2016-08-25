@@ -14,14 +14,3 @@ Jos allaoleva linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriv
 
 Terveisin,
 [Lupapiste](https://www.lupapiste.fi/)
-
----
-
-# Hej {{user-first-name}},
-
-Samma på svenska.
-
-{{link-calendar-sv}}
-
-Hälsningar,
-[Lupapiste](https://www.lupapiste.fi/)
