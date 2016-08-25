@@ -476,6 +476,8 @@
 "download-all" "sv" "Ladda alla bilagor"
 "download-file" "fi" "Lataa tiedosto"
 "download-file" "sv" "Ladda ner fil"
+"file" "fi" "tiedosto"
+"file-plural-partitive" "fi" "tiedostoa"
 "draft.title" "fi" "Luonnos-tilassa voit rauhassa valmistella hakemusta ja kutsua muita osapuolia hakemukselle. Tarvittaessa voit kysyä neuvoa viranomaiselta keskusteluketjussa. Muuten viranomainen käsittelee hakemuksesi vasta jätettyäsi sen."
 "draft.title" "sv" "I utkastläget kan du i lugn och ro bereda din ansökan och inbjuda andra parter att delta. Vid behov kan du i diskussionskedjan be om råd av myndigheten. Annars behandlar myndigheten din ansökan först när du har lämnat in den."
 "dummy" "fi" "Kutsuttu, ei vielä rekisteröitynyt Lupapisteeseen"

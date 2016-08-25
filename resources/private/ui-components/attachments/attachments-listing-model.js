@@ -110,7 +110,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
         });
       }),
       attachmentIds: subGroup.attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
     };
   }
 
@@ -144,13 +147,17 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function modelForMainAccordion(mainGroup) {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
+    var attachmentInfos = getAttachmentInfos(attachmentIds);
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
       hasContent: someSubGroupsField(subGroups, "hasContent"),
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
 
