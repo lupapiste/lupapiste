@@ -3,7 +3,7 @@
         <!-- ko if: !hasInvites() -->
             <button data-bind="click: approveApplication,
                            visible: $root.authorization.ok('approve-application'),
-                           enable: !stateChanged() && $root.authorization.ok('approve-application'),
+                           enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application'),
                            attr: {'title': loc('tooltip.approveApplication')}"
                     data-test-id="approve-application"
                     class="positive caps">
@@ -21,7 +21,7 @@
                 <span data-bind="ltext: 'application.toAsianhallinta'"></span>
             </button>
             <button class="function"
-                    data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !stateChanged() && $root.authorization.ok('request-for-complement')"
+                    data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !stateChanged() && !processing() && $root.authorization.ok('request-for-complement')"
                     data-test-id="request-for-complement">
                 <i class="lupicon-circle-plus"></i>
                 <span data-bind="ltext: 'application.requestForComplement'"></span>
@@ -63,19 +63,19 @@
                 <span data-bind="ltext: 'application.createContinuationPeriodPermit'"></span>
             </button>
             <button class="function"
-                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !stateChanged() && $root.authorization.ok('cancel-application')"
+                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application'), enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application')"
                     data-test-id="application-cancel-btn">
                 <i class="lupicon-circle-remove"></i>
                 <span data-bind="ltext: 'application.cancelApplication'"></span>
             </button>
             <button class="function"
-                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !stateChanged() && $root.authorization.ok('cancel-application-authority')"
+                    data-bind="click: cancelApplication, visible: $root.authorization.ok('cancel-application-authority'), enable: !stateChanged() && !processing() && $root.authorization.ok('cancel-application-authority')"
                     data-test-id="application-cancel-authority-btn">
                 <i class="lupicon-circle-remove"></i>
                 <span data-bind="ltext: 'application.cancelApplication'"></span>
             </button>
             <button class="function"
-                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !stateChanged(), attr: {'title': loc('tooltip.undoCancellation')}"
+                    data-bind="click: undoCancellation, visible: $root.authorization.ok('undo-cancellation'), enable: !stateChanged() && !processing(), attr: {'title': loc('tooltip.undoCancellation')}"
                     data-test-id="application-undo-cancellation-btn">
                 <i class="lupicon-circle-attention"></i>
                 <span data-bind="ltext: 'application.undoCancellation'"></span>
