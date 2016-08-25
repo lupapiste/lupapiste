@@ -219,14 +219,23 @@ Authority can view draft foreman application, but can't use commands
   Wait until  Element should be visible  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]
   Open accordions  info
   Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]//textarea
+
+...on parties tab
   Open tab  parties
   Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
   Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
+
+...on attachments tab
   Open tab  attachments
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
-  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse...
+  Element should be disabled  jquery=div#application-attachments-tab button[data-test-id=add-attachment]
+  Element should be disabled  jquery=div#application-attachments-tab button[data-test-id=add-attachment-templates]
+  Page should not contain  jquery=div#application-attachments-tab div[data-test-id=attachment-operation-buttons] button:visible
+
+...submit aplication
   Open tab  requiredFieldSummary
   Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
+
+...application actions
   # Application actions only exportPDF is visible
   Element should be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-pdf-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="add-operation"]
