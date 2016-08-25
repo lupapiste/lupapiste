@@ -18,7 +18,7 @@
           <span data-bind="ltext: 'mycalendar.in-organization'"></span>:
           <select class="form-input combobox tip"
                   data-bind="options: calendars,
-                             optionsText: function(item) { return _.get(item, 'organization'); },
+                             optionsText: function(item) { return _.get(item, 'organizationName.' + loc.currentLanguage); },
                              optionsCaption: loc('choose'),
                              value: selectedCalendar">
           </select>

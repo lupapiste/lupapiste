@@ -32,7 +32,9 @@
               <span data-bind="ltext: 'application.calendar.reservation.location'"></span>:
             </div>
             <div class="col-3">
+              <!-- ko ifnot: lupapisteApp.models.currentUser.isApplicant -->
               <input type="text" data-bind="textInput: $parent.location" style="width: 100%"/>
+              <!-- /ko -->
             </div>
           </div>
 

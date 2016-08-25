@@ -10,16 +10,18 @@
             [lupapalvelu.organization :as o]
             [sade.strings :as str]
             [monger.operators :refer :all]
-            [lupapalvelu.calendar-emails]))
+            [lupapalvelu.calendar-emails]
+            [lupapalvelu.organization :as org]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
 (defn- ->FrontendCalendar [calendar user]
-  {:id           (:id calendar)
-   :name         (format "%s %s" (:firstName user) (:lastName user))
-   :email        (:email user)
-   :organization (:organizationCode calendar)
-   :active       (:active calendar)})
+  {:id               (:id calendar)
+   :name             (format "%s %s" (:firstName user) (:lastName user))
+   :email            (:email user)
+   :organization     (:organizationCode calendar)
+   :organizationName (get-in (org/get-organization (:organizationCode calendar)) [:name])
+   :active           (:active calendar)})
 
 (defn- ->FrontendReservation [r]
   {:id        (:id r)
