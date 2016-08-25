@@ -91,7 +91,18 @@
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
                                      (filter (fn [recipient] (usr/applicant? recipient)) (map usr/get-user-by-id recipient-ids))))
-   :model-fn                     (model-fn)})
+   :model-fn                     (fn [{application :application result :result user :user} _ recipient]
+                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))]
+                                     {:reservation      {:startTime       (util/to-local-datetime (:startTime reservation))
+                                                         :participants    (display-names (reservation-participants reservation))
+                                                         :reservationType (:reservationType reservation)
+                                                         :comment         (:comment reservation)
+                                                         :location        (:location reservation)}
+                                      :address          (:address application)
+                                      :municipality     (i18n/localize-fallback nil (str "municipality." (:municipality application)))
+                                      :link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
+                                      :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)
+                                      :user-first-name  (:firstName user)}))})
 
 (notifications/defemail
   :decline-appointment
