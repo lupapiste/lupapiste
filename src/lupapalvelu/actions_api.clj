@@ -2,7 +2,7 @@
   (:require [clojure.set :refer [difference]]
             [sade.env :as env]
             [sade.core :refer :all]
-            [sade.util :refer [fn->]]
+            [sade.util :refer [fn-> fn->>]]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.authorization :as auth]))
 
@@ -12,12 +12,12 @@
 
 (defn- foreach-action [web user application data]
   (map
-    #(let [{type :type par :parameters opt-par :optional-parameters} (action/get-meta %)]
+   #(let [{type :type categories :categories} (action/get-meta %)]
       (assoc
         (action/action % :type type :data data :user user)
         :application application
         :web web
-        :action-parameters (concat par opt-par)))
+        :categories categories))
     (remove nil? (keys (action/get-actions)))))
 
 (defn- validated [command]
@@ -28,13 +28,17 @@
    :description "List of all actions and their meta-data."} [_]
   (ok :actions (action/serializable-actions)))
 
-(defn- get-allowed-actions [web user application data]
-  (let [results  (->> (foreach-action web user application data)
-                      (map validated))
-        filtered (if (env/dev-mode?)
-                   results
-                   (filter (comp :ok first vals) results))]
-    (into {} filtered)))
+(def- validate-actions
+  (if (env/dev-mode?)
+    (fn->> (map validated) (into {}))
+    (fn->> (map validated) (filter (comp :ok first vals)) (into {}))))
+
+(defn- action-has-category-fn [category]
+  (fn [action]
+    (->> action :categories (some #{category}) boolean)))
+
+(defn- filter-actions-by-category [actions]
+  (filter (action-has-category-fn :attachments) actions))
 
 (defmulti allowed-actions-for-category (fn-> :data :category keyword))
 
@@ -49,17 +53,20 @@
 
 (defmethod allowed-actions-for-category :attachments
   [{:keys [web user application]}]
-  (->> (:attachments application)
-       (map (partial build-attachment-query-params application))
-       (map (partial get-allowed-actions web user application))
-       (zipmap (map :id (:attachments application)))))
+  (let [{:keys [attachments]} application]
+    (->> (map (partial build-attachment-query-params application) attachments)
+         (map (partial foreach-action web user application))
+         (map filter-actions-by-category)
+         (map validate-actions)
+         (zipmap (map :id attachments)))))
 
 (defquery allowed-actions
   {:user-roles       #{:anonymous}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
   [{:keys [web data user application]}]
-  (ok :actions (get-allowed-actions web user application data)))
+  (ok :actions (->> (foreach-action web user application data)
+                    (validate-actions))))
 
 (defquery allowed-actions-for-category
   {:description      "Returns map of allowed actions for a category (attachments, tasks, etc.)"

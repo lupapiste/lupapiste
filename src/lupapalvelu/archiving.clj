@@ -45,6 +45,7 @@
         url (str host "/documents/" encoded-id)]
     (http/put url {:basic-auth [app-id app-key]
                    :throw-exceptions false
+                   :quiet true
                    :multipart  [{:name      "metadata"
                                  :mime-type "application/json"
                                  :encoding  "UTF-8"
@@ -116,8 +117,7 @@
         (.submit
           upload-threadpool
           (fn []
-            (try
-              (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
+            (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
               (if (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
@@ -131,9 +131,6 @@
                       (state-update-fn :arkistoitu application now id)
                       (mark-application-archived-if-done application now))
                     (state-update-fn :valmis application now id)))))
-              (catch Throwable t
-                (error "Failed to archive attachment id" id "from application" app-id "message:" t)
-                (state-update-fn :valmis application now id)))
             (when (instance? File is-or-file)
               (io/delete-file is-or-file :silently)))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))

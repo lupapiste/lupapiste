@@ -317,6 +317,37 @@
     }
   };
 
+  var viewWithDownloadTemplate =
+        _.template(
+          "<div class='view-with-download'><a target='_blank' "
+            +"href='/api/raw/view-attachment?attachment-id"
+            + "=<%- fileId %>'><%- filename %></a><br>"
+            + "<div class='download'>"
+            + "<a href='/api/raw/download-attachment?attachment-id"
+            + "=<%- fileId %>'>"
+            + "<i class='lupicon-download btn-small'></i>"
+            + "<span><%- download %></span></a> (<%- sizeText %>)"
+            + "</div></div>");
+
+  // Fills the target element with:
+  // <a href="attachment file view url" target="_blank">filename</a><br>
+  // <div class="download">
+  //   <a href="attachment file download url">
+  //     <i class="lupicon-download btn-small"></i>
+  //     <span>Download file localization</span>
+  //   </a>
+  // (localized content size string)</div>
+  ko.bindingHandlers.viewWithDownload = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).html( viewWithDownloadTemplate( _.merge( data, {download: loc("download-file"),
+                                                                    sizeText: sizeString( data.size )})));
+      }
+    }
+  };
+
   ko.bindingHandlers.version = {
     update: function(element, valueAccessor) {
       var verValue = ko.utils.unwrapObservable(valueAccessor());

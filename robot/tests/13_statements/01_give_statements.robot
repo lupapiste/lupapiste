@@ -135,13 +135,13 @@ Sonja cannot regive statement to own statement
 
 Attachment is generated
   Open tab  attachments
-  Wait until  Element should be visible  //table[@data-test-id='attachments-template-table']//tr[@id='attachment-row-ennakkoluvat_ja_lausunnot-lausunto']
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
 
 Attachment is not removable from list view
-  Element should not be visible  //table[@data-test-id='attachments-template-table']//tr[@data-test-icon='delete-ennakkoluvat_ja_lausunnot.lausunto']
+  Wait until  Element should be disabled  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto'] button[data-test-icon=delete-button]
 
 Attachement is not removable from attachment view
-  Wait and click  //table[@data-test-id='attachments-template-table']//a[@data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
+  Open attachment details  ennakkoluvat_ja_lausunnot.lausunto
   Wait until  Element should contain  //span[@id='test-attachment-file-name']/a  Lausunto.pdf
   Element should not be visible  //button[@data-test-id='delete-attachment']
 
@@ -204,8 +204,8 @@ Sonja can see statement indicator
 There is no possibility to delete the generated statement pdf attachment
   Open application  ${appname}  ${appPropertyId}
   Open tab  attachments
-  Wait until  Element should be visible  xpath=//tr[@id="attachment-row-ennakkoluvat_ja_lausunnot-lausunto"]
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-ennakkoluvat_ja_lausunnot.lausunto"]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
+  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto'] span[data-test-icon="delete-button"]
   [Teardown]  Logout
 
 Mikko logs in and submits application

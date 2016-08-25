@@ -266,7 +266,7 @@
                                  :attachmentId "5234"}}]
       (execute command) => {:ok false
                             :text "error.unauthorized"
-                            :desc "Read-only attachments cannot be modified."}))
+                            :desc "Attachment is read only."}))
 
   (fact "a valid function code can be set to application and it is stored in history array"
     (let [fc "10 03 00 01"

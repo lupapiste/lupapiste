@@ -130,7 +130,7 @@
     (provided (att-type/tag-by-type anything) => nil)))
 
 
-(fact "attachments-filters"
+(fact "attachments-filters, operations and types"
   (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
         operation-id2 (ssg/generate ssc/ObjectIdStr)
         operation-id3 (ssg/generate ssc/ObjectIdStr)
@@ -149,9 +149,29 @@
                      :secondaryOperations [{:id operation-id2} {:id operation-id3}]
                      :attachments attachments}]
 
-    (attachments-filters application) =>   [[{:tag :preVerdict :default false}
-                                             {:tag :postVerdict :default false}]
-                                            [{:tag :paapiirustus :default false}
+    (attachments-filters application) =>   [[{:tag :general :default false}
+                                             {:tag :parties :default false}
+                                             {:tag :paapiirustus :default false}
+                                             {:tag :iv_suunnitelma :default false}
+                                             {:tag :other :default false}]]
+
+    ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
+    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
+    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
+    (provided (att-type/tag-by-type anything) => nil)))
+
+(fact "attachments-filters, not needed"
+  (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
+        operation-id2 (ssg/generate ssc/ObjectIdStr)
+        operation-id3 (ssg/generate ssc/ObjectIdStr)
+        attachments  [{:type {:type-group "somegroup" :type-id "sometype"}}
+                      {:notNeeded true :type {:type-group "somegroup" :type-id "sometype"}}
+                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
+        application {:primaryOperation {:id operation-id1}
+                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                     :attachments attachments}]
+
+    (attachments-filters application) =>   [[{:tag :general :default false}
                                              {:tag :iv_suunnitelma :default false}
                                              {:tag :other :default false}]
                                             [{:tag :needed :default true}
@@ -159,5 +179,24 @@
 
     ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
+    (provided (att-type/tag-by-type anything) => nil)))
+
+(fact "attachments-filters, application state"
+  (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
+        operation-id2 (ssg/generate ssc/ObjectIdStr)
+        operation-id3 (ssg/generate ssc/ObjectIdStr)
+        attachments  [{:applicationState :verdictGiven :type {:type-group "somegroup" :type-id "sometype"}}
+                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
+        application {:primaryOperation {:id operation-id1}
+                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                     :attachments attachments
+                     :state :submitted}]
+    (attachments-filters application) =>   [[{:tag :preVerdict :default true}
+                                             {:tag :postVerdict :default false}]
+                                            [{:tag :general :default false}
+                                             {:tag :iv_suunnitelma :default false}
+                                             {:tag :other :default false}]]
+
+    ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
+    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
     (provided (att-type/tag-by-type anything) => nil)))

@@ -98,6 +98,7 @@
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
    (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
@@ -322,6 +323,7 @@
     (let [{:keys [url username password crypto-iv]} m
           base-request {:query-params params
                         :throw-exceptions false
+                        :quiet true
                         :headers (select-keys headers [:accept :accept-encoding])
                         :as :stream}
           request (if-not (ss/blank? crypto-iv)
@@ -331,7 +333,7 @@
       (if (= 200 (:status response))
         response
         (do
-          (debug "organization" org-id "wms server" url "returned" (:status response))
+          (error "error.integration - organization" org-id "wms server" url "returned" (:status response))
           response)))))
 
 (defn organization-map-layers-data [org-id]

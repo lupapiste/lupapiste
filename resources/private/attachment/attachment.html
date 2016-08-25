@@ -248,7 +248,8 @@
                     <!-- /ko -->
                 </div>
                 <button data-test-id="signLatestAttachmentVersion" class="positive"
-                        data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
+                        data-bind="click: sign, 
+                                   visible: versions().length && $root.authorization.ok('sign-attachments')">
                     <i class="lupicon-circle-pen"></i>
                     <span data-bind="ltext: 'attachment.signLatest'"></span>
                 </button>

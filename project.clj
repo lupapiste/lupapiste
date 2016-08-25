@@ -87,6 +87,7 @@
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
+                 [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
@@ -119,7 +120,10 @@
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
                  [lupapiste/openpdf "1.0.4"]
                  ; Wrapper for clj-pdf for PDF/A document generation
-                 [lupapiste/pdfa-generator "1.0.1"]]
+                 [lupapiste/pdfa-generator "1.0.1"]
+                 ; Apache pdfbox for PDF/A wrapper
+                 [org.apache.pdfbox/pdfbox "2.0.2"]
+                 [org.apache.pdfbox/xmpbox "2.0.2"]]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [com.raspasov/clj-ssh "0.5.12"]

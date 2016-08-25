@@ -28,7 +28,7 @@
                                                    :data   {:meta {"contents" "foobar"}}})]
         (execute command) => {:ok   false
                               :text "error.unauthorized"
-                              :desc "Read-only attachments cannot be modified."}))
+                              :desc "Attachment is read only."}))
 
     (fact "new attachment version cannot be uploaded if the attachment is read-only"
       (let [command (util/deep-merge base-command {:action "upload-attachment"
@@ -41,4 +41,4 @@
                                                             :tempfile       ""}})]
         (execute command) => {:ok   false
                               :text "error.unauthorized"
-                              :desc "Read-only attachments cannot be modified."}))))
+                              :desc "Attachment is read only."}))))

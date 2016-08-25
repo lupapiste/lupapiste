@@ -1,5 +1,1597 @@
-@import url('main-blessed1.css?z=1471945076377');
+@import url('main-blessed1.css?z=1472128368164');
 
+/* line 137, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table th {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+/* line 141, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table th:first-child {
+  padding-left: 16px;
+}
+/* line 144, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table th:last-child {
+  padding-right: 16px;
+}
+/* line 149, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachmentState {
+  padding: 0 0 0 12px;
+  white-space: nowrap;
+}
+/* line 153, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachmentState .icon {
+  margin: 6px;
+  vertical-align: middle;
+}
+/* line 158, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-type-group, table.attachments-template-table td.attachment-type-id, table.attachments-template-table td.attachment-help-info, table.attachments-template-table td.attachment-not-needed, table.attachments-template-table td.attachment-file-info, table.attachments-template-table td.attachment-file-changed {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+/* line 163, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-group-select a {
+  font-size: 15px;
+  font-weight: normal;
+  float: right;
+}
+/* line 169, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-type-group, table.attachments-template-table td.attachment-type-id {
+  max-width: 150px;
+  word-wrap: break-word;
+}
+/* line 173, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-help-info {
+  max-width: 200px;
+  word-wrap: break-word;
+}
+/* line 177, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-file-info, table.attachments-template-table td.attachment-file-changed {
+  max-width: 230px;
+  word-wrap: break-word;
+}
+/* line 181, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-version-info {
+  max-width: 60px;
+  word-wrap: break-word;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-5 {
+  min-width: 5%;
+  max-width: 5%;
+  width: 5%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-50px {
+  max-height: 50px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-10 {
+  min-width: 10%;
+  max-width: 10%;
+  width: 10%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-100px {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-15 {
+  min-width: 15%;
+  max-width: 15%;
+  width: 15%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-150px {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-20 {
+  min-width: 20%;
+  max-width: 20%;
+  width: 20%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-200px {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-25 {
+  min-width: 25%;
+  max-width: 25%;
+  width: 25%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-250px {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-30 {
+  min-width: 30%;
+  max-width: 30%;
+  width: 30%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-300px {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-35 {
+  min-width: 35%;
+  max-width: 35%;
+  width: 35%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-350px {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-40 {
+  min-width: 40%;
+  max-width: 40%;
+  width: 40%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-400px {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-45 {
+  min-width: 45%;
+  max-width: 45%;
+  width: 45%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-450px {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-50 {
+  min-width: 50%;
+  max-width: 50%;
+  width: 50%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-500px {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-55 {
+  min-width: 55%;
+  max-width: 55%;
+  width: 55%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-550px {
+  max-height: 550px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-60 {
+  min-width: 60%;
+  max-width: 60%;
+  width: 60%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-600px {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-65 {
+  min-width: 65%;
+  max-width: 65%;
+  width: 65%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-650px {
+  max-height: 650px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-70 {
+  min-width: 70%;
+  max-width: 70%;
+  width: 70%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-700px {
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-75 {
+  min-width: 75%;
+  max-width: 75%;
+  width: 75%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-750px {
+  max-height: 750px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-80 {
+  min-width: 80%;
+  max-width: 80%;
+  width: 80%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-800px {
+  max-height: 800px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-85 {
+  min-width: 85%;
+  max-width: 85%;
+  width: 85%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-850px {
+  max-height: 850px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-90 {
+  min-width: 90%;
+  max-width: 90%;
+  width: 90%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-900px {
+  max-height: 900px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-95 {
+  min-width: 95%;
+  max-width: 95%;
+  width: 95%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-950px {
+  max-height: 950px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-100 {
+  min-width: 100%;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-1000px {
+  max-height: 1000px;
+  overflow-y: auto;
+}
+
+/* line 191, ../../../private/common-html/sass/partials/_tables.scss */
+.width-105 {
+  min-width: 105%;
+  max-width: 105%;
+  width: 105%;
+}
+
+/* line 196, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-1050px {
+  max-height: 1050px;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-1em {
+  max-height: 1em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-2em {
+  max-height: 2em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-3em {
+  max-height: 3em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-4em {
+  max-height: 4em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-5em {
+  max-height: 5em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-6em {
+  max-height: 6em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-7em {
+  max-height: 7em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-8em {
+  max-height: 8em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-9em {
+  max-height: 9em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-10em {
+  max-height: 10em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-11em {
+  max-height: 11em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-12em {
+  max-height: 12em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-13em {
+  max-height: 13em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-14em {
+  max-height: 14em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-15em {
+  max-height: 15em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-16em {
+  max-height: 16em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-17em {
+  max-height: 17em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-18em {
+  max-height: 18em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-19em {
+  max-height: 19em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-20em {
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-21em {
+  max-height: 21em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-22em {
+  max-height: 22em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-23em {
+  max-height: 23em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-24em {
+  max-height: 24em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-25em {
+  max-height: 25em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-26em {
+  max-height: 26em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-27em {
+  max-height: 27em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-28em {
+  max-height: 28em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-29em {
+  max-height: 29em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-30em {
+  max-height: 30em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-31em {
+  max-height: 31em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-32em {
+  max-height: 32em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-33em {
+  max-height: 33em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-34em {
+  max-height: 34em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-35em {
+  max-height: 35em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-36em {
+  max-height: 36em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-37em {
+  max-height: 37em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-38em {
+  max-height: 38em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-39em {
+  max-height: 39em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-40em {
+  max-height: 40em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-41em {
+  max-height: 41em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-42em {
+  max-height: 42em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-43em {
+  max-height: 43em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-44em {
+  max-height: 44em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-45em {
+  max-height: 45em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-46em {
+  max-height: 46em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-47em {
+  max-height: 47em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-48em {
+  max-height: 48em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-49em {
+  max-height: 49em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-50em {
+  max-height: 50em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-51em {
+  max-height: 51em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-52em {
+  max-height: 52em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-53em {
+  max-height: 53em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-54em {
+  max-height: 54em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-55em {
+  max-height: 55em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-56em {
+  max-height: 56em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-57em {
+  max-height: 57em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-58em {
+  max-height: 58em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-59em {
+  max-height: 59em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-60em {
+  max-height: 60em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-61em {
+  max-height: 61em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-62em {
+  max-height: 62em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-63em {
+  max-height: 63em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-64em {
+  max-height: 64em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-65em {
+  max-height: 65em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-66em {
+  max-height: 66em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-67em {
+  max-height: 67em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-68em {
+  max-height: 68em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-69em {
+  max-height: 69em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-70em {
+  max-height: 70em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-71em {
+  max-height: 71em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-72em {
+  max-height: 72em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-73em {
+  max-height: 73em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-74em {
+  max-height: 74em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-75em {
+  max-height: 75em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-76em {
+  max-height: 76em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-77em {
+  max-height: 77em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-78em {
+  max-height: 78em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-79em {
+  max-height: 79em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-80em {
+  max-height: 80em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-81em {
+  max-height: 81em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-82em {
+  max-height: 82em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-83em {
+  max-height: 83em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-84em {
+  max-height: 84em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-85em {
+  max-height: 85em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-86em {
+  max-height: 86em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-87em {
+  max-height: 87em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-88em {
+  max-height: 88em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-89em {
+  max-height: 89em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-90em {
+  max-height: 90em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-91em {
+  max-height: 91em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-92em {
+  max-height: 92em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-93em {
+  max-height: 93em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-94em {
+  max-height: 94em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-95em {
+  max-height: 95em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-96em {
+  max-height: 96em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-97em {
+  max-height: 97em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-98em {
+  max-height: 98em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-99em {
+  max-height: 99em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-100em {
+  max-height: 100em;
+  overflow-y: auto;
+}
+
+/* line 204, ../../../private/common-html/sass/partials/_tables.scss */
+.scroll-101em {
+  max-height: 101em;
+  overflow-y: auto;
+}
+
+/* line 210, ../../../private/common-html/sass/partials/_tables.scss */
+.header-table {
+  margin-top: 30px;
+}
+/* line 212, ../../../private/common-html/sass/partials/_tables.scss */
+.header-table table {
+  margin: 0;
+}
+
+/* line 217, ../../../private/common-html/sass/partials/_tables.scss */
+.header-table > tbody > tr > td {
+  padding: 0;
+}
+
+/* line 221, ../../../private/common-html/sass/partials/_tables.scss */
+.header-table > tfoot > tr:hover {
+  background-color: transparent;
+}
+
+/* line 225, ../../../private/common-html/sass/partials/_tables.scss */
+td.positive {
+  background-color: #2ca92c;
+  color: white;
+}
+
+/* line 229, ../../../private/common-html/sass/partials/_tables.scss */
+td.negative {
+  background-color: #df3215;
+  color: white;
+}
+
+/* line 237, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--action {
+  text-align: right;
+}
+/* line 239, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--action a {
+  padding-right: 2em;
+}
+/* line 243, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table td.reviews-table--icons {
+  text-align: center;
+  color: #f39129;
+}
+/* line 247, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note:active {
+  background-color: initial;
+}
+/* line 256, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note td.reviews-table--extra {
+  white-space: pre-wrap;
+}
+/* line 259, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table tr.reviews-table__note td.reviews-table--no-extra {
+  color: #bbbbbb;
+}
+/* line 263, ../../../private/common-html/sass/partials/_tables.scss */
+.reviews-table div.bubble-dialog {
+  border: none;
+}
+
+/* line 273, ../../../private/common-html/sass/partials/_tables.scss */
+table.review-buildings-table th.review-buildings--description {
+  min-width: 20em;
+}
+/* line 276, ../../../private/common-html/sass/partials/_tables.scss */
+table.review-buildings-table select.dropdown {
+  min-width: 10em;
+}
+/* line 279, ../../../private/common-html/sass/partials/_tables.scss */
+table.review-buildings-table div.docgen-checkbox-wrapper {
+  border: none;
+  text-align: center;
+}
+/* line 283, ../../../private/common-html/sass/partials/_tables.scss */
+table.review-buildings-table div.docgen-checkbox-wrapper.wrapper--disabled {
+  background-color: transparent;
+}
+
+/* line 237, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action {
+  text-align: right;
+}
+/* line 239, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--action a {
+  padding-right: 2em;
+}
+/* line 243, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table td.company-users-table--icons {
+  text-align: center;
+  color: #f39129;
+}
+/* line 247, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note {
+  padding-left: 2em;
+  padding-right: 2em;
+  background-color: white;
+}
+/* line 252, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note:active {
+  background-color: initial;
+}
+/* line 256, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--extra {
+  white-space: pre-wrap;
+}
+/* line 259, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table tr.company-users-table__note td.company-users-table--no-extra {
+  color: #bbbbbb;
+}
+/* line 263, ../../../private/common-html/sass/partials/_tables.scss */
+.company-users-table div.bubble-dialog {
+  border: none;
+}
+
+/* line 292, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table select {
+  width: initial;
+}
+/* line 295, ../../../private/common-html/sass/partials/_tables.scss */
+table.company-users-table tr:hover, table.company-users-table tr:active {
+  background-color: transparent;
+}
+
+/* line 300, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container {
+  padding-top: 1em;
+  padding-right: .6em;
+  padding-left: .5em;
+}
+/* line 306, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table {
+  margin-bottom: 1em;
+}
+/* line 308, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .checkbox-wrapper {
+  border: none;
+}
+/* line 310, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .checkbox-wrapper .checkbox-label {
+  padding-top: 2px;
+  padding-left: 0;
+  white-space: nowrap;
+}
+/* line 316, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table td {
+  vertical-align: top;
+}
+/* line 319, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table td.attachments-table__state-icons > i {
+  margin-left: 1px;
+  magint-right: 1px;
+}
+/* line 323, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .attachments-table--widest {
+  width: 80%;
+}
+
+/* line 329, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table {
+  margin-top: 12px;
+}
+/* line 331, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table td:nth-child(even) {
+  width: 50%;
+}
+/* line 333, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table td:nth-child(even) input {
+  width: 90%;
+}
+
+/* line 339, ../../../private/common-html/sass/partials/_tables.scss */
+div.suti-admin-container .serversettings--wide {
+  width: 50%;
+}
+
+/* line 343, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display {
+  margin-bottom: 12px;
+}
+/* line 346, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .rollup-button span {
+  text-transform: uppercase;
+}
+/* line 350, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .form-grid, .suti-display .checkbox-wrapper {
+  border: none;
+}
+/* line 353, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .suti-display--error {
+  color: #df3215;
+}
+
+/* line 359, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download {
+  white-space: nowrap;
+}
+/* line 361, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download a:hover {
+  text-decoration: none;
+}
+/* line 364, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download a:hover > span {
+  text-decoration: underline;
+}
+
+/*Tab styles*/
+/* line 42, ../../../private/common-html/sass/partials/_tabs.scss */
+.tab-wrapper {
+  padding: 30px;
+}
+
+/* line 46, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs-container {
+  width: 100%;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  padding-top: 40px;
+}
+
+/* line 56, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs {
+  list-style: none;
+  margin: 0;
+}
+/* line 59, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs li {
+  display: inline;
+}
+/* line 61, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs li a {
+  display: inline-block;
+  text-decoration: none;
+  background: white;
+  color: #333333;
+  padding-left: 12px;
+  padding-right: 12px;
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dddddd;
+  border-bottom: none;
+  position: relative;
+  outline: 0;
+}
+/* line 67, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs li.active a {
+  box-sizing: content-box;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #bbbbbb;
+  border-bottom: none;
+}
+/* line 32, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs li.active a:before {
+  content: " ";
+  border-bottom: 2px solid white;
+  position: absolute;
+  bottom: -2px;
+  left: 0%;
+  width: 100%;
+}
+
+/* line 73, ../../../private/common-html/sass/partials/_tabs.scss */
+ul.tabs {
+  font-size: 0;
+}
+
+/* line 77, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs span.indicator {
+  display: table-cell;
+  float: right;
+  line-height: 22px;
+  font-size: 12px;
+  border: 2px solid #f39129;
+  min-height: 24px;
+  max-height: 24px;
+  text-align: center;
+  box-sizing: border-box;
+  padding-bottom: 2px;
+  vertical-align: middle;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* line 97, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs a.link-btn :first-child {
+  padding-right: 2px !important;
+}
+
+/* line 102, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs li.active > a.link-btn,
+.tabs li.active > a.link-btn-julkipano {
+  cursor: default;
+  color: #333333;
+  pointer-events: none;
+}
+
+/* line 109, ../../../private/common-html/sass/partials/_tabs.scss */
+.tabs-content-container {
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 10px;
+  width: 400px;
+}
+
+/* line 116, ../../../private/common-html/sass/partials/_tabs.scss */
+.tab-content {
+  padding: 0;
+}
+/* line 118, ../../../private/common-html/sass/partials/_tabs.scss */
+.tab-content h1 {
+  line-height: normal;
+  display: inline-block;
+}
+
+/* line 124, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs {
+  display: inline;
+}
+/* line 127, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs input[type=radio] {
+  display: none;
+  width: 0px;
+  height: 0px;
+  margin: 0px;
+  padding: 0px;
+  -moz-appearance: none;
+  position: absolute;
+  z-index: -1;
+}
+/* line 137, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs input[type="radio"] + label {
+  display: inline-block;
+  padding: 8px 10px;
+  text-decoration: none;
+  background: #f6f6f6;
+  color: #333;
+  outline: none;
+  /* Note: IE filters and border-radius don't mix */
+  filter: none;
+}
+/* line 146, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs input[type="radio"] + label:hover {
+  cursor: pointer;
+}
+/* line 150, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs input[type="radio"]:checked + label {
+  background: #dddddd;
+}
+/* line 154, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs [type="radio"] + label.checked {
+  background: #dddddd;
+}
+/* line 157, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs .form-input, .radio-tabs .form-input--inline {
+  margin-bottom: 7px;
+}
+/* line 160, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs button.application-create, .radio-tabs button.application-from-previous {
+  display: inline;
+  margin-bottom: 0;
+  width: 330px;
+}
+@media all and (max-width: 1000px) {
+  /* line 160, ../../../private/common-html/sass/partials/_tabs.scss */
+  .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
+    position: absolute;
+    left: 8px;
+    top: 54px;
+  }
+}
+/* line 170, ../../../private/common-html/sass/partials/_tabs.scss */
+.radio-tabs button.application-from-previous {
+  margin: 0 5px;
+}
+
+/* line 176, ../../../private/common-html/sass/partials/_tabs.scss */
+.missing-info-title {
+  margin-bottom: 6px;
+  margin-top: 24px;
+}
+
+/* line 2, ../../../private/common-html/sass/partials/_conversation.scss */
+.conversation-button-group button {
+  margin-right: 6px;
+}
+
+/* line 7, ../../../private/common-html/sass/partials/_conversation.scss */
+.conversation-input {
+  width: 100%;
+  display: block;
+  margin: 24px 30px 24px 0;
+  box-sizing: border-box;
+}
+
+/* line 14, ../../../private/common-html/sass/partials/_conversation.scss */
+.commenttd {
+  text-align: left;
+}
+
+/* line 18, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment {
+  text-align: left;
+  position: relative;
+  background-color: #d8f0fa;
+  margin-bottom: 26px;
+  padding: 8px;
+}
+/* line 19, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .arrow {
+  white-space: nowrap;
+}
+/* line 21, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .arrow:after {
+  content: "\2192";
+}
+/* line 25, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .role {
+  font-weight: bold;
+}
+/* line 27, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .role:before {
+  content: "(";
+}
+/* line 30, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .role:after {
+  content: ")";
+}
+/* line 39, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment:nth-child(even) {
+  background-color: #d8f0fa;
+}
+/* line 42, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .comment-party {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: #595959 dotted 1px;
+}
+/* line 49, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .comment-party span {
+  margin-right: 6px;
+}
+/* line 53, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment:after {
+  position: absolute;
+  content: " ";
+  display: block;
+  bottom: -23px;
+  left: 24px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 24px solid #d8f0fa;
+}
+/* line 65, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .attachment-details a, .comment .new-attachment-version-details a {
+  color: #595959;
+}
+/* line 69, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .deleted-attachment {
+  font-style: italic;
+}
+/* line 74, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.attachment-comment:after {
+  border-top: 24px solid #e9e9e9;
+}
+/* line 78, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment .comment-text {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+/* line 83, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.authority-comment {
+  background-color: #9afda2;
+}
+/* line 85, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.authority-comment:after {
+  position: absolute;
+  content: " ";
+  display: block;
+  bottom: -23px;
+  left: auto;
+  right: 24px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 24px solid #9afda2;
+}
+/* line 98, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.authority-comment .comment-party {
+  position: relative;
+}
+/* line 100, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.authority-comment .comment-party:after {
+  display: none;
+}
+/* line 105, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment.authority-comment.attachment-comment:after {
+  border-top: 24px solid #e9e9e9;
+}
+
+/* line 112, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-for-me {
+  border: solid 2px #f39129;
+}
+
+/* line 117, ../../../private/common-html/sass/partials/_conversation.scss */
+.conversation div {
+  vertical-align: top;
+}
+
+/* line 122, ../../../private/common-html/sass/partials/_conversation.scss */
+.conversation .attachment-comment {
+  vertical-align: top;
+  background-color: #e9e9e9;
+}
+
+/* line 127, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls {
+  display: inline-block;
+  margin-left: 24px;
+}
+/* line 131, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .comment-request {
+  display: inline-block;
+  margin-left: 24px;
+}
+/* line 134, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .comment-request label {
+  display: block;
+}
+/* line 137, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .comment-request select {
+  display: block;
+}
+/* line 142, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .mark-answered {
+  margin-left: 24px;
+  display: inline-block;
+}
+/* line 145, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-controls .mark-answered label, .comment-controls .mark-answered input {
+  display: inline;
+}
+
+/* line 152, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-toggle {
+  margin-bottom: 8px;
+}
+
+/* line 156, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-message {
+  white-space: pre-line;
+}
+
+/* line 246, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble {
+  position: relative;
+  color: #333333;
+  background: #f6f6f6;
+  width: 100%;
+  border-radius: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #bbbbbb;
+}
+/* line 177, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after, .comment-bubble:before {
+  top: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 188, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after, .comment-bubble:before {
+  left: 5%;
+}
+/* line 191, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:after {
+  border-color: rgba(246, 246, 246, 0);
+  border-top-color: #f6f6f6;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 197, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble:before {
+  border-color: rgba(187, 187, 187, 0);
+  border-top-color: #bbbbbb;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 203, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header {
+  border-bottom: 2px solid #bbbbbb;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  width: 100%;
+  overflow-y: hidden;
+  vertical-align: top;
+}
+/* line 210, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender {
+  font-weight: bold;
+}
+/* line 212, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role {
+  text-transform: lowercase;
+}
+/* line 214, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role:before {
+  content: "(";
+}
+/* line 217, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .role:after {
+  content: ")";
+}
+/* line 222, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .sender .to:before {
+  margin-left: 12px;
+  margin-right: 12px;
+  content: "→";
+}
+/* line 229, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .header .timestamp {
+  float: right;
+}
+/* line 234, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble .content .target {
+  margin-right: 6px;
+}
+/* line 238, ../../../private/common-html/sass/partials/_conversation.scss */
+.comment-bubble a {
+  color: #f39129;
+  text-decoration: none;
+}
 /* line 10, ../../../private/common-html/sass/partials/_links.scss */
 .comment-bubble a:link, .comment-bubble a:visited {
   color: #f39129;
@@ -3209,24 +4801,6 @@ span.icon_clear:before {
 }
 
 /* line 467, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-check,
-#application-attachments-tab i.lupicon-circle-pen,
-#application-attachments-tab i.lupicon-circle-arrow-up,
-#application-attachments-tab i.lupicon-circle-stamp,
-#application-attachments-tab i.lupicon-circle-section-sign {
-  color: #2ca92c;
-}
-/* line 474, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-star,
-#application-attachments-tab i.lupicon-lock {
-  color: #f39129;
-}
-/* line 478, ../../../private/common-html/sass/views/_application.scss */
-#application-attachments-tab i.lupicon-circle-attention {
-  color: #df3215;
-}
-
-/* line 467, ../../../private/common-html/sass/views/_application.scss */
 #application-tasks-tab i.lupicon-circle-check,
 #application-tasks-tab i.lupicon-circle-pen,
 #application-tasks-tab i.lupicon-circle-arrow-up,
@@ -3244,23 +4818,23 @@ span.icon_clear:before {
   color: #df3215;
 }
 
-/* line 488, ../../../private/common-html/sass/views/_application.scss */
+/* line 487, ../../../private/common-html/sass/views/_application.scss */
 #application-tasks-tab .stacked.legends {
   margin-bottom: 12px;
   margin-left: 12px;
 }
-/* line 492, ../../../private/common-html/sass/views/_application.scss */
+/* line 491, ../../../private/common-html/sass/views/_application.scss */
 #application-tasks-tab table {
   margin-top: 12px;
   margin-bottom: 12px;
 }
 
-/* line 498, ../../../private/common-html/sass/views/_application.scss */
+/* line 497, ../../../private/common-html/sass/views/_application.scss */
 #construction-time-documents {
   margin-top: 24px;
 }
 
-/* line 502, ../../../private/common-html/sass/views/_application.scss */
+/* line 501, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask {
   display: none;
   position: absolute;
@@ -3271,279 +4845,279 @@ span.icon_clear:before {
   height: 100%;
   background: #fff;
 }
-/* line 511, ../../../private/common-html/sass/views/_application.scss */
+/* line 510, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content {
   display: table;
   margin: 0 auto;
 }
-/* line 514, ../../../private/common-html/sass/views/_application.scss */
+/* line 513, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content img {
   display: table;
   margin: 0 auto;
 }
-/* line 518, ../../../private/common-html/sass/views/_application.scss */
+/* line 517, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content div {
   margin-top: 25px;
 }
 
-/* line 524, ../../../private/common-html/sass/views/_application.scss */
+/* line 523, ../../../private/common-html/sass/views/_application.scss */
 .process-nav {
   margin-top: 24px;
 }
-/* line 526, ../../../private/common-html/sass/views/_application.scss */
+/* line 525, ../../../private/common-html/sass/views/_application.scss */
 .process-nav .process-next {
   float: right;
 }
 
-/* line 531, ../../../private/common-html/sass/views/_application.scss */
+/* line 530, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last {
   font-size: 15px;
 }
-/* line 533, ../../../private/common-html/sass/views/_application.scss */
+/* line 532, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last li {
   font-size: 15px;
 }
-/* line 536, ../../../private/common-html/sass/views/_application.scss */
+/* line 535, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last .attachments-list {
   padding-left: 25px;
 }
 
-/* line 541, ../../../private/common-html/sass/views/_application.scss */
+/* line 540, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section {
   margin-top: 24px;
   margin-bottom: 24px;
   padding: 24px;
   border: 1px solid #b5b5b5;
 }
-/* line 547, ../../../private/common-html/sass/views/_application.scss */
+/* line 546, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section #choose-statement-givers-title {
   font-weight: bold;
 }
-/* line 550, ../../../private/common-html/sass/views/_application.scss */
+/* line 549, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section #invite-statement-giver-saateText {
   resize: none;
   width: 99%;
 }
-/* line 554, ../../../private/common-html/sass/views/_application.scss */
+/* line 553, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section button {
   margin-top: 24px;
 }
 
-/* line 559, ../../../private/common-html/sass/views/_application.scss */
+/* line 558, ../../../private/common-html/sass/views/_application.scss */
 .statement-over-due {
   color: red;
 }
 
-/* line 564, ../../../private/common-html/sass/views/_application.scss */
+/* line 563, ../../../private/common-html/sass/views/_application.scss */
 #neighbors .map {
   width: 100%;
   height: 700px;
 }
 
-/* line 570, ../../../private/common-html/sass/views/_application.scss */
+/* line 569, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors {
   padding-top: 20px;
 }
-/* line 572, ../../../private/common-html/sass/views/_application.scss */
+/* line 571, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td {
   vertical-align: top;
 }
-/* line 574, ../../../private/common-html/sass/views/_application.scss */
+/* line 573, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td a.command {
   display: block;
 }
-/* line 577, ../../../private/common-html/sass/views/_application.scss */
+/* line 576, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-name {
   font-weight: bold;
 }
-/* line 580, ../../../private/common-html/sass/views/_application.scss */
+/* line 579, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-street {
   display: block;
   padding-left: 8px;
 }
-/* line 584, ../../../private/common-html/sass/views/_application.scss */
+/* line 583, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-zip {
   padding-left: 8px;
 }
-/* line 587, ../../../private/common-html/sass/views/_application.scss */
+/* line 586, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-email {
   display: block;
   font-style: italic;
 }
-/* line 591, ../../../private/common-html/sass/views/_application.scss */
+/* line 590, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .status-state {
   font-weight: bold;
 }
-/* line 594, ../../../private/common-html/sass/views/_application.scss */
+/* line 593, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .status-time {
   display: block;
   font-style: italic;
 }
 
-/* line 602, ../../../private/common-html/sass/views/_application.scss */
+/* line 601, ../../../private/common-html/sass/views/_application.scss */
 .neighbors .command {
   margin-right: 6px;
 }
 
-/* line 608, ../../../private/common-html/sass/views/_application.scss */
+/* line 607, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .dialog-content, #dialog-verdict-attachment-prints-order-history .dialog-content {
   padding-left: 15px;
 }
-/* line 611, ../../../private/common-html/sass/views/_application.scss */
+/* line 610, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .order-amount, #dialog-verdict-attachment-prints-order-history .order-amount {
   width: 18px;
 }
-/* line 614, ../../../private/common-html/sass/views/_application.scss */
+/* line 613, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .btn-prints-dialog-ok, #dialog-verdict-attachment-prints-order-history .btn-prints-dialog-ok {
   margin-left: 15px;
 }
-/* line 618, ../../../private/common-html/sass/views/_application.scss */
+/* line 617, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .context-error, #dialog-verdict-attachment-prints-order-history .context-error {
   max-width: 820px;
   word-wrap: break-word;
 }
-/* line 632, ../../../private/common-html/sass/views/_application.scss */
+/* line 631, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers, #dialog-verdict-attachment-prints-order-history .fixed-headers {
   width: 820px;
   table-layout: fixed;
   margin-right: 20px;
 }
-/* line 637, ../../../private/common-html/sass/views/_application.scss */
+/* line 636, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers .center, #dialog-verdict-attachment-prints-order-history .fixed-headers .center {
   text-align: center;
 }
-/* line 641, ../../../private/common-html/sass/views/_application.scss */
+/* line 640, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td, #dialog-verdict-attachment-prints-order-history .fixed-headers td {
   word-wrap: break-word;
 }
-/* line 645, ../../../private/common-html/sass/views/_application.scss */
+/* line 644, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(1) {
   width: 200px;
   max-width: 200px;
 }
-/* line 649, ../../../private/common-html/sass/views/_application.scss */
+/* line 648, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(2) {
   width: 200px;
   max-width: 200px;
 }
-/* line 653, ../../../private/common-html/sass/views/_application.scss */
+/* line 652, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(3) {
   width: 300px;
   max-width: 300px;
 }
-/* line 657, ../../../private/common-html/sass/views/_application.scss */
+/* line 656, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(4) {
   width: 120px;
   max-width: 120px;
 }
-/* line 663, ../../../private/common-html/sass/views/_application.scss */
+/* line 662, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers thead tr, #dialog-verdict-attachment-prints-order-history .fixed-headers thead tr {
   display: block;
   position: relative;
 }
-/* line 668, ../../../private/common-html/sass/views/_application.scss */
+/* line 667, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers tbody, #dialog-verdict-attachment-prints-order-history .fixed-headers tbody {
   display: block;
   overflow: auto;
   width: 100%;
   max-height: 200px;
 }
-/* line 676, ../../../private/common-html/sass/views/_application.scss */
+/* line 675, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper {
   max-height: 200px;
   width: 820px;
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 681, ../../../private/common-html/sass/views/_application.scss */
+/* line 680, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper tbody, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper tbody {
   height: auto;
 }
 
-/* line 686, ../../../private/common-html/sass/views/_application.scss */
+/* line 685, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-dialog-description {
   margin-bottom: 12px;
 }
-/* line 690, ../../../private/common-html/sass/views/_application.scss */
+/* line 689, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items {
   margin-top: 6px;
   overflow-y: auto;
   max-height: 500px;
 }
-/* line 695, ../../../private/common-html/sass/views/_application.scss */
+/* line 694, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items .history-item {
   margin: 6px 0;
 }
 
-/* line 702, ../../../private/common-html/sass/views/_application.scss */
+/* line 701, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 707, ../../../private/common-html/sass/views/_application.scss */
+/* line 706, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 713, ../../../private/common-html/sass/views/_application.scss */
+/* line 712, ../../../private/common-html/sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
 
-/* line 717, ../../../private/common-html/sass/views/_application.scss */
+/* line 716, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 719, ../../../private/common-html/sass/views/_application.scss */
+/* line 718, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 725, ../../../private/common-html/sass/views/_application.scss */
+/* line 724, ../../../private/common-html/sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 728, ../../../private/common-html/sass/views/_application.scss */
+/* line 727, ../../../private/common-html/sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 731, ../../../private/common-html/sass/views/_application.scss */
+/* line 730, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 733, ../../../private/common-html/sass/views/_application.scss */
+/* line 732, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 737, ../../../private/common-html/sass/views/_application.scss */
+/* line 736, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 741, ../../../private/common-html/sass/views/_application.scss */
+/* line 740, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 749, ../../../private/common-html/sass/views/_application.scss */
+/* line 748, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 754, ../../../private/common-html/sass/views/_application.scss */
+/* line 753, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 759, ../../../private/common-html/sass/views/_application.scss */
+/* line 758, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -3559,165 +5133,165 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 774, ../../../private/common-html/sass/views/_application.scss */
+/* line 773, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 780, ../../../private/common-html/sass/views/_application.scss */
+/* line 779, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 782, ../../../private/common-html/sass/views/_application.scss */
+/* line 781, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 787, ../../../private/common-html/sass/views/_application.scss */
+/* line 786, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 791, ../../../private/common-html/sass/views/_application.scss */
+/* line 790, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
 }
-/* line 794, ../../../private/common-html/sass/views/_application.scss */
+/* line 793, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 798, ../../../private/common-html/sass/views/_application.scss */
+/* line 797, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 802, ../../../private/common-html/sass/views/_application.scss */
+/* line 801, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 806, ../../../private/common-html/sass/views/_application.scss */
+/* line 805, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 809, ../../../private/common-html/sass/views/_application.scss */
+/* line 808, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 818, ../../../private/common-html/sass/views/_application.scss */
+/* line 817, ../../../private/common-html/sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 823, ../../../private/common-html/sass/views/_application.scss */
+/* line 822, ../../../private/common-html/sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 827, ../../../private/common-html/sass/views/_application.scss */
+/* line 826, ../../../private/common-html/sass/views/_application.scss */
 .info-line {
   display: table-row;
 }
-/* line 829, ../../../private/common-html/sass/views/_application.scss */
+/* line 828, ../../../private/common-html/sass/views/_application.scss */
 .info-line span, .info-line a {
   display: table-cell;
 }
-/* line 832, ../../../private/common-html/sass/views/_application.scss */
+/* line 831, ../../../private/common-html/sass/views/_application.scss */
 .info-line a {
   padding-left: 12px;
 }
-/* line 835, ../../../private/common-html/sass/views/_application.scss */
+/* line 834, ../../../private/common-html/sass/views/_application.scss */
 .info-line .required-field-error-element-name {
   padding-left: 6px;
 }
-/* line 838, ../../../private/common-html/sass/views/_application.scss */
+/* line 837, ../../../private/common-html/sass/views/_application.scss */
 .info-line .lupicon-circle-attention {
   color: #e34319;
 }
-/* line 842, ../../../private/common-html/sass/views/_application.scss */
+/* line 841, ../../../private/common-html/sass/views/_application.scss */
 .info-line.warning .lupicon-circle-attention {
   color: #f39129;
 }
 
-/* line 848, ../../../private/common-html/sass/views/_application.scss */
+/* line 847, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 850, ../../../private/common-html/sass/views/_application.scss */
+/* line 849, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 852, ../../../private/common-html/sass/views/_application.scss */
+/* line 851, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 860, ../../../private/common-html/sass/views/_application.scss */
+/* line 859, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 863, ../../../private/common-html/sass/views/_application.scss */
+/* line 862, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 869, ../../../private/common-html/sass/views/_application.scss */
+/* line 868, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 872, ../../../private/common-html/sass/views/_application.scss */
+/* line 871, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 878, ../../../private/common-html/sass/views/_application.scss */
+/* line 877, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 883, ../../../private/common-html/sass/views/_application.scss */
+/* line 882, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 888, ../../../private/common-html/sass/views/_application.scss */
+/* line 887, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 891, ../../../private/common-html/sass/views/_application.scss */
+/* line 890, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 896, ../../../private/common-html/sass/views/_application.scss */
+/* line 895, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 899, ../../../private/common-html/sass/views/_application.scss */
+/* line 898, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 905, ../../../private/common-html/sass/views/_application.scss */
+/* line 904, ../../../private/common-html/sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 910, ../../../private/common-html/sass/views/_application.scss */
+/* line 909, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 915, ../../../private/common-html/sass/views/_application.scss */
+/* line 914, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 917, ../../../private/common-html/sass/views/_application.scss */
+/* line 916, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -3737,30 +5311,30 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
-/* line 924, ../../../private/common-html/sass/views/_application.scss */
+/* line 923, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
 }
-/* line 927, ../../../private/common-html/sass/views/_application.scss */
+/* line 926, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata {
   max-width: 875px;
 }
-/* line 929, ../../../private/common-html/sass/views/_application.scss */
+/* line 928, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 936, ../../../private/common-html/sass/views/_application.scss */
+/* line 935, ../../../private/common-html/sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 941, ../../../private/common-html/sass/views/_application.scss */
+/* line 940, ../../../private/common-html/sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
 
-/* line 945, ../../../private/common-html/sass/views/_application.scss */
+/* line 944, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
 }
@@ -4328,12 +5902,12 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 604, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 612, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 610, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 618, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -5484,13 +7058,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 493, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 501, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 498, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 506, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

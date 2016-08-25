@@ -25,9 +25,11 @@ Edit katselmus
   Select From List by test id  ${select}  ${item}
   Edit review date  ${date}
   Wait for jQuery
-  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}
+  Input text with jQuery  input[data-test-id="katselmus.pitaja"]  ${name}  ${true}
+  Sleep  0.5s
   Wait for jQuery
-  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}
+  Input text with jQuery  textarea[data-test-id="katselmus.huomautukset.kuvaus"]  ${notes}  ${true}
+  Sleep  0.5s
   Wait for jQuery
   Wait until  Test id enabled  review-done
 
@@ -126,5 +128,5 @@ Finalize review
   Return from review
 
 Has review attachment
-  [Arguments]  ${row-selector}  ${regex}
-  Javascript?  $("${row-selector} td.attachment-file-info a").text().match( ${regex})
+  [Arguments]  ${type}  ${regex}  ${index}=0
+  Javascript?  $("tr[data-test-type='${type}'] td[data-test-id=file-info] a").slice( ${index}).text().match( ${regex})

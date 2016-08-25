@@ -12,7 +12,14 @@
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
-  (if (and (:name schema-info) (:version schema-info))
+  (cond
+    (not (and (:name schema-info) (:version schema-info)))
+    {:document-id id :schema-info schema-info :results "Schema name or version missing"}
+
+    (not (map? data))
+    {:document-id id :schema-info schema-info :results (str "Data is not a map but " (class data))}
+
+    :else
     (let [ignored (set ignored-errors)
           schema (model/get-document-schema doc)
           info (model/document-info doc schema)
@@ -21,8 +28,7 @@
                       (and (= :err (first result)) (not (ignored (second result)))))
                     (flatten (model/validate-fields application info nil data [])))]
       (when (seq results)
-        {:document-id id :schema-info schema-info :results results}))
-    {:document-id id :schema-info schema-info :results "Schema name or version missing"}))
+        {:document-id id :schema-info schema-info :results results}))))
 
 (defn- validate-documents [ignored-errors {documents :documents :as application}]
   (let [results (filter seq (map (partial validate-doc ignored-errors application) documents))]

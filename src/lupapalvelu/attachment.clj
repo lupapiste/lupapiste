@@ -26,7 +26,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File FilterInputStream]))
+           [java.io File FilterInputStream InputStream]))
 
 ;;
 ;; Metadata
@@ -548,6 +548,10 @@
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
+(defn- cleanup-temp-file [conversion-result]
+  (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
+    (io/delete-file (:content conversion-result) :silently)))
+
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
    2) Validates and converts for archivability, uploads converted file to GridFS if applicable
@@ -578,6 +582,7 @@
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (cleanup-temp-file conversion-result)
     linked-version))
 
 (defn- append-stream [zip file-name in]
@@ -613,6 +618,26 @@
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
+(defn- maybe-append-gridfs-file! 
+  "Download and add the attachment file if user can access the application"
+  [zip user {:keys [filename fileId]}]
+  (when fileId
+    (when-let [file (get-attachment-file-as! user fileId)]
+      (with-open [in ((:content file))]
+        (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
+
+(defn get-attachments-for-user! 
+  "Returns the latest corresponding attachment files readable by the user as a ZIP file"
+  [user attachments]
+  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+    (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
+    (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
+      (doseq [attachment attachments]
+        (maybe-append-gridfs-file! zip user (-> attachment :versions last)))
+      (.finish zip))
+    (debugf "Size of the temporary zip file: %d" (.length temp-file))
+    temp-file))
+   
 (defn temp-file-input-stream [^File file]
   (let [i (io/input-stream file)]
     (proxy [FilterInputStream] [i]

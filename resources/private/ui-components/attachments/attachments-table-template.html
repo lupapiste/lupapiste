@@ -5,7 +5,8 @@
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
-          <th data-bind="ltext: 'attachment.th-type'"></th>
+          <th data-bind="ltext: 'attachment.th-type'"
+              class="attachments-table--widest"></th>
           <th data-bind="ltext: 'application.attachmentFile'"></th>
           <th data-bind="ltext: 'attachment.th-not-needed'"></th>
           <th data-bind="ltext: 'ok'"></th>
@@ -14,18 +15,26 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: attachments">
-        <tr>
+        <tr data-bind="attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id'],
+                              'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachments-table__state-icons">
-            <i data-bind="attr: {'class': $data}"></i>
+            <i data-bind="attr: {'class': $data.css,
+                                 'data-test-icon':  $data.icon + '-icon'}"></i>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <a data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']]),
-                          click: $parent.openAttachment"></a><br>
-            <span data-bind="text: $data.contents || ''"></span>
+            <a data-bind="click: $parent.openAttachment"
+               data-test-id="open-attachment">
+              <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+              <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+            </a>
+            <br>
+            <span data-bind="text: $data.contents || ''"
+                  data-test-id="attachment-contents"></span>
           </td>
-          <td data-bind="attachmentVersion: latestVersion"></td>
+          <td data-bind="viewWithDownload: latestVersion"
+              data-test-id="file-info"></td>
           <td>
             <span data-bind="dateString: latestVersion.created"></span><br>
             <span data-bind="firstLastName: latestVersion.user"></span>
@@ -34,26 +43,29 @@
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
             <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+            <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             <br>
             <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
-            <a class="link-btn link-btn--link">
+            <a class="link-btn link-btn--link"
+               data-bind="click: $parent.openAttachment"
+               data-test-id="open-attachment">
               <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addFile'"></span>
+              <span data-bind="ltext: 'attachment.addFile'"
+                    data-test-id="add-file-link"></span>
             </a>
           </td>
-          <td>
+          <td data-bind="if: $data.authModel.ok('set-attachment-not-needed')">
             <div class="checkbox-wrapper">
               <input type="checkbox"
-                     data-bind="attr: {id: $parent.inputId( $index() ),
-                                enable: $data.authModel.ok('set-attachment-not-needed'),
-                                checked: $parent.isNotNeeded( $data )}">
+                     data-bind="attr: {'id': $parent.inputId( $index() ),
+                                       'data-test-id': 'not-needed-checkbox' },
+                                checked: $data.notNeeded">
               <label class="checkbox-label"
-                     data-bind="attr: {'for': $parent.inputId( $index())},
-                                ltext: 'application.attachmentNotNeeded',
-                                click: $parent.toggleNotNeeded,
-                                clickBubble: false"></label>
+                     data-bind="attr: {'for': $parent.inputId( $index()),
+                                       'data-test-id': 'not-needed-label'},
+                                ltext: 'application.attachmentNotNeeded'"></label>
             </div>
           </td>
           <!-- /ko -->
@@ -62,7 +74,7 @@
                     data-bind="enable: $data.authModel.ok('approve-attachment'),
                                css: { positive: $parent.isApproved( $data ),
                                       'no-events': $parent.isApproved( $data ),
-                                      secondary: !$parent.isApproved( $data ) },
+                                      approve: !$parent.isApproved( $data ) },
                                click: $parent.approve,
                                clickBubble: false">
               <i class="lupicon-check"></i>
@@ -73,7 +85,7 @@
                     data-bind="enable: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
                                       'no-events': $parent.isRejected( $data ),
-                                      secondary: !$parent.isRejected( $data ) },
+                                      reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,
                                clickBubble: false">
               <i class="lupicon-circle-attention"></i>
@@ -83,17 +95,13 @@
             <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove,
                                clickBubble: false,
-                               enable: $data.authModel.ok('delete-attachment')">
+                               enable: $data.authModel.ok('delete-attachment')"
+                    data-test-icon="delete-button">
               <i class="lupicon-remove"></i>
             </button>
           </td>
         </tr>
       </tbody>
     </table>
-    <button data-bind="enable: canDownload"
-            class="secondary">
-      <i class="lupicon-download"></i>
-      <span data-bind="ltext: 'download-all'"></span>
-    </button>
   </div>
 </scripspan>

@@ -22,7 +22,8 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.stamper :refer [file-types]]
             [lupapalvelu.states :as states]
-            [lupapalvelu.xml.validator :as validator]))
+            [lupapalvelu.xml.validator :as validator]
+            [lupapalvelu.attachment.conversion :as conversion]))
 
 (def themes #{"louhi", "facta"})
 
@@ -80,7 +81,8 @@
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
                  :supportedLangs        i18n/languages
                  :urgencyStates         ["normal" "urgent" "pending"]
-                 :calendars             (cal/ui-params)}]
+                 :calendars             (cal/ui-params)
+                 :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

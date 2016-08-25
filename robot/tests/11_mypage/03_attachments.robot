@@ -33,11 +33,11 @@ Mikko copies his attachments to application
   [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  open
   Open tab  attachments
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
-  Wait Until  Table Should Contain  css=table.attachments-template-table  ${PDF_TESTFILE_NAME}
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 Copy own attachments button is not shown to non-architect
   [Tags]  firefox
@@ -45,16 +45,15 @@ Copy own attachments button is not shown to non-architect
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Label  architect
   Save User Data
-  Reload Page
-  Wait for Page to Load  Mikko  Intonen
-  Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
+  Click by test id  back-button
+  Wait until  Page should contain element  jquery=button[data-test-id=add-attachment]
+  Page should not contain element  jquery=button[data-test-id=copy-own-attachments]
 
 Mikko deletes own attachment from application and submits
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-osapuolet.cv"]
-  Confirm yes no dialog
-  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Delete attachment  osapuolet.cv
+  Wait Until  Element should not be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
   Submit application
   Logout
 
@@ -63,8 +62,8 @@ Sonja asks for the cv
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Add empty attachment template  CV  osapuolet  cv
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="osapuolet.cv"]
-  ${trCount}=   Get Matching Xpath Count  //div[@data-test-id="application-pre-attachments-table"]//tr[@class='attachment-row' and .//a[@data-test-type="osapuolet.cv"]]/preceding-sibling::tr[@class='attachment-row']
+  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']
+  ${trCount}=   Get Matching Xpath Count  //div[@id='application-attachments-tab']//tr[@data-test-type='osapuolet.cv']/preceding-sibling::tr
   ${index}=  Evaluate  ${trCount}+${1}
   Set Suite Variable  ${cvIndex}  ${index}
   Logout
@@ -81,12 +80,11 @@ Mikko logs in and sets himself architect
 Mikko copies own CV to application
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
 
 Mikko's CV should be uploaded to placeholder requested by Sonja
-  Wait until  Element should contain  xpath=//div[@data-test-id="application-pre-attachments-table"]//tr[@class='attachment-row'][${cvIndex}]/td[@class='attachment-file-info']//a[1]  ${PDF_TESTFILE_NAME}
-  Logout
+  Wait until  Element should contain  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']:nth-child(${cvIndex}) td[data-test-id=file-info] a  ${PDF_TESTFILE_NAME}
 
 Application is given verdict
   As Sonja
@@ -100,10 +98,10 @@ Mikko can add his attachments in post verdict state
   As Mikko
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsCopyOwn']
-  Select attachment operation option from dropdown  attachmentsCopyOwn
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=copy-user-attachments]
+  Click by test id  copy-user-attachments
   Confirm yes no dialog
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
 
 
 *** Keywords ***

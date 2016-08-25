@@ -38,8 +38,8 @@
 
   var filterByArchiveStatus = function(attachments, keepArchived) {
     return _.filter(attachments, function(attachment) {
-      if (!attachment.metadata() || !attachment.metadata().sailytysaika || !attachment.metadata().sailytysaika.arkistointi()
-        || attachment.metadata().sailytysaika.arkistointi() === "ei") {
+      var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
+      if (!arkistointi || arkistointi === "ei") {
         return !keepArchived;
       } else {
         return keepArchived;
@@ -74,6 +74,10 @@
   };
 
   var openAttachmentIds = [];
+
+  var isConvertableType = function (contentType) {
+    return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
+  };
 
   var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
     return _.map(attachments, function(attachment) {
@@ -154,13 +158,18 @@
       attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
       attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
       attachment.sendToArchive = ko.observable(false);
-      attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() && lv.contentType() === "application/pdf" : false;
+      if (lv && _.isUndefined(lv.archivable) && isConvertableType(lv.contentType())) {
+        attachment.convertableToPdfA = true;
+      } else {
+        attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() : false;
+      }
       return attachment;
     });
   };
 
   var selectIfArchivable = function(attachment) {
-    if (attachment.archivable && attachment.metadata().tila() !== "arkistoitu") {
+    var tila = util.getIn(attachment, ["metadata", "tila"]);
+    if (attachment.archivable && tila !== "arkistoitu") {
       attachment.sendToArchive(true);
     }
   };
@@ -192,8 +201,9 @@
     });
     self.stateMap = ko.pureComputed(function() {
       var getState = function(doc) {
-        if (util.getIn(doc, ["metadata", "tila"])) {
-          return ko.unwrap(ko.unwrap(doc.metadata).tila);
+        var tila = util.getIn(doc, ["metadata", "tila"]);
+        if (tila) {
+          return tila;
         } else {
           return "valmis";
         }
@@ -284,7 +294,8 @@
     self.archivingInProgressIds = ko.observableArray();
 
     self.archiveButtonEnabled = ko.pureComputed(function() {
-      return _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
+      return  lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
+        _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
         _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
@@ -292,7 +303,8 @@
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
       _.forEach(self.archivedDocuments(), function(doc) {
-        if (!doc.metadata().tila || doc.metadata().tila() !== "arkistoitu") {
+        var tila = util.getIn(doc, ["metadata", "tila"]);
+        if (tila !== "arkistoitu") {
           doc.sendToArchive(true);
         }
       });
@@ -397,7 +409,6 @@
       return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
     });
     self.updateTosFunction = function() {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
       var data = {
         id: ko.unwrap(params.application.id),
         functionCode: self.newTosFunction(),
@@ -406,10 +417,17 @@
       ajax
         .command("force-fix-tos-function-for-application", data)
         .success(function() {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
           self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
-            docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
-            docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            // FIXME added ifs to fix LPK-2110, but why are only docs 0 and 1 updated,
+            // and the values differ???
+            if (util.getIn(docs, [0, "metadata"])) {
+              docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
+            }
+            if (util.getIn(docs, [1, "metadata"])) {
+              docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            }
           });
         })
         .call();

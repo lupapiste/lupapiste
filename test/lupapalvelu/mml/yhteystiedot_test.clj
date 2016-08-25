@@ -27,13 +27,13 @@
            :postinumero "00100"
            :paikkakunta "Helsinki"
            }]
-      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-LU.xml")))))
+      (provided (cr/get-xml anything anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-LU.xml")))))
 
 (fact "Juridinen henkil\u00F6" (lh/get-owners "12312312341234")
       => [{:henkilolaji :juridinen
            :nimi "Hokki-kiinteist\u00F6t Oy"
            :ytunnus "0704458-3"}]
-      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-JU.xml")))))
+      (provided (cr/get-xml anything anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-JU.xml")))))
 
 (fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "12312312341234")
       => [{:henkilolaji :kuolinpesa
@@ -66,4 +66,4 @@
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
                            }}]
-      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-KP.xml")))))
+      (provided (cr/get-xml anything anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-KP.xml")))))

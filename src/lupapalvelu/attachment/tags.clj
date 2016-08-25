@@ -100,17 +100,29 @@
   (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
 
-(defn attachments-filters
-  "Get all possible filters with default values for attachments based on attachment data."
-  [{attachments :attachments}]
-  (let [existing-groups-and-types (->> (map (some-fn tag-by-type tag-by-group-type) attachments)
-                                       (remove nil?)
+(defn- application-state-filter [{attachments :attachments state :state}]
+  (let [existing-state-tags (-> (map tag-by-applicationState attachments) set)]
+    (when (or (states/post-verdict-states (keyword state))
+              (existing-state-tags :postVerdict))
+      [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
+       {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))}])))
+
+(defn- group-and-type-filters [{attachments :attachments}]
+  (let [existing-groups-and-types (->> (mapcat (juxt tag-by-type tag-by-group-type) attachments)
                                        (remove #{:operation})
                                        set)]
-    [[{:tag :preVerdict :default false}
-      {:tag :postVerdict :default false}]
-     (->> (concat all-group-tags att-type/type-groups)
-          (filter existing-groups-and-types)
-          (map (partial hash-map :default false :tag) ))
-     [{:tag :needed :default true}
-      {:tag :notNeeded :default false}]]))
+    (->> (concat all-group-tags att-type/type-groups)
+         (filter existing-groups-and-types)
+         (map (partial hash-map :default false :tag) ))))
+
+(defn- not-needed-filters [{attachments :attachments}]
+  (let [existing-notNeeded-tags (-> (map tag-by-notNeeded attachments) set)]
+    (when (every? existing-notNeeded-tags [:needed :notNeeded])
+      [{:tag :needed    :default true}
+       {:tag :notNeeded :default false}])))
+
+(defn attachments-filters
+  "Get all possible filters with default values for attachments based on attachment data."
+  [application]
+  (->> ((juxt application-state-filter group-and-type-filters not-needed-filters) application)
+       (remove nil?)))

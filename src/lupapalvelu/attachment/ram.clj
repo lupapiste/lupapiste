@@ -35,13 +35,12 @@
                                                               :created-date  (util/to-local-date created)}}))
 
 
-(defn ram-status-ok
-  "Pre-checker that fails only if the attachment is unapproved RAM attachment."
+(defn attachment-status-ok
+  "Pre-checker that fails only if the attachment is not approved"
   [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
-    (when (and (ss/not-blank? ramLink)
-               (util/not=as-kw state :ok))
-      (fail :error.ram-not-approved))))
+  (let [{:keys [state]} (util/find-by-id attachment-id (:attachments app))]
+    (when (util/not=as-kw state :ok)
+      (fail :error.attachment-not-approved))))
 
 (defn ram-status-not-ok
   "Pre-checker that fails only if the attachment is approved RAM attachment."
@@ -54,16 +53,13 @@
 (defn- find-by-ram-link [link attachments]
   (util/find-first (comp #{link} :ramLink) attachments))
 
-(defn ram-not-root-attachment
-  "Pre-checker that fails if the attachment is the root for RAM
-  attachments and the user is applicant (authority can delete the
-  root)."
-  [{user :user {attachment-id :attachmentId} :data {:keys [attachments]} :application}]
-  (when (and (-> attachment-id (util/find-by-id attachments) :ramLink ss/blank?)
-             (find-by-ram-link attachment-id attachments)
-             (usr/applicant? user))
-    (fail :error.ram-cannot-delete-root)))
-
+(defn ram-not-linked
+  "Pre-checker that fails if the attachment is linked by a RAM
+  attachment. In other words, the attachment is either root or in the
+  middle of the link chain."
+  [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
+  (when (find-by-ram-link attachment-id attachments)
+    (fail :error.ram-linked)))
 
 (defn- make-ram-attachment [{:keys [id op target type contents scale size] :as base-attachment} application created]
   (->> (att/create-attachment-data application {:created created

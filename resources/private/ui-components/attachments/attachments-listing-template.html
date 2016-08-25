@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-template">
 
-  <h1>Suunnitelmat ja liitteet POC</h1>
+  <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
   <span data-bind="component: {
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
@@ -9,6 +9,8 @@
   <div class="clear"></div>
   <div data-bind="template: {name: 'attachments-operation-buttons-template',
                              data: $data}"></div>
+
+  <suti-display></suti-display>
 
   <filters></filters>
 

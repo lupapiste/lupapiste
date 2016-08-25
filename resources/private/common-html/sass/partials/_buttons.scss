@@ -258,6 +258,10 @@ i.btn-small {
   @include styled-input( $bg: $green-link, $hover-bg: $green-hover, $active-bg: $green-active );
 }
 
+@include button-div-a-i-span (approve) {
+  @include styled-input( $bg: $gray-link, $hover-bg: $green-hover, $active-bg: $green-active );
+}
+
 // btn-primary is now the same as positive.
 // This is used only for legacy support until the old definitions have been rooted out.
 
@@ -267,6 +271,10 @@ i.btn-small {
 
 @include button-div-a-i-span ( negative ) {
   @include styled-input( $bg: $red-link, $hover-bg: $red-hover, $active-bg: $red-active );
+}
+
+@include button-div-a-i-span ( reject ) {
+  @include styled-input( $bg: $gray-link, $hover-bg: $red-hover, $active-bg: $red-active );
 }
 
 @include button-div-a-i-span ( authority ) {
