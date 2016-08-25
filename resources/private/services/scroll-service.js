@@ -17,7 +17,7 @@ LUPAPISTE.ScrollService = function() {
   var positions = {};
 
   function getHash() {
-    // Null-safe regardign location.
+    // Null-safe regarding location.
     return _.get( window, "location.hash");
   }
 
