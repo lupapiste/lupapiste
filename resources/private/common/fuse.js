@@ -11,11 +11,7 @@ LUPAPISTE.Fuse = function() {
       return burned();
     },
     write: function(value) {
-      if (value === null) {
-        burned(false);
-      } else {
-        burned(Boolean(value || burned()));
-      }
+      burned( value === null ? false : Boolean(value || burned()) );
     }
   });
 };
