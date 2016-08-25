@@ -98,6 +98,7 @@
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
    (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
