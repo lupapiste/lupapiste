@@ -114,7 +114,7 @@
 
 (defn- do-get-xml [http-fn url opts raw?]
   ; Set default timeout to 120 s
-  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000} opts)
+  (let [options (merge {:socket-timeout 120000, :conn-timeout 120000, :throw-fail! (not raw?)} opts)
         raw (:body (http-fn url options))]
     (if-not (s/blank? raw)
       (if raw? raw (parse raw))
@@ -123,15 +123,16 @@
         nil))))
 
 (defn get-xml
-  ([url]
-    (get-xml url nil false))
-  ([url credentials]
+  ([url options]
+    (get-xml url options nil false))
+  ([url options credentials]
     (get-xml url credentials false))
-  ([url credentials raw?]
-    {:pre [url
+  ([url options credentials raw?]
+    {:pre [(string? url)
+           (or (nil? options) (map? options))
            (or (nil? credentials) (= (count credentials) 2))
            (or (nil? raw?) (boolean? raw?))]}
-    (let [options (when credentials {:basic-auth credentials})]
+    (let [options (merge options (when credentials {:basic-auth credentials}))]
       (do-get-xml http/get url options raw?))))
 
 (defn get-xml-with-post

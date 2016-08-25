@@ -314,13 +314,10 @@
                    :get  [http/get  :query-params]})
 
 (defn- exec-http [http-fn url request]
-  (try
-    (let [{status :status body :body} (http-fn url request)]
-      (if (= status 200)
-        [:ok body]
-        [:error status body]))
-    (catch Exception e
-      [:failure e])))
+  (let [{status :status body :body} (http-fn url (assoc request :throw-exceptions false :quiet true))]
+    (if (= status 200)
+      [:ok body]
+      [:error status body])))
 
 (defn parse-features-as-latin1 [s]
   (-> s (s/replace-first "UTF-8" "ISO-8859-1") (->features sxml/startparse-sax-no-doctype "ISO-8859-1")))
@@ -331,20 +328,16 @@
     (let [[http-fn param-key] (method http-method)
          timeout (env/value :http-client :conn-timeout)
          credentials (or credentials (auth url))
-         request {:throw-exceptions false
-                  :basic-auth credentials
+         request {:basic-auth credentials
                   param-key q}
          task (future* (exec-http http-fn url request))
          [status data error-body] (deref task timeout [:timeout])
          error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
-     (condp = status
-       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
-       :error   (do
-                  (case data
-                    400 (errorf "wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
-                    (errorf "wfs status %s: url=%s, response body=%s" data url error-text))
-                  nil)
-       :failure (do (errorf data "wfs failure: url=%s" url) nil)
+     (case status
+       :timeout (error "error.integration - wfs timeout while requesting" url)
+       :error   (case data
+                  400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                  (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
        :ok      (let [xml (if (= url nearestfeature)
                             (parse-features-as-latin1 data)
                             (->features data sxml/startparse-sax-no-doctype))
@@ -362,14 +355,14 @@
 (defn wms-get
   "WMS query with error handling. Returns response body or nil."
   [url query-params]
-  (let [{:keys [status body]} (http/get url {:query-params query-params})
+  (let [{:keys [status body]} (http/get url {:query-params query-params :quiet true :throw-exceptions false})
         error (when (ss/contains? body "ServiceException")
                 (-> body ss/trim
                   (->features startparse-sax-non-validating "UTF-8")
                   (xml-> :ServiceException)
                   first text ss/trim))]
     (if (or (not= 200 status) error)
-      (errorf "Failed to get %s (status %s): %s" url status (logging/sanitize 1000 error))
+      (errorf "error.integration - Failed to get %s (status %s): %s" url status (logging/sanitize 1000 error))
       body)))
 
 ;;
@@ -379,15 +372,13 @@
 (defn- exec-trimble-kaavamaaraykset-post [method url user passwd q picurltemplate]
   (let [[http-fn param-key] (method http-method)
         timeout (env/value :http-client :conn-timeout)
-        request {:throw-exceptions false
-                 :basic-auth [user passwd]
+        request {:basic-auth [user passwd]
                  param-key q}
         task (future* (exec-http http-fn url request))
         [status data] (deref task timeout [:timeout])]
     (case status
-      :timeout (errorf "wfs timeout: url=%s" url)
-      :error   (errorf "wfs status %s: url=%s" data url)
-      :failure (errorf data "wfs failure: url=%s" url)
+      :timeout (error "error.integration - wfs timeout from" url)
+      :error   (error "error.integration - wfs status" data "from" url)
       :ok      (let [features (->features data sxml/startparse-sax-no-doctype "UTF-8")
                      muukaavatunnus (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:muuKaavatunnus text))
                      kaavatunnus (first (xml-> features :gml:featureMember :akaava:Kaava :akaava:kaavatunnus text))
@@ -644,13 +635,10 @@
   "checks if the given system is Web Feature Service -enabled. kindof."
   [url username password]
   (when-not (s/blank? url)
-    (try
-      (let [resp (query-get-capabilities url "WFS" username password false)]
-        (or
-          (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-          (warn "Response not OK or did not contain XML. Response was: " resp)))
-      (catch Exception e
-        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
+    (let [resp (query-get-capabilities url "WFS" username password false)]
+      (or
+        (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
+        (warn "Response not OK or did not contain XML. Response was: " (:status resp) (:body resp))))))
 
 (defn get-our-capabilities []
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
@@ -667,7 +655,8 @@
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
     (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
-          ktj-xml (reader/get-xml url (get auth ktjkii) false)
+          options {:http-error :error.ktj-down, :connection-error :error.ktj-down}
+          ktj-xml (reader/get-xml url options (get auth ktjkii) false)
           features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))
 

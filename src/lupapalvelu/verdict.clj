@@ -204,11 +204,9 @@
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
                    _ (debug "Download " url)
                    url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
-                   resp            (try
-                                     (http/get url :as :stream :throw-exceptions false)
-                                     (catch Exception e {:status -1 :body (str e)}))
-                   header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                                      (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                   resp            (http/get url :as :stream :throw-exceptions false)
+                   header-filename (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
+                                     (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
                    filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)

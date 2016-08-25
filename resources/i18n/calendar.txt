@@ -66,6 +66,8 @@
 "calendar.reserve-slot.title" "sv" "Information om mötet"
 "calendar.error.delete-reservation-slot-not-allowed" "fi" "Varattua aikaa ei voi poistaa"
 "calendar.error.delete-reservation-slot-not-allowed" "sv" "Inbokad tid kan ej raderas"
+"calendar.error.delete-reservation-type-not-allowed" "fi" "Tapaamistyyppi on käytössä tulevissa varauksissa eikä sitä voi poistaa"
+"calendar.error.delete-reservation-type-not-allowed" "sv" ""
 "calendar.error.slot-fully-booked" "fi" "Aika on varattu"
 "calendar.error.slot-fully-booked" "sv" "Tiden är bokad"
 "calendar.error.reservation-slot-update-not-allowed" "fi" "Varattua aikaa ei voi muokata"

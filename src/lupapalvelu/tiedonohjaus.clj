@@ -25,14 +25,12 @@
 
 (defn get-from-toj-api [organization-id coerce? & path-parts]
   (when (:permanent-archive-enabled (o/get-organization organization-id))
-    (try
-      (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
-            response (http/get url (cond-> {:throw-exceptions false}
-                                           coerce? (assoc :as :json)))]
-        (when (= 200 (:status response))
-          (:body response)))
-      (catch Exception e
-        (error "Error accessing TOJ API" e)))))
+    (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
+          {:keys [status body]} (http/get url (cond-> {:throw-exceptions false}
+                                                      coerce? (assoc :as :json)))]
+      (if (= 200 status)
+        body
+        (error "Error accessing TOJ API:" body)))))
 
 (defn- get-tos-functions-from-toj [organization-id]
   (or (get-from-toj-api organization-id :coerce) []))

@@ -32,3 +32,24 @@
       (fact {:midje/description (str h " is dropped")} (contains? secured h) => false))
 
     filtered => empty?))
+
+(facts "status 404"
+  (let [url (str (server-address) "/dev/404")]
+    (fact "by default an exception is thrown"
+      (http/get url) => (throws clojure.lang.ExceptionInfo))
+    (fact "404 response is returned"
+      (http/get url {:throw-exceptions false}) => (contains {:status 404}))
+    (fact "fail! is thrown"
+      (http/get url {:throw-exceptions false, :throw-fail! true}) => (throws clojure.lang.ExceptionInfo))))
+
+(facts "connection error"
+  ; Port 9 is designated to the Discard Protocol.
+  ; Connection should fail because the port is blocked or there is no service listenign,
+  ; or timeout occurs because TCP packages are being discarded.
+  (let [url "http://localhost:9/"]
+    (fact "by default an exception is thrown"
+      (http/get url) => (throws java.io.IOException))
+    (fact "proxy error response is returned"
+      (http/get url {:throw-exceptions false}) => (contains {:status 502}))
+    (fact "fail! is thrown"
+      (http/get url {:throw-exceptions false, :throw-fail! true}) => (throws clojure.lang.ExceptionInfo))))
