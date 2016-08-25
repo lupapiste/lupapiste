@@ -400,10 +400,7 @@
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (get-reservation reservationId)]
     (info "Accepting reservation" reservationId)
-    (post-command (str "reservations/" reservationId "/accept"))
-    (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "ACCEPTED"}})
-    (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
-    (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
+    (cal/accept-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))
 
 (defcommand decline-reservation
@@ -416,10 +413,7 @@
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (get-reservation reservationId)]
     (info "Declining reservation" reservationId)
-    (post-command (str "reservations/" reservationId "/decline"))
-    (cal/update-reservation application reservationId {$set {:reservations.$.reservationStatus "DECLINED"}})
-    (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
-    (cal/update-reservation application reservationId {$push {:reservations.$.action-required-by (:reservedBy reservation)}})
+    (cal/decline-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))
 
 (defcommand mark-reservation-update-seen
@@ -429,7 +423,7 @@
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
-  (cal/update-reservation application reservationId {$pull {:reservations.$.action-required-by userId}})
+  (cal/mark-reservation-update-seen application reservationId userId)
   (ok))
 
 (defquery my-reserved-slots

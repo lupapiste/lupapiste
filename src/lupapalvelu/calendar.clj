@@ -178,6 +178,38 @@
     {:reservations {$elemMatch {:id reservation-id}}}
     changes))
 
+(defn update-mongo-for-reservation-state-change
+  [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
+  (let [comment-update (comment/comment-mongo-update (:state application)
+                                                     (:comment reservation)
+                                                     {:type "reservation-update"
+                                                      :id (:id reservation)}
+                                                     "system"
+                                                     false ; mark-answered
+                                                     user
+                                                     to-user
+                                                     timestamp)]
+    (update-application
+      (application->command application)
+      comment-update)
+    (update-reservation application reservation-id {$set {:reservations.$.reservationStatus (name new-state)}})
+    (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}})
+    (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
+
+(defn accept-reservation
+  [application {reservation-id :id to-user :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/accept"))
+  (update-mongo-for-reservation-state-change application reservation :ACCEPTED user to-user timestamp))
+
+(defn decline-reservation
+  [application {reservation-id :id to-user :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/decline"))
+  (update-mongo-for-reservation-state-change application reservation :DECLINED user to-user timestamp))
+
+(defn mark-reservation-update-seen
+  [application reservation-id user-id]
+  (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}}))
+
 ; -- Configuration
 
 (defn ui-params []
