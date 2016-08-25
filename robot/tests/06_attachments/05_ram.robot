@@ -129,7 +129,6 @@ Mikko logs in and opens RAM
 
 Mikko adds new RAM attachment and uploads file
   Click by test id  add-ram-attachment
-  Wait test id visible  ram-links-table
   Wait test id visible  ram-link-type-2
   Add attachment version  ${PNG_TESTFILE_PATH}
   Delete allowed  True
