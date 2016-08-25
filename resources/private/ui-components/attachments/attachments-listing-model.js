@@ -147,6 +147,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function modelForMainAccordion(mainGroup) {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
+    var attachmentInfos = getAttachmentInfos(attachmentIds);
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
@@ -154,7 +155,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
       downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
-      downloadAllText: function() { return loc("download-all"); } /* generic version not intended to be called */
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
 
