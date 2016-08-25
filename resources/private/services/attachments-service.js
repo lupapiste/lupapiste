@@ -177,7 +177,6 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
-  // Approving and rejecting attachments
   self.approveAttachment = function(attachmentId, options) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
@@ -191,6 +190,28 @@ LUPAPISTE.AttachmentsService = function() {
   self.setNotNeeded = function(attachmentId, flag, options) {
     forceVisibleIds.push(attachmentId);
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag}, options);
+  };
+
+  self.setVisibility = function(attachmentId, visibility, options) {
+    self.updateAttachment(attachmentId, "set-attachment-visibility", {"value": visibility}, options);
+  };
+
+  self.setMeta = function(attachmentId, metadata, options) {
+    self.updateAttachment(attachmentId, "set-attachment-meta", metadata, options);
+  };
+
+  self.setForPrinting = function(attachmentId, isForPrinting, options) {
+    var params = {selectedAttachmentIds: isForPrinting ? [attachmentId] : [],
+                  unSelectedAttachmentIds: isForPrinting ? [] : [attachmentId]};
+    self.updateAttachment(attachmentId, "set-attachments-as-verdict-attachment", params, options);
+  };
+
+  self.rotatePdf = function(attachmentId, rotation, options) {
+    self.updateAttachment(attachmentId, "rotate-pdf", {rotation: rotation}, options);
+  };
+
+  self.setType = function(attachmentId, type, options) {
+    self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, options);
   };
 
   self.createAttachmentTempaltes = function(types, options) {
