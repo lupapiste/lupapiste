@@ -77,7 +77,7 @@
 
   var isConvertableType = function (contentType) {
     return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
-  }
+  };
 
   var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
     return _.map(attachments, function(attachment) {
