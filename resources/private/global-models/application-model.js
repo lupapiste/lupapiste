@@ -320,7 +320,8 @@ LUPAPISTE.ApplicationModel = function() {
               ajax.command("submit-application", {id: self.id()})
               .success( self.reload)
               .onError("error.cannot-submit-application", cannotSubmitResponse)
-              .processing(self.stateChanged)
+              .fuse(self.stateChanged)
+              .processing(self.processing)
               .call();
               hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
               return false;
@@ -333,30 +334,28 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.requestForComplement = function() {
-    if (!self.stateChanged()) {
-      ajax.command("request-for-complement", { id: self.id()})
-        .success(function() {
-          ajax.command( "cleanup-krysp", {id: self.id()})
-            .onError(_.noop)
-            .call();
-          self.reload();
-        })
-        .processing(self.stateChanged)
-        .call();
-    }
+    ajax.command("request-for-complement", { id: self.id()})
+      .success(function() {
+        ajax.command( "cleanup-krysp", {id: self.id()})
+          .onError(_.noop)
+          .call();
+        self.reload();
+      })
+      .fuse(self.stateChanged)
+      .processing(self.processing)
+      .call();
     return false;
   };
 
   self.convertToApplication = function() {
-    if (!self.stateChanged()) {
-      ajax.command("convert-to-application", {id: self.id()})
-        .success(function() {
-          pageutil.openPage("application", self.id());
-        })
-        .processing(self.stateChanged)
-        .call();
-        hub.send("track-click", {category:"Inforequest", label:"", event:"convertToApplication"});
-      }
+    ajax.command("convert-to-application", {id: self.id()})
+      .success(function() {
+        pageutil.openPage("application", self.id());
+      })
+      .fuse(self.stateChanged)
+      .processing(self.processing)
+      .call();
+      hub.send("track-click", {category:"Inforequest", label:"", event:"convertToApplication"});
     return false;
   };
 
@@ -380,7 +379,8 @@ LUPAPISTE.ApplicationModel = function() {
           }
         })
         .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
-        .processing(self.stateChanged)
+        .fuse(self.stateChanged)
+        .processing(self.processing)
         .call();
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
@@ -520,7 +520,8 @@ LUPAPISTE.ApplicationModel = function() {
           ajax
             .command("cancel-inforequest", {id: self.id()})
             .success(function() {pageutil.openPage("applications");})
-            .processing(self.stateChanged)
+            .fuse(self.stateChanged)
+            .processing(self.processing)
             .call();
           hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
           return false;}},
@@ -556,7 +557,8 @@ LUPAPISTE.ApplicationModel = function() {
                 self.lightReload();
               }
             })
-            .processing(self.stateChanged)
+            .fuse(self.stateChanged)
+            .processing(self.processing)
             .call();
           return false;}},
         {title: loc("no")}
@@ -572,7 +574,8 @@ LUPAPISTE.ApplicationModel = function() {
                           .success(function() {
                             repository.load(self.id());
                           })
-                          .processing(self.stateChanged);
+                          .fuse(self.stateChanged)
+                          .processing(self.processing);
 
       hub.send("show-dialog", {ltitle: "application.undoCancellation",
                                size: "medium",
