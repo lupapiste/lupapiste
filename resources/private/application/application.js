@@ -284,9 +284,9 @@
 
       applicationModel.calendarNotificationsPending(
         _.transform(
-          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf('day').valueOf(); }),
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
           function (result, value, key) {
-            return result.push({ day: _.parseInt(key), notifications: value })
+            return result.push({ day: _.parseInt(key), notifications: value });
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length || 0);
 
