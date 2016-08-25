@@ -52,7 +52,8 @@ LUPAPISTE.CurrentUser = function() {
   var hash = ko.observable();
 
   window.onhashchange = function() {
-    hash(location.hash);
+    // Null-safe regarding location
+    hash( _.get( window, "location.hash" ));
   };
 
   function isOutsideAuthority() {
