@@ -716,6 +716,11 @@ Add attachment version
   ${path}  ${filename}=  Split Path  ${path}
   Wait until     Element Text Should Be  xpath=//section[@id='attachment']//span[@id='test-attachment-file-name']/a  ${filename}
 
+Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Scroll and click test id  postVerdict-filter-label
+
 Select operation path by permit type
   [Arguments]  ${permitType}
   Run Keyword If  '${permitType}' == 'R'  Select operations path R
@@ -1334,6 +1339,14 @@ Javascript? helper
 Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
+
+Checkbox wrapper selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+
+Checkbox wrapper not selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
 
 Click label
   [Arguments]  ${for}

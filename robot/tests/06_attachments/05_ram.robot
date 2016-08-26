@@ -34,8 +34,10 @@ Sonja logs in and gives verdict
   Open application  ${appname}  753-416-25-30
   Submit empty verdict
 
-Sonja opens the attachment
-  Open tab  attachments
+Sonja opens the attachment tab and unselects post verdict filter
+  Open attachments tab and unselect post verdict filter
+
+Sonja opens attachment details
   Open attachment details  muut.muu
   No such test id  ram-links-table
 
@@ -73,10 +75,12 @@ Sonja clicks RAM link and opens old attachment details
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
   [Teardown]  Logout
 
-Mikko logs in and can sees the RAM attachment in attachments tab
+Mikko logs in and unselects post verdict filter
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+  Open attachments tab and unselect post verdict filter
+
+RAM indicator is visible for RAM attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] span[data-test-id=ram-indicator]:visible
 
 Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
@@ -101,10 +105,12 @@ Mikko follows RAM link and cannot delete the base attachment either
   Delete disallowed  True
   [Teardown]  Logout
 
-Sonja logs in, rejects but could not delete base attachment
+Sonja logs in and goes to attachments tab
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+  Open attachments tab and unselect post verdict filter
+
+Sonja rejects attachment but could not delete base attachment
   Open attachment details  muut.muu  1
   Follow ram link  0
   No such test id  ram-prefix
@@ -120,10 +126,12 @@ Sonja approves RAM (again)
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   [Teardown]  Logout
 
-Mikko logs in and opens RAM
+Mikko logs in and goes to attachment tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+  Open attachments tab and unselect post verdict filter
+
+Mikko opens RAM
   Open attachment details  muut.muu  1
   Wait test id visible  ram-prefix
 
@@ -146,10 +154,12 @@ RAM links table has been updated after delete
   Element should not be visible  jquery=td[data-test-id=ram-link-file-2] a
   [Teardown]  Logout
 
-Sonja rejects the first RAM but cannot delete it
+Sonja goes to attachments tab
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+  Open attachments tab and unselect post verdict filter
+
+Sonja rejects the first RAM but cannot delete it
   Open attachment details  muut.muu  1
   Wait test id visible  ram-prefix
   Wait Until  Click button  id=test-attachment-reject
@@ -157,10 +167,12 @@ Sonja rejects the first RAM but cannot delete it
   Delete disallowed
   [Teardown]  Logout
 
-Mikko deletes RAM
+Mikko goes to attachments tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open tab  attachments
+  Open attachments tab and unselect post verdict filter
+
+Mikko deletes RAM
   Open attachment details  muut.muu  1
   Wait test id visible  ram-prefix
   Follow ram link  2
