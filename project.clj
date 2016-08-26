@@ -9,7 +9,7 @@
                  [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
-                 [ring "1.4.0"]
+                 [ring "1.5.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
 
