@@ -16,10 +16,8 @@ Mikko uploads attachment
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
-  Wait Until  Element should be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='osapuolet.cv']
 
 Mikko sets CV to be visible only to himself and authorities
-  Open attachment details  osapuolet.cv
   # By default attachment is public
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen
@@ -29,9 +27,7 @@ Mikko sets CV to be visible only to himself and authorities
   Wait Until  Tab should be visible  attachments
 
 Mikko uploads attachment to placeholder asemapiirros
-  Open attachment details  paapiirustus.asemapiirros
-  Wait Until  Element Should Be Disabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
-  Add attachment version  ${PNG_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}
   Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments

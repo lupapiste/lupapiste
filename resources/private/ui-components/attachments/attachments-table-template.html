@@ -10,8 +10,10 @@
           <th data-bind="ltext: 'application.attachmentFile'"></th>
           <th data-bind="ltext: 'attachment.th-not-needed'"></th>
           <!-- ko if: isAuthority() -->
-          <th data-bind="ltext: 'ok'"></th>
-          <th data-bind="ltext: 'attachment.th-not-ok'"></th>
+          <th data-bind="ltext: 'ok'"
+              data-test-id="approve-column"></th>
+          <th data-bind="ltext: 'attachment.th-not-ok'"
+              data-test-id="reject-column"></th>
           <!-- /ko -->
           <th data-bind="ltext: 'remove'"></th>
         </tr>
