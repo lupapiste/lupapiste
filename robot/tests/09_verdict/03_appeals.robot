@@ -34,8 +34,10 @@ Sonja adds appeal to the first verdict
   Add to verdict  0-0  appeal  Veijo  1.4.2016  Hello world
   Appeals row check  0-0  0  appeal  Veijo  1.4.2016
 
+Sonja opens attachment tab and unselects post verdict filter
+  Open attachments tab and unselect post verdict filter
+
 The appeal is visible on the Attachments tab
-  Open tab  attachments
   Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
   Open tab  verdict
 
@@ -181,8 +183,10 @@ Sonja logs in and deletes the first verdict.
   Confirm  dynamic-yes-no-confirm-dialog
   Appeals row check  0-0  0  appeal  Megabyte  7.7.2016
 
+Sonja opens attachments tab and unselects post verdict filter
+  Open attachments tab and unselect post verdict filter
+
 There is only one appeal in the Attachments tab
-  Open tab  attachments
   Xpath should match X times  //tr[@data-test-type='muutoksenhaku.valitus']  1
   Open tab  verdict
 

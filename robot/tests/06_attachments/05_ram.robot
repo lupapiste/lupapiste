@@ -209,8 +209,3 @@ Delete allowed
 Follow ram link
   [Arguments]  ${index}
   Wait until  Click link  jquery=td[data-test-id=ram-link-type-${index}] a
-
-Open attachments tab and unselect post verdict filter
-  Open tab  attachments
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Scroll and click test id  postVerdict-filter-label
