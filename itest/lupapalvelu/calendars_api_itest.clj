@@ -164,7 +164,7 @@
                                   :year current-year
                                   :week current-week)]
                 result => ok?
-                (count (:availableSlots result)) => 3
+                (count (:availableSlots result)) => 3))
             (fact "Find available slots as applicant without the correct application in context should fail"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
@@ -173,7 +173,7 @@
                                   :id "LP-001-2016-99999"
                                   :year current-year
                                   :week current-week)]
-                result => fail?)))))))))
+                result => fail?)))))))
 
   (fact "clear db"
     (clear-ajanvaraus-db)))
