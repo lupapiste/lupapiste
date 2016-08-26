@@ -19,7 +19,7 @@
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
 (defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
-  (if (states/post-verdict-states app-state)
+  (if (states/post-verdict-states (keyword app-state))
     :postVerdict
     :preVerdict))
 
@@ -100,7 +100,7 @@
   (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
 
-(defn- application-state-filter [{attachments :attachments state :state}]
+(defn- application-state-filters [{attachments :attachments state :state}]
   (let [existing-state-tags (-> (map tag-by-applicationState attachments) set)]
     (when (or (states/post-verdict-states (keyword state))
               (existing-state-tags :postVerdict))
@@ -124,5 +124,5 @@
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
   [application]
-  (->> ((juxt application-state-filter group-and-type-filters not-needed-filters) application)
+  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
        (remove nil?)))
