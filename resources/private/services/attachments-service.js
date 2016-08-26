@@ -156,6 +156,16 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
+  self.nextAttachmentId = function(attachmentId) {
+    var index = _(self.filteredAttachments()).map(ko.unwrap).findIndex(["id", attachmentId]);
+    return util.getIn(self.filteredAttachments()[index+1], ["id"]);
+  };
+
+  self.previousAttachmentId = function(attachmentId) {
+    var index = _(self.filteredAttachments()).map(ko.unwrap).findIndex(["id", attachmentId]);
+    return util.getIn(self.filteredAttachments()[index-1], ["id"]);
+  };
+
   self.queryGroupTypes = function() {
     queryData("attachment-groups", "groups", self.setGroupTypes);
   };
