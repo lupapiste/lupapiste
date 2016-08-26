@@ -8843,14 +8843,14 @@ div.review-done {
   padding-left: 6px;
 }
 
-/* line 4, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 18, ../../../private/common-html/sass/partials/_tables.scss */
 table {
   width: 100%;
   margin-bottom: 24px;
   color: #333333;
 }
 
-/* line 10, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 24, ../../../private/common-html/sass/partials/_tables.scss */
 th {
   background: #dddddd;
   padding-left: 12px;
@@ -8858,98 +8858,98 @@ th {
   vertical-align: middle;
 }
 
-/* line 21, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 35, ../../../private/common-html/sass/partials/_tables.scss */
 tr {
   background: white;
   border: 1px solid #dddddd;
 }
-/* line 24, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 38, ../../../private/common-html/sass/partials/_tables.scss */
 tr:nth-child(even) {
   background: #f6f6f6;
 }
-/* line 27, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 41, ../../../private/common-html/sass/partials/_tables.scss */
 tr:hover {
   background-color: #eeeeee;
 }
-/* line 29, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 43, ../../../private/common-html/sass/partials/_tables.scss */
 tr:hover:active {
   background-color: #dddddd;
 }
-/* line 34, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 48, ../../../private/common-html/sass/partials/_tables.scss */
 tr.application-row:hover {
   background-color: #f7ac2e;
 }
-/* line 36, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 50, ../../../private/common-html/sass/partials/_tables.scss */
 tr.application-row:hover:active {
   background-color: #fbc732;
 }
-/* line 39, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 53, ../../../private/common-html/sass/partials/_tables.scss */
 tr.application-row:hover i {
   color: #f6f6f6;
 }
-/* line 44, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 58, ../../../private/common-html/sass/partials/_tables.scss */
 tr.attachment-row {
   cursor: pointer;
 }
-/* line 47, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 61, ../../../private/common-html/sass/partials/_tables.scss */
 tr.attachment-row td:last-child {
   text-align: right;
 }
-/* line 52, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 66, ../../../private/common-html/sass/partials/_tables.scss */
 tr.attachment-multiselect-row.selected {
   background-color: #f8c38a;
   color: black;
 }
-/* line 55, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 69, ../../../private/common-html/sass/partials/_tables.scss */
 tr.attachment-multiselect-row.selected:hover {
   background-color: #f7b671;
   color: black;
 }
-/* line 62, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 76, ../../../private/common-html/sass/partials/_tables.scss */
 tr.attachment-multiselect-row td.attachment-file-info span.attachment-file-name {
   display: block;
 }
 
-/* line 69, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 83, ../../../private/common-html/sass/partials/_tables.scss */
 th, td {
   padding: 6px 12px;
   text-align: left;
   height: 40px;
   min-height: 40px;
 }
-/* line 74, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 88, ../../../private/common-html/sass/partials/_tables.scss */
 th.btn, .dataTables_paginate th.paginate_disabled_previous, .dataTables_paginate th.paginate_disabled_next, td.btn, .dataTables_paginate td.paginate_disabled_previous, .dataTables_paginate td.paginate_disabled_next {
   margin-bottom: 0px;
 }
-/* line 77, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 91, ../../../private/common-html/sass/partials/_tables.scss */
 th .icon, td .icon {
   margin: 12px 12px 6px 12px;
 }
-/* line 81, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 95, ../../../private/common-html/sass/partials/_tables.scss */
 th.actions a, td.actions a {
   margin-right: 12px;
 }
-/* line 83, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 97, ../../../private/common-html/sass/partials/_tables.scss */
 th.actions a:last-child, td.actions a:last-child {
   margin-right: 0;
 }
 
-/* line 91, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 105, ../../../private/common-html/sass/partials/_tables.scss */
 th.action-column .icon, td.action-column .icon {
   margin: 0;
 }
 
-/* line 97, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 111, ../../../private/common-html/sass/partials/_tables.scss */
 tbody td, tfoot td {
   vertical-align: middle;
 }
 
-/* line 103, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 117, ../../../private/common-html/sass/partials/_tables.scss */
 .dataTables_wrapper {
   position: relative;
 }
 
-/* line 106, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 120, ../../../private/common-html/sass/partials/_tables.scss */
 .table-filter {
   float: right;
   position: absolute;
@@ -8957,27 +8957,27 @@ tbody td, tfoot td {
   right: 0;
 }
 
-/* line 113, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 127, ../../../private/common-html/sass/partials/_tables.scss */
 table.tasks thead tr:first-child td {
   padding-left: 0;
 }
 
-/* line 117, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 131, ../../../private/common-html/sass/partials/_tables.scss */
 .tasks-content {
   margin-top: 12px;
   margin-bottom: 12px;
 }
 
-/* line 123, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 137, ../../../private/common-html/sass/partials/_tables.scss */
 table.tasks .task-state {
   width: 22px;
 }
-/* line 125, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 139, ../../../private/common-html/sass/partials/_tables.scss */
 table.tasks .task-state .icon {
   margin: 12px 6px 6px 6px;
 }
 
-/* line 133, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 147, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table .center {
   text-align: center;
 }

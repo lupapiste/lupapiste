@@ -16,7 +16,7 @@
       </thead>
       <tbody data-bind="foreach: attachments">
         <tr data-bind="attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id'],
-                              'data-test-state': $data.state}">
+                       'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachments-table__state-icons">
             <i data-bind="attr: {'class': $data.css,
@@ -49,8 +49,8 @@
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
-               data-bind="attr: {'href': $parent.buildHash( $data )}"
-               data-test-id="open-attachment">
+               data-bind="click: $parent.addFile"
+               data-test-id="add-attachment-file">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'attachment.addFile'"
                     data-test-id="add-file-link"></span>

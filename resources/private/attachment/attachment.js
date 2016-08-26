@@ -3,6 +3,7 @@ var attachment = (function() {
 
   var applicationId = null;
   var uploadingApplicationId = null;
+  var uploadOngoing = ko.observable();
   var attachmentId = null;
   var model = null;
   var applicationModel = lupapisteApp.models.application;
@@ -459,7 +460,7 @@ var attachment = (function() {
 
     unsubscribe();
 
-    var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
+    var attachment = _.find(application.attachments, {id: attachmentId});
     if (!attachment) {
       pageutil.hideAjaxWait();
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
@@ -559,11 +560,21 @@ var attachment = (function() {
     applicationId = pageutil.subPage();
     attachmentId = pageutil.lastSubPage();
 
-    if (applicationModel._js.id !== applicationId || model.dirty) {
-      repository.load(applicationId, undefined, undefined, true);
-    } else {
-      showAttachment();
+    function reloadWaiter( counter ) {
+      if( !uploadOngoing() || !counter ) {
+        if (applicationModel._js.id !== applicationId
+            || model.dirty
+            || (attachmentId
+                && !_.find(applicationModel._js.attachments, {id: attachmentId}))) {
+          repository.load(applicationId, undefined, undefined, true);
+        } else {
+          showAttachment();
+        }
+      } else {
+        _.delay( reloadWaiter, 100, counter - 1 );
+      }
     }
+    reloadWaiter( 10 );
   });
 
   hub.subscribe("application-model-updated", showAttachment);
@@ -599,7 +610,7 @@ var attachment = (function() {
 
   function uploadDone() {
     if (uploadingApplicationId) {
-      repository.load(uploadingApplicationId, undefined, undefined, true);
+      repository.load(uploadingApplicationId, uploadOngoing, undefined, true);
       LUPAPISTE.ModalDialog.close();
       uploadingApplicationId = null;
     }
