@@ -288,7 +288,7 @@
           function (result, value, key) {
             return result.push({ day: _.parseInt(key), notifications: value });
           }, []));
-      applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length || 0);
+      applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
 
       isInitializing = false;
       pageutil.hideAjaxWait();

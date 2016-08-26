@@ -131,3 +131,5 @@
 "calendar.accepted" "sv" ""
 "calendar.declined" "fi" "Kutsu hylätty."
 "calendar.declined" "sv" ""
+"application.calendar.new-calendar-messages" "fi" "Sinulle on saapunut uusia kalenteriviestejä."
+"application.calendar.new-calendar-messages" "sv" ""

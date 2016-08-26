@@ -13,7 +13,7 @@
            (net.fortuna.ical4j.model.parameter PartStat)))
 
 (defn- generate-unique-id []
-  (str (.toString (to-local-date-time (local-now))) "/" (java.util.UUID/randomUUID) "@lupapiste.fi"))
+  (str (to-local-date-time (local-now)) "/" (java.util.UUID/randomUUID) "@lupapiste.fi"))
 
 (defn- recipients-fn []
   (fn [{application :application result :result}]
@@ -21,18 +21,18 @@
           recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
       (map usr/get-user-by-id recipient-ids))))
 
-(defn- model-fn []
+(defn model
   (fn [{application :application} _ recipient]
     {:link-calendar-fi (notifications/get-application-link application "calendar" "fi" recipient)
      :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)}))
 
 (defn- display-names [users]
-  (clojure.string/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
+  (sade.strings/join ", " (map (fn [user] (str (:firstName user) " " (:lastName user))) users)))
 
 (defn- reservation-participants [reservation]
   (map usr/get-user-by-id (flatten (vals (select-keys reservation [:from :to])))))
 
-(defn- suggest-appointment-model-fn []
+(def suggest-appointment-model
   (fn [{application :application result :result user :user} _ recipient]
     (let [reservation (util/find-by-id (:reservationId result) (:reservations application))]
       {:reservation      {:startTime       (util/to-local-datetime (:startTime reservation))
@@ -68,7 +68,7 @@
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
                                      (filter (fn [recipient] (usr/authority? recipient)) (map usr/get-user-by-id recipient-ids))))
-   :model-fn                     (suggest-appointment-model-fn)})
+   :model-fn                     suggest-appointment-model})
 
 (notifications/defemail
   :suggest-appointment-applicant
@@ -92,7 +92,7 @@
                                    (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
                                          recipient-ids (flatten (vals (select-keys reservation [:from :to])))]
                                      (filter (fn [recipient] (usr/applicant? recipient)) (map usr/get-user-by-id recipient-ids))))
-   :model-fn                     (suggest-appointment-model-fn)})
+   :model-fn                     suggest-appointment-model})
 
 (notifications/defemail
   :decline-appointment
@@ -110,7 +110,7 @@
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
-   :model-fn                     (model-fn)})
+   :model-fn                     model})
 
 (notifications/defemail
   :accept-appointment
@@ -128,4 +128,4 @@
                                      (ical/create-calendar-event reservation)))
    :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
-   :model-fn                     (model-fn)})
+   :model-fn                     model})

@@ -6,10 +6,11 @@
                        params: {lhtml: 'application.calendar.applicant.helpText'}}"></span>
     </div>
 
-    <!-- ko if: pendingNotifications().length > 0 -->
+    <!-- ko ifnot: _.isEmpty(pendingNotifications()) -->
     <div style="margin-bottom: 36px">
       <div>
-        <p><b><i class="lupicon-circle-attention"></i> Sinulla on hyväksymätön tapaamiskutsu.</b></p>
+        <p><b><i class="lupicon-circle-attention"></i>
+        <span data-bind="ltext: 'application.calendar.new-calendar-messages'"></span></b></p>
       </div>
 
       <div data-bind="foreach: pendingNotifications">
@@ -23,7 +24,7 @@
               </div>
               <div class="titlebar">
                 <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
-                <br />Osallistujat: <span data-bind="text: $component.appointmentParticipants($data)"></span>
+                <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>: <span data-bind="text: $component.appointmentParticipants($data)"></span>
               </div>
               <div class="titlebar"
                    data-bind="css: { 'buttons-box': acknowledged() === 'none',
