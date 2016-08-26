@@ -9,7 +9,7 @@
                  [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
-                 [ring "1.5.0"]
+                 [ring "1.5.0" :exclusions [commons-fileupload]] ; we will depend on the latest version manually until ring 1.6.0 is released
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
 
@@ -54,9 +54,10 @@
                  [org.mnode.ical4j/ical4j "1.0.7"]
 
                  ; Apache Commons
+                 [commons-fileupload "1.3.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
-                 [commons-io/commons-io "2.5"]
-                 [commons-codec/commons-codec "1.10"]
+                 [commons-io "2.5"]
+                 [commons-codec "1.10"]
 
                  ; Joda time wrapper
                  [clj-time "0.12.0"]
