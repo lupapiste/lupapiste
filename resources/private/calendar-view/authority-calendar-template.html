@@ -2,63 +2,9 @@
   <div>
     <div>
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
-      <span data-bind="component: {name: 'help-toggle',
-                       params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
     </div>
 
-    <!-- ko ifnot: _.isEmpty(pendingNotifications()) -->
-    <div style="margin-bottom: 36px">
-      <div>
-        <p><b><i class="lupicon-circle-attention"></i>
-        <span data-bind="ltext: 'application.calendar.new-calendar-messages'"></span></b></p>
-      </div>
-
-      <div data-bind="foreach: pendingNotifications">
-        <div class="calendar-pending-action">
-          <h3 data-bind="weekdayAndDate: day"></h3>
-          <div data-bind="foreach: notifications">
-            <div class="calendar-pending-action-item">
-              <div class="times">
-                <div class="startTime" data-bind="timeString: startTime"></div><br />
-                <div class="endTime" data-bind="timeString: endTime"></div>
-              </div>
-              <div class="titlebar">
-                <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
-                <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>: <span data-bind="text: $component.appointmentParticipants($data)"></span>
-              </div>
-              <div class="titlebar"
-                   data-bind="css: { 'buttons-box': acknowledged() === 'none',
-                                     'undo-link': acknowledged() !== 'none' }">
-                <!-- ko if: acknowledged() === 'none' -->
-                <button class="positive"
-                        data-bind="click: $component.markSeen.bind($data)">
-                  <i class="lupicon-check" style="display: inline;"></i>
-                  <i class="wait spin lupicon-refresh"></i>
-                  <span data-bind="ltext: 'button.ok'"></span>
-                </button>
-                <!-- /ko -->
-                <!-- ko if: acknowledged() === 'seen' -->
-                  <span data-bind="ltext: 'button.ok'"></span>
-                <!-- /ko -->
-              </div>
-              <!-- ko if: reservationStatus() === 'ACCEPTED' && from() === lupapisteApp.models.currentUser.id() -->
-              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
-              <!-- /ko -->
-              <!-- ko if: reservationStatus() === 'DECLINED' && from() === lupapisteApp.models.currentUser.id() -->
-              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
-              <!-- /ko -->
-              <!-- ko if: reservationStatus() === 'ACCEPTED' && from() !== lupapisteApp.models.currentUser.id() -->
-              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
-              <!-- /ko -->
-            </div>
-            <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
-              <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- /ko -->
+    <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
 
     <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>

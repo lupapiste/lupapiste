@@ -75,12 +75,12 @@
         _ (.close sw)]
     (.replaceAll (.toString sw) "\r" "")))
 
-(defn create-calendar-event [{:keys [method startTime endTime location attendee unique-id sequence] :as data}]
+(defn create-calendar-event [{:keys [method startTime endTime location comment attendee unique-id sequence title] :as data}]
   (let [cal  (create-cal method "Lupapiste" "Lupapiste Calendar" "V0.1" "EN")
         event (create-event  (Date. startTime)
                              (Date. endTime)
-                             "title"
-                             :description "description"
+                             title
+                             :description comment
                              :url "url"
                              :location location
                              :attendee attendee

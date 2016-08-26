@@ -180,9 +180,13 @@
 
 (defn update-mongo-for-reservation-state-change
   [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
-  (let [comment-update (comment/comment-mongo-update (:state application)
+  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED))]}
+  (let [type (cond
+               :ACCEPTED "reservation-accepted"
+               :DECLINED "reservation-declined")
+        comment-update (comment/comment-mongo-update (:state application)
                                                      (:comment reservation)
-                                                     {:type "reservation-update"
+                                                     {:type type
                                                       :id (:id reservation)}
                                                      "system"
                                                      false ; mark-answered
@@ -197,14 +201,14 @@
     (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
 
 (defn accept-reservation
-  [application {reservation-id :id to-user :reservedBy :as reservation} user timestamp]
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
   (post-command (str "reservations/" reservation-id "/accept"))
-  (update-mongo-for-reservation-state-change application reservation :ACCEPTED user to-user timestamp))
+  (update-mongo-for-reservation-state-change application reservation :ACCEPTED user (usr/get-user-by-id to-user-id) timestamp))
 
 (defn decline-reservation
-  [application {reservation-id :id to-user :reservedBy :as reservation} user timestamp]
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
   (post-command (str "reservations/" reservation-id "/decline"))
-  (update-mongo-for-reservation-state-change application reservation :DECLINED user to-user timestamp))
+  (update-mongo-for-reservation-state-change application reservation :DECLINED user (usr/get-user-by-id to-user-id) timestamp))
 
 (defn mark-reservation-update-seen
   [application reservation-id user-id]

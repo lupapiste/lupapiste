@@ -355,7 +355,8 @@
                       (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
    :on-success       [(notify :suggest-appointment-authority)
-                      (notify :suggest-appointment-applicant)]}
+                      (notify :suggest-appointment-from-applicant)
+                      (notify :suggest-appointment-to-applicant)]}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
@@ -398,7 +399,7 @@
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
    :on-success       (notify :accept-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
-  (let [reservation (get-reservation reservationId)]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Accepting reservation" reservationId)
     (cal/accept-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))
@@ -411,7 +412,7 @@
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
    :on-success       (notify :decline-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
-  (let [reservation (get-reservation reservationId)]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Declining reservation" reservationId)
     (cal/decline-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))

@@ -286,7 +286,9 @@
                         "reservation-slot-reserve-bubble-model.js"]
                    :html ["reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
+
                           "authority-calendar-template.html" "applicant-calendar-template.html"
+                          "calendar-message-items-template.html"
                           "reservation-slot-reserve-bubble-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
