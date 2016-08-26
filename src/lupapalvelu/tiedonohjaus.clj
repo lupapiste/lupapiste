@@ -28,9 +28,10 @@
     (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
           {:keys [status body]} (http/get url (cond-> {:throw-exceptions false}
                                                       coerce? (assoc :as :json)))]
-      (if (= 200 status)
-        body
-        (error "Error accessing TOJ API:" body)))))
+      (case status
+        200 body
+        502 (error "Error accessing TOJ API:" body)
+        nil))))
 
 (defn- get-tos-functions-from-toj [organization-id]
   (or (get-from-toj-api organization-id :coerce) []))
