@@ -149,6 +149,14 @@
     }
   };
 
+  ko.bindingHandlers.timeString = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? moment(value).format("HH:mm") : "";
+      $(element).text(dateStr);
+    }
+  };
+
   function localized(fnName, element, valueAccessor) {
     var e$ = $(element);
     var fn = e$[fnName];
@@ -624,6 +632,14 @@
     update: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var dateStr = value ? monthName(value) + moment(value).format(" YYYY ") + weekText(value) : "";
+      $(element).html(dateStr);
+    }
+  };
+
+  ko.bindingHandlers.weekdayAndDate = {
+    update: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var dateStr = value ? dayName(value) + ", " + moment(value).format("D.M.YYYY") : "" ;
       $(element).html(dateStr);
     }
   };

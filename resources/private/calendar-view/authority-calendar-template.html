@@ -2,8 +2,11 @@
   <div>
     <div>
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
-      <span data-bind="component: {name: 'help-toggle',
-                       params: {lhtml: 'application.calendar.authority.helpText'}}"></span>
+    </div>
+
+    <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
+
+    <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
     </div>
 
@@ -43,6 +46,7 @@
       </calendar-view>
 
       <div>
+        <div id="legend-orangebox"></div><span data-bind="ltext: 'application.calendar.legend.accepted-appointment'"></span>
         <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
 
         <!-- ko if: selectedParty -->

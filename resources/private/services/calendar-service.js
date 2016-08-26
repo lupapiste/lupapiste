@@ -130,6 +130,8 @@ LUPAPISTE.CalendarService = function() {
     ajax.query("my-calendars")
       .success(function(data) {
         hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
+      }).error(function() {
+        hub.send("calendarService::serviceNotAvailable");
       })
       .call();
   });

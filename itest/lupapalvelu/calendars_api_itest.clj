@@ -1,8 +1,8 @@
 (ns lupapalvelu.calendars-api-itest
-    (require [midje.sweet :refer :all]
-             [lupapalvelu.itest-util :refer :all]
-             [clj-time.core :as t]
-             [clj-time.coerce :as tc]))
+  (require [midje.sweet :refer :all]
+           [lupapalvelu.itest-util :refer :all]
+           [clj-time.core :as t]
+           [clj-time.coerce :as tc]))
 
 (facts :ajanvaraus
   (def authority (apikey-for "sonja"))
@@ -129,10 +129,12 @@
                       (let [emails (sent-emails)]
                         (count emails) => 2
                         (:to (first emails)) => (contains "Sonja Sibbo")
-                        (:calendar (:body (first emails))) => (contains "BEGIN:VCALENDAR")
+                        (:calendar (:body (first emails))) => (every-checker (contains "BEGIN:VCALENDAR")
+                                                                             (contains "METHOD:REQUEST"))
                         (:to (last emails)) => (contains "Pena Panaani")
-                        (:calendar (:body (last emails))) => (contains "BEGIN:VCALENDAR")))
-                    (fact "my-reservations for authority includes the new reservation"
+                        (:calendar (:body (last emails))) => (every-checker (contains "BEGIN:VCALENDAR")
+                                                                            (contains "METHOD:REQUEST"))))
+                    (fact "my-reserved-slots for authority includes the new reservation"
                       (->> (query authority :my-reserved-slots :year current-year :week current-week)
                            :reservations
                            (map #(get-in % [:reservation :id]))) => (contains #{reservation-id}))
@@ -145,10 +147,14 @@
                              :year current-year
                              :week current-week)
                            :readOnlySlots
-                           (map #(get-in % [:reservation :id]))) => (just #{reservation-id})))
-                  (fact "Calendar can not be disabled if it has reservations in the future"
-                    (command sipoo :set-calendar-enabled-for-authority
-                                   :userId authority-id :enabled false) => fail?))))
+                           (map #(get-in % [:reservation :id]))) => (just #{reservation-id}))
+                    (fact "Calendar can not be disabled if it has reservations in the future"
+                      (command sipoo :set-calendar-enabled-for-authority
+                                     :userId authority-id :enabled false) => fail?)
+                    (fact "Pena declines the invitation"
+                      (command pena :decline-reservation
+                                    :reservationId reservation-id
+                                    :id app-id) => ok?)))))
             (fact "Find available slots as applicant"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
@@ -158,7 +164,7 @@
                                   :year current-year
                                   :week current-week)]
                 result => ok?
-                (count (:availableSlots result)) => 2))
+                (count (:availableSlots result)) => 3
             (fact "Find available slots as applicant without the correct application in context should fail"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
@@ -167,7 +173,7 @@
                                   :id "LP-001-2016-99999"
                                   :year current-year
                                   :week current-week)]
-                result => fail?)))))))
+                result => fail?)))))))))
 
   (fact "clear db"
     (clear-ajanvaraus-db)))

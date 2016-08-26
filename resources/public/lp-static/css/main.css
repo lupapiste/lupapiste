@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1472113410649');
+@import url('main-blessed1.css?z=1472128368164');
 
 /* line 137, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table th {
@@ -7529,6 +7529,16 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 }
 
 /* line 55, ../../../private/common-html/sass/views/_calendars.scss */
+#legend-orangebox {
+  height: 15px;
+  width: 15px;
+  background-color: #f39129;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
+/* line 64, ../../../private/common-html/sass/views/_calendars.scss */
 #triangle-topright {
   width: 0;
   height: 0;
@@ -7539,18 +7549,77 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   margin-right: 5px;
 }
 
-/* line 65, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 74, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action {
+  width: 96%;
+}
+/* line 77, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action h3 {
+  margin-top: 12px;
+  font-weight: bold;
+}
+/* line 82, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item {
+  border: 1px solid #dddddd;
+  margin-top: 12px;
+}
+/* line 86, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .times {
+  display: inline-block;
+  font-weight: bold;
+  vertical-align: top;
+  text-align: center;
+  margin: 6px 12px;
+}
+/* line 94, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .titlebar {
+  display: inline-block;
+  border-left: 1px solid #dddddd;
+  padding-left: 6px;
+  margin: 6px 0px;
+  height: 48px;
+}
+/* line 101, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .titlebar button span {
+  display: inherit;
+}
+/* line 105, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .titlebar.buttons-box {
+  float: right;
+  padding: 6px;
+}
+/* line 110, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .titlebar.undo-link, .calendar-pending-action .calendar-pending-action-item .titlebar.status {
+  float: right;
+  padding: 12px;
+}
+/* line 115, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .titlebar.status {
+  font-weight: bold;
+}
+/* line 120, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .startTime {
+  display: inherit;
+  font-size: 20px;
+}
+/* line 125, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-pending-action .calendar-pending-action-item .endTime {
+  display: inherit;
+  font-size: 12px;
+}
+
+/* line 132, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table {
   width: 100%;
   min-height: 144px;
   padding-top: 24px;
 }
-/* line 70, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 137, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions {
   width: 96%;
   text-align: right;
 }
-/* line 72, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 139, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions .month {
   float: left;
   margin-left: 5%;
@@ -7558,30 +7627,30 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   font-size: 18px;
   font-weight: bold;
 }
-/* line 79, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 146, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table .nav-actions .nav-links {
   vertical-align: top;
 }
-/* line 85, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 152, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table {
   width: 96%;
 }
-/* line 87, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 154, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table tr {
   border: none;
 }
-/* line 91, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 158, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table th {
   background: white;
   font-size: 18px;
   font-weight: normal;
 }
-/* line 96, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 163, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table th.date-today {
   background: #dddddd;
   border: 1px solid #dddddd;
 }
-/* line 102, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 169, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td {
   background: #f6f6f6;
   padding: 0;
@@ -7589,7 +7658,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   width: 18%;
   border: 1px solid #dddddd;
 }
-/* line 109, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 176, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td:first-child {
   font-size: 18px;
   font-weight: normal;
@@ -7597,38 +7666,38 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   width: 5%;
   border: none;
 }
-/* line 117, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 184, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today {
   background: #dddddd;
 }
-/* line 121, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 188, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.timestamp {
   height: 60px;
 }
-/* line 125, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 192, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot {
   height: 60px;
   border-bottom: 1px solid #ccc;
 }
-/* line 129, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 196, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot:nth-child(even) {
   background: white;
 }
-/* line 133, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 200, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 138, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 205, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today div.timeline-slot {
   height: 60px;
   border-bottom: 1px solid #ccc;
   background: #eeeeee;
 }
-/* line 143, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 210, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td.date-today div.timeline-slot:hover {
   background: #dddddd;
 }
-/* line 148, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 215, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot {
   position: absolute;
   width: 100%;
@@ -7638,30 +7707,21 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   white-space: nowrap;
   color: #f39129;
 }
-/* line 157, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 224, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot #triangle-topright {
   margin-right: 0px !important;
   margin-top: 6px;
 }
-/* line 162, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 229, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked {
   color: white;
   background: #2ca92c;
 }
-/* line 166, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 233, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.booked a {
   color: white;
 }
-/* line 171, ../../../private/common-html/sass/views/_calendars.scss */
-.calendar-table table td div.calendar-slot.accepted {
-  color: white;
-  background: #f39129;
-}
-/* line 175, ../../../private/common-html/sass/views/_calendars.scss */
-.calendar-table table td div.calendar-slot.accepted a {
-  color: white;
-}
-/* line 180, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 238, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot {
   background: inherit;
   width: 100%;
@@ -7671,18 +7731,18 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   text-align: center;
   display: table;
 }
-/* line 190, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 248, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot div {
   display: inline;
   margin-right: auto;
   margin-left: auto;
 }
-/* line 196, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 254, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.available-slot button.reserve-slot div i, .calendar-table table td div.calendar-slot button.reserve-slot div span {
   display: table-cell;
   vertical-align: middle;
 }
-/* line 201, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 259, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation {
   padding-top: 0;
   padding-bottom: 0;
@@ -7690,25 +7750,34 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   color: white;
   background: #2ca92c;
 }
-/* line 208, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 266, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation.read-only {
   background: none;
 }
-/* line 211, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 269, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation.read-only div {
   color: grey;
 }
-/* line 216, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 274, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation.accepted {
+  color: white;
+  background: #f39129;
+}
+/* line 278, ../../../private/common-html/sass/views/_calendars.scss */
+.calendar-table table td div.calendar-slot.reservation.accepted a {
+  color: white;
+}
+/* line 285, ../../../private/common-html/sass/views/_calendars.scss */
 .calendar-table table td div.calendar-slot.reservation div {
   height: 20px;
 }
 
-/* line 227, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 296, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
   margin-top: 24px;
 }
 
-/* line 231, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 300, ../../../private/common-html/sass/views/_calendars.scss */
 #application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
