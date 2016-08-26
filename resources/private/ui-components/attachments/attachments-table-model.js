@@ -21,9 +21,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     return hasFile(att) && !service.isNotNeeded(attachment);
   }
 
-  function openAttachment(attachment) {
+  function buildHash(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
-    pageutil.openPage("attachment", applicationId + "/" + attachment.id);
+    return pageutil.buildPageHash("attachment", applicationId, attachment.id);
   }
 
   function removeAttachment(attachment) {
@@ -80,6 +80,6 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     canVouch: canVouch,
-    openAttachment: openAttachment
+    buildHash: buildHash
   };
 };

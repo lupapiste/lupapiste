@@ -72,14 +72,26 @@ var pageutil = (function($) {
     }
   }
 
-  function openPage(page, suffix) {
+  function buildPagePath(page, suffix) {
     var suffixStr = suffixToStr(suffix);
     if (!page) {
-      openFrontpage();
+      return "!/";
     } else if (page.indexOf("!/") === 0) {
-      window.location.hash = page + suffixStr;
+      return page + suffixStr;
     } else {
-      window.location.hash = "!/" + page + suffixStr;
+      return "!/" + page + suffixStr;
+    }
+  }
+
+  function buildPageHash(page /* & suffix arguments */) {
+    return "#" + buildPagePath(page, _.tail(arguments).join("/"));
+  }
+
+  function openPage(page, suffix) {
+    if (!page) {
+      openFrontpage();
+    } else {
+      window.location.hash = buildPagePath(page, suffix);
     }
     hub.send( "scrollService::pop", {delay: 200});
   }
@@ -111,7 +123,8 @@ var pageutil = (function($) {
     openFrontpage:        openFrontpage,
     openPage:             openPage,
     frontpage:            frontpage,
-    getPagePath:          pagePath
+    getPagePath:          pagePath,
+    buildPageHash:        buildPageHash
   };
 
 })(jQuery);
