@@ -38,11 +38,9 @@ Mikko adds txt attachment without comment
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//div[@id='application-attachments-tab']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko opens attachment details
   [Tags]  attachments
-  Open attachment details  muut.muu
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Title Should Be  ${appname} - Lupapiste
 

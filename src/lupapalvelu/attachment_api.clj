@@ -481,7 +481,8 @@
                             :locked locked
                             :required false
                             :comment-text text}]
-    (when-not (:id (attachment/upload-and-attach! command attachment-options file-options))
+    (if-let [{id :id} (attachment/upload-and-attach! command attachment-options file-options)]
+      (ok :attachmentId id)
       (fail! :error.unknown))))
 
 ;;

@@ -15,9 +15,10 @@ LUPAPISTE.ScrollService = function() {
   self.serviceName = "scrollService";
 
   var positions = {};
+  var followed  = [];
 
   function getHash() {
-    // Null-safe regardign location.
+    // Null-safe regarding location.
     return _.get( window, "location.hash");
   }
 
@@ -49,10 +50,34 @@ LUPAPISTE.ScrollService = function() {
     }
   };
 
+  // Service can follow the scroll positions for the matching hashes.
+  // If the current hash matches any of the followed regexps, the
+  // scroll position is pushed. The position checking is rate-limited
+  // with debounce.
+
+  function scrolled() {
+    var hash = getHash();
+    if( _.find( followed, function( re ) {
+      return re.test( hash );
+    })) {
+      self.push( {override: true});
+    }
+  }
+
+  window.onscroll = _.debounce( scrolled, 250 );
+
+  self.follow = function( options ) {
+    var hashRe = _.get( options, "hashRe");
+    if( _.isRegExp( hashRe)) {
+      followed.push( hashRe );
+    }
+  };
+
   // There really should be a better way to restore
   // the scroll position than waiting for 500 ms and hoping
   // that everything has been rendered.
   hub.subscribe( "application-model-updated", _.partial( self.pop, {delay: 500} ) );
   hub.subscribe( self.serviceName + "::push", self.push );
-  hub.subscribe( self.serviceName + "::pop", self.pop );
+  hub.subscribe( self.serviceName + "::pop", self.pop);
+  hub.subscribe( self.serviceName + "::follow", self.follow);
 };
