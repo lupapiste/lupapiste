@@ -398,4 +398,12 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return _(self.attachmentGroups()).invokeMap("hasFile").some();
   });
 
+  self.hasUnfilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.attachments());
+  });
+
+  self.hasFilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.filteredAttachments());
+  });
+
 };
