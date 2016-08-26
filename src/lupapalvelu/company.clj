@@ -1,5 +1,7 @@
 (ns lupapalvelu.company
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [clojure.data :refer [diff]]
+            [clojure.set :as set]
             [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.util :refer [fn-> fn->>] :as util]
@@ -11,6 +13,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
@@ -193,6 +196,12 @@
        (or (= :custom (keyword old-type))
            (= :custom (keyword new-type)))))
 
+(defn- changes [old new]
+  (let [[in-old in-new _] (diff old new)
+        keyset (set/union (-> in-old keys set) (-> in-new keys set))
+        fmt #(str \" (logging/sanitize 200 %) \")]
+    (reduce #(conj %1 (str (name %2) " from " (-> in-old %2 fmt) " to " (-> in-new %2 fmt))) [] (sort keyset))))
+
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
    Returns the updated company."
@@ -210,6 +219,8 @@
     (when (and (not (usr/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
+    ; Log the changes for later review
+    (info "company-update - changes were:" (ss/join ", " (changes company updated)))
     updated))
 
 (defn company-user-edit-allowed
