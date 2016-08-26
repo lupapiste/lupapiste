@@ -39,13 +39,13 @@
                         data-bind="click: $component.acceptReservation.bind($data)">
                   <i class="lupicon-check" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
-                  Hyväksy
+                  <span data-bind="ltext: 'button.accept'"></span>
                 </button>
                 <button class="negative"
                         data-bind="click: $component.declineReservation.bind($data)">
                   <i class="lupicon-remove" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
-                  Hylkää
+                  <span data-bind="ltext: 'button.decline'"></span>
                 </button>
                 <!-- /ko -->
               <!-- /ko -->

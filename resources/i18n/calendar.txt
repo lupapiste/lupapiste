@@ -139,3 +139,7 @@
 "calendar.declined" "sv" ""
 "application.calendar.new-calendar-messages" "fi" "Sinulle on saapunut uusia kalenteriviestejä."
 "application.calendar.new-calendar-messages" "sv" ""
+"button.accept" "fi" "Hyväksy"
+"button.accept" "sv" ""
+"button.decline" "fi" "Hylkää"
+"button.decline" "sv" ""
