@@ -24,9 +24,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   function buildHash(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
     return pageutil.buildPageHash("attachment", applicationId, attachment.id);
+  }
 
   function addFile(attachment) {
-    hub.send( "scrollService::push");
     hub.send( "add-attachment-file", {attachmentId: attachment.id,
                                       attachmentType: attachment.type["type-group"]
                                       + "." + attachment.type["type-id"]});

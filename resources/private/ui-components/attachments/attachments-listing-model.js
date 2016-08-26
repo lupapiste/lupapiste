@@ -44,6 +44,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
     dispose();
   };
 
+  hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
+
   //
   // Attachment hierarchy
   //
