@@ -5,25 +5,18 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   var DEFAULT_VISIBILITY = _.head(LUPAPISTE.config.attachmentVisibilities);
 
+  var service = lupapisteApp.services.attachmentsService;
+
   // Attachemnt data fields that are mapped as observables
   var observableFields = ["notNeeded", "contents", "scale", "size", "type"];
 
   self.authModel = authModel;
-  var service = lupapisteApp.services.attachmentsService;
 
   self.processing = ko.observable(false);
 
   _.forEach(observableFields, function(field) {
     _.set(self, field, ko.observable(_.get(attachmentData, field)));
   });
-
-  function buildVisibility(data) {
-    return data.metadata ? data.metadata.nakyvyys : DEFAULT_VISIBILITY;
-  }
-
-  function buildGroup(data) {
-    return _.merge(data.op, {groupType: data.groupType});
-  }
 
   self.group = ko.observable(buildGroup(attachmentData));
 
@@ -40,6 +33,14 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
     return _.assign(self, _.omit(attachmentData, _.concat(observableFields)));
   };
+
+  function buildGroup(data) {
+    return _.merge(data.op, {groupType: data.groupType});
+  }
+
+  function buildVisibility(data) {
+    return data.metadata ? data.metadata.nakyvyys : DEFAULT_VISIBILITY;
+  }
 
   //
   // Updates which require attachment model reload
