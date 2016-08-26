@@ -1335,6 +1335,14 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+Checkbox wrapper selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+
+Checkbox wrapper not selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
+
 Click label
   [Arguments]  ${for}
   Scroll to  label[for=${for}]
