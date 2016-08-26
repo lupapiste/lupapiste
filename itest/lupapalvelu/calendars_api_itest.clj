@@ -173,7 +173,7 @@
                                   :id "LP-001-2016-99999"
                                   :year current-year
                                   :week current-week)]
-                result => fail?)))))))
+                result => fail?)))))))))
 
   (fact "clear db"
     (clear-ajanvaraus-db)))
