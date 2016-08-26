@@ -26,6 +26,12 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     return pageutil.buildPageHash("attachment", applicationId, attachment.id);
   }
 
+  function addFile(attachment) {
+    hub.send( "add-attachment-file", {attachmentId: attachment.id,
+                                      attachmentType: attachment.type["type-group"]
+                                      + "." + attachment.type["type-id"]});
+  }
+
   function removeAttachment(attachment) {
     var yesFn = function() {
       hub.send("track-click", {category:"Attachments", label: "", event: "deleteAttachmentFromListing"});
@@ -80,6 +86,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     canVouch: canVouch,
-    buildHash: buildHash
+    buildHash: buildHash,
+    addFile: addFile,
+    isAuthority: lupapisteApp.models.currentUser.isAuthority
   };
 };
