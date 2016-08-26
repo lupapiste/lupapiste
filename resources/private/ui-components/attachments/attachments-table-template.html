@@ -9,8 +9,10 @@
               class="attachments-table--widest"></th>
           <th data-bind="ltext: 'application.attachmentFile'"></th>
           <th data-bind="ltext: 'attachment.th-not-needed'"></th>
+          <!-- ko if: isAuthority() -->
           <th data-bind="ltext: 'ok'"></th>
           <th data-bind="ltext: 'attachment.th-not-ok'"></th>
+          <!-- /ko -->
           <th data-bind="ltext: 'remove'"></th>
         </tr>
       </thead>
@@ -69,6 +71,7 @@
             </div>
           </td>
           <!-- /ko -->
+          <!-- ko if: $parent.isAuthority() -->
           <td>
             <button class="btn-icon-only"
                     data-bind="enable: $data.authModel.ok('approve-attachment'),
@@ -91,6 +94,7 @@
               <i class="lupicon-circle-attention"></i>
             </button>
           </td>
+          <!-- /ko -->
           <td>
             <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove,

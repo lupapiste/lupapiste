@@ -87,6 +87,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     authModel: lupapisteApp.models.applicationAuthModel,
     canVouch: canVouch,
     buildHash: buildHash,
-    addFile: addFile
+    addFile: addFile,
+    isAuthority: lupapisteApp.models.currentUser.isAuthority
   };
 };
