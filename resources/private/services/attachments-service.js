@@ -185,6 +185,10 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
+  self.removeAttachmentVersion = function(attachmentId, fileId, originalFileId, options) {
+    self.updateAttachment(attachmentId, "delete-attachment-version", {fileId: fileId, originalFileId: originalFileId}, options);
+  };
+
   self.approveAttachment = function(attachmentId, options) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
