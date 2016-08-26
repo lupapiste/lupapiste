@@ -113,7 +113,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
       downloadAllText: ko.pureComputed(function() { 
          var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
-         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     };
   }
 
@@ -157,7 +157,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
       downloadAllText: ko.pureComputed(function() { 
          var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
-         return loc("download") + " " + n + " " + loc((n == 1) ? "file" : "file-plural-partitive"); })
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
 
