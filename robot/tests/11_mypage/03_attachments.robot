@@ -94,12 +94,10 @@ Application is given verdict
   Wait until  Application state should be  verdictGiven
   Logout
 
-Mikko logs in opens attachments tab and unselects post verdict filter
+Mikko can add his attachments in post verdict state
   As Mikko
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
-
-Mikko can add his attachments in post verdict state
+  Open tab  attachments
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=copy-user-attachments]
   Click by test id  copy-user-attachments
   Confirm yes no dialog
