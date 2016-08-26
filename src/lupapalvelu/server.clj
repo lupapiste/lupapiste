@@ -113,7 +113,7 @@
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl in port 9090")
     (require 'clojure.tools.nrepl.server)
-    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
+    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090 :bind "localhost")))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}
