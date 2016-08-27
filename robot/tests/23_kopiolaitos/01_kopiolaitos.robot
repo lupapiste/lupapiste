@@ -17,6 +17,7 @@ Mikko creates an application
 Mikko adds an attachment
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Return to application
 
 Mikko submits application
   Submit application

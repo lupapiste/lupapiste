@@ -88,8 +88,7 @@ Mikko selects not needed for valtakirja attachment
   Positive indicator should be visible
 
 Mikko adds pdf attachment to the attachment template added by Sonja
-  Open attachment details  muut.muu
-  Add attachment version  ${PDF_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='muut.muu']  ${PDF_TESTFILE_PATH}
   Scroll and click test id  back-to-application-from-attachment
   Wait Until  Tab should be visible  attachments
 
@@ -105,6 +104,7 @@ Mikko fills up first name for the hakija party in the parties tab
   Open accordions  parties
   ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
+  Scroll to test id  application-invite-hakija-r
   Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija-r"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
   Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
   Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']

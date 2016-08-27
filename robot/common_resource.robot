@@ -656,6 +656,9 @@ Add attachment
   Run Keyword If  '${kind}' == 'application'  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
 
+Return to application
+  Wait Until  Click by test id  back-to-application-from-attachment
+
 Delete attachment
   [Arguments]  ${type}
   Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']

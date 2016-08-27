@@ -416,5 +416,3 @@ Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
 
-Return to application
-  Wait Until  Click by test id  back-to-application-from-attachment

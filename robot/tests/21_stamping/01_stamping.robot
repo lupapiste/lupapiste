@@ -26,11 +26,11 @@ Mikko creates & submits application and goes to empty attachments tab
 
 Mikko adds PDF attachment without comment
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME1}')
+  Return to application  
   Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME2}')
+  Return to application  
   Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  operation=Yleisesti hankkeeseen
-  Wait Until  Element should be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME3}')
+  Return to application  
 
 Mikko does not see stamping button
   Wait until  Element should not be visible  jquery=button[data-test-id=stamp-attachments]
