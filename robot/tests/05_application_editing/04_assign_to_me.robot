@@ -58,7 +58,7 @@ Assignee has changed
 
 Viewing attachment should not reset the assignee select
   Open tab  attachments
-  Add attachment file  tr[data-test-type='hakija.valtakirja']  ${TXT_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}
   Return to application  
   Wait Until  Application assignee select is  Sibbo Sonja
   Open tab  parties
