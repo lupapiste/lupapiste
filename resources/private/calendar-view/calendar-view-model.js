@@ -41,7 +41,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.timelineSlots = function(weekday) {
     var times = [];
-    var weekdayStr = moment(weekday.startOfDay).format("dddd");
     ko.utils.arrayForEach(ko.utils.range(self.firstFullHour, self.lastFullHour), function(hour) {
       times.push({ weekday: weekday,
                    calendarId: weekday.calendarId,
