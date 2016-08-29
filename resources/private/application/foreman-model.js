@@ -50,6 +50,14 @@ LUPAPISTE.ForemanModel = function() {
           lastname = util.getIn(foreman, ["lastName"]);
         }
 
+        // Foreman is deemed substitute if any of the subsitute name fields is filled.
+        var isSubstitute = Boolean( _.find( ["Etunimi", "Sukunimi"],
+                                            function( s ) {
+                                              return _.trim( util.getIn( foremanDoc, ["data",
+                                                                                      "sijaistus",
+                                                                                      "sijaistettavaHlo" + s,
+                                                                                      "value"]));
+                                            }));
         var data = {"state":       app.state,
                     "id":          app.id,
                     "email":       username,
@@ -57,7 +65,8 @@ LUPAPISTE.ForemanModel = function() {
                     "lastName":    lastname,
                     "name":        name,
                     "statusName":  app.state === "acknowledged" || _.includes(LUPAPISTE.config.postVerdictStates, app.state) ? "ok" : "new",
-                    "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : ""};
+                    "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : "",
+                    isSubstitute:  isSubstitute};
 
         data.displayName = ko.pureComputed(function() {
           var output = data.id;
