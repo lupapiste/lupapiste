@@ -14,7 +14,7 @@ Library  Collections
 *** Test Cases ***
 
 Admin sets up the calendar
-  [Tags]  fail
+#  [Tags]  fail
   Sipoo logs in
   Go to page  organization-calendars
   Set default reservation location  Foobarbaz
@@ -24,7 +24,7 @@ Admin sets up the calendar
   Logout
 
 Mikko opens an application
-  [Tags]  fail
+#  [Tags]  fail
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
@@ -33,12 +33,12 @@ Mikko opens an application
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
 Mikko submits application and logs out
-  [Tags]  fail
+#  [Tags]  fail
   Submit application
   Logout
 
 Sonja logs in and allocates free calendar slots
-  [Tags]  fail
+#  [Tags]  fail
   Sonja logs in
   Go to page  mycalendar
   Wait until  Element should be visible by test id  calendar-view-calendar-table
@@ -53,17 +53,24 @@ Sonja logs in and allocates free calendar slots
   Wait Until  Page should contain  Foobar
 
 Sonja opens and assigns application to herself
-  [Tags]  fail
+#  [Tags]  fail
   Go to page  applications
   Request should be visible  ${appname}
   Open application  ${appname}  ${propertyId}
   Assign application to  Sibbo Sonja
 
 Sonja opens the calendar tab
-  [Tags]  fail
+#  [Tags]  fail
   Wait until  Element should be visible by test id  application-open-calendar-tab
   Open tab  calendar
+
+Sonja suggests an appointment
+  [Tags]  fail
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
   Goto following week in calendar view
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='reserve-slot']
+  Wait Until  Element should be visible  xpath=//button[@data-test-id='reserve-slot-Friday-1000']
+  Click by test id  reserve-slot-Friday-1000
+  Wait Until  Element should be visible  xpath=//textarea[@data-test-id='reservation-comment-textarea']
+  Fill test id  reservation-comment-textarea  diibadaabakommenttia
+  Click by test id  reservation-slot-reserve-bubble-dialog-ok
