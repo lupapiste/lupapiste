@@ -1081,8 +1081,7 @@
 
                         <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
-                        <h2 class="top-marginM" data-bind="ltext: 'foreman.allForemen'"></h2>
-                        <div data-bind="template: {name: 'application-foreman-list-template', data: $root.foreman}"></div>
+                        <div data-bind="template: {name: 'all-foremen-table-template', data: $root.foreman}"></div>
                         <!-- /ko -->
 
                         <review-tasks params="openTask: openTask"></review-tasks>

@@ -1,3 +1,34 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="all-foremen-table-template">
+  <!-- ko if: _.size( foremanApplications() ) -->
+  <h2 class="top-marginM" data-bind="ltext: 'foreman.allForemen'"></h2>
+  <table class="all-foremen-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label'"></th>
+        <th data-bind="ltext: 'foreman'"></th>
+        <th data-bind="ltext: 'buildingPermit'"></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: foremanApplications">
+      <tr>
+        <td>
+          <span data-bind="text: $data.displayRole"></span>
+          <span data-bind="visible: isSubstitute,
+                           ltext: 'tyonjohtaja.substitute'"></span>
+        </td>
+        <td data-bind="fullName: $data"></td>
+        <td>
+          <a data-bind="attr: {href: '#!/application/' + $data.id}">
+            <span class="foreman-application" data-bind="text: $data.id"></span>
+          </a>
+          <span class="foreman-state" data-bind="ltext: $data.state"></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>
+
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-foreman-list-template">
   <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
     <li class="foreman">

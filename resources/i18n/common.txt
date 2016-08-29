@@ -2172,6 +2172,8 @@
 "tyonjohtaja.muutHankkeet.ajantarve" "sv" "Tidsbehov i timmar per 3mån"
 "tyonjohtaja.noProjects" "fi" "Ei hankkeita"
 "tyonjohtaja.noProjects" "sv" "Inga projekt"
+"tyonjohtaja.substitute" "fi" "(sijainen)"
+"tyonjohtaja.substitute" "sv" "(vikarie)"
 "tyonjohtaja.sijaistus._group_label" "fi" "Sijaisuus"
 "tyonjohtaja.sijaistus._group_label" "sv" "Vikariering"
 "tyonjohtaja.sijaistus.alkamisPvm" "fi" "Alkaa"

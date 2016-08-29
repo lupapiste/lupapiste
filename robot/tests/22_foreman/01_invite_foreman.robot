@@ -123,7 +123,10 @@ Foreman application can't be submitted before link permit is submitted
   Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
   Wait until  Submit application error should be  error.not-submittable.foreman-link
 
-
+Pena can set Teppo as foreman substitute
+  Open tab  parties
+  Input text with jQuery  input[data-docgen-path="sijaistus.sijaistettavaHloEtunimi"]  Bob
+  
 Application is submitted
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
@@ -139,6 +142,10 @@ Original application is approved and given a verdict
   Approve application
   Open tab  verdict
   Submit empty verdict
+
+All foremen table is shown on the Construction tab
+  Open tab  tasks
+  Element should contain  jquery=table.all-foremen-table tbody tr td  (sijainen)
   [Teardown]  logout
 
 Pena can create foreman applications after verdict is given for the original application
