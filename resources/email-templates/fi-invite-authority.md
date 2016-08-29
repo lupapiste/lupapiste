@@ -4,7 +4,7 @@ sinut on kutsuttu Lupapiste-palvelussa viranomaiseksi organisaatioon {{org}}. Jo
 
 Jatka klikkaamalla alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
-{{link}}
+{{link-fi}}
 
 S&auml;hk&ouml;ist&auml; meininki&auml; lupak&auml;sittelyyn toivottaa,
 {{lupapiste}}
