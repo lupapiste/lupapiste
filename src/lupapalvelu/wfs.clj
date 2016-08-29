@@ -616,7 +616,7 @@
   ([url service]
     (query-get-capabilities url service nil nil true))
   ([url service username password throw-exceptions?]
-    {:pre [(not (ss/blank? url))]}
+    {:pre [(ss/not-blank? url)]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
                              :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
