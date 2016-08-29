@@ -14,7 +14,7 @@
         </tr>
         </thead>
         <tbody data-bind="foreach: calendars.items">
-        <tr>
+        <tr data-bind="attr: { 'data-test-authority-name': lastName + ' ' + firstName }">
           <td>
             <a data-bind="attr: {'href': '#!/calendar-admin/' + id + '/' + calendarId() },
                           visible: calendarEnabled">

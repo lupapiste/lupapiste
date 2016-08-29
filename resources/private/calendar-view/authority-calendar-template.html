@@ -18,7 +18,7 @@
       <div class="times-filter-group">
         <span class="form-entry">
           <label class="form-label tip" data-bind="ltext: 'application.calendar.party-to-invite'"></label>
-          <select class="form-input combobox tip"
+          <select class="form-input combobox tip" data-test-id="attendee-select"
                   data-bind="options: authorizedParties,
                              optionsText: util.partyFullName,
                              optionsCaption: loc('choose'),
@@ -27,7 +27,7 @@
         </span>
         <span class="form-entry">
           <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
-          <select class="form-input combobox tip"
+          <select class="form-input combobox tip" data-test-id="reservation-type-select"
                   data-bind="options: reservationTypes,
                              optionsValue: function(item) { return _.get(item, 'id'); },
                              optionsText: function(item) { return _.get(item, 'name'); },

@@ -35,10 +35,7 @@ Ronja looks at her own calendar
 
 Goto following week view
   [Tags]  fail
-  ${monday}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
-  Click by test id  calendar-view-following-week
-  ${monday}=  Evaluate  ${monday}+604800000
-  Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${monday}']
+  Goto following week in calendar view
 
 Create reservation slots for Friday next week
   [Tags]  fail
