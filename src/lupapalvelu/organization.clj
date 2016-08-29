@@ -195,10 +195,13 @@
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
 
-(defn municipality-address-endpoint [municipality]
-  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
-
+(defn municipality-address-endpoint [^String municipality]
+  {:pre [(or (string? municipality) (nil? municipality))]}
+  (when (and (ss/not-blank? municipality) (re-matches #"\d{3}" municipality) )
+    (let [no-bbox-srs (env/value :municipality-wfs (keyword municipality) :no-bbox-srs)]
+      (merge
+        (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)
+        (when no-bbox-srs {:no-bbox-srs true})))))
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
@@ -209,7 +212,7 @@
                   (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
                   (into {})
                   (hash-map $set))]
-    (if (and (not (ss/blank? url)) (= "osoitteet" endpoint-type))
+    (if (and (ss/not-blank? url) (= "osoitteet" endpoint-type))
       (let [capabilities-xml (wfs/get-capabilities-xml url username password)
             osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
                                          (map (comp :FeatureType sxml/xml->edn))

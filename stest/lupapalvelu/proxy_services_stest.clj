@@ -319,8 +319,7 @@
                                               :number "80",
                                               :name {:fi "Turku" :sv "\u00c5bo"}
                                               :municipality "853"
-                                              ; FIXME at the moment fallbacks to NSL, which returns different coordinates
-                                              ;:location {:x 237551.371, :y 6709441.9}
+                                              :location {:x 237551.371, :y 6709441.9}
                                               }))))
 
   (fact "address-by-point-proxy"

@@ -421,11 +421,14 @@
                              :MAXFEATURES "1"
                              :BUFFER "500"}))
 
-(defn address-by-point-from-municipality [x y {:keys [url credentials]}]
+(defn address-by-point-from-municipality [x y {:keys [url credentials no-bbox-srs]}]
   (let [x_d (util/->double x)
         y_d (util/->double y)
         radius 50
-        bbox (ss/join "," [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50) "EPSG:3067"])]
+        corners [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50)]
+        ; Queries to some bockends must have the SRS defined at the end of BBOX,
+        ; but some bockends return NO RESULTS if it is defened!
+        bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))]
     (exec :get url
       credentials
       {:REQUEST "GetFeature"
@@ -613,7 +616,7 @@
   ([url service]
     (query-get-capabilities url service nil nil true))
   ([url service username password throw-exceptions?]
-    {:pre [(not (ss/blank? url))]}
+    {:pre [(ss/not-blank? url)]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
                              :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
