@@ -41,13 +41,20 @@ LUPAPISTE.AttachmentsService = function() {
     self.internedObservables = {};
   });
 
-  self.clearData = function() {
-    // to avoid showing stale data before ajax queries return, after switching views or applications
+  function clearData() {
+    // to avoid showing stale data before ajax queries return.
     self.attachments([]);
     forceVisibleIds([]);
     self.filters([]);
     self.tagGroups([]);
-  };
+  }
+
+  ko.computed(function() {
+    if (self.applicationId()) {
+      clearData();  // Just in case
+      self.queryAll();
+    }
+  });
 
   function queryData(queryName, responseJsonKey, dataSetter, params, hubParams) {
     if (self.authModel.ok(queryName)) {

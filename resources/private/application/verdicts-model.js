@@ -2,6 +2,8 @@ LUPAPISTE.VerdictsModel = function() {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel() );
+
   function getApplicationId(bindings) {
     return bindings.application.id();
   }
@@ -16,6 +18,26 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.applicationId = null;
 
+  function poytakirjaAttachments( verdict, pk ) {
+    return self.disposedComputed( function() {
+      return _.filter(lupapisteApp.services.attachmentsService.attachments(),
+                      function(attachment) {
+                        var target = attachment().target;
+                        var idMatch = false;
+                        if (target && target.type === "verdict") {
+                          if (target.poytakirjaId) {
+                            idMatch = target.poytakirjaId === pk.id;
+                          } else if (target.urlHash) {
+                            idMatch = target.urlHash === pk.urlHash;
+                          } else {
+                            idMatch = target.id === verdict.id;
+                          }
+                        }
+                        return idMatch;
+                      });
+    });
+  }
+
   self.refresh = function(application, authorities) {
     self.applicationId = application.id;
     var verdicts = _(application.verdicts || [])
@@ -23,21 +45,7 @@ LUPAPISTE.VerdictsModel = function() {
       .map(function(verdict) {
         var paatokset = _.map(verdict.paatokset || [], function(paatos) {
           var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-            var myAttachments = _.filter(application.attachments || [], function(attachment) {
-              var target = attachment.target;
-              var idMatch = false;
-              if (target && target.type === "verdict") {
-                if (target.poytakirjaId) {
-                  idMatch = target.poytakirjaId === pk.id;
-                } else if (target.urlHash) {
-                  idMatch = target.urlHash === pk.urlHash;
-                } else {
-                  idMatch = target.id === verdict.id;
-                }
-              }
-              return idMatch;
-            }) || [];
-            pk.attachments = myAttachments;
+            pk.attachments = poytakirjaAttachments( verdict, pk );
             return pk;
           });
           paatos.poytakirjat = poytakirjat;

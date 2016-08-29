@@ -31,19 +31,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.appModel = lupapisteApp.models.application;
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
-  self.disposedComputed(function() {
-    var id = self.service.applicationId(); // create dependency
-    if (id) {
-      self.service.queryAll();
-    }
-  });
-  // Reference to default dispose.
-  var dispose = self.dispose;
-  self.dispose = function() {
-    self.service.clearData();
-    dispose();
-  };
-
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
   //

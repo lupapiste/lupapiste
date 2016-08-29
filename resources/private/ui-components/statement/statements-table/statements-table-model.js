@@ -10,12 +10,13 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.statementIdsWithAttachments = ko.pureComputed(function() {
     var statementIdsWithAttachments = [];
-    _.forEach(lupapisteApp.models.application.attachments(), function(attachment) {
-      var target = ko.mapping.toJS(attachment.target);
-      if (target && target.type === "statement") {
-        statementIdsWithAttachments.push(target.id);
-      }
-    });
+    _.forEach(lupapisteApp.services.attachmentsService.attachments(),
+              function(attachment) {
+                var target = ko.mapping.toJS(attachment.target);
+                if (target && target.type === "statement") {
+                  statementIdsWithAttachments.push(target.id);
+                }
+              });
     return _.uniq(statementIdsWithAttachments);
   });
 
