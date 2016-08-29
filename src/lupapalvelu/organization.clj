@@ -195,10 +195,13 @@
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
 
-(defn municipality-address-endpoint [municipality]
+(defn municipality-address-endpoint [^String municipality]
+  {:pre [(or (string? municipality) (nil? municipality))]}
   (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
-
+    (let [no-bbox-srs (env/value :municipality-wfs (keyword municipality) :no-bbox-srs)]
+      (merge
+        (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)
+        (when no-bbox-srs {:no-bbox-srs true})))))
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
