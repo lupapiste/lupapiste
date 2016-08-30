@@ -1,13 +1,14 @@
 (ns lupapalvelu.attachment.conversion
   (:require [taoensso.timbre :refer [debug]]
-            [schema.core :as sc]
             [clojure.java.io :as io]
+            [schema.core :as sc]
+            [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.attachment.file :as file]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [sade.env :as env]
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper])
   (:import (java.io File InputStream))
   (:import (org.apache.commons.io FilenameUtils)))
@@ -60,7 +61,7 @@
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
             (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
             (:pdfa? processing-result) {:archivable true
-                                        :filename (file/filename-for-pdfa filename)
+                                        :filename (files/filename-for-pdfa filename)
                                         :archivabilityError nil
                                         :content (:output-file processing-result)
                                         :autoConversion (:autoConversion processing-result)}))

@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
             [sade.core :refer [ok fail fail! now def-]]
+            [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [schema.core :as sc]
@@ -418,7 +419,7 @@
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (attachment/temp-file-input-stream (attachment/get-all-attachments! attachments application lang))})
+        :body (files/temp-file-input-stream (attachment/get-all-attachments! attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -437,7 +438,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (attachment/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+       :body (files/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
 
 ;;
 ;; Upload
