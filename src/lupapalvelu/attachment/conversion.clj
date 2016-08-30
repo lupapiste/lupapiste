@@ -1,13 +1,13 @@
 (ns lupapalvelu.attachment.conversion
   (:require [taoensso.timbre :refer [debug]]
-            [schema.core :as sc]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment.file :as file]
+            [schema.core :as sc]
+            [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [sade.env :as env]
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper])
   (:import (java.io File InputStream))
   (:import (org.apache.commons.io FilenameUtils)))
@@ -60,7 +60,7 @@
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
             (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
             (:pdfa? processing-result) {:archivable true
-                                        :filename (file/filename-for-pdfa filename)
+                                        :filename (files/filename-for-pdfa filename)
                                         :archivabilityError nil
                                         :content (:output-file processing-result)
                                         :autoConversion (:autoConversion processing-result)}))
@@ -75,7 +75,7 @@
 (defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
   (if (env/feature? :convert-all-attachments)
     (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
+          pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
           pdf-title filename]
       (try
         (io/copy content tmp-file)
@@ -83,7 +83,7 @@
         {:archivable true
          :archivabilityError nil
          :autoConversion true
-         :content pdf-file
+         :content (files/temp-file-input-stream pdf-file)
          :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
         (finally
           (io/delete-file tmp-file :silently))))
