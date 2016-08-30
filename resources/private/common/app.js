@@ -100,6 +100,9 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.hashChanged = function () {
+      lupapisteApp.services.scrollService.push( {hash: "#!/" + self.currentHash,
+                                                 followed: true,
+                                                 override: true});
       self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
 
