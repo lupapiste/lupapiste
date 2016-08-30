@@ -8,7 +8,7 @@ Du kan ge ditt utl&aring;tande genom att klicka p&aring; l&auml;nken nedan. Om l
 
 Tidsfristen f&ouml;r utl&aring;tandet g&aring;r ut {{due-date-str-sv}}. Den som bett om utl&aring;tandet skickar f&ouml;ljande h&auml;lsningar:
 
-> {{message}}
+{{message}}
 
 H&auml;lsningar,
 {{lupapiste}}

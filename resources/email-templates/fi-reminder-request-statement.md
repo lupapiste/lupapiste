@@ -8,7 +8,7 @@ P&auml;&auml;set antamaan lausunnon klikkaamalla alla olevaa linkki&auml;. Jos l
 
 Lausuntoa pyyt&auml;nyt taho l&auml;hett&auml;&auml; viel&auml; seuraavat terveiset:
 
-> {{message}}
+{{message}}
 
 Terveisin,
 {{lupapiste}}
