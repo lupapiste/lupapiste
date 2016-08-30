@@ -1,5 +1,62 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1472551404652');
 
+=======
+@import url('main-blessed1.css?z=1472482544328');
+
+/* line 97, ../../../private/common-html/sass/partials/_tables.scss */
+th.actions a:last-child, td.actions a:last-child {
+  margin-right: 0;
+}
+
+/* line 105, ../../../private/common-html/sass/partials/_tables.scss */
+th.action-column .icon, td.action-column .icon {
+  margin: 0;
+}
+
+/* line 111, ../../../private/common-html/sass/partials/_tables.scss */
+tbody td, tfoot td {
+  vertical-align: middle;
+}
+
+/* line 117, ../../../private/common-html/sass/partials/_tables.scss */
+.dataTables_wrapper {
+  position: relative;
+}
+
+/* line 120, ../../../private/common-html/sass/partials/_tables.scss */
+.table-filter {
+  float: right;
+  position: absolute;
+  top: -36px;
+  right: 0;
+}
+
+/* line 127, ../../../private/common-html/sass/partials/_tables.scss */
+table.tasks thead tr:first-child td {
+  padding-left: 0;
+}
+
+/* line 131, ../../../private/common-html/sass/partials/_tables.scss */
+.tasks-content {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+/* line 137, ../../../private/common-html/sass/partials/_tables.scss */
+table.tasks .task-state {
+  width: 22px;
+}
+/* line 139, ../../../private/common-html/sass/partials/_tables.scss */
+table.tasks .task-state .icon {
+  margin: 12px 6px 6px 6px;
+}
+
+/* line 147, ../../../private/common-html/sass/partials/_tables.scss */
+table.attachments-template-table .center {
+  text-align: center;
+}
+>>>>>>> Stamping uses attachment service.
 /* line 151, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table th {
   padding-left: 6px;
@@ -1097,6 +1154,7 @@ div.attachments-table-container table.attachments-table td {
   vertical-align: top;
 }
 /* line 334, ../../../private/common-html/sass/partials/_tables.scss */
+<<<<<<< HEAD
 div.attachments-table-container table.attachments-table .attachments-table--widest {
   width: 80%;
 }
@@ -1120,15 +1178,40 @@ table.suti-admin-table td:nth-child(even) {
   width: 50%;
 }
 /* line 352, ../../../private/common-html/sass/partials/_tables.scss */
+=======
+div.attachments-table-container table.attachments-table td.attachments-table__state-icons > i {
+  margin-left: 1px;
+  magint-right: 1px;
+}
+/* line 338, ../../../private/common-html/sass/partials/_tables.scss */
+div.attachments-table-container table.attachments-table .attachments-table--widest {
+  width: 80%;
+}
+
+/* line 344, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table {
+  margin-top: 12px;
+}
+/* line 346, ../../../private/common-html/sass/partials/_tables.scss */
+table.suti-admin-table td:nth-child(even) {
+  width: 50%;
+}
+/* line 348, ../../../private/common-html/sass/partials/_tables.scss */
+>>>>>>> Stamping uses attachment service.
 table.suti-admin-table td:nth-child(even) input {
   width: 90%;
 }
 
+<<<<<<< HEAD
 /* line 358, ../../../private/common-html/sass/partials/_tables.scss */
+=======
+/* line 354, ../../../private/common-html/sass/partials/_tables.scss */
+>>>>>>> Stamping uses attachment service.
 div.suti-admin-container .serversettings--wide {
   width: 50%;
 }
 
+<<<<<<< HEAD
 /* line 362, ../../../private/common-html/sass/partials/_tables.scss */
 .suti-display {
   margin-bottom: 12px;
@@ -1142,10 +1225,26 @@ div.suti-admin-container .serversettings--wide {
   border: none;
 }
 /* line 372, ../../../private/common-html/sass/partials/_tables.scss */
+=======
+/* line 358, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display {
+  margin-bottom: 12px;
+}
+/* line 361, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .rollup-button span {
+  text-transform: uppercase;
+}
+/* line 365, ../../../private/common-html/sass/partials/_tables.scss */
+.suti-display .form-grid, .suti-display .checkbox-wrapper {
+  border: none;
+}
+/* line 368, ../../../private/common-html/sass/partials/_tables.scss */
+>>>>>>> Stamping uses attachment service.
 .suti-display .suti-display--error {
   color: #df3215;
 }
 
+<<<<<<< HEAD
 /* line 378, ../../../private/common-html/sass/partials/_tables.scss */
 .view-with-download .download {
   white-space: nowrap;
@@ -1155,6 +1254,17 @@ div.suti-admin-container .serversettings--wide {
   text-decoration: none;
 }
 /* line 383, ../../../private/common-html/sass/partials/_tables.scss */
+=======
+/* line 374, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download {
+  white-space: nowrap;
+}
+/* line 376, ../../../private/common-html/sass/partials/_tables.scss */
+.view-with-download .download a:hover {
+  text-decoration: none;
+}
+/* line 379, ../../../private/common-html/sass/partials/_tables.scss */
+>>>>>>> Stamping uses attachment service.
 .view-with-download .download a:hover > span {
   text-decoration: underline;
 }
@@ -3893,20 +4003,29 @@ div.search i {
   font-weight: bold;
 }
 
+<<<<<<< HEAD
 /* .rollup { */
 /*   width: 100%; */
 /*   display: block; */
 /* } */
 /* line 6, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 1, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup--closed > .rollup__open {
   display: none;
 }
 
+<<<<<<< HEAD
 /* line 10, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 5, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup--open > .rollup__closed {
   display: none;
 }
 
+<<<<<<< HEAD
 /* line 14, ../../../private/common-html/sass/partials/_rollup.scss */
 button.rollup-button {
   width: 100%;
@@ -3920,26 +4039,53 @@ button.rollup-button {
 }
 
 /* line 24, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 9, ../../../private/common-html/sass/partials/_rollup.scss */
+button.rollup-button {
+  width: 100%;
+  display: table-cell;
+}
+
+/* line 14, ../../../private/common-html/sass/partials/_rollup.scss */
+.rollup-status {
+  width: 100%;
+  display: table-cell;
+}
+
+/* line 19, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup-status__text {
   display: table-cell;
   width: 100%;
   text-transform: uppercase;
 }
 
+<<<<<<< HEAD
 /* line 30, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 25, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup-status__icon {
   display: table-cell;
   min-width: 22px;
 }
 
+<<<<<<< HEAD
 /* line 36, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 31, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup-accordion .rollup-accordion-content {
   padding-top: 6px;
   position: relative;
   border: 1px solid #dddddd;
   border-top: none;
 }
+<<<<<<< HEAD
 /* line 43, ../../../private/common-html/sass/partials/_rollup.scss */
+=======
+/* line 38, ../../../private/common-html/sass/partials/_rollup.scss */
+>>>>>>> Stamping uses attachment service.
 .rollup-accordion .rollup-accordion-content .rollup-accordion-content-part {
   margin-left: 12px;
   margin-right: 12px;
@@ -7823,6 +7969,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   border-top: none;
 }
 
+<<<<<<< HEAD
 /* line 25, ../../../private/common-html/sass/views/_attachmentsPOC.scss */
 .attachments-title {
   margin-top: 12px;
@@ -7830,6 +7977,8 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: inline-block;
 }
 
+=======
+>>>>>>> Stamping uses attachment service.
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
 #bulletins {
   font-family: "Source Sans Pro", sans-serif;

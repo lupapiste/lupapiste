@@ -2,6 +2,8 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+
   function allVersionsStamped(versions) {
     return _.every(versions, function(v) {
       return v.stamped;
@@ -74,27 +76,35 @@ LUPAPISTE.StampModel = function(params) {
   // Init
   self.application = params.application;
   self.attachments = params.attachments;
-  self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
+  self.preFiles = ko.observableArray();
+  self.postFiles = ko.observableArray();
+  self.status = ko.observable();
 
-  // group by post/pre verdict attachments
-  var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+  self.disposedComputed( function() {
+    self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
+
+    // group by post/pre verdict attachments
+    var grouped = _.groupBy(self.filteredFiles, function(a) {
+      return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+    });
+
+    // group attachments by operation
+    grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
+    grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
+
+    // map files for stamping
+    self.preFiles(_.map(grouped.pre, mapAttachmentGroup));
+    self.postFiles(_.map(grouped.post, mapAttachmentGroup));
+
+    self.status(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
   });
 
-  // group attachments by operation
-  grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
-  grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
 
-  // map files for stamping
-  self.preFiles = ko.observableArray(_.map(grouped.pre, mapAttachmentGroup));
-  self.postFiles = ko.observableArray(_.map(grouped.post, mapAttachmentGroup));
 
-  self.status = ko.observable(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
-
-  self.selectedFiles = ko.computed(function() {
+  self.selectedFiles = self.disposedComputed(function() {
     return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
-  self.allSelected = ko.computed(function() {
+  self.allSelected = self.disposedComputed(function() {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
 

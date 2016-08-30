@@ -255,10 +255,15 @@
                 </span>
               </td>
               <td>
-                <input type="checkbox" data-bind="checked: $data.selected,
-                      visible: $parents[2].status() < $parents[2].statusRunning,
-                      enable: $parents[2].status() === $parents[2].statusReady,
-                      click: function() {return true;}, clickBubble: false" />
+                <div class="stampbox-wrapper"
+                     data-bind="visible: $parents[2].status() < $parents[2].statusRunning">
+                  <input type="checkbox" data-bind="checked: $data.selected,
+                                                    enable: $parents[2].status() === $parents[2].statusReady,
+                                                    attr: {id: $data.fileId}">
+                  
+                  <label class="stampbox-label"
+                         data-bind="attr: {'for': $data.fileId}"></label>
+                </div>
                   <span data-bind="
                       text: loc(['stamp.file.status', $data.status()]),
                       visible: $parents[2].status() >= $parents[2].statusRunning"

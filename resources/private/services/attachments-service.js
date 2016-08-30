@@ -357,14 +357,22 @@ LUPAPISTE.AttachmentsService = function() {
     var rejected = self.isRejected(data) && canVouch(data);
 
     return  _( [[approved, {css: "lupicon-circle-check positive", icon: "approved"}],
-                [rejected || (!hasFile && !notNeeded), {css: "lupicon-circle-attention negative", icon: "rejected"}],
-                [ _.get( data, "signatures.0"), {css: "lupicon-circle-pen positive", icon: "signed"}],
-                [data.state === "requires_authority_action", {css: "lupicon-circle-star primary", icon: "state"}],
-                [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive", icon: "stamped"}],
-                [showSentIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent"}],
-                [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent-to-case-management"}],
-                [attachment.forPrinting, {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
-                [_.get( data, "metadata.nakyvyys") !== "julkinen", {css: "lupicon-lock primary", icon: "not-public"}]] )
+                [rejected || (!hasFile && !notNeeded), {css: "lupicon-circle-attention negative",
+                                                        icon: "rejected"}],
+                [ _.get( data, "signatures.0"), {css: "lupicon-circle-pen positive",
+                                                 icon: "signed"}],
+                [data.state === "requires_authority_action", {css: "lupicon-circle-star primary",
+                                                              icon: "state"}],
+                [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive",
+                                                        icon: "stamped"}],
+                [showSentIcon(data), {css: "lupicon-circle-arrow-up positive",
+                                      icon: "sent"}],
+                [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive",
+                                                      icon: "sent-to-case-management"}],
+                [attachment.forPrinting, {css: "lupicon-circle-section-sign positive",
+                                          icon: "for-printing"}],
+                [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary",
+                                                                                icon: "not-public"}]] )
       .filter(_.first)
       .map(_.last)
       .value();

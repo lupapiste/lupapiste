@@ -6103,6 +6103,99 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
 }
 
 /* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+<<<<<<< HEAD
+=======
+label.stampbox-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-label:hover.stampbox-label:before,
+input:checked + .stampbox-label:hover.stampbox-label:before {
+  color: #fbc732;
+}
+
+/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+input:checked + .stampbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "";
+  color: white;
+}
+
+/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+input:disabled + .stampbox-label:before,
+input:disabled + .stampbox-label:hover.stampbox-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper {
+  display: inherit;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+/* line 5, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper input[type=checkbox], .stampbox-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  font-size: 0;
+}
+
+/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+/* line 91, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper {
+  border: none;
+}
+
+/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 label.radio-label {
   width: 100%;
   display: inline-block;
@@ -6272,17 +6365,29 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   background-color: #f6f6f6;
 }
 
+<<<<<<< HEAD
 /* line 97, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 102, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
+<<<<<<< HEAD
 /* line 102, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 107, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .wrapper--break {
   margin-bottom: 24px;
 }
 
+<<<<<<< HEAD
 /* line 106, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 111, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -6372,7 +6477,11 @@ input:disabled + .filter-label:hover.filter-label:before {
   background-color: #f6f6f6;
 }
 
+<<<<<<< HEAD
 /* line 118, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 123, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6381,11 +6490,16 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
+<<<<<<< HEAD
 /* line 128, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 133, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
+<<<<<<< HEAD
 /* line 132, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
@@ -6395,11 +6509,23 @@ input:disabled + .filter-label:hover.filter-label:before {
   color: #fbc732;
 }
 /* line 139, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 137, ../../../private/common-html/sass/partials/_inputs.scss */
+.filter-group .filter-group__state span {
+  text-transform: uppercase;
+}
+/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
+.filter-group .filter-group__state:hover > i {
+  color: #fbc732;
+}
+/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
+<<<<<<< HEAD
 /* line 146, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
@@ -6409,6 +6535,18 @@ input:disabled + .filter-label:hover.filter-label:before {
   vertical-align: middle;
 }
 /* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
+=======
+/* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
+.button-input {
+  width: 100%;
+}
+/* line 153, ../../../private/common-html/sass/partials/_inputs.scss */
+.button-input input, .button-input button {
+  display: table-cell;
+  vertical-align: middle;
+}
+/* line 157, ../../../private/common-html/sass/partials/_inputs.scss */
+>>>>>>> Stamping uses attachment service.
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
@@ -8927,6 +9065,7 @@ th .icon, td .icon {
 /* line 95, ../../../private/common-html/sass/partials/_tables.scss */
 th.actions a, td.actions a {
   margin-right: 12px;
+<<<<<<< HEAD
 }
 /* line 97, ../../../private/common-html/sass/partials/_tables.scss */
 th.actions a:last-child, td.actions a:last-child {
@@ -8979,4 +9118,6 @@ table.tasks .task-state .icon {
 /* line 147, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table .center {
   text-align: center;
+=======
+>>>>>>> Stamping uses attachment service.
 }
