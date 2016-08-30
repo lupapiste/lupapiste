@@ -17,6 +17,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   self.defaultLocation = ko.observable();
 
   self.noCalendarFoundForOrganization = ko.observable();
+  self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
   self.disposedComputed(function() {
     var organizationId = lupapisteApp.models.application.organization();
@@ -37,9 +38,15 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     self.defaultLocation(event.defaultLocation);
   });
 
+  function isGuest( p ) {
+    return _.includes( ["reader", "guestAuthority"], p.role() );
+  }
+
   self.disposedComputed(function() {
     var parties = lupapisteApp.models.application.roles();
     var partyDocs = _.filter(lupapisteApp.models.application._js.documents, util.isPartyDoc);
+
+    parties = _.filter(parties, function(p) { return !isGuest(p); });
 
     self.authorizedParties(
       _.map(parties, function (p) {
@@ -59,8 +66,18 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     }
   });
 
-  self.partyFullName = function(party) {
-    return party.firstName + " " + party.lastName;
+  self.markSeen = function(r) {
+    ajax
+      .command("mark-reservation-update-seen", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
+      .success(function() {
+        r.acknowledged("seen");
+      })
+      .call();
   };
+
+  self.appointmentParticipants = function(r) {
+    return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
+  };
+
 
 };

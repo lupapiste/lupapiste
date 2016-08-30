@@ -232,7 +232,7 @@
                             <li data-bind="feature: 'attachments-poc',
                                            css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
                                 <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
-                                    <span>Suunnitelmat ja liitteet POC</span>
+                                    <span>Suunnitelmat ja liitteet, Vanha sivu</span>
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
@@ -418,8 +418,9 @@
                     </div>
 
                     <!-- Attachments tab -->
-                    <!-- ko if: selectedTabName() === 'attachments' -->
-                    <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
+                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
+                    <div id="application-attachmentsPOC-tab" class="tab-content"
+                         data-bind="with: $root.attachmentsTab, feature: 'attachments-poc'">
                         <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
                         <span data-bind="component: {
                                          name: 'help-toggle',
@@ -514,10 +515,9 @@
                     </div>
                     <!-- /ko -->
 
-                    <!-- AttachmentsPOC tab -->
-                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
-                    <div id="application-attachmentsPOC-tab" class="tab-content feature--no-border"
-                         data-bind="feature: 'attachments-poc'">
+                    <!-- Attachments tab -->
+                    <!-- ko if: selectedTabName() === 'attachments' -->
+                    <div id="application-attachments-tab" class="tab-content feature--no-border">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->
@@ -623,7 +623,7 @@
                         </button>
 
                         <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                                           enable: !$root.verdictModel.processing() && $root.verdictAttachmentPrintsOrderModel.attachments().length,
+                                           enable: !$root.verdictModel.processing(),
                                            visible: $root.authorization.ok('order-verdict-attachment-prints'),
                                            attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
                                 class="positive"
@@ -1081,8 +1081,7 @@
 
                         <!-- ko if: $root.foreman.isVisible -->
                         <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
-                        <h2 class="top-marginM" data-bind="ltext: 'foreman.allForemen'"></h2>
-                        <div data-bind="template: {name: 'application-foreman-list-template', data: $root.foreman}"></div>
+                        <div data-bind="template: {name: 'all-foremen-table-template', data: $root.foreman}"></div>
                         <!-- /ko -->
 
                         <review-tasks params="openTask: openTask"></review-tasks>

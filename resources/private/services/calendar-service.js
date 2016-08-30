@@ -53,20 +53,26 @@ LUPAPISTE.CalendarService = function() {
   var doFetchApplicationCalendarWeek = function(event) {
     var startOfWeekMoment = _getStartOfWeekMoment(event.week, event.year, event.weekObservable);
     var slots = [];
+    var _week = startOfWeekMoment.isoWeek();
+    var _year = startOfWeekMoment.year();
 
-    ajax.query("my-reservations", { week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year() })
+    ajax.query("my-reserved-slots", { week: _week, year: _year })
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
         notifyView(event, _weekdays(event, slots, startOfWeekMoment));
 
-        if (event.clientId && event.authorityId && event.reservationTypeId) {
-          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId, reservationTypeId: event.reservationTypeId,
+        if (event.clientId) {
+          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId,
+                                                   reservationTypeId: event.reservationTypeId,
                                                    week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
                                                    id: lupapisteApp.models.application.id() })
             .success(function(data) {
-              slots = slots.concat(data.slots);
-
+              slots = _.concat(slots, data.availableSlots);
+              slots = _.concat(slots,
+                _.map(
+                   _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
+                   function(r) { return _.set(r, "status", "read-only"); }));
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })
             .error(function(e) {
@@ -124,6 +130,8 @@ LUPAPISTE.CalendarService = function() {
     ajax.query("my-calendars")
       .success(function(data) {
         hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
+      }).error(function() {
+        hub.send("calendarService::serviceNotAvailable");
       })
       .call();
   });

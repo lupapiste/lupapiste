@@ -26,14 +26,14 @@ Mikko creates & submits application and goes to empty attachments tab
 
 Mikko adds PDF attachment without comment
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
+  Return to application  
   Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  operation=Uusi asuinrakennus
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME2}')]
+  Return to application  
   Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  operation=Yleisesti hankkeeseen
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
+  Return to application  
 
 Mikko does not see stamping button
-  Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
+  Wait until  Element should not be visible  jquery=button[data-test-id=stamp-attachments]
 
 Mikko previews file
   [Tags]  attachments
@@ -58,14 +58,14 @@ Sonja goes to attachments tab
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
-Attachment is not stamped
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
+Sonja sees that attachment is not stamped
+  Attachment should not be stamped  muut.muu
 
 Sonja sees stamping button
-  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
+  Wait until  Page should contain element  jquery=div#application-attachments-tab button[data-test-id=stamp-attachments]
 
 Sonja clicks stamp button, stamping page opens
-  Select attachment operation option from dropdown  stampAttachments
+  Click by test id  stamp-attachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
@@ -91,11 +91,10 @@ Sonja inputs new stamping info values
   Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
   Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
-Sonja can go to attachments tab. When she returns, stamp info fields are persistent.
-  Execute Javascript  window.scrollTo(0, 0);
-  Wait until  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
-  Element should be visible  application-attachments-tab
-  Select attachment operation option from dropdown  stampAttachments
+Sonja can go to attachments tab. When she returns, stamp info fields are persistent
+  Wait until  Scroll and click test id  back-to-application-from-stamping
+  Wait until  Element should be visible  application-attachments-tab
+  Scroll and click test id  stamp-attachments
   Wait Until  Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
@@ -106,15 +105,15 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
 
 Sonja can toggle selection of attachments by group/all/none
   # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-select"]
+  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  2
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-deselect"]
+  Scroll and click  div#stamping-container tr[data-test-id=asuinrakennus] a[data-test-id=attachments-group-deselect]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
-  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="attachments.general"]//a[@data-test-id="attachments-group-select"]
+  Scroll and click  div#stamping-container tr[data-test-id='attachments.general'] a[data-test-id=attachments-group-select]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-all]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
-  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-none"]
+  Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Status of stamping is ready
@@ -140,6 +139,15 @@ Return from stamping to attachments tab
   Element should be visible  application-attachments-tab
 
 Attachment has stamped icon
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//i[@data-test-icon="stamped-muut.muu"]  3
+  Wait until  Attachment should be stamped  muut.muu
 
+
+*** Keywords ***
+
+Attachment should be stamped
+  [Arguments]  ${type}
+  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] i[data-test-icon=stamped-icon]
+
+Attachment should not be stamped
+  [Arguments]  ${type}
+  Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] i[data-test-icon=stamped-icon]

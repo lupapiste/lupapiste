@@ -616,7 +616,7 @@
     (if expect-to-succeed
       (facts "Upload succesfully"
              (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
+             (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
       (facts "Upload should fail"
              (fact "Status code" (:status resp) => 302)
              (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
@@ -640,7 +640,7 @@
     (if expect-to-succeed
       (facts "upload to target succesfully"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/lp-static/html/upload-ok.html"))
+        (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
       (facts "upload to target should fail"
         (fact "Status code" (:status resp) => 302)
         (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
@@ -816,3 +816,14 @@
   (-> (query apikey :appeals :id app-id)
       :data
       (get (keyword verdict-id))))
+
+(defn ->xml
+  "Transforms map into XML structure."
+  [m]
+  (for [[k v] m]
+    {:tag (keyword k)
+     :attrs nil
+     :content (cond
+                (map? v)        (->xml v)
+                (sequential? v) (apply concat (map ->xml v))
+                :default        [(str v)])}))

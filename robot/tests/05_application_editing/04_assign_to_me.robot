@@ -58,9 +58,8 @@ Assignee has changed
 
 Viewing attachment should not reset the assignee select
   Open tab  attachments
-  Open attachment details  hakija.valtakirja
-  Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
-  Scroll and click test id  back-to-application-from-attachment
+  Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}
+  Return to application  
   Wait Until  Application assignee select is  Sibbo Sonja
   Open tab  parties
 

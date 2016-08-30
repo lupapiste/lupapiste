@@ -1,7 +1,7 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/data.zip "0.1.1"]
+                 [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/tools.trace "0.7.9"]
@@ -9,7 +9,7 @@
                  [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
-                 [ring "1.4.0"]
+                 [ring "1.5.0" :exclusions [commons-fileupload]] ; we will depend on the latest version manually until ring 1.6.0 is released
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
 
@@ -24,8 +24,8 @@
                  [org.slf4j/slf4j-log4j12 "1.7.21"]
 
                  ;;Hystrix
-                 [com.netflix.hystrix/hystrix-clj "1.5.2"]
-                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.2"]
+                 [com.netflix.hystrix/hystrix-clj "1.5.5"]
+                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.5"]
 
                  ; markup processing
                  [enlive "1.1.6"]
@@ -38,25 +38,26 @@
                  [org.jasypt/jasypt "1.9.2"]
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
-                 [org.bouncycastle/bcprov-jdk15on "1.54"]
+                 [org.bouncycastle/bcprov-jdk15on "1.55"]
                  [pandect "0.5.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
 
                  ; JSON
                  [cheshire "5.5.0"]
 
                  ; HTTP client
-                 [clj-http "3.0.1" :exclusions [commons-codec]]
+                 [clj-http "3.1.0" :exclusions [commons-codec]]
 
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
 
                  ; iCalendar
-                 [org.mnode.ical4j/ical4j "1.0.2"]
+                 [org.mnode.ical4j/ical4j "1.0.7"]
 
                  ; Apache Commons
+                 [commons-fileupload "1.3.2"]
                  [org.apache.commons/commons-lang3 "3.4"]
-                 [commons-io/commons-io "2.4"]
-                 [commons-codec/commons-codec "1.10"]
+                 [commons-io "2.5"]
+                 [commons-codec "1.10"]
 
                  ; Joda time wrapper
                  [clj-time "0.12.0"]
@@ -74,7 +75,7 @@
                  [slingshot "0.12.2"]
 
                  ; A Clojure(Script) library for declarative data description and validation
-                 [prismatic/schema "1.1.1"]
+                 [prismatic/schema "1.1.3"]
                  [prismatic/schema-generators "0.1.0"]
 
                  ; MIME type resolution
@@ -87,14 +88,15 @@
                  [com.github.jai-imageio/jai-imageio-core "1.3.1"]
                  [com.github.jai-imageio/jai-imageio-jpeg2000 "1.3.0"]
                  [com.google.zxing/javase "2.2"] ; QR codes
+                 [com.twelvemonkeys.imageio/imageio-jpeg "3.2.1"]
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.14"]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.5"]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5" :exclusions [com.lowagie/itext]]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
-                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.6"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.6" :exclusions [com.lowagie/itext]]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.6"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.6" :exclusions [org.freemarker/freemarker]]
 
                  ; JavaScript and CSS compression
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
@@ -113,17 +115,20 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.39"]
+                 [lupapiste/commons "0.7.41"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
-                 [lupapiste/openpdf "1.0.4"]
+                 [lupapiste/openpdf "1.0.5"]
                  ; Wrapper for clj-pdf for PDF/A document generation
-                 [lupapiste/pdfa-generator "1.0.1"]]
+                 [lupapiste/pdfa-generator "1.0.1"]
+                 ; Apache pdfbox for PDF/A wrapper
+                 [org.apache.pdfbox/pdfbox "2.0.2"]
+                 [org.apache.pdfbox/xmpbox "2.0.2"]]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
-                                  [ring-mock "0.1.5"]
+                                  [ring/ring-mock "0.3.0"]
                                   [com.raspasov/clj-ssh "0.5.12"]
-                                  [rhizome "0.2.5"]
+                                  [rhizome "0.2.7"]
                                   [pdfboxing "0.1.9"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]

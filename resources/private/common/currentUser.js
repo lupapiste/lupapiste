@@ -46,16 +46,33 @@ LUPAPISTE.CurrentUser = function() {
     return self.id();
   });
 
+  // Hash is cleared when returned to the application list. But the
+  // we need to wrap it to the observable in order to trigger
+  // isAuthority and isApplicant computeds.
+  var hash = ko.observable();
+
+  window.onhashchange = function() {
+    // Null-safe regarding location
+    hash( _.get( window, "location.hash" ));
+  };
+
+  function isOutsideAuthority() {
+    var app = lupapisteApp.models.application;
+    return self.role() === "authority"
+      && app && _.includes( hash(), app.id())
+      && !_.get( self.orgAuthz(), app.organization());
+  }
+
   self.isAuthorityAdmin = ko.pureComputed(function() {
     return self.role() === "authorityAdmin";
   });
 
   self.isAuthority = ko.pureComputed(function() {
-    return self.role() === "authority";
+    return self.role() === "authority" && !isOutsideAuthority();
   });
 
   self.isApplicant = ko.pureComputed(function() {
-    return self.role() === "applicant";
+    return self.role() === "applicant" || isOutsideAuthority();
   });
 
   self.isCompanyUser = ko.pureComputed(function() {

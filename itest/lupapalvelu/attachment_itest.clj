@@ -442,40 +442,41 @@
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
-(facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
-  (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
-        application-id (:id application)
-        type {:type-group "paapiirustus" :type-id "asemapiirros"}
-        resp (command raktark-jarvenpaa
-                 :create-attachments
-                 :id application-id
-                 :attachmentTypes [type]) => ok?
-        attachment {:id (first (:attachmentIds resp))
-                    :type type}
-        attachment-id (:id attachment)]
+(when (or pdfa/pdf2pdf-enabled? dev-env?)
+  (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
+          (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+                application-id (:id application)
+                type {:type-group "paapiirustus" :type-id "asemapiirros"}
+                resp (command raktark-jarvenpaa
+                              :create-attachments
+                              :id application-id
+                              :attachmentTypes [type]) => ok?
+                attachment {:id (first (:attachmentIds resp))
+                            :type type}
+                attachment-id (:id attachment)]
 
-    (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
+            (upload-attachment pena application-id attachment true :filename "dev-resources/invalid-pdfa.pdf")
 
-    (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
-          v1 (first v1-versions)]
-      (fact "one version" (count v1-versions) => 1)
-      (fact "fileID is set" (:fileId v1) => truthy)
-      (fact "fileID is set" (:originalFileId v1) => truthy)
-      (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
-      (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
-      (fact "version number is set" (:version v1) => {:major 1 :minor 0})
-      (fact "Auto conversion flag is set" (:autoConversion v1) => true)
+            (let [v1-versions (:versions (get-attachment-by-id pena application-id attachment-id))
+                  v1 (first v1-versions)]
+              (fact "one version" (count v1-versions) => 1)
+              (fact "fileID is set" (:fileId v1) => truthy)
+              (fact "fileID is set" (:originalFileId v1) => truthy)
+              (fact "PDF/A has ref to original before rotate" (:fileId v1) =not=> (:originalFileId v1))
+              (fact "Uploader is Pena" (-> v1 :user :id) => pena-id)
+              (fact "version number is set" (:version v1) => {:major 1 :minor 0})
+              (fact "Auto conversion flag is set" (:autoConversion v1) => true)
 
-      (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
+              (command raktark-jarvenpaa :rotate-pdf :id application-id :attachmentId attachment-id :rotation 90) => ok?
 
-      (let [v2-versions (:versions (get-attachment-by-id raktark-jarvenpaa application-id  attachment-id))
-            v2          (first v2-versions)]
-        (fact "No new version" (count v2-versions) => 1)
-        (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
-        (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
-        (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
-        (fact "version number is not changed" (:version v2) => (:version v1))
-        (fact "Auto conversion flag is preserved" (:autoConversion v2) => true)))))
+              (let [v2-versions (:versions (get-attachment-by-id raktark-jarvenpaa application-id  attachment-id))
+                    v2          (first v2-versions)]
+                (fact "No new version" (count v2-versions) => 1)
+                (fact "File is changed" (:fileId v2) =not=> (:fileId v1))
+                (fact "Original file is the same" (:originalFileId v2) => (:originalFileId v1))
+                (fact "Uploader is still Pena" (-> v2 :user :id) => pena-id)
+                (fact "version number is not changed" (:version v2) => (:version v1))
+                (fact "Auto conversion flag is preserved" (:autoConversion v2) => true))))))
 
 (facts "Convert attachment to PDF/A with Libre"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
@@ -545,7 +546,7 @@
             (get-in attachment [:latestVersion :archivable]) => true
             (get-in attachment [:latestVersion :archivabilityError]) => nil
             (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa-PDFA.pdf"))
+            (get-in attachment [:latestVersion :filename]) => "invalid-pdfa.pdf"))
 
 
         (fact "Latest version should be 1.0 after conversion"
@@ -778,6 +779,15 @@
         {attachments :attachments} (query-application pena application-id)
         base-attachment (first attachments)]
 
+    (defn latest-attachment []
+      (-> (query-application pena application-id) :attachments last))
+
+    (defn first-attachment []
+      (-> (query-application pena application-id) :attachments first))
+
+    (fact "Upload file to attachment"
+          (upload-attachment pena application-id base-attachment true) => true)
+
     (fact "Assign application to Ronja"
       (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
 
@@ -793,9 +803,15 @@
       (command pena :create-ram-attachment :id application-id :attachmentId "invalid_id")
       => (partial expected-failure? :error.attachment.id))
 
-    (fact "RAM link is created"
-      (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
-      => ok?)
+    (fact "RAM link cannot be created on unapproved attachment"
+          (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
+          => (partial expected-failure? :error.attachment-not-approved))
+
+    (fact "RAM link is created after approval"
+          (command sonja :approve-attachment :id application-id
+                   :fileId (-> (first-attachment) :latestVersion :fileId)) => ok?
+          (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
+          => ok?)
 
     (fact "Email notification about new RAM is sent"
       (let [email (last-email)]
@@ -804,23 +820,27 @@
 
     (fact "RAM link cannot be created twice on same attachment"
           (command pena :create-ram-attachment :id application-id :attachmentId (:id base-attachment))
-          => (partial expected-failure? :error.ram-link-already-exists))
+          => (partial expected-failure? :error.ram-linked))
 
-    (defn latest-attachment []
-      (-> (query-application pena application-id) :attachments last))
-
-    (fact "Pena uploads new post-verdict attachment and corresponding RAM attachment"
+    (facts "Pena uploads new post-verdict attachment and corresponding RAM attachment"
           (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
           (let [base (latest-attachment)]
-            (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?
+            (fact "RAM creation fails do to unapproved base attachment"
+                  (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
+                  => (partial expected-failure? :error.attachment-not-approved) )
+
+            (fact "Approve and create RAM"
+                  (command sonja :approve-attachment :id application-id
+                           :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
+                  (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
             (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => true
             (fact "Applicant cannot delete base attachment"
                   (command pena :delete-attachment :id application-id :attachmentId (:id base))
-                  => (partial expected-failure? :error.ram-cannot-delete-root))
+                  => (partial expected-failure? :error.ram-linked))
             (fact "Applicant cannot delete base attachment version"
                   (command pena :delete-attachment-version :id application-id :attachmentId (:id base)
                            :fileId (-> base :latestVersion :fileId) :originalFileId (-> base :latestVersion :originalFileId))
-                  => (partial expected-failure? :error.ram-cannot-delete-root))))
+                  => (partial expected-failure? :error.ram-linked))))
     (let [ram-id (:id (latest-attachment))]
       (facts "Latest attachment has RAM link"
              (let [{[a b] :ram-links} (query pena :ram-linked-attachments :id application-id :attachmentId ram-id)]
@@ -854,5 +874,23 @@
         (let [base (latest-attachment)]
           (fact "Pena again creates RAM attachment"
                 (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
-          (fact "Sonja can delete base attachment"
-                (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => ok?))))))
+          (fact "Sonja cannot delete base attachment"
+                (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => (partial expected-failure? :error.ram-linked))
+          (fact "Fill and approve RAM and create one more link"
+                (upload-attachment pena application-id (latest-attachment) true) => true
+                (let [middle (latest-attachment)]
+                  (command sonja :approve-attachment :id application-id
+                           :fileId (-> middle :latestVersion :fileId)) => ok?
+                  (command pena :create-ram-attachment :id application-id :attachmentId (:id middle)) => ok?
+                  (fact "Sonja can reject the middle RAM"
+                        (command sonja :reject-attachment :id application-id
+                                 :fileId (-> middle :latestVersion :fileId)) => ok?)
+                  (fact "... but cannot delete it"
+                        (command sonja :delete-attachment :id application-id :attachmentId (:id middle))
+                        => (partial expected-failure? :error.ram-linked))
+                  (fact "... or its version"
+                        (command sonja :delete-attachment-version :id application-id
+                                 :attachmentId (:id middle)
+                                 :fileId (-> middle :latestVersion :fileId)
+                                 :originalFileId (-> middle :latestVersion :originalFileId))
+                        => (partial expected-failure? :error.ram-linked)))))))))

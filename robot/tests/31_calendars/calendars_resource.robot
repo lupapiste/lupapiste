@@ -29,3 +29,14 @@ Add reservation type
   Confirm   dialog-edit-reservation-type
   Positive indicator should be visible
   Wait until  Element should be visible  //table[@data-test-id='organization-reservation-types']//td[text()='${name}']
+
+Goto following week in calendar view
+  ${monday}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
+  Click by test id  calendar-view-following-week
+  ${monday}=  Evaluate  ${monday}+604800000
+  Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${monday}']
+
+Assign application to
+  [Arguments]  ${to}
+  Wait Until  Element Should Be Visible  jquery=[data-test-id=assignee-select]:visible
+  Select From List By Label  jquery=[data-test-id=assignee-select]:visible  ${to}

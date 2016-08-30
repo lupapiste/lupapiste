@@ -42,7 +42,7 @@ Pena sets Solita as hakija
   Open application  ${appname}  753-416-25-22
   Open tab  parties
   Open foreman accordions
-  Scroll and click  section[data-doc-type=hakija-r] input[value=yritys]
+  Scroll and click input  section[data-doc-type=hakija-r] input[value=yritys]
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
@@ -123,7 +123,10 @@ Foreman application can't be submitted before link permit is submitted
   Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
   Wait until  Submit application error should be  error.not-submittable.foreman-link
 
-
+Pena can set Teppo as foreman substitute
+  Open tab  parties
+  Input text with jQuery  input[data-docgen-path="sijaistus.sijaistettavaHloEtunimi"]  Bob
+  
 Application is submitted
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
@@ -139,6 +142,10 @@ Original application is approved and given a verdict
   Approve application
   Open tab  verdict
   Submit empty verdict
+
+All foremen table is shown on the Construction tab
+  Open tab  tasks
+  Element should contain  jquery=table.all-foremen-table tbody tr td  (sijainen)
   [Teardown]  logout
 
 Pena can create foreman applications after verdict is given for the original application
@@ -219,14 +226,23 @@ Authority can view draft foreman application, but can't use commands
   Wait until  Element should be visible  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]
   Open accordions  info
   Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]//textarea
+
+...on parties tab
   Open tab  parties
   Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
   Element should be disabled  xpath=//section[@data-doc-type="hakija-tj"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
+
+...on attachments tab
   Open tab  attachments
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
-  Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse...
+  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=add-attachment]
+  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=add-attachment-templates]
+  Page should not contain  jquery=div#application-attachments-tab div[data-test-id=attachment-operation-buttons] button:visible
+
+...submit aplication
   Open tab  requiredFieldSummary
   Element should not be visible  xpath=//div[@id="application-requiredFieldSummary-tab"]//button[@data-test-id="application-submit-btn"]
+
+...application actions
   # Application actions only exportPDF is visible
   Element should be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="application-pdf-btn"]
   Element should not be visible  xpath=//div[@class="application_actions"]//button[@data-test-id="add-operation"]

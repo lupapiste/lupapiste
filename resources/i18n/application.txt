@@ -69,7 +69,7 @@
 "application.attachments.yleiset" "fi" "Yleiset hankkeen liitteet"
 "application.attachments.yleiset" "sv" "Projektets allmänna bilagor"
 "application.attachments.general" "fi" "Yleiset hankkeen liitteet"
-"application.attachments.genaral" "sv" "Projektets allmänna bilagor"
+"application.attachments.general" "sv" "Projektets allmänna bilagor"
 "application.attachmentsAdd" "fi" "Lisää liite"
 "application.attachmentsAdd" "sv" "Lägg till bilaga"
 "application.attachmentsAddList" "fi" "Lisää liitetiedosto"

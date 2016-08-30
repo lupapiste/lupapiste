@@ -43,6 +43,7 @@
                       "text/plain; charset=utf-8" :plain
                       "text/html; charset=utf-8"  :html
                       "text/calendar; charset=utf-8; method=REQUEST"  :calendar
+                      "text/calendar; charset=utf-8; method=REPLY"  :calendar
                       content-type) content))
       body))
 
@@ -105,7 +106,7 @@
       (enlive/emit*
         {:tag :html
          :content [{:tag :head :content [{:tag :title, :content "Latest emails"}
-                                         {:tag :style, :content "* {font-family: sans-serif}\ndl {background-color: #eee}"}]}
+                                         {:tag :style, :content "* {font-family: sans-serif}\npre {font-family: courier; font-size: 10pt}\ndl {background-color: #eee}"}]}
                    {:tag :body
                     :content (map (fn [msg]
                                     {:tag :div
@@ -113,7 +114,8 @@
                                      :content
                                      (vector
                                        (msg-header msg)
-                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes ^String (get-in msg [:body :html]) "UTF-8"))) [:body]))
+                                       {:tag :pre :content (get-in msg [:body :calendar])})}
                                    ) msgs)}]
          })
       {:status 404 :body "No emails"}))

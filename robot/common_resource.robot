@@ -619,27 +619,21 @@ Do prepare new request
   Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
-
-Select attachment operation option from dropdown
-  [Arguments]  ${optionName}
-  Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
-  Wait until  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
-
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Select attachment operation option from dropdown  newAttachmentTemplates
-  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
-  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
-  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
+  Click enabled by test id  add-attachment-templates
+  Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
+  List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list] option:contains('${templateName}')
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
+  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
+  Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
-  Run Keyword If  '${kind}' == 'application'  Select attachment operation option from dropdown  attachmentsAdd
+  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
 
@@ -659,8 +653,17 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Run Keyword If  '${kind}' == 'application'  Wait until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='${type}']
+  Run Keyword If  '${kind}' == 'application'  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
+
+Return to application
+  Wait Until  Click by test id  back-to-application-from-attachment
+
+Delete attachment
+  [Arguments]  ${type}
+  Scroll to  tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Click element  jquery=tr[data-test-type='${type}'] button[data-test-icon='delete-button']
+  Confirm yes no dialog
 
 Set attachment type for upload
   [Arguments]  ${type}
@@ -668,15 +671,28 @@ Set attachment type for upload
   Select From List  attachmentType  ${type}
 
 Open attachment details
-  [Arguments]  ${type}  ${nth}=1
+  [Arguments]  ${type}  ${nth}=0
   Open tab  attachments
-  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//td[@class='attachment-type-id']//a[@data-test-type="${type}"][${nth}]
-  Wait Until  Page Should Contain Element  ${path}
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Wait Until  Focus  ${path}
-  Wait Until  Click element  ${path}
-  Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+  ${selector} =  Set Variable  $("div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length>0;  10
+  Execute Javascript  ${selector}[${nth}].click();
+  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
+
+Click not needed
+  [Arguments]  ${type}  ${nth}=1
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  Wait until  Element should be visible  jquery=${selector}
+  Scroll to  ${selector}
+  Click element  jquery=${selector}
+
+Attachment indicator icon should be visible
+  [Arguments]  ${icon}  ${type}
+  Element should be visible  jquery=table.attachments-table tr[data-test-type='${type}'] i[data-test-icon=${icon}-icon]
+
+Attachment indicator icon should not be visible
+  [Arguments]  ${icon}  ${type}
+  Element should not be visible  jquery=table.attachments-table tr[data-test-type='${type}'] i[data-test-icon=${icon}-icon]
 
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}
@@ -685,10 +701,8 @@ Assert file latest version
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
-Add attachment version
+Attachment file upload
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
-  Click Element  xpath=//button[@id="add-new-attachment-version"]
   Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
   Select Frame   uploadFrame
   Wait until     Element should be visible  test-save-new-attachment
@@ -702,6 +716,26 @@ Add attachment version
   Unselect Frame
   ${path}  ${filename}=  Split Path  ${path}
   Wait until     Element Text Should Be  xpath=//section[@id='attachment']//span[@id='test-attachment-file-name']/a  ${filename}
+
+# Add file version from attachment details
+Add attachment version
+  [Arguments]  ${path}
+  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
+  Click Element  xpath=//button[@id="add-new-attachment-version"]
+  Attachment file upload  ${path}
+
+# Add the first file to template from attachments view
+Add attachment file
+  [Arguments]  ${row}  ${path}
+  Wait Until     Element should be visible  jquery=${row}
+  Scroll and click  ${row} a[data-test-id=add-attachment-file]
+  Attachment file upload  ${path}
+  
+
+Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Scroll and click test id  postVerdict-filter-label
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -1011,6 +1045,10 @@ Task count is
   [Arguments]  ${type}  ${amount}
   Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]  ${amount}
 
+Task state count is
+  [Arguments]  ${type}  ${state}  ${amount}
+  Wait until  Xpath Should Match X Times  //table//tbody/tr[@data-test-type="${type}"]//i[@data-test-state="${state}"]  ${amount}
+
 Foreman count is
   [Arguments]  ${amount}
   Wait until  Xpath Should Match X Times  //table[@class="tasks-foreman"]/tbody/tr  ${amount}
@@ -1245,6 +1283,11 @@ Scroll to test id
 Scroll and click
   [Arguments]  ${selector}
   Scroll to  ${selector}
+  Click Element  jquery=${selector}
+
+Scroll and click input
+  [Arguments]  ${selector}
+  Scroll to  ${selector}
   Element should be enabled  jquery=${selector}
   Click Element  jquery=${selector}
 
@@ -1312,6 +1355,14 @@ Javascript? helper
 Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
+
+Checkbox wrapper selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+
+Checkbox wrapper not selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
 
 Click label
   [Arguments]  ${for}

@@ -3,6 +3,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  self.APPROVED = "ok";
+  self.REJECTED = "requires_user_action";
+
   var legendTemplate = _.template( "<div class='like-btn'>"
                                    + "<i class='<%- icon %>'></i>"
                                    + "<span><%- text %></span>"
@@ -34,12 +37,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
       self.service.queryAll();
     }
   });
+  // Reference to default dispose.
   var dispose = self.dispose;
   self.dispose = function() {
-    self.service.changeScheduledNotNeeded();
     self.service.clearData();
     dispose();
   };
+
+  hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
   //
   // Attachment hierarchy
@@ -48,7 +53,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function findMatchingTag(tags, attachment) {
     return _.find(tags, function(tag) {
       return _.includes(attachment.tags, tag);
-    }) || "default";
+    });
   }
 
   function resolveTagGrouping(attachments, tagGroups) {
@@ -64,11 +69,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
         return resolveTagGrouping(attachmentsInGroup, _.tail(tagGroup));
       })
       .value();
-  }
-
-
-  function notNeededForModel(attachment) {
-    return attachment.notNeeded;
   }
 
   //
@@ -89,35 +89,34 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
 
 
-  function modelForAttachmentInfo(attachmentIds) {
-    var attachments = _(attachmentIds)
+  function getAttachmentInfos(attachmentIds) {
+    return _(attachmentIds)
           .map(self.service.getAttachment)
-          .filter(_.identity)
+          .filter()
           .value();
-    return {
-      approve:      self.service.approveAttachment,
-      reject:       self.service.rejectAttachment,
-      remove:       self.service.removeAttachment,
-      setNotNeeded: self.service.setNotNeeded,
-      isApproved:   self.service.isApproved,
-      isRejected:   self.service.isRejected,
-      isNotNeeded:  notNeededForModel,
-      attachments:  attachments
-    };
   }
 
-
   function modelForSubAccordion(subGroup) {
-    var attachmentInfos = modelForAttachmentInfo(subGroup.attachmentIds);
+    var attachmentInfos = getAttachmentInfos(subGroup.attachmentIds);
     return {
       type: "sub",
       attachmentInfos: attachmentInfos,
       // all approved or some rejected
       status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
       hasContent: ko.pureComputed(function() {
-        return attachmentInfos && attachmentInfos.attachments &&
-          attachmentInfos.attachments.length > 0;
-      })
+        return attachmentInfos &&
+          attachmentInfos.length > 0;
+      }),
+      hasFile: ko.pureComputed(function() {
+        return _.some(attachmentInfos, function(attachment) {
+          return !!util.getIn(attachment, ["latestVersion", "fileId"]);
+        });
+      }),
+      attachmentIds: subGroup.attachmentIds,
+      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     };
   }
 
@@ -141,19 +140,27 @@ LUPAPISTE.AttachmentsListingModel = function() {
     });
   }
 
-  function someSubGroupsHaveContent(subGroups) {
+  function someSubGroupsField(subGroups, fieldName) {
     return ko.pureComputed(function() {
       return _.some(_.values(subGroups),
-                    function(sg) { return sg.hasContent(); });
+                    function(sg) { return util.getIn(sg, [fieldName]); });
     });
   }
 
   function modelForMainAccordion(mainGroup) {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
+    var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
+    var attachmentInfos = getAttachmentInfos(attachmentIds);
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
-      hasContent: someSubGroupsHaveContent(subGroups)
+      hasContent: someSubGroupsField(subGroups, "hasContent"),
+      hasFile: someSubGroupsField(subGroups, "hasFile"),
+      attachmentIds: attachmentIds,
+      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
 
@@ -196,7 +203,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         return group;
       }
     }
-    var group = util.getIn(self.attachmentsHierarchy(), groupPath) || "default";
+    var group = util.getIn(self.attachmentsHierarchy(), groupPath);
     return getAttachments(group);
   }
 
@@ -206,18 +213,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
     });
   }
 
-
   function getOperationLocalization(operationId) {
     var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
     return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
-  }
-
-  function getLocalizationForDefaultGroup(groupPath) {
-    if (groupPath.length === 1) {
-      return loc("application.attachments.general");
-    } else {
-      return loc("application.attachments.other");
-    }
   }
 
   function groupToAccordionName(groupPath) {
@@ -225,8 +223,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
         key = _.last(groupPath);
     if (opIdRegExp.test(key)) {
       return getOperationLocalization(opIdRegExp.exec(key)[1]);
-    } else if (_.last(groupPath) === "default") {
-      return getLocalizationForDefaultGroup(groupPath);
     } else {
       return loc(["application", "attachments", key]);
     }
@@ -235,6 +231,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function getDataForAccordion(groupPath) {
     return {
       name: groupToAccordionName(groupPath),
+      path: groupPath,
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
@@ -249,6 +246,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
     if (tagGroups.length) {
       return {
         name: groupToAccordionName(groupPath),
+        path: groupPath,
         open: ko.observable(),
         data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {
@@ -296,45 +294,57 @@ LUPAPISTE.AttachmentsListingModel = function() {
     }
   });
 
-
-
-  self.newAttachment = function() {
+  function addAttachmentFile( params ) {
+    var attachmentId = _.get( params, "attachmentId");
+    var attachmentType = _.get( params, "attachmentType");
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
-      attachmentId: null,
-      attachmentType: null,
-      typeSelector: true,
+      attachmentId: attachmentId,
+      attachmentType: attachmentType,
+      typeSelector: !attachmentType,
       opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
+  }
 
-  self.onUploadDone = function() {
-    self.service.queryAll();
-  };
-  hub.subscribe("upload-done", self.onUploadDone);
+  self.newAttachment = _.ary( addAttachmentFile, 0 );
 
-  self.onTemplateCreateDone = function() {
-    self.service.queryAll();
-  };
+  self.addHubListener( "add-attachment-file", addAttachmentFile );
+
+  function onUploadDone( params) {
+    var id = _.get( params, "attachmentId");
+    if( id ) {
+      self.service.queryOne( id, {attachmentUploaded: id} );
+    } else {
+      self.service.queryAll();
+    }
+  }
+
+  self.addHubListener("upload-done", onUploadDone);
+
+  // After attachment query
+  function afterQuery( params ) {
+    var id = _.get( params, "attachmentUploaded");
+    if( id ) {
+      pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
+    }
+  }
+
+  self.addEventListener( self.service.serviceName, "query", afterQuery );
 
   function AttachmentTemplatesModel() {
     var templateModel = this;
-
-    templateModel.ok = function(ids) {
-      ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
-        .success(self.onTemplateCreateDone)
-        .complete(LUPAPISTE.ModalDialog.close)
-        .call();
-    };
-
     templateModel.init = function() {
       templateModel.initDone = true;
       templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
       templateModel.selectm
         .allowDuplicates(true)
-        .ok(templateModel.ok)
+        .ok(function(types) {
+          self.service.createAttachmentTempaltes(types, {
+            onComplete: LUPAPISTE.ModalDialog.close
+          });
+        })
         .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
@@ -365,12 +375,60 @@ LUPAPISTE.AttachmentsListingModel = function() {
     self.attachmentTemplatesModel.show();
   };
 
+  self.copyUserAttachments = function() {
+    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
+                                               yesFn: self.service.copyUserAttachments}});
+  };
+
+  self.canCopyUserAttachments = function() {
+    return self.authModel.ok("copy-user-attachments-to-application");
+  };
+
   self.startStamping = function() {
     hub.send("start-stamping", {application: self.appModel});
   };
 
   self.canStamp = function() {
-    return self.authModel.ok("stamp-attachments") && self.appModel.hasAttachment();
+    return self.authModel.ok("stamp-attachments");
   };
+
+  self.signAttachments = function() {
+    hub.send("sign-attachments", {application: self.appModel});
+  };
+
+  self.canSign = function() {
+    return self.authModel.ok("sign-attachments");
+  };
+
+  self.markVerdictAttachments = function() {
+    hub.send("start-marking-verdict-attachments", {application: self.appModel});
+  };
+
+  self.canMarkVerdictAttachments = function() {
+    return self.authModel.ok("set-attachments-as-verdict-attachment");
+  };
+
+  self.orderAttachmentPrints = function() {
+    hub.send("order-attachment-prints", {application: self.appModel});
+  };
+
+  self.canOrderAttachmentPrints = function() {
+    return self.authModel.ok("order-verdict-attachment-prints");
+  };
+
+  self.hasFile = ko.pureComputed(function() {
+    return _(self.attachmentGroups()).invokeMap("hasFile").some();
+  });
+
+  self.hasUnfilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.attachments());
+  });
+
+  self.hasFilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.filteredAttachments());
+  });
 
 };

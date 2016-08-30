@@ -117,4 +117,4 @@
           (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
           (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy
           (finally
-            (io/delete-file temp-pdf-path :silently)))))))
+            (io/delete-file temp-pdf-path)))))))

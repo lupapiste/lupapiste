@@ -86,6 +86,7 @@
 
 (defcommand add-comment
   {:parameters [id text target roles]
+   :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
    :user-authz-roles auth/all-authz-writer-roles
@@ -110,6 +111,6 @@
                              #{:authority :applicant :oirAuthority})]
     (update-application command
       (util/deep-merge
-        (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created ensured-visibility)
+        (comment/comment-mongo-update (:state application) text target (application/user-role user application) mark-answered user to-user created ensured-visibility)
         (when (and openApplication (= (:state application) "draft"))
           (application/state-transition-update :open created user))))))

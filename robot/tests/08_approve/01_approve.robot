@@ -36,19 +36,19 @@ Mikko can't approve application
 Mikko adds an attachment
   Open tab  attachments
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Return to application
 
 Mikko decides to submit application
   Submit application
 
 Mikko still can't approve application
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
   [Teardown]  Kill session
 
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
   Kill session
 
 Sonja logs in for approval
@@ -132,9 +132,9 @@ Sonja cant re-approve application
 Party tab indicators have been reset
   Wait Until  Element should not be visible  applicationPartyDocumentIndicator
 
-Sonja sees that attachment has transferred indicator icon
+Sonja sees that attachment has sent indicator icon
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//i[@data-test-icon="transfered-muut.muu"]
+  Wait until  Attachment indicator icon should be visible  sent  muut.muu
 
 Building selector keeps its value
   Open tab  info
@@ -145,7 +145,7 @@ Building selector keeps its value
 Sonja sees that some completion is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
-  
+
 Mikko comes back, fills in missing parts and no submit button enabled
   Kill session
   Mikko logs in
@@ -285,7 +285,7 @@ Reject group
 
 Close message monitor
   Click Element  jquery=div.integration-message-monitor span.close
-  
+
 
 # Quick'n'dirty: wipe out current session and go to
 # login page

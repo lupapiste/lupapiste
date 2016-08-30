@@ -3,6 +3,8 @@
             [lupapalvelu.attachment.type :as att-type]))
 
 (def attachment-groups [:parties :building-site :operation])
+(def general-group-tag :general)
+(def all-group-tags (cons general-group-tag attachment-groups))
 
 (defmulti groups-for-attachment-group-type (fn [application group-type] group-type))
 
@@ -17,7 +19,7 @@
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
 (defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
-  (if (states/post-verdict-states app-state)
+  (if (states/post-verdict-states (keyword app-state))
     :postVerdict
     :preVerdict))
 
@@ -31,10 +33,16 @@
     (str "op-id-" op-id)))
 
 (defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
-  (or (keyword group-type) (when op-id :operation)))
+  (or (keyword group-type)
+      (when op-id :operation)
+      general-group-tag))
 
 (defn- tag-by-operation [{{op-id :id} :op :as attachment}]
   (op-id->tag op-id))
+
+(defn- tag-by-type [{{op-id :id} :op :as attachment}]
+  (or (att-type/tag-by-type attachment)
+      (when op-id att-type/other-type-group)))
 
 (defn attachment-tags
   "Returns tags for a single attachment for filtering and grouping attachments of an application"
@@ -43,12 +51,12 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              att-type/tag-by-type)
+              tag-by-type)
         attachment)
        (remove nil?)))
 
 (defn- attachments-group-types [attachments]
-  (->> (map #(if ((comp :id :op) %) :operation (:groupType %)) attachments)
+  (->> (map tag-by-group-type attachments)
        (remove nil?)
        (map keyword)
        distinct))
@@ -58,26 +66,19 @@
        (remove nil?)
        distinct))
 
-(def type-grouping-stresshold 1)
-
 (defn- type-groups-for-operation
-  "Returns attachment type based grouping. Type group is created only if amount of attachments
-  of same type exceeds type-grouping-stresshold value."
+  "Returns attachment type based grouping, used inside operation groups."
   [attachments operation-id]
   (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map att-type/tag-by-type)
-       (remove nil?)
-       frequencies
-       (filter (comp (partial < type-grouping-stresshold) val))
-       keys))
+       (map tag-by-type)
+       distinct))
 
 (defn- operation-grouping
   "Creates subgrouping for operations attachments if needed."
   [type-groups operation-id]
   (if (empty? type-groups)
     [(op-id->tag operation-id)]
-    (->> (conj (vec type-groups) :default)
-         (map vector)
+    (->> (map vector type-groups)
          (cons (op-id->tag operation-id)))))
 
 (defmulti tag-grouping-for-group-type (fn [application group-type] group-type))
@@ -96,18 +97,32 @@
   There are one and two level groups in tag hierarchy (operations are two level groups).
   eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
   [{attachments :attachments :as application}]
-  (->> (filter (set (attachments-group-types attachments)) attachment-groups) ; keep sorted
-       (cons :default)
+  (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
+
+(defn- application-state-filters [{attachments :attachments state :state}]
+  (let [existing-state-tags (-> (map tag-by-applicationState attachments) set)]
+    (when (or (states/post-verdict-states (keyword state))
+              (existing-state-tags :postVerdict))
+      [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
+       {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))}])))
+
+(defn- group-and-type-filters [{attachments :attachments}]
+  (let [existing-groups-and-types (->> (mapcat (juxt tag-by-type tag-by-group-type) attachments)
+                                       (remove #{:operation})
+                                       set)]
+    (->> (concat all-group-tags att-type/type-groups)
+         (filter existing-groups-and-types)
+         (map (partial hash-map :default false :tag) ))))
+
+(defn- not-needed-filters [{attachments :attachments}]
+  (let [existing-notNeeded-tags (-> (map tag-by-notNeeded attachments) set)]
+    (when (every? existing-notNeeded-tags [:needed :notNeeded])
+      [{:tag :needed    :default true}
+       {:tag :notNeeded :default false}])))
 
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
-  [{attachments :attachments}]
-  [[{:tag :preVerdict :default false}
-    {:tag :postVerdict :default false}]
-   (->> (map att-type/tag-by-type attachments)
-        (remove nil?)
-        distinct
-        (map (partial hash-map :default false :tag)))
-   [{:tag :needed :default true}
-    {:tag :notNeeded :default false}]])
+  [application]
+  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+       (remove nil?)))

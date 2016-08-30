@@ -1,7 +1,7 @@
 (ns lupapalvelu.verdict-test
   (require [midje.sweet :refer :all]
            [midje.util :refer [testable-privates]]
-           [lupapalvelu.itest-util :refer [expected-failure?]]
+           [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
            [lupapalvelu.action :as action]
            [lupapalvelu.application :as application]
            [lupapalvelu.application-meta-fields :as meta-fields]
@@ -131,3 +131,42 @@
     (verdict-attachment-type {:permitType "R"} anything) => {:type-group "paatoksenteko" :type-id anything})
   (fact "YA - with type"
     (verdict-attachment-type {:permitType "YA"} anything) => {:type-group "muut" :type-id anything}))
+
+(facts "Section requirement for verdicts"
+       (let [org        {:section {:operations ["pool" "house"]
+                                   :enabled    true}}
+             pool       {:name "pool"}
+             no-xml1    (->xml {:root {:foo {:bar "nope"}}})
+             no-xml2    (->xml {:root {:foo {:bar "nope"}
+                                       :paatostieto {:hii "hoo"}}})
+             blank-xml1 (->xml {:root {:foo {:bar "nope"}
+                                       :paatostieto {:pykala ""}}})
+             blank-xml2 (->xml {:root {:foo         {:bar "nope"}
+                                       :paatostieto {:doh {:pykala ""}}}})
+             wrong-path (->xml {:root {:pykala 22}})
+             good1      (->xml {:root {:paatostieto {:pykala 22}}})
+             good2      (->xml {:root {:another {:paatostieto {:pykala "33"}}}})
+             good3      (->xml {:root {:paatostieto {:between {:pykala "33"}}}})
+             fail-check (partial expected-failure? :info.section-required-in-verdict)]
+         (fact "No paatostieto element"
+               (validate-section-requirement pool no-xml1 org) => fail-check)
+         (fact "No pykala element"
+               (validate-section-requirement pool no-xml2 org) => fail-check)
+         (fact "Blank section 1"
+               (validate-section-requirement pool blank-xml1 org) => fail-check)
+         (fact "Blank section 2"
+               (validate-section-requirement pool blank-xml2 org) => fail-check)
+         (fact "Pykala outside of paatostieto element"
+               (validate-section-requirement pool wrong-path org) => fail-check)
+         (fact "Good sections 1"
+               (validate-section-requirement pool good1 org) => nil)
+         (fact "Good sections 2"
+               (validate-section-requirement pool good2 org) => nil)
+         (fact "Good section 3"
+               (validate-section-requirement pool good3 org) => nil)
+         (fact "Organization does not require section"
+               (validate-section-requirement pool no-xml1 {:section {:operations ["pool" "house"]
+                                                                     :enabled    false}}) => nil)
+         (fact "Section not required for the operation"
+               (validate-section-requirement pool no-xml1 {:section {:operations ["sauna" "house"]
+                                                                     :enabled    true}}) => nil)))

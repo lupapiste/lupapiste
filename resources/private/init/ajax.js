@@ -42,6 +42,9 @@ var ajax = (function($) {
         if (self.rawData || e && e.ok) {
           self.successHandler.call(self.savedThis, e);
         } else if (e) {
+          if (self.fuseListener) {
+            self.fuseListener(false);
+          }
           var res = resolveErrorHandler(e).call(self.savedThis, e);
           if (res && res.ok === false) {
             defaultError(e);
@@ -63,6 +66,9 @@ var ajax = (function($) {
     self.successHandler = function() { };
     self.errorHandler = defaultError;
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
+      if (self.fuseListener) {
+        self.fuseListener(false);
+      }
       if (jqXHR && jqXHR.status > 0 && jqXHR.readyState > 0) {
         switch (jqXHR.status) {
           case 403:
@@ -72,7 +78,14 @@ var ajax = (function($) {
             notify.error(loc("error.service-lockdown"));
             break;
           default:
-            error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+            var maxLength = 200;
+            var responseText = /<html/i.test(jqXHR.responseText) ?
+                _.filter($.parseHTML(jqXHR.responseText).map(function(e) {
+                  var text = $.trim(e.innerText || e.textContent || "");
+                  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+                }))
+                : jqXHR.responseText;
+            error("Ajax: FAIL", self.request.url, jqXHR.status + " " + errorThrown, responseText);
             break;
         }
       }
@@ -163,6 +176,15 @@ var ajax = (function($) {
       return self;
     };
 
+    self.fuse = function(listener) {
+      if (_.isFunction(listener)) {
+        self.fuseListener = listener;
+      } else {
+        error("fuse listener must be a function", listener, self.request.url);
+      }
+      return self;
+    };
+
     self.processing = function(listener) {
       if (_.isFunction(listener)) {
         self.processingListener = listener;
@@ -185,6 +207,13 @@ var ajax = (function($) {
     };
 
     self.call = function() {
+      if (self.fuseListener) {
+        if (self.fuseListener()) {
+          debug("Fuse is blown, call aborted");
+          return;
+        }
+        self.fuseListener(true);
+      }
       if (self.processingListener) {
         self.processingListener(true);
       }

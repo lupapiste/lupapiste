@@ -25,7 +25,7 @@ Admin inputs bad server address
   Scroll to test id  munimap-send
   Input text with jQuery  .munimaps [data-test-id=munimap-url]  foobar
 
-  Scroll and click  .munimaps [data-test-id=munimap-send]
+  Scroll and click input  .munimaps [data-test-id=munimap-send]
   # Error popup
   Confirm  dynamic-ok-confirm-dialog
   Yes error
@@ -34,7 +34,7 @@ Admin inputs bad server address
 Admin inputs good server address
   Scroll to test id  munimap-send
   Input text with jQuery  [data-test-id=munimap-url]  ${url}
-  Scroll and click  [data-test-id=munimap-send]
+  Scroll and click input  [data-test-id=munimap-send]
   No error
   Yes layers
 
@@ -91,7 +91,7 @@ Select layer
   Select from list by value  jquery=select[data-test-id=layer${index}-select]  ${value}
 
 Add layer
-  Scroll and click  [data-test-id=layers-add]
+  Scroll and click input  [data-test-id=layers-add]
 
 Name layer
   [Arguments]  ${index}  ${name}

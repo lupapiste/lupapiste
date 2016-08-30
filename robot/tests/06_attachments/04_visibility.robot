@@ -16,10 +16,8 @@ Mikko uploads attachment
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko sets CV to be visible only to himself and authorities
-  Open attachment details  osapuolet.cv
   # By default attachment is public
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen
@@ -29,9 +27,7 @@ Mikko sets CV to be visible only to himself and authorities
   Wait Until  Tab should be visible  attachments
 
 Mikko uploads attachment to placeholder asemapiirros
-  Open attachment details  paapiirustus.asemapiirros
-  Wait Until  Element Should Be Disabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
-  Add attachment version  ${PNG_TESTFILE_PATH}
+  Add attachment file  tr[data-test-type='paapiirustus.asemapiirros']  ${PNG_TESTFILE_PATH}
   Wait Until  Element Should Be Enabled  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']
   Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
@@ -46,8 +42,7 @@ Teppo logs in, doesn't see Mikko's CV
   Wait until  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Confirm yes no dialog
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr
-  Element should not be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='osapuolet.cv']
+  Wait Until  Element should not be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='osapuolet.cv']
 
 Teppo uploads new version to asemapiirros
   # When Teppo uploads version to attachment, he is authed to attachment and can see contents even if visibility is set to only-authority level
@@ -68,9 +63,9 @@ Pena logs in, doesn't see Mikko's CV, nor asemapiirros
   Wait until  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Confirm yes no dialog
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr
-  Element should not be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='osapuolet.cv']
-  Element should not be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='paapiirustus.asemapiirros']
+  Wait Until  Element should be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='paapiirustus.pohjapiirustus']
+  Element should not be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='osapuolet.cv']
+  Element should not be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='paapiirustus.asemapiirros']
 
   Logout
 
@@ -90,8 +85,7 @@ Pena logs in and now sees asemapiirros, as he has auth to application
   Pena logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id='attachments-template-table']//tr
-  Element Should Be Visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='paapiirustus.asemapiirros']
+  Wait Until  Element should be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='paapiirustus.pohjapiirustus']
+  Element should be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='paapiirustus.asemapiirros']
   # CV is still hidden
-  Element should not be visible  xpath=//table[@data-test-id='attachments-template-table']//tr//a[@data-test-type='osapuolet.cv']
-
+  Element should not be visible  jquery=div[id=application-attachments-tab] tr[data-test-type='osapuolet.cv']

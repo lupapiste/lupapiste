@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-template">
 
-  <h1>Suunnitelmat ja liitteet POC</h1>
+  <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
   <span data-bind="component: {
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
@@ -10,8 +10,13 @@
   <div data-bind="template: {name: 'attachments-operation-buttons-template',
                              data: $data}"></div>
 
-  <filters></filters>
+  <suti-display></suti-display>
 
+  <!-- ko if: $data.hasUnfilteredAttachments() -->
+  <filters></filters>
+  <!-- /ko -->
+
+  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilteredAttachments() -->
   <help-toggle params="html: legendHtml,
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
@@ -28,6 +33,19 @@
       <div class="attachment-templates"></div>
     </div>
   </div>
+  <!-- /ko -->
+  <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
+  <div data-test-id="no-filtered-attachments-info">
+    <i class="lupicon-circle-attention negative"></i>
+    <span data-bind="ltext: 'attachment.listing.no-filtered-attachments'"></span>
+  </div>
+  <!-- /ko -->
+  <!-- ko if: !$data.hasUnfilteredAttachments() -->
+  <div data-test-id="no-unfiltered-attachments-info">
+    <i class="lupicon-circle-attention negative"></i>
+    <span data-bind="ltext: 'attachment.listing.no-attachments'"></span>
+  </div>
+  <!-- /ko -->
 
 
 </script>

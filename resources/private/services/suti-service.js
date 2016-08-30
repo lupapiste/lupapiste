@@ -88,6 +88,7 @@ LUPAPISTE.SutiService = function() {
   };
 
   function fetchApplicationProducts( application, waiting ) {
+    suti( _.set( suti(), "products", "suti.products-wait"));
     ajax.query( "suti-application-products", {id: application.id()})
       .pending( waiting || _.noop)
       .success( function( res ) {
@@ -114,10 +115,13 @@ LUPAPISTE.SutiService = function() {
   }
 
   // waiting is an optional observable.
-  self.fetchApplicationData = function( application, waiting ) {
+  // if clear is true, then old data is cleared before fetch.
+  self.fetchApplicationData = function( application, waiting, clear ) {
     // Application Suti object is outdated from now on
     delete application.suti;
-    suti({});
+    if( clear ) {
+      suti({});
+    }
     if (!application.infoRequest()) {
       ajax.query( "suti-application-data", {id: application.id()})
         .pending( waiting || _.noop)
@@ -128,10 +132,11 @@ LUPAPISTE.SutiService = function() {
           // products: array of Suti products OR error ltext.
           // title: Title to be shown on Suti rollup button (see suti-display)
           // suti: application Suti details (id and added).
-          suti( _.merge( res.data,
-              {products: "suti.products-wait"}));
+          suti( res.data );
           // We fetch the products separately so the UI has time to render.
-          fetchApplicationProducts( application, waiting );
+          if( _.get( suti(), "suti.id") && (!_.get( suti(), "suti.added"))) {
+            fetchApplicationProducts( application, waiting );
+          }
         })
         .call();
     }

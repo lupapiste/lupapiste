@@ -63,7 +63,7 @@
     (try
       (validator/validate xml-s (permit/permit-type application) schema-version)
       (catch org.xml.sax.SAXParseException e
-        (fail! :error.integration.send :details (.getMessage e))))
+        (fail! :error.integration.create-message :details (.getMessage e))))
 
     (fs/mkdirs output-dir)
 

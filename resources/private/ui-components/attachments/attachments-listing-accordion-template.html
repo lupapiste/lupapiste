@@ -1,7 +1,8 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-accordion-template">
   <!-- ko if: $data.data && $data.data() && $data.data().hasContent -->
-    <rollup params="open: $data.open">
+    <rollup params="open: $data.open"
+            data-bind="attr: {'data-test-level': 'accordion-level-' + $parent.level}">
       <rollup-status-button
          params="open: $parent.open,
                  style: {'secondary': $parent.level === 0,
@@ -14,19 +15,24 @@
         <!-- ko if: $parent.data().type === "main" -->
         <div data-bind="foreach: $parent.accordions">
           <div class="attachments-accordion-content-part"
-               data-bind="template:
-                          {name: 'attachments-listing-accordion-template',
-                           data: _.merge($data, {level: $parents[1].level + 1})}">
+               data-bind="template: {name: 'attachments-listing-accordion-template',
+                                     data: _.merge($data, {level: $parents[1].level + 1})}">
           </div>
         </div>
         <!-- /ko -->
         <!-- ko if: $parent.data().type === "sub" -->
         <div class="rollup-accordion-content-part">
-          <div data-bind="template:
-                          {name: 'attachments-table-template',
-                           data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
+          <div data-bind="template: { name: 'attachments-table-template',
+                                      data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
         </div>
         <!-- /ko -->
+        <button data-bind="click: $parent.data().downloadAll,
+                           enable: $parent.data && $parent.data() && $parent.data().hasFile,
+                           attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($parent.path)}"
+                class="secondary">
+          <i class="lupicon-download"></i>
+          <span data-bind="text: $parent.data().downloadAllText"></span>
+        </button>
       </div>
     </rollup>
   <!-- /ko -->

@@ -17,7 +17,8 @@
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; construct command, query and raw
@@ -229,6 +230,15 @@
     (info "invalid type:" (name type))
     (fail :error.invalid-type)))
 
+(defn outside-authority-only
+  "Pre-check that fails if the current user is authority in the
+  application organisation."
+  [{:keys [user application] :as command}]
+  (when (usr/user-is-authority-in-organization? user (:organization application))
+    unauthorized))
+
+
+
 (defn missing-roles [command]
   (when-not (has-required-user-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
@@ -317,7 +327,8 @@
   (auth/has-auth? application (get-in user [:company :id])))
 
 (defn- user-is-not-allowed-to-access?
-  "Current user must have correct role in application.auth, work in the organization or company that has been invited"
+  "Current user must have correct role in application.auth, work in
+  the organization or company that has been invited"
   [{user :user :as command} application]
   (let [meta-data (meta-data command)]
     (when-not (or
@@ -414,6 +425,8 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
+(def categories [:attachments])
+
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -422,6 +435,8 @@
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
+   ;; Array of categories for use of allowed-actions-for-cateory
+   (sc/optional-key :categories)   [(apply sc/enum categories)]
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
@@ -486,12 +501,13 @@
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (if (= #{:authority} user-roles)
-                             #{} ; By default, authority gets authorization fron organization role
-                             (auth/default-user-authz action-type))
-         :org-authz-roles (cond
-                            (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
-                            (user-roles :anonymous) auth/all-org-authz-roles)}
+       {:user-authz-roles (if (= #{:authority} user-roles)
+                            ;; By default, authority gets authorization fron organization role
+                            #{}
+                            (auth/default-user-authz action-type))
+        :org-authz-roles (cond
+                           (some user-roles [:authority :oirAuthority]) auth/default-org-authz-roles
+                           (user-roles :anonymous) auth/all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

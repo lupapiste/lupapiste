@@ -1,8 +1,10 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [clojure.string :refer [join]]
             [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
@@ -10,6 +12,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
+
+(testable-privates lupapalvelu.actions-api foreach-action)
 
 (apply-remote-minimal)
 
@@ -91,7 +95,7 @@
          (:id authority-before-assignation) => nil
          authority-after-assignation => (contains {:id ronja-id})
          (fact "Authority is not able to submit"
-           sonja =not=> (allowed? sonja :submit-application :id application-id))))
+           sonja =not=> (allowed? :submit-application :id application-id))))
 
 (fact* "Assign application to an authority and then to no-one"
        (let [application-id (create-app-id pena :propertyId sipoo-property-id)
@@ -226,9 +230,6 @@
           (> submitted intial-submitted) => true)
         (fact "old canceled history entry is preserved"
           (-> history butlast last :state) => "canceled")))))
-
-(fact "Authority is unable to create an application to a municipality in another organization"
-  (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"
   (let [operation "kerrostalo-rivitalo"
@@ -510,6 +511,7 @@
 (fact "Authority can access drafts, but can't use most important commands"
   (let [id (create-app-id pena)
         app (query-application sonja id)
+        user (find-user-from-minimal-by-apikey sonja)
         denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
                          :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
                          :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
@@ -519,15 +521,14 @@
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
-                         :change-application-state :change-application-state-targets}
-        user (find-user-from-minimal-by-apikey sonja)]
+                         :change-application-state :change-application-state-targets}]
     app => map?
-    (doseq [command (ca/foreach-action {} user {} app)
+    (doseq [command (foreach-action {} user {} app)
             :let [action (keyword (:action command))
                   result (a/validate-authority-in-drafts command)]]
       (fact {:midje/description (name action)}
         (when (denied-actions action)
-          result => unauthorized?)))))
+          result => (some-fn nil? unauthorized?))))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]
@@ -564,3 +565,54 @@
           (command sonja :change-application-state :id application-id :state "appealed") => ok?
           (-> (query sonja :change-application-state-targets :id application-id) :states set (contains? "verdictGiven")) => true
           (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))
+
+(facts "Authority can create application in other organisation"
+       (let [application-id (create-app-id luukas
+                                            :operation "kerrostalo-rivitalo"
+                                            :propertyId oulu-property-id)
+             {:keys [state]} (query-application luukas application-id)]
+         (fact "Application state is draft (not open)"
+               state => "draft")
+         (facts "As an application owner, authority can use applicant commands"
+                (doseq [cmd [:submit-application :cancel-application]]
+                  (fact {:midje/description cmd}
+                        luukas => (allowed? cmd :id application-id))))
+         (fact "Owner submits application"
+               (command luukas :submit-application :id application-id) => ok?)
+         (fact "Outside authority cannot use authority commands"
+               (command luukas :approve-application :id application-id :lang "fi") => unauthorized?
+               (command luukas :cancel-application-authority :id application-id :lang "fi" :text "") => unauthorized?)
+         (facts "Local authority cannot use applicant commands"
+                (command olli :cancel-application :id application-id :lang "fi" :text "")=> unauthorized?)
+         (fact "(Outside) authority cannot access the application"
+               (query sonja :application :id application-id) => not-accessible?)
+         (fact "Outside authority's comments are applicant comments"
+               (command luukas :add-comment :id application-id :text "Zao!" :target {:type "application"}
+                        :roles #{:applicant :authority}) => ok?
+               (query-application luukas application-id) => (util/fn-> :comments first ((contains {:type "applicant"
+                                                                                                   :text "Zao!"}))))
+         (fact "Local authority's comments are authority comments"
+               (command olli :add-comment :id application-id :text "Zaoshang hao!" :target {:type "application"}
+                        :roles #{:applicant :authority}) => ok?
+               (query-application olli application-id) => (util/fn-> :comments last ((contains {:type "authority"
+                                                                                                :text "Zaoshang hao!"}))))
+
+         (facts "Applications search result contains correct applications"
+                (let [sipoo-draft     (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+                      luukas-canceled (create-app-id luukas
+                                                     :operation "kerrostalo-rivitalo"
+                                                     :propertyId oulu-property-id)
+                      _               (command luukas :cancel-application :id luukas-canceled :lang "fi" :text "")
+                      luukas-draft    (create-app-id luukas
+                                                     :operation "kerrostalo-rivitalo"
+                                                     :propertyId oulu-property-id)
+                      applications    (->> (query luukas :applications-search :applicationType "all" :limit 100)
+                                           :data :applications  (map :id) set)]
+                  (fact "Created application is listed"
+                        (contains? applications application-id) => true)
+                  (fact "Sipoo draft is not listed"
+                        (contains? applications sipoo-draft) => false)
+                  (fact "Canceled application is not listed"
+                        (contains? applications luukas-canceled) => false)
+                  (fact "Created draft is listed"
+                        (contains? applications luukas-draft) => true)))))

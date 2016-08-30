@@ -15,20 +15,35 @@ LUPAPISTE.ScrollService = function() {
   self.serviceName = "scrollService";
 
   var positions = {};
+  var followed  = [];
 
   function getHash() {
-    // Null-safe regardign location.
+    // Null-safe regarding location.
     return _.get( window, "location.hash");
   }
 
+  function hashSupported( options ) {
+    return options.hash
+      && (!options.followed
+          || _.find( followed, function( re ) {
+            return re.test( options.hash );
+          }) );
+  }
   // Options [optional]:
   //  [override]: If true the current position wll override the
   //  possibly stored one (default false).
+  //  [followed]: if true the push only happens if hash is followed (default false).
+  //  [hash]: Page hash (default window.location.hash).
   self.push = function( options ) {
-    options = options || {};
-    var hash = getHash();
-    if( hash && ( !positions[hash] || options.override ) ) {
-      positions[hash] = {x: window.scrollX, y: window.scrollY };
+    options = _.defaults( options, {override: false,
+                                    followed: false,
+                                    hash: getHash()});
+
+    if( hashSupported( options)
+        && ( !positions[options.hash] || options.override ) ) {
+          // scrollX/Y not supported by IE.
+          positions[options.hash] = {x: window.scrollX || window.pageXOffset,
+                                     y: window.scrollY || window.pageYOffset};
     }
   };
 
@@ -49,10 +64,18 @@ LUPAPISTE.ScrollService = function() {
     }
   };
 
+  self.follow = function( options ) {
+    var hashRe = _.get( options, "hashRe");
+    if( _.isRegExp( hashRe)) {
+      followed.push( hashRe );
+    }
+  };
+
   // There really should be a better way to restore
   // the scroll position than waiting for 500 ms and hoping
   // that everything has been rendered.
   hub.subscribe( "application-model-updated", _.partial( self.pop, {delay: 500} ) );
   hub.subscribe( self.serviceName + "::push", self.push );
-  hub.subscribe( self.serviceName + "::pop", self.pop );
+  hub.subscribe( self.serviceName + "::pop", self.pop);
+  hub.subscribe( self.serviceName + "::follow", self.follow);
 };

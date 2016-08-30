@@ -67,6 +67,18 @@ var hub = (function() {
     return count;
   }
 
+  // Message params are in the hash.
+  // ...#param1=value1&param2=value2...
+  function sendHash( eventType, hash ) {
+    var params = _.reduce( _.split( _.get( _.split( hash , "#" ), 1, ""), "&"),
+                           function( acc, p ) {
+                             var xs = _.map( _.split( p, "="), decodeURIComponent );
+                             return _.set( acc, _.first( xs ), _.last( xs ));
+                           }, {});
+    hub.send( eventType, params );
+
+  }
+
   // Helpers for page change events:
   function onPageLoad(pageId, listener, oneshot) {
     return hub.subscribe({eventType: "page-load", pageId: pageId}, listener, oneshot);
@@ -79,6 +91,7 @@ var hub = (function() {
     subscribe:      subscribe,
     unsubscribe:    unsubscribe,
     send:           send,
+    sendHash:        sendHash,
     onPageLoad:     onPageLoad,
     onPageUnload:   onPageUnload,
     setDebug:       setDebug

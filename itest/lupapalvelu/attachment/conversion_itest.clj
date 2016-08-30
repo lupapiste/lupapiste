@@ -1,4 +1,4 @@
-(ns lupapalvelu.attachment.conversion-test
+(ns lupapalvelu.attachment.conversion-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.attachment.conversion :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
@@ -39,7 +39,7 @@
                                    :contentType "application/pdf"
                                    :content (io/file "dev-resources/invalid-pdfa.pdf")}) => {:archivable false :archivabilityError :not-validated}
     (provided
-      (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => false))
+      (pdfa/pdf-a-required? anything) => false))
 
   (when pdfa/pdf2pdf-enabled?
     (fact "PDF conversion - with archive => archivable"
@@ -49,8 +49,8 @@
                                      :content (io/file "dev-resources/invalid-pdfa.pdf")}) => (contains {:archivabilityError nil
                                                                                                          :archivable         true
                                                                                                          :content            (partial instance? File)
-                                                                                                         :filename           "foo-PDFA.pdf"})
+                                                                                                         :filename           "foo.pdf"})
       (provided
-        (lupapalvelu.pdf.pdfa-conversion/pdf-a-required? anything) => true))))
+        (pdfa/pdf-a-required? anything) => true))))
 
 

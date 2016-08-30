@@ -36,7 +36,7 @@ Sonja adds appeal to the first verdict
 
 The appeal is visible on the Attachments tab
   Open tab  attachments
-  Element should be visible  jquery=#attachment-row-muutoksenhaku-valitus
+  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
   Open tab  verdict
 
 Sonja edits appeal
@@ -110,10 +110,10 @@ Sonja adds appealVerdict thus locking appeals
 
 Every appeal type is shown in the Attachments tab
   Open tab  attachments
-  Element should be visible  jquery=#attachment-row-muutoksenhaku-valitus
-  Element should be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
+  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
+  Element should be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
   # There is a verdict and an appealVerdict
-  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  3
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  3
 
 Show info buttons show correct data
   Open tab  verdict
@@ -183,7 +183,7 @@ Sonja logs in and deletes the first verdict.
 
 There is only one appeal in the Attachments tab
   Open tab  attachments
-  Xpath should match X times  //tr[@id='attachment-row-muutoksenhaku-valitus']  1
+  Xpath should match X times  //tr[@data-test-type='muutoksenhaku.valitus']  1
   Open tab  verdict
 
 Fetching new verdicts will nuke appeals
@@ -193,9 +193,9 @@ Fetching new verdicts will nuke appeals
 
 There are no appeals attachments in the Attachments tab
   Open tab  attachments
-  Element should not be visible  jquery=#attachment-row-muutoksenhaku-valitus
-  Element should not be visible  jquery=#attachment-row-muutoksenhaku-oikaisuvaatimus
-  Xpath should match X times  //tr[@id='attachment-row-paatoksenteko-paatos']  2
+  Element should not be visible  jquery=tr[data-test-type='muutoksenhaku.valitus']
+  Element should not be visible  jquery=tr[data-test-type='muutoksenhaku.oikaisuvaatimus']
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
   [Teardown]  Logout
 
 
