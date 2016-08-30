@@ -1,5 +1,6 @@
 (ns lupapalvelu.child-to-attachment-test
-  (:require [lupapalvelu.child-to-attachment :refer :all]
+  (:require [clojure.java.io :as io]
+            [lupapalvelu.child-to-attachment :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.test-util :as test-util]
@@ -84,6 +85,7 @@
          (doseq [lang i18n/languages]
            (let [file (File/createTempFile (str "child-test-statement-" (name lang) "-") ".pdf")
                  att (build-attachment-options {} application :statements "2" lang file nil)]
+             (io/delete-file file)
              (fact ":contents"
                    (:contents att) => "Paloviranomainen")
              (fact " :attachment-type"
@@ -101,6 +103,7 @@
            (let [file (File/createTempFile (str "child-test-neighbour-" (name lang) "-") ".pdf")
                  att (build-attachment-options {} application :neighbors "2" lang file nil)
                  att-other (build-attachment-options {} application :tasks "2" lang file nil)]
+             (io/delete-file file)
              (fact ":contents"
                    (:contents att) => "Matti Malli")
              (fact ":attachment-type"
@@ -121,6 +124,7 @@
                  att (build-attachment-options {} application :tasks "2" lang file nil)
                  att1 (build-attachment-options {} application :tasks "1" lang file "one")
                  att-other (build-attachment-options {} application :tasks "2" lang file nil)]
+             (io/delete-file file)
              (fact ":contents"
                    (:contents att) => (str (i18n/localize lang "task-katselmus.katselmuksenLaji.muu katselmus") " - katselmointi ftw"))
              (fact ":attachment-type"
