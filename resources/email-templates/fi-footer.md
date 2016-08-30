@@ -1,0 +1,1 @@
+_T&auml;m&auml; on automaattinen s&auml;hk&ouml;posti - &auml;l&auml; tuhlaa aikaasi vastaamalla t&auml;h&auml;n viestiin, se ei tavoita ket&auml;&auml;n. Sen sijaan edist&auml; hankettasi kirjautumalla sis&auml;&auml;n Lupapisteeseen._
