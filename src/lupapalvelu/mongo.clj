@@ -255,17 +255,13 @@
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
-                                  (apply hash-map metadata)))
-        store-content (fn [input-stream]
-                        (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
-                                        (set-file-id file-id)
-                                        (gfs/filename filename)
-                                        (gfs/content-type content-type)
-                                        (gfs/metadata (assoc meta :uploaded (now)))))]
-    (if (instance? java.io.InputStream content)
-      (store-content content) ; Closing the stream should be handled by the caller
-      (with-open [input-stream (io/input-stream content)]
-        (store-content input-stream)))))
+                                  (apply hash-map metadata)))]
+    (with-open [input-stream (io/input-stream content)]
+      (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
+        (set-file-id file-id)
+        (gfs/filename filename)
+        (gfs/content-type content-type)
+        (gfs/metadata (assoc meta :uploaded (now)))))))
 
 (defn- gridfs-file-as-map [attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
