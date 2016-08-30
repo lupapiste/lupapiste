@@ -4,7 +4,6 @@
             [schema.core :as sc]
             [sade.env :as env]
             [sade.files :as files]
-            [lupapalvelu.attachment.file :as file]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
