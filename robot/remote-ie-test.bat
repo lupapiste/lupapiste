@@ -6,4 +6,4 @@
 
 call remote-config.bat
 
-pybot -d target --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://%remote%:%port%/wd/hub --variable SERVER:%server% %target%
+pybot -d target --exclude integration --exclude ajanvaraus --exclude fail --variable BROWSER:internetexplorer --variable SELENIUM:http://%remote%:%port%/wd/hub --variable SERVER:%server% %target%
