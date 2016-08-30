@@ -76,7 +76,7 @@
 (defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
   (if (env/feature? :convert-all-attachments)
     (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
+          pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
           pdf-title filename]
       (try
         (io/copy content tmp-file)
@@ -84,7 +84,7 @@
         {:archivable true
          :archivabilityError nil
          :autoConversion true
-         :content pdf-file
+         :content (files/temp-file-input-stream pdf-file)
          :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
         (finally
           (io/delete-file tmp-file :silently))))
