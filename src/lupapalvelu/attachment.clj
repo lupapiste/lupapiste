@@ -26,7 +26,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File FilterInputStream InputStream]))
+           [java.io File InputStream]))
 
 ;;
 ;; Metadata
@@ -618,7 +618,7 @@
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
-(defn- maybe-append-gridfs-file! 
+(defn- maybe-append-gridfs-file!
   "Download and add the attachment file if user can access the application"
   [zip user {:keys [filename fileId]}]
   (when fileId
@@ -626,7 +626,7 @@
       (with-open [in ((:content file))]
         (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
 
-(defn get-attachments-for-user! 
+(defn get-attachments-for-user!
   "Returns the latest corresponding attachment files readable by the user as a ZIP file"
   [user attachments]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
@@ -637,14 +637,6 @@
       (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
-   
-(defn temp-file-input-stream [^File file]
-  (let [i (io/input-stream file)]
-    (proxy [FilterInputStream] [i]
-      (close []
-        (proxy-super close)
-        (when (= (io/delete-file file :could-not) :could-not)
-          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))

@@ -143,9 +143,9 @@
         (s/trim (str (:value first-name) " " (:value last-name)))))))
 
 (defn create-libre-doc [template file fields]
-  (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
-    (with-open [rdr (io/reader template)]
-      (doseq [line (line-seq rdr)]
-        (write-line line fields wrtr)
-        (when-let [table-rows (get fields (get-table-name line))]
-          (write-table! rdr wrtr table-rows fields))))))
+  (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)
+              rdr (io/reader template)]
+    (doseq [line (line-seq rdr)]
+      (write-line line fields wrtr)
+      (when-let [table-rows (get fields (get-table-name line))]
+        (write-table! rdr wrtr table-rows fields)))))
