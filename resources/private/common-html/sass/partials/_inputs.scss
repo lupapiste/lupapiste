@@ -144,9 +144,8 @@
 
 
 .button-input {
-  width: 100%;
+  white-space: nowrap;
   input, button {
-    display: table-cell;
     vertical-align: middle;
   }
   input {

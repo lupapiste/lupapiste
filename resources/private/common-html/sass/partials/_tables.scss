@@ -330,14 +330,18 @@ div.attachments-table-container {
     }
     td {
       vertical-align: top;
-    }
-    td.attachments-table__state-icons > i {
-      margin-left: 1px;
-      magint-right: 1px;
-    }
+    }    
     .attachments-table--widest {
       width: 80%;
     }
+  }
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+  i {
+    margin-left: 1px;
+    magint-right: 1px;
   }
 }
 
