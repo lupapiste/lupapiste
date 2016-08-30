@@ -41,11 +41,13 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.timelineSlots = function(weekday) {
     var times = [];
+    var weekdayStr = moment(weekday.startOfDay).format("dddd");
     ko.utils.arrayForEach(ko.utils.range(self.firstFullHour, self.lastFullHour), function(hour) {
       times.push({ weekday: weekday,
                    calendarId: weekday.calendarId,
                    hour: hour,
-                   minutes:  0 });
+                   minutes:  0,
+                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00"});
     });
     return times;
   };
