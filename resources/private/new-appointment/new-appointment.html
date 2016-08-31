@@ -12,12 +12,12 @@
     <div>
       <p>&nbsp;</p>
       <h1 data-bind="ltext: 'new-appointment.page-title'"></h1>
+      <p><span data-bind="ltext: 'new-appointment.book-appointment.intro'"></span> </p>
     </div>
 
     <div data-bind="with: model">
-
       <div>
-        <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+        <h3 data-bind="ltext: 'new-appointment.book-appointment.title'" style="font-weight: bold; margin-bottom: 12px;"></h3>
         <span class="form-entry">
           <label class="form-label tip" data-bind="ltext: 'new-appointment.application-select.label'"></label>
           <select class="form-input combobox tip" data-test-id="application-select"

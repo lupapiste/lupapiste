@@ -147,3 +147,7 @@
 "new-appointment.page-title" "sv" ""
 "new-appointment.application-select.label" "fi" "Hanke, johon ajanvaraus liittyy"
 "new-appointment.application-select.label" "sv" ""
+"new-appointment.book-appointment.intro" "fi" "Voit varata ajan tapaamiseen viranomaisen kanssa. Valitse myös hanke, johon tapaaminen liittyy."
+"new-appointment.book-appointment.intro" "sv" ""
+"new-appointment.book-appointment.title" "fi" "Varaa tapaamisaika"
+"new-appointment.book-appointment.title" "sv" ""
