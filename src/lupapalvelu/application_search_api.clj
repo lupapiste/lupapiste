@@ -9,7 +9,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as operations]))
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.organization :as org]))
 
 (defquery applications-search
   {:description "Service point for application search component"
@@ -22,6 +24,25 @@
                 data
                 [:tags :organizations :applicationType :handlers
                  :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
+
+(defquery applications-for-new-appointment-page
+  {:description "Service point for application list in new-appointment page"
+   :parameters []
+   :user-roles #{:applicant}}
+  [{user :user data :data}]
+  (let [fields [:id :kind :organization :municipality
+                :permitType :address :primaryOperation]
+        query  (search/make-query
+                   (domain/applications-with-writer-authz-query-for user)
+                   {:organizations (org/organizations-with-calendars-enabled)} user)
+        skip   (or (util/->long (:skip data)) 0)
+        limit  (or (util/->long (:limit data)) Integer/MAX_VALUE)
+        apps   (search/search query fields (search/make-sort data) skip limit)]
+    (ok :data (map #(-> (mongo/with-id %)
+                        (domain/filter-application-content-for user)
+                        app-utils/with-application-kind
+                        (select-keys fields))
+                   apps))))
 
 (defn- selected-ops-by-permit-type [selected-ops]
   (let [selected-ops-set (set (map keyword selected-ops))]

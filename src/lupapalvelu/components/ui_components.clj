@@ -388,13 +388,17 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
+   :new-appointment {:depends [:calendar-view]
+                     :js ["new-appointment.js"]
+                     :html ["new-appointment.html"]}
+
    :applicant-app {:depends []
                    :js ["applicant.js"]}
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company :footer :ui-components]}
+                             :company :analytics :register-company :footer :new-appointment :ui-components]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]

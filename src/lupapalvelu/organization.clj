@@ -297,6 +297,9 @@
 (defn some-organization-has-calendars-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
 
+(defn organizations-with-calendars-enabled []
+  (map :id (mongo/select :organizations {:calendars-enabled true} {:id 1})))
+
 ;;
 ;; Backend server addresses
 ;;

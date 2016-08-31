@@ -23,6 +23,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.client = params.searchConditions.client; // observable from parent
   self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
   self.defaultLocation = params.defaultLocation;
+  self.applicationModel = params.applicationModel || lupapisteApp.models.application;
 
   self.view = params.view;
 
@@ -88,7 +89,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
       hub.send("calendarService::fetchApplicationCalendarSlots",
         { clientId: _.get(self.client(), "id"),
           authorityId: _.get(self.authority(), "id"),
-          applicationId: lupapisteApp.models.application.id(),
+          applicationId: self.applicationModel.id(),
           reservationTypeId: self.reservationTypeId(),
           week: self.startOfWeek().isoWeek(),
           year: self.startOfWeek().year(),

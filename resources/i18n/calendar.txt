@@ -143,3 +143,7 @@
 "button.accept" "sv" ""
 "button.decline" "fi" "Hylkää"
 "button.decline" "sv" ""
+"new-appointment.page-title" "fi" "Varaa aika viranomaiselle"
+"new-appointment.page-title" "sv" ""
+"new-appointment.application-select.label" "fi" "Hanke, johon ajanvaraus liittyy"
+"new-appointment.application-select.label" "sv" ""

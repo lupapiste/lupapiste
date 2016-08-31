@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="new-appointment">
+
+  <div class="container">
+    <button class="secondary" data-bind="click: function() { history.go(-1); }">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+
+    <div>
+      <p>&nbsp;</p>
+      <h1 data-bind="ltext: 'new-appointment.page-title'"></h1>
+    </div>
+
+    <div data-bind="with: model">
+
+      <div>
+        <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'new-appointment.application-select.label'"></label>
+          <select class="form-input combobox tip" data-test-id="application-select"
+                  style="width: auto;"
+                  data-bind="options: applications,
+                             optionsText: function(item) {
+                               return [item.id, item.address, loc('municipality.'+item.municipality),
+                                       loc(item.primaryOperation.name+'._group_label')].join(', '); },
+                             optionsCaption: loc('choose'),
+                             value: selectedApplicationId">
+          </select>
+        </span>
+      </div>
+
+      <div class="times-filter-group">
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.select-authority'"></label>
+          <select class="form-input combobox tip" data-test-id="attendee-select"
+                  data-bind="options: availableAuthorities,
+                             optionsText: function(item) { return util.partyFullName(item); },
+                             optionsCaption: loc('choose'),
+                             value: selectedParty">
+          </select>
+        </span>
+        <span class="form-entry">
+          <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
+          <select class="form-input combobox tip" data-test-id="reservation-type-select"
+                  data-bind="options: reservationTypes,
+                             optionsValue: function(item) { return _.get(item, 'id'); },
+                             optionsText: function(item) { return _.get(item, 'name'); },
+                             optionsCaption: loc('choose'),
+                             value: selectedReservationType">
+          </select>
+        </span>
+      </div>
+
+      <calendar-view params="searchConditions: { client: lupapisteApp.models.currentUser.id,
+                                                 authority: selectedParty,
+                                                 reservationTypeId: selectedReservationType },
+                             view: 'applicationView',
+                             applicationModel: selectedApplicationModel,
+                             reservationTypes: reservationTypes,
+                             defaultLocation: defaultLocation">
+      </calendar-view>
+    </div>
+
+  </div>
+
+</section>
+</body>
+</html>

@@ -31,6 +31,9 @@
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
 
+(defn applications-with-writer-authz-query-for [user]
+  {:auth {$elemMatch {:id (:id user) :role {$in [:owner :writer :foreman]}}}})
+
 (defn application-query-for [user]
   (merge
     (basic-application-query-for user)
