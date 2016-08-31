@@ -12,7 +12,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.reservationTypes = params.reservationTypes;
 
   self.slot = ko.observable();
-  self.location = ko.observable();
+  self.location = ko.observable("");
   self.comment = ko.observable("");
   self.participants = ko.observableArray([]);
   self.reservationType = ko.observable();
@@ -72,6 +72,8 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
     self.location(params.defaultLocation());
+
+    self.comment("");
 
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();

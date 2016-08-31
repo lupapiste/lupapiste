@@ -35,6 +35,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
       .command("accept-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
       .success(function() {
         r.acknowledged("accepted");
+
       })
       .call();
   };

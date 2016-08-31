@@ -48,6 +48,9 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
 
     parties = _.filter(parties, function(p) { return !isGuest(p); });
 
+    self.selectedParty(null);
+    self.selectedReservationType(null);
+
     self.authorizedParties(
       _.map(parties, function (p) {
         var party = ko.mapping.toJS(p);
