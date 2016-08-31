@@ -36,9 +36,10 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  self.applicationId.subscribe(function() {
+  self.applicationId.subscribe(function(val) {
     // to avoid retaining old filter states when going to different application
     self.internedObservables = {};
+  self.authModel.refresh({id: val});
   });
 
   self.clearData = function() {
@@ -47,11 +48,12 @@ LUPAPISTE.AttachmentsService = function() {
     forceVisibleIds([]);
     self.filters([]);
     self.tagGroups([]);
+    self.groupTypes([]);
   };
 
   function queryData(queryName, responseJsonKey, dataSetter, params) {
     if (self.authModel.ok(queryName)) {
-      var queryParams = _.assign({"id": self.applicationId}, params);
+      var queryParams = _.assign({"id": self.applicationId()}, params);
       ajax.query(queryName, queryParams)
         .success(function(data) {
           dataSetter(data[responseJsonKey]);
@@ -80,29 +82,29 @@ LUPAPISTE.AttachmentsService = function() {
   // This function should NOT be used for refreshing entire set of authModels since
   // one query is produced for each authModel.
   function refreshAuthModel(attachment) {
-    var authModel = self.authModels[attachment.id];
+    var authModel = self.authModels()[attachment.id];
     if (authModel) {
-      authModel.refresh({id: self.applicationId(),
-                         attachmentId: attachment.id,
+      authModel.refresh(self.applicationId(),
+                        {attachmentId: attachment.id,
                          fileId: util.getIn(attachment, ["latestVersion", "fileId"])});
     }
   }
 
   // Returns authorization model for attachment from self.authModels or creates new authModel and stores it in self.authModels.
-  function getAuthModel(attachment) {
-    var authModel = self.authModels()[attachment.id];
+  self.getAuthModel = function(attachmentId) {
+    var authModel = self.authModels()[attachmentId];
     if (!authModel) {
       authModel = authorization.create();
-      self.authModels(_.set(self.authModels(), attachment.id, authModel));
+      self.authModels(_.set(self.authModels(), attachmentId, authModel));
     }
     return authModel;
-  }
+  };
 
   function buildAttachmentModel(attachment, attachmentObs) {
     if (ko.isObservable(attachmentObs)) {
       attachmentObs(attachmentObs().reset(attachment));
     } else {
-      attachmentObs = ko.observable(new LUPAPISTE.AttachmentModel(attachment, getAuthModel(attachment)));
+      attachmentObs = ko.observable(new LUPAPISTE.AttachmentModel(attachment, self.getAuthModel(attachment.id)));
     }
     return attachmentObs;
   }
@@ -113,12 +115,14 @@ LUPAPISTE.AttachmentsService = function() {
     self.attachments(_.map(attachments, buildAttachmentModel));
   };
 
-  self.setAttachmentData = function(attachment) {
-    var attachmentObs = self.getAttachment(attachment.id);
-    if (attachmentObs) {
-      buildAttachmentModel(attachment, attachmentObs);
-      refreshAuthModel(attachment);
+  self.setAttachmentData = function(attachmentData) {
+    var existingAttachmentModel = self.getAttachment(attachmentData.id);
+    var attachmentModel = buildAttachmentModel(attachmentData, existingAttachmentModel);
+    if (!existingAttachmentModel) {
+      self.authModels(_.set(self.authModels(), attachmentData.id, attachmentModel().authModel));
+      self.attachments.push(attachmentModel);
     }
+    refreshAuthModel(attachmentData);
   };
 
   self.setTagGroups = function(data) {
@@ -176,12 +180,30 @@ LUPAPISTE.AttachmentsService = function() {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
-        _.get(options, "onSuccess", util.showSavedIndicator)(res);
+        _.get(options, "onSuccess", _.noop)(res);
       })
-      .complete(_.get(options, "onComplete", _.noop))
+      .complete(_.get(options, "onComplete", util.showSavedIndicator))
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  self.copyUserAttachments = function(options) {
+    ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
+      .success(function(res) {
+        self.queryAll();
+        _.get(options, "onSuccess", _.noop)(res);
+      })
+      .complete(_.get(options, "onComplete", util.showSavedIndicator))
+      .processing(self.processing)
+      .call();
+  };
+
+  self.downloadAttachments = function(attachmentIds) {
+    var ids = attachmentIds || _(self.attachments()).map(ko.unwrap).map("id");
+    var applicationId = self.applicationId();
+    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + ids.join(",") + "&lang=" + loc.getCurrentLanguage();
+    window.open(uri);
   };
 
   self.updateAttachment = function(attachmentId, commandName, params, options) {
@@ -219,7 +241,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setMeta = function(attachmentId, metadata, options) {
-    self.updateAttachment(attachmentId, "set-attachment-meta", metadata, options);
+    self.updateAttachment(attachmentId, "set-attachment-meta", {meta: metadata}, options);
   };
 
   self.setForPrinting = function(attachmentId, isForPrinting, options) {
@@ -244,24 +266,6 @@ LUPAPISTE.AttachmentsService = function() {
       })
       .complete(_.get(options, "onComplete", _.noop))
       .call();
-  };
-
-  self.copyUserAttachments = function(options) {
-    ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
-      .success(function(res) {
-        self.queryAll();
-        _.get(options, "onSuccess", util.showSavedIndicator)(res);
-      })
-      .complete(_.get(options, "onComplete", _.noop))
-      .processing(self.processing)
-      .call();
-  };
-
-  self.downloadAttachments = function(attachmentIds) {
-    var ids = attachmentIds || _(self.attachments()).map(ko.unwrap).map("id");
-    var applicationId = self.applicationId();
-    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + ids.join(",") + "&lang=" + loc.getCurrentLanguage();
-    window.open(uri);
   };
 
   //helpers for checking relevant attachment states

@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: attachments">
-        <tr data-bind="attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id'],
+        <tr data-bind="attr: {'data-test-type': $data.type()['type-group'] + '.' + $data.type()['type-id'],
                               'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachments-table__state-icons">
@@ -26,11 +26,11 @@
           <td>
             <a data-bind="click: $parent.openAttachment"
                data-test-id="open-attachment">
-              <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+              <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
               <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             </a>
             <br>
-            <span data-bind="text: $data.contents || ''"
+            <span data-bind="text: $data.contents() || ''"
                   data-test-id="attachment-contents"></span>
           </td>
           <td data-bind="attachmentVersion: latestVersion"
@@ -42,7 +42,7 @@
           <!-- /ko -->
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+            <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
             <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             <br>
             <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
@@ -104,4 +104,4 @@
       </tbody>
     </table>
   </div>
-</scripspan>
+</script>

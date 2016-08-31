@@ -8,7 +8,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var service = lupapisteApp.services.attachmentsService;
 
   // Attachemnt data fields that are mapped as observables
-  var observableFields = ["notNeeded", "contents", "scale", "size", "type"];
+  var observableFields = ["notNeeded", "contents", "scale", "size", "type", "op", "groupType"];
 
   self.authModel = authModel;
 
@@ -23,7 +23,9 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   self.visibility = ko.observable(buildVisibility(attachmentData));
 
   self.reset = function(attachmentData) {
-    _.forEach(observableFields, function(field) { self[field](attachmentData[field]); });
+    _.forEach(observableFields, function(field) {
+      _.get(self, field)(_.get(attachmentData, field));
+    });
 
     self.processing(false);
 
@@ -35,11 +37,12 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   };
 
   function buildGroup(data) {
-    return _.merge(data.op, {groupType: data.groupType});
+    var group = {groupType: data.groupType, id: _.get(data, "op.id"), name: _.get(data, "op.name")};
+    return _.isEmpty(_.filter(group)) ? null : group;
   }
 
   function buildVisibility(data) {
-    return data.metadata ? data.metadata.nakyvyys : DEFAULT_VISIBILITY;
+    return _.has(data.metadata, "nakyvyys") ? data.metadata.nakyvyys : DEFAULT_VISIBILITY;
   }
 
   //
@@ -60,17 +63,19 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   self.disposedSubscribe(self.typeString, function(val) {
     self.processing(true);
-    service.setNotNeeded(self.id, val, updateOptions);
+    service.setType(self.id, val, updateOptions);
   });
 
   // Helper string to subscribe changes in op and groupType
   self.groupString = self.disposedComputed(function() {
-    return _.filter([self.group().groupType, self.group().id], _.isString).join("-");
+    return _.filter([util.getIn(self.group(), ["groupType"]), util.getIn(self.group(), ["id"])], _.isString).join("-");
   });
 
   self.disposedSubscribe(self.groupString, function(val) {
     self.processing(true);
-    service.setType(self.id, {group: !_.isEmty(val) ? self.group() : null}, updateOptions);
+    self.op(_.omit(val, "groupType"));
+    self.groupType(_.get(val, "groupType"));
+    service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, updateOptions);
   });
 
   //
@@ -80,7 +85,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   function lightUpdateErrorFn(response) {
     self.processing(true);
     util.showSavedIndicatorIcon(response);
-    //service.queryOne(self.id);
+    service.queryOne(self.id);
   }
 
   var lightUpdateOptions = { onSuccess: util.showSavedIndicatorIcon,
