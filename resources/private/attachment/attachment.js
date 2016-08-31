@@ -68,7 +68,7 @@ var attachment = (function() {
   }
 
   $(function() {
-    $("#attachment").applyBindings({attachment: attachment, signingModel: signingModel, foo: "foo"});
+    $("#attachment").applyBindings({attachment: attachment, signingModel: signingModel});
     $("#upload-page").applyBindings({});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: service.authModel});
 

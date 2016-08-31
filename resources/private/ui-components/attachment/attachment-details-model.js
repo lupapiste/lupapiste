@@ -64,8 +64,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.attachment().type(data.attachmentType);
   });
 
-
-
   self.deleteAttachment = function() {
     // TODO: Dialog
     service.deleteAttachment(self.id);
@@ -163,117 +161,5 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
   self.addHubListener("side-panel-close", _.partial(self.disablePreview, false));
-
-
-
-  // Type
-  //var applicationModel = lupapisteApp.models.application;
-
-  //var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
-
-
-
-  // //// Subscriptions ////
-  // Set attachment type
-  // Set groupType and op
-  // Set for printing
-  // Set visibility
-  // Set meta - contents, scale, size
-
-
-
-
-
-
-
-
-  // function subscribe() {
-  //   model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
-  //     var type = model.type();
-  //     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
-  //     var loader$ = $("#attachment-type-select-loader");
-  //     if (prevAttachmentType !== attachmentType) {
-  //       loader$.show();
-  //       ajax
-  //         .command("set-attachment-type",
-  //           {id:              applicationId,
-  //            attachmentId:    attachmentId,
-  //            attachmentType:  attachmentType})
-  //         .success(function() {
-  //           loader$.hide();
-  //           repository.load(applicationId, undefined, undefined, true);
-  //         })
-  //         .error(function(e) {
-  //           loader$.hide();
-  //           repository.load(applicationId, undefined, undefined, true);
-  //           error(e.text);
-  //         })
-  //         .call();
-  //     }
-  //   }));
-
-  //   function applySubscription(label) {
-  //     model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
-  //       if (value || value === "") {
-  //         var data = {};
-  //         data[label] = value;
-  //         saveLabelInformation(label, {meta: data});
-  //       }
-  //     }, 500)));
-  //   }
-
-  //   model.subscriptions.push(model.selectedGroup.subscribe(function(group) {
-  //     // Update attachment group type + operation when new group is selected
-  //     if (util.getIn(group, ["id"]) !== util.getIn(model, ["operation", "id"]) ||
-  //         util.getIn(group, ["groupType"]) !== util.getIn(model, ["groupType"])) {
-
-  //       group = _.pick(group, ["id", "name", "groupType"]);
-  //       saveLabelInformation("group", {meta: {group: !_.isEmpty(group) ? group : null}});
-
-  //       model.operation(util.getIn(group, ["id"]) ? _.omit(group, "groupType") : null);
-  //       model.groupType(util.getIn(group, ["groupType"]));
-  //     }
-  //   }));
-
-  //   model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
-  //     ajax.command("set-attachments-as-verdict-attachment", {
-  //       id: applicationId,
-  //       selectedAttachmentIds: isVerdictAttachment ? [attachmentId] : [],
-  //       unSelectedAttachmentIds: isVerdictAttachment ? [] : [attachmentId]
-  //     })
-  //     .success(function() {
-  //       hub.send("indicator-icon", {style: "positive"});
-  //       repository.load(applicationId, undefined, undefined, true);
-  //     })
-  //     .error(function(e) {
-  //       error(e.text);
-  //       notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-  //       repository.load(applicationId, undefined, undefined, true);
-  //     })
-  //     .call();
-  //   }));
-
-  //   model.subscriptions.push(model.visibility.subscribe(function(data) {
-  //     if (authorizationModel.ok("set-attachment-visibility")) {
-  //       ajax.command("set-attachment-visibility", {
-  //         id: applicationId,
-  //         attachmentId: model.id(),
-  //         value: data
-  //       })
-  //       .success(function() {
-  //         model.dirty = true;
-  //         hub.send("indicator-icon", {style: "positive"});
-  //       })
-  //       .call();
-  //     }
-  //   }));
-
-
-
-  //   applySubscription("contents");
-  //   applySubscription("scale");
-  //   applySubscription("size");
-  // }
-
 
 };
