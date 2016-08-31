@@ -321,6 +321,7 @@ LUPAPISTE.ApplicationModel = function() {
               ajax.command("submit-application", {id: self.id()})
               .success( self.reload)
               .onError("error.cannot-submit-application", cannotSubmitResponse)
+              .onError("error.command-illegal-state", self.lightReload)
               .fuse(self.stateChanged)
               .processing(self.processing)
               .call();
@@ -342,6 +343,7 @@ LUPAPISTE.ApplicationModel = function() {
           .call();
         self.reload();
       })
+      .onError("error.command-illegal-state", self.lightReload)
       .fuse(self.stateChanged)
       .processing(self.processing)
       .call();
@@ -379,6 +381,7 @@ LUPAPISTE.ApplicationModel = function() {
             hub.send("external-api::integration-sent", permit);
           }
         })
+        .onError("error.command-illegal-state", self.lightReload)
         .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
         .fuse(self.stateChanged)
         .processing(self.processing)
@@ -521,6 +524,7 @@ LUPAPISTE.ApplicationModel = function() {
           ajax
             .command("cancel-inforequest", {id: self.id()})
             .success(function() {pageutil.openPage("applications");})
+            .onError("error.command-illegal-state", self.lightReload)
             .fuse(self.stateChanged)
             .processing(self.processing)
             .call();
@@ -558,6 +562,7 @@ LUPAPISTE.ApplicationModel = function() {
                 self.lightReload();
               }
             })
+            .onError("error.command-illegal-state", self.lightReload)
             .fuse(self.stateChanged)
             .processing(self.processing)
             .call();
@@ -575,6 +580,7 @@ LUPAPISTE.ApplicationModel = function() {
                           .success(function() {
                             repository.load(self.id());
                           })
+                          .onError("error.command-illegal-state", self.lightReload)
                           .fuse(self.stateChanged)
                           .processing(self.processing);
 
@@ -756,6 +762,7 @@ LUPAPISTE.ApplicationModel = function() {
         .query("application-submittable", {id: self.id.peek()})
         .success(function() { self.submitErrors([]); })
         .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .onError("error.command-illegal-state", self.lightReload)
         .call();
     }
   }
