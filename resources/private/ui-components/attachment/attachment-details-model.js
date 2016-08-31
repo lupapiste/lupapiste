@@ -72,10 +72,27 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.isDeletable = function() { return authModel.ok("delete-attachment") && editable(); };
 
   // Version
+  self.hasVersion = self.disposedComputed(function() { return !_.isEmpty(self.attachment().versions); });
+  self.disposedSubscribe(self.hasVersion, function(val) { self.showHelp(!val); }); // Toggle help
   self.showAttachmentVersionHistory = ko.observable(false);
-  self.newAttachmentVersion = _.noop;
+  self.newAttachmentVersion = function() {};
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
-  self.areVersionsDeletable = function() { return authModel.ok("delete-attachment-version") && editable(); };
+  self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
+  self.deleteVersion = function(fileModel) {
+    var fileId = fileModel.fileId;
+    var originalFileId = fileModel.originalFileId;
+    var deleteFn = function() {
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
+      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: _.ary(_.partial(service.queryOne, self.id), 1) });
+    };
+    self.disablePreview(true);
+    hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "attachment.delete.version.message",
+                                                 yesFn: deleteFn }});
+  };
+
 
   // RAM
   self.isRamAttachment = self.disposedComputed( function() {
@@ -116,6 +133,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.permanentArchiveEnabled = function() { return authModel.ok("permanent-archive-enabled"); };
 
   // Signatures
+  self.hasSignature = self.disposedComputed(function() { return !_.isEmpty(self.attachment().signatures); });
   self.sign = function() {
     self.disablePreview(true);
     self.signingModel.init({id: self.applicationId, attachments:[self.attachment]});
