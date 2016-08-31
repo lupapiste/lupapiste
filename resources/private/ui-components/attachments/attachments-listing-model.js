@@ -302,7 +302,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
-      opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
+      opSelector: attachmentId ? false : lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
