@@ -228,12 +228,24 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
+  function downloadRedirect( uri ) {
+    if( location ) {
+      location.assign( uri );
+    }
+  }
+
   self.downloadAttachments = function(attachmentIds) {
     var ids = attachmentIds || _(self.attachments()).map(ko.unwrap).map("id");
     var applicationId = self.applicationId();
     var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + ids.join(",") + "&lang=" + loc.getCurrentLanguage();
-    window.open(uri);
+    downloadRedirect( uri );
   };
+
+  function downloadAllAttachments() {
+    downloadRedirect("/api/raw/download-all-attachments?id=" + self.applicationId());
+  }
+
+  hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {

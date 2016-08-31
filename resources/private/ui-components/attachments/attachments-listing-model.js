@@ -215,7 +215,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   function getOperationLocalization(operationId) {
     var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
-    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
+    return operation
+      ? _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ")
+      : "";
   }
 
   function groupToAccordionName(groupPath) {
@@ -302,7 +304,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
-      opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
+      opSelector: attachmentId ? false : lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");

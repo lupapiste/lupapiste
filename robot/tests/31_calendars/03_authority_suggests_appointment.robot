@@ -62,8 +62,48 @@ Sonja suggests an appointment
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
   Goto following week in calendar view
-  Wait Until  Element should be visible  xpath=//button[@data-test-id='reserve-slot-Friday-1000']
+  Wait Until  Element should be visible by test id  reserve-slot-Friday-1000
   Click by test id  reserve-slot-Friday-1000
-  Wait Until  Element should be visible  xpath=//textarea[@data-test-id='reservation-comment-textarea']
+  Wait Until  Element should be visible by test id  reservation-comment-textarea
   Fill test id  reservation-comment-textarea  diibadaabakommenttia
   Click by test id  reservation-slot-reserve-bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should be visible by test id  reservation-PENDING-Friday-1000
+  Logout
+  
+Mikko declines appointment
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Wait until  Element should be visible by test id  decline-reservation-btn-0
+  Click by test id  decline-reservation-btn-0
+  Wait until  Element should be visible by test id  reservation-declined-ack-0
+  Logout
+
+Sonja suggests another appointment
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Goto following week in calendar view
+  Wait until  Select From List by test id  reservation-type-select  Foobar
+  Wait until  Select From List by test id  attendee-select  Mikko Intonen
+  Wait Until  Element should be visible by test id  reserve-slot-Friday-1100
+  Element should not be visible by test id  reservation-PENDING-Friday-1000
+  Element should not be visible by test id  reservation-ACCEPTED-Friday-1000
+  Click by test id  reserve-slot-Friday-1100
+  Wait Until  Element should be visible by test id  reservation-comment-textarea
+  Fill test id  reservation-comment-textarea  foobarcomment66
+  Click by test id  reservation-slot-reserve-bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should be visible by test id  reservation-PENDING-Friday-1100
+  Logout
+
+Mikko accepts appointment
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Wait until  Element should be visible by test id  accept-reservation-btn-0
+  Click by test id  accept-reservation-btn-0
+  Wait until  Element should be visible by test id  reservation-accepted-ack-0
+  Goto following week in calendar view
+  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
