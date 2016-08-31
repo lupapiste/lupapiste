@@ -65,9 +65,17 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   self.deleteAttachment = function() {
-    // TODO: Dialog
-    service.deleteAttachment(self.id);
-    // TODO: Return to listing
+    self.disablePreview(true);
+    var deleteFn = function() {
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
+      lupapisteApp.models.application.open("attachments");
+      service.removeAttachment(self.id);
+    };
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(self.attachment().versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: deleteFn }});
   };
   self.isDeletable = function() { return authModel.ok("delete-attachment") && editable(); };
 

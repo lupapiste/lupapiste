@@ -146,18 +146,21 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
 
+  function queryTagGroupsAndFilters() {
+    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
+    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+  }
+
   self.queryAll = function() {
     forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);
-    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
-    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+    queryTagGroupsAndFilters();
   };
 
   // hubParams are attached to the hub send event for attachment query.
   self.queryOne = function(attachmentId, hubParams) {
     queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
-    queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
-    queryData("attachments-filters", "attachmentsFilters", self.setFilters);
+    queryTagGroupsAndFilters();
   };
 
   self.getAttachment = function(attachmentId) {
@@ -186,6 +189,7 @@ LUPAPISTE.AttachmentsService = function() {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
+        queryTagGroupsAndFilters();
         _.get(options, "onSuccess", _.showSavedIndicator)(res);
       })
       .error(_.get(options, "onError", util.showSavedIndicator))
