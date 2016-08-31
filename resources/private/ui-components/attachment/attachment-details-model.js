@@ -187,7 +187,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return !self.disablePreview() && _.some(["image", "pdf", "plainText"], self.previewIs);
   };
 
-  self.rotationAllowed = function() { return authModel.ok("rotate-pdf") && self.previewIs("pdf"); }; // TODO: check file type in pre-check
+  self.rotationAllowed = function() { return authModel.ok("rotate-pdf"); };
 
   self.rotate = function(rotation) {
     var iframe$ = $("#file-preview-iframe");

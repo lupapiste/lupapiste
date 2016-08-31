@@ -123,6 +123,12 @@
     (when-not (att-type/allowed-attachment-type-for-application? attachment-type application)
       (fail :error.illegal-attachment-type))))
 
+(defn- mime-validator [& allowed-mime-types]
+  (fn validate-mime-type [{{attachment-id :attachmentId} :data application :application}]
+    (when-let [version (some->> attachment-id (attachment/get-attachment-info application) :latestVersion)]
+      (when-not ((set allowed-mime-types) (:contentType version))
+        (fail :error.illegal-file-type)))))
+
 (defn- validate-operation-in-application [{data :data application :application}]
   (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
     (when-not (util/find-by-id op-id (app/get-operations application))
@@ -500,6 +506,7 @@
    :pre-checks  [(partial attachment/if-not-authority-state-must-not-be #{:sent})
                  attachment-editable-by-application-state
                  validate-attachment-type
+                 (mime-validator "application/pdf")
                  app/validate-authority-in-drafts
                  attachment-id-is-present-in-application-or-not-set]
    :states      (conj (states/all-states-but states/terminal-states) :answered)
