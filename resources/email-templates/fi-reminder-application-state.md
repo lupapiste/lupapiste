@@ -1,17 +1,12 @@
-# Moi {{name}},
+# Hei {{user.firstName}},
 
-sinulla on Lupapiste-palvelussa aktiivinen lupahakemus {{link-fi}}. Hakemusta on p&auml;ivitetty viimeksi {{modified}}.
+sinulla on Lupapiste-palvelussa aktiivinen lupahakemus hankkeesta {{operation}} osoitteessa {{address}}, {{city}}. Hakemusta on p&auml;ivitetty viimeksi {{modified}}. Onko asia viel&auml; ajankohtainen? 
 
-Mikäli hakemus on aiheeton, kirjaudu sisään Lupapisteeseen ja klikkaa "Peruuta hakemus" hakemuksen oikeasta ylälaidasta. Hakemuksen perumisen myötä myös hakemusta koskevat sähköposti-ilmoitukset perutaan. Perutun hakemuksen tietoja ei voi enää muokata, eikä hakemusta voi palauttaa aktiiviseksi.
+Mik&auml;li hakemus on aiheeton, kirjaudu sis&auml;&auml;n Lupapisteeseen ja klikkaa "Peruuta hakemus" hakemuksen oikeasta yl&auml;laidasta. Hakemuksen perumisen my&ouml;t&auml; my&ouml;s hakemusta koskevat s&auml;hk&ouml;posti-ilmoitukset perutaan.
+
+N&auml;hd&auml;ksesi hankkeen tiedot klikkaa alla olevaa linkki&auml;. Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+
+{{link-fi}}
 
 Terveisin,
-[Lupapiste](https://www.lupapiste.fi/)
-
----
-
-# Hej {{name}},
-
-Du har en aktiv ans&ouml;kan om lov i Lupapiste-tj&auml;nst: {{link-sv}}. Ans&ouml;kan om lov har senast uppdaterat {{modified}}.
-
-Hälsningar,
-[Lupapiste](https://www.lupapiste.fi/)
+{{lupapiste}}
