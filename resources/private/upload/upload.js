@@ -24,7 +24,7 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
   LUPAPISTE.Upload.selectableGroups([{groupType: options.group, id: options.operationId}]);
-  LUPAPISTE.Upload.operationId(options.operationId);
+  LUPAPISTE.Upload.operationId(options.operationId || options.group);
   LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);

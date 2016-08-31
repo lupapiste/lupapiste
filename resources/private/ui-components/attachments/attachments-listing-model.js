@@ -297,12 +297,15 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");
+    var attachmentGroup = _.get( params, "attachmentGroup" );
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
-      opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
+      group: _.get(attachmentGroup, "groupType"),
+      operationId: _.get(attachmentGroup, "id"),
+      opSelector: attachmentId ? false : lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
