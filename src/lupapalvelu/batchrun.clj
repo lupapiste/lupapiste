@@ -412,3 +412,22 @@
 (defn check-review-for-id [& args]
   (mongo/connect!)
   (poll-verdicts-for-reviews (first args)))
+
+(defn pdfa-convert-review-pdfs [& args]
+  (mongo/connect!)
+  (println "# of applications with background generated tasks:"
+           (mongo/count :applications {:tasks.source.type "background"}))
+  (doseq [app-id (mongo/select :applications {:tasks.source.type "background"})]
+    (doseq [task (:tasks app-id)]
+      (if (= "background" (:type (:source task)))
+        (do
+          (println "processing task" (:id task))
+          (doseq [att (:attachments app-id)]
+            (if (= (:id task) (:id (:source att)))
+              (do
+                (println "converting task #" (:id task) " -> attachment # " (:id att) " of application " (:_id app-id))
+                (attachment/convert-to-pdfa! app-id (:id att)))))
+
+          #_(action/update-application
+            (action/application->command app-id)
+            {$pull {:tasks {:id (:id task)}}}))))))
