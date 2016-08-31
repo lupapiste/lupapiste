@@ -79,7 +79,6 @@ var attachment = (function() {
 
   function uploadDone() {
     if (uploadingApplicationId) {
-      service.queryOne(attachmentId());
       LUPAPISTE.ModalDialog.close();
       uploadingApplicationId = null;
     }

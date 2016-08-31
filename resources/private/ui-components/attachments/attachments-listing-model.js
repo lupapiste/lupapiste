@@ -114,8 +114,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
       }),
       attachmentIds: subGroup.attachmentIds,
       downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
-      downloadAllText: ko.pureComputed(function() { 
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+      downloadAllText: ko.pureComputed(function() {
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
          return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     };
   }
@@ -158,8 +158,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
       downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
-      downloadAllText: ko.pureComputed(function() { 
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+      downloadAllText: ko.pureComputed(function() {
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
          return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
@@ -297,11 +297,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");
+    var attachmentGroup = _.get( params, "attachmentGroup" );
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
+      group: _.get(attachmentGroup, "groupType"),
+      operationId: _.get(attachmentGroup, "id"),
       opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });

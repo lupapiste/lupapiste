@@ -28,8 +28,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   function addFile(attachment) {
     hub.send( "add-attachment-file", {attachmentId: attachment.id,
-                                      attachmentType: attachment.type["type-group"]
-                                      + "." + attachment.type["type-id"]});
+                                      attachmentType: [util.getIn(attachment, ["type", "type-group"]),
+                                                       util.getIn(attachment, ["type", "type-id"])].join("."),
+                                      attachmentGroup: attachment.group() });
   }
 
   function removeAttachment(attachment) {
