@@ -215,7 +215,9 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   function getOperationLocalization(operationId) {
     var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
-    return _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ");
+    return operation
+      ? _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ")
+      : "";
   }
 
   function groupToAccordionName(groupPath) {
