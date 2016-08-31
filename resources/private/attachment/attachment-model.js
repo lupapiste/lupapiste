@@ -49,7 +49,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   // Updates which require attachment model reload
   //
 
-  var updateOptions = { onComplete: _.partial(service.queryOne, self.id)};
+  var updateOptions = { onComplete: _.ary(_.partial(service.queryOne, self.id), 0) };
 
   self.disposedSubscribe(self.notNeeded, function(val) {
     self.processing(true);
@@ -91,8 +91,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   }
 
   var lightUpdateOptions = { onSuccess: util.showSavedIndicatorIcon,
-                             onError: lightUpdateErrorFn,
-                             onComplete: _.noop };
+                             onError: lightUpdateErrorFn };
 
   self.disposedSubscribe(self.contents, function(val) {
     service.setMeta(self.id, {contents: val}, lightUpdateOptions);

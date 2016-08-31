@@ -45,11 +45,11 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   }
 
   function approveAttachment(attachment) {
-    service.approveAttachment(attachment.id, { onComplete: _.partial(service.queryOne, attachment.id) });
+    service.approveAttachment(attachment.id, { onComplete: _.ary(_.partial(service.queryOne, attachment.id), 0) });
   }
 
   function rejectAttachment(attachment) {
-    service.rejectAttachment(attachment.id, { onComplete: _.partial(service.queryOne, attachment.id) });
+    service.rejectAttachment(attachment.id, { onComplete: _.ary(_.partial(service.queryOne, attachment.id), 0) });
   }
 
   function stateIcons(attachment) {

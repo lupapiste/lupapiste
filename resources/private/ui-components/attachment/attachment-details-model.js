@@ -93,7 +93,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", _.ary(_.partial(service.queryOne, self.id)));
+  self.addHubListener("upload-done", _.ary(_.partial(service.queryOne, self.id), 0));
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
   self.deleteVersion = function(fileModel) {
@@ -101,7 +101,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     var originalFileId = fileModel.originalFileId;
     var deleteFn = function() {
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
-      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: _.ary(_.partial(service.queryOne, self.id), 1) });
+      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: _.ary(_.partial(service.queryOne, self.id), 0) });
     };
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",

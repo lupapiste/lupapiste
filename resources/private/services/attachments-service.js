@@ -186,9 +186,10 @@ LUPAPISTE.AttachmentsService = function() {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
-        _.get(options, "onSuccess", _.noop)(res);
+        _.get(options, "onSuccess", _.showSavedIndicator)(res);
       })
-      .complete(_.get(options, "onComplete", util.showSavedIndicator))
+      .error(_.get(options, "onError", util.showSavedIndicator))
+      .complete(_.get(options, "onComplete", _.noop))
       .processing(self.processing)
       .call();
     return false;
@@ -200,7 +201,8 @@ LUPAPISTE.AttachmentsService = function() {
         self.queryAll();
         _.get(options, "onSuccess", _.noop)(res);
       })
-      .complete(_.get(options, "onComplete", util.showSavedIndicator))
+      .error(_.get(options, "onError", util.showSavedIndicator))
+      .complete(_.get(options, "onComplete", _.noop))
       .processing(self.processing)
       .call();
   };
