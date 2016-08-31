@@ -22,6 +22,8 @@ jQuery(document).ready(function() {
     {name: "docgen-review-buildings", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
     {name: "attachments-multiselect"},
+    {name: "attachment-details"},
+    {name: "attachments-change-type"},
     {name: "authority-select"},
     {name: "base-autocomplete", model: "autocomplete-base-model"},
     {name: "autocomplete"},
