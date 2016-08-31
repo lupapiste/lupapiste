@@ -324,8 +324,7 @@
 
 (defn check-for-verdicts [& args]
   (mongo/connect!)
-  (fetch-verdicts)
-  (mongo/disconnect!))
+  (fetch-verdicts))
 
 (defn- get-asianhallinta-ftp-users [organizations]
   (->> (for [org organizations
@@ -364,10 +363,8 @@
           (errorf "Failed to rename %s to %s" zip-path target))))))
 
 (defn check-for-asianhallinta-verdicts [& args]
-  (do
-    (mongo/connect!)
-    (fetch-asianhallinta-verdicts)
-    (mongo/disconnect!)))
+  (mongo/connect!)
+  (fetch-asianhallinta-verdicts))
 
 (defn batchrun-user-for-review-fetch [orgs-by-id]
   ;; modified from fetch-verdicts.

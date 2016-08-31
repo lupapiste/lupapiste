@@ -37,11 +37,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
       self.service.queryAll();
     }
   });
+  // Reference to default dispose.
   var dispose = self.dispose;
   self.dispose = function() {
     self.service.clearData();
     dispose();
   };
+
+  hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
   //
   // Attachment hierarchy
@@ -110,7 +113,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
         });
       }),
       attachmentIds: subGroup.attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     };
   }
 
@@ -144,13 +150,17 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function modelForMainAccordion(mainGroup) {
     var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
     var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
+    var attachmentInfos = getAttachmentInfos(attachmentIds);
     return _.merge({
       type: "main",
       status: subGroupsStatus(subGroups),
       hasContent: someSubGroupsField(subGroups, "hasContent"),
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds)
+      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
+      downloadAllText: ko.pureComputed(function() { 
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
 
@@ -284,22 +294,44 @@ LUPAPISTE.AttachmentsListingModel = function() {
     }
   });
 
-  self.newAttachment = function() {
+  function addAttachmentFile( params ) {
+    var attachmentId = _.get( params, "attachmentId");
+    var attachmentType = _.get( params, "attachmentType");
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
-      attachmentId: null,
-      attachmentType: null,
-      typeSelector: true,
+      attachmentId: attachmentId,
+      attachmentType: attachmentType,
+      typeSelector: !attachmentType,
       opSelector: lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
+  }
 
-  self.onUploadDone = function() {
-    self.service.queryAll();
-  };
-  hub.subscribe("upload-done", self.onUploadDone);
+  self.newAttachment = _.ary( addAttachmentFile, 0 );
+
+  self.addHubListener( "add-attachment-file", addAttachmentFile );
+
+  function onUploadDone( params) {
+    var id = _.get( params, "attachmentId");
+    if( id ) {
+      self.service.queryOne( id, {attachmentUploaded: id} );
+    } else {
+      self.service.queryAll();
+    }
+  }
+
+  self.addHubListener("upload-done", onUploadDone);
+
+  // After attachment query
+  function afterQuery( params ) {
+    var id = _.get( params, "attachmentUploaded");
+    if( id ) {
+      pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
+    }
+  }
+
+  self.addEventListener( self.service.serviceName, "query", afterQuery );
 
   function AttachmentTemplatesModel() {
     var templateModel = this;
@@ -389,6 +421,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.hasFile = ko.pureComputed(function() {
     return _(self.attachmentGroups()).invokeMap("hasFile").some();
+  });
+
+  self.hasUnfilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.attachments());
+  });
+
+  self.hasFilteredAttachments = ko.pureComputed(function() {
+    return !_.isEmpty(self.service.filteredAttachments());
   });
 
 };

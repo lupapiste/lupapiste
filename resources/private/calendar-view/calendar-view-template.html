@@ -73,7 +73,8 @@
                                                                             height: $component.slotHeight($data) }">
                 <button class="reserve-slot"
                         data-test-id="reserve-slot"
-                        data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent,
+                        data-bind="attr: { 'data-test-id': moment($data.startTime).format('[reserve-slot-]dddd-HHmm') },
+                                   click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent,
                                                                          clientId: $parents[1].clientId,
                                                                          reservationTypeId: $parents[1].reservationTypeId }, 'available-slot')">
                   <div>
@@ -86,6 +87,7 @@
               <!--ko if: $data.status === 'booked' -->
               <div class="calendar-slot reservation" data-bind="style: { top: $component.slotPositionTop($data),
                                                                          height: $component.slotHeight($data) },
+                                                                css: { 'accepted': $data.reservation.reservationStatus === 'ACCEPTED' },
                                                                 with: $data.reservation">
                 <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
                 <div data-bind="text: location, attr: {'title': location}"></div>

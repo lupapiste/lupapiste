@@ -2,7 +2,9 @@
         id="attachments-accordions-template">
   <div>
     <!-- ko if: $data.groups() && !_.isEmpty($data.groups().accordions) -->
-    <button class="ghost bottom-marginM" data-bind="click: $data.toggleAll">
+    <h2 data-bind="ltext: 'application.attachments'"
+        class="attachments-title" />
+    <button class="ghost right bottom-marginM" data-bind="click: $data.toggleAll">
       <i class="lupicon-menu"></i>
       <span data-bind="ltext: 'accordions.toggle-all'"></span>
     </button>

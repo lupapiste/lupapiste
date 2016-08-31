@@ -15,6 +15,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
                                 partyType: [] });
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
+  self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
   self.disposedComputed(function() {
     var id = lupapisteApp.models.application.id();
@@ -28,5 +29,27 @@ LUPAPISTE.ApplicantCalendarModel = function () {
     self.reservationTypes(event.reservationTypes);
     self.defaultLocation(event.defaultLocation);
   });
+
+  self.acceptReservation = function(r) {
+    ajax
+      .command("accept-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
+      .success(function() {
+        r.acknowledged("accepted");
+      })
+      .call();
+  };
+
+  self.declineReservation = function(r) {
+    ajax
+      .command("decline-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
+      .success(function() {
+        r.acknowledged("declined");
+      })
+      .call();
+  };
+
+  self.appointmentParticipants = function(r) {
+    return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
+  };
 
 };

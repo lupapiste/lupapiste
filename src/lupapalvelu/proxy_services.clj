@@ -4,7 +4,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as user]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error fatal]]
+            [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.coordinate :as coord]
@@ -127,7 +127,7 @@
             (future-cancel nls-address-query)
             (resp/json address-from-muni))
           (do
-            (debugf "Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
+            (errorf "error.integration - Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
             (respond-nls-address @nls-address-query x y lang municipality)))
         (respond-nls-address @nls-address-query x y lang municipality)))
     (resp/status 400 "Bad Request")))

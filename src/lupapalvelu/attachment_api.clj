@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
             [sade.core :refer [ok fail fail! now def-]]
+            [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [schema.core :as sc]
@@ -18,6 +19,7 @@
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
+            [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.mongo :as mongo]
@@ -295,10 +297,8 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when-not (util/find-by-id attachment-id attachments)
                           (fail :error.attachment.id)))
-                      (fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
-                        (when (some (comp #{attachment-id} :ramLink) attachments)
-                          (fail :error.ram-link-already-exists)))
-                      ram/ram-status-ok]
+                      ram/ram-not-linked
+                      ram/attachment-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/default-authz-writer-roles
@@ -328,7 +328,7 @@
                  attachment-not-required
                  attachment-editable-by-application-state
                  ram/ram-status-not-ok
-                 ram/ram-not-root-attachment]}
+                 ram/ram-not-linked]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
   (ok))
@@ -345,7 +345,7 @@
                  attachment-not-readOnly
                  attachment-editable-by-application-state
                  ram/ram-status-not-ok
-                 ram/ram-not-root-attachment]}
+                 ram/ram-not-linked]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)
@@ -419,7 +419,7 @@
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (attachment/temp-file-input-stream (attachment/get-all-attachments! attachments application lang))})
+        :body (files/temp-file-input-stream (attachment/get-all-attachments! attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -438,7 +438,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (attachment/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+       :body (files/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
 
 ;;
 ;; Upload
@@ -482,7 +482,8 @@
                             :locked locked
                             :required false
                             :comment-text text}]
-    (when-not (:id (attachment/upload-and-attach! command attachment-options file-options))
+    (if-let [{id :id} (attachment/upload-and-attach! command attachment-options file-options)]
+      (ok :attachmentId id)
       (fail! :error.unknown))))
 
 ;;
@@ -716,7 +717,7 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (let [attachment (util/find-first #(= (:id %) attachment-id) attachments)
                               {:keys [archivable contentType]} (last (:versions attachment))]
-                          (when (or archivable (not= "application/pdf" contentType))
+                          (when (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg) (keyword contentType))))
                             (fail :error.attachment.id))))]
    :states           (states/all-application-states-but :draft)}
   [{:keys [application]}]
@@ -731,9 +732,9 @@
                                           :comment-text nil
                                           :required false
                                           :created created
-                                          :stamped stamped}
-                                         {:content temp-pdf :filename filename})
-          (ok))
+                                          :stamped stamped
+                                          :original-file-id fileId}
+                                         {:content temp-pdf :filename filename}))
         (finally
-          (io/delete-file temp-pdf :silently))))
-    (fail :error.unknown)))
+          (io/delete-file temp-pdf :silently)))
+      (ok))))

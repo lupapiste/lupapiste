@@ -5,22 +5,23 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
-            [lupapalvelu.icalendar :as ical]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.mongo :as mongo]
-            [sade.strings :as str]))
+            [sade.strings :as str]
+            [monger.operators :refer :all]
+            [lupapalvelu.calendar-emails]
+            [lupapalvelu.organization :as org]))
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
 (defn- ->FrontendCalendar [calendar user]
-  {:id           (:id calendar)
-   :name         (format "%s %s" (:firstName user) (:lastName user))
-   :email        (:email user)
-   :organization (:organizationCode calendar)
-   :active       (:active calendar)})
+  {:id               (:id calendar)
+   :name             (format "%s %s" (:firstName user) (:lastName user))
+   :email            (:email user)
+   :organization     (:organizationCode calendar)
+   :organizationName (get-in (org/get-organization (:organizationCode calendar)) [:name])
+   :active           (:active calendar)})
 
 (defn- ->FrontendReservation [r]
   {:id        (:id r)
@@ -31,7 +32,9 @@
    :endTime   (util/to-millis-from-local-datetime-string (-> r :time :end))
    :comment   (:comment r)
    :location  (:location r)
-   :applicationId (:contextId r)})
+   :applicationId (:contextId r)
+   :reservedBy (:reservedBy r)
+   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to]))))})
 
 (defn Reservations->FrontendSlots
   [status reservations]
@@ -344,25 +347,6 @@
 (defn- get-reservation [id]
   (->FrontendReservation (api-query (str "reservations/" id))))
 
-(notifications/defemail
-  :suggest-appointment
-  {:subject-key                  "application.calendar.appointment.suggestion"
-   :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :attendee recipient)]
-                                     (ical/create-calendar-event reservation)))
-   :show-municipality-in-subject true
-   :recipients-fn                (fn [{application :application result :result}]
-                                   (let [reservations (group-by :id (:reservations application))
-                                         reservation (first (get reservations (:reservationId result)))]
-                                     (map usr/get-user-by-id (:calendar-recipients reservation))))
-   :model-fn                     (fn [{application :application} _ recipient]
-                                   {:link-fi (notifications/get-application-link application nil "fi" recipient)
-                                    :link-sv (notifications/get-application-link application nil "sv" recipient)
-                                    :info-fi (str (env/value :host) "/ohjeet")
-                                    :info-sv (str (env/value :host) "/ohjeet")})})
-
 (defcommand reserve-calendar-slot
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
@@ -370,7 +354,9 @@
    :input-validators [(partial action/number-parameters [:slotId :reservationTypeId])
                       (partial action/string-parameters [:clientId :comment :location])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
-   :on-success       (notify :suggest-appointment)}
+   :on-success       [(notify :suggest-appointment-authority)
+                      (notify :suggest-appointment-from-applicant)
+                      (notify :suggest-appointment-to-applicant)]}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   ; Applicant: clientId must be the same as user id
   ; Authority: authorityId must be the same as user id
@@ -392,14 +378,54 @@
                           {:clientId clientId :reservationSlotId slotId
                            :reservationTypeId reservationTypeId :comment comment
                            :location location :contextId id :reservedBy userId})
+          ; Reservations made by applicants are auto-accepted
+          _ (if (usr/applicant? user)
+              (post-command (str "reservations/" reservationId "/accept")))
           reservation (get-reservation reservationId)
           to-user (cond
                     (usr/applicant? user) (usr/get-user-by-id authorityId)
                     (usr/authority? user) (usr/get-user-by-id clientId))
-          reservation (assoc reservation :calendar-recipients (map :id [user to-user])
+          reservation (assoc reservation :from (:id user)
+                                         :to [(:id to-user)]
                                          :action-required-by [(:id to-user)])]
       (cal/update-mongo-for-new-reservation application reservation user to-user timestamp)
       (ok :reservationId reservationId))))
+
+(defcommand accept-reservation
+  {:user-roles       #{:applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]
+   :on-success       (notify :accept-appointment)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
+    (info "Accepting reservation" reservationId)
+    (cal/accept-reservation application reservation user timestamp)
+    (ok :reservationId reservationId)))
+
+(defcommand decline-reservation
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority :applicant})]
+   :on-success       (notify :decline-appointment)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
+    (info "Declining reservation" reservationId)
+    (cal/decline-reservation application reservation user timestamp)
+    (ok :reservationId reservationId)))
+
+(defcommand mark-reservation-update-seen
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
+  (cal/mark-reservation-update-seen application reservationId userId)
+  (ok))
 
 (defquery my-reserved-slots
   {:user-roles       #{:authority :applicant}

@@ -1,6 +1,20 @@
 // Default table
 //
 // Styleguide 4.1
+
+$tr-color-even: $gray246;
+
+@mixin no-row-hover() {
+  tr {
+    &:hover {
+      background-color: white;
+    }
+    &:hover:nth-child(even) {
+      background: $tr-color-even;
+    }    
+  }
+}
+
 table {
   width:100%;
   margin-bottom: $marginL;
@@ -22,7 +36,7 @@ tr {
   background: white;
   border: 1px solid $gray221;
   &:nth-child(even) {
-    background: $gray246;
+    background: $tr-color-even;
   }
   &:hover {
     background-color: $gray238;
@@ -304,27 +318,30 @@ div.attachments-table-container {
   left: .5em;
 }
   table.attachments-table {
+    @include no-row-hover;
     margin-bottom: 1em;
     .checkbox-wrapper {
       border: none;
       .checkbox-label {
         padding-top: 2px;
         padding-left: 0;
+        white-space: nowrap;
       }
     }
     td {
       vertical-align: top;
-      .fileinfo {
-        font-style: normal;
-      }
-    }
-    td.attachments-table__state-icons > i {
-      margin-left: 1px;
-      magint-right: 1px;
-    }
+    }    
     .attachments-table--widest {
       width: 80%;
     }
+  }
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+  i {
+    margin-left: 1px;
+    magint-right: 1px;
   }
 }
 
@@ -356,3 +373,16 @@ div.suti-admin-container .serversettings--wide {
     color: $negative;
   }
 }
+
+.view-with-download {
+  .download {
+    white-space: nowrap;
+    a:hover {
+      text-decoration: none;
+    }
+    a:hover > span {
+      text-decoration: underline;
+    }
+  }
+}
+

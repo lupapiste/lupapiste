@@ -13,3 +13,8 @@ Initialize (integration)
   [Tags]  integration
   Open browser to login page
   #Set integration proxy off
+  
+Initialize (ajanvaraus)
+  [Tags]  ajanvaraus
+  Open browser to login page
+  #Set integration proxy off

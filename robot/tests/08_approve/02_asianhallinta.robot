@@ -101,7 +101,7 @@ Velho logs in, sets Mikko as maksaja and moves application to asianhallinta
   Open tab  parties
   Open accordions  parties
   Select From List  //section[@data-doc-type="maksaja"]//select[@name="henkilo.userId"]  Intonen Mikko
-  Wait Until  Textfield Value Should Be  //section[@data-doc-type="maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
+  Wait Until  Javascript?  $("section[data-doc-type=maksaja] input[data-docgen-path='henkilo.henkilotiedot.etunimi']").val() == "Mikko" 
   Click by test id  to-asianhallinta
   Wait until  Application state should be  sent
   [Teardown]  logout

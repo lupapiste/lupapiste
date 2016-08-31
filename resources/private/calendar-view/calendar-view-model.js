@@ -47,7 +47,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
                    calendarId: weekday.calendarId,
                    hour: hour,
                    minutes:  0,
-                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00" });
+                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00"});
     });
     return times;
   };

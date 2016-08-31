@@ -28,10 +28,11 @@
       images)))
 
 (defn- read-jpeg [^File file]
-  (let [readers (ImageIO/getImageReadersByFormatName "jpeg")
-        ^JPEGImageReader reader (.next readers)]
-    (.setInput reader (FileImageInputStream. file) false false)
-    (read-images reader 0 [])))
+  (with-open [in (FileImageInputStream. file)]
+    (let [readers (ImageIO/getImageReadersByFormatName "jpeg")
+          ^JPEGImageReader reader (.next readers)]
+      (.setInput reader in false false)
+      (read-images reader 0 []))))
 
 (defn- picture-to-pdf [doc jpeg-file]
   (doseq [{:keys [width length content]} (read-jpeg jpeg-file)]

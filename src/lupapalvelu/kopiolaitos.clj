@@ -1,7 +1,7 @@
 (ns lupapalvelu.kopiolaitos
   (:require [taoensso.timbre :as timbre :refer [warnf info error errorf]]
             [monger.operators :refer :all]
-            [clojure.java.io :as io :refer [delete-file]]
+            [clojure.java.io :as io]
             [clojure.string :as s]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
@@ -97,10 +97,7 @@
                                   email-addresses)
 
                                 (finally
-                                  (try
-                                    (io/delete-file zip)
-                                    (catch Exception e
-                                      (errorf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
+                                  (io/delete-file zip :silently)))]
 
     (when (-> results-failed-emails count pos?)
       (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails)))))

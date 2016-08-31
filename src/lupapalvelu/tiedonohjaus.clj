@@ -2,7 +2,7 @@
   (:require [sade.http :as http]
             [sade.env :as env]
             [clojure.core.memoize :as memo]
-            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error fatal]]
+            [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf]]
             [lupapalvelu.organization :as o]
             [lupapalvelu.action :as action]
             [monger.operators :refer :all]
@@ -25,14 +25,13 @@
 
 (defn get-from-toj-api [organization-id coerce? & path-parts]
   (when (:permanent-archive-enabled (o/get-organization organization-id))
-    (try
-      (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
-            response (http/get url (cond-> {:throw-exceptions false}
-                                           coerce? (assoc :as :json)))]
-        (when (= 200 (:status response))
-          (:body response)))
-      (catch Exception e
-        (error "Error accessing TOJ API" e)))))
+    (let [url (apply str (env/value :toj :host) "/tiedonohjaus/api/org/" organization-id "/asiat" (when path-parts "/") path-parts)
+          {:keys [status body]} (http/get url (cond-> {:throw-exceptions false}
+                                                      coerce? (assoc :as :json)))]
+      (case status
+        200 body
+        502 (error "Error accessing TOJ API:" body)
+        nil))))
 
 (defn- get-tos-functions-from-toj [organization-id]
   (or (get-from-toj-api organization-id :coerce) []))
@@ -195,19 +194,31 @@
         tos-fn-changes (tos-function-changes-from-history history lang)
         all-docs (sort-by :ts (concat tos-fn-changes documents attachments statement-reqs neighbors-reqs review-reqs reviews-held))
         state-changes (filter :state history)]
-    (map (fn [[{:keys [state ts user]} next]]
-           (let [api-response (toimenpide-for-state organization (:tosFunction application) state)
-                 action-name (cond
-                               (:name api-response) (:name api-response)
-                               (= state "complementNeeded") (i18n/localize lang "caseFile.complementNeeded")
-                               :else (i18n/localize lang "caseFile.stateNotSet"))]
-             {:action    action-name
-              :start     ts
-              :user      (full-name user)
-              :documents (filter (fn [{doc-ts :ts}]
-                                   (and (>= doc-ts ts) (or (nil? next) (< doc-ts (:ts next)))))
-                                 all-docs)}))
-         (partition 2 1 nil state-changes))))
+    (doall
+      (map (fn [[{:keys [state ts user]} next]]
+             (let [api-response (toimenpide-for-state organization (:tosFunction application) state)
+                   action-name (cond
+                                 (:name api-response) (:name api-response)
+                                 (= state "complementNeeded") (i18n/localize lang "caseFile.complementNeeded")
+                                 :else (i18n/localize lang "caseFile.stateNotSet"))
+                   ; History entries of legacy applications might not have all the timestamps
+                   next-ts (or (:ts next) 0)]
+               {:action    action-name
+                :start     ts
+                :user      (full-name user)
+                :documents (if ts
+                             (doall
+                               (filter
+                                 (fn [doc]
+                                   (if-let [doc-ts (:ts doc)]
+                                     (and (>= doc-ts ts) (or (nil? next) (< doc-ts next-ts)))
+                                     (error "document excluded from case file due to missing timestamp:" doc)))
+                                 all-docs))
+                             (do
+                               (errorf "not returning documents for state '%s' because the state has no timestamp in the history array" state)
+                               [])
+                             )}))
+          (partition 2 1 nil state-changes)))))
 
 (defn- document-metadata-final-state [metadata verdicts]
   (-> (assoc metadata :tila :valmis)

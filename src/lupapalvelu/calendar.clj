@@ -1,18 +1,18 @@
 (ns lupapalvelu.calendar
-  (:require [sade.core :refer [fail! unauthorized]]
-            [sade.env :as env]
-            [taoensso.timbre :as timbre :refer [info error]]
-            [sade.strings :as str]
+  (:require [taoensso.timbre :as timbre :refer [info error]]
             [cheshire.core :as json]
-            [sade.http :as http]
+            [monger.operators :refer :all]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as usr]
-            [sade.util :as util]
             [lupapalvelu.action :refer [application->command update-application]]
             [lupapalvelu.application :as app]
             [lupapalvelu.comment :as comment]
-            [monger.operators :refer :all]
-            [lupapalvelu.application :as application]))
+            [lupapalvelu.application :as application]
+            [sade.core :refer [fail! unauthorized]]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.strings :as str]
+            [sade.util :as util]))
 
 ; -- API Call helpers
 
@@ -23,6 +23,7 @@
   (let [url (build-url action)]
     (info "Calling:" url " with " opts)
     (f url (merge {:as               :json
+                   :coerce           :always
                    :throw-exceptions false
                    :basic-auth       [(env/value :ajanvaraus :username)
                                       (env/value :ajanvaraus :password)]}
@@ -41,13 +42,12 @@
   (api-call http/delete action {:body (clj-http.client/json-encode request-body)
                                 :content-type :json}))
 
-(defn- handle-error-response [response]
-  (let [body (json/decode (:body response) keyword)]
-    (error response)
-    (case (:status response)
-      401 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Bad credentials")
-      403 (fail! "Unauthorized" :code "calendar.error.unauthorized-access" :message "Forbidden")
-      (fail! "Bad request" :code (str "calendar.error." (:code body)) :message (:message body)))))
+(defn- handle-error-response [{:keys [status body]}]
+  (let [{:keys [code message]} (if (map? body) body {:message body})]
+    (error "calendar api returned" status code message)
+    (if code
+      (fail! (str "calendar.error." code))
+      (fail! :error.unknown))))
 
 (defn api-query
   ([action]
@@ -170,6 +170,49 @@
     (update-application
       (application->command application)
       (util/deep-merge comment-update reservation-push state-change))))
+
+(defn update-reservation
+  [application reservation-id changes]
+  (update-application
+    (application->command application)
+    {:reservations {$elemMatch {:id reservation-id}}}
+    changes))
+
+(defn update-mongo-for-reservation-state-change
+  [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
+  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED))]}
+  (let [type (cond
+               :ACCEPTED "reservation-accepted"
+               :DECLINED "reservation-declined")
+        comment-update (comment/comment-mongo-update (:state application)
+                                                     (:comment reservation)
+                                                     {:type type
+                                                      :id (:id reservation)}
+                                                     "system"
+                                                     false ; mark-answered
+                                                     user
+                                                     to-user
+                                                     timestamp)]
+    (update-application
+      (application->command application)
+      comment-update)
+    (update-reservation application reservation-id {$set {:reservations.$.reservationStatus (name new-state)}})
+    (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}})
+    (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
+
+(defn accept-reservation
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/accept"))
+  (update-mongo-for-reservation-state-change application reservation :ACCEPTED user (usr/get-user-by-id to-user-id) timestamp))
+
+(defn decline-reservation
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/decline"))
+  (update-mongo-for-reservation-state-change application reservation :DECLINED user (usr/get-user-by-id to-user-id) timestamp))
+
+(defn mark-reservation-update-seen
+  [application reservation-id user-id]
+  (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}}))
 
 ; -- Configuration
 

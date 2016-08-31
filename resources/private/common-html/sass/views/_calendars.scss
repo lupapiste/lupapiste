@@ -52,6 +52,15 @@
   margin-right: 5px;
 }
 
+#legend-orangebox {
+  height: 15px;
+  width: 15px;
+  background-color: $orange-dark;
+  display: inline-block;
+  margin-left: 30px;
+  margin-right: 5px;
+}
+
 #triangle-topright {
   width: 0;
   height: 0;
@@ -60,6 +69,64 @@
   border-left: 15px solid transparent;
   margin-left: 30px;
   margin-right: 5px;
+}
+
+.calendar-pending-action {
+  width: 96%;
+
+  h3 {
+    margin-top: $marginM;
+    font-weight: bold;
+  }
+
+  .calendar-pending-action-item {
+    border: 1px solid $gray221;
+    margin-top: $marginM;
+
+    .times {
+      display: inline-block;
+      font-weight: bold;
+      vertical-align: top;
+      text-align: center;
+      margin: $marginS $marginM;
+    }
+
+    .titlebar {
+      display: inline-block;
+      border-left: 1px solid $gray221;
+      padding-left: 6px;
+      margin: $marginS 0px;
+      height: $baseline * 2;
+
+      button span {
+        display: inherit;
+      }
+
+      &.buttons-box {
+        float: right;
+        padding: $marginS;
+      }
+
+      &.undo-link, &.status {
+        float: right;
+        padding: $marginM;
+      }
+
+      &.status {
+        font-weight: bold;
+      }
+    }
+
+    .startTime {
+      display: inherit;
+      font-size: 20px;
+    }
+
+    .endTime {
+      display: inherit;
+      font-size: 12px;
+    }
+  }
 }
 
 .calendar-table {
@@ -168,15 +235,6 @@
           }
         }
 
-        &.accepted {
-          color: white;
-          background: $orange-dark;
-
-          a {
-            color: white;
-          }
-        }
-
         &.available-slot button.reserve-slot {
           background: inherit;
           width: 100%;
@@ -212,6 +270,17 @@
               color: grey;
             }
           }
+
+          &.accepted {
+            color: white;
+            background: $orange-dark;
+
+            a {
+              color: white;
+            }
+          }
+
+
 
           div {
             height: 20px;

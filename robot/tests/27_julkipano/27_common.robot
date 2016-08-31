@@ -89,7 +89,9 @@ Create application with attachment and publish it as bulletin
   Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
   Open tab  attachments
   Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Koeluontoinen toiminta
+  Return to application
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Koeluontoinen toiminta
+  Return to application
   Publish bulletin
   Logout
 

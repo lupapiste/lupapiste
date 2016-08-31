@@ -6,7 +6,7 @@
 
 @set startTime=%time%
 @echo Start Time: %startTime%
-call pybot --exclude integration --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
+call pybot --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite --variable SERVER:http://%server% -d target common/setup %target% common/teardown
 @echo Done
 @echo Start Time:  %startTime%
 @echo Finish Time: %time%

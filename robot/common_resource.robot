@@ -653,8 +653,11 @@ Add attachment
   Click element     test-save-new-attachment
   Unselect Frame
   Wait until  Element should not be visible  upload-dialog
-  Run Keyword If  '${kind}' == 'application'  Wait until  Scroll to  table[class='attachments-table'] tr[data-test-type='${type}']
+  Run Keyword If  '${kind}' == 'application'  Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
   Run Keyword If  '${kind}' == 'inforequest'  Wait Until Page Contains  ${description}
+
+Return to application
+  Wait Until  Click by test id  back-to-application-from-attachment
 
 Delete attachment
   [Arguments]  ${type}
@@ -698,10 +701,8 @@ Assert file latest version
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
-Add attachment version
+Attachment file upload
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
-  Click Element  xpath=//button[@id="add-new-attachment-version"]
   Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
   Select Frame   uploadFrame
   Wait until     Element should be visible  test-save-new-attachment
@@ -715,6 +716,26 @@ Add attachment version
   Unselect Frame
   ${path}  ${filename}=  Split Path  ${path}
   Wait until     Element Text Should Be  xpath=//section[@id='attachment']//span[@id='test-attachment-file-name']/a  ${filename}
+
+# Add file version from attachment details
+Add attachment version
+  [Arguments]  ${path}
+  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
+  Click Element  xpath=//button[@id="add-new-attachment-version"]
+  Attachment file upload  ${path}
+
+# Add the first file to template from attachments view
+Add attachment file
+  [Arguments]  ${row}  ${path}
+  Wait Until     Element should be visible  jquery=${row}
+  Scroll and click  ${row} a[data-test-id=add-attachment-file]
+  Attachment file upload  ${path}
+  
+
+Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Scroll and click test id  postVerdict-filter-label
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -1334,6 +1355,14 @@ Javascript? helper
 Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
+
+Checkbox wrapper selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
+
+Checkbox wrapper not selected by test id
+  [Arguments]  ${data-test-id}
+  Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
 
 Click label
   [Arguments]  ${for}

@@ -98,6 +98,7 @@
    (sc/optional-key :operations-tos-functions) sc/Any
    (sc/optional-key :permanent-archive-enabled) sc/Bool
    (sc/optional-key :permanent-archive-in-use-since) sc/Any
+   (sc/optional-key :reservations) sc/Any
    (sc/optional-key :selected-operations) sc/Any
    (sc/optional-key :statementGivers) sc/Any
    (sc/optional-key :suti) {(sc/optional-key :www) ssc/OptionalHttpUrl
@@ -194,10 +195,13 @@
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
 
-(defn municipality-address-endpoint [municipality]
-  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
-
+(defn municipality-address-endpoint [^String municipality]
+  {:pre [(or (string? municipality) (nil? municipality))]}
+  (when (and (ss/not-blank? municipality) (re-matches #"\d{3}" municipality) )
+    (let [no-bbox-srs (env/value :municipality-wfs (keyword municipality) :no-bbox-srs)]
+      (merge
+        (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)
+        (when no-bbox-srs {:no-bbox-srs true})))))
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
@@ -208,7 +212,7 @@
                   (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
                   (into {})
                   (hash-map $set))]
-    (if (and (not (ss/blank? url)) (= "osoitteet" endpoint-type))
+    (if (and (ss/not-blank? url) (= "osoitteet" endpoint-type))
       (let [capabilities-xml (wfs/get-capabilities-xml url username password)
             osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
                                          (map (comp :FeatureType sxml/xml->edn))
@@ -322,6 +326,7 @@
     (let [{:keys [url username password crypto-iv]} m
           base-request {:query-params params
                         :throw-exceptions false
+                        :quiet true
                         :headers (select-keys headers [:accept :accept-encoding])
                         :as :stream}
           request (if-not (ss/blank? crypto-iv)
@@ -331,7 +336,7 @@
       (if (= 200 (:status response))
         response
         (do
-          (debug "organization" org-id "wms server" url "returned" (:status response))
+          (error "error.integration - organization" org-id "wms server" url "returned" (:status response))
           response)))))
 
 (defn organization-map-layers-data [org-id]

@@ -9,8 +9,12 @@
               class="attachments-table--widest"></th>
           <th data-bind="ltext: 'application.attachmentFile'"></th>
           <th data-bind="ltext: 'attachment.th-not-needed'"></th>
-          <th data-bind="ltext: 'ok'"></th>
-          <th data-bind="ltext: 'attachment.th-not-ok'"></th>
+          <!-- ko if: isAuthority() -->
+          <th data-bind="ltext: 'ok'"
+              data-test-id="approve-column"></th>
+          <th data-bind="ltext: 'attachment.th-not-ok'"
+              data-test-id="reject-column"></th>
+          <!-- /ko -->
           <th data-bind="ltext: 'remove'"></th>
         </tr>
       </thead>
@@ -18,13 +22,13 @@
         <tr data-bind="attr: {'data-test-type': $data.type()['type-group'] + '.' + $data.type()['type-id'],
                               'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
-              class="attachments-table__state-icons">
+              class="attachment-state-icons">
             <i data-bind="attr: {'class': $data.css,
                                  'data-test-icon':  $data.icon + '-icon'}"></i>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
-            <a data-bind="click: $parent.openAttachment"
+            <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
               <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
               <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
@@ -33,7 +37,7 @@
             <span data-bind="text: $data.contents() || ''"
                   data-test-id="attachment-contents"></span>
           </td>
-          <td data-bind="attachmentVersion: latestVersion"
+          <td data-bind="viewWithDownload: latestVersion"
               data-test-id="file-info"></td>
           <td>
             <span data-bind="dateString: latestVersion.created"></span><br>
@@ -49,8 +53,8 @@
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
-               data-bind="click: $parent.openAttachment"
-               data-test-id="open-attachment">
+               data-bind="click: $parent.addFile"
+               data-test-id="add-attachment-file">
               <i class="lupicon-circle-plus"></i>
               <span data-bind="ltext: 'attachment.addFile'"
                     data-test-id="add-file-link"></span>
@@ -69,6 +73,7 @@
             </div>
           </td>
           <!-- /ko -->
+          <!-- ko if: $parent.isAuthority() -->
           <td>
             <button class="btn-icon-only"
                     data-bind="enable: $data.authModel.ok('approve-attachment'),
@@ -91,6 +96,7 @@
               <i class="lupicon-circle-attention"></i>
             </button>
           </td>
+          <!-- /ko -->
           <td>
             <button class="secondary btn-icon-only"
                     data-bind="click: $parent.remove,

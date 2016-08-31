@@ -9,6 +9,7 @@ LUPAPISTE.AttachmentsService = function() {
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
+  self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
@@ -51,12 +52,16 @@ LUPAPISTE.AttachmentsService = function() {
     self.groupTypes([]);
   };
 
-  function queryData(queryName, responseJsonKey, dataSetter, params) {
+  function queryData(queryName, responseJsonKey, dataSetter, params, hubParams) {
     if (self.authModel.ok(queryName)) {
       var queryParams = _.assign({"id": self.applicationId()}, params);
       ajax.query(queryName, queryParams)
         .success(function(data) {
           dataSetter(data[responseJsonKey]);
+          hub.send( self.serviceName + "::query", _.merge({query: queryName,
+                                                           key: responseJsonKey},
+                                                          params,
+                                                          hubParams));
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
@@ -148,8 +153,9 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
   };
 
-  self.queryOne = function(attachmentId) {
-    queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId});
+  // hubParams are attached to the hub send event for attachment query.
+  self.queryOne = function(attachmentId, hubParams) {
+    queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
   };

@@ -21,3 +21,11 @@
   .attachments-accordion-content-part {
   }
 }
+
+.attachments-title {
+  margin: {
+  top: $marginM;
+  bottom: $marginS;
+}  
+  display: inline-block;
+}

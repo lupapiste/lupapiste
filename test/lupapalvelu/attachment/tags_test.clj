@@ -6,15 +6,19 @@
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
 
-(testable-privates lupapalvelu.attachment.tags type-groups-for-operation)
+(testable-privates lupapalvelu.attachment.tags
+                   type-groups-for-operation
+                   application-state-filters
+                   group-and-type-filters
+                   not-needed-filters)
 
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-    (attachment-tags {:applicationState :submitted :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
+    (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-    (attachment-tags {:applicationState :verdictGiven :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
+    (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
 
   (fact "defaults"
     (attachment-tags {}) => (just #{:preVerdict :general :needed} :in-any-order :gaps-ok))
@@ -130,34 +134,145 @@
     (provided (att-type/tag-by-type anything) => nil)))
 
 
-(fact "attachments-filters"
-  (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
-        operation-id2 (ssg/generate ssc/ObjectIdStr)
-        operation-id3 (ssg/generate ssc/ObjectIdStr)
-        attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
-        application {:primaryOperation {:id operation-id1}
-                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
-                     :attachments attachments}]
+(facts "attachments-filters"
 
-    (attachments-filters application) =>   [[{:tag :preVerdict :default false}
-                                             {:tag :postVerdict :default false}]
-                                            [{:tag :paapiirustus :default false}
-                                             {:tag :iv_suunnitelma :default false}
-                                             {:tag :other :default false}]
-                                            [{:tag :needed :default true}
-                                             {:tag :notNeeded :default false}]]
+  (facts "application state"
+    (fact "pre verdict - no post verdict attachments"
+      (let [attachments  [{:applicationState "submitted"}
+                          {:applicationState "open"}
+                          {:applicationState "draft"}]
+            application {:state "open"
+                         :attachments attachments}]
+        (application-state-filters application) =>  nil)
 
-    ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
-    (provided (att-type/tag-by-type anything) => nil)))
+    (fact "pre verdict - with post verdict attachment"
+      (let [attachments  [{:applicationState "submitted"}
+                          {:applicationState "open"}
+                          {:applicationState "verdictGiven"}]
+            application {:state "submitted"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default true}
+                                                     {:tag :postVerdict :default false}]))
+
+    (fact "post verdict"
+      (let [attachments  [{:applicationState "submitted"}
+                          {:applicationState "open"}
+                          {:applicationState "verdictGiven"}]
+            application {:state "verdictGiven"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default false}
+                                                     {:tag :postVerdict :default true}]))))
+
+  (facts "group and type"
+    (fact "with parties group"
+      (let [attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}]
+            application {:attachments attachments}]
+
+        (group-and-type-filters application) =>   [{:tag :parties :default false}]
+
+        (provided (att-type/tag-by-type anything) => nil)))
+
+    (fact "with parties and general group"
+      (let [attachments  [{:groupType "parties"}
+                          {:groupType "unknown"}
+                          {:groupType nil}]
+            application {:attachments attachments}]
+
+        (group-and-type-filters application) =>   [{:tag :general :default false}
+                                                   {:tag :parties :default false}]
+
+        (provided (att-type/tag-by-type anything) => nil)))
+
+    (fact "attachment type - one attachment"
+
+      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}]
+            application  {:attachments attachments}]
+
+        (group-and-type-filters application) =>   [{:tag :iv_suunnitelma :default false}]
+
+        ;; Correct type group tag names must be used, since function ensures the order of the tags by names
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)))
+
+    (fact "attachment type - many attachments"
+
+      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+            application  {:attachments attachments}]
+
+        (group-and-type-filters application) =>   [{:tag :paapiirustus :default false}
+                                                   {:tag :iv_suunnitelma :default false}
+                                                   {:tag :other :default false}]
+
+        ;; Correct type group tag names must be used, since function ensures the order of the tags by names
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other)))
+
+    (fact "all together"
+
+      (let [attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+            application  {:attachments attachments}]
+
+        (group-and-type-filters application) =>   [{:tag :general :default false}
+                                                   {:tag :parties :default false}
+                                                   {:tag :paapiirustus :default false}
+                                                   {:tag :iv_suunnitelma :default false}
+                                                   {:tag :other :default false}]
+
+        ;; Correct type group tag names must be used, since function ensures the order of the tags by names
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
+        (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other))))
+
+  (facts "not needed"
+    (fact "one attachment - not needed true"
+      (let [attachments [{:notNeeded true :type {:type-group "somegroup" :type-id "sometype"}}]
+            application {:attachments attachments}]
+
+        (not-needed-filters application) => nil))
+
+    (fact "one attachment - not needed false"
+      (let [attachments [{:notNeeded false :type {:type-group "somegroup" :type-id "sometype"}}]
+            application {:attachments attachments}]
+
+        (not-needed-filters application) => nil))
+
+    (fact "one true - other false"
+      (let [attachments [{:notNeeded true  :type {:type-group "somegroup" :type-id "sometype"}}
+                         {:notNeeded false :type {:type-group "somegroup" :type-id "sometype"}}]
+            application {:attachments attachments}]
+
+        (not-needed-filters application) => [{:tag :needed :default true}
+                                             {:tag :notNeeded :default false}])))
+
+  (fact "all filters"
+    (let [attachments  [{:applicationState "verdictGiven"}
+                        {:groupType "parties"}
+                        {:groupType "unknown"}
+                        {:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}
+                        {:notNeeded true}]
+          application {:attachments attachments :state "submitted"}]
+
+      (attachments-filters application) =>   [[{:tag :preVerdict :default true}
+                                               {:tag :postVerdict :default false}]
+                                              [{:tag :general :default false}
+                                               {:tag :parties :default false}
+                                               {:tag :paapiirustus :default false}
+                                               {:tag :iv_suunnitelma :default false}
+                                               {:tag :other :default false}]
+                                              [{:tag :needed :default true}
+                                               {:tag :notNeeded :default false}]]
+
+      ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other)
+      (provided (att-type/tag-by-type anything) => nil))))

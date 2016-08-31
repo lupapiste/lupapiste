@@ -162,6 +162,7 @@
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
+      applicationModel.stateChanged(false);
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -267,17 +268,27 @@
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
-      function sumCalendarIndicators() {
-        var res = _.filter(app.reservations,
-          function (r) {
-            return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
-          });
-        return res.length;
-      }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      applicationModel.calendarNotificationIndicator(sumCalendarIndicators());
+      var pendingCalendarNotifications = _.sortBy(_.filter(app.reservations,
+        function (r) {
+         return _.includes(r["action-required-by"], lupapisteApp.models.currentUser.id());
+        }), "startTime");
+
+      pendingCalendarNotifications = _.map(pendingCalendarNotifications,
+        function(n) {
+          n.acknowledged = "none";
+          return ko.mapping.fromJS(n);
+        });
+
+      applicationModel.calendarNotificationsPending(
+        _.transform(
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
+          function (result, value, key) {
+            return result.push({ day: _.parseInt(key), notifications: value });
+          }, []));
+      applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
 
       isInitializing = false;
       pageutil.hideAjaxWait();

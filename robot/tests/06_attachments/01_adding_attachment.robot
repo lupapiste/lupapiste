@@ -36,6 +36,10 @@ Mikko unsets asemapiirros not needed
   Positive indicator should be visible
   Not needed should not be selected  paapiirustus.asemapiirros
 
+As an applicant Mikko does not see approve or reject columns
+  No such test id  approve-column
+  No such test id  reject-column
+
 "Download all attachments" should be disabled
   [Tags]  attachments
   Element should be disabled  jquery=button[data-test-id='download-all-attachments-button']
@@ -51,7 +55,10 @@ Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+  #Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+
+Mikko returns to application
+  Return to application
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
@@ -62,18 +69,16 @@ Mikko adds txt attachment without comment again
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko deletes attachment version
   [Tags]  attachments
-  Open attachment details  muut.muu
   Wait and click  show-attachment-versions
   Wait and click  jquery=tr[data-test-id='version-row-1.0'] a[data-test-id='delete-version']
   Confirm yes no dialog
   Wait until  Element should not be visible  show-attachment-versions
 
 Mikko deletes also the attachment template
-  Click by test id  back-to-application-from-attachment
+  Return to application  
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
@@ -81,8 +86,8 @@ Mikko adds again txt attachment with comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
-  Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
-  Comment count is  1
+  Return to application
+  Wait Until  Comment count is  1
 
 "Download all attachments" should be enabled
   [Tags]  attachments
@@ -97,8 +102,7 @@ Mikko opens attachment details
 Mikko returns to application right away
   [Tags]  attachments
   Wait until  Element should be visible  //a[@data-test-id='back-to-application-from-attachment']
-  Scroll to test id  back-to-application-from-attachment
-  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Return to application
   Wait Until Page Contains  ${propertyId}
 
 Scroll to muut muu
@@ -118,6 +122,7 @@ Not needed should be checked after reload with correct filters
   Reload Page
   Wait Until  Not needed should be visible  hakija.valtakirja
   Not needed should not be visible  paapiirustus.asemapiirros
+  Scroll to  div.filter-wrapper:last-child label.filter-label
   Click element  jquery=div.filter-wrapper:last-child label.filter-label
   Not needed should be selected  paapiirustus.asemapiirros
 
@@ -149,6 +154,7 @@ Comment is present after delete
 Mikko adds txt attachment with comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Return to application
 
 Mikko opens application to authorities
   [Tags]  attachments
@@ -230,8 +236,12 @@ Sonja goes to attachments tab
   [Tags]  attachments
   Wait Until  Element should be visible  jquery=a[data-test-id='back-to-application-from-attachment']
   Scroll to test id  back-to-application-from-attachment
-  Click element  jquery=[data-test-id=back-to-application-from-attachment]
+  Return to application  
   Open tab  attachments
+
+As an authority Sonja sees approve and reject columns
+  Wait test id visible  approve-column
+  Wait test id visible  reject-column
 
 Sonja adds new attachment template
   [Tags]  attachments
@@ -239,7 +249,7 @@ Sonja adds new attachment template
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
+  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
   Logout
 
 Mikko logs back in and browses to the Attachments tab
@@ -260,7 +270,7 @@ Sonja logs back in and browses to the Attachments tab
 Sonja deletes the newly created attachment template
   [Tags]  attachments
   Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=open-attachment]
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
@@ -320,7 +330,6 @@ Sign attachments button should not be visible
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Create new application
   [Tags]  attachments
@@ -333,7 +342,7 @@ Create new application
 Authority adds png attachment without comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//tr[@data-test-type='muut.muu']//a[contains(., '${PNG_TESTFILE_NAME}')]
+  Return to application  
 
 Signature icon is not visible to authority
   [Tags]  attachments
@@ -406,3 +415,4 @@ Not needed should not be visible
 Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
+

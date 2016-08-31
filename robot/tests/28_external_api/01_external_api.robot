@@ -70,7 +70,7 @@ Add post verdict attachment
   Open tab  attachments
   Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
   Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Element should be visible  xpath=//tr[@data-test-type='muut.muu']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Return to application  
 
 Transfering attachments emits LupapisteApi.integrationSent function call
   Scroll to top

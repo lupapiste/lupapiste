@@ -86,6 +86,8 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
     self.processing(true);
     util.showSavedIndicatorIcon(response);
     service.queryOne(self.id);
+    error("Unable to set attachment-meta", response.text);
+    notify.ajaxError(e);
   }
 
   var lightUpdateOptions = { onSuccess: util.showSavedIndicatorIcon,

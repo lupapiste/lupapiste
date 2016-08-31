@@ -21,9 +21,15 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     return hasFile(att) && !service.isNotNeeded(attachment);
   }
 
-  function openAttachment(attachment) {
+  function buildHash(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
-    pageutil.openPage("attachment", applicationId + "/" + attachment.id);
+    return pageutil.buildPageHash("attachment", applicationId, attachment.id);
+  }
+
+  function addFile(attachment) {
+    hub.send( "add-attachment-file", {attachmentId: attachment.id,
+                                      attachmentType: attachment.type["type-group"]
+                                      + "." + attachment.type["type-id"]});
   }
 
   function removeAttachment(attachment) {
@@ -60,8 +66,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                 [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive", icon: "stamped"}],
                 [showSentIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent"}],
                 [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent-to-case-management"}],
-                [attachment.forPrinting, {css: "lupicon-circle-section-sign", icon: "for-printing"}],
-                [data.isPublic, {css: "lupicon-lock", icon: "public"}]] )
+                [attachment.forPrinting, {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
+                [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary", icon: "not-public"}]] )
       .filter(_.first)
       .map(_.last)
       .value();
@@ -85,6 +91,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     appModel: appModel,
     authModel: lupapisteApp.models.applicationAuthModel,
     canVouch: canVouch,
-    openAttachment: openAttachment
+    buildHash: buildHash,
+    addFile: addFile,
+    isAuthority: lupapisteApp.models.currentUser.isAuthority
   };
 };

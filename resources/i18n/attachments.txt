@@ -8,3 +8,7 @@
 "attachment.auto-conversion" "sv" "Preparerad"
 "attachment.converted" "fi" "Tiedosto on muunnettu automaattisesti PDF/A-muotoon"
 "attachment.converted" "sv" "Filen är automatiskt ändrad till PDF/A-form"
+"attachment.listing.no-filtered-attachments" "fi" "Hups! Valituilla hakurajauksilla ei löytynyt yhtään liitettä. Ole hyvä ja muuta valintoja"
+"attachment.listing.no-filtered-attachments" "sv" "Ojdå! Med de angivna sökbegränsningarna hittades inga bilagor. Var god och ändra sökningen."
+"attachment.listing.no-attachments" "fi" "Ei liitteitä."
+"attachment.listing.no-attachments" "sv" "Inga bilagor."

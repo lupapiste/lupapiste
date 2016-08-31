@@ -46,17 +46,12 @@
 (defn- fetch-suti-products
   "Returns either list of products (can be empty) or error localization key."
   [url {:keys [username password crypto-iv]}]
-  (try
-    (some-<> url
-             (http/get (merge {}
-                              (when (ss/not-blank? crypto-iv)
-                                {:basic-auth [username (org/decode-credentials password
-                                                                               crypto-iv)]})))
-             :body
-             (json/parse-string true)
-             :productlist
-             (map clean-suti-dates <>))
-    (catch Exception _
+  (let [options (merge {:as :json, :throw-exceptions false}
+                  (when (ss/not-blank? crypto-iv)
+                    {:basic-auth [username (org/decode-credentials password crypto-iv)]}))
+        {:keys [status body]} (http/get url options)]
+    (if (= 200 status)
+      (some->> body :productlist (map clean-suti-dates))
       "suti.products-error")))
 
 (defn- suti-enabled?
