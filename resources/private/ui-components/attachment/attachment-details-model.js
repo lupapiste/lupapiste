@@ -73,9 +73,27 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Version
   self.hasVersion = self.disposedComputed(function() { return !_.isEmpty(self.attachment().versions); });
-  self.disposedSubscribe(self.hasVersion, function(val) { self.showHelp(!val); }); // Toggle help
   self.showAttachmentVersionHistory = ko.observable(false);
-  self.newAttachmentVersion = function() {};
+  self.disposedSubscribe(self.hasVersion, function(val) {
+    self.showHelp(!val);
+    self.showAttachmentVersionHistory(val);
+  });
+  self.newAttachmentVersion = function() {
+    self.disablePreview(true);
+    attachment.initFileUpload({
+      applicationId: self.applicationId,
+      attachmentId: self.id,
+      attachmentType: self.attachment().typeString(),
+      group: util.getIn(self.attachment(), ["groupType"]),
+      operationId: util.getIn(self.attachment(), ["op", "id"]),
+      typeSelector: false,
+      archiveEnabled: authModel.ok("permanent-archive-enabled")
+    });
+    // Upload dialog is opened manually here, because click event binding to
+    // dynamic content rendered by Knockout is not possible
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
+  };
+  self.addHubListener("upload-done", _.ary(_.partial(service.queryOne, self.id)));
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
   self.deleteVersion = function(fileModel) {
