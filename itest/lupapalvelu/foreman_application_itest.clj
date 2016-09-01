@@ -537,13 +537,13 @@
       (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
                        :documentId "" :path "" :role "foreman") => unauthorized?)
 
-    (fact "foreman can NOT invite reader to the main application"
-      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
-                       :documentId "" :path "" :role "guest") => unauthorized?)
+    (fact "foreman can NOT invite guest to the main application"
+      (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => unauthorized?)
 
-    (fact "foreman CAN invite reader to the foreman application"
+    (fact "foreman CAN invite guest to the foreman application"
       (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
-                       :documentId "" :path "" :role "guest") => ok?)
+                       :documentId "" :path "" :role "guest") => fail?
+      (command foreman :invite-guest :id foreman-app-id :email "foo@example.com" :role "guest") => ok?)
 
     (fact "applicant CAN update applicant document on foreman application"
       (command applicant :update-doc :id foreman-app-id :doc (:id foreman-applicant-doc)  :collection "documents"

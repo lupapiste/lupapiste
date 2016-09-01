@@ -11,7 +11,6 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -88,14 +87,6 @@
   (when-not (valid-role role)
     (fail! :error.illegal-role :parameters role)))
 
-(defn- foreman-can-invate-only-guest [{{role :role} :data :keys [application user]}]
-  (when role
-    (if (and (foreman/foreman-in-foreman-app application user)
-            (not= "guest" role))
-     unauthorized
-     (println (:id user) "can add" role ", auth:" (:auth application))
-     )))
-
 (defcommand invite-with-role
   {:parameters [:id :email :text :documentName :documentId :path :role]
    :input-validators [(partial action/non-blank-parameters [:email])
@@ -103,10 +94,7 @@
                       role-validator]
    :states     states/all-application-states
    :user-roles #{:applicant :authority}
-   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :pre-checks  [foreman/allow-foreman-only-in-foreman-app
-                 foreman-can-invate-only-guest
-                 application/validate-authority-in-drafts]
+   :pre-checks  [application/validate-authority-in-drafts]
    :notified   true}
   [command]
   (send-invite! command))
