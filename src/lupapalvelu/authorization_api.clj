@@ -190,6 +190,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
+   :user-authz-roles auth/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
@@ -199,6 +200,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
+   :user-authz-roles auth/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
