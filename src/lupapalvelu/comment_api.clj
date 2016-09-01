@@ -9,6 +9,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
@@ -78,8 +79,9 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :org-authz-roles auth/commenter-org-authz-roles
+   :pre-checks [foreman/allow-foreman-only-in-foreman-app]
    :states states/all-states}
   [{{app-id :id :as application} :application}]
   (ok {:id app-id :comments (comment/enrich-comments application)}))
@@ -89,9 +91,10 @@
    :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :org-authz-roles auth/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
+                foreman/allow-foreman-only-in-foreman-app
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target
                       (partial action/map-parameters [:target])

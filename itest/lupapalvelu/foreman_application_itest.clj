@@ -479,3 +479,35 @@
            (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
            (fact "Teppo is not double authed"
                  (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
+
+(facts* "foreman rights"
+  (let [applicant pena
+        foreman    teppo
+        foreman-email (email-for-key foreman)
+
+        {application-id :id} (create-and-submit-application applicant :operation "kerrostalo-rivitalo") => truthy
+
+        _ (give-verdict sonja application-id :verdictId "321-2016")
+
+        resp (command applicant :create-foreman-application :id application-id
+                                  :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email) => ok?
+        {foreman-app-id :id} resp]
+
+      (fact "no commant rights before invites are accepted"
+        (comment-application foreman application-id) => unauthorized?
+        (comment-application foreman foreman-app-id) => unauthorized?)
+
+      (fact "accept invites"
+        (command foreman :approve-invite :id application-id) => ok?
+        (command foreman :approve-invite :id foreman-app-id) => ok?)
+
+      (fact "foreman can NOT read & write comments on the main application"
+        (query foreman :comments :id application-id) => unauthorized?
+        (comment-application foreman application-id) => unauthorized?)
+
+      (fact "foreman CAN read & write comments on the main application"
+        (query foreman :comments :id foreman-app-id) => ok?
+        (comment-application foreman foreman-app-id) => ok?)
+
+
+      ))
