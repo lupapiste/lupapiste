@@ -19,6 +19,10 @@
             [sade.validators :as v]
             [monger.operators :refer :all]))
 
+(defn foreman-app-check [{application :application}]
+  (when-not (foreman/foreman-app? application)
+    (fail :error.not-foreman-app)))
+
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
@@ -44,19 +48,22 @@
    :states     states/all-states
    :parameters [:id foremanHetu]
    :input-validators [(partial action/string-parameters [:foremanHetu])]
-   :pre-checks [application/validate-authority-in-drafts]}
-  [{application :application user :user :as command}]
+   :pre-checks [foreman-app-check
+                application/validate-authority-in-drafts]}
+  [{:keys [application user created] :as command}]
   (let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))
-        other-applications (map #(foreman/other-project-document % (:created command)) foreman-applications)
-        tyonjohtaja-doc (update-in (domain/get-document-by-name application "tyonjohtaja-v2") [:data :muutHankkeet]
-                                   (fn [muut-hankkeet]
-                                     (->> (vals muut-hankkeet)
-                                          (remove #(get-in % [:autoupdated :value]))
-                                          (concat other-applications)
-                                          (zipmap (map (comp keyword str) (range))))))
-        documents (util/replace-by-id tyonjohtaja-doc (:documents application))]
-    (update-application command {$set {:documents documents}}))
-  (ok))
+        other-applications (map #(foreman/other-project-document % created) foreman-applications)
+        tyonjohtaja-doc (domain/get-document-by-name application "tyonjohtaja-v2")
+        muut-hankkeet (get-in tyonjohtaja-doc [:data :muutHankkeet])
+        muut-hankkeet-new (->> (vals muut-hankkeet)
+                               (remove #(get-in % [:autoupdated :value]))
+                               (concat other-applications)
+                               (zipmap (map str (range))))]
+    (if tyonjohtaja-doc
+      (do
+        (update-application command {:documents {$elemMatch {:id (:id tyonjohtaja-doc)}}} {$set {:documents.$.data.muutHankkeet muut-hankkeet-new}})
+        (ok))
+      (fail :error.document-not-found))))
 
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
@@ -71,10 +78,6 @@
       (let [updates [[[:asiointitunnus] foremanAppId]]]
         (doc-persistence/persist-model-updates application "tasks" task updates created))
       (fail :error.not-found))))
-
-(defn foreman-app-check [{application :application}]
-  (when-not (foreman/foreman-app? application)
-    (fail :error.not-foreman-app)))
 
 (defquery foreman-history
   {:user-roles #{:authority}
