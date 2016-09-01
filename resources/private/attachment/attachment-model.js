@@ -49,11 +49,15 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   // Updates which require attachment model reload
   //
 
-  var updateOptions = { onComplete: _.ary(_.partial(service.queryOne, self.id), 0) };
+  function buildUpdateOptions(triggerName) {
+    return { onSuccess: function(response) {
+      service.queryOne(self.id, {triggerName: triggerName, triggerResponse: response});
+    }};
+  }
 
   self.disposedSubscribe(self.notNeeded, function(val) {
     self.processing(true);
-    service.setNotNeeded(self.id, val, updateOptions);
+    service.setNotNeeded(self.id, val, buildUpdateOptions("set-not-needed"));
   });
 
   // Helper string to subscribe changes in attachemnt type
@@ -63,7 +67,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   self.disposedSubscribe(self.typeString, function(val) {
     self.processing(true);
-    service.setType(self.id, val, updateOptions);
+    service.setType(self.id, val, buildUpdateOptions("set-type"));
   });
 
   // Helper string to subscribe changes in op and groupType
@@ -75,7 +79,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
     self.processing(true);
     self.op(_.omit(val, "groupType"));
     self.groupType(_.get(val, "groupType"));
-    service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, updateOptions);
+    service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, buildUpdateOptions("set-group"));
   });
 
   //
@@ -84,14 +88,17 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   function lightUpdateErrorFn(response) {
     self.processing(true);
-    util.showSavedIndicatorIcon(response);
-    service.queryOne(self.id);
+    hub.send( service.serviceName + "::update", {name: "set-metadata", response: response});
     error("Unable to set attachment-meta", response.text);
-    notify.ajaxError(e);
+    notify.ajaxError(response);
   }
 
-  var lightUpdateOptions = { onSuccess: util.showSavedIndicatorIcon,
-                             onError: lightUpdateErrorFn };
+  function lightUpdateSuccessFn(response) {
+    hub.send( service.serviceName + "::update", {name: "set-metadata", response: response});
+  }
+
+  var lightUpdateOptions = { onSuccess: lightUpdateSuccessFn,
+                             onError:   lightUpdateErrorFn };
 
   self.disposedSubscribe(self.contents, function(val) {
     service.setMeta(self.id, {contents: val}, lightUpdateOptions);

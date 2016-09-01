@@ -24,34 +24,58 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "attachmentType." + self.attachment().typeString();
   });
 
-  function querySelf() {
-    service.queryOne(self.id);
+  // Use as callback for ajax updates to trigger attachment query after update.
+  function querySelfFn(triggerName) {
+    return function(response) { service.queryOne(self.id, {triggerName: triggerName, triggerResponse: response}); };
+  }
+
+  // Add listener for updates that trigger attachment query
+  function addQueryListener(triggerName, fn) {
+    self.addEventListener( service.serviceName, "query", function(hubParams) {
+      if (hubParams.triggerName === triggerName) {
+        fn(hubParams.triggerResponse);
+      }
+    });
+  }
+  // Add listener for updates that do not require attachment query
+  function addUpdateListener(name, fn) {
+    self.addEventListener( service.serviceName, "update", function(hubParams) {
+      if (hubParams.name === name) {
+        fn(hubParams.response);
+      }
+    });
   }
 
   function trackClick(eventName) {
     hub.send("track-click", {category:"Attachments", label: "", event: eventName});
   }
 
+  // Like lodash _.partial but trigger track click event.
+  function partialWithTrackClick(eventName, fn) {
+    var args = _.drop(arguments, 2);
+    return function() {
+      trackClick(eventName);
+      _.spread(fn)(args);
+    };
+  }
+
   // Navigation
-  self.backToApplication = function() {
-    trackClick("backToApplication");
-    lupapisteApp.models.application.open("attachments");
-  };
+  self.backToApplication = partialWithTrackClick("backToApplication", lupapisteApp.models.application.open, "attachments");
 
   self.nextAttachmentId = service.nextAttachmentId(self.id);
   self.previousAttachmentId = service.previousAttachmentId(self.id);
 
-  self.openNextAttachment = _.noop;
-  self.openPreviousAttachment = _.noop;
+  self.openNextAttachment = partialWithTrackClick("nextAttachment", _.noop);
+  self.openPreviousAttachment = partialWithTrackClick("previousAttachment", _.noop);
 
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
   // Approve and reject
-  self.approveAttachment = _.partial(service.approveAttachment, self.id, { onSuccess: querySelf });
-  self.rejectAttachment =  _.partial(service.rejectAttachment,  self.id, { onSuccess: querySelf });
-  self.isApproved =   function() { return self.attachment().state === service.APPROVED; };
+  self.approveAttachment = partialWithTrackClick("approveAttachment", service.approveAttachment, self.id, { onSuccess: querySelfFn("approve-attachment") });
+  self.rejectAttachment  = partialWithTrackClick("rejectAttachment",  service.rejectAttachment,  self.id, { onSuccess: querySelfFn("reject-attachment") });
+  self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected =   function() { return self.attachment().state === service.REJECTED; };
+  self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
   self.approval = {approval: self.disposedComputed(function() {
@@ -69,6 +93,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addEventListener("attachments", "change-attachment-type", function(data) {
     self.attachment().type(data.attachmentType);
   });
+  addQueryListener("set-type", util.showSavedIndicator);
 
   // Delete attachment
   self.deleteAttachment = function() {
@@ -109,17 +134,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", querySelf);
+  self.addHubListener("upload-done", querySelfFn("upload-done") );
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
 
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;
-    var deleteFn = function() {
-      trackClick("deleteAttachmentVersion");
-      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: querySelf });
-    };
+    var deleteFn = partialWithTrackClick("deleteAttachmentVersion", service.removeAttachmentVersion, self.id, fileId, originalFileId, { onSuccess: querySelfFn("delete-attachment-version") });
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
                              size: "medium",
@@ -153,13 +175,17 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
   self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
+  addQueryListener("set-group", util.showSavedIndicatorIcon);
+  addUpdateListener("set-metadata", util.showSavedIndicatorIcon);
 
   // For Printing
   self.setForPrintingAllowed = function() { return authModel.ok("set-attachments-as-verdict-attachment"); };
   self.forPrinting = ko.observable(self.attachment().forPrinting);
   self.disposedSubscribe(self.forPrinting, function(val) {
-    service.setForPrinting(self.id, val, { onSuccess: querySelf });
+    service.setForPrinting(self.id, val, { onSuccess: querySelfFn("set-for-printing") });
   });
+  addQueryListener("set-for-printing", util.showSavedIndicatorIcon);
+
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
@@ -206,8 +232,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.rotate = function(rotation) {
     $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
-    service.rotatePdf(self.id, rotation, { onComplete: querySelf });
+    service.rotatePdf(self.id, rotation, { onSuccess: querySelfFn("rotate-pdf") });
   };
+
+  self.disposedSubscribe(self.showPreview, function(val) {
+    if (val) {
+      trackClick("previewVisible");
+    }
+  });
 
   self.disposedSubscribe(self.previewUrl, function(url) {
     if (self.showPreview()) {

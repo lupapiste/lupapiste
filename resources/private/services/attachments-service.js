@@ -223,7 +223,7 @@ LUPAPISTE.AttachmentsService = function() {
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(_.get(options, "onSuccess", util.showSavedIndicator))
+      .success(_.get(options, "onSuccess", _.noop))
       .error(_.get(options, "onError", util.showSavedIndicator))
       .complete(_.get(options, "onComplete", _.noop))
       .call();
