@@ -104,7 +104,7 @@
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs :tasks-tab-visible
                            :pdfa-casefile :suti-application-data :suti-application-products
-                           :ram-linked-attachments :attachment-groups
+                           :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
                            :pdf-export
