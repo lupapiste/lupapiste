@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
+            [clojure.set :refer [intersection]]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail! unauthorized! now]]
+            [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
             [lupapalvelu.application :as application]
@@ -26,6 +27,18 @@
                       (model/get-document-schema)
                       (get-in [:info :construction-time]))
       (fail :error.document-not-construction-time-doc))))
+
+(defn validate-user-authz
+  [{:keys [data application user]}]
+  (let [doc-id (or (:documentId data) (:doc data))
+        authority? (auth/application-authority? application user)
+        schema (some-> (domain/get-document-by-id application doc-id) model/get-document-schema)
+        user-roles (->> user :id (auth/get-auths application) (map (comp keyword :role)) set)
+        allowed-roles (get-in schema [:info :user-authz-roles] auth/default-authz-writer-roles)]
+    (when (and doc-id (not authority?))
+      (cond
+        (nil? schema) (fail :error.document-not-found)
+        (empty? (intersection allowed-roles user-roles)) unauthorized))))
 
 (defquery document
   {:parameters       [:id doc collection]
@@ -66,6 +79,7 @@
     :user-roles #{:applicant :authority}
     :states     #{:draft :answered :open :submitted :complementNeeded}
     :pre-checks [application/validate-authority-in-drafts
+                 validate-user-authz
                  remove-doc-validator]}
   [{:keys [application created] :as command}]
   (if-let [document (domain/get-document-by-id application docId)]
@@ -80,7 +94,8 @@
                       (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     update-doc-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [validate-user-authz
+                application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -90,7 +105,9 @@
                       (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
-   :pre-checks [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+   :pre-checks [validate-user-authz
+                application/validate-authority-in-drafts
+                validate-is-construction-time-doc]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -100,7 +117,8 @@
                       (partial action/vector-parameters [:updates])]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [validate-user-authz
+                application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))
 
@@ -109,7 +127,8 @@
    :user-roles       #{:applicant :authority}
    :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [application/validate-authority-in-drafts]}
+   :pre-checks       [validate-user-authz
+                      application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/remove-document-data command doc [path] collection))
 
@@ -118,7 +137,9 @@
    :user-roles       #{:applicant :authority}
    :states           states/post-verdict-states
    :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [application/validate-authority-in-drafts validate-is-construction-time-doc]}
+   :pre-checks       [validate-is-construction-time-doc
+                      validate-user-authz
+                      application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/remove-document-data command doc [path] collection))
 
@@ -198,6 +219,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :pre-checks [user-can-be-set-validator
+                validate-user-authz
                 application/validate-authority-in-drafts]
    :states     update-doc-states}
   [{:keys [created application] :as command}]
@@ -208,6 +230,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :pre-checks [domain/validate-owner-or-write-access
+                validate-user-authz
                 application/validate-authority-in-drafts]
    :states     update-doc-states}
   [{:keys [created application user] :as command}]
@@ -218,7 +241,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :user-roles #{:applicant :authority}
    :states     update-doc-states
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [validate-user-authz
+                application/validate-authority-in-drafts]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)

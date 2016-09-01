@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
             [sade.util :as util]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
@@ -54,6 +55,7 @@
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
                  :removable-only-by-authority
+                 :user-authz-roles
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
@@ -1453,6 +1455,7 @@
            :repeating false
            :approvable true
            :type :party
+           :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
            :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
            :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}
