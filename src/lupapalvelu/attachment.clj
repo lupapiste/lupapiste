@@ -247,15 +247,12 @@
        (number? (:created options-map))))
 
 (defn- resolve-group-name [{documents :documents} {op-id :id op-name :name :as group}]
-  (if (ss/blank? op-id)
+  (if (or (ss/blank? op-id) (ss/not-blank? op-name))
     group
-    (let [op-name (if (ss/not-blank? op-name)
-                    op-name
-                    (some #(when-let [{:keys [name id]} (-> % :schema-info :op)]
-                             (when (= op-id id)
-                               name))
-                          documents))]
-      (util/assoc-when group :name op-name))))
+    (->> (map (comp :op :schema-info) documents)
+         (util/find-by-id op-id)
+         :name
+         (util/assoc-when group :name))))
 
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
