@@ -27,7 +27,8 @@
               <!-- ko if: acknowledged() === 'none' -->
                 <!-- ko if: (reservationStatus() === 'ACCEPTED' || reservationStatus() === 'DECLINED') -->
                 <button class="positive"
-                        data-bind="click: $component.markSeen.bind($data)">
+                        data-bind="click: $component.markSeen.bind($data),
+                                   attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
                   <i class="lupicon-check" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'button.ok'"></span>

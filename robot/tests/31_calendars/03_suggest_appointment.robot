@@ -22,7 +22,7 @@ Admin sets up the calendar
   Add reservation type  Foobar
   Logout
 
-Mikko opens an application
+Applicant opens an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
@@ -30,11 +30,11 @@ Mikko opens an application
   Set Suite Variable  ${propertyId}  753-423-2-41
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
-Mikko submits application and logs out
+Applicant submits application and logs out
   Submit application
   Logout
 
-Sonja logs in and allocates free calendar slots
+Authority logs in and allocates free calendar slots
   Sonja logs in
   Go to page  mycalendar
   Wait until  Element should be visible by test id  calendar-view-calendar-table
@@ -48,18 +48,18 @@ Sonja logs in and allocates free calendar slots
   Wait until  Element should not be visible by test id  reservation-slot-create-amount
   Wait Until  Page should contain  Foobar
 
-Sonja opens and assigns application to herself
+Authority opens and assigns application to herself
   Go to page  applications
   Request should be visible  ${appname}
   Open application  ${appname}  ${propertyId}
   Assign application to  Sibbo Sonja
 
-Sonja opens the calendar tab
+Authority opens the calendar tab
   Wait until  Element should be visible by test id  application-open-calendar-tab
   Open tab  calendar
   Wait until  Element should be visible by test id  calendar-weekday-0
 
-Sonja suggests an appointment
+Authority suggests an appointment
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
   Goto following week in calendar view
@@ -72,7 +72,7 @@ Sonja suggests an appointment
   Wait until  Element should be visible by test id  reservation-PENDING-Friday-1000
   Logout
   
-Mikko declines appointment
+Applicant declines appointment
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
@@ -81,7 +81,7 @@ Mikko declines appointment
   Wait until  Element should be visible by test id  reservation-declined-ack-0
   Logout
 
-Sonja suggests another appointment
+Authority suggests another appointment
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
@@ -100,7 +100,7 @@ Sonja suggests another appointment
   Wait until  Element should be visible by test id  reservation-PENDING-Friday-1100
   Logout
 
-Mikko accepts appointment
+Applicant accepts appointment
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
@@ -109,3 +109,27 @@ Mikko accepts appointment
   Wait until  Element should be visible by test id  reservation-accepted-ack-0
   Goto following week in calendar view
   Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
+  
+Applicant suggests an appointment
+  Wait until  Select From List by test id  reservation-type-select  Foobar
+  Wait until  Select From List by test id  attendee-select  Sonja Sibbo
+  Wait Until  Element should be visible by test id  reserve-slot-Friday-1200
+  Click by test id  reserve-slot-Friday-1200
+  Wait Until  Element should be visible by test id  reservation-comment-textarea
+  Fill test id  reservation-comment-textarea  diibadaabakommenttia
+  Click by test id  reservation-slot-reserve-bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1200
+  Logout
+  
+Authority marks suggested appointment seen
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Wait until  Element should be visible by test id  mark-seen-reservation-btn-0
+  Click by test id  mark-seen-reservation-btn-0
+  Wait until  Element should be visible by test id  reservation-seen-ack-0
+  Goto following week in calendar view
+  Wait Until  Element should be visible by test id  reservation-ACCEPTED-Friday-1200
+  
