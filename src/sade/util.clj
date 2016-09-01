@@ -358,7 +358,7 @@
 (defn boolean? [x] (instance? Boolean x))
 
 (defn assoc-when
-  "Assocs entries with falsey values into m."
+  "Assocs entries with truthy values into m."
   [m & kvs]
   (apply merge m (filter val (apply hash-map kvs))))
 

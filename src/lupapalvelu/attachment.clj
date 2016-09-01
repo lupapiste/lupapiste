@@ -246,6 +246,14 @@
   (and (map?    (:attachment-type options-map))
        (number? (:created options-map))))
 
+(defn- resolve-group-name [{documents :documents} {op-id :id op-name :name :as group}]
+  (if (or (ss/blank? op-id) (ss/not-blank? op-name))
+    group
+    (->> (map (comp :op :schema-info) documents)
+         (util/find-by-id op-id)
+         :name
+         (util/assoc-when group :name))))
+
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority contents read-only source]
@@ -258,7 +266,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     group
+                     (resolve-group-name application group)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
