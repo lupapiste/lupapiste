@@ -490,7 +490,7 @@
         _ (give-verdict sonja application-id :verdictId "321-2016")
 
         resp (command applicant :create-foreman-application :id application-id
-                                  :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email) => ok?
+                            :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email) => ok?
         {foreman-app-id :id} resp]
 
       (fact "no commant rights before invites are accepted"
@@ -501,6 +501,13 @@
         (command foreman :approve-invite :id application-id) => ok?
         (command foreman :approve-invite :id foreman-app-id) => ok?)
 
+      (fact "foreman can NOT add parteis"
+        (command foreman :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? "error.command-illegal-state") ; verdict has been given
+        (command foreman :create-doc :id foreman-app-id :schemaName "hakija-tj") => unauthorized?)
+
+      (fact "applicant can add parties"
+        (command applicant :create-doc :id foreman-app-id :schemaName "hakija-tj") => ok?)
+
       (fact "foreman can NOT read & write comments on the main application"
         (query foreman :comments :id application-id) => unauthorized?
         (comment-application foreman application-id) => unauthorized?)
@@ -509,5 +516,11 @@
         (query foreman :comments :id foreman-app-id) => ok?
         (comment-application foreman foreman-app-id) => ok?)
 
+      (fact "foreman CAN submit the foreman application"
+
+        (fact "Update subtype to 'tyonjohtaja-hakemus'"
+          (command applicant :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
+
+        (command foreman :submit-application :id foreman-app-id) => ok?)
 
       ))

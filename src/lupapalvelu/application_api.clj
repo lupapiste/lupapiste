@@ -284,12 +284,14 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)]
    :pre-checks       [domain/validate-owner-or-write-access
+                      foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
   [{:keys [application organization created] :as command}]
@@ -478,10 +480,12 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
+   ;:user-authz-roles (conj auth/default-authz-writer-roles :foreman) ;; TODO enable or not?
    :states     states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [app/validate-has-subtypes
                 app/pre-check-permit-subtype
+                ;foreman/allow-foreman-only-in-foreman-app
                 app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
