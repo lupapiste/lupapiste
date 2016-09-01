@@ -92,7 +92,11 @@
               (raw nil "download-attachment" :attachment-id file-id) => http401?)
 
             (fact "download-attachment as pena should be possible"
-              (raw pena "download-attachment" :attachment-id file-id) => http200?))))
+                  (raw pena "download-attachment" :attachment-id file-id) => http200?))
+          (fact "operation info"
+                (upload-attachment pena application-id {:type {:type-id "muu" :type-group "muut"}
+                                                        :op-id (-> application :primaryOperation :id)} true)
+                (-> (query-application pena application-id) :attachments last :op :name) => "kerrostalo-rivitalo")))
 
       (fact "Pena submits the application"
         (command pena :submit-application :id application-id) => ok?
