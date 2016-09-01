@@ -480,12 +480,12 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
-   ;:user-authz-roles (conj auth/default-authz-writer-roles :foreman) ;; TODO enable or not?
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [app/validate-has-subtypes
                 app/pre-check-permit-subtype
-                ;foreman/allow-foreman-only-in-foreman-app
+                foreman/allow-foreman-only-in-foreman-app
                 app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})

@@ -519,7 +519,7 @@
       (fact "foreman CAN submit the foreman application"
 
         (fact "Update subtype to 'tyonjohtaja-hakemus'"
-          (command applicant :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
+          (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
 
         (command foreman :submit-application :id foreman-app-id) => ok?)
 
