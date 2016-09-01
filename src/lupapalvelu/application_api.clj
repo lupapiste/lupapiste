@@ -225,10 +225,10 @@
 
 ;; Submit
 
-(defn- do-submit [command application created]
+(defn do-submit [{:keys [application created user] :as command} ]
   (let [history-entries (remove nil?
-                          [(when-not (:opened application) (app/history-entry :open created (:user command)))
-                           (app/history-entry :submitted created (:user command))])]
+                          [(when-not (:opened application) (app/history-entry :open created user))
+                           (app/history-entry :submitted created user)])]
     (update-application command
       {$set {:state     :submitted
              :modified  created
@@ -294,12 +294,11 @@
                       foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application organization created] :as command}]
+  [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do-submit command application created))))
-
+      (do-submit command))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
