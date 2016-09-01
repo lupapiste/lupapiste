@@ -124,3 +124,8 @@
   [requested-authz-roles {organization :organization} user]
   (let [user-org-authz (org-authz organization user)]
     (and (usr/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
+
+(defn application-authority?
+  "Returns true if the user is an authority in the organization that processes the application"
+  [application user]
+  (has-organization-authz-roles? #{:authority :approver} application user))
