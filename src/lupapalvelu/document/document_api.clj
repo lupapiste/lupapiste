@@ -28,17 +28,22 @@
                       (get-in [:info :construction-time]))
       (fail :error.document-not-construction-time-doc))))
 
-(defn validate-user-authz
-  [{:keys [data application user]}]
-  (let [doc-id (or (:documentId data) (:doc data))
+(defn- validate-user-authz-by-key
+  [doc-id-key {:keys [data application user]}]
+  {:pre [(keyword? doc-id-key)]}
+  (let [doc-id (get data doc-id-key)
         authority? (auth/application-authority? application user)
-        schema (some-> (domain/get-document-by-id application doc-id) model/get-document-schema)
+        schema (when doc-id (some-> application (domain/get-document-by-id doc-id) model/get-document-schema))
         user-roles (->> user :id (auth/get-auths application) (map (comp keyword :role)) set)
         allowed-roles (get-in schema [:info :user-authz-roles] auth/default-authz-writer-roles)]
     (when (and doc-id (not authority?))
       (cond
         (nil? schema) (fail :error.document-not-found)
         (empty? (intersection allowed-roles user-roles)) unauthorized))))
+
+(def validate-user-authz-by-doc (partial validate-user-authz-by-key :doc))
+(def validate-user-authz-by-doc-id (partial validate-user-authz-by-key :doc-id))
+(def validate-user-authz-by-document-id (partial validate-user-authz-by-key :documentId))
 
 (defquery document
   {:parameters       [:id doc collection]
@@ -79,7 +84,7 @@
     :user-roles #{:applicant :authority}
     :states     #{:draft :answered :open :submitted :complementNeeded}
     :pre-checks [application/validate-authority-in-drafts
-                 validate-user-authz
+                 validate-user-authz-by-doc-id
                  remove-doc-validator]}
   [{:keys [application created] :as command}]
   (if-let [document (domain/get-document-by-id application docId)]
@@ -95,7 +100,7 @@
    :states     update-doc-states
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz
+   :pre-checks [validate-user-authz-by-doc
                 application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
@@ -106,7 +111,7 @@
    :states     states/post-verdict-states
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz
+   :pre-checks [validate-user-authz-by-doc
                 application/validate-authority-in-drafts
                 validate-is-construction-time-doc]}
   [command]
@@ -118,7 +123,7 @@
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz
+   :pre-checks [validate-user-authz-by-doc
                 application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "tasks"))
@@ -129,7 +134,7 @@
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [validate-user-authz
+   :pre-checks       [validate-user-authz-by-doc
                       application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/remove-document-data command doc [path] collection))
@@ -140,7 +145,7 @@
    :states           states/post-verdict-states
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [validate-is-construction-time-doc
-                      validate-user-authz
+                      validate-user-authz-by-doc
                       application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/remove-document-data command doc [path] collection))
@@ -222,7 +227,7 @@
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [user-can-be-set-validator
-                validate-user-authz
+                validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]
    :states     update-doc-states}
   [{:keys [created application] :as command}]
@@ -234,7 +239,7 @@
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [domain/validate-owner-or-write-access
-                validate-user-authz
+                validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]
    :states     update-doc-states}
   [{:keys [created application user] :as command}]
@@ -246,7 +251,7 @@
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     update-doc-states
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [validate-user-authz
+   :pre-checks [validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]

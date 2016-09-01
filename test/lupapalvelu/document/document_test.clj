@@ -50,24 +50,24 @@
                               {:id "2", :schema-info {:name "hakija-tj"}}]}}]
 
     (fact "guest does not have access to docs"
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "1"))) => unauthorized?
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "1"))) => unauthorized?)
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "1"))) => unauthorized?
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "1"))) => unauthorized?)
 
     (fact "owner has access to docs"
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "2"))) => nil
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "2"))) => nil)
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "2"))) => nil
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "2"))) => nil)
 
     (fact "writer has access to docs"
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "3"))) => nil
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "3"))) => nil)
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "3"))) => nil
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "3"))) => nil)
 
     (fact "authority has access to docs"
       (let [authority {:id "-1", :orgAuthz {:000-R #{:authority}}, :role "authority"}]
-        (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "1"), (assoc :user authority))) => nil
-        (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "2"), (assoc :user authority))) => nil))
+        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc :user authority))) => nil
+        (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc :user authority))) => nil))
 
     (fact "foreman has access to foreman doc"
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "4"))) => nil)
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "1"), (assoc-in [:user :id] "4"))) => nil)
 
     (fact "foreman does not have access to applicant doc"
-      (dapi/validate-user-authz (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
+      (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
