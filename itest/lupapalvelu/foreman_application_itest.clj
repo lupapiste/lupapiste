@@ -480,66 +480,95 @@
            (fact "Teppo is not double authed"
                  (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
 
-(facts* "foreman rights"
+(facts "foreman rights"
   (let [applicant pena
         foreman    teppo
         foreman-email (email-for-key foreman)
 
-        {application-id :id} (create-and-submit-application applicant :operation "kerrostalo-rivitalo") => truthy
+        {application-id :id :as main-application} (create-and-submit-application applicant :operation "kerrostalo-rivitalo")
 
         _ (give-verdict sonja application-id :verdictId "321-2016")
 
         resp (command applicant :create-foreman-application :id application-id
-                            :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email) => ok?
-        {foreman-app-id :id} resp]
+               :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
+        {foreman-app-id :id} resp
+        foreman-application (query-application applicant foreman-app-id)
+        foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+        foreman-applicant-doc (domain/get-document-by-name foreman-application "hakija-tj")]
 
-      (fact "no commant rights before invites are accepted"
-        (comment-application foreman application-id) => unauthorized?
-        (comment-application foreman foreman-app-id) => unauthorized?)
+    (fact "sanity checks"
+      resp => ok?
+      foreman-doc => map?
+      (:id foreman-doc) => truthy
+      foreman-applicant-doc => map?
+      (:id foreman-applicant-doc) => truthy)
 
-      (fact "accept invites"
-        (command foreman :approve-invite :id application-id) => ok?
-        (command foreman :approve-invite :id foreman-app-id) => ok?)
+    (fact "no commant rights before invites are accepted"
+      (comment-application foreman application-id) => unauthorized?
+      (comment-application foreman foreman-app-id) => unauthorized?)
 
-      (fact "foreman can NOT add parteis"
-        (command foreman :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? "error.command-illegal-state") ; verdict has been given
-        (command foreman :create-doc :id foreman-app-id :schemaName "hakija-tj") => unauthorized?)
+    (fact "accept invites"
+      (command foreman :approve-invite :id application-id) => ok?
+      (command foreman :approve-invite :id foreman-app-id) => ok?)
 
-      (fact "applicant can add parties"
-        (command applicant :create-doc :id foreman-app-id :schemaName "hakija-tj") => ok?)
+    (fact "foreman can NOT add parteis"
+      (command foreman :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? "error.command-illegal-state") ; verdict has been given
+      (command foreman :create-doc :id foreman-app-id :schemaName "hakija-tj") => unauthorized?)
 
-      (fact "foreman can NOT read & write comments on the main application"
-        (query foreman :comments :id application-id) => unauthorized?
-        (comment-application foreman application-id) => unauthorized?)
+    (fact "applicant can add parties"
+      (command applicant :create-doc :id foreman-app-id :schemaName "hakija-tj") => ok?)
 
-      (fact "foreman CAN read & write comments on the main application"
-        (query foreman :comments :id foreman-app-id) => ok?
-        (comment-application foreman foreman-app-id) => ok?)
+    (fact "foreman can NOT read & write comments on the main application"
+      (query foreman :comments :id application-id) => unauthorized?
+      (comment-application foreman application-id) => unauthorized?)
 
-      (fact "foreman can NOT invite writers"
-        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "writer") => unauthorized?
-        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "writer") => unauthorized?)
-      (fact "foreman can NOT invite other foremen"
-        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "foreman") => unauthorized?
-        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "foreman") => unauthorized?)
+    (fact "foreman CAN read & write comments on the main application"
+      (query foreman :comments :id foreman-app-id) => ok?
+      (comment-application foreman foreman-app-id) => ok?)
 
-      (fact "foreman can NOT invite reader to the main application"
-        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "guest") => unauthorized?)
+    (fact "foreman can NOT invite writers"
+      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "writer") => unauthorized?
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "writer") => unauthorized?)
+    (fact "foreman can NOT invite other foremen"
+      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "foreman") => unauthorized?
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "foreman") => unauthorized?)
 
-      (fact "foreman CAN invite reader to the foreman application"
-        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
-                         :documentId "" :path "" :role "guest") => ok?)
+    (fact "foreman can NOT invite reader to the main application"
+      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "guest") => unauthorized?)
 
-      (fact "foreman CAN submit the foreman application"
-        (fact "Update subtype to 'tyonjohtaja-hakemus'"
-          (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
-        (command foreman :submit-application :id foreman-app-id) => ok?)
+    (fact "foreman CAN invite reader to the foreman application"
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "guest") => ok?)
+
+    (fact "applicant CAN update applicant document on foreman application"
+      (command applicant :update-doc :id foreman-app-id :doc (:id foreman-applicant-doc)  :collection "documents"
+                         :updates [["henkilo.yhteystiedot.email" "foo@example.com"]]) => ok?)
+
+    (fact "foreman can NOT update applicant document on foreman application"
+      (command foreman :update-doc :id foreman-app-id :doc (:id foreman-applicant-doc)  :collection "documents"
+                       :updates [["henkilo.yhteystiedot.email" "foo@example.com"]]) => unauthorized?)
 
 
+    (fact "both applicant ans foreman CAN update foreman document on foreman application"
+      (command applicant :update-doc :id foreman-app-id :doc (:id foreman-doc) :collection "documents"
+                         :updates [["yhteystiedot.email" "foo@example.com"]]) => ok?
+      (command foreman :update-doc :id foreman-app-id :doc (:id foreman-doc) :collection "documents"
+                       :updates [["yhteystiedot.email" "foo2@example.com"]]) => ok?)
 
-      ))
+    (fact "foreman can NOT set his own info to applicatn document on foreman application"
+      (command foreman :set-current-user-to-document :id foreman-app-id :documentId (:id foreman-applicant-doc) :path "") => unauthorized?)
+
+    (fact "foreman CAN set his own info to foreman document on foreman application"
+      (command foreman :set-current-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :path "") => ok?)
+
+    (fact "foreman CAN submit the foreman application"
+      (fact "Update subtype to 'tyonjohtaja-hakemus'"
+        (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
+      (command foreman :submit-application :id foreman-app-id) => ok?)
+
+    ))
