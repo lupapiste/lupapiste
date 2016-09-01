@@ -18,6 +18,7 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [lupapalvelu.attachment :as attachment]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
@@ -415,19 +416,17 @@
 
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
-  (println "# of applications with background generated tasks:"
+  (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))
-  (doseq [app-id (mongo/select :applications {:tasks.source.type "background"})]
-    (doseq [task (:tasks app-id)]
-      (if (= "background" (:type (:source task)))
-        (do
-          (println "processing task" (:id task))
-          (doseq [att (:attachments app-id)]
-            (if (= (:id task) (:id (:source att)))
-              (do
-                (println "converting task #" (:id task) " -> attachment # " (:id att) " of application " (:_id app-id))
-                (attachment/convert-to-pdfa! app-id (:id att)))))
-
-          #_(action/update-application
-            (action/application->command app-id)
-            {$pull {:tasks {:id (:id task)}}}))))))
+  (let [orgs-by-id (orgs-for-review-fetch)
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
+      (let [command (assoc (application->command application) :user eraajo-user :created (now))]
+        (doseq [task (:tasks application)]
+          (if (= "background" (:type (:source task)))
+            (do
+              (doseq [att (:attachments application)]
+                (if (= (:id task) (:id (:source att)))
+                  (do
+                    (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
+                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
