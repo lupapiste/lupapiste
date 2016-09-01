@@ -516,11 +516,30 @@
         (query foreman :comments :id foreman-app-id) => ok?
         (comment-application foreman foreman-app-id) => ok?)
 
-      (fact "foreman CAN submit the foreman application"
+      (fact "foreman can NOT invite writers"
+        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "writer") => unauthorized?
+        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "writer") => unauthorized?)
+      (fact "foreman can NOT invite other foremen"
+        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "foreman") => unauthorized?
+        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "foreman") => unauthorized?)
 
+      (fact "foreman can NOT invite reader to the main application"
+        (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "guest") => unauthorized?)
+
+      (fact "foreman CAN invite reader to the foreman application"
+        (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                         :documentId "" :path "" :role "guest") => ok?)
+
+      (fact "foreman CAN submit the foreman application"
         (fact "Update subtype to 'tyonjohtaja-hakemus'"
           (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
-
         (command foreman :submit-application :id foreman-app-id) => ok?)
+
+
 
       ))
