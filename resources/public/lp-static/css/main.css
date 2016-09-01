@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1472551404652');
+@import url('main-blessed1.css?z=1472670649591');
 
 /* line 151, ../../../private/common-html/sass/partials/_tables.scss */
 table.attachments-template-table th {
@@ -7790,11 +7790,16 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 }
 
 /* line 296, ../../../private/common-html/sass/views/_calendars.scss */
+#mycalendar .container, #new-appointment .container {
+  padding: 12px 24px;
+}
+
+/* line 300, ../../../private/common-html/sass/views/_calendars.scss */
 #mycalendar h1 {
   margin-top: 24px;
 }
 
-/* line 300, ../../../private/common-html/sass/views/_calendars.scss */
+/* line 304, ../../../private/common-html/sass/views/_calendars.scss */
 #application-calendar-tab div.times-filter-group {
   margin-top: 24px;
 }
