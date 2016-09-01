@@ -60,7 +60,7 @@
                                                  :subject-key "invite"})
 
 (defn- valid-role [role]
-  (#{:writer :foreman :guest} (keyword role)))
+  (#{:writer :foreman} (keyword role)))
 
 (defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
