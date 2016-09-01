@@ -91,7 +91,7 @@ var stamping = (function() {
           setStampFields();
 
           model.stampingMode(true);
-        });
+        }, true);
       } else { // appModel already initialized, show stamping
         model.stampingMode(true);
         lupapisteApp.setTitle(model.appModel.title());

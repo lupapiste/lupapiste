@@ -81,10 +81,10 @@ LUPAPISTE.StampModel = function(params) {
   self.status = ko.observable();
 
   self.disposedComputed( function() {
-    self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
+    var filteredFiles = _(ko.mapping.toJS(self.attachments())).filter(stampableAttachment).value();
 
     // group by post/pre verdict attachments
-    var grouped = _.groupBy(self.filteredFiles, function(a) {
+    var grouped = _.groupBy(filteredFiles, function(a) {
       return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
     });
 
@@ -95,8 +95,7 @@ LUPAPISTE.StampModel = function(params) {
     // map files for stamping
     self.preFiles(_.map(grouped.pre, mapAttachmentGroup));
     self.postFiles(_.map(grouped.post, mapAttachmentGroup));
-
-    self.status(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
+    self.status(_.size(filteredFiles) > 0 ? self.statusReady : self.statusNoFiles);
   });
 
 

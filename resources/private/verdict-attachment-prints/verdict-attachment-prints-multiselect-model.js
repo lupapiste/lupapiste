@@ -6,7 +6,12 @@
     selectingMode: ko.observable(false),
     authorization: undefined,
     appModel: undefined,
-    filteredAttachments: undefined,
+    filteredAttachments: ko.pureComputed( function() {
+      return _.map(lupapisteApp.services.attachmentsService.attachments(),
+                   function( a ) {
+                     return _.defaults( {selected: Boolean( a().forPrinting)}, a());
+                   });
+    }),
 
     setAttachmentsAsVerdictAttachment: function(selectedAttachmentsIds, unSelectedAttachmentsIds) {
       var id = model.appModel.id();
@@ -37,18 +42,8 @@
     }
   };
 
-  function filterAttachments(attachments) {
-    return _(attachments)
-      .map(function(a) {
-        a.selected = a.forPrinting ? a.forPrinting : false;
-        return a;
-      })
-      .value();
-  }
-
   function initMarking(appModel) {
     model.appModel = appModel;
-    model.filteredAttachments = filterAttachments(appModel._js.attachments);
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     pageutil.openPage("verdict-attachments-select", model.appModel.id());
@@ -70,10 +65,8 @@
           ko.mapping.fromJS(application, {}, model.appModel);
           model.appModel._js = application;
 
-          model.filteredAttachments = filterAttachments(application.attachments);
-
           model.selectingMode(true);
-        });
+        }, true);
       } else { // appModel already initialized, show the multiselect view
         model.selectingMode(true);
         lupapisteApp.setTitle(model.appModel.title());

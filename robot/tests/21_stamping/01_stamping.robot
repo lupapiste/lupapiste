@@ -85,6 +85,8 @@ Sonja sees stamping info fields
 
 Sonja inputs new stamping info values
   Input text by test id  stamp-info-text  ${STAMP_TEXT}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
   Input text by test id  stamp-info-date  ${STAMP_DATE}
   Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
   Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
@@ -115,7 +117,7 @@ Sonja can toggle selection of attachments by group/all/none
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
-
+  
 Status of stamping is ready
   Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
 
@@ -130,7 +132,7 @@ There were no errors
 
 Reset stamping, stamping page should be refreshed
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-reset"]
-  Element should be visible  stamping-container
+  Wait until  Element should be visible  stamping-container
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
