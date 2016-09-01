@@ -24,7 +24,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "attachmentType." + self.attachment().typeString();
   });
 
-  function queryAttachment() {
+  function querySelf() {
     service.queryOne(self.id);
   }
 
@@ -47,8 +47,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
   // Approve and reject
-  self.approveAttachment = _.partial(service.approveAttachment, self.id, { onSuccess: queryAttachment });
-  self.rejectAttachment = _.partial(service.rejectAttachment, self.id, { onSuccess: queryAttachment });
+  self.approveAttachment = _.partial(service.approveAttachment, self.id, { onSuccess: querySelf });
+  self.rejectAttachment =  _.partial(service.rejectAttachment,  self.id, { onSuccess: querySelf });
   self.isApproved =   function() { return self.attachment().state === service.APPROVED; };
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
   self.isRejected =   function() { return self.attachment().state === service.REJECTED; };
@@ -109,7 +109,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", queryAttachment);
+  self.addHubListener("upload-done", querySelf);
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
 
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
@@ -118,7 +118,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     var originalFileId = fileModel.originalFileId;
     var deleteFn = function() {
       trackClick("deleteAttachmentVersion");
-      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: queryAttachment });
+      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: querySelf });
     };
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
@@ -202,7 +202,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.rotate = function(rotation) {
     $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
-    service.rotatePdf(self.id, rotation, { onComplete: queryAttachment });
+    service.rotatePdf(self.id, rotation, { onComplete: querySelf });
   };
 
   self.disposedSubscribe(self.previewUrl, function(url) {
