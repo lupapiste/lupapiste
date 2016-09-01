@@ -110,7 +110,7 @@ Applicant accepts appointment
   Goto following week in calendar view
   Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
   
-Applicant suggests an appointment
+Applicant reserves slot from authority's calendar
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Sonja Sibbo
   Wait Until  Element should be visible by test id  reserve-slot-Friday-1200
@@ -122,7 +122,7 @@ Applicant suggests an appointment
   Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1200
   Logout
   
-Authority marks suggested appointment seen
+Authority marks reservation seen
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
