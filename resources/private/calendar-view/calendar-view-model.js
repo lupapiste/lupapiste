@@ -86,10 +86,11 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
+      var app = self.applicationModel();
       hub.send("calendarService::fetchApplicationCalendarSlots",
         { clientId: _.get(self.client(), "id"),
           authorityId: _.get(self.authority(), "id"),
-          applicationId: self.applicationModel.id(),
+          applicationId: _.isEmpty(app) ? undefined : ko.unwrap(app.id),
           reservationTypeId: self.reservationTypeId(),
           week: self.startOfWeek().isoWeek(),
           year: self.startOfWeek().year(),

@@ -5,15 +5,33 @@
 
   function NewAppointmentPageModel() {
     var self = this;
-    self.applications = ko.observableArray([]);
-    self.selectedApplicationId = ko.observable();
-    self.selectedApplicationModel = { id: ko.observable() };
-    self.selectedReservationType = ko.observable();
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-    self.selectedParty = ko.observable();
-    self.availableAuthorities = ko.observable();
-    self.reservationTypes = ko.observable();
-    self.defaultLocation = ko.observable();
+    self.applications = ko.observableArray([]);
+    self.selectedApplication = ko.observable();
+
+    self.bookAppointmentParams = { // for compatibility reasons this is an observable
+                                   client: ko.observable({id: lupapisteApp.models.currentUser.id }),
+                                   application: ko.observable(),
+                                   authorities: ko.observableArray([]),
+                                   selectedParty: ko.observable(),
+                                   reservationTypes: ko.observableArray([]),
+                                   selectedReservationType: ko.observable(),
+                                   defaultLocation: ko.observable() };
+
+    self.disposedComputed(function() {
+      var app = self.selectedApplication();
+      if (!_.isEmpty(app)) {
+        self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: app.id});
+        self.bookAppointmentParams.application({id: ko.observable(app.id)});
+      }
+    });
+
+    self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
+      self.bookAppointmentParams.authorities(event.authorities);
+      self.bookAppointmentParams.reservationTypes(event.reservationTypes);
+      self.bookAppointmentParams.defaultLocation(event.defaultLocation);
+    });
 
     self.initApplications = function(data) {
       self.applications(data);

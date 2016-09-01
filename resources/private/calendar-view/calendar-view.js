@@ -7,6 +7,7 @@
     {name: "reservation-slot-edit-bubble"},
     {name: "application-authority-calendar"},
     {name: "applicant-calendar"},
+    {name: "book-appointment-filter"},
     {name: "reservation-slot-reserve-bubble"}
   ];
 

@@ -1,0 +1,23 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="book-appointment-filter-template">
+  <div class="times-filter-group">
+    <span class="form-entry">
+      <label class="form-label tip" data-bind="ltext: 'book-appointment.select-authority'"></label>
+      <select class="form-input combobox tip" data-test-id="attendee-select"
+              data-bind="options: authorities,
+                         optionsText: function(item) { return util.partyFullName(item); },
+                         optionsCaption: loc('choose'),
+                         value: selectedParty">
+      </select>
+    </span>
+    <span class="form-entry">
+      <label class="form-label tip" data-bind="ltext: 'book-appointment.reservation-type'"></label>
+      <select class="form-input combobox tip" data-test-id="reservation-type-select"
+              data-bind="options: reservationTypes,
+                         optionsValue: function(item) { return _.get(item, 'id'); },
+                         optionsText: function(item) { return _.get(item, 'name'); },
+                         optionsCaption: loc('choose'),
+                         value: selectedReservationType">
+      </select>
+    </span>
+  </div>
+</script>
