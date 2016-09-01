@@ -28,9 +28,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     service.queryOne(self.id);
   }
 
+  function trackClick(eventName) {
+    hub.send("track-click", {category:"Attachments", label: "", event: eventName});
+  }
+
   // Navigation
   self.backToApplication = function() {
-    hub.send("track-click", {category:"Attachments", label: "", event:"backToApplication"});
+    trackClick("backToApplication");
     lupapisteApp.models.application.open("attachments");
   };
 
@@ -66,10 +70,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.attachment().type(data.attachmentType);
   });
 
+  // Delete attachment
   self.deleteAttachment = function() {
     self.disablePreview(true);
     var deleteFn = function() {
-      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
+      trackClick("deleteAttachment");
       lupapisteApp.models.application.open("attachments");
       service.removeAttachment(self.id);
     };
@@ -81,13 +86,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
   self.isDeletable = function() { return authModel.ok("delete-attachment") && editable(); };
 
-  // Version
-  self.hasVersion = self.disposedComputed(function() { return !_.isEmpty(self.attachment().versions); });
+  // Versions
+  self.hasVersion = function() { return !_.isEmpty(self.attachment().versions); };
   self.showAttachmentVersionHistory = ko.observable(false);
   self.disposedSubscribe(self.hasVersion, function(val) {
     self.showHelp(!val);
     self.showAttachmentVersionHistory(val);
   });
+
   self.newAttachmentVersion = function() {
     self.disablePreview(true);
     attachment.initFileUpload({
@@ -103,29 +109,27 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", _.ary(_.partial(service.queryOne, self.id), 0));
+  self.addHubListener("upload-done", queryAttachment);
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
+
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;
     var deleteFn = function() {
-      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVersion"});
-      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: _.ary(_.partial(service.queryOne, self.id), 0) });
+      trackClick("deleteAttachmentVersion");
+      service.removeAttachmentVersion(self.id, fileId, originalFileId, { onSuccess: queryAttachment });
     };
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
-                               size: "medium",
-                               component: "yes-no-dialog",
-                               componentParams: {ltext: "attachment.delete.version.message",
-                                                 yesFn: deleteFn }});
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "attachment.delete.version.message",
+                                               yesFn: deleteFn }});
   };
 
-
   // RAM
-  self.isRamAttachment = self.disposedComputed( function() {
-    return Boolean(self.attachment().ramLink);
-  });
+  self.isRamAttachment =    function() { return Boolean(self.attachment().ramLink); };
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachemnt"); };
 
   // Meta
@@ -161,7 +165,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.permanentArchiveEnabled = function() { return authModel.ok("permanent-archive-enabled"); };
 
   // Signatures
-  self.hasSignature = self.disposedComputed(function() { return !_.isEmpty(self.attachment().signatures); });
+  self.hasSignature = function() { return !_.isEmpty(self.attachment().signatures); };
   self.sign = function() {
     self.disablePreview(true);
     self.signingModel.init({id: self.applicationId, attachments:[self.attachment]});
@@ -198,9 +202,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.rotate = function(rotation) {
     $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
-    service.rotatePdf(self.id, rotation, { onComplete: function() {
-      service.queryOne(self.id);
-    }});
+    service.rotatePdf(self.id, rotation, { onComplete: queryAttachment });
   };
 
   self.disposedSubscribe(self.previewUrl, function(url) {
