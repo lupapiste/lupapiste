@@ -45,6 +45,7 @@
 
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     states/all-states
    :parameters [:id foremanHetu]
    :input-validators [(partial action/string-parameters [:foremanHetu])]
