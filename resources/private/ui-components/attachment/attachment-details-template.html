@@ -50,11 +50,11 @@
       <div class="attachment-info-wrapper">
         <div class="attachment-info-header">
           <h1>
-            <span data-bind="visible: $data.isRamAttachment,
+            <span data-bind="visible: $data.isRamAttachment(),
                              ltext: 'ram.prefix'"
                   data-test-id="ram-prefix"></span>
             <span data-bind="text: $data.applicationTitle"></span>: <span data-bind="ltext: $data.name"></span>
-            <span data-bind="if: $data.hasVersion">
+            <span data-bind="if: $data.hasVersion()">
               <span data-bind="ltext: 'attachment.version'">versio</span>
               <span id="test-attachment-version" data-bind="version: $data.attachment().latestVersion.version">0.0</span>
             </span>
@@ -73,9 +73,9 @@
             <button
                id="add-new-attachment-version"
                class="positive"
-               data-bind="click: $data.newAttachmentVersion, visible: $data.uploadingAllowed">
+               data-bind="click: $data.newAttachmentVersion, visible: $data.uploadingAllowed()">
               <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addVersion', visible: $data.hasVersion"></span>
+              <span data-bind="ltext: 'attachment.addVersion', visible: $data.hasVersion()"></span>
               <span data-bind="ltext: 'attachment.addFile', visible: !$data.hasVersion()"></span>
             </button>
             <button data-test-id="add-ram-attachment"
@@ -87,7 +87,7 @@
             </button>
             <button id="show-attachment-versions"
                     class="btn"
-                    data-bind="toggleClick: $data.showAttachmentVersionHistory, visible: $data.hasVersion">
+                    data-bind="toggleClick: $data.showAttachmentVersionHistory, visible: $data.hasVersion()">
               <i data-bind="css: {'lupicon-chevron-small-right': !$data.showAttachmentVersionHistory(),
                             'lupicon-chevron-small-down': $data.showAttachmentVersionHistory}"></i>
               <span data-bind="ltext: 'attachment.showVersionHistory'"></span>
@@ -168,7 +168,7 @@
                 <input class="form-input" type="text"
                        data-test-id="attachment-contents-input"
                        data-bind="value: $data.attachment().contents,
-                                  enable: $data.metaUpdateAllowed" />
+                                  enable: $data.metaUpdateAllowed()" />
               </div>
               <div class="col2 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
@@ -187,7 +187,7 @@
                                    optionsText: $data.getScaleOptionsText,
                                    optionsCaption: loc('choose'),
                                    value: $data.attachment().scale,
-                                   enable: $data.metaUpdateAllowed">
+                                   enable: $data.metaUpdateAllowed()">
                 </select>
                 <div class="col2 attachment-info-field">
                   <label data-bind="ltext: 'attachment.label.size'"></label>
@@ -196,11 +196,11 @@
                                      optionsText: loc,
                                      optionsCaption: loc('choose'),
                                      value: $data.attachment().size,
-                                     enable: $data.metaUpdateAllowed"></select>
+                                     enable: $data.metaUpdateAllowed()"></select>
                 </div>
               </div>
 
-              <div class="col1 attachment-info-field" data-bind="if: $data.setForPrintingAllowed">
+              <div class="col1 attachment-info-field" data-bind="if: $data.setForPrintingAllowed()">
                 <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
                 <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
                        data-bind="checked: $data.forPrinting"/>
@@ -214,7 +214,7 @@
                                    optionsText: $data.getVibilityOptionsText,
                                    value: $data.attachment().visibility,
                                    valueAllowUnset: true,
-                                   enable: $data.setVisibilityAllowed"></select>
+                                   enable: $data.setVisibilityAllowed()"></select>
               </div>
               <div data-bind="if: $data.permanentArchviveVisible && $data.hasVersion()">
 
@@ -253,9 +253,9 @@
             </div>
           </div>
 
-          <div class="signatures clear" data-bind="if: $data.hasVersion">
+          <div class="signatures clear" data-bind="if: $data.hasVersion()">
             <h3 data-bind="ltext: 'attachment.signatures'"></h3>
-            <div class="signature-table" data-bind="if: $data.hasSignature">
+            <div class="signature-table" data-bind="if: $data.hasSignature()">
               <!-- ko foreach: { data: $data.attachment().signatures, as: 'signature' } -->
               <div class="signature-row">
                 <div class="signature-cell" data-bind="fullName: signature.user"></div>
@@ -269,7 +269,7 @@
             </div>
             <button data-test-id="signLatestAttachmentVersion" class="positive"
                     data-bind="click: $data.sign,
-                               visible: $data.signingAllowed() && $data.hasSignature">
+                               visible: $data.signingAllowed() && $data.hasSignature()">
               <i class="lupicon-circle-pen"></i>
               <span data-bind="ltext: 'attachment.signLatest'"></span>
             </button>
@@ -294,7 +294,7 @@
         </div>
       </div>
 
-      <div class="col2" data-bind="if: $data.hasVersion">
+      <div class="col2" data-bind="if: $data.hasVersion()">
         <!-- Preview images and pdf files only -->
         <div class="file-preview" data-bind="visible: $data.hasPreview()">
           <div class="file-preview-image" data-bind="if: $data.previewIs('image')">
