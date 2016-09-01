@@ -1,6 +1,8 @@
 (ns lupapalvelu.document.schemas-test
-  (:use [lupapalvelu.document.schemas]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.document.schemas :refer [repeatable update-in-body]]
+            [lupapalvelu.document.tools :refer [body]]
+           ))
 
 (facts "body"
   (fact "flattens stuff into lists"    (body 1 2 [3 4] 5) => [1 2 3 4 5])
