@@ -57,6 +57,7 @@ Sonja opens and assigns application to herself
 Sonja opens the calendar tab
   Wait until  Element should be visible by test id  application-open-calendar-tab
   Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
 
 Sonja suggests an appointment
   Wait until  Select From List by test id  reservation-type-select  Foobar
@@ -84,9 +85,10 @@ Sonja suggests another appointment
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
-  Goto following week in calendar view
+  Wait until  Element should be visible by test id  calendar-weekday-0
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
+  Goto following week in calendar view
   Wait Until  Element should be visible by test id  reserve-slot-Friday-1100
   Element should not be visible by test id  reservation-PENDING-Friday-1000
   Element should not be visible by test id  reservation-ACCEPTED-Friday-1000
