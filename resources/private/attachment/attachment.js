@@ -13,6 +13,7 @@ var attachment = (function() {
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
 
   hub.onPageLoad("attachment", function() {
+    attachmentId(null); // Reset attachment id to kill component, if already alive.
     pageutil.showAjaxWait();
     applicationId(pageutil.subPage());
     attachmentId(pageutil.lastSubPage());
@@ -26,9 +27,11 @@ var attachment = (function() {
   });
 
   hub.onPageUnload("attachment", function() {
-    pageReadyForQuery(false);
-    applicationId(null);
-    attachmentId(null);
+    if (pageutil.getPage() !== "attachment") {
+      pageReadyForQuery(false);
+      applicationId(null);
+      attachmentId(null);
+    }
   });
 
   pageReadyForQuery.subscribe(function(ready) {

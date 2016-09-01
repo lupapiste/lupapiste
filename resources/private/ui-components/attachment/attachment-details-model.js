@@ -65,8 +65,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.nextAttachmentId = service.nextAttachmentId(self.id);
   self.previousAttachmentId = service.previousAttachmentId(self.id);
 
-  self.openNextAttachment = partialWithTrackClick("nextAttachment", _.noop);
-  self.openPreviousAttachment = partialWithTrackClick("previousAttachment", _.noop);
+  self.openNextAttachment = partialWithTrackClick("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
+  self.openPreviousAttachment = partialWithTrackClick("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );
 
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
