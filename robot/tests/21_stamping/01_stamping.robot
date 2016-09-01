@@ -131,7 +131,7 @@ There were no errors
   Page should not contain  Virhe
 
 Reset stamping, stamping page should be refreshed
-  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-reset"]
+  Scroll and click test id  stamp-reset
   Wait until  Element should be visible  stamping-container
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
