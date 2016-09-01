@@ -189,18 +189,25 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.rotationAllowed = function() { return authModel.ok("rotate-pdf"); };
 
+  self.previewUrl = self.disposedComputed(function() {
+    var fileId = util.getIn(self.attachment(), ["latestVersion", "fileId"]);
+    return "/api/raw/view-attachment?attachment-id=" + fileId;
+  });
+
   self.rotate = function(rotation) {
-    var iframe$ = $("#file-preview-iframe");
-    iframe$.attr("src","/lp-static/img/ajax-loader.gif");
-    service.rotatePdf(self.id, rotation); // TODO: success handler
-      //.success(function() {
-      //  applicationModel.reload();
-      //  hub.subscribe("attachment-loaded", function() {
-      //    model.previewVisible(true);
-      //      iframe$.attr("src", model.previewUrl());
-      //  }, true);
+    $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
+    service.rotatePdf(self.id, rotation, { onComplete: function() {
+      service.queryOne(self.id);
+    }});
   };
 
+  self.disposedSubscribe(self.previewUrl, function(url) {
+    if (self.showPreview()) {
+      $("#file-preview-iframe").attr("src", url);
+    }
+  });
+
+  // Common hub listeners
   self.addHubListener("dialog-close", _.partial(self.disablePreview, false));
 
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
