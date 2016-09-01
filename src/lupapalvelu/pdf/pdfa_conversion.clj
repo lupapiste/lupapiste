@@ -33,7 +33,7 @@
 (defn- pdf2pdf-key []
   (env/value :pdf2pdf :license-key))
 
-(def pdf2pdf-enabled? (and (string? pdf2pdf-executable) (string? pdf2pdf-key)))
+(def pdf2pdf-enabled? (and (string? (pdf2pdf-executable)) (string? (pdf2pdf-key))))
 
 (defn- pdftools-pdfa-command
   "Conversion error mask 68 means that the following things will cause the conversion to fail:
