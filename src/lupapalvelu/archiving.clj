@@ -19,7 +19,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.states :as states])
+            [lupapalvelu.states :as states]
+            [lupapalvelu.foreman :as foreman])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -198,6 +199,20 @@
 (defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
   (str type-group "." type-id))
 
+(defn- foreman-name [document]
+  (->>
+    (str (get-in document [:data :henkilotiedot :sukunimi :value]))
+    (str " ")
+    (str (get-in document [:data :henkilotiedot :etunimi :value]))))
+
+(defn- foremen [application]
+  (if (empty? (:foreman application))
+    (let [foreman-applications (foreman/get-linked-foreman-applications (:id application))
+          foreman-documents (mapv foreman/get-foreman-documents foreman-applications)
+          foremen (mapv foreman-name foreman-documents)]
+      (apply str (interpose ", " foremen)))
+    (:foreman application)))
+
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality location location-wgs84] :as application}
    user
@@ -227,7 +242,8 @@
                        :kayttotarkoitukset    (get-usages application (get-in attachment [:op :id]))
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
-                       :suunnittelijat        (:_designerIndex (amf/designers-index application))}]
+                       :suunnittelijat        (:_designerIndex (amf/designers-index application))
+                       :foremen               (foremen application)}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
