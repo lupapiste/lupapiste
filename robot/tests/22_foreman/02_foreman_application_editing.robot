@@ -8,7 +8,8 @@ Suite Teardown  Logout
 
 *** Keywords ***
 Sonja creates an application and invites foreman
-  Create project application
+  # Create application directly to submitted state to speed up the test
+  Create project application  submitted
   Sonja invites foreman to application
 
 Open linking dialog
@@ -21,10 +22,6 @@ Sonja inits applications
   Sonja logs in
   Sonja creates an application and invites foreman
   Sonja creates an application and invites foreman
-
-Submit the base apps
-  Submit foreman base app  0
-  Submit foreman base app  1
   [Teardown]  Logout
 
 Foreman fills personal information and submits the first foreman application
