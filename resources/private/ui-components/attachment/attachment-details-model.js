@@ -24,6 +24,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "attachmentType." + self.attachment().typeString();
   });
 
+  function queryAttachment() {
+    service.queryOne(self.id);
+  }
+
   // Navigation
   self.backToApplication = function() {
     hub.send("track-click", {category:"Attachments", label: "", event:"backToApplication"});
@@ -39,18 +43,16 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
   // Approve and reject
-  self.approveAttachment = _.ary(_.partial(service.approveAttachment, self.id), 0);
-  self.rejectAttachment = _.ary(_.partial(service.rejectAttachment, self.id), 0);
-  self.isApproved = self.disposedComputed(function() {
-    return self.attachment().state === service.APPROVED;
-  });
+  self.approveAttachment = _.partial(service.approveAttachment, self.id, { onSuccess: queryAttachment });
+  self.rejectAttachment = _.partial(service.rejectAttachment, self.id, { onSuccess: queryAttachment });
+  self.isApproved =   function() { return self.attachment().state === service.APPROVED; };
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected = self.disposedComputed( function() {
-    return self.attachment().state === service.REJECTED;
-  });
+  self.isRejected =   function() { return self.attachment().state === service.REJECTED; };
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
-  //self.approval = ko.observable(self.attachment().approved); // TODO: ???
+  self.approval = {approval: self.disposedComputed(function() {
+    return self.attachment().approved;
+  })};
 
   var editable = ko.observable(true); // TODO: find out use cases from old implementation
 
