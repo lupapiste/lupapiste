@@ -108,7 +108,7 @@
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 4000 :css []
+      :body [{:name "kuvaus" :type :text :max-len 20000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }
              {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
              {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
@@ -201,7 +201,7 @@
     :rows [["maarays::3"] ["kuvaus::3"]]
     :template "form-grid-docgen-group-template"
     :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
-           {:name "kuvaus"  :type :text :max-len 4000 }
+           {:name "kuvaus"  :type :text :max-len 20000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
 
