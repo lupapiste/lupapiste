@@ -87,7 +87,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.isDeletable = function() { return authModel.ok("delete-attachment") && editable(); };
 
   // Versions
-  self.hasVersion = function() { return !_.isEmpty(self.attachment().versions); };
+  self.hasVersion = self.disposedComputed(function() { return !_.isEmpty(self.attachment().versions); });
   self.showAttachmentVersionHistory = ko.observable(false);
   self.disposedSubscribe(self.hasVersion, function(val) {
     self.showHelp(!val);
