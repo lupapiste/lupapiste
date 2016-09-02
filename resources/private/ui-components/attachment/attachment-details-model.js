@@ -24,40 +24,28 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return "attachmentType." + self.attachment().typeString();
   });
 
-  // Use as callback for ajax updates to trigger attachment query after update.
-  function querySelfFn(triggerName) {
-    return function(response) { service.queryOne(self.id, {triggerName: triggerName, triggerResponse: response}); };
-  }
-
-  // Add listener for updates that trigger attachment query
-  function addQueryListener(triggerName, fn) {
-    self.addEventListener( service.serviceName, "query", function(hubParams) {
-      if (hubParams.triggerName === triggerName) {
-        fn(hubParams.triggerResponse);
-      }
-    });
-  }
-  // Add listener for updates that do not require attachment query
-  function addUpdateListener(name, fn) {
-    self.addEventListener( service.serviceName, "update", function(hubParams) {
-      if (hubParams.name === name) {
-        fn(hubParams.response);
-      }
-    });
+  function querySelf(hubParams) {
+    service.queryOne(self.id, hubParams);
   }
 
   function trackClick(eventName) {
     hub.send("track-click", {category:"Attachments", label: "", event: eventName});
   }
 
-  // Like lodash _.partial but trigger track click event.
-  function partialWithTrackClick(eventName, fn) {
+  function partialWithTrackClick(eventName, fn /* & args */) {
     var args = _.drop(arguments, 2);
     return function() {
       trackClick(eventName);
       _.spread(fn)(args);
     };
   }
+
+  function addUpdateListener(commandName, params, fn) {
+    self.addEventListener(service.serviceName, _.merge({eventType: "update", attachmentId: self.id, commandName: commandName}, params), fn);
+  }
+
+  // Show indicator always when attachment update fails
+  self.addEventListener(service.serviceName, {eventType: "update", attachmentId: self.id, ok: false}, util.showSavedIndicator);
 
   // Navigation
   self.backToApplication = partialWithTrackClick("backToApplication", lupapisteApp.models.application.open, "attachments");
@@ -71,8 +59,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
   // Approve and reject
-  self.approveAttachment = partialWithTrackClick("approveAttachment", service.approveAttachment, self.id, { onSuccess: querySelfFn("approve-attachment") });
-  self.rejectAttachment  = partialWithTrackClick("rejectAttachment",  service.rejectAttachment,  self.id, { onSuccess: querySelfFn("reject-attachment") });
+  self.approveAttachment = partialWithTrackClick("approveAttachment", service.approveAttachment, self.id);
+  self.rejectAttachment  = partialWithTrackClick("rejectAttachment",  service.rejectAttachment,  self.id);
+  addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
+  addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
   self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
   self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
@@ -93,22 +83,18 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addEventListener("attachments", "change-attachment-type", function(data) {
     self.attachment().type(data.attachmentType);
   });
-  addQueryListener("set-type", util.showSavedIndicator);
+  addUpdateListener("set-attachment-type", {}, util.showSavedIndicator);
 
   // Delete attachment
   self.deleteAttachment = function() {
     self.disablePreview(true);
-    var deleteFn = function() {
-      trackClick("deleteAttachment");
-      lupapisteApp.models.application.open("attachments");
-      service.removeAttachment(self.id);
-    };
     hub.send("show-dialog", {ltitle: "attachment.delete.header",
                              size: "medium",
                              component: "yes-no-dialog",
                              componentParams: {ltext: _.isEmpty(self.attachment().versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
-                                               yesFn: deleteFn }});
+                                               yesFn: partialWithTrackClick("deleteAttachment", service.removeAttachment, self.id) }});
   };
+  self.addEventListener(service.serviceName, {eventType: "remove", attachmentId: self.id}, _.ary(_.partial(lupapisteApp.models.application.open, "attachments")));
   self.isDeletable = function() { return authModel.ok("delete-attachment") && editable(); };
 
   // Versions
@@ -119,6 +105,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.showAttachmentVersionHistory(val);
   });
 
+  // Versions - add
   self.newAttachmentVersion = function() {
     self.disablePreview(true);
     attachment.initFileUpload({
@@ -134,14 +121,15 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", querySelfFn("upload-done") );
+  self.addHubListener("upload-done", querySelf );
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment") && editable(); };
 
+  // Versions - delete
   self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version") && editable(); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;
-    var deleteFn = partialWithTrackClick("deleteAttachmentVersion", service.removeAttachmentVersion, self.id, fileId, originalFileId, { onSuccess: querySelfFn("delete-attachment-version") });
+    var deleteFn = partialWithTrackClick("deleteAttachmentVersion", service.removeAttachmentVersion, self.id, fileId, originalFileId);
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
                              size: "medium",
@@ -149,6 +137,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
                              componentParams: {ltext: "attachment.delete.version.message",
                                                yesFn: deleteFn }});
   };
+
+  addUpdateListener("delete-attachment-version", {ok: true}, _.ary(querySelf, 0));
 
   // RAM
   self.isRamAttachment =    function() { return Boolean(self.attachment().ramLink); };
@@ -175,21 +165,24 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
   self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
-  addQueryListener("set-group", util.showSavedIndicatorIcon);
-  addUpdateListener("set-metadata", util.showSavedIndicatorIcon);
+
+  addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
 
   // For Printing
   self.setForPrintingAllowed = function() { return authModel.ok("set-attachments-as-verdict-attachment"); };
   self.forPrinting = ko.observable(self.attachment().forPrinting);
   self.disposedSubscribe(self.forPrinting, function(val) {
-    service.setForPrinting(self.id, val, { onSuccess: querySelfFn("set-for-printing") });
+    service.setForPrinting(self.id, val);
   });
-  addQueryListener("set-for-printing", util.showSavedIndicatorIcon);
-
+  addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, function(res) {
+    querySelf();
+    util.showSavedIndicatorIcon(res);
+  });
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
   self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility") && editable(); };
+  addUpdateListener("set-attachment-visibility", {ok: true}, util.showSavedIndicatorIcon);
 
   // Permanent archive
   self.permanentArchiveEnabled = function() { return authModel.ok("permanent-archive-enabled"); };
@@ -232,8 +225,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.rotate = function(rotation) {
     $("#file-preview-iframe").attr("src","/lp-static/img/ajax-loader.gif");
-    service.rotatePdf(self.id, rotation, { onSuccess: querySelfFn("rotate-pdf") });
+    service.rotatePdf(self.id, rotation);
   };
+  addUpdateListener("rotate-pdf", {ok: true}, _.ary(querySelf, 0));
 
   self.disposedSubscribe(self.showPreview, function(val) {
     if (val) {

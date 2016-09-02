@@ -183,30 +183,38 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachment-groups", "groups", self.setGroupTypes);
   };
 
-  self.removeAttachment = function(attachmentId, options) {
-    ajax.command("delete-attachment", {id: self.applicationId(), attachmentId: attachmentId})
+
+  function sendHubNotification(eventType, commandName, params, response) {
+    hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
+                                                           ok: response.ok,
+                                                           response: response},
+                                                          params));
+  }
+
+  self.removeAttachment = function(attachmentId, hubParams) {
+    var params = {id: self.applicationId(), attachmentId: attachmentId};
+    ajax.command("delete-attachment", params)
       .success(function(res) {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
         queryTagGroupsAndFilters();
-        _.get(options, "onSuccess", _.showSavedIndicator)(res);
+        sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
       })
-      .error(_.get(options, "onError", util.showSavedIndicator))
-      .complete(_.get(options, "onComplete", _.noop))
+      .error(_.partial(sendHubNotification, "remove", "delete-attachment", _.merge(params, hubParams)))
       .processing(self.processing)
       .call();
     return false;
   };
 
-  self.copyUserAttachments = function(options) {
-    ajax.command("copy-user-attachments-to-application", {id: self.applicationId()})
+  self.copyUserAttachments = function(hubParams) {
+    var params = {id: self.applicationId()};
+    ajax.command("copy-user-attachments-to-application", params)
       .success(function(res) {
         self.queryAll();
-        _.get(options, "onSuccess", _.noop)(res);
+        sendHubNotification("copy-user-attachments", "copy-user-attachments-to-application", _.merge(params, hubParams), res);
       })
-      .error(_.get(options, "onError", util.showSavedIndicator))
-      .complete(_.get(options, "onComplete", _.noop))
+      .error(_.partial(sendHubNotification, "copy-user-attachments", "copy-user-attachments-to-application", _.merge(params, hubParams)))
       .processing(self.processing)
       .call();
   };
@@ -218,65 +226,71 @@ LUPAPISTE.AttachmentsService = function() {
     window.open(uri);
   };
 
-  self.updateAttachment = function(attachmentId, commandName, params, options) {
+  self.updateAttachment = function(attachmentId, commandName, params, hubParams) {
     var commandParams = _.assign({"id": self.applicationId(),
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(_.get(options, "onSuccess", _.noop))
-      .error(_.get(options, "onError", util.showSavedIndicator))
-      .complete(_.get(options, "onComplete", _.noop))
+      .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
+      .error(function(response) {
+        sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
+        error("Unable to update attachment: ", response.text);
+        notify.ajaxError(response);
+      })
+      .processing(self.processing)
       .call();
   };
 
-  self.removeAttachmentVersion = function(attachmentId, fileId, originalFileId, options) {
-    self.updateAttachment(attachmentId, "delete-attachment-version", {fileId: fileId, originalFileId: originalFileId}, options);
+  self.removeAttachmentVersion = function(attachmentId, fileId, originalFileId, hubParams) {
+    self.updateAttachment(attachmentId, "delete-attachment-version", {fileId: fileId, originalFileId: originalFileId}, hubParams);
   };
 
-  self.approveAttachment = function(attachmentId, options) {
+  self.approveAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
-    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
+    self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
   };
 
-  self.rejectAttachment = function(attachmentId, options) {
+  self.rejectAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
-    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, options);
+    self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
   };
 
-  self.setNotNeeded = function(attachmentId, flag, options) {
+  self.setNotNeeded = function(attachmentId, flag, hubParams) {
     forceVisibleIds.push(attachmentId);
-    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag}, options);
+    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag}, hubParams);
   };
 
-  self.setVisibility = function(attachmentId, visibility, options) {
-    self.updateAttachment(attachmentId, "set-attachment-visibility", {"value": visibility}, options);
+  self.setVisibility = function(attachmentId, visibility, hubParams) {
+    self.updateAttachment(attachmentId, "set-attachment-visibility", {"value": visibility}, hubParams);
   };
 
-  self.setMeta = function(attachmentId, metadata, options) {
-    self.updateAttachment(attachmentId, "set-attachment-meta", {meta: metadata}, options);
+  self.setMeta = function(attachmentId, metadata, hubParams) {
+    self.updateAttachment(attachmentId, "set-attachment-meta", {meta: metadata}, hubParams);
   };
 
-  self.setForPrinting = function(attachmentId, isForPrinting, options) {
+  self.setForPrinting = function(attachmentId, isForPrinting, hubParams) {
     var params = {selectedAttachmentIds: isForPrinting ? [attachmentId] : [],
                   unSelectedAttachmentIds: isForPrinting ? [] : [attachmentId]};
-    self.updateAttachment(attachmentId, "set-attachments-as-verdict-attachment", params, options);
+    self.updateAttachment(attachmentId, "set-attachments-as-verdict-attachment", params, hubParams);
   };
 
-  self.rotatePdf = function(attachmentId, rotation, options) {
-    self.updateAttachment(attachmentId, "rotate-pdf", {rotation: rotation}, options);
+  self.rotatePdf = function(attachmentId, rotation, hubParams) {
+    self.updateAttachment(attachmentId, "rotate-pdf", {rotation: rotation}, hubParams);
   };
 
-  self.setType = function(attachmentId, type, options) {
-    self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, options);
+  self.setType = function(attachmentId, type, hubParams) {
+    self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, hubParams);
   };
 
-  self.createAttachmentTempaltes = function(types, options) {
-    ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: types})
+  self.createAttachmentTemplates = function(types, hubParams) {
+    var params =  {id: self.applicationId(), attachmentTypes: types};
+    ajax.command("create-attachments", params)
       .success(function(res) {
         self.queryAll();
-        _.get(options, "onSuccess", util.showSavedIndicator)(res);
+        sendHubNotification("create", "create-attachments", _.merge(params, hubParams), res);
       })
-      .complete(_.get(options, "onComplete", _.noop))
+      .error(_.partial(sendHubNotification, "create", "create-attachments", _.merge(params, hubParams)))
+      .processing(self.processing)
       .call();
   };
 

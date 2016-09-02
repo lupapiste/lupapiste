@@ -333,8 +333,15 @@ LUPAPISTE.AttachmentsListingModel = function() {
       pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
     }
   }
-
   self.addEventListener( self.service.serviceName, "query", afterQuery );
+
+  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
+    self.service.queryOne(params.attachmentId);
+  });
+
+  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "reject-attachment"}, function(params) {
+    self.service.queryOne(params.attachmentId);
+  });
 
   function AttachmentTemplatesModel() {
     var templateModel = this;
@@ -343,11 +350,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
       templateModel.selectm
         .allowDuplicates(true)
-        .ok(function(types) {
-          self.service.createAttachmentTempaltes(types, {
-            onComplete: LUPAPISTE.ModalDialog.close
-          });
-        })
+        .ok(_.ary(self.service.createAttachmentTemplates, 1))
         .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
@@ -377,6 +380,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.attachmentTemplatesAdd = function() {
     self.attachmentTemplatesModel.show();
   };
+  self.addEventListener(self.service.serviceName, "create", LUPAPISTE.ModalDialog.close);
+
+  self.addEventListener(self.service.serviceName, "remove", util.showSavedIndicator);
+
+  self.addEventListener(self.service.serviceName, "copy-user-attachments", util.showSavedIndicator);
 
   self.copyUserAttachments = function() {
     hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",

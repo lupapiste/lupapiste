@@ -49,16 +49,18 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   // Updates which require attachment model reload
   //
 
-  function buildUpdateOptions(triggerName) {
-    return { onSuccess: function(response) {
-      service.queryOne(self.id, {triggerName: triggerName, triggerResponse: response});
-    }};
+
+  function addSelfUpdateListener(fieldName) {
+    var event = {eventType: "update", ok: true, field: fieldName, attachmentId: self.id};
+    self.addEventListener(service.serviceName, event, _.ary(_.partial(service.queryOne, self.id), 0));
   }
 
   self.disposedSubscribe(self.notNeeded, function(val) {
     self.processing(true);
-    service.setNotNeeded(self.id, val, buildUpdateOptions("set-not-needed"));
+    service.setNotNeeded(self.id, val, {field: "not-needed"});
   });
+
+  addSelfUpdateListener("not-needed");
 
   // Helper string to subscribe changes in attachemnt type
   self.typeString = ko.computed(function() {
@@ -67,8 +69,10 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   self.disposedSubscribe(self.typeString, function(val) {
     self.processing(true);
-    service.setType(self.id, val, buildUpdateOptions("set-type"));
+    service.setType(self.id, val, {field: "type"});
   });
+
+  addSelfUpdateListener("type");
 
   // Helper string to subscribe changes in op and groupType
   self.groupString = self.disposedComputed(function() {
@@ -79,41 +83,39 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
     self.processing(true);
     self.op(_.omit(val, "groupType"));
     self.groupType(_.get(val, "groupType"));
-    service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, buildUpdateOptions("set-group"));
+    service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, {field: "group"});
   });
+
+  addSelfUpdateListener("group");
 
   //
   // Updates which only reloads attachment model if failed
   //
 
-  function lightUpdateErrorFn(response) {
-    self.processing(true);
-    hub.send( service.serviceName + "::update", {name: "set-metadata", response: response});
-    error("Unable to set attachment-meta", response.text);
-    notify.ajaxError(response);
-  }
-
-  function lightUpdateSuccessFn(response) {
-    hub.send( service.serviceName + "::update", {name: "set-metadata", response: response});
-  }
-
-  var lightUpdateOptions = { onSuccess: lightUpdateSuccessFn,
-                             onError:   lightUpdateErrorFn };
-
   self.disposedSubscribe(self.contents, function(val) {
-    service.setMeta(self.id, {contents: val}, lightUpdateOptions);
+    self.processing(true);
+    service.setMeta(self.id, {contents: val}, {field: "contents"});
   });
 
   self.disposedSubscribe(self.scale, function(val) {
-    service.setMeta(self.id, {scale: val}, lightUpdateOptions);
+    self.processing(true);
+    service.setMeta(self.id, {scale: val}, {field: "scale"});
   });
 
   self.disposedSubscribe(self.size, function(val) {
-    service.setMeta(self.id, {size: val}, lightUpdateOptions);
+    self.processing(true);
+    service.setMeta(self.id, {size: val}, {field: "size"});
   });
 
   self.disposedSubscribe(self.visibility, function(val) {
-    service.setVisibility(self.id, val, lightUpdateOptions);
+    self.processing(true);
+    service.setVisibility(self.id, val, {field: "visibility"});
+  });
+
+  self.addEventListener(service.serviceName, {eventType: "update", attachmentId: self.id}, function(params) {
+    if (!params.ok || _.includes(["contents","scale","size", "visibility"], params.field)) {
+      self.processing(false);
+    }
   });
 
 };

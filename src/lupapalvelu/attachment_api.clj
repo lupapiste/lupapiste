@@ -452,6 +452,7 @@
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
+   :categories [:attachments]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
