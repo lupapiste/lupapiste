@@ -47,6 +47,17 @@ Foreman application can be submitted
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
   Submit application
+
+Foreman can comment foreman application
+  Add comment  Hakemus on nyt jätetty
+
+Foreman only read comments on project application
+  Open project application
+  Confirm yes no dialog
+  Open side panel  conversation
+  Element should not be visible by test id  application-new-comment-text
+  Element should not be visible by test id  application-new-comment-btn
+
   [Teardown]  Logout
 
 Sonja logs in and gets verdict for the first foreman application
@@ -65,8 +76,6 @@ Foreman logs in and checks related projects on the second foreman application
 
 Can not link base app to foreman application
   Open project application
-  Confirm yes no dialog
-
   Open linking dialog
 
   ${app} =   Get From List  ${applications}  1
@@ -188,3 +197,4 @@ Foreman state has reset again on base app
   Go back to project application
   Open tab  tasks
   Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+
