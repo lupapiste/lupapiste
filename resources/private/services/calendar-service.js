@@ -82,13 +82,13 @@ LUPAPISTE.CalendarService = function() {
               notifyView(event, _weekdays(event, slots, startOfWeekMoment));
             })
             .error(function(e) {
-              hub.send("indicator", {style: "negative", message: e.code});
+              hub.send("indicator", {style: "negative", message: e.text});
             })
             .call();
         }
       })
       .error(function(e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
       }).call();
   };
 
@@ -158,7 +158,7 @@ LUPAPISTE.CalendarService = function() {
         doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .error(function(e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
         doFetchCalendarWeek(event);
       })
       .call();
@@ -172,7 +172,7 @@ LUPAPISTE.CalendarService = function() {
         doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .error(function (e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
         doFetchCalendarWeek(event);
       })
       .call();
@@ -186,7 +186,7 @@ LUPAPISTE.CalendarService = function() {
         doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .error(function (e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
         doFetchCalendarWeek(event);
       })
       .call();
@@ -206,7 +206,7 @@ LUPAPISTE.CalendarService = function() {
                                          reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
       .error(function(e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
       })
       .call();
   });

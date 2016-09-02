@@ -54,7 +54,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
             LUPAPISTE.ModalDialog.close();
           })
           .error(function(e) {
-            hub.send("indicator", {style: "negative", message: e.code});
+            hub.send("indicator", {style: "negative", message: e.text});
           })
           .call();
       }
@@ -74,7 +74,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
             LUPAPISTE.ModalDialog.close();
           })
           .error(function(e) {
-            hub.send("indicator", {style: "negative", message: e.code});
+            hub.send("indicator", {style: "negative", message: e.text});
           })
           .call();
       }
@@ -90,7 +90,7 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         hub.send("indicator", {style: "positive"});
       })
       .error(function(e) {
-        hub.send("indicator", {style: "negative", message: e.code});
+        hub.send("indicator", {style: "negative", message: e.text});
       })
       .call();
   };
