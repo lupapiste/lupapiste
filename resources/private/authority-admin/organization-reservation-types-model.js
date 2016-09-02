@@ -90,7 +90,6 @@ LUPAPISTE.AuthAdminReservationTypesModel = function () {
         hub.send("indicator", {style: "positive"});
       })
       .error(function(e) {
-        console.info(e);
         hub.send("indicator", {style: "negative", message: e.text});
       })
       .call();
