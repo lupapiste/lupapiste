@@ -77,7 +77,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
     self.slot(event.slot);
     self.location(params.defaultLocation());
 
-    var client = ko.unwrap(params.client);
+    var client = params.client();
     if (client) {
       self.clientId(ko.unwrap(client.id));
     }
