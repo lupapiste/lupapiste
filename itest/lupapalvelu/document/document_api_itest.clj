@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.document-api-itest
   (:require [midje.sweet :refer :all]
-            [sade.util :refer [fn->]]
+            [sade.util :refer [fn->] :as util]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.itest-util :refer :all]
@@ -224,5 +224,10 @@
           (count (:secondaryOperations updated-app)) => 1
           (fact "attachments belonging to operation don't exist anymore"
             (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
-          (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
-            (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app)))))))))
+          (let [attachment (util/find-by-id (:id sauna-attachment) (:attachments updated-app))]
+            (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+              attachment)
+            (fact "attachment op is unset"
+              (:op attachment) => nil)
+            (fact "attachment groupType is unset"
+              (:groupType attachment) => nil)))))))
