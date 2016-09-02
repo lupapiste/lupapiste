@@ -454,19 +454,22 @@
 ;; Upload
 ;;
 
+(defn- foreman-must-be-uploader [command])
+
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
    :categories [:attachments]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
-   :pre-checks [attachment-is-not-locked
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :pre-checks [attachment-id-is-present-in-application-or-not-set
+                attachment-is-not-locked
+                attachment-not-readOnly
                 statement/upload-attachment-allowed
+                foreman-must-be-uploader
                 (partial attachment-editable-by-application-state true)
                 validate-attachment-type
                 app/validate-authority-in-drafts
-                attachment-id-is-present-in-application-or-not-set
-                validate-operation-in-application
-                attachment-not-readOnly]
+                validate-operation-in-application]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))

@@ -486,18 +486,22 @@
         foreman-email (email-for-key foreman)
 
         {application-id :id :as main-application} (create-and-submit-application applicant :operation "kerrostalo-rivitalo")
+        main-attachment-1 (-> main-application :attachments first)
 
+        ; Verdict is given so that the foreman application can be created by applicant
         _ (give-verdict sonja application-id :verdictId "321-2016")
 
         resp (command applicant :create-foreman-application :id application-id
                :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
         {foreman-app-id :id} resp
         foreman-application (query-application applicant foreman-app-id)
+
         foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
         foreman-applicant-doc (domain/get-document-by-name foreman-application "hakija-tj")]
 
     (fact "sanity checks"
       resp => ok?
+      main-attachment-1 => map?
       foreman-doc => map?
       (:id foreman-doc) => truthy
       foreman-applicant-doc => map?
@@ -570,5 +574,13 @@
       (fact "Update subtype to 'tyonjohtaja-hakemus'"
         (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
       (command foreman :submit-application :id foreman-app-id) => ok?)
+
+    (facts "attachments"
+      (let [new-main-attachment (upload-attachment foreman application-id nil true)
+            attachment-by-foreman (upload-attachment foreman foreman-app-id nil true)
+            attachment-by-applicant (upload-attachment applicant foreman-app-id nil true)]
+        (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
+        (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
+        (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)))
 
     ))
