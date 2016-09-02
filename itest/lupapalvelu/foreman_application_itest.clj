@@ -522,8 +522,10 @@
     (fact "applicant can add parties"
       (command applicant :create-doc :id foreman-app-id :schemaName "hakija-tj") => ok?)
 
-    (fact "foreman can NOT read & write comments on the main application"
-      (query foreman :comments :id application-id) => unauthorized?
+    (fact "foreman CAN read comments on the main application"
+      (query foreman :comments :id application-id) => ok?)
+
+    (fact "foreman can NOT comment on the main application"
       (comment-application foreman application-id) => unauthorized?)
 
     (fact "foreman CAN read & write comments on the main application"

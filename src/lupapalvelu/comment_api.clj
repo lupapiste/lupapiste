@@ -81,7 +81,6 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :org-authz-roles auth/commenter-org-authz-roles
-   :pre-checks [foreman/allow-foreman-only-in-foreman-app]
    :states states/all-states}
   [{{app-id :id :as application} :application}]
   (ok {:id app-id :comments (comment/enrich-comments application)}))
