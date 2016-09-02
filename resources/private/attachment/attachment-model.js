@@ -89,7 +89,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   addSelfUpdateListener("group");
 
   //
-  // Updates which only reloads attachment model if failed
+  // Updates which do not require attachment reload
   //
 
   self.disposedSubscribe(self.contents, function(val) {
