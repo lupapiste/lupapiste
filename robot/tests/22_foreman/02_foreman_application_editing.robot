@@ -51,6 +51,19 @@ Foreman application can be submitted
 Foreman can comment foreman application
   Add comment  Hakemus on nyt jätetty
 
+Foreman could only add guests to foreman application
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Element should not be visible by test id  application-invite-person
+
+Foreman can not add parties to foreman application
+  Element should not be visible by test id  hakija-tj_append_btn
+  Element should not be visible by test id  add-party
+
+Foreman could add attachment to foreman application
+  Open tab  attachments
+  Element should be visible by test id  add-attachment
+
 Foreman only read comments on project application
   Open project application
   Confirm yes no dialog
@@ -58,6 +71,17 @@ Foreman only read comments on project application
   Element should not be visible by test id  application-new-comment-text
   Element should not be visible by test id  application-new-comment-btn
 
+Foreman can not invite anyone to the project application
+  Open accordions  parties
+  Element should not be visible by test id  application-invite-person
+  Element should not be visible by test id  application-guest-add
+
+Foreman can not add parties to the project application
+  Element should not be visible by test id  add-party
+
+Foreman could add attachment to project application
+  Open tab  attachments
+  Element should be visible by test id  add-attachment
   [Teardown]  Logout
 
 Sonja logs in and gets verdict for the first foreman application
