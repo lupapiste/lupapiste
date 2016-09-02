@@ -283,10 +283,9 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js"]
-                   :html ["reservation-slot-edit-bubble-template.html"
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js"]
+                   :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
-
                           "authority-calendar-template.html" "applicant-calendar-template.html"
                           "calendar-message-items-template.html"
                           "reservation-slot-reserve-bubble-template.html"]}

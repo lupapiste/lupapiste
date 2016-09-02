@@ -80,6 +80,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
       self.sendEvent("calendarView", "availableSlotClicked",
         { slot: this.slot,
           weekday: this.calendarWeekday });
+    } else if (clazz === "booked-slot") {
+      self.sendEvent("calendarView", "bookedSlotClicked",
+        { slot: this.slot,
+          weekday: this.calendarWeekday });
     }
   };
 
