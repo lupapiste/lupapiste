@@ -591,5 +591,21 @@
         (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
           (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
-    ))
+        (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
+              actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
+              actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
+              actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
+                       :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
+
+          (fact "Foreman can edit own attachment"
+            (doseq [action actions]
+              (fact {:midje/description (name action)}
+                (action actions-for-foreman-att) => ok?)))
+
+          (fact "Foreman can not edit applicant's attachment"
+            (doseq [action actions]
+              (fact {:midje/description (name action)}
+                (action actions-for-applicant-att) =not=> ok?))))
+
+        ))
     ))

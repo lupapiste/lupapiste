@@ -215,9 +215,12 @@
    :categories [:attachments]
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
-   :pre-checks [app/validate-authority-in-drafts attachment-editable-by-application-state attachment-not-readOnly]}
+   :pre-checks [app/validate-authority-in-drafts
+                foreman-must-be-uploader
+                attachment-editable-by-application-state
+                attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
   (let [attachment-type (att-type/parse-attachment-type attachmentType)]
@@ -311,11 +314,12 @@
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when-not (util/find-by-id attachment-id attachments)
                           (fail :error.attachment.id)))
+                      foreman-must-be-uploader
                       ram/ram-not-linked
                       ram/attachment-status-ok]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/default-authz-writer-roles
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           states/post-verdict-states}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
@@ -335,9 +339,10 @@
    :categories  [:attachments]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states      (states/all-states-but (conj states/terminal-states :answered))
    :pre-checks  [app/validate-authority-in-drafts
+                 foreman-must-be-uploader
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
@@ -353,9 +358,10 @@
    :categories  [:attachments]
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks  [app/validate-authority-in-drafts
+                 foreman-must-be-uploader
                  attachment-not-readOnly
                  attachment-editable-by-application-state
                  ram/ram-status-not-ok
@@ -482,6 +488,7 @@
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
+   :categories [:attachments]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
@@ -510,10 +517,11 @@
   {:parameters  [id attachmentId rotation]
    :categories  [:attachments]
    :user-roles  #{:applicant :authority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :input-validators [(partial action/number-parameters [:rotation])
                       (fn [{{rotation :rotation} :data}] (when-not (#{-90, 90, 180} rotation) (fail :error.illegal-number)))]
    :pre-checks  [(partial attachment/if-not-authority-state-must-not-be #{:sent})
+                 foreman-must-be-uploader
                  attachment-editable-by-application-state
                  validate-attachment-type
                  (mime-validator "application/pdf")
@@ -592,7 +600,6 @@
    :categories [:attachments]
    :input-validators [(partial action/non-blank-parameters [:job-id :version])]
    :user-roles #{:authority}
-   :user-authz-roles auth/default-authz-writer-roles
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (stamping/status job-id version timeout)))
@@ -645,11 +652,12 @@
   {:parameters [id attachmentId meta]
    :categories [:attachments]
    :user-roles #{:applicant :authority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation validate-group]
    :pre-checks [app/validate-authority-in-drafts
+                foreman-must-be-uploader
                 attachment-editable-by-application-state
                 attachment-not-readOnly
                 validate-operation-in-application]}
@@ -675,8 +683,10 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
+                foreman-must-be-uploader
                 attachment-not-requested-by-authority]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
@@ -709,13 +719,15 @@
   {:parameters       [id attachmentId value]
    :categories       [:attachments]
    :user-roles       #{:authority :applicant}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
                         (when-not (some (hash-set (keyword nakyvyys-value)) attachment-meta/visibilities)
                           (fail :error.invalid-nakyvyys-value)))]
    :pre-checks       [app/validate-authority-in-drafts
+                      foreman-must-be-uploader
                       (fn [{{attachment-id :attachmentId} :data app :application}]
                         (when attachment-id
-                          (when-let [{versions :versions} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
+                          (when-let [{versions :versions} (util/find-by-id attachment-id (:attachments app))]
                             (when (empty? versions)
                               (fail :error.attachment.no-versions)))))
                       access/has-attachment-auth
