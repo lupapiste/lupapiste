@@ -624,14 +624,13 @@
                                               {:name "upload"         :content uploadfile}])})
         location (get-in resp [:headers "location"])]
     (if expect-to-succeed
-      (do
+      (and
         (facts "Upload succesfully"
           (fact "Status code" (:status resp) => 302)
           (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
         ; Return the attachment id, can be new or existing attachment
-        (parse-attachment-id-from-location location)
-        )
-      (do
+        (parse-attachment-id-from-location location))
+      (and
         (facts "Upload should fail"
           (fact "Status code" (:status resp) => 302)
           (fact "location"    location => #"/lp-static/html/upload-[\d\.]+\.html?.*errorMessage=.+"))
