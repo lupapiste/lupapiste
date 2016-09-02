@@ -56,16 +56,17 @@
 
 (defn autologin [request]
   (let [[email password] (http/decode-basic-auth request)
+        canonical-email  (user/canonize-email email)
         ip (http/client-ip request)
         [ts hash] (parse-ts-hash password)]
 
     (when (and ts hash
             (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
-      (let [user (user/get-user-by-email (user/canonize-email email))
+      (let [user (user/get-user-by-email canonical-email)
             organization-ids (user/organization-ids user)]
 
-        (trace "autologin (if allowed by organization)" (user/session-summary user))
+        (when-not user (errorf "error.integration - user '%s' not found" canonical-email))
 
         (cond
           (not (:enabled user)) (throw+ {:type ::autologin :text "User not enabled"})
