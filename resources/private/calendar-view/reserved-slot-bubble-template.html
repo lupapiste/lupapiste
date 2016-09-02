@@ -51,7 +51,9 @@
               <span data-bind="ltext: 'application.calendar.reservation.participants'"></span>:
             </div>
             <div class="col-3">
-              <span data-bind="text: 'FIXME'" style="display: block"></span>
+              <!--ko foreach: $parent.reservation().participants-->
+                <span data-bind="text: $data.firstName + ' ' + $data.lastName" style="display: block"></span>
+              <!--/ko-->
             </div>
           </div>
 

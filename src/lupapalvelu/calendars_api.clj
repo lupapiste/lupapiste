@@ -34,7 +34,7 @@
    :location  (:location r)
    :applicationId (:contextId r)
    :reservedBy (:reservedBy r)
-   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to]))))})
+   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to :externalRef :clientId]))))})
 
 (defn Reservations->FrontendSlots
   [status reservations]
