@@ -64,7 +64,7 @@
     (filter (partial can-access-attachment? user application) attachments-with-auth)))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data app :application}]
-  (when (and attachment-id (not (user/authority? user)))
+  (when (and attachment-id (not (auth/application-authority? app user)))
     (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
       (when (and auth (not (auth/has-auth? {:auth auth} (:id user))))
         (fail :error.attachment.no-auth))
