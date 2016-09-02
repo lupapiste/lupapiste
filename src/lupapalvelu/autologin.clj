@@ -62,7 +62,7 @@
     (when (and ts hash
             (valid-hash? hash email ip ts (load-secret ip))
             (valid-timestamp? ts (now)))
-      (let [user (user/get-user-by-email email)
+      (let [user (user/get-user-by-email (user/canonize-email email))
             organization-ids (user/organization-ids user)]
 
         (trace "autologin (if allowed by organization)" (user/session-summary user))
