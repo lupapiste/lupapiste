@@ -10,8 +10,10 @@
     self.applications = ko.observableArray([]);
     self.selectedApplication = ko.observable();
 
-    self.bookAppointmentParams = { // for compatibility reasons this is an observable
-                                   client: ko.observable({id: lupapisteApp.models.currentUser.id }),
+    self.bookAppointmentParams = { // for compatibility reasons client is an observable
+                                   client: ko.observable({id: lupapisteApp.models.currentUser.id,
+                                                          firstName: lupapisteApp.models.currentUser.firstName,
+                                                          lastName: lupapisteApp.models.currentUser.lastName}),
                                    application: ko.observable(),
                                    authorities: ko.observableArray([]),
                                    selectedParty: ko.observable(),
@@ -23,7 +25,8 @@
       var app = self.selectedApplication();
       if (!_.isEmpty(app)) {
         self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: app.id});
-        self.bookAppointmentParams.application({id: ko.observable(app.id)});
+        self.bookAppointmentParams.application({id: ko.observable(app.id),
+                                                organizationName: ko.observable(app.organizationName)});
       }
     });
 

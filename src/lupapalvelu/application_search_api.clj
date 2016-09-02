@@ -30,7 +30,7 @@
    :parameters []
    :user-roles #{:applicant}}
   [{user :user data :data}]
-  (let [fields [:id :kind :organization :municipality
+  (let [fields [:id :kind :organization :municipality :organizationName
                 :permitType :address :primaryOperation]
         query  (search/make-query
                    (domain/applications-with-writer-authz-query-for user)
@@ -41,6 +41,7 @@
     (ok :data (map #(-> (mongo/with-id %)
                         (domain/filter-application-content-for user)
                         app-utils/with-application-kind
+                        app-utils/with-organization-name
                         (select-keys fields))
                    apps))))
 

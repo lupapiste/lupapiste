@@ -29,7 +29,6 @@
           <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
           <select class="form-input combobox tip" data-test-id="reservation-type-select"
                   data-bind="options: reservationTypes,
-                             optionsValue: function(item) { return _.get(item, 'id'); },
                              optionsText: function(item) { return _.get(item, 'name'); },
                              optionsCaption: loc('choose'),
                              value: selectedReservationType">
@@ -39,8 +38,9 @@
 
       <calendar-view params="searchConditions: { client: selectedParty,
                                                  authority: authority,
-                                                 reservationTypeId: selectedReservationType },
+                                                 reservationType: selectedReservationType },
                              view: 'applicationView',
+                             applicationModel: lupapisteApp.models.application,
                              reservationTypes: reservationTypes,
                              defaultLocation: defaultLocation">
       </calendar-view>

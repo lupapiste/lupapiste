@@ -4,7 +4,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
       calendarService = lupapisteApp.services.calendarService;
 
   self.calendarWeekdays = ko.observableArray();
-  self.reservationTypes = ko.observableArray();
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
   self.userId = ko.observable();
@@ -21,14 +20,14 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.authority = params.searchConditions.authority; // observable from parent
   self.reservationTypes = params.reservationTypes; // observable from parent
   self.client = params.searchConditions.client; // observable from parent
-  self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
+  self.reservationType = params.searchConditions.reservationType; // observable from parent
   self.defaultLocation = params.defaultLocation;
-  self.applicationModel = params.applicationModel || lupapisteApp.models.application;
+  self.applicationModel = params.applicationModel;
 
   self.view = params.view;
 
-  self.firstFullHour = calendarService.params().firstFullHour;
-  self.lastFullHour = calendarService.params().lastFullHour;
+  self.firstFullHour = LUPAPISTE.config.calendars.firstFullHour;
+  self.lastFullHour = LUPAPISTE.config.calendars.lastFullHour;
 
   var timelineTimesBuilder = function() {
     var times = [];
@@ -86,15 +85,15 @@ LUPAPISTE.CalendarViewModel = function (params) {
 
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
-      var app = self.applicationModel();
-      hub.send("calendarService::fetchApplicationCalendarSlots",
-        { clientId: _.get(self.client(), "id"),
-          authorityId: _.get(self.authority(), "id"),
-          applicationId: _.isEmpty(app) ? undefined : ko.unwrap(app.id),
-          reservationTypeId: self.reservationTypeId(),
-          week: self.startOfWeek().isoWeek(),
-          year: self.startOfWeek().year(),
-          weekObservable: self.calendarWeekdays });
+      var app = ko.unwrap(self.applicationModel);
+      var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
+                   authorityId: _.get(self.authority(), "id"),
+                   reservationTypeId: _.get(self.reservationType(), "id"),
+                   applicationId: _.isEmpty(app) ? undefined : ko.unwrap(app.id),
+                   week: self.startOfWeek().isoWeek(),
+                   year: self.startOfWeek().year(),
+                   weekObservable: self.calendarWeekdays };
+      hub.send("calendarService::fetchApplicationCalendarSlots", data);
     } else {
       hub.send("calendarService::fetchCalendarSlots",
         { calendarId: self.calendarId(),

@@ -16,7 +16,7 @@
         <label class="form-label tip" data-bind="ltext: 'book-appointment.select-authority'"></label>
         <select class="form-input combobox tip" data-test-id="attendee-select"
                 data-bind="options: authorities,
-                           optionsText: function(item) { return util.partyFullName(item); },
+                           optionsText: util.partyFullName,
                            optionsCaption: loc('choose'),
                            value: selectedParty">
         </select>
@@ -25,7 +25,6 @@
         <label class="form-label tip" data-bind="ltext: 'book-appointment.reservation-type'"></label>
         <select class="form-input combobox tip" data-test-id="reservation-type-select"
                 data-bind="options: reservationTypes,
-                           optionsValue: function(item) { return _.get(item, 'id'); },
                            optionsText: function(item) { return _.get(item, 'name'); },
                            optionsCaption: loc('choose'),
                            value: selectedReservationType">
@@ -35,8 +34,9 @@
 
     <calendar-view params="searchConditions: { client: client,
                                                authority: selectedParty,
-                                               reservationTypeId: selectedReservationType },
+                                               reservationType: selectedReservationType },
                            view: 'applicationView',
+                           applicationModel: lupapisteApp.models.application,
                            reservationTypes: reservationTypes,
                            defaultLocation: defaultLocation">
     </calendar-view>
