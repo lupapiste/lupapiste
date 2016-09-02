@@ -580,7 +580,16 @@
             attachment-by-foreman (upload-attachment foreman foreman-app-id nil true)
             attachment-by-applicant (upload-attachment applicant foreman-app-id nil true)]
         (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
-        (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
-        (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)))
+        (fact "foreman CAN upload a new version on main application"
+          (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
 
+        (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
+        (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)
+
+        (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
+          (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
+        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
+          (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
+
+    ))
     ))

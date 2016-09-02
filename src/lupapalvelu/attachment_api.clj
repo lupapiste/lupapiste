@@ -9,6 +9,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
             [schema.core :as sc]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
@@ -20,18 +21,17 @@
             [lupapalvelu.attachment.ram :as ram]
             [lupapalvelu.attachment.stamping :as stamping]
             [lupapalvelu.attachment.conversion :as conversion]
-            [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
-            [lupapalvelu.mime :as mime]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.tiedonohjaus :as tos])
   (:import [java.io File]))
 
@@ -133,6 +133,10 @@
   (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
     (when-not (util/find-by-id op-id (app/get-operations application))
       (fail :error.illegal-attachment-operation))))
+
+(defn- foreman-must-be-uploader [{:keys [user application] :as command}]
+  (when (auth/has-auth-role? application (:id user) :foreman)
+    (access/has-attachment-auth-role :uploader command)))
 
 ;;
 ;; Attachments
@@ -453,8 +457,6 @@
 ;;
 ;; Upload
 ;;
-
-(defn- foreman-must-be-uploader [command])
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
