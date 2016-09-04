@@ -1,0 +1,62 @@
+<script class="ko-template" type="x-jquery/tmpl"
+        id="info-link-template">
+
+  <!-- ko if: editorView -->
+  <table class="info-link-editor-view">
+    <tr>
+      <td><a class="link-btn"><i class="lupicon-arrows-up-down"></i></a></td>
+      <td class="spacehog">
+        <a class="link-btn"
+           target="_blank"
+           data-bind="attr: {href: link().url}">
+          <span data-bind="text: link().text"></span>
+        </a>
+      </td>
+      <td><a class="link-btn"
+             data-bind="toggleClick: editorEdit">
+          <i class="lupicon-pen"></i></a></td>
+      <td><a class="link-btn"
+             data-bind="click: remove">
+          <i class="lupicon-remove"></i></a></td>
+    </tr>
+  </table>
+  <!-- /ko -->
+  <!-- ko if: editorEdit -->
+  <form data-bind="submit: save,
+                   event: {keydown: handleKey},
+                   keydownBubble: false">
+    <table class="info-link-editor-edit">
+      <tr>
+        <td><i class="lupicon-external-link"></i></td>
+        <td class="spacehog">
+          <input type="text"
+                 data-bind="lplaceholder: 'info.edit.text',
+                            textInput: textInput,
+                            hasFocus: textFocus">
+        </td>
+        <td><button class="ghost positive"
+                    data-bind="enable: canSave,
+                               click: save">
+            <i class="lupicon-save"></i>
+          </button>
+        </td>
+        <td><button class="ghost primary"
+                    data-bind="click: cancel">
+            <i data-bind="css: {'lupicon-undo': !isTemporary(),
+                          'lupicon-remove': isTemporary}" ></i>
+        </button></td>
+      </tr>
+      <tr>
+        <td><i class="lupicon-world"></i></td>
+        <td class="spacehog" colspan="3">
+          <input type="text" data-bind="lplaceholder: 'info.edit.url',
+                                        textInput: urlInput,
+                                        hasFocus: urlFocus">
+        </td>
+      </tr>
+    </table>
+  </form>
+  <!-- /ko -->
+</script>
+
+ 

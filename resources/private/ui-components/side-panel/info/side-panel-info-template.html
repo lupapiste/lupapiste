@@ -1,0 +1,37 @@
+<script class="ko-template" type="x-jquery/tmpl"
+        id="side-panel-info-template">
+  <div class="info-panel-container">
+    <div class="header">
+      <h1 class="inline-block title" data-bind="ltext: 'info.title'"></h1>
+      <span data-bind="component: {name: 'help-toggle',
+                       params: {lhtml: 'info.help.html'}}">
+      </span>
+    </div>
+    <!-- ko if: _.size( organizationLinks() ) -->
+    <h2 data-bind="ltext: 'info.organization.links'"></h2>
+    <ul data-bind="foreach: organizationLinks">
+      <li>
+        <a class="link-btn"
+           target="_blank"
+           data-bind="attr: {href: url}">
+          <span data-bind="text: text"></span>
+          <i class="lupicon-circle-star"
+             data-bind="visible: isNew"></i>
+        </a>
+      </li>
+    </ul>
+    <!-- /ko -->
+    <!-- ko if: _.size( infoLinks() ) -->
+    <h2 data-bind="ltext: 'info.info.links'"></h2>
+    <div data-bind="foreach: infoLinks">
+      <info-link params="id: $data.id"></info-link>
+    </div>
+    <!-- /ko -->
+    <button class="ghost top-marginM"
+            data-bind="visible:lupapisteApp.services.infoService.canEdit,
+                       click: _.partial( _.ary( hub.send, 1), 'infoService::new')">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'info.add-link'"></span>
+    </button>
+  </div>
+</script>

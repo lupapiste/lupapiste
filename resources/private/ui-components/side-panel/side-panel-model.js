@@ -15,11 +15,24 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
+  self.showInfoPanel = ko.observable( false );
+
+  var panelFlags = [self.showConversationPanel,
+                    self.showNoticePanel,
+                    self.showInfoPanel];
+
+  function flagOff( obs ) {
+    return obs( false );
+  }
+
+  function closeOtherPanels( flag ) {
+    _.each( _.without( panelFlags, flag ), flagOff );
+  }
 
   self.showHelp = ko.observable(false);
 
   self.sidePanelOpen = ko.pureComputed(function() {
-    return self.showConversationPanel() || self.showNoticePanel();
+    return _.some( panelFlags, ko.unwrap );
   });
 
   self.unseenComments = ko.pureComputed(function() {
@@ -37,7 +50,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
-    self.showNoticePanel(false);
+    closeOtherPanels( self.showConversationPanel );
 
     if (self.showConversationPanel()) {
       self.sendEvent("SidePanelService", "UnseenCommentsSeen");
@@ -46,12 +59,11 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
-    self.showConversationPanel(false);
+    closeOtherPanels( self.showNoticePanel );
   };
 
   self.closeSidePanel = function() {
-    self.showNoticePanel(false);
-    self.showConversationPanel(false);
+    _.each( panelFlags, flagOff );
   };
 
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
@@ -66,4 +78,17 @@ LUPAPISTE.SidePanelModel = function(params) {
       self.toggleConversationPanel();
     }
   });
+
+  self.toggleInfoPanel = function() {
+    self.showInfoPanel( !self.showInfoPanel());
+    closeOtherPanels( self.showInfoPanel );
+  };
+
+  self.closeOnEsc = function( data, event ) {
+    console.log( "Side key:", event.which );
+    if( event.which === 27 ) {
+      self.closeSidePanel();
+    }
+  };
+
 };

@@ -290,10 +290,11 @@ i.btn-small {
 }
 
 @mixin function ($text, $hover-text, $active-text,
-                 $border-color: $gray221, $border-hover: $gray187, $border-active: $gray187 ) {
-  @include styled-input($bg: white, $hover-bg: white, $active-bg: white,
+                 $border-color: $gray221, $border-hover: $gray187, $border-active: $gray187,
+                $bg: white, $disabled-bg: $gray246 ) {
+  @include styled-input($bg: $bg, $hover-bg: $bg, $active-bg: $bg,
                         $text: $text, $hover-text: $hover-text, $active-text: $active-text,
-                        $disabled-text: $gray187, $disabled-bg: $gray246);
+                        $disabled-text: $gray187, $disabled-bg: $disabled-bg);
   border: {
     style: solid;
     width: 1px;
@@ -338,7 +339,8 @@ button.function {
 
 @include button-div-a-i-span( ghost ) {
   @include function($orange-dark, $orange-hover, $orange-active,
-                    $orange-dark, $orange-hover, $orange-active );
+                    $orange-dark, $orange-hover, $orange-active,
+                    transparent, transparent);
 
 }
 
@@ -356,6 +358,12 @@ button.ghost {
   }
  }
 
+@include button-div-a-i-span( 'ghost.positive' ) {
+  @include function($green-dark, $green-hover, $green-active,
+                    $green-dark, $green-hover, $green-active,
+                    transparent, transparent);
+
+}
 
 // Link button is a link that is laid out as button.
 // However, no background or borders.
@@ -620,6 +628,8 @@ button {
   }
 }
 
+// Not supported well on IE
+// http://caniuse.com/#feat=pointer-events
 .no-events {
    pointer-events: none;
 }

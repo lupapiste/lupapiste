@@ -28,6 +28,13 @@
                 <i class="lupicon-document-list"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
             </button>
+            <button id="open-info-side-panel"
+                    class="primary vertical caps btn-notice"
+                    data-bind="click: toggleInfoPanel,
+                               css: {active: showInfoPanel}">
+                <i class="lupicon-circle-info"></i>
+                <span class="btn-title" data-bind="lspaced: 'info.button'"></span>
+            </button>
         </div>
         <div class="content-wrapper">
               <div id="conversation-panel" data-bind="visible: showConversationPanel">
@@ -62,6 +69,7 @@
                                                        authorityNotice: sidePanelService.authorityNotice}}"></div>
               </div>
               <!-- /ko -->
+              <side-panel-info data-bind="visible: showInfoPanel"></side-panel-info>
           </div>
         </div>
       </div>

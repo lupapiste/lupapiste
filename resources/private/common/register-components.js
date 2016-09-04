@@ -128,7 +128,9 @@ jQuery(document).ready(function() {
     {name: "rollup-status-button"},
     {name: "filters"},
     {name: "suti-display"},
-    {name: "change-email"}
+    {name: "change-email"},
+    {name: "side-panel-info"},
+    {name: "info-link"}
 ];
 
   ko.registerLupapisteComponents(components);
