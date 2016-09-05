@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [sade.env :as env]
             [sade.util :as util]
-            [sade.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail! now]]
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -39,17 +39,16 @@
    (let [links (:info-links app)]
       (take-first (fn [link] (= link-id (:id link))) (info-links app) nil)))
 
+(defn update-info-links! [app links]
+   (mongo/update-by-id :applications (:id app) {$set {:info-links links}}))
+
 (defn add-info-link! [app text url]
    (let [links (info-links app)
          new-id (free-link-id links)
          foo (println new-id)
-         link-node {:linkId new-id :text text :url url}]
-      (mongo/update-by-id :applications (:id app) 
-         {$set {:info-links (cons link-node links)}})
+         link-node {:linkId new-id :text text :url url :modified (now)}]
+      (update-info-links! app (cons link-node links))
       new-id))
-
-(defn update-info-links! [app links]
-   (mongo/update-by-id :applications (:id app) {$set {:info-links links}}))
 
 (defn delete-info-link! [app link-id]
    (update-info-links! app
@@ -57,7 +56,7 @@
 
 (defn update-info-link! [app link-id text url]
    (let [links (info-links app)
-         link-node {:linkId link-id :text text :url url}
+         link-node {:linkId link-id :text text :url url :modified (now)}
          new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
       (if (= links new-links)
          false
@@ -67,13 +66,9 @@
 
 (defn reorder-info-links! [app link-ids]
    (let [links (info-links app)]
+      ;; depending on UI needs could just sort the intersection
       (if (= (set link-ids) (set (map :linkId links)))
-         (do
-            (update-info-links! app
-               (order-links links link-ids))
-            true)
+         (do (update-info-links! app (order-links links link-ids))
+             true)
          false)))
-         
-; test app
-; (defn foo [] (domain/get-application-no-access-checking "LP-753-2016-90001"))
 
