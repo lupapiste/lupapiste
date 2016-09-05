@@ -17,8 +17,6 @@
 
 
 ;; Action category: documents & tasks
-(action/register-action-category! :documents)
-(action/register-action-category! :tasks)
 
 (defn- build-document-params [{application-id :id} {document-id :id}]
   {:id  application-id

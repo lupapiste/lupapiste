@@ -425,9 +425,6 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
-(defonce categories (atom #{}))
-(defn register-action-category! [c] (swap! categories conj c))
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -437,7 +434,7 @@
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    ; Set of categories for use of allowed-actions-for-cateory
-   (sc/optional-key :categories)   (sc/pred (fn [x] (and (set? x) (every? @categories x))))
+   (sc/optional-key :categories)   #{sc/Keyword}
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords

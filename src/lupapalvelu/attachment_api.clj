@@ -36,7 +36,6 @@
   (:import [java.io File]))
 
 ;; Action category: attachments
-(action/register-action-category! :attachments)
 
 (defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
   {:id           application-id
