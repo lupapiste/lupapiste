@@ -7,7 +7,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   var service = lupapisteApp.services.attachmentsService;
 
-  // Attachemnt data fields that are mapped as observables
+  // Attachment data fields that are mapped as observables
   var observableFields = ["notNeeded", "contents", "scale", "size", "type", "op", "groupType"];
 
   self.authModel = authModel;

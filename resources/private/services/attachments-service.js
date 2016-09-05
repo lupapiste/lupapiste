@@ -257,7 +257,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
     forceVisibleIds.push(attachmentId);
-    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": !!flag}, hubParams);
+    self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": Boolean(flag)}, hubParams);
   };
 
   self.setVisibility = function(attachmentId, visibility, hubParams) {
