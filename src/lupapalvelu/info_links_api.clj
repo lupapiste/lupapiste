@@ -14,24 +14,45 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
-(defn- application-link [lang role full-path]
-  (str (env/value :host) "/app/" lang "/" (user/applicationpage-for role) "#!" full-path))
-
 
 ;;
 ;; API
 ;;
 
-;; FIXME: saako käyttäjä päivittää itse?
+(defcommand info-link-delete
+  {:description "Remove an application-specific info-link"
+   :user-roles #{:authority :applicant}
+   :parameters [id linkId]
+   :input-validators [(partial action/non-blank-parameters [:linkId])]
+   :org-authz-roles #{:authority}
+   :states states/all-states}
+  [command]
+  (ok (info-links/delete-info-link! (:application command) linkId)))
+
+(defcommand info-link-reorder
+   {:description "Reorder application-specific info-links"
+   :user-roles #{:authority :applicant}
+   :parameters [id linkIds]
+   :input-validators [(partial action/non-blank-parameters [:linkIds])]
+   :org-authz-roles #{:authority}
+   :states states/all-states}
+  [command]
+  (ok (info-links/reorder-info-links! (:application command) linkIds)))
 
 (defcommand info-link-upsert
   {:description "Add or update application-specific info-link"
    :user-roles #{:authority :applicant}
+   :parameters [id text url linkId] ; linkId optional
+   :input-validators [(partial action/non-blank-parameters [:text]) 
+                      (partial action/non-blank-parameters [:url])] 
    :org-authz-roles #{:authority}
    :states      states/all-states}
   [command]
-  (println "info-link-upsert command " command)
-  (ok "dummy"))
+  (let [app (:application command)]
+     (ok
+        (if linkId
+           (info-links/update-info-link! app linkId text url)
+           (info-links/add-info-link! app text url)))))
 
 (defquery info-links
   {:description "Return a list of application-specific info-links"
@@ -39,6 +60,6 @@
    :user-roles #{:authority :applicant}}
   [command]
   (let [app (:application command)]
-     (ok (info-links/app-info-links app))))
+     (ok (info-links/info-links app))))
 
 

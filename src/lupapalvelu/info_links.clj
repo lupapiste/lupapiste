@@ -15,6 +15,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
+;; stub
+(defn last-seen-date [app user]
+   42)
+
 (defn- take-first [pred lst def]
    (loop [lst lst]
       (cond
@@ -31,27 +35,22 @@
 (defn info-links [app]
    (or (:info-links app) []))
 
-(defn last-seen-date [app user]
-   42)
-
 (defn get-info-link [app link-id]
-   (println "Looking for info link " link-id " from app " (:id app))
    (let [links (:info-links app)]
-      (take-first (fn [link] (= link-id (:id link))) links nil)))
+      (take-first (fn [link] (= link-id (:id link))) (info-links app) nil)))
 
 (defn add-info-link! [app text url]
    (let [links (info-links app)
          new-id (free-link-id links)
          foo (println new-id)
          link-node {:linkId new-id :text text :url url}]
-      (println "Lisätään hakemukselle" (:id app) "linkki" link-node)
       (mongo/update-by-id :applications (:id app) 
          {$set {:info-links (cons link-node links)}})
       new-id))
 
 (defn update-info-links! [app links]
    (mongo/update-by-id :applications (:id app) {$set {:info-links links}}))
-   
+
 (defn delete-info-link! [app link-id]
    (update-info-links! app
       (remove (fn [x] (= link-id (:linkId x))) (info-links app))))
@@ -75,10 +74,6 @@
             true)
          false)))
          
-(defn app-info-links [app]
-  (or (:info-links app)
-      []))
-
 ; test app
 ; (defn foo [] (domain/get-application-no-access-checking "LP-753-2016-90001"))
 
