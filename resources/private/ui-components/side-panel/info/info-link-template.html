@@ -2,7 +2,17 @@
         id="info-link-template">
 
   <!-- ko if: editorView -->
-  <table class="info-link-editor-view">
+  <table class="info-link-editor-view"
+         data-bind="dragZone: { name: 'reorder-links',
+                    dragStart: dragStart,
+                    dragEnd: dragEnd
+                    },
+                    dragEvents: {
+                    accepts: 'reorder-links',
+                    dragOver: reorder,
+                    data: $data.link()},
+                    css: {dragging: dragging,
+                          hidden: hidden}">
     <tr>
       <td><a class="link-btn"><i class="lupicon-arrows-up-down"></i></a></td>
       <td class="spacehog">

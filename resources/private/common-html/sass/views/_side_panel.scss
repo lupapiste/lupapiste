@@ -329,6 +329,14 @@ table.info-link-editor-view {
   @include info-table( transparent )
 }
 
+table.info-link-editor-view + .dragging {
+  background-color: $orange-light;
+}
+
+table.info-link-editor-view + .hidden {
+  visibility: hidden;
+};
+
 table.info-link-editor-edit {
   @include info-table( white );
   margin-bottom: 2px;

@@ -85,11 +85,13 @@ LUPAPISTE.InfoService = function() {
     }
   }
 
-  var appId = null;
+  var appId = "This is not a real application id.";
 
   ko.computed( function() {
-    appId = lupapisteApp.models.application.id();
-    // Todo: load links
+    if( lupapisteApp.models.application.id() !== appId ) {
+      appId = lupapisteApp.models.application.id();
+     fetchInfoLinks( {star: true});
+    }
   });
 
   self.canEdit = ko.pureComputed( function() {
@@ -131,12 +133,6 @@ LUPAPISTE.InfoService = function() {
   hubscribe( "delete", function( data ) {
     infoLinks.remove( self.infoLink( data.id ));
     // Todo: ajax delete
-  });
-
-  ko.computed( function() {
-    if( lupapisteApp.models.application.id() ) {
-      fetchInfoLinks( {star: true});
-    }
   });
 
 };

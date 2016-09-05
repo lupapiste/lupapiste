@@ -107,4 +107,36 @@ LUPAPISTE.InfoLinkModel = function( params ) {
 
                            }
                          });
+
+  // Drag'n'drop
+
+  self.dragging = ko.observable();
+
+  self.dragStart = function( item ) {
+    item.dragging( true );
+  };
+
+  self.dragEnd = function( item ) {
+    item.dragging( false );
+  };
+
+  self.reorder = function( event, dragData, zoneData ) {
+    function isTarget( targetId, link ) {
+        return link().id === targetId;
+    }
+    var dragId = dragData.link().id;
+
+    var zoneId = zoneData.id;
+    if( dragId !== zoneId ) {
+      var links = service.infoLinks();
+      var drag = _.find( links, _.partial( isTarget, dragId ));
+      _.remove( links, _.partial( isTarget, dragId ) );
+      links.splice( _.findIndex( links, _.partial( isTarget, zoneId)),
+                    0, drag );
+      service.infoLinks( links );
+    }
+  };
+
+
+
 };

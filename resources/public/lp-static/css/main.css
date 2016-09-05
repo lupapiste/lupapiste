@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1472998461816');
+@import url('main-blessed1.css?z=1473094564143');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 .col--vertical label {
@@ -8184,6 +8184,16 @@ table.info-link-editor-view tr:hover:nth-child(even) {
 }
 
 /* line 332, ../../../private/common-html/sass/views/_side_panel.scss */
+table.info-link-editor-view + .dragging {
+  background-color: #fbc732;
+}
+
+/* line 336, ../../../private/common-html/sass/views/_side_panel.scss */
+table.info-link-editor-view + .hidden {
+  visibility: hidden;
+}
+
+/* line 340, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit {
   border: none;
   margin-bottom: 0;
@@ -8203,16 +8213,16 @@ table.info-link-editor-edit tr:hover {
 table.info-link-editor-edit tr:hover:nth-child(even) {
   background: white;
 }
-/* line 335, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 343, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:nth-child(odd) {
   border-bottom: 1px solid #dddddd;
 }
-/* line 338, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 346, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit td {
   padding-left: 5px;
   padding-right: 5px;
 }
-/* line 344, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 352, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit input {
   box-sizing: border-box;
   font-size: 16px;
@@ -8221,7 +8231,7 @@ table.info-link-editor-edit input {
   padding-bottom: 2px;
   padding-top: 2px;
 }
-/* line 354, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 362, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit button.ghost {
   border: none;
   padding-left: 4px;
