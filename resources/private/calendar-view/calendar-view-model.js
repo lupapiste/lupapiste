@@ -9,6 +9,8 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.userId = ko.observable();
   self.view = ko.observable();
 
+  self.currentRole = params.currentRole;
+
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   if (_.get(params, "searchConditions.calendarId")) {
