@@ -24,12 +24,18 @@ Sonja inits applications
   Sonja creates an application and invites foreman
   [Teardown]  Logout
 
-Foreman fills personal information and submits the first foreman application
+Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
 
+Foreman can not fill applicant information
+  # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
+  Xpath Should Match X Times  //section[@data-doc-type='hakija-tj']//input[not(@readonly)]  0
+
+Foreman selects application type and submits the first foreman application
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
+
   Submit application
 
 Foreman cannot see related projects
