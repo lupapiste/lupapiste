@@ -35,6 +35,18 @@
             [lupapalvelu.tiedonohjaus :as tos])
   (:import [java.io File]))
 
+;; Action category: attachments
+(action/register-action-category! :attachments)
+
+(defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
+  {:id           application-id
+   :attachmentId attachment-id
+   :fileId       latest-version})
+
+(defmethod action/allowed-actions-for-category :attachments
+  [command]
+  (action/allowed-actions-for-collection :attachments build-attachment-query-params command))
+
 ;; Validators and pre-checks
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data application :application}]
@@ -155,7 +167,7 @@
 (defquery attachment
   {:description "Get single attachment"
    :parameters [id attachmentId]
-   :categories [:attachments]
+   :categories #{:attachments}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
@@ -212,7 +224,7 @@
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
@@ -238,7 +250,7 @@
 
 (defquery ram-linked-attachments
   {:parameters [id attachmentId]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
@@ -268,7 +280,7 @@
 (defcommand approve-attachment
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id fileId]
-   :categories  [:attachments]
+   :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
@@ -279,7 +291,7 @@
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id fileId]
-   :categories  [:attachments]
+   :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
    :user-roles #{:authority}
    :states      (states/all-states-but (conj states/terminal-states :answered :sent))
@@ -310,7 +322,7 @@
 (defcommand create-ram-attachment
   {:description      "Create RAM attachment based on existing attachment"
    :parameters       [id attachmentId]
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]
                         (when-not (util/find-by-id attachment-id attachments)
                           (fail :error.attachment.id)))
@@ -336,7 +348,7 @@
   delete comments. Non-atomic operation: first deletes files, then
   updates document."
    :parameters  [id attachmentId]
-   :categories  [:attachments]
+   :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
@@ -355,7 +367,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId originalFileId]
-   :categories  [:attachments]
+   :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
@@ -379,7 +391,7 @@
 
 (defraw "preview-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
@@ -389,7 +401,7 @@
 
 (defraw "view-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
@@ -399,7 +411,7 @@
 
 (defraw "download-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
@@ -409,7 +421,7 @@
 
 (defraw "latest-attachment-version"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :optional-parameters [:download]
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:applicant :authority :oirAuthority}
@@ -420,7 +432,7 @@
 
 (defraw "download-bulletin-attachment"
   {:parameters       [attachment-id]  ; Note that this is actually file id
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles       #{:anonymous}}
   [_]
@@ -488,7 +500,7 @@
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
-   :categories [:attachments]
+   :categories #{:attachments}
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
@@ -515,7 +527,7 @@
 
 (defcommand rotate-pdf
   {:parameters  [id attachmentId rotation]
-   :categories  [:attachments]
+   :categories  #{:attachments}
    :user-roles  #{:applicant :authority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :input-validators [(partial action/number-parameters [:rotation])
@@ -558,7 +570,7 @@
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin page extraInfo includeBuildings kuntalupatunnus section lang]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])
                       (partial action/number-parameters [:xMargin :yMargin])
                       (partial action/non-blank-parameters [:page])]
@@ -597,7 +609,7 @@
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:job-id :version])]
    :user-roles #{:authority}
    :description "Returns state of stamping job"}
@@ -607,7 +619,7 @@
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:password])
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states     (states/all-application-states-but states/terminal-states)
@@ -650,7 +662,7 @@
 
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
-   :categories [:attachments]
+   :categories #{:attachments}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
@@ -668,7 +680,7 @@
 
 (defcommand set-attachment-contents
   {:parameters [id attachmentId contents]
-   :categories [:attachments]
+   :categories #{:attachments}
    :user-roles #{:authority}
    :org-authz-roles #{:archivist}
    :states     states/all-application-states
@@ -679,7 +691,7 @@
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
-   :categories [:attachments]
+   :categories #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
@@ -694,7 +706,7 @@
 
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
-   :categories [:attachments]
+   :categories #{:attachments}
    :user-roles #{:authority}
    :states     states/all-but-draft-or-terminal
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
@@ -717,7 +729,7 @@
 
 (defcommand set-attachment-visibility
   {:parameters       [id attachmentId value]
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :user-roles       #{:authority :applicant}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(fn [{{nakyvyys-value :value} :data}]
@@ -740,7 +752,7 @@
 
 (defcommand convert-to-pdfa
   {:parameters       [id attachmentId]
-   :categories       [:attachments]
+   :categories       #{:attachments}
    :user-roles       #{:authority}
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
    :pre-checks       [(fn [{{attachment-id :attachmentId} :data {:keys [attachments]} :application}]

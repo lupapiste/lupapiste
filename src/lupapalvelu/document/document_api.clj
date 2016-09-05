@@ -16,6 +16,32 @@
             [lupapalvelu.document.tools :as tools]))
 
 
+;; Action category: documents & tasks
+(action/register-action-category! :documents)
+(action/register-action-category! :tasks)
+
+(defn- build-document-params [{application-id :id} {document-id :id}]
+  {:id  application-id
+   :doc document-id
+   :docId document-id
+   :documentId document-id
+   :collection "documents"})
+
+(defn- build-task-params [{application-id :id} {document-id :id}]
+  {:id  application-id
+   :doc document-id
+   :docId document-id
+   :documentId document-id
+   :collection "tasks"})
+
+(defmethod action/allowed-actions-for-category :documents
+  [command]
+  (action/allowed-actions-for-collection :documents build-document-params command))
+
+(defmethod action/allowed-actions-for-category :tasks
+  [command]
+  (action/allowed-actions-for-collection :tasks build-task-params command))
+
 (def update-doc-states #{:draft :open :submitted :complementNeeded})
 
 (def approve-doc-states #{:open :submitted :complementNeeded})
@@ -47,6 +73,7 @@
 
 (defquery document
   {:parameters       [:id doc collection]
+   :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
@@ -63,6 +90,7 @@
 
 (defcommand create-doc
   {:parameters [:id :schemaName]
+   :categories  #{:documents}
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
@@ -80,12 +108,13 @@
 
 (defcommand remove-doc
   {:parameters  [id docId]
+   :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
-    :user-roles #{:applicant :authority}
-    :states     #{:draft :answered :open :submitted :complementNeeded}
-    :pre-checks [application/validate-authority-in-drafts
-                 validate-user-authz-by-doc-id
-                 remove-doc-validator]}
+   :user-roles #{:applicant :authority}
+   :states     #{:draft :answered :open :submitted :complementNeeded}
+   :pre-checks [application/validate-authority-in-drafts
+                validate-user-authz-by-doc-id
+                remove-doc-validator]}
   [{:keys [application created] :as command}]
   (if-let [document (domain/get-document-by-id application docId)]
     (do
@@ -95,6 +124,7 @@
 
 (defcommand update-doc
   {:parameters [id doc updates]
+   :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     update-doc-states
@@ -107,6 +137,7 @@
 
 (defcommand update-construction-time-doc
   {:parameters [id doc updates]
+   :categories #{:documents}
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
    :input-validators [(partial action/non-blank-parameters [:id :doc])
@@ -119,6 +150,7 @@
 
 (defcommand update-task
   {:parameters [id doc updates]
+   :categories #{:tasks}
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but (conj states/terminal-states :sent))
    :input-validators [(partial action/non-blank-parameters [:id :doc])
@@ -130,6 +162,7 @@
 
 (defcommand remove-document-data
   {:parameters       [id doc path collection]
+   :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           #{:draft :answered :open :submitted :complementNeeded}
@@ -141,6 +174,7 @@
 
 (defcommand remove-construction-time-document-data
   {:parameters       [id doc path collection]
+   :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
    :states           states/post-verdict-states
    :input-validators [doc-persistence/validate-collection]
@@ -156,6 +190,7 @@
 
 (defquery validate-doc
   {:parameters       [:id doc collection]
+   :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
    :states           states/all-states
    :input-validators [doc-persistence/validate-collection]
@@ -181,6 +216,7 @@
 
 (defcommand approve-doc
   {:parameters [:id :doc :path :collection]
+   :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
@@ -190,6 +226,7 @@
 
 (defcommand approve-construction-time-doc
   {:parameters [:id :doc :path :collection]
+   :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
@@ -200,6 +237,7 @@
 
 (defcommand reject-doc
   {:parameters [:id :doc :path :collection]
+   :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
@@ -209,6 +247,7 @@
 
 (defcommand reject-construction-time-doc
   {:parameters [:id :doc :path :collection]
+   :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
@@ -223,6 +262,7 @@
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
+   :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
@@ -235,6 +275,7 @@
 
 (defcommand set-current-user-to-document
   {:parameters [id documentId path]
+   :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
@@ -247,6 +288,7 @@
 
 (defcommand set-company-to-document
   {:parameters [id documentId companyId path]
+   :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     update-doc-states
