@@ -279,7 +279,7 @@
     (reduce strip-field command [:password :newPassword :oldPassword])))
 
 (defn get-meta [name]
-  ((keyword name) (get-actions)))
+  (get @actions (keyword name)))
 
 (defn executed
   ([command] (executed (:action command) command))
@@ -548,13 +548,13 @@
 
 (defn foreach-action [web user application data]
   (map
-   #(let [{type :type categories :categories} (get-meta %)]
-      (assoc
-        (action % :type type :data data :user user)
-        :application application
-        :web web
-        :categories categories))
-    (remove nil? (keys @actions))))
+    #(when-let [{type :type categories :categories} (get-meta %)]
+       (assoc
+         (action % :type type :data data :user user)
+         :application application
+         :web web
+         :categories categories))
+   (remove nil? (keys @actions))))
 
 (defn- validated [command]
   {(:action command) (validate command)})
