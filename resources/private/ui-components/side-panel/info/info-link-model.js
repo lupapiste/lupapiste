@@ -12,6 +12,10 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     return service.isTemporaryId( self.link().id );
   });
 
+  self.canEdit = self.disposedPureComputed( function() {
+    return service.canEdit();
+  });
+
   var editing = ko.observable( self.isTemporary());
 
   self.textFocus = ko.observable( editing());
@@ -65,18 +69,24 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     }
   };
 
+  self.addHubListener( "side-panel-esc-pressed",
+                       function( data ) {
+                         if( self.editorEdit()
+                             && (self.textFocus() || self.urlFocus())) {
+                           self.cancel();
+                           data.canClose(false);
+                         }
+                       });
+
+  self.addHubListener( "side-panel-closing", self.cancel );
+
   self.handleKey = function( data, event ) {
-    console.log( "handleKey")
-    switch( event.which ) {
-    case 9:  // Tab
+    if( event.which === 9 ) {
+      // Tab switches between text fields.
       self.textFocus(!self.textFocus());
       // textFocus value has now changed.
       self.urlFocus( !self.textFocus());
-      break;
-    case 27:  // Esc
-      self.cancel();
-      break;
-    default:
+    } else {
       return true;
     }
   };

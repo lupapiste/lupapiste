@@ -10,6 +10,8 @@
            target="_blank"
            data-bind="attr: {href: link().url}">
           <span data-bind="text: link().text"></span>
+          <i class="lupicon-circle-star"
+             data-bind="visible: link().isNew"></i>
         </a>
       </td>
       <td><a class="link-btn"
@@ -23,8 +25,7 @@
   <!-- /ko -->
   <!-- ko if: editorEdit -->
   <form data-bind="submit: save,
-                   event: {keydown: handleKey},
-                   keydownBubble: false">
+                   event: {keydown: handleKey}">
     <table class="info-link-editor-edit">
       <tr>
         <td><i class="lupicon-external-link"></i></td>
@@ -57,6 +58,16 @@
     </table>
   </form>
   <!-- /ko -->
+  <!-- ko ifnot: canEdit -->
+  <div>
+    <a class="link-btn"
+       data-bind="attr: {href: link().url}">
+      <span data-bind="text: link().text"></span>
+      <i class="lupicon-circle-star"
+         data-bind="visible: link().isNew"></i>
+    </a>
+  </div>
+  <!-- /ko -->  
 </script>
 
  

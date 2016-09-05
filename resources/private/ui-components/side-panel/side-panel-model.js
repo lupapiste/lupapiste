@@ -63,6 +63,7 @@ LUPAPISTE.SidePanelModel = function(params) {
   };
 
   self.closeSidePanel = function() {
+    hub.send( "side-panel-closing");
     _.each( panelFlags, flagOff );
   };
 
@@ -84,11 +85,13 @@ LUPAPISTE.SidePanelModel = function(params) {
     closeOtherPanels( self.showInfoPanel );
   };
 
-  self.closeOnEsc = function( data, event ) {
-    console.log( "Side key:", event.which );
-    if( event.which === 27 ) {
+  self.closeOnEsc = function() {
+    var obj = {canClose: ko.observable( true )};
+    hub.send( "side-panel-esc-pressed", obj );
+    if( obj.canClose() ) {
       self.closeSidePanel();
     }
   };
+
 
 };

@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="side-panel-template">
       <!-- dummy div for catching keypress events -->
-      <div data-bind="visible: false, documentEvent: {keypress: closeSidePanel, key: 27}"></div>
+      <div data-bind="visible: false, documentEvent: {keypress: closeOnEsc, key: 27}"></div>
       <!-- ko if: enableSidePanel -->
       <div id="side-panel" data-bind="visible: showSidePanel, transition: sidePanelOpen, class: 'show-side-panel'">
         <div class="buttons">
