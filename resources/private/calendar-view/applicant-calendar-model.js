@@ -5,20 +5,17 @@ LUPAPISTE.ApplicantCalendarModel = function () {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.authorities = ko.observableArray([]);
-  self.reservationTypes = ko.observableArray([]);
-  self.defaultLocation = ko.observable();
-    self.bookAppointmentParams = { // for compatibility reasons client is an observable
-                                   client: ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
-                                                           lastName: lupapisteApp.models.currentUser.lastName(),
-                                                           id: lupapisteApp.models.currentUser.id(),
-                                                           partyType: [] }),
-                                   application: ko.observable(),
-                                   authorities: ko.observableArray([]),
-                                   selectedParty: ko.observable(),
-                                   reservationTypes: ko.observableArray([]),
-                                   selectedReservationType: ko.observable(),
-                                   defaultLocation: ko.observable() };
+  self.bookAppointmentParams = { // for compatibility reasons client is an observable
+                                 client: ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
+                                                         lastName: lupapisteApp.models.currentUser.lastName(),
+                                                         id: lupapisteApp.models.currentUser.id(),
+                                                         partyType: [] }),
+                                 application: ko.observable(),
+                                 authorities: ko.observableArray([]),
+                                 selectedParty: ko.observable(),
+                                 reservationTypes: ko.observableArray([]),
+                                 selectedReservationType: ko.observable(),
+                                 defaultLocation: ko.observable() };
 
   self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
