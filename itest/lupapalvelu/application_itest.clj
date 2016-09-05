@@ -8,12 +8,10 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-api :as app]
             [lupapalvelu.application :as a]
-            [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
-
-(testable-privates lupapalvelu.actions-api foreach-action)
 
 (apply-remote-minimal)
 
@@ -522,13 +520,16 @@
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
                          :change-application-state :change-application-state-targets}]
-    app => map?
-    (doseq [command (foreach-action {} user {} app)
-            :let [action (keyword (:action command))
-                  result (a/validate-authority-in-drafts command)]]
-      (fact {:midje/description (name action)}
-        (when (denied-actions action)
-          result => (some-fn nil? unauthorized?))))))
+    (fact "meta"
+      app => map?
+      user => map?)
+
+    (doseq [command (action/foreach-action {} user {} app)
+          :let [action (keyword (:action command))
+                result (a/validate-authority-in-drafts command)]]
+    (fact {:midje/description (name action)}
+     (when (denied-actions action)
+       result => (some-fn nil? unauthorized?))))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]
