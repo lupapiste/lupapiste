@@ -169,14 +169,36 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.nextAttachmentId = function(attachmentId) {
-    var index = _(self.filteredAttachments()).map(ko.unwrap).findIndex(["id", attachmentId]);
-    return util.getIn(self.filteredAttachments()[index+1], ["id"]);
+  function orderByTags(attachments, tagGroups) {
+    if (_.isEmpty(tagGroups)) {
+      return attachments;
+    } else {
+      return _(tagGroups)
+        .map(function(group) {
+          var groupAttachments = _.filter(attachments, function(att) {
+            return _.includes(att().tags, _.first(group));
+          });
+          return orderByTags(groupAttachments, _.tail(group));
+        })
+        .flatten()
+        .value();
+    }
+  }
+
+  var orderedFilteredAttachments = ko.pureComputed(function() {
+    return orderByTags(self.filteredAttachments(), self.tagGroups());
+  });
+
+  self.nextFilteredAttachmentId = function(attachmentId) {
+    var attachments = orderedFilteredAttachments();
+    var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
+    return util.getIn(attachments[index+1], ["id"]);
   };
 
-  self.previousAttachmentId = function(attachmentId) {
-    var index = _(self.filteredAttachments()).map(ko.unwrap).findIndex(["id", attachmentId]);
-    return util.getIn(self.filteredAttachments()[index-1], ["id"]);
+  self.previousFilteredAttachmentId = function(attachmentId) {
+    var attachments = orderedFilteredAttachments();
+    var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
+    return util.getIn(attachments, [index-1, "id"]);
   };
 
   self.queryGroupTypes = function() {

@@ -50,8 +50,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   // Navigation
   self.backToApplication = partialWithTrackClick("backToApplication", lupapisteApp.models.application.open, "attachments");
 
-  self.nextAttachmentId = service.nextAttachmentId(self.id);
-  self.previousAttachmentId = service.previousAttachmentId(self.id);
+  self.nextAttachmentId = service.nextFilteredAttachmentId(self.id);
+  self.previousAttachmentId = service.previousFilteredAttachmentId(self.id);
 
   self.openNextAttachment = partialWithTrackClick("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
   self.openPreviousAttachment = partialWithTrackClick("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );
