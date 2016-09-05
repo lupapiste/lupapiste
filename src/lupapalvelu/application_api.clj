@@ -14,7 +14,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -53,15 +52,13 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
-  [{:keys [application user]}]
+  [{:keys [application user] :as command}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (->> (att-type/get-attachment-types-for-application application)
-                                                              (att-type/->grouped-array)))]
-      (ok :application (app/post-process-app app user)
-          :authorities (if (usr/authority? user)
-                         (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users app "authority"))
-                         [])
-          :permitSubtypes (app/resolve-valid-subtypes app)))
+    (ok :application (app/post-process-app command)
+        :authorities (if (usr/authority? user)
+                       (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users application "authority"))
+                       [])
+        :permitSubtypes (app/resolve-valid-subtypes application))
     (fail :error.not-found)))
 
 (defquery application-authorities
