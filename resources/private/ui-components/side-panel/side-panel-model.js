@@ -16,6 +16,7 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
   self.showInfoPanel = ko.observable( false );
+  self.showStar = lupapisteApp.services.infoService.showStar;
 
   var panelFlags = [self.showConversationPanel,
                     self.showNoticePanel,
@@ -24,6 +25,12 @@ LUPAPISTE.SidePanelModel = function(params) {
   function flagOff( obs ) {
     return obs( false );
   }
+
+  self.disposedComputed( function() {
+    if( self.showInfoPanel()) {
+      self.showStar( false );
+    }
+  });
 
   function closeOtherPanels( flag ) {
     _.each( _.without( panelFlags, flag ), flagOff );

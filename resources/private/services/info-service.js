@@ -9,6 +9,9 @@ LUPAPISTE.InfoService = function() {
     return _.startsWith( id, tmpPrefix );
   };
 
+  self.showStar = ko.observable();
+
+
   // Todo: ajax query
   self.organizationLinks = ko.pureComputed( function() {
     return _.map( ko.mapping.toJS( lupapisteApp.models.application.organizationLinks),
@@ -35,7 +38,8 @@ LUPAPISTE.InfoService = function() {
   // Options:
   // [markSeen]: mark-seen command after query (default falsey)
   // [retainEditing]: retain editing states (default falsey)
-  // [originator]: id of the event orignator
+  // [originator]: id of the event originator
+  // [star]: if true then showStar observable is updated (default falsey)
   function fetchInfoLinks( options ) {
     options = options || {};
     var tmpLinks = [];
@@ -75,6 +79,9 @@ LUPAPISTE.InfoService = function() {
     }));
     if( options.markSeen ) {
       // Todo: ajax query
+    }
+    if( options.star) {
+      self.showStar( _.some( infoLinks(), _.ary( _.partialRight( util.getIn, ["isNew"]), 1)));
     }
   }
 
@@ -126,6 +133,10 @@ LUPAPISTE.InfoService = function() {
     // Todo: ajax delete
   });
 
-
+  ko.computed( function() {
+    if( lupapisteApp.models.application.id() ) {
+      fetchInfoLinks( {star: true});
+    }
+  });
 
 };

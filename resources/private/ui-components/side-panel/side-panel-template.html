@@ -29,10 +29,13 @@
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
             </button>
             <button id="open-info-side-panel"
-                    class="primary vertical caps btn-notice"
+                    class="vertical caps btn-notice"
                     data-bind="click: toggleInfoPanel,
-                               css: {active: showInfoPanel}">
-                <i class="lupicon-circle-info"></i>
+                               css: {active: showInfoPanel,
+                               primary: !showStar(),
+                               positive: showStar}">
+              <i data-bind="css: {'lupicon-circle-info': !showStar(),
+                            'lupicon-circle-star': showStar}"></i>
                 <span class="btn-title" data-bind="lspaced: 'info.button'"></span>
             </button>
         </div>
