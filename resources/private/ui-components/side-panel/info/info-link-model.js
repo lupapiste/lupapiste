@@ -16,12 +16,15 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     return service.canEdit();
   });
 
-  var editing = ko.observable( self.isTemporary());
+  var editing = ko.observable( self.isTemporary() || Boolean(self.link().editing));
 
   self.textFocus = ko.observable( editing());
-  self.urlFocus = ko.observable();
-  self.textInput = ko.observable();
-  self.urlInput = ko.observable();
+  self.urlFocus  = ko.observable();
+
+  self.textInput = ko.observable(_.get(self.link().editing, "text"));
+  self.urlInput  = ko.observable(_.get(self.link().editing, "url"));
+
+  delete self.link().editing;
 
   self.editorEdit = self.disposedComputed( {
     read: function() {
@@ -35,6 +38,7 @@ LUPAPISTE.InfoLinkModel = function( params ) {
         self.urlFocus( false );
       }
       editing( flag );
+      self.link().editing = flag;
     }
   });
 
@@ -90,4 +94,17 @@ LUPAPISTE.InfoLinkModel = function( params ) {
       return true;
     }
   };
+
+  self.addEventListener( service.serviceName,
+                         "save-edit-state",
+                         function( data ) {
+                           var id = self.link().id;
+                           var obj = _.get( data.states, id, {});
+                           if( self.editorEdit() ) {
+                             data.states[id] = _.set( obj, "editing",
+                                                      {text: self.textInput(),
+                                                       url: self.urlInput()});
+
+                           }
+                         });
 };

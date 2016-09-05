@@ -9,6 +9,7 @@ LUPAPISTE.InfoService = function() {
     return _.startsWith( id, tmpPrefix );
   };
 
+  // Todo: ajax query
   self.organizationLinks = ko.pureComputed( function() {
     return _.map( ko.mapping.toJS( lupapisteApp.models.application.organizationLinks),
                   function( link ) {
@@ -30,6 +31,52 @@ LUPAPISTE.InfoService = function() {
       return obs().id === linkId;
     });
   };
+
+  // Options:
+  // [markSeen]: mark-seen command after query (default falsey)
+  // [retainEditing]: retain editing states (default falsey)
+  // [originator]: id of the event orignator
+  function fetchInfoLinks( options ) {
+    options = options || {};
+    var tmpLinks = [];
+    var oldStates = _.reduce( infoLinks(),
+                              function( acc, link ) {
+                                if( self.isTemporaryId( link().id)) {
+                                  tmpLinks.push( {id: link().id});
+                                }
+                                return _.set( acc, link().id, {isNew: link().isNew});
+                              }, {});
+
+    if( options.retainEditing) {
+      hub.send( self.serviceName + "::save-edit-state", {states: oldStates});
+    }
+
+    delete oldStates[options.originator];
+
+    // Todo: ajax query
+
+    var cleanedOldies = _.filter(ko.mapping.toJS(infoLinks),
+                                 _.flow( _.ary(_.partialRight( _.get, "id"), 1),
+                                         _.negate(self.isTemporaryId) ));
+    var newLinks = _.concat( _.map( cleanedOldies,
+                                    function( link ) {
+                                      return _.set( link, "isNew", false );
+                                    }),
+                             _.map( _.range( 2 ), function() {
+                               var id = _.uniqueId( "Link-");
+                               return {id: id,
+                                       text: id,
+                                       url: "http://example.com/" + id,
+                                       isNew: true};
+                             } ),
+                           tmpLinks);
+    infoLinks( _.map( newLinks, function( link ) {
+      return ko.observable( _.merge( link, oldStates[link.id]));
+    }));
+    if( options.markSeen ) {
+      // Todo: ajax query
+    }
+  }
 
   var appId = null;
 
@@ -57,6 +104,7 @@ LUPAPISTE.InfoService = function() {
   }
 
   hubscribe( "new", function() {
+    // Todo: ajax new
     infoLinks.push( ko.observable( {id: _.uniqueId( tmpPrefix ),
                                     text: "", url: ""
                                    }));
@@ -65,15 +113,19 @@ LUPAPISTE.InfoService = function() {
   hubscribe( "save", function( data ) {
     var params = makeParams( data );
     // Todo: ajax upsert, receive real id.
-    self.infoLink( data.id )( {id: _.uniqueId( "id"),
+    var id = self.isTemporaryId( data.id ) ? _.uniqueId( "id") : data.id;
+    self.infoLink( data.id )( {id: id,
                                text: params.text,
                                url: params.url });
+    fetchInfoLinks( {retainEditing: true,
+                     originator: id });
   });
 
   hubscribe( "delete", function( data ) {
     infoLinks.remove( self.infoLink( data.id ));
     // Todo: ajax delete
   });
+
 
 
 };
