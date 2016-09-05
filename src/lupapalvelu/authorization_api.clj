@@ -89,6 +89,7 @@
 
 (defcommand invite-with-role
   {:parameters [:id :email :text :documentName :documentId :path :role]
+   :categories #{:documents}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]

@@ -443,6 +443,7 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :op-id])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
@@ -454,6 +455,7 @@
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
