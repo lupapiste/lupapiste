@@ -9,7 +9,8 @@
     filteredAttachments: ko.pureComputed( function() {
       return _.map(lupapisteApp.services.attachmentsService.attachments(),
                    function( a ) {
-                     return _.defaults( {selected: Boolean( a().forPrinting)}, a());
+                     return _.defaults( {selected: Boolean( a().forPrinting)},
+                                        ko.mapping.toJS( a ));
                    });
     }),
 

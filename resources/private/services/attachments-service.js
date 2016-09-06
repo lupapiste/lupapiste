@@ -52,10 +52,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.groupTypes([]);
   }
 
-  var oldAppId = "Not real application id.";
   ko.computed(function() {
-    if(self.applicationId() && self.applicationId() !== oldAppId) {
-      oldAppId = self.applicationId();
+    if(self.applicationId()) {
       clearData();  // Just in case
       self.queryAll();
     }
@@ -461,7 +459,7 @@ LUPAPISTE.AttachmentsService = function() {
                                      icon: "sent"}],
                [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive",
                                                      icon: "sent-to-case-management"}],
-               [attachment.forPrinting(), {css: "lupicon-circle-section-sign positive",
+               [ko.unwrap(attachment.forPrinting), {css: "lupicon-circle-section-sign positive",
                                           icon: "for-printing"}],
                [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary",
                                                                                icon: "not-public"}]] )
