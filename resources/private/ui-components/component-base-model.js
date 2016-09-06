@@ -14,7 +14,11 @@ LUPAPISTE.ComponentBaseModel = function() {
   };
 
   self.addEventListener = function(service, event, fn) {
-    self.addHubListener( service + "::" + event, fn );
+    if (_.isString(event)) {
+      self.addHubListener(service + "::" + event, fn);
+    } else {
+      self.addHubListener(_.assign(event, {eventType: service + "::" + event.eventType}), fn);
+    }
   };
 
   self.disposedSubscribe = function(observable, fn) {

@@ -44,7 +44,18 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   // Conversation
-  self.comments = ko.observableArray([]);
+  var allComments = ko.observableArray([]);
+  self.queryComments = function() {
+    ajax
+      .query("comments", {id: self.application.id()})
+      .success(function (res) {
+        allComments(res.comments);
+      })
+      .call();
+  };
+  hub.subscribe("application-model-updated", self.queryComments);
+  hub.subscribe("upload-done", self.queryComments);
+  hub.subscribe("attachmentsService::remove", self.queryComments);
 
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
@@ -60,7 +71,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   self.comments = ko.pureComputed(function() {
-    return _(ko.mapping.toJS(self.application.comments))
+    return _(allComments())
       .filter(
          function(comment) {
            return self.showAllComments()
@@ -149,7 +160,7 @@ LUPAPISTE.SidePanelService = function() {
                                  size: "small",
                                  componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
-      repository.load(ko.unwrap(self.application.id));
+      repository.load(ko.unwrap(self.application.id)); // TODO: use comments query instead ?
     })
     .call();
   });

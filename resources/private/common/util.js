@@ -254,6 +254,14 @@ var util = (function($) {
     }
   }
 
+  function showSavedIndicatorIcon(response) {
+    if (response.ok) {
+      hub.send("indicator-icon", {style: "positive"});
+    } else {
+      hub.send("indicator-icon", {style: "negative", message: response.text});
+    }
+  }
+
   // Shows OK dialog, with text (loc key) from respose
   // To define click handler for "OK" button, give options object looking like following:
   // {componentParams: {okFn: your-callback-function-here}}
@@ -408,6 +416,7 @@ var util = (function($) {
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
+    showSavedIndicatorIcon: showSavedIndicatorIcon,
     showErrorDialog: showErrorDialog,
     isNonNegative: isNonNegative,
     createSortableColumn: createSortableColumn,

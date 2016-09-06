@@ -50,6 +50,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
         .success(function() {
           self.password("");
           repository.load(id);
+          hub.send("attachments-signed", {id: id, attachments: attachmentIds});
           LUPAPISTE.ModalDialog.close();
           if (self.confirmSuccess) {
             LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));

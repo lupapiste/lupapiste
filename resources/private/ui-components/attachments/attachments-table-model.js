@@ -28,8 +28,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   function addFile(attachment) {
     hub.send( "add-attachment-file", {attachmentId: attachment.id,
-                                      attachmentType: attachment.type["type-group"]
-                                      + "." + attachment.type["type-id"]});
+                                      attachmentType: attachment.typeString(),
+                                      attachmentGroup: attachment.group() });
   }
 
   function removeAttachment(attachment) {
@@ -42,6 +42,14 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                              component: "yes-no-dialog",
                              componentParams: {ltext: _.isEmpty(attachment.versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
                                                yesFn: yesFn}});
+  }
+
+  function approveAttachment(attachment) {
+    service.approveAttachment(attachment.id);
+  }
+
+  function rejectAttachment(attachment) {
+    service.rejectAttachment(attachment.id);
   }
 
   function stateIcons(attachment) {
@@ -58,7 +66,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                 [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive", icon: "stamped"}],
                 [showSentIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent"}],
                 [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent-to-case-management"}],
-                [attachment.forPrinting, {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
+                [attachment.forPrinting(), {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
                 [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary", icon: "not-public"}]] )
       .filter(_.first)
       .map(_.last)
@@ -68,9 +76,6 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
 
-  // When foo = idFun( fun ), then foo(data) -> fun(data.id)
-  var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
-
   return {
     attachments: attachments,
     idPrefix: idPrefix,
@@ -78,9 +83,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     stateIcons: stateIcons,
     inputId: function(index) { return idPrefix + index; },
     isApproved: service.isApproved,
-    approve: idFun(service.approveAttachment),
+    approve: approveAttachment,
     isRejected: service.isRejected,
-    reject: idFun(service.rejectAttachment),
+    reject: rejectAttachment,
     isNotNeeded: service.isNotNeeded,
     remove: removeAttachment,
     appModel: appModel,
