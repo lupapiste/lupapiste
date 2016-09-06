@@ -398,7 +398,7 @@
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application user attachment options)
                                 (build-version-updates user attachment version-model options))
-           update-result (update-application (application->command application) mongo-query mongo-updates true)]
+           update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
              (do (remove-old-files! attachment version-model)

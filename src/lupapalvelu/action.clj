@@ -151,10 +151,8 @@
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."
   ([command changes]
-    (update-application command {} changes false))
-  ([command mongo-query changes]
-    (update-application command mongo-query changes false))
-  ([command mongo-query changes return-count?]
+    (update-application command {} changes))
+  ([command mongo-query changes & {:keys [return-count?]}]
 
     (when-let [new-state (get-in changes [$set :state])]
       (assert
