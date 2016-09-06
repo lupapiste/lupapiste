@@ -113,6 +113,8 @@
 "application.calendar.comment.reservation-accepted" "sv" ""
 "application.calendar.comment.reservation-declined" "fi" "Kutsu hylätty"
 "application.calendar.comment.reservation-declined" "sv" ""
+"application.calendar.comment.reservation-canceled" "fi" "Kutsu peruutettu"
+"application.calendar.comment.reservation-canceled" "sv" ""
 "application.calendar.legend.accepted-appointment" "fi" "Vahvistettu tapaaminen"
 "application.calendar.legend.accepted-appointment" "sv" ""
 "application.calendar.legend.waiting-for-acceptance" "fi" "Odottaa hyväksymistä"
