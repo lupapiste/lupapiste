@@ -159,6 +159,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // hubParams are attached to the hub send event for attachment query.
   self.queryOne = function(attachmentId, hubParams) {
+    (_.get(ko.unwrap(self.getAttachment(attachmentId)), "processing", _.noop))(true);
     queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
     queryTagGroupsAndFilters();
   };
@@ -259,7 +260,6 @@ LUPAPISTE.AttachmentsService = function() {
         error("Unable to update attachment: ", response.text);
         notify.ajaxError(response);
       })
-      .processing(self.processing)
       .call();
   };
 

@@ -198,6 +198,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.signingModel.init({id: self.applicationId, attachments:[self.attachment]});
   };
   self.signingAllowed = function() { return authModel.ok("sign-attachments"); };
+  self.addHubListener({eventType: "attachments-signed", id: self.applicationId}, function(params) {
+    if (_.includes(params.attachments, self.id)) {
+      querySelf();
+    }
+  });
 
   // TOS
   self.showTosMetadata = ko.observable(false);
