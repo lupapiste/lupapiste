@@ -578,49 +578,56 @@
       (command foreman :submit-application :id foreman-app-id) => ok?)
 
     (facts "attachments"
-      (let [new-main-attachment (upload-attachment foreman application-id nil true)
-            attachment-by-foreman (upload-attachment foreman foreman-app-id nil true)
-            attachment-by-applicant (upload-attachment applicant foreman-app-id nil true)]
-        (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
-        (fact "foreman CAN upload a new version on main application"
-          (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
+     (let [new-main-attachment (upload-attachment foreman application-id nil true)
+           attachment-by-foreman (upload-attachment foreman foreman-app-id nil true)
+           attachment-by-applicant (upload-attachment applicant foreman-app-id nil true)]
+       (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
+       (fact "foreman CAN upload a new version on main application"
+         (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
 
-        (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
-        (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)
+       (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
+       (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)
 
-        (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
-          (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
-        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
-          (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
+       (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
+         (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
+       (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
+         (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
 
-        (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
-              actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
-              actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
-              actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
-                       :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
+       (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
+             actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
+             actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
+             actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
+                      :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
 
-          (fact "Foreman can edit own attachment"
-            (doseq [action actions]
-              (fact {:midje/description (name action)}
-                (action actions-for-foreman-att) => ok?)))
+         (fact "Foreman can edit own attachment"
+           (doseq [action actions]
+             (fact {:midje/description (name action)}
+               (action actions-for-foreman-att) => ok?)))
 
-          (fact "Foreman can not edit applicant's attachment"
-            (doseq [action actions]
-              (fact {:midje/description (name action)}
-                (action actions-for-applicant-att) =not=> ok?))))
+         (fact "Foreman can not edit applicant's attachment"
+           (doseq [action actions]
+             (fact {:midje/description (name action)}
+               (action actions-for-applicant-att) =not=> ok?))))
 
-        (fact "Foreman CAN set attachment meta data"
-          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
+       (fact "Foreman CAN set attachment meta data"
+         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
 
-        (give-verdict sonja foreman-app-id) => ok?
+       (give-verdict sonja foreman-app-id) => ok?
 
-        (fact "Foreman can NOT upload new attachment after verduct is given"
-          (upload-attachment foreman foreman-app-id nil false))
+       (fact "Foreman can NOT upload new attachment after verduct is given"
+         (upload-attachment foreman foreman-app-id nil false))
 
-        (fact "Authority CAN upload new attachment after verduct is given"
-          (upload-attachment sonja foreman-app-id nil true))
+       (fact "Authority CAN upload new attachment after verduct is given"
+         (upload-attachment sonja foreman-app-id nil true))
 
-        (fact "Foreman can NOT set attachment meta data after verdict is given"
-          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)
+       (fact "Foreman can NOT set attachment meta data after verdict is given"
+         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)))
 
-    ))))
+    (fact "Foreman can not upgrade own role"
+      (command foreman :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => unauthorized?)
+
+    (fact "Applicant upgrades foreman role to writer on main application"
+      (command applicant :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => ok?
+
+      (fact "Foreman can now  invite guest to the main application"
+        (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => ok?))))

@@ -1,6 +1,6 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
-  (:require [taoensso.timbre :refer [debug]]
+  (:require [taoensso.timbre :refer [debug error errorf]]
             [clojure.string :refer [blank? join trim split]]
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
@@ -58,8 +58,11 @@
                                                  :model-fn create-prev-permit-invite-email-model
                                                  :subject-key "invite"})
 
+(def settable-roles #{:writer :foreman})
+(def changeable-roles #{:writer :foreman})
+
 (defn- valid-role [role]
-  (#{:writer :foreman} (keyword role)))
+  (settable-roles (keyword role)))
 
 (defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
@@ -165,6 +168,33 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (do-remove-auth command username))
+
+(defcommand change-auth
+  {:parameters [:id userId role]
+   :input-validators [(partial action/non-blank-parameters [:userId])
+                      role-validator
+                      (fn [{:keys [data user]}]
+                        (when (= (:id user) (-> data :userId ss/trim))
+                          (fail :error.unauthorized :cause "Own role can not be changes")))]
+   :user-roles #{:applicant :authority}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
+  [{:keys [application] :as command}]
+  (let [user-id (ss/trim userId)
+        auths (auth/get-auths application user-id)
+        roles (map :role auths)]
+
+    (when (> (count auths) 1) (errorf "More than one authorization for user " (-> auths first :username) roles))
+
+    (if (changeable-roles (-> roles first keyword))
+      (do
+        (update-application command
+         {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
+         {$set {:auth.$.role role}})
+        (ok))
+      (do
+        (errorf "Role %s was not changed to %s" (first roles) role)
+        (fail :error.invalid-role)))))
 
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
