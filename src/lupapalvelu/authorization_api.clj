@@ -183,8 +183,8 @@
                 (fn [command]
                   (when-let [user-id (get-in command [:data :userId])]
                     (if-let [auths (seq (auth/get-auths (:application command) user-id))]
-                      (when-not (some changeable-roles (map :role auths))
-                        (fail :error.invalid-role))
+                      (when-not (some changeable-roles (map (comp keyword :role) auths))
+                        (fail :error.invalid-role :cause (map :role auths)))
                       (fail :error.user-not-found))))]}
   [{:keys [application] :as command}]
   (let [user-id (ss/trim userId)
