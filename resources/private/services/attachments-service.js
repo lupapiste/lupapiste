@@ -52,8 +52,10 @@ LUPAPISTE.AttachmentsService = function() {
     self.groupTypes([]);
   }
 
+  var oldAppId = "Not real application id.";
   ko.computed(function() {
-    if (self.applicationId()) {
+    if(self.applicationId() && self.applicationId() !== oldAppId) {
+      oldAppId = self.applicationId();
       clearData();  // Just in case
       self.queryAll();
     }
