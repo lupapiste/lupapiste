@@ -370,7 +370,7 @@ var util = (function($) {
   }
 
   function partyFullName(party) {
-    return getIn(party, ["firstName"], "") + " " + getIn(party, ["lastName"], "");
+    return ko.unwrap(party.firstName) + " " + ko.unwrap(party.lastName);
   }
 
 

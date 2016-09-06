@@ -194,7 +194,8 @@
                      :attachments
                      all-attachments
                      #(= (:id (:op %)) op-id)
-                     :op nil)))}))
+                     :op nil
+                     :groupType nil)))}))
     (when (seq removable-attachment-ids)
       (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
 

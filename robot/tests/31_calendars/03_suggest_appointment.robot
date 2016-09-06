@@ -132,4 +132,22 @@ Authority marks reservation seen
   Wait until  Element should be visible by test id  reservation-seen-ack-0
   Goto following week in calendar view
   Wait Until  Element should be visible by test id  reservation-ACCEPTED-Friday-1200
-  
+  Logout
+
+Applicant reserves an appointment via new appointment page
+  Mikko logs in
+  Go to page  new-appointment
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Wait until  Select From List by test id and index  application-select  1
+  Goto following week in calendar view
+  Wait until  Element should be visible  xpath=//*[@data-test-id='reservation-type-select']/option[contains(.,'Foobar')]
+  Wait until  Select From List by test id  reservation-type-select  Foobar
+  Wait until  Select From List by test id  attendee-select  Sonja Sibbo
+  Wait Until  Element should be visible by test id  reserve-slot-Friday-1500
+  Click by test id  reserve-slot-Friday-1500
+  Wait Until  Element should be visible by test id  reservation-comment-textarea
+  Fill test id  reservation-comment-textarea  diibadaabakommenttia
+  Click by test id  reservation-slot-reserve-bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
+  Logout

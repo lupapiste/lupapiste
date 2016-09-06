@@ -33,7 +33,7 @@
     (str "op-id-" op-id)))
 
 (defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
-  (or (keyword group-type)
+  (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))
       (when op-id :operation)
       general-group-tag))
 
