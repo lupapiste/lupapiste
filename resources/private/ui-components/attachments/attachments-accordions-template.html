@@ -16,7 +16,8 @@
       <div data-bind="template: {name: 'attachments-listing-accordion-template',
                       data: _.merge($data, {level: 0})}"></div>
     </div>
-    <button data-bind="enable: $data.hasFile"
+    <button data-bind="enable: $data.hasFile,
+                       click: _.partial( _.ary( hub.send, 1), 'attachmentsService::downloadAllAttachments')"
             class="secondary"
             data-test-id="download-all-attachments-button">
       <i class="lupicon-download"></i>

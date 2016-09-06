@@ -27,7 +27,8 @@
               <!-- ko if: acknowledged() === 'none' -->
                 <!-- ko if: (reservationStatus() === 'ACCEPTED' || reservationStatus() === 'DECLINED') -->
                 <button class="positive"
-                        data-bind="click: $component.markSeen.bind($data)">
+                        data-bind="click: $component.markSeen.bind($data),
+                                   attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
                   <i class="lupicon-check" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'button.ok'"></span>
@@ -36,13 +37,15 @@
 
                 <!-- ko if: reservationStatus() === 'PENDING' -->
                 <button class="positive"
-                        data-bind="click: $component.acceptReservation.bind($data)">
+                        data-bind="click: $component.acceptReservation.bind($data),
+                                   attr: { 'data-test-id': 'accept-reservation-btn-' + $index() }">
                   <i class="lupicon-check" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'button.accept'"></span>
                 </button>
                 <button class="negative"
-                        data-bind="click: $component.declineReservation.bind($data)">
+                        data-bind="click: $component.declineReservation.bind($data),
+                                   attr: { 'data-test-id': 'decline-reservation-btn-' + $index() }">
                   <i class="lupicon-remove" style="display: inline;"></i>
                   <i class="wait spin lupicon-refresh"></i>
                   <span data-bind="ltext: 'button.decline'"></span>
@@ -51,15 +54,18 @@
               <!-- /ko -->
 
               <!-- ko if: acknowledged() === 'seen' -->
-                <span data-bind="ltext: 'button.ok'"></span>
+                <span data-bind="ltext: 'button.ok',
+                                 attr: { 'data-test-id': 'reservation-seen-ack-' + $index() }"></span>
               <!-- /ko -->
 
               <!-- ko if: acknowledged() === 'accepted' -->
-                <span data-bind="ltext: 'calendar.accepted'"></span>
+                <span data-bind="ltext: 'calendar.accepted',
+                                 attr: { 'data-test-id': 'reservation-accepted-ack-' + $index() }"></span>
               <!-- /ko -->
 
               <!-- ko if: acknowledged() === 'declined' -->
-                <span data-bind="ltext: 'calendar.declined'"></span>
+                <span data-bind="ltext: 'calendar.declined',
+                                 attr: { 'data-test-id': 'reservation-declined-ack-' + $index() }"></span>
               <!-- /ko -->
             </div>
 

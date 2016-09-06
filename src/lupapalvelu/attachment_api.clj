@@ -142,6 +142,7 @@
   {:description "Get all attachments in application filtered by user visibility"
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{{attachments :attachments :as application} :application}]
@@ -152,6 +153,7 @@
    :parameters [id attachmentId]
    :categories [:attachments]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
@@ -175,6 +177,7 @@
   {:description "Get all attachments filters for application"
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{application :application}]
@@ -184,6 +187,7 @@
   {:description "Get hierarchical attachment grouping by attachment tags."
    :parameters [:id]
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{application :application}]
