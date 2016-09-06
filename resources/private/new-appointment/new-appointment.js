@@ -11,9 +11,7 @@
     self.selectedApplication = ko.observable();
 
     self.bookAppointmentParams = { // for compatibility reasons client is an observable
-                                   client: ko.observable({id: lupapisteApp.models.currentUser.id,
-                                                          firstName: lupapisteApp.models.currentUser.firstName,
-                                                          lastName: lupapisteApp.models.currentUser.lastName}),
+                                   client: ko.observable(),
                                    application: ko.observable(),
                                    authorities: ko.observableArray([]),
                                    selectedParty: ko.observable(),
@@ -27,6 +25,14 @@
         self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: app.id});
         self.bookAppointmentParams.application({id: ko.observable(app.id),
                                                 organizationName: ko.observable(app.organizationName)});
+      }
+    });
+
+    self.disposedComputed(function() {
+      if (lupapisteApp.models.currentUser.loaded()) {
+        self.bookAppointmentParams.client({id: lupapisteApp.models.currentUser.id(),
+                                           firstName: lupapisteApp.models.currentUser.firstName(),
+                                           lastName: lupapisteApp.models.currentUser.lastName()});
       }
     });
 

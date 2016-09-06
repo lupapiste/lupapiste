@@ -88,6 +88,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
       var app = ko.unwrap(self.applicationModel);
+      console.log(self.client());
       var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
                    authorityId: _.get(self.authority(), "id"),
                    reservationTypeId: _.get(self.reservationType(), "id"),
