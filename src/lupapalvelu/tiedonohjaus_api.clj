@@ -157,7 +157,7 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
+   :states states/all-with-acknowledged-but-not-draft-or-terminal
    :pre-checks [aa/attachment-not-readOnly]}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
