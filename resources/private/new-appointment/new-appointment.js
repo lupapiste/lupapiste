@@ -44,7 +44,7 @@
 
     self.initApplications = function(data) {
       self.applications(data);
-    }
+    };
   }
 
   $(function() {

@@ -29,7 +29,6 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   });
 
   self.send = function() {
-    console.log("client", ko.unwrap(self.client));
     self.sendEvent("calendarService", "reserveCalendarSlot",
       { clientId: _.get(ko.unwrap(self.client), "id"),
         authorityId: _.get(ko.unwrap(self.authority), "id"),
