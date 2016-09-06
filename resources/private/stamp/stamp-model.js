@@ -34,13 +34,6 @@ LUPAPISTE.StampModel = function(params) {
     a.stamped = ko.observable(a.stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
     return a;
-    // return self.disposedComputed( function() {
-    //   return _.merge( {}, a, ko.unwrap(_.find( params.attachments(), function( obs ) {
-    //     return a.id === obs().id;
-    //   })));
-    // });
-
-
   }
 
   function mapAttachmentGroup(group) {
