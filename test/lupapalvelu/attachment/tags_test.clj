@@ -185,7 +185,7 @@
 
     (fact "attachment type - one attachment"
 
-      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}]
+      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :iv_suunnitelma :default false}]
@@ -195,9 +195,9 @@
 
     (fact "attachment type - many attachments"
 
-      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :paapiirustus :default false}
@@ -214,9 +214,9 @@
       (let [attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :general :default false}

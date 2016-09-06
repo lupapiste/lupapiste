@@ -111,6 +111,13 @@ LUPAPISTE.ConversationModel = function(params) {
     return util.getIn(comment, ["target", "type"]) === "attachment";
   };
 
+  self.getAttachmentTypeLocKey = function(comment) {
+    return ["attachmentType",
+            util.getIn(comment, ["target", "attachmentType", "type-group"]),
+            util.getIn(comment, ["target", "attachmentType", "type-id"])]
+      .join(".");
+  };
+
   function isPreparationComment(comment) {
     // verdict's comments
     return util.getIn(comment, ["roles", 0]) === "authority";

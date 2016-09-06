@@ -16,8 +16,8 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   function addFile(attachment) {
     hub.send( "add-attachment-file", {attachmentId: attachment.id,
-                                      attachmentType: attachment.type["type-group"]
-                                      + "." + attachment.type["type-id"]});
+                                      attachmentType: attachment.typeString(),
+                                      attachmentGroup: attachment.group() });
   }
 
   function removeAttachment(attachment) {
@@ -32,13 +32,13 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                                                yesFn: yesFn}});
   }
 
+  function approveAttachment(attachment) {
+    service.approveAttachment(attachment.id);
+  }
 
 
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
-
-  // When foo = idFun( fun ), then foo(data) -> fun(data.id)
-  var idFun = _.partial( _.flow, _.nthArg(), _.partialRight( _.get, "id" ));
 
   return {
     attachments: attachments,
@@ -47,9 +47,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     stateIcons: service.stateIcons,
     inputId: function(index) { return idPrefix + index; },
     isApproved: service.isApproved,
-    approve: idFun(service.approveAttachment),
+    approve: approveAttachment,
     isRejected: service.isRejected,
-    reject: idFun(service.rejectAttachment),
+    reject: rejectAttachment,
     isNotNeeded: service.isNotNeeded,
     remove: removeAttachment,
     appModel: appModel,

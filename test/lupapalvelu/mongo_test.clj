@@ -51,7 +51,8 @@
 
   (facts "generate-array-updates"
     (mongo/generate-array-updates :attachments attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
-    (mongo/generate-array-updates :attachments attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar", "attachments.2.foo" "bar"}))
+    (mongo/generate-array-updates :attachments attachments #(odd? (:id %)) "foo" "bar") => {"attachments.0.foo" "bar", "attachments.2.foo" "bar"}
+    (mongo/generate-array-updates :attachments attachments #(= (:id %) 1) "foo" "bar" "quu" "quz") => {"attachments.0.foo" "bar" "attachments.0.quu" "quz"}))
 
 (facts "remove-null-chars"
   (mongo/remove-null-chars nil) => nil

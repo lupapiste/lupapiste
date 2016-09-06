@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
-            [sade.util :as util]
+            [sade.util :refer [fn->>] :as util]
             [sade.core :refer :all]
             [monger.core :as m]
             [monger.collection :as mc]
@@ -101,8 +101,11 @@
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
    E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
          => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
-  [array-name array pred k v]
-  (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
+  [array-name array pred & kvs]
+  (reduce (fn [m i] (->> (apply hash-map kvs)
+                         (util/map-keys (fn->> name (str (name array-name) \. i \.)))
+                         (merge m)))
+          {} (util/positions pred array)))
 
 (defn ^{:perfmon-exclude true} remove-null-chars
   "Removes illegal null characters from input.

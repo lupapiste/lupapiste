@@ -101,8 +101,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
       }),
       attachmentIds: subGroup.attachmentIds,
       downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
-      downloadAllText: ko.pureComputed(function() { 
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+      downloadAllText: ko.pureComputed(function() {
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
          return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     };
   }
@@ -145,8 +145,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
       hasFile: someSubGroupsField(subGroups, "hasFile"),
       attachmentIds: attachmentIds,
       downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
-      downloadAllText: ko.pureComputed(function() { 
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length; 
+      downloadAllText: ko.pureComputed(function() {
+         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
          return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
     }, subGroups);
   }
@@ -286,11 +286,14 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");
+    var attachmentGroup = _.get( params, "attachmentGroup" );
     attachment.initFileUpload({
       applicationId: self.appModel.id(),
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
+      group: _.get(attachmentGroup, "groupType"),
+      operationId: _.get(attachmentGroup, "id"),
       opSelector: attachmentId ? false : lupapisteApp.models.application.primaryOperation()["attachment-op-selector"](),
       archiveEnabled: self.authModel.ok("permanent-archive-enabled")
     });
@@ -319,8 +322,15 @@ LUPAPISTE.AttachmentsListingModel = function() {
       pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
     }
   }
-
   self.addEventListener( self.service.serviceName, "query", afterQuery );
+
+  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
+    self.service.queryOne(params.attachmentId);
+  });
+
+  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "reject-attachment"}, function(params) {
+    self.service.queryOne(params.attachmentId);
+  });
 
   function AttachmentTemplatesModel() {
     var templateModel = this;
@@ -329,11 +339,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
       templateModel.selectm
         .allowDuplicates(true)
-        .ok(function(types) {
-          self.service.createAttachmentTempaltes(types, {
-            onComplete: LUPAPISTE.ModalDialog.close
-          });
-        })
+        .ok(_.ary(self.service.createAttachmentTemplates, 1))
         .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
@@ -363,6 +369,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
   self.attachmentTemplatesAdd = function() {
     self.attachmentTemplatesModel.show();
   };
+  self.addEventListener(self.service.serviceName, "create", LUPAPISTE.ModalDialog.close);
+
+  self.addEventListener(self.service.serviceName, "remove", util.showSavedIndicator);
+
+  self.addEventListener(self.service.serviceName, "copy-user-attachments", util.showSavedIndicator);
 
   self.copyUserAttachments = function() {
     hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
