@@ -6,6 +6,8 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
   var authModel = params.authModel;
   var allowedTypes = params.allowedAttachmentTypes;
 
+  var valueToType = {};
+
   function attachmentGroupLabel(groupName) {
     return loc(["attachmentType", groupName, "_group_label"].join("."));
   }
@@ -18,16 +20,22 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
     return {"type-group": groupName, "type-id": typeName};
   }
 
-  self.attachmentType = ko.observable().extend({notify: "always"});
+  function typeToString(type) {
+    return [type["type-group"], type["type-id"]].join(".");
+  }
+
+  self.attachmentType = ko.observable(typeToString(params.attachmentType())).extend({notify: "always"});
 
   self.selectableAttachmentTypes = _.map(allowedTypes, function(typeGroup) {
     return {
       label: attachmentGroupLabel(typeGroup[0]),
-      types: _.map(typeGroup[1], function(type) {
-        var value = attachmentType(typeGroup[0], type);
+      types: _.map(typeGroup[1], function(typeId) {
+        var type = attachmentType(typeGroup[0], typeId);
+        var value = typeToString(type);
+        valueToType[value] = type;
         return {
-          label: attachmentTypeLabel(typeGroup[0], type),
-          value: _.isEqual(value, params.attachmentType) ? params.attachmentType : value
+          label: attachmentTypeLabel(typeGroup[0], typeId),
+          value: value
         };
       })
     };
@@ -36,7 +44,7 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
   self.changingTypeAllowed = function() { return authModel.ok("set-attachment-type"); };
 
   self.ok = function() {
-    self.sendEvent("attachments", "change-attachment-type", {attachmentType: self.attachmentType()});
+    self.sendEvent("attachments", "change-attachment-type", {attachmentType: valueToType[self.attachmentType()]});
     LUPAPISTE.ModalDialog.close();
   };
 
