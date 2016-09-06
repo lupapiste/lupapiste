@@ -29,6 +29,7 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
@@ -56,10 +57,15 @@
   (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
     (fail :error.attachment.id)))
 
-(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data application :application}]
-  (when (-> (attachment/get-attachment-info application attachmentId) attachment/attachment-is-readOnly?)
-    (fail :error.unauthorized
-          :desc "Attachment is read only.")))
+(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data :keys [application user]}]
+  (let [attachment (attachment/get-attachment-info application attachmentId)
+        readonly-after-sent? (op/get-primary-operation-metadata application :attachments-readonly-after-sent)]
+    (when (or (attachment/attachment-is-readOnly? attachment)
+              (and readonly-after-sent?
+                   (not (states/pre-sent-application-states (-> application :state keyword)))
+                   (not (auth/application-authority? application user))))
+      (fail :error.unauthorized
+            :desc "Attachment is read only."))))
 
 (defn- attachment-not-required [{{attachmentId :attachmentId} :data user :user application :application}]
   (when (and (not (usr/authority? user))

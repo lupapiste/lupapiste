@@ -415,7 +415,7 @@
             recipients => (just ["heppu@example.com" ; foreman is invited to original application also
                                  "heppu@example.com"
                                  "foo@example.com"
-                                 "Kaino Solita <kaino@solita.fi>"])))))
+                                 "Kaino Solita <kaino@solita.fi>"] :in-any-order)))))
 
     (fact "Create foreman application with the applicant as foreman"
           (let [{application-id :id} (create-and-submit-application apikey :operation "kerrostalo-rivitalo") => truthy
@@ -609,5 +609,18 @@
               (fact {:midje/description (name action)}
                 (action actions-for-applicant-att) =not=> ok?))))
 
-        ))
-    ))
+        (fact "Foreman CAN set attachment meta data"
+          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
+
+        (give-verdict sonja foreman-app-id) => ok?
+
+        (fact "Foreman can NOT upload new attachment after verduct is given"
+          (upload-attachment foreman foreman-app-id nil false))
+
+        (fact "Authority CAN upload new attachment after verduct is given"
+          (upload-attachment sonja foreman-app-id nil true))
+
+        (fact "Foreman can NOT set attachment meta data after verdict is given"
+          (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)
+
+    ))))
