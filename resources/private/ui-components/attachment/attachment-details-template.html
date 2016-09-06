@@ -279,13 +279,16 @@
               <!-- ko foreach: { data: $data.attachment().signatures, as: 'signature' } -->
               <div class="signature-row">
                 <div class="signature-cell"
-                     data-bind="fullName: signature.user"></div>
+                     data-bind="fullName: signature.user"
+                     data-test-id="attachment-signature-fullname"></div>
                 <div class="signature-cell">
                   <span data-bind="ltext: 'attachment.version'"></span>
-                  <span data-bind="version: signature.version"></span>
+                  <span data-bind="version: signature.version"
+                        data-test-id="attachment-signature-version"></span>
                 </div>
                 <div class="signature-cell"
-                     data-bind="dateTimeString: signature.created"></div>
+                     data-bind="dateTimeString: signature.created"
+                     data-test-id="attachment-signature-date"></div>
               </div>
               <!-- /ko -->
             </div>
