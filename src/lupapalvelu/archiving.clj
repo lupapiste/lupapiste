@@ -20,7 +20,8 @@
             [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman])
+            [lupapalvelu.foreman :as foreman]
+            [sade.strings :as ss])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -200,10 +201,7 @@
   (str type-group "." type-id))
 
 (defn- foreman-name [document]
-  (->>
-    (str (get-in document [:data :henkilotiedot :sukunimi :value]))
-    (str " ")
-    (str (get-in document [:data :henkilotiedot :etunimi :value]))))
+  (ss/trim (str (get-in document [:data :henkilotiedot :sukunimi :value]) \space (get-in document [:data :henkilotiedot :etunimi :value]))))
 
 (defn- foremen [application]
   (if (empty? (:foreman application))
