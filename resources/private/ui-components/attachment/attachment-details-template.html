@@ -209,17 +209,16 @@
                                    optionsText: $data.getScaleOptionsText,
                                    optionsCaption: loc('choose'),
                                    value: $data.attachment().scale,
-                                   enable: $data.metaUpdateAllowed()">
-                </select>
-                <div class="col2 attachment-info-field">
-                  <label data-bind="ltext: 'attachment.label.size'"></label>
-                  <select data-test-id="attachment-size-select"
-                          data-bind="options: $data.sizes,
-                                     optionsText: loc,
-                                     optionsCaption: loc('choose'),
-                                     value: $data.attachment().size,
-                                     enable: $data.metaUpdateAllowed()"></select>
-                </div>
+                                   enable: $data.metaUpdateAllowed()"></select>
+              </div>
+              <div class="col2 attachment-info-field">
+                <label data-bind="ltext: 'attachment.label.size'"></label>
+                <select data-test-id="attachment-size-select"
+                        data-bind="options: $data.sizes,
+                                   optionsText: loc,
+                                   optionsCaption: loc('choose'),
+                                   value: $data.attachment().size,
+                                   enable: $data.metaUpdateAllowed()"></select>
               </div>
 
               <div class="col1 attachment-info-field"
