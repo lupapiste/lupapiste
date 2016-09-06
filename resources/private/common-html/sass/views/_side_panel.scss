@@ -326,7 +326,11 @@ table.info-link-editor-view {
   td {
     padding-left: 0;
   }
-  @include info-table( transparent )
+  @include info-table( transparent ) {}
+  a.link-btn--passive:active {
+    // In Firefox the active state gets stuck after drag'n'drop.
+    color: $orange-dark;
+  }
 }
 
 

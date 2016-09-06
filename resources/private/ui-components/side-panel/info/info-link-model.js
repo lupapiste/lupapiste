@@ -116,9 +116,14 @@ LUPAPISTE.InfoLinkModel = function( params ) {
 
   var zoneId = null;
 
-  self.dragStart = function( item ) {
+  self.dragStart = function( item, event ) {
     zoneId = null;
-    item.dragging( true );
+    // Dragging only allowed using the drag handle.
+    var goodGrab =  _.get( document.elementFromPoint( event.clientX,
+                                                      event.clientY ),
+                           "className") === "lupicon-arrows-up-down";
+    item.dragging( goodGrab );
+    return goodGrab;
   };
 
   self.dragEnd = function( item ) {
