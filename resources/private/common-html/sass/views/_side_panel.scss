@@ -348,6 +348,18 @@ table.info-link-editor-view + .dragging {
   display: block !important;
 }
 
+span.info-link-text {
+  max-width: 20em;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+@media all and (max-width: $narrow-breakpoint) {
+  span.info-link-text {
+    max-width: 14em;
+  }
+}
+
 
 
 table.info-link-editor-edit {

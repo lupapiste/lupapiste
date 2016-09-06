@@ -17,12 +17,15 @@
                     css: {dragging: dragging,
                     'slot-before': showSlotBefore}">
     <tr>
-      <td><a class="link-btn link-btn--passive"><i class="lupicon-arrows-up-down"></i></a></td>
+      <td><a class="link-btn link-btn--passive">
+          <i class="lupicon-arrows-up-down"></i>
+      </a></td>
       <td class="spacehog">
         <a class="link-btn"
            target="_blank"
            data-bind="attr: {href: link().url}">
-          <span data-bind="text: link().text"></span>
+          <span class="info-link-text" 
+                data-bind="text: link().text"></span>
           <i class="lupicon-circle-star"
              data-bind="visible: link().isNew"></i>
         </a>

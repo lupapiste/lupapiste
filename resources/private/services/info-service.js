@@ -24,7 +24,7 @@ LUPAPISTE.InfoService = function() {
 
   // Todo: ajax query
   var infoLinks = ko.observableArray([ko.observable({id: "a", text: "First link", url: "http://example.com/first", isNew: _.random( 1 )}),
-                                       ko.observable({id: "b", text: "Second link", url: "http://example.com/third", isNew: _.random( 1 )}),
+                                       ko.observable({id: "b", text: "Second link with a ridiculously long title that does not fit into panel", url: "http://example.com/third", isNew: _.random( 1 )}),
                                        ko.observable({id: "c", text: "Third link", url: "http://example.com/fourth", isNew: _.random( 1 )})]);
 
   self.infoLinks = infoLinks;
