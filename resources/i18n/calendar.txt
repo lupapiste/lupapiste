@@ -147,3 +147,5 @@
 "button.decline" "sv" ""
 "reservation.cancel" "fi" "Peru tapaaminen"
 "reservation.cancel" "sv" ""
+"reservation.confirm-cancel" "fi" "Haluatko varmasti perua ajan?"
+"reservation.confirm-cancel" "sv" ""

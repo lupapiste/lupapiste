@@ -21,14 +21,16 @@ LUPAPISTE.ReservedSlotBubbleModel = function(params) {
   });
 
   self.cancelReservation = function() {
-    self.sendEvent("calendarService", "cancelReservation", 
-      { clientId: _.get(params.client(), "id"),
-        authorityId: _.get(params.authority(), "id"),
-        reservationTypeId: params.reservationTypeId(),
-        applicationId: lupapisteApp.models.application.id(),
-        reservationId: self.reservation().id,
-        weekObservable: params.weekdays });
-    self.bubbleVisible(false);
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("reservation.confirm-cancel"), {title: loc("yes"), fn: function() {
+      self.sendEvent("calendarService", "cancelReservation",
+        { clientId: _.get(params.client(), "id"),
+          authorityId: _.get(params.authority(), "id"),
+          reservationTypeId: params.reservationTypeId(),
+          applicationId: lupapisteApp.models.application.id(),
+          reservationId: self.reservation().id,
+          weekObservable: params.weekdays });
+      self.bubbleVisible(false);
+    }});
   };
   
   self.addEventListener("calendarView", "bookedSlotClicked", function(event) {
