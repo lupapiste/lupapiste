@@ -329,13 +329,22 @@ table.info-link-editor-view {
   @include info-table( transparent )
 }
 
-table.info-link-editor-view + .dragging {
-  background-color: $orange-light;
+
+table.info-link-editor-view.slot-before {
+  margin-top: 1em;
 }
 
-table.info-link-editor-view + .hidden {
-  visibility: hidden;
-};
+// Dragged link within list
+table.info-link-editor-view.dragging {
+  display: none;
+}
+
+// Drag element
+table.info-link-editor-view + .dragging {
+  display: block !important;
+}
+
+
 
 table.info-link-editor-edit {
   @include info-table( white );

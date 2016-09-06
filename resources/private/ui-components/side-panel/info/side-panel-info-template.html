@@ -23,7 +23,8 @@
     <!-- /ko -->
     <!-- ko if: _.size( infoLinks() ) -->
     <h2 data-bind="ltext: 'info.info.links'"></h2>
-    <div data-bind="foreach: infoLinks">
+    <div id="side-panel-info-links" 
+         data-bind="foreach: infoLinks">
       <info-link params="id: $data.id"></info-link>
     </div>
     <!-- /ko -->

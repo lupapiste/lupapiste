@@ -110,24 +110,29 @@ LUPAPISTE.InfoLinkModel = function( params ) {
 
   // Drag'n'drop
 
+  var ddHub = "info-link-drag-drop-event";
+
   self.dragging = ko.observable();
 
+  var zoneId = null;
+
   self.dragStart = function( item ) {
+    zoneId = null;
     item.dragging( true );
   };
 
   self.dragEnd = function( item ) {
     item.dragging( false );
+    hub.send( ddHub, {});
   };
 
-  self.reorder = function( event, dragData, zoneData ) {
-    function isTarget( targetId, link ) {
+  function isTarget( targetId, link ) {
         return link().id === targetId;
-    }
-    var dragId = dragData.link().id;
+  }
 
-    var zoneId = zoneData.id;
-    if( dragId !== zoneId ) {
+  self.dragDrop = function( item ) {
+    var dragId = item.link().id;
+    if( zoneId && zoneId !== dragId ) {
       var links = service.infoLinks();
       var drag = _.find( links, _.partial( isTarget, dragId ));
       _.remove( links, _.partial( isTarget, dragId ) );
@@ -137,6 +142,15 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     }
   };
 
+  self.showSlotBefore = ko.observable();
 
+  self.addHubListener(ddHub, function( params ) {
+    self.showSlotBefore( self.link().id === params.zoneId );
+  });
+
+  self.dragOver = function( event, dragData, zoneData ) {
+    zoneId = zoneData.id;
+    hub.send( ddHub, {zoneId: zoneId});
+  };
 
 };

@@ -16,7 +16,8 @@ LUPAPISTE.SidePanelModel = function(params) {
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
   self.showInfoPanel = ko.observable( false );
-  self.showStar = lupapisteApp.services.infoService.showStar;
+  // Info panel can exist before services (e.g., logout page).
+  self.showStar = _.get( lupapisteApp, "services.infoService.showStar" );
 
   var panelFlags = [self.showConversationPanel,
                     self.showNoticePanel,

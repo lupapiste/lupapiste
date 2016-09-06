@@ -7,12 +7,15 @@
                     dragStart: dragStart,
                     dragEnd: dragEnd
                     },
+                    dropZone: { accepts: 'reorder-links',
+                    drop: dragDrop
+                    },
                     dragEvents: {
                     accepts: 'reorder-links',
-                    dragOver: reorder,
+                    dragOver: dragOver,
                     data: $data.link()},
                     css: {dragging: dragging,
-                          hidden: hidden}">
+                    'slot-before': showSlotBefore}">
     <tr>
       <td><a class="link-btn"><i class="lupicon-arrows-up-down"></i></a></td>
       <td class="spacehog">
