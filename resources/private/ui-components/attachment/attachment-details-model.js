@@ -32,7 +32,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     hub.send("track-click", {category:"Attachments", label: "", event: eventName});
   }
 
-  function partialWithTrackClick(eventName, fn /* & args */) {
+  function trackClickWrap(eventName, fn /* & args */) {
     var args = _.drop(arguments, 2);
     return function() {
       trackClick(eventName);
@@ -48,19 +48,19 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addEventListener(service.serviceName, {eventType: "update", attachmentId: self.id, ok: false}, util.showSavedIndicator);
 
   // Navigation
-  self.backToApplication = partialWithTrackClick("backToApplication", lupapisteApp.models.application.open, "attachments");
+  self.backToApplication = trackClickWrap("backToApplication", lupapisteApp.models.application.open, "attachments");
 
   self.nextAttachmentId = service.nextFilteredAttachmentId(self.id);
   self.previousAttachmentId = service.previousFilteredAttachmentId(self.id);
 
-  self.openNextAttachment = partialWithTrackClick("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
-  self.openPreviousAttachment = partialWithTrackClick("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );
+  self.openNextAttachment = trackClickWrap("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
+  self.openPreviousAttachment = trackClickWrap("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );
 
   self.showHelp = ko.observable(_.isEmpty(self.attachment().versions));
 
   // Approve and reject
-  self.approveAttachment = partialWithTrackClick("approveAttachment", service.approveAttachment, self.id);
-  self.rejectAttachment  = partialWithTrackClick("rejectAttachment",  service.rejectAttachment,  self.id);
+  self.approveAttachment = trackClickWrap("approveAttachment", service.approveAttachment, self.id);
+  self.rejectAttachment  = trackClickWrap("rejectAttachment",  service.rejectAttachment,  self.id);
   addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
   addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
   self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
@@ -94,7 +94,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
                              size: "medium",
                              component: "yes-no-dialog",
                              componentParams: {ltext: _.isEmpty(self.attachment().versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
-                                               yesFn: partialWithTrackClick("deleteAttachment", service.removeAttachment, self.id) }});
+                                               yesFn: trackClickWrap("deleteAttachment", service.removeAttachment, self.id) }});
   };
   self.addEventListener(service.serviceName, {eventType: "remove", attachmentId: self.id}, _.ary(_.partial(lupapisteApp.models.application.open, "attachments")));
   self.isDeletable = function() { return authModel.ok("delete-attachment"); };
@@ -131,7 +131,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;
-    var deleteFn = partialWithTrackClick("deleteAttachmentVersion", service.removeAttachmentVersion, self.id, fileId, originalFileId);
+    var deleteFn = trackClickWrap("deleteAttachmentVersion", service.removeAttachmentVersion, self.id, fileId, originalFileId);
     self.disablePreview(true);
     hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
                              size: "medium",
