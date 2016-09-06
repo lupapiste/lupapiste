@@ -66,7 +66,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
                 [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive", icon: "stamped"}],
                 [showSentIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent"}],
                 [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive", icon: "sent-to-case-management"}],
-                [attachment.forPrinting, {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
+                [attachment.forPrinting(), {css: "lupicon-circle-section-sign positive", icon: "for-printing"}],
                 [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary", icon: "not-public"}]] )
       .filter(_.first)
       .map(_.last)

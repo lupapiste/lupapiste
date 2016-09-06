@@ -230,8 +230,9 @@
                        id="attachment-is-verdict-attachment"
                        class="form-input"
                        data-test-id="is-verdict-attachment"
-                       data-bind="checked: $data.forPrinting"/>
+                       data-bind="checked: $data.attachment().forPrinting"/>
               </div>
+
               <div class="clear">
                 <h3 class="left" data-bind="ltext: 'attachment.visibility'"></h3>
                 <span data-bind="component: {name: 'help-toggle',

@@ -174,12 +174,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // For Printing
   self.setForPrintingAllowed = function() { return authModel.ok("set-attachments-as-verdict-attachment"); };
-  self.forPrinting = ko.observable(self.attachment().forPrinting);
-  self.disposedSubscribe(self.forPrinting, function(val) {
-    service.setForPrinting(self.id, val);
-  });
   addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, function(res) {
-    querySelf();
     util.showSavedIndicatorIcon(res);
   });
 
