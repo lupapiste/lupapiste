@@ -1,8 +1,7 @@
 LUPAPISTE.AttachmentsTableModel = function(attachments) {
   "use strict";
 
-  var service = lupapisteApp.services.attachmentsService,
-      application = lupapisteApp.models.application._js;
+  var service = lupapisteApp.services.attachmentsService;
 
   function hasFile(attachment) {
     return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
