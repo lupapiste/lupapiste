@@ -55,6 +55,7 @@ LUPAPISTE.SidePanelService = function() {
   };
   hub.subscribe("application-model-updated", self.queryComments);
   hub.subscribe("upload-done", self.queryComments);
+  hub.subscribe("attachmentsService::remove", self.queryComments);
 
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
