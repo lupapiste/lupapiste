@@ -61,7 +61,7 @@ LUPAPISTE.AttachmentsService = function() {
           hub.send( self.serviceName + "::query", _.merge({query: queryName,
                                                            key: responseJsonKey},
                                                           params,
-                                                          hubParams));
+                                                          _.omit(hubParams, "eventType")));
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
