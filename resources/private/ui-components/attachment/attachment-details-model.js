@@ -123,7 +123,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener("upload-done", querySelf );
+  self.addHubListener({eventType: "upload-done", attachmentId: self.id}, querySelf );
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
 
   // Versions - delete
