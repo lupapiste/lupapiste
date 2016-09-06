@@ -33,6 +33,15 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
+  // Todo: for some reason this computed is needed in order to open
+  // the rollups initially?
+  self.disposedComputed(function() {
+    var id = self.service.applicationId(); // create dependency
+    if (id) {
+      self.service.queryAll();
+    }
+  });
+
   //
   // Attachment hierarchy
   //

@@ -461,7 +461,7 @@ LUPAPISTE.AttachmentsService = function() {
                                      icon: "sent"}],
                [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive",
                                                      icon: "sent-to-case-management"}],
-               [attachment.forPrinting, {css: "lupicon-circle-section-sign positive",
+               [attachment.forPrinting(), {css: "lupicon-circle-section-sign positive",
                                           icon: "for-printing"}],
                [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary",
                                                                                icon: "not-public"}]] )
