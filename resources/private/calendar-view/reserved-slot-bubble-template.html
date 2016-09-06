@@ -6,11 +6,14 @@
                   css: weekdayCss ">
 
     <bubble-dialog params="visible: bubbleVisible,
+                           okVisible: false,
                            okEnabled: false,
                            okFun: _.noop,
                            removeVisible: removeVisible,
                            removeFun: cancelReservation,
                            removeEnabled: true,
+                           removeText: 'reservation.cancel',
+                           cancelText: 'close',
                            error: error,
                            prefix: 'reserved-slot',
                            waiting: waiting">

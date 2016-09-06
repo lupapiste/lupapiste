@@ -143,3 +143,5 @@
 "button.accept" "sv" ""
 "button.decline" "fi" "Hylkää"
 "button.decline" "sv" ""
+"reservation.cancel" "fi" "Peru tapaaminen"
+"reservation.cancel" "sv" ""
