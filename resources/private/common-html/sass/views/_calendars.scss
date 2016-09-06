@@ -297,8 +297,16 @@
   padding: $baseline/2 $baseline;
 }
 
-#mycalendar h1 {
-  margin-top: $baseline;
+#mycalendar {
+  h1 {
+    margin-top: $baseline;
+  }
+
+  div.view-toggle {
+    float: right;
+    padding-right: 4%;
+    text-align: right;
+  }
 }
 
 #application-calendar-tab div.times-filter-group {

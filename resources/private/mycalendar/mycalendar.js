@@ -9,6 +9,12 @@
     self.selectedCalendarId = ko.observable();
     self.reservationTypes = ko.observableArray();
 
+    self.viewMode = ko.observable("calendar");
+
+    self.setViewMode = function(mode) {
+      self.viewMode(mode);
+    }
+
     hub.subscribe("calendarService::myCalendarsFetched", function(event) {
       self.calendars(event.calendars);
       if (event.calendars.length > 0) {

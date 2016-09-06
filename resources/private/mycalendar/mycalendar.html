@@ -29,7 +29,20 @@
         <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
       <!-- /ko -->
       <!-- ko ifnot: noCalendarsFound -->
-        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' -->
+        <div class="view-toggle">
+          Lista / Kalenteri (<span data-bind="text: viewMode"></span>)<br />
+          <button data-bind="click: setViewMode('list')">
+            <i class="lupicon-list"></i>
+          </button>
+          <button data-bind="click: setViewMode('calendar')">
+            <i class="lupicon-calendar"></i>
+          </button>
+        </div>
+        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'list' -->
+        <div>Listanäyttö</div>
+        <!-- /ko -->
+
+        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'calendar' -->
         <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
                                                    userId: lupapisteApp.models.currentUser.id },
                                reservationTypes: reservationTypes"
