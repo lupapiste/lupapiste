@@ -277,7 +277,8 @@
     (reduce strip-field command [:password :newPassword :oldPassword])))
 
 (defn get-meta [name]
-  (get @actions (keyword name)))
+  ; Using wrapper function to enable mock actions it test
+  (get (get-actions) (keyword name)))
 
 (defn executed
   ([command] (executed (:action command) command))
