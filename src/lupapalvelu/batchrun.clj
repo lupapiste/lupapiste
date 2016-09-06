@@ -22,7 +22,8 @@
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [clj-time.coerce :as c]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -430,3 +431,24 @@
                   (do
                     (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
                     (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+
+(defn pdf-to-pdfa-conversion [& args]
+  (debug "Starting pdf to pdf/a conversion")
+  (mongo/connect!)
+  (let [organization (first args)
+        start-ts (c/to-long (c/from-string (second args)))
+        end-ts (c/to-long (c/from-string (second (next args))))]
+  (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
+    (let [eraajo-user (user/batchrun-user organization)
+          command (assoc (application->command application) :user eraajo-user :created (now))
+          last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
+    (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
+      (debug "Converting attachments of application" (:id application))
+      (doseq [attachment (:attachments application)]
+        (if (not (true? (get-in attachment [:latestVersion :archivable])))
+          (do
+            (debug "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+            (let [result (attachment/convert-existing-to-pdfa! (:application command) (:user command) attachment)]
+              (if (:archivabilityError result)
+                (error "Conversion of attachment" (:id attachment) "failed with error:" (:archivabilityError result))
+                (debug "Conversion succeed")))))))))))
