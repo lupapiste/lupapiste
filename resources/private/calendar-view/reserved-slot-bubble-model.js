@@ -22,8 +22,11 @@ LUPAPISTE.ReservedSlotBubbleModel = function(params) {
 
   self.cancelReservation = function() {
     self.sendEvent("calendarService", "cancelReservation", 
-      { reservationId: self.reservation().id,
-        calendarId: _.parseInt(params.calendarId()),
+      { clientId: _.get(params.client(), "id"),
+        authorityId: _.get(params.authority(), "id"),
+        reservationTypeId: params.reservationTypeId(),
+        applicationId: lupapisteApp.models.application.id(),
+        reservationId: self.reservation().id,
         weekObservable: params.weekdays });
     self.bubbleVisible(false);
   };

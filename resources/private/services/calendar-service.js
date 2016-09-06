@@ -60,7 +60,7 @@ LUPAPISTE.CalendarService = function() {
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
-        notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+        notifyView(event, _weekdays(null, slots, startOfWeekMoment));
 
         if (event.clientId) {
           ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId,
@@ -73,7 +73,7 @@ LUPAPISTE.CalendarService = function() {
                 _.map(
                    _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
                    function(r) { return _.set(r, "status", "read-only"); }));
-              notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+              notifyView(event, _weekdays(null, slots, startOfWeekMoment));
             })
             .error(function(e) {
               hub.send("indicator", {style: "negative", message: e.text});
@@ -206,14 +206,14 @@ LUPAPISTE.CalendarService = function() {
   
   var _cancelReservation = hub.subscribe("calendarService::cancelReservation", function(event) {
     ajax
-      .command("cancel-reservation", { reservationId: event.reservationId })
+      .command("cancel-reservation", { id: event.applicationId, reservationId: event.reservationId })
       .success(function() {
         hub.send("indicator", { style: "positive" });
-        doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
+        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
+                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
       .error(function(e) {
         hub.send("indicator", {style: "negative", message: e.text});
-        doFetchCalendarWeek({calendarId: event.calendarId, weekObservable: event.weekObservable});
       })
       .call();
   });

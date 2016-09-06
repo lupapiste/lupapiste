@@ -38,7 +38,9 @@
                                                      defaultLocation: $component.defaultLocation"></reservation-slot-reserve-bubble>
           </div>
           <div style="position: relative;">
-            <reserved-slot-bubble params="calendarId: $component.calendarId,
+            <reserved-slot-bubble params="client: $component.client,
+                                          authority: $component.authority,
+                                          reservationTypeId: $component.reservationTypeId,
                                           weekdays: $component.calendarWeekdays"></reserved-slot-bubble>
           </div>
         </td>
