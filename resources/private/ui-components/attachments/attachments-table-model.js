@@ -36,6 +36,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     service.approveAttachment(attachment.id);
   }
 
+  function rejectAttachment(attachment) {
+    service.rejectAttachment(attachment.id);
+  }
 
   var idPrefix = _.uniqueId("at-input-");
   var appModel = lupapisteApp.models.application;
