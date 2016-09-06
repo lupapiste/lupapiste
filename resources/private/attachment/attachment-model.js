@@ -33,7 +33,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
     self.visibility(buildVisibility(attachmentData));
 
-    return _.assign(self, _.omit(attachmentData, _.concat(observableFields)));
+    return _.assign(self, _.omit(attachmentData, observableFields));
   };
 
   function buildGroup(data) {
@@ -48,7 +48,6 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   //
   // Updates which require attachment model reload
   //
-
 
   function addSelfUpdateListener(fieldName) {
     var event = {eventType: "update", ok: true, field: fieldName, attachmentId: self.id};
@@ -93,27 +92,23 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   //
 
   self.disposedSubscribe(self.contents, function(val) {
-    self.processing(true);
     service.setMeta(self.id, {contents: val}, {field: "contents"});
   });
 
   self.disposedSubscribe(self.scale, function(val) {
-    self.processing(true);
     service.setMeta(self.id, {scale: val}, {field: "scale"});
   });
 
   self.disposedSubscribe(self.size, function(val) {
-    self.processing(true);
     service.setMeta(self.id, {size: val}, {field: "size"});
   });
 
   self.disposedSubscribe(self.visibility, function(val) {
-    self.processing(true);
     service.setVisibility(self.id, val, {field: "visibility"});
   });
 
   self.addEventListener(service.serviceName, {eventType: "update", attachmentId: self.id}, function(params) {
-    if (!params.ok || _.includes(["contents","scale","size", "visibility"], params.field)) {
+    if (!params.ok) {
       self.processing(false);
     }
   });
