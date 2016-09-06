@@ -4,7 +4,7 @@
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand update-application] :as action]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]

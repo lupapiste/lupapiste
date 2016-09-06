@@ -2,7 +2,7 @@
   (:require [sade.core :refer [ok fail]]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.states :as states]
             [lupapalvelu.kopiolaitos :as kopiolaitos]))
 
