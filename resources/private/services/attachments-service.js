@@ -221,6 +221,7 @@ LUPAPISTE.AttachmentsService = function() {
         self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
         });
+        self.authModel.refresh({id: self.applicationId()});
         queryTagGroupsAndFilters();
         sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
       })
@@ -229,6 +230,7 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
     return false;
   };
+  hub.subscribe("upload-done", function() { self.authModel.refresh({id: self.applicationId()}); });
 
   self.copyUserAttachments = function(hubParams) {
     var params = {id: self.applicationId()};
