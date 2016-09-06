@@ -1,7 +1,6 @@
 LUPAPISTE.CalendarViewModel = function (params) {
   "use strict";
-  var self = this,
-      calendarService = lupapisteApp.services.calendarService;
+  var self = this;
 
   self.calendarWeekdays = ko.observableArray();
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
@@ -88,7 +87,6 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.disposedComputed(function() {
     if (params.view === "applicationView") {
       var app = ko.unwrap(self.applicationModel);
-      console.log(self.client());
       var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
                    authorityId: _.get(self.authority(), "id"),
                    reservationTypeId: _.get(self.reservationType(), "id"),

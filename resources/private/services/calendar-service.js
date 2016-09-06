@@ -61,18 +61,18 @@ LUPAPISTE.CalendarService = function() {
         notifyView(event, _weekdays(event, slots, startOfWeekMoment));
 
         if (event.clientId && event.applicationId) {
-          var data = { clientId: event.clientId,
-                       week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
-                       id: event.applicationId };
+          var queryParams = { clientId: event.clientId,
+                              week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
+                              id: event.applicationId };
           // Optional params added if available
           if (!_.isUndefined(event.authorityId)) {
-            data.authorityId = event.authorityId;
+            queryParams.authorityId = event.authorityId;
           }
           if (!_.isUndefined(event.reservationTypeId)) {
-            data.reservationTypeId = event.reservationTypeId;
+            queryParams.reservationTypeId = event.reservationTypeId;
           }
 
-          ajax.query("available-calendar-slots", data)
+          ajax.query("available-calendar-slots", queryParams)
             .success(function(data) {
               slots = _.concat(slots, data.availableSlots);
               slots = _.concat(slots,
