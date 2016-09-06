@@ -5,16 +5,18 @@ LUPAPISTE.ApplicantCalendarModel = function () {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.authorities = ko.observableArray([]);
-  self.reservationTypes = ko.observableArray([]);
-  self.defaultLocation = ko.observable();
+  self.bookAppointmentParams = { // for compatibility reasons client is an observable
+                                 client: ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
+                                                         lastName: lupapisteApp.models.currentUser.lastName(),
+                                                         id: lupapisteApp.models.currentUser.id(),
+                                                         partyType: [] }),
+                                 application: ko.observable(),
+                                 authorities: ko.observableArray([]),
+                                 selectedParty: ko.observable(),
+                                 reservationTypes: ko.observableArray([]),
+                                 selectedReservationType: ko.observable(),
+                                 defaultLocation: ko.observable() };
 
-  self.client = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
-                                lastName: lupapisteApp.models.currentUser.lastName(),
-                                id: lupapisteApp.models.currentUser.id(),
-                                partyType: [] });
-  self.selectedParty = ko.observable();
-  self.selectedReservationType = ko.observable();
   self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
   self.disposedComputed(function() {
@@ -25,9 +27,9 @@ LUPAPISTE.ApplicantCalendarModel = function () {
   });
 
   self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
-    self.authorities(event.authorities);
-    self.reservationTypes(event.reservationTypes);
-    self.defaultLocation(event.defaultLocation);
+    self.bookAppointmentParams.authorities(event.authorities);
+    self.bookAppointmentParams.reservationTypes(event.reservationTypes);
+    self.bookAppointmentParams.defaultLocation(event.defaultLocation);
   });
 
   self.acceptReservation = function(r) {
@@ -35,6 +37,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
       .command("accept-reservation", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
       .success(function() {
         r.acknowledged("accepted");
+
       })
       .call();
   };

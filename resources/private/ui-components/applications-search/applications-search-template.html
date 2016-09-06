@@ -23,6 +23,16 @@
               <span data-bind="ltext: 'newRequest.newApplication'"></span>
             </button>
 
+            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+            <a href="#!/new-appointment">
+              <button data-test-id="applications-goto-new-appointment"
+                    class="positive application-create">
+                <i class="lupicon-circle-plus"></i>
+                <span data-bind="ltext: 'new-appointment.page-title'"></span>
+              </button>
+            </a>
+            <!-- /ko -->
+
             <!-- ko if: authorizationModel.ok('create-application-from-previous-permit') -->
             <button data-bind="click: createWithPrevPermit"
                     data-test-id="applications-create-new-with-prev-permit"

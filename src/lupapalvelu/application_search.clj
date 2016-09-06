@@ -192,12 +192,9 @@
     (concat frontend-fields indicator-fields)))
 
 
-(defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
+(defn- enrich-row [app]
   (-> app
-      (assoc :kind (cond
-                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
-                     infoRequest "applications.inforequest"
-                     :else       "applications.application"))
+      app-utils/with-application-kind
       app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant

@@ -3,8 +3,6 @@ LUPAPISTE.CalendarService = function() {
   var self = this,
       params = LUPAPISTE.config.calendars;
 
-  self.params = ko.observable(params);
-
   var _weekdays = function(calendarId, slots, startOfWeekMoment) {
     var now = moment();
     return _.map([1, 2, 3, 4, 5], function(i) {
@@ -62,11 +60,19 @@ LUPAPISTE.CalendarService = function() {
 
         notifyView(event, _weekdays(event, slots, startOfWeekMoment));
 
-        if (event.clientId) {
-          ajax.query("available-calendar-slots", { clientId: event.clientId, authorityId: event.authorityId,
-                                                   reservationTypeId: event.reservationTypeId,
-                                                   week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
-                                                   id: lupapisteApp.models.application.id() })
+        if (event.clientId && event.applicationId) {
+          var data = { clientId: event.clientId,
+                       week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
+                       id: event.applicationId };
+          // Optional params added if available
+          if (!_.isUndefined(event.authorityId)) {
+            data.authorityId = event.authorityId;
+          }
+          if (!_.isUndefined(event.reservationTypeId)) {
+            data.reservationTypeId = event.reservationTypeId;
+          }
+
+          ajax.query("available-calendar-slots", data)
             .success(function(data) {
               slots = _.concat(slots, data.availableSlots);
               slots = _.concat(slots,
@@ -188,14 +194,15 @@ LUPAPISTE.CalendarService = function() {
 
   var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
     ajax
-      .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId(),
-                                          comment: event.comment(), location: event.location(), id: event.applicationId() })
+      .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId,
+                                          comment: event.comment(), location: event.location(), id: event.applicationId })
       .success(function() {
         hub.send("indicator", { style: "positive" });
-        if (lupapisteApp.models.application.id() === event.applicationId()) {
+        if (lupapisteApp.models.application.id() === event.applicationId) {
           repository.load(ko.unwrap(lupapisteApp.models.application.id));
         }
         doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
+                                         applicationId: event.applicationId,
                                          reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
       })
       .error(function(e) {
