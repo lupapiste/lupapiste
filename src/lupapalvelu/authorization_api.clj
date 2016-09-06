@@ -175,26 +175,29 @@
                       role-validator
                       (fn [{:keys [data user]}]
                         (when (= (:id user) (-> data :userId ss/trim))
-                          (fail :error.unauthorized :cause "Own role can not be changes")))]
+                          (fail :error.unauthorized :cause "Own role can not be changes")))
+                      ]
    :user-roles #{:applicant :authority}
    :states     (states/all-application-states-but [:canceled])
-   :pre-checks [application/validate-authority-in-drafts]}
+   :pre-checks [application/validate-authority-in-drafts
+                (fn [command]
+                  (when-let [user-id (get-in command [:data :userId])]
+                    (if-let [auths (seq (auth/get-auths (:application command) user-id))]
+                      (when-not (some changeable-roles (map :role auths))
+                        (fail :error.invalid-role))
+                      (fail :error.user-not-found))))]}
   [{:keys [application] :as command}]
   (let [user-id (ss/trim userId)
         auths (auth/get-auths application user-id)
         roles (map :role auths)]
 
-    (when (> (count auths) 1) (errorf "More than one authorization for user " (-> auths first :username) roles))
+    (when (> (count auths) 1)
+      (errorf "More than one authorization for user %s %s, will change first that is changeable"
+             (-> auths first :username), roles))
 
-    (if (changeable-roles (-> roles first keyword))
-      (do
-        (update-application command
-         {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
-         {$set {:auth.$.role role}})
-        (ok))
-      (do
-        (errorf "Role %s was not changed to %s" (first roles) role)
-        (fail :error.invalid-role)))))
+    (update-application command
+      {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
+      {$set {:auth.$.role role}})))
 
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
