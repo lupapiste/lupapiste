@@ -483,7 +483,7 @@
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType group filename tempfile size]
-   :categories [:attachments]
+   :categories #{:attachments}
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
    :pre-checks [attachment-id-is-present-in-application-or-not-set
@@ -505,7 +505,6 @@
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
-   :categories #{:attachments}
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
