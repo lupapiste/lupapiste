@@ -8,6 +8,8 @@ LUPAPISTE.ConversationModel = function(params) {
   self.authorization = params.authorization;
   self.currentPage = params.currentPage;
 
+  var authService = lupapisteApp.services.authService;
+
   self.authorities = params.authorities;
 
   self.text = ko.observable();
@@ -170,10 +172,6 @@ LUPAPISTE.ConversationModel = function(params) {
   // handle outside authorities correctly. The more robust approach
   // would be to resolve the role in the backend.
   self.commentRole = function( data ) {
-    var role = data.type;
-    if( role === "system" ) {
-      role = _.get( data, "user.role" );
-    }
-    return role;
+    return authService.getRole(_.get(data, "user.id"));
   };
 };
