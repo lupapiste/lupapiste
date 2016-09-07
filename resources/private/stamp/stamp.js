@@ -63,7 +63,7 @@ var stamping = (function() {
 
   function initStamp(appModel) {
     model.appModel = appModel;
-    model.attachments = model.appModel._js.attachments;
+    model.attachments = lupapisteApp.services.attachmentsService.attachments;
     model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
@@ -86,12 +86,12 @@ var stamping = (function() {
           ko.mapping.fromJS(application, {}, model.appModel);
           model.appModel._js = application;
 
-          model.attachments = application.attachments;
+          model.attachments = lupapisteApp.services.attachmentsService.attachments;
 
           setStampFields();
 
           model.stampingMode(true);
-        });
+        }, true);
       } else { // appModel already initialized, show stamping
         model.stampingMode(true);
         lupapisteApp.setTitle(model.appModel.title());
