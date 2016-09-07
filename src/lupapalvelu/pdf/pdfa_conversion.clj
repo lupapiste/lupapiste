@@ -8,7 +8,8 @@
             [clojure.java.io :as io]
             [sade.env :as env]
             [lupapalvelu.statistics :as statistics]
-            [lupapalvelu.organization :as organization])
+            [lupapalvelu.organization :as organization]
+            [sade.files :as files])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
            [com.netflix.hystrix HystrixCommandProperties]))
@@ -150,6 +151,8 @@
             (info "Converted to PDF/A " pdf-a-file-path)
             (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
           (info "Could not convert the file to PDF/A"))
+        (if stream?
+          (io/delete-file (io/file file-path) :silently))
         conversion-result)
       (catch Exception e
         (error "Error in PDF/A conversion, using original" e)
