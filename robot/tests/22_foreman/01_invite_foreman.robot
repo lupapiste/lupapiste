@@ -9,7 +9,7 @@ Suite Setup     Initialize foreman
 
 Applicant creates new application
   Pena logs in
-  Create project application
+  Create project application  open
 
 Applicant invites Mikko
   Open tab  parties
@@ -55,9 +55,6 @@ Applicant sets his info to the applicant document
   Click by test id  hakija-r_append_btn
   Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
-
-Applicant inputs comment in order to open the application
-  Input comment and open to authorities  Avataan
   [Teardown]  logout
 
 Sonja can invite foremen to application
