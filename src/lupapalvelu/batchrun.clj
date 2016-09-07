@@ -445,7 +445,7 @@
     (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
       (debug "Converting attachments of application" (:id application))
       (doseq [attachment (:attachments application)]
-        (if (not (true? (get-in attachment [:latestVersion :archivable])))
+        (when-not (get-in attachment [:latestVersion :archivable])
           (do
             (debug "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
             (let [result (attachment/convert-existing-to-pdfa! (:application command) (:user command) attachment)]
