@@ -15,6 +15,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
+  self.unseenNotice = self.sidePanelService.unseenNotice;
   self.showInfoPanel = ko.observable( false );
   // Info panel can exist before services (e.g., logout page).
   self.showStar = _.get( lupapisteApp, "services.infoService.showStar" );
@@ -31,6 +32,16 @@ LUPAPISTE.SidePanelModel = function(params) {
     if( self.showInfoPanel()) {
       self.showStar( false );
     }
+    if( self.showNoticePanel()) {
+      hub.send( "SidePanelService::NoticeSeen");
+    }
+  });
+
+  self.noticeIcon = self.disposedPureComputed( function() {
+    return _.get( {urgent: "lupicon-warning",
+                   pending: "lupicon-circle-dash"},
+                  self.sidePanelService.urgency(),
+                  "lupicon-document-list");
   });
 
   function closeOtherPanels( flag ) {

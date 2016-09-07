@@ -88,6 +88,8 @@ LUPAPISTE.InfoService = function() {
   var appId = "This is not a real application id.";
 
   ko.computed( function() {
+    // Id guard to avoid unnecessary fetching (and star), since
+    // fetchInfoLinks references observables internally.
     if( lupapisteApp.models.application.id() !== appId ) {
       appId = lupapisteApp.models.application.id();
      fetchInfoLinks( {star: true});

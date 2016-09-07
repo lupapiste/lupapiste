@@ -9,11 +9,14 @@
       <div id="side-panel" data-bind="visible: showSidePanel, transition: sidePanelOpen, class: 'show-side-panel'">
         <div class="buttons">
             <button id="open-conversation-side-panel"
-                    class="primary vertical caps btn-conversation"
+                    class="vertical caps btn-conversation"
                     data-bind="click: toggleConversationPanel,
                                visible: authorization.ok('comments') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
-                               css: {active: showConversationPanel}">
-                <i class="lupicon-conversation"></i>
+                               css: {active: showConversationPanel,
+                               positive: unseenComments,
+                               primary: !unseenComments()}">
+              <i data-bind="visible: !unseenComments()"
+                 class="lupicon-conversation"></i>
                 <div data-bind="visible: unseenComments,
                                  text: unseenComments"
                      id="applicationUnseenComments" class="unseen-comments">
@@ -21,11 +24,13 @@
                 <span class="btn-title" data-bind="lspaced: 'conversation.title'"></span>
             </button>
             <button id="open-notice-side-panel"
-                    class="primary vertical caps btn-notice"
+                    class="vertical caps btn-notice"
                     data-bind="click: toggleNoticePanel,
                                visible: authorization.ok('authority-notice'),
-                               css: {active: showNoticePanel}">
-                <i class="lupicon-document-list"></i>
+                               css: {active: showNoticePanel,
+                               primary: !unseenNotice(),
+                               positive: unseenNotice}">
+                <i data-bind="attr: {'class': noticeIcon}"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
             </button>
             <button id="open-info-side-panel"

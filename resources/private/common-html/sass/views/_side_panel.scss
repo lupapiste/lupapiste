@@ -39,19 +39,13 @@
       display: block;
       font-weight: bold;
       margin: 0 0 $marginM 0;
-
+      
       .unseen-comments {
-        @include spite-bg;
-        background-position: 1px -5396px;
-        width: $lupicon-size;
-        margin: {
-          top: 10px;
-          bottom: -4px;
-        }
-        height: 30px;
-        padding-top: 3px;
-        color: $color-text;
-        text-shadow: none;
+        color: $green-dark;
+        font-size: 14px;
+        background-color: white;
+        padding: 2px 2px 2px 2px;
+        min-width: $lupicon-size;
       }
     }
 
@@ -63,8 +57,7 @@
   .content-wrapper {
     float: left;
     height: 100%;
-    background:  fade-out($lp-dark-grey, 0.1);
-    background: $lp-dark-grey \9; /* IE 8 and below */
+    background-color: $gray69; 
     padding: $marginS;
     width: 500px;
   }
