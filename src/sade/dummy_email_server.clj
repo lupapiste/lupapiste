@@ -44,6 +44,7 @@
                       "text/html; charset=utf-8"  :html
                       "text/calendar; charset=utf-8; method=REQUEST"  :calendar
                       "text/calendar; charset=utf-8; method=REPLY"  :calendar
+                      "text/calendar; charset=utf-8; method=CANCEL"  :calendar
                       content-type) content))
       body))
 
