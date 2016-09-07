@@ -341,17 +341,35 @@ table.info-link-editor-view + .dragging {
   display: block !important;
 }
 
-span.info-link-text {
-  max-width: 20em;
+@mixin link-text( $max-width) {
+  max-width: $max-width;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
+
+span.info-link-text {
+  @include link-text( 20em );
+}
+
+span.info-link-text-wide {
+  @include link-text( 28em );
+}
+
 
 @media all and (max-width: $narrow-breakpoint) {
   span.info-link-text {
     max-width: 14em;
   }
+  
+  span.info-link-text-wide {
+    max-width: 22em;
+  }
 }
+
+.info-link-link {
+  margin-bottom: .5em;
+}
+
 
 
 

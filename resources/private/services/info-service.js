@@ -23,9 +23,9 @@ LUPAPISTE.InfoService = function() {
   });
 
   // Todo: ajax query
-  var infoLinks = ko.observableArray([ko.observable({id: "a", text: "First link", url: "http://example.com/first", isNew: _.random( 1 )}),
-                                       ko.observable({id: "b", text: "Second link with a ridiculously long title that does not fit into panel", url: "http://example.com/third", isNew: _.random( 1 )}),
-                                       ko.observable({id: "c", text: "Third link", url: "http://example.com/fourth", isNew: _.random( 1 )})]);
+  var infoLinks = ko.observableArray([ko.observable({id: "a", text: "First link", url: "http://example.com/first", isNew: _.random( 1 ), canEdit: _.random( 1 )}),
+                                      ko.observable({id: "b", text: "Second link with a ridiculously long title that does not fit into panel. This should either be truncated or wrapped.", url: "http://example.com/third", isNew: true, canEdit: _.random( 1 )}),
+                                       ko.observable({id: "c", text: "Third link", url: "http://example.com/fourth", isNew: _.random( 1 ), canEdit: _.random( 1 )})]);
 
   self.infoLinks = infoLinks;
 
@@ -71,7 +71,8 @@ LUPAPISTE.InfoService = function() {
                                return {id: id,
                                        text: id,
                                        url: "http://example.com/" + id,
-                                       isNew: true};
+                                       isNew: true,
+                                       canEdit: _.random( 1 )};
                              } ),
                            tmpLinks);
     infoLinks( _.map( newLinks, function( link ) {
