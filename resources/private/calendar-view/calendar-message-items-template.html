@@ -25,7 +25,7 @@
                  data-bind="css: { 'buttons-box': acknowledged() === 'none',
                                    'undo-link': acknowledged() !== 'none' }">
               <!-- ko if: acknowledged() === 'none' -->
-                <!-- ko if: (reservationStatus() === 'ACCEPTED' || reservationStatus() === 'DECLINED') -->
+                <!-- ko if: (reservationStatus() === 'ACCEPTED' || reservationStatus() === 'DECLINED' || reservationStatus() === 'CANCELED') -->
                 <button class="positive"
                         data-bind="click: $component.markSeen.bind($data),
                                    attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
@@ -81,6 +81,9 @@
             <!-- /ko -->
             <!-- ko if: reservationStatus() === 'ACCEPTED' && from() !== lupapisteApp.models.currentUser.id() -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
+            <!-- /ko -->
+            <!-- ko if: reservationStatus() === 'CANCELED' -->
+            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-canceled'"></div>
             <!-- /ko -->
 
           </div>

@@ -133,6 +133,8 @@
 "application.calendar.notification.applicant-declined" "sv" ""
 "application.calendar.notification.invited" "fi" "Sinut on kutsuttu tapaamiseen."
 "application.calendar.notification.invited" "sv" ""
+"application.calendar.notification.applicant-canceled" "fi" "Tapaaminen on peruttu"
+"application.calendar.notification.applicant-canceled" "sv" ""
 "calendar.accepted" "fi" "Kutsu hyväksytty."
 "calendar.accepted" "sv" ""
 "calendar.declined" "fi" "Kutsu hylätty."

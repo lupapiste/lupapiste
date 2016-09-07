@@ -284,7 +284,7 @@
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
                         "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" 
-                        "book-appointment-filter.js"]
+                        "book-appointment-filter.js" "base-calendar-model.js"]
                    :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
                           "authority-calendar-template.html" "applicant-calendar-template.html"

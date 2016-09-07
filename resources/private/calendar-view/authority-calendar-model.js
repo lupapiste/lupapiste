@@ -3,6 +3,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.BaseCalendarModel());
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.authority = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
@@ -68,15 +69,6 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
       self.noCalendarFoundForOrganization(true);
     }
   });
-
-  self.markSeen = function(r) {
-    ajax
-      .command("mark-reservation-update-seen", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
-      .success(function() {
-        r.acknowledged("seen");
-      })
-      .call();
-  };
 
   self.appointmentParticipants = function(r) {
     return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
