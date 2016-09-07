@@ -29,6 +29,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   });
 
   self.send = function() {
+    self.sendEvent("calendarView", "updateOperationCalled");
     self.sendEvent("calendarService", "reserveCalendarSlot",
       { clientId: _.get(ko.unwrap(self.client), "id"),
         authorityId: _.get(ko.unwrap(self.authority), "id"),
@@ -38,12 +39,6 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
         location: self.location,
         applicationId: self.applicationId(),
         weekObservable: params.weekdays });
-    if (params.role === "authority") {
-      params.client(null);
-    } else {
-      params.authority(null);
-    }
-    params.reservationType(null);
     self.bubbleVisible(false);
   };
 

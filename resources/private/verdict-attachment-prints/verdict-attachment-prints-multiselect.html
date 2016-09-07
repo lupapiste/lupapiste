@@ -13,7 +13,7 @@
       <div class="attachment-multiselect-content" data-bind="if: selectingMode">
         <div id="attachments-multiselect-component-container"
              data-bind="component: {name: 'attachments-multiselect',
-                                    params: {attachments: filteredAttachments,
+                                    params: {attachments: filteredAttachments(),
                                              titleLoc: 'application.select-verdict-attachments',
                                              okLoc: 'verdict-attachments-multiselect.mark-selected-as-verdict-attachments',
                                              saveFn: setAttachmentsAsVerdictAttachment,

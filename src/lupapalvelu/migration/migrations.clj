@@ -2377,6 +2377,17 @@
                             change-rakennuspaikka-to-toiminnan-sijainti
                             {$and [{:versions.permitType "YL"} {:versions.documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
+(defmigration remove-suunnittelija-from-puun-kaataminen-applications
+  {:apply-when (pos? (mongo/count :applications {$and [{:primaryOperation.name "puun-kaataminen"}
+                                                       {:state {$in ["draft" "open"]}}
+                                                       {:documents.schema-info.name "suunnittelija"}]}))}
+  (mongo/update-n :applications
+                  {$and [{:primaryOperation.name "puun-kaataminen"}
+                         {:state {$in ["draft" "open"]}}
+                         {:documents.schema-info.name "suunnittelija"}]}
+                  {$pull {:documents {:schema-info.name "suunnittelija"}}}
+                  :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

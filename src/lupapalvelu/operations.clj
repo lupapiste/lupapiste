@@ -197,6 +197,9 @@
 (def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 (def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 
+(def- puun-kaataminen-schemas (filterv (partial not= "suunnittelija")
+                                        mini-rakval-schemas))
+
 (def- optional-rakval-schemas #{"hakijan-asiamies"})
 
 (def- optional-mini-rakval-schemas #{"paasuunnittelija" "hakijan-asiamies"})
@@ -797,7 +800,7 @@
    :puun-kaataminen             {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
+                                 :required puun-kaataminen-schemas
                                  :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true

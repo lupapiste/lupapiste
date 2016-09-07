@@ -198,7 +198,7 @@
       comment-update)
     (update-reservation application reservation-id {$set {:reservations.$.reservationStatus (name new-state)}})
     (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}})
-    (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
+    (update-reservation application reservation-id {$push {:reservations.$.action-required-by (:id to-user)}})))
 
 (defn accept-reservation
   [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]

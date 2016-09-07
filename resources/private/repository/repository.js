@@ -120,18 +120,6 @@ var repository = (function() {
 
           _.each(application.tasks || [], setSchema);
 
-          _.each(application.comments || [], function(comment) {
-            if (comment.target && comment.target.type === "attachment" && comment.target.id) {
-              var targetAttachment = _.find(application.attachments || [], function(attachment) {
-                return attachment.id === comment.target.id;
-              });
-              if (targetAttachment) {
-                comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
-                comment.target.attachmentId = targetAttachment.id;
-              }
-            }
-          });
-
           _.each(application.attachments ||[], function(att) {
             calculateAttachmentStateIndicators(att, application);
             setAttachmentOperation(application.allOperations, att);

@@ -81,8 +81,8 @@
    :user-authz-roles auth/all-authz-writer-roles
    :org-authz-roles auth/commenter-org-authz-roles
    :states states/all-states}
-  [{application :application}]
-  (ok (select-keys application [:id :comments])))
+  [{{app-id :id :as application} :application}]
+  (ok {:id app-id :comments (comment/enrich-comments application)}))
 
 (defcommand add-comment
   {:parameters [id text target roles]

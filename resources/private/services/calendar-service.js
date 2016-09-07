@@ -201,12 +201,11 @@ LUPAPISTE.CalendarService = function() {
         if (lupapisteApp.models.application.id() === event.applicationId) {
           repository.load(ko.unwrap(lupapisteApp.models.application.id));
         }
-        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
-                                         applicationId: event.applicationId,
-                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
+        hub.send("calendarView::updateOperationProcessed");
       })
       .error(function(e) {
         hub.send("indicator", {style: "negative", message: e.text});
+        hub.send("calendarView::updateOperationProcessed");
       })
       .call();
   });

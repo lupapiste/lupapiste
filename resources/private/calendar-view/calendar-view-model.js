@@ -67,6 +67,9 @@ LUPAPISTE.CalendarViewModel = function (params) {
   };
 
   self.clickHandler = function(clazz) {
+    if (self.isDirty()) {
+      return;
+    }
     if (clazz === "timeline-slot") {
       self.sendEvent("calendarView", "timelineSlotClicked",
         { calendarId: this.calendarId,
@@ -84,13 +87,29 @@ LUPAPISTE.CalendarViewModel = function (params) {
     }
   };
 
+  self.isDirty = ko.observable(false);
+  self.addEventListener("calendarView", "updateOperationCalled", function() {
+    self.isDirty(true);
+  });
+  self.addEventListener("calendarView", "updateOperationProcessed", function() {
+    if (self.currentRole === "authority") {
+      self.client(null);
+    } else {
+      self.authority(null);
+    }
+    self.reservationType(null);
+    self.isDirty(false);
+  });
+
   self.disposedComputed(function() {
+    if (self.isDirty()) {
+      return;
+    }
     if (params.view === "applicationView") {
-      var app = ko.unwrap(self.applicationModel);
       var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
                    authorityId: _.get(self.authority(), "id"),
                    reservationTypeId: _.get(self.reservationType(), "id"),
-                   applicationId: _.isEmpty(app) ? undefined : ko.unwrap(app.id),
+                   applicationId: _.get(self.applicationModel(), "id"),
                    week: self.startOfWeek().isoWeek(),
                    year: self.startOfWeek().year(),
                    weekObservable: self.calendarWeekdays };

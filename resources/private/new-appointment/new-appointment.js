@@ -23,8 +23,8 @@
       var app = self.selectedApplication();
       if (!_.isEmpty(app)) {
         self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: app.id});
-        self.bookAppointmentParams.application({id: ko.observable(app.id),
-                                                organizationName: ko.observable(app.organizationName)});
+        self.bookAppointmentParams.application({id: app.id,
+                                                organizationName: app.organizationName});
       }
     });
 
