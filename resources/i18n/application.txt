@@ -214,7 +214,7 @@
 "application.find-owners" "sv" "Sök fastighetens ägare"
 "application.grant-writer-access" "fi" "Anna kirjoitusoikeus"
 "application.grant-writer-access" "sv" ""
-"application.grant-writer-access.confirm" "fi" "Anna kirjoitusoikeus"
+"application.grant-writer-access.confirm" "fi" "Oletko varma, että haluat antaa työnjohtajalle <strong>{0}</strong> täydet kirjoitusoikeudet tälle hankkeelle? Toimintoa ei voi perua.""
 "application.grant-writer-access.confirm" "sv" ""
 "application.help" "fi" "Ohje"
 "application.help" "sv" "Anvisning"

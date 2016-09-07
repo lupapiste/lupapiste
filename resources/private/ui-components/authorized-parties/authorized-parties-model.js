@@ -75,6 +75,7 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     var userId = model.id();
     var id = application().id();
     var role = roleChangeMap[model.role()];
+    var name = _.escape(_.filter([model.firstName(), model.lastName()]).join("\u00a0"));
 
     if (role && hasAuth("change-auth") ) {
       hub.send("track-click", {category:"Application", label:"", event:"changeAuth"});
