@@ -101,11 +101,24 @@ Foreman can see application
   # Should work always because latest application is always at the top
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}'][1]/td[@data-test-col-name='operation']  Työnjohtajan nimeäminen
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon tai rivitalon rakentaminen
+
+Foreman accepts invite to project application
+  Open project application
+  Wait until  Confirm yes no dialog
   [Teardown]  logout
 
-Foreman application can't be submitted before subtype is selected
+Applicant returns to project application
   Pena logs in
   Open project application
+
+Applicant upgrades foremans authorization to full write access
+  Open tab  parties
+  Element should be visible by test id  change-auth-teppo@example.com
+  Click enabled by test id  change-auth-teppo@example.com
+  Confirm yes no dialog
+  Element should not be visible by test id  change-auth-teppo@example.com
+
+Foreman application can't be submitted before subtype is selected
   Wait until  Element should be visible  xpath=//a[@data-test-id='test-application-app-linking-to-us']
   Click by test id  test-application-app-linking-to-us
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
@@ -155,7 +168,7 @@ Applicant can create foreman applications after verdict is given for the origina
   Wait until  Element should be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
   [Teardown]  logout
 
-Add työnjohtaja task to original application
+Authority adds työnjohtaja task to original application
   Sonja logs in
   Open project application
   Add työnjohtaja task to current application  Ylitarkastaja
