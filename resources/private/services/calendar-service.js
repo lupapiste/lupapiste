@@ -61,18 +61,18 @@ LUPAPISTE.CalendarService = function() {
         notifyView(event, _weekdays(null, slots, startOfWeekMoment));
 
         if (event.clientId && event.applicationId) {
-          var data = { clientId: event.clientId,
-                       week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
-                       id: event.applicationId };
+          var queryParams = { clientId: event.clientId,
+                              week: startOfWeekMoment.isoWeek(), year: startOfWeekMoment.year(),
+                              id: event.applicationId };
           // Optional params added if available
           if (!_.isUndefined(event.authorityId)) {
-            data.authorityId = event.authorityId;
+            queryParams.authorityId = event.authorityId;
           }
           if (!_.isUndefined(event.reservationTypeId)) {
-            data.reservationTypeId = event.reservationTypeId;
+            queryParams.reservationTypeId = event.reservationTypeId;
           }
 
-          ajax.query("available-calendar-slots", data)
+          ajax.query("available-calendar-slots", queryParams)
             .success(function(data) {
               slots = _.concat(slots, data.availableSlots);
               slots = _.concat(slots,
@@ -201,12 +201,11 @@ LUPAPISTE.CalendarService = function() {
         if (lupapisteApp.models.application.id() === event.applicationId) {
           repository.load(ko.unwrap(lupapisteApp.models.application.id));
         }
-        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
-                                         applicationId: event.applicationId,
-                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
+        hub.send("calendarView::updateOperationProcessed");
       })
       .error(function(e) {
         hub.send("indicator", {style: "negative", message: e.text});
+        hub.send("calendarView::updateOperationProcessed");
       })
       .call();
   });

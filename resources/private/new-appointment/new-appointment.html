@@ -31,6 +31,7 @@
 
       <book-appointment-filter params="model: bookAppointmentParams"></book-appointment-filter>
 
+      <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'new-appointment' -->
       <calendar-view params="searchConditions: { client: bookAppointmentParams.client,
                                                  authority: bookAppointmentParams.selectedParty,
                                                  reservationType: bookAppointmentParams.selectedReservationType },
@@ -39,6 +40,7 @@
                              reservationTypes: bookAppointmentParams.reservationTypes,
                              defaultLocation: bookAppointmentParams.defaultLocation">
       </calendar-view>
+      <!-- /ko -->
     </div>
     <div>
       <div id="legend-orangebox"></div><span data-bind="ltext: 'application.calendar.legend.accepted-appointment'"></span>
