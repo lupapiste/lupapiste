@@ -131,31 +131,24 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     hub.send( ddHub, {});
   };
 
-  function isTarget( targetId, link ) {
-        return link().id === targetId;
-  }
-
   self.dragDrop = function( item ) {
-    var dragId = item.link().id;
-    if( zoneId && zoneId !== dragId ) {
-      var links = service.infoLinks();
-      var drag = _.find( links, _.partial( isTarget, dragId ));
-      _.remove( links, _.partial( isTarget, dragId ) );
-      links.splice( _.findIndex( links, _.partial( isTarget, zoneId)),
-                    0, drag );
-      service.infoLinks( links );
-    }
+    service.reorder( item.link().id, zoneId );
   };
 
-  self.showSlotBefore = ko.observable();
+  self.showZone = ko.observable();
 
   self.addHubListener(ddHub, function( params ) {
-    self.showSlotBefore( self.link().id === params.zoneId );
+    self.showZone( self.link().id === params.zoneId );
   });
 
   self.dragOver = function( event, dragData, zoneData ) {
     zoneId = zoneData.id;
     hub.send( ddHub, {zoneId: zoneId});
   };
+
+  self.showDivider = self.disposedPureComputed( function() {
+    return !self.showZone()
+      && _.last( service.infoLinks())().id !== self.link().id;
+  });
 
 };

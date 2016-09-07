@@ -15,7 +15,7 @@
                     dragOver: dragOver,
                     data: $data.link()},
                     css: {dragging: dragging,
-                    'slot-before': showSlotBefore}">
+                    'info-link-divider': showDivider()}">
     <tr>
       <td><a class="link-btn link-btn--passive">
           <i class="lupicon-arrows-up-down"></i>
@@ -38,6 +38,10 @@
              data-bind="click: remove,
                         visible: link().canEdit">
           <i class="lupicon-remove"></i></a></td>
+    </tr>
+    <tr data-bind="visible: showZone">
+      <td class="info-link-drop-zone"
+          colspan="4"></td>
     </tr>
   </table>
   <!-- /ko -->

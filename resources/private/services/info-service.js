@@ -37,27 +37,32 @@ LUPAPISTE.InfoService = function() {
 
   // Options:
   // [markSeen]: mark-seen command after query (default falsey)
-  // [retainEditing]: retain editing states (default falsey)
-  // [originator]: id of the event originator
+  // [reset]: resets the links according to query result, discards
+  // editing states and temporary ids. updates showStar observable
+  // (default falsey)
+  // [originator]: id of the event originator. The originators editing
+  // state is not retained.
   // [star]: if true then showStar observable is updated (default falsey)
   function fetchInfoLinks( options ) {
     options = options || {};
     var tmpLinks = [];
-    var oldStates = _.reduce( infoLinks(),
-                              function( acc, link ) {
-                                if( self.isTemporaryId( link().id)) {
-                                  tmpLinks.push( {id: link().id});
-                                }
-                                return _.set( acc, link().id, {isNew: link().isNew});
-                              }, {});
+    var oldStates = options.reset
+          ? []
+          :_.reduce( infoLinks(),
+                     function( acc, link ) {
+                       if( self.isTemporaryId( link().id)) {
+                         tmpLinks.push( {id: link().id});
+                       }
+                       return _.set( acc, link().id, {isNew: link().isNew});
+                     }, {});
 
-    if( options.retainEditing) {
+    if( !options.reset) {
       hub.send( self.serviceName + "::save-edit-state", {states: oldStates});
     }
 
-    delete oldStates[options.originator];
-
     // Todo: ajax query
+
+    delete oldStates[options.originator];
 
     var cleanedOldies = _.filter(ko.mapping.toJS(infoLinks),
                                  _.flow( _.ary(_.partialRight( _.get, "id"), 1),
@@ -81,19 +86,22 @@ LUPAPISTE.InfoService = function() {
     if( options.markSeen ) {
       // Todo: ajax query
     }
-    if( options.star) {
-      self.showStar( _.some( infoLinks(), _.ary( _.partialRight( util.getIn, ["isNew"]), 1)));
+    if( options.reset) {
+      self.showStar( _.some( infoLinks(),
+                             _.ary( _.partialRight( util.getIn, ["isNew"]),
+                                    1)));
     }
   }
 
-  var appId = "This is not a real application id.";
+  var latestAppId = "This is not a real application id.";
 
   ko.computed( function() {
-    // Id guard to avoid unnecessary fetching (and star), since
+    // Id guard to avoid unnecessary fetching (and reset), since
     // fetchInfoLinks references observables internally.
-    if( lupapisteApp.models.application.id() !== appId ) {
-      appId = lupapisteApp.models.application.id();
-     fetchInfoLinks( {star: true});
+    var appId = lupapisteApp .models.application.id();
+    if( appId && appId !== latestAppId ) {
+      latestAppId = appId;
+     fetchInfoLinks( {reset: true});
     }
   });
 
@@ -101,6 +109,22 @@ LUPAPISTE.InfoService = function() {
     // Todo: auth model
     return lupapisteApp.models.currentUser.isAuthority();
   });
+
+  function isTarget( targetId, link ) {
+    return link().id === targetId;
+  }
+
+  self.reorder = function( moveId, afterId ) {
+    if( moveId !== afterId ) {
+      var links = infoLinks();
+      var mover = _.find( links, _.partial( isTarget, moveId ));
+      _.remove( links, _.partial( isTarget, moveId ) );
+      links.splice( _.findIndex( links, _.partial( isTarget, afterId)) + 1,
+                    0, mover );
+      // Todo ajax query
+      self.infoLinks( links );
+    }
+  };
 
   function hubscribe( event, fun ) {
     hub.subscribe( self.serviceName + "::" + event, fun );
@@ -116,7 +140,7 @@ LUPAPISTE.InfoService = function() {
   }
 
   hubscribe( "new", function() {
-    // Todo: ajax new
+    // Todo: ajax reorder command, followed by fetch
     infoLinks.push( ko.observable( {id: _.uniqueId( tmpPrefix ),
                                     text: "", url: ""
                                    }));
@@ -129,8 +153,8 @@ LUPAPISTE.InfoService = function() {
     self.infoLink( data.id )( {id: id,
                                text: params.text,
                                url: params.url });
-    fetchInfoLinks( {retainEditing: true,
-                     originator: id });
+    fetchInfoLinks( {originator: id,
+                     markSeen: true});
   });
 
   hubscribe( "delete", function( data ) {
@@ -138,4 +162,5 @@ LUPAPISTE.InfoService = function() {
     // Todo: ajax delete
   });
 
+  hubscribe( "fetch-info-links", fetchInfoLinks );
 };

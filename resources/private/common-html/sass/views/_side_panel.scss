@@ -326,9 +326,15 @@ table.info-link-editor-view {
   }
 }
 
+table.info-link-editor-view.info-link-divider {
+  border-bottom: 1px solid $gray85;
+}
 
-table.info-link-editor-view.slot-before {
-  margin-top: 1em;
+.info-link-drop-zone {
+  border: 1px dashed $orange-light;
+  min-height: $btn-height;
+  width: 100%;
+  
 }
 
 // Dragged link within list
@@ -339,6 +345,8 @@ table.info-link-editor-view.dragging {
 // Drag element
 table.info-link-editor-view + .dragging {
   display: block !important;
+  max-width: 30em;  
+  background-color: $gray51;
 }
 
 @mixin link-text( $max-width) {
@@ -357,6 +365,9 @@ span.info-link-text-wide {
 
 
 @media all and (max-width: $narrow-breakpoint) {
+  table.info-link-editor-view + .dragging {
+    max-width: 24em;
+  }
   span.info-link-text {
     max-width: 14em;
   }

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1473252184257');
+@import url('main-blessed1.css?z=1473256632592');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 .col--vertical label {
@@ -8180,29 +8180,38 @@ table.info-link-editor-view a.link-btn--passive:active {
   color: #f39129;
 }
 
-/* line 330, ../../../private/common-html/sass/views/_side_panel.scss */
-table.info-link-editor-view.slot-before {
-  margin-top: 1em;
+/* line 329, ../../../private/common-html/sass/views/_side_panel.scss */
+table.info-link-editor-view.info-link-divider {
+  border-bottom: 1px solid #555555;
 }
 
-/* line 335, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 333, ../../../private/common-html/sass/views/_side_panel.scss */
+.info-link-drop-zone {
+  border: 1px dashed #fbc732;
+  min-height: 40px;
+  width: 100%;
+}
+
+/* line 341, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view.dragging {
   display: none;
 }
 
-/* line 340, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 346, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view + .dragging {
   display: block !important;
+  max-width: 30em;
+  background-color: #333333;
 }
 
-/* line 350, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 358, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text {
   max-width: 20em;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
-/* line 354, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 362, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text-wide {
   max-width: 28em;
   overflow-x: hidden;
@@ -8210,22 +8219,27 @@ span.info-link-text-wide {
 }
 
 @media all and (max-width: 991px) {
-  /* line 360, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 368, ../../../private/common-html/sass/views/_side_panel.scss */
+  table.info-link-editor-view + .dragging {
+    max-width: 24em;
+  }
+
+  /* line 371, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text {
     max-width: 14em;
   }
 
-  /* line 364, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 375, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text-wide {
     max-width: 22em;
   }
 }
-/* line 369, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 380, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-link-link {
   margin-bottom: .5em;
 }
 
-/* line 376, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 387, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit {
   border: none;
   margin-bottom: 0;
@@ -8245,16 +8259,16 @@ table.info-link-editor-edit tr:hover {
 table.info-link-editor-edit tr:hover:nth-child(even) {
   background: white;
 }
-/* line 379, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 390, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:nth-child(odd) {
   border-bottom: 1px solid #dddddd;
 }
-/* line 382, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 393, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit td {
   padding-left: 5px;
   padding-right: 5px;
 }
-/* line 388, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 399, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit input {
   box-sizing: border-box;
   font-size: 16px;
@@ -8263,7 +8277,7 @@ table.info-link-editor-edit input {
   padding-bottom: 2px;
   padding-top: 2px;
 }
-/* line 398, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 409, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit button.ghost {
   border: none;
   padding-left: 4px;

@@ -29,11 +29,17 @@ LUPAPISTE.SidePanelModel = function(params) {
   }
 
   self.disposedComputed( function() {
-    if( self.showInfoPanel()) {
-      self.showStar( false );
-    }
     if( self.showNoticePanel()) {
       hub.send( "SidePanelService::NoticeSeen");
+    }
+  });
+
+  self.showInfoPanel.subscribe( function( flag ) {
+    if( flag ) {
+      self.showStar( false );
+    } else {
+      hub.send( "infoService::fetch-info-links",{reset: true,
+                                                 markSeen: true});
     }
   });
 
