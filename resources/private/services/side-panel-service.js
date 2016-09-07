@@ -46,12 +46,14 @@ LUPAPISTE.SidePanelService = function() {
   // Conversation
   var allComments = ko.observableArray([]);
   self.queryComments = function() {
-    ajax
-      .query("comments", {id: self.application.id()})
-      .success(function (res) {
-        allComments(res.comments);
-      })
-      .call();
+    if (self.authorization.ok("comments")) {
+      ajax
+        .query("comments", {id: self.application.id()})
+        .success(function (res) {
+          allComments(res.comments);
+        })
+        .call();
+    }
   };
   hub.subscribe("application-model-updated", self.queryComments);
   hub.subscribe("upload-done", self.queryComments);
