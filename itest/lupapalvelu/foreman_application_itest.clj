@@ -578,9 +578,9 @@
       (command foreman :submit-application :id foreman-app-id) => ok?)
 
     (facts "attachments"
-     (let [new-main-attachment (upload-attachment foreman application-id nil true)
-           attachment-by-foreman (upload-attachment foreman foreman-app-id nil true)
-           attachment-by-applicant (upload-attachment applicant foreman-app-id nil true)]
+     (let [new-main-attachment (upload-attachment foreman application-id nil true :filename "dev-resources/test-pdf.pdf")
+           attachment-by-foreman (upload-attachment foreman foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")
+           attachment-by-applicant (upload-attachment applicant foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")]
        (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
        (fact "foreman CAN upload a new version on main application"
          (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
