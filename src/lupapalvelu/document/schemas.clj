@@ -199,7 +199,7 @@
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def postinumero {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero" :transform :trim})
+(def postinumero {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero"})
 
 (def simple-osoite [{:name "osoite"
                      :type :group
