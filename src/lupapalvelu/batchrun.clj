@@ -18,6 +18,7 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [lupapalvelu.attachment :as attachment]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
@@ -412,3 +413,20 @@
 (defn check-review-for-id [& args]
   (mongo/connect!)
   (poll-verdicts-for-reviews (first args)))
+
+(defn pdfa-convert-review-pdfs [& args]
+  (mongo/connect!)
+  (debug "# of applications with background generated tasks:"
+           (mongo/count :applications {:tasks.source.type "background"}))
+  (let [orgs-by-id (orgs-for-review-fetch)
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
+      (let [command (assoc (application->command application) :user eraajo-user :created (now))]
+        (doseq [task (:tasks application)]
+          (if (= "background" (:type (:source task)))
+            (do
+              (doseq [att (:attachments application)]
+                (if (= (:id task) (:id (:source att)))
+                  (do
+                    (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
+                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
