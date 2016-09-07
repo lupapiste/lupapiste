@@ -81,19 +81,19 @@
                        (after-update-triggered-updates application collection document updated-doc))
        :post-results  post-results})))
 
-(defmulti transform-value (fn [transform _] (keyword transform)))
+(defmulti transform-trimmed-value (fn [transform _] (keyword transform)))
 
-(defmethod transform-value :default [_ value] value)
+(defmethod transform-trimmed-value :default [_ value] value)
 
-(defmethod transform-value :upper-case
+(defmethod transform-trimmed-value :upper-case
   [_ value]
   (ss/upper-case value))
 
-(defmethod transform-value :lower-case
+(defmethod transform-trimmed-value :lower-case
   [_ value]
   (ss/lower-case value))
 
-(defmethod transform-value :zero-pad-4
+(defmethod transform-trimmed-value :zero-pad-4
   [_ value]
   (if (and value (re-matches #"[\s0-9]+" value))
     (try
@@ -101,9 +101,16 @@
       (catch Exception _ value))
     value))
 
-(defmethod transform-value :trim [_ value] (ss/trim value))
+(defn- trim-value [value]
+  (if (string? value)
+    (ss/trim value)
+    value))
 
-(defn transform
+(defn transform-value [transform value]
+  (transform-trimmed-value transform (trim-value value)))
+
+
+(defn- transform
   "Processes model updates with the schema-defined transforms if defined."
   [document updates]
   (let [doc-schema (model/get-document-schema document)]
@@ -140,7 +147,7 @@
         (when (or readonly (and (sent? document) readonly-after-sent))
           (fail! :error-trying-to-update-readonly-field))))))
 
-(defn validate-readonly-removes! [document remove-paths]
+(defn- validate-readonly-removes! [document remove-paths]
   (let [doc-schema              (model/get-document-schema document)
         validate-all-subschemas (fn validate-all-subschemas [{:keys [readonly readonly-after-sent body]}]
                                   (or readonly
@@ -229,7 +236,7 @@
      (when (model/has-errors? post-results) (fail! :document-would-be-in-error-after-update :results post-results))
      document)))
 
-(defn can-add-schema? [{info :info :as schema} application]
+(defn- can-add-schema? [{info :info :as schema} application]
   (let [schema-name         (:name info)
         applicant-schema    (operations/get-applicant-doc-schema-name application)
 
