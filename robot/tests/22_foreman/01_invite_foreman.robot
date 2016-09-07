@@ -7,16 +7,16 @@ Suite Setup     Initialize foreman
 
 *** Test Cases ***
 
-Pena creates new application
+Applicant creates new application
   Pena logs in
   Create project application
 
-Pena invites Mikko
+Applicant invites Mikko
   Open tab  parties
   Open foreman accordions
   Invite Mikko
 
-Pena invites Solita
+Applicant invites Solita
   Open tab  parties
   Open foreman accordions
   Invite company to application  Solita Oy
@@ -37,7 +37,7 @@ Mikko accepts invitation
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
   [Teardown]  logout
 
-Pena sets Solita as hakija
+Applicant sets Solita as hakija
   Pena logs in
   Open application  ${appname}  753-416-25-22
   Open tab  parties
@@ -46,17 +46,17 @@ Pena sets Solita as hakija
   Wait until  Select From List  xpath=//section[@data-doc-type="hakija-r"]//select[@name="company-select"]  Solita Oy (1060155-5)
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="yritys.yritysnimi"]  Solita Oy
 
-Pena cannot create foreman applications before verdict is given
+Applicant cannot create foreman applications before verdict is given
   Element should be visible  xpath=//div[@data-test-id="invite-foreman-authority-info"]
   Element should not be visible  xpath=//button[@data-test-id="invite-foreman-button"]
   Element should not be visible  xpath=//div[@data-test-id="invite-foreman-button-info"]
 
-Pena sets himself the applicant
+Applicant sets his info to the applicant document
   Click by test id  hakija-r_append_btn
   Wait until  Select From List  xpath=(//section[@data-doc-type="hakija-r"])[2]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]  Panaani Pena
   Wait Until  Textfield Value Should Be  xpath=(//section[@data-doc-type="hakija-r"])[2]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Pena
 
-Pena inputs comment in order to open the application
+Applicant inputs comment in order to open the application
   Input comment and open to authorities  Avataan
   [Teardown]  logout
 
@@ -79,7 +79,7 @@ Sonja invites foreman Teppo to application
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
   [Teardown]  logout
 
-Pena sees sent invitation on the original application
+Applicant sees sent invitation on the original application
   Pena logs in
   Open project application
   Open tab  parties
@@ -88,7 +88,7 @@ Pena sees sent invitation on the original application
   # Also in auth array
   Wait until  Is authorized party  teppo@example.com
 
-Pena sees sent invitations on the foreman application
+Applicant sees sent invitations on the foreman application
   Open application by id  ${foremanAppId}
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${foremanAppId}
   Open tab  parties
@@ -123,10 +123,10 @@ Foreman application can't be submitted before link permit is submitted
   Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
   Wait until  Submit application error should be  error.not-submittable.foreman-link
 
-Pena can set Teppo as foreman substitute
+Applicant can set Teppo as foreman substitute
   Open tab  parties
   Input text with jQuery  input[data-docgen-path="sijaistus.sijaistettavaHloEtunimi"]  Bob
-  
+
 Application is submitted
   Open project application
   Wait Until  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
@@ -148,7 +148,7 @@ All foremen table is shown on the Construction tab
   Element should contain  jquery=table.all-foremen-table tbody tr td  (sijainen)
   [Teardown]  logout
 
-Pena can create foreman applications after verdict is given for the original application
+Applicant can create foreman applications after verdict is given for the original application
   Pena logs in
   Open project application
   Open tab  parties
@@ -166,7 +166,7 @@ Add työnjohtaja task to original application
   Wait until  Xpath Should Match X Times  //div[@data-test-id="tasks-foreman"]//tbody/tr  2
   [Teardown]  logout
 
-Pena can link existing foreman application to foreman task
+Applicant can link existing foreman application to foreman task
   Pena logs in
   Open project application
   Open tab  tasks
@@ -175,7 +175,7 @@ Pena can link existing foreman application to foreman task
   Sleep  2s
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-1"]  ${foremanAppId}
 
-Pena can clear the link and change the foreman role
+Applicant can clear the link and change the foreman role
   Select From List By Index  xpath=//select[@data-test-id="foreman-selection-1"]  0
   # Sleep so the repository reload does not prune dom when waiting
   Sleep  2s
@@ -184,12 +184,12 @@ Pena can clear the link and change the foreman role
   Sleep  2s
   Wait Until  List Selection Should Be  xpath=//select[@data-test-id="foreman-selection-0"]  ${foremanAppId}
 
-Pena can move to linked foreman application and back
+Applicant can move to linked foreman application and back
   Click by test id  foreman-application-link-${foremanAppId}
   Wait until  Element text should be  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
   Click by test id  test-application-link-permit-lupapistetunnus
 
-Pena can start invite flow from tasks tab
+Applicant can start invite flow from tasks tab
   Open tab  tasks
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
@@ -198,7 +198,7 @@ Pena can start invite flow from tasks tab
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog
 
-Pena can invite additional foremans to application with verdict
+Applicant can invite additional foremans to application with verdict
   Wait and click   xpath=//div[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
@@ -206,7 +206,7 @@ Pena can invite additional foremans to application with verdict
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
 
-Pena invites foreman Mikko to application
+Applicant invites foreman Mikko to application
   Open project application
   Open tab  parties
   Open foreman accordions
