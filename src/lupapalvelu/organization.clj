@@ -199,9 +199,8 @@
   {:pre [(or (string? municipality) (nil? municipality))]}
   (when (and (ss/not-blank? municipality) (re-matches #"\d{3}" municipality) )
     (let [no-bbox-srs (env/value :municipality-wfs (keyword municipality) :no-bbox-srs)]
-      (merge
-        (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)
-        (when no-bbox-srs {:no-bbox-srs true})))))
+      (some-> (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" "\\S+"}} :osoitteet)
+              (util/assoc-when :no-bbox-srs (boolean no-bbox-srs))))))
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
@@ -296,6 +295,9 @@
 
 (defn some-organization-has-calendars-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
+
+(defn organizations-with-calendars-enabled []
+  (map :id (mongo/select :organizations {:calendars-enabled true} {:id 1})))
 
 ;;
 ;; Backend server addresses
