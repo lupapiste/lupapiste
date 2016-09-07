@@ -172,7 +172,7 @@ Unto hasn't accepted auth, so it can't be upgreded
 
 Mikko deletes auhtorzation from Unto
   Click by test id  remove-auth-unto@example.com
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Invite count is  0
 
 *** Keywords ***

@@ -79,21 +79,23 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
 
     if (role && hasAuth("change-auth") ) {
       hub.send("track-click", {category:"Application", label:"", event:"changeAuth"});
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-          loc("areyousure"),
-          loc("application.grant-writer-access.confirm"),
-          {title: loc("yes"),
-            fn:  function() {
-              ajax.command("change-auth", { id: id, userId: userId, role: role})
-              .success(application().lightReload)
-              .processing(application().processing)
-              .call();
-              hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
-              return false;
-            }},
-            {title: loc("no")}
-      );
-      hub.send("track-click", {category:"Application", label:"", event:"authChangeCanceled"});
+      hub.send("show-dialog", {ltitle: "areyousure",
+        size: "medium",
+        component: "yes-no-dialog",
+        componentParams: {text: loc("application.grant-writer-access.confirm", name),
+                          yesFn: function() {
+                            ajax.command("change-auth", { id: id, userId: userId, role: role})
+                            .success(function() {
+                              application().lightReload();
+                              hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
+                            })
+                            .processing(application().processing)
+                            .call();
+                            return false;
+                          },
+                          noFn: function() {
+                            hub.send("track-click", {category:"Application", label:"", event:"authChangeCanceled"});
+                          }}});
       return false;
     }
   };
@@ -106,20 +108,24 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     var username = model.username();
     var id = application().id();
     hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.message"),
-      {title: loc("yes"),
-       fn:  function() {
-         ajax.command("remove-auth", { id: id, username: username})
-           .success(application().lightReload)
-           .processing(application().processing)
-           .call();
-          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
-         return false;
-      }},
-      {title: loc("no")}
-    );
+
+    hub.send("show-dialog", {ltitle: "areyousure",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {ltext: "areyousure.message",
+                        yesFn: function() {
+                          ajax.command("remove-auth", { id: id, username: username})
+                          .success(function() {
+                            application().lightReload();
+                            hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
+                          })
+                          .processing(application().processing)
+                          .call();
+                          return false;
+                        },
+                        noFn: function() {
+                          hub.send("track-click", {category:"Application", label:"", event:"authChangeCanceled"});
+                        }}});
     hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
     return false;
   };
