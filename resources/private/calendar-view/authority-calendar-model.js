@@ -32,7 +32,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
       self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
-      self.applicationModel({id: id, organizationName: lupapisteApp.models.application.organizationName()})
+      self.applicationModel({id: id, organizationName: lupapisteApp.models.application.organizationName()});
     }
   });
 

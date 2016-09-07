@@ -23,7 +23,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
       self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
-      self.bookAppointmentParams.application({id: id, organizationName: lupapisteApp.models.application.organizationName()})
+      self.bookAppointmentParams.application({id: id, organizationName: lupapisteApp.models.application.organizationName()});
     }
   });
 
