@@ -14,7 +14,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
-
 ;;
 ;; API
 ;;
@@ -27,39 +26,52 @@
    :org-authz-roles #{:authority}
    :states states/all-states}
   [command]
-  (ok (info-links/delete-info-link! (:application command) linkId)))
+  (println "Poistetaan linkki id:llä " linkId)
+  (println " - numerona " (Integer/parseInt linkId 10))
+  (ok :res (info-links/delete-info-link! (:application command) 
+     (Integer/parseInt linkId 10))))
 
 (defcommand info-link-reorder
    {:description "Reorder application-specific info-links"
    :user-roles #{:authority :applicant}
    :parameters [id linkIds]
-   :input-validators [(partial action/non-blank-parameters [:linkIds])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
+   ;:input-validators [(partial action/non-blank-parameters [:linkIds])] ;; todo: check why this fails in unexpected way
    :org-authz-roles #{:authority}
    :states states/all-states}
   [command]
-  (ok (info-links/reorder-info-links! (:application command) linkIds)))
+  (let [ids (map #(Integer/parseInt % 10) linkIds)]
+     (if (empty? (remove number? ids))
+        (ok :res (info-links/reorder-info-links! (:application command) ids))
+        (ok :res false))))
 
 (defcommand info-link-upsert
   {:description "Add or update application-specific info-link"
    :user-roles #{:authority :applicant}
-   :parameters [id text url linkId] ; linkId optional
+   :parameters [id text url]
+   :optional-parameters [linkId]
    :input-validators [(partial action/non-blank-parameters [:text]) 
                       (partial action/non-blank-parameters [:url])] 
    :org-authz-roles #{:authority}
    :states      states/all-states}
   [command]
-  (let [app (:application command)]
-     (ok
-        (if linkId
-           (info-links/update-info-link! app linkId text url)
-           (info-links/add-info-link! app text url)))))
+  (let [app (:application command)
+        res (if linkId
+              (info-links/update-info-link! app linkId text url)
+              (info-links/add-info-link! app text url))]
+     (info-links/mark-links-seen! command)
+     (ok :linkId res)))
 
 (defquery info-links
   {:description "Return a list of application-specific info-links"
-   :parameters []
-   :user-roles #{:authority :applicant}}
+   :parameters [id]
+   :user-roles #{:authority :applicant}
+   :states      states/all-states}
   [command]
   (let [app (:application command)]
-     (ok (info-links/info-links app))))
+       
+     (info-links/mark-links-seen! command)
+     (println "returning info links " (info-links/info-links app))
+     (ok :links (info-links/info-links app))))
 
 

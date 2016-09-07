@@ -8,17 +8,21 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
-;; stub
 (defn last-seen-date [app user]
+   ;; take from app -> _seen_info-links_user -> timestamp
    42)
 
+(defn mark-links-seen! [command]
+   (update-application command
+      {$set (app/mark-collection-seen-update (:user command) (now) "info-links")}))
+   
 (defn- take-first [pred lst def]
    (loop [lst lst]
       (cond
@@ -58,11 +62,8 @@
    (let [links (info-links app)
          link-node {:linkId link-id :text text :url url :modified (now)}
          new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
-      (if (= links new-links)
-         false
-         (do
-            (update-info-links! app new-links)
-            true))))
+        (update-info-links! app new-links)
+        link-id))
 
 (defn reorder-info-links! [app link-ids]
    (let [links (info-links app)]
