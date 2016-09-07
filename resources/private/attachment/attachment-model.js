@@ -7,6 +7,8 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   var service = lupapisteApp.services.attachmentsService;
 
+  var data = attachmentData;
+
   // Attachment data fields that are mapped as observables
   var observableFields = ["notNeeded", "contents", "scale", "size", "forPrinting", "type", "op", "groupType"];
 
@@ -27,11 +29,15 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
       _.get(self, field)(_.get(attachmentData, field));
     });
 
-    self.processing(false);
+    _.forEach(_.keys(_.omit(data, observableFields)), _.partial(_.unset, self));
 
     self.group(buildGroup(attachmentData));
 
     self.visibility(buildVisibility(attachmentData));
+
+    self.processing(false);
+
+    data = attachmentData;
 
     return _.assign(self, _.omit(attachmentData, observableFields));
   };
