@@ -423,7 +423,7 @@
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
-   :on-success       (notify :cancel-appointment)}
+   :on-success       (notify :decline-appointment)}
   [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
   (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Canceling reservation" reservationId)
