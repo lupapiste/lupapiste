@@ -68,9 +68,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
-  self.approval = {approval: self.disposedComputed(function() {
+  self.approval = self.disposedPureComputed(function () {
     return self.attachment().approved;
-  })};
+  });
 
   var editable = self.disposedComputed(function() {
     return !service.processing() && !self.attachment().processing();
