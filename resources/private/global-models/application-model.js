@@ -454,27 +454,6 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.removeAuth = function(model) {
-    var username = model.username();
-    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.message"),
-      {title: loc("yes"),
-       fn:  function() {
-         ajax.command("remove-auth", { id: self.id(), username: username})
-           .success(self.reload)
-           .processing(self.processing)
-           .call();
-          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
-         return false;
-      }},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
-    return false;
-  };
-
   self.isNotOwner = function(model) {
     return model.role() !== "owner";
   };
