@@ -143,8 +143,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   addUpdateListener("delete-attachment-version", {ok: true}, _.ary(querySelf, 0));
 
   // RAM
-  self.isRamAttachment =    function() { return Boolean(self.attachment().ramLink); };
-  self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachemnt"); };
+  self.newRamAttachment   = function() { self.sendEvent("ramService", "new", {id: self.applicationId, attachmentId: self.id} ); };
+  self.isRamAttachment    = function() { return Boolean(self.attachment().ramLink); };
+  self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
   function groupToString(group) {
