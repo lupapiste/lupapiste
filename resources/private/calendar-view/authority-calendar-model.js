@@ -16,6 +16,8 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   self.selectedReservationType = ko.observable();
   self.defaultLocation = ko.observable();
 
+  self.applicationModel = ko.observable();
+
   self.noCalendarFoundForOrganization = ko.observable();
   self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
@@ -30,6 +32,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
       self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+      self.applicationModel({id: id, organizationName: lupapisteApp.models.application.organizationName()})
     }
   });
 
@@ -47,9 +50,6 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     var partyDocs = _.filter(lupapisteApp.models.application._js.documents, util.isPartyDoc);
 
     parties = _.filter(parties, function(p) { return !isGuest(p); });
-
-    self.selectedParty(null);
-    self.selectedReservationType(null);
 
     self.authorizedParties(
       _.map(parties, function (p) {
