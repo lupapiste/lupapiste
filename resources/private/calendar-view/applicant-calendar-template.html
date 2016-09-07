@@ -6,6 +6,10 @@
 
     <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
 
+    <div>
+      <h2 data-bind="ltext: 'book-appointment.title'"></h2>
+    </div>
+
     <!-- book-appointment -->
     <book-appointment-filter params="model: bookAppointmentParams"></book-appointment-filter>
 

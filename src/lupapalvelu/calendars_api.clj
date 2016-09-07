@@ -15,6 +15,8 @@
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
+(defn- reservation-participants [res] (flatten (vals (select-keys res [:from :to]))))
+
 (defn- ->FrontendCalendar [calendar user]
   {:id               (:id calendar)
    :name             (format "%s %s" (:firstName user) (:lastName user))
@@ -34,7 +36,7 @@
    :location  (:location r)
    :applicationId (:contextId r)
    :reservedBy (:reservedBy r)
-   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to]))))})
+   :participants (map usr/get-user-by-id reservation-participants)})
 
 (defn Reservations->FrontendSlots
   [status reservations]
@@ -417,13 +419,32 @@
     (cal/decline-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))
 
+(defn- process-application-with-reservation-updates
+  [{:keys [reservations] :as appl}]
+  (let [appl-without-reservations (dissoc appl :reservations)
+        reservation-fields [:id :status :reservationStatus :reservationType :startTime :endTime
+                            :comment :location :applicationId :reservedBy]
+        participant-fields [:firstName :lastName :id]
+        id->participant (comp (fn [u] (select-keys u participant-fields)) usr/get-user-by-id)]
+    (map #(merge (select-keys % reservation-fields)
+                 {:application appl-without-reservations
+                  :participants (map id->participant (reservation-participants %))}) reservations)))
+
+(defquery unseen-reservation-updates
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
+  [{user :user}]
+  (ok :reservationUpdates (mapcat process-application-with-reservation-updates
+                                  (cal/applications-with-unseen-reservation-updates user))))
+
 (defcommand mark-reservation-update-seen
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :parameters       [reservationId :id]
    :input-validators [(partial action/number-parameters [:reservationId])]
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant})]}
-  [{{userId :id :as user} :user {:keys [id organization] :as application} :application}]
+  [{{userId :id :as user} :user application :application}]
   (cal/mark-reservation-update-seen application reservationId userId)
   (ok))
 
