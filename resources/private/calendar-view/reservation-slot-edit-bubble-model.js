@@ -1,8 +1,7 @@
 LUPAPISTE.ReservationSlotEditBubbleModel = function(params) {
   "use strict";
   var self = this,
-      calendarService = lupapisteApp.services.calendarService,
-      config = calendarService.params();
+      config = LUPAPISTE.config.calendars;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
