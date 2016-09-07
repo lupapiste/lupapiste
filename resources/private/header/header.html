@@ -24,7 +24,8 @@
                         <span class="narrow-hide" data-bind="ltext: 'navigation'"></span>
                     </a>
                 </div>
-                <div class="header-box" data-bind="visible: $root.showCalendarMenuOptions">
+                <div class="header-box"
+                     data-bind="visible: $root.showCalendarMenuOptions">
                   <!-- ko if: lupapisteApp.models.currentUser.isAuthorityAdmin -->
                     <a href="#!/organization-calendars" data-bind="attr: {'title': loc('Ajanvaraus')}">
                       <span class="lupicon-calendar"></span>
@@ -36,6 +37,12 @@
                       <span class="lupicon-calendar"></span>
                       <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
                     </a>
+                  <!-- /ko -->
+                  <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                  <a href="#!/new-appointment" data-bind="attr: {'title': loc('Ajanvaraus')}">
+                    <span class="lupicon-calendar"></span>
+                    <span class="narrow-hide" data-bind="ltext: 'Ajanvaraus'"></span>
+                  </a>
                   <!-- /ko -->
                 </div>
                 <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
@@ -74,12 +81,12 @@
     </div>
     <div class="nav-bottom">
         <div class="nav-box">
-            <div class="language-menu" style="display: none" data-bind="visible: $root.languageMenuVisible">
-                <ul data-bind="foreach: $root.languages">
-                    <li><a href="#" data-bind="click: $root.changeLanguage,
-                                               text: $data.toUpperCase() + ' - ' + loc( $data )"></a></li>
-                </ul>
-            </div>
+          <div class="language-menu" style="display: none" data-bind="visible: $root.languageMenuVisible">
+              <ul data-bind="foreach: $root.languages">
+                  <li><a href="#" data-bind="click: $root.changeLanguage,
+                                             text: $data.toUpperCase() + ' - ' + loc( $data )"></a></li>
+              </ul>
+          </div>
         </div>
     </div>
 </nav>

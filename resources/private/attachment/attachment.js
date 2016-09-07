@@ -22,6 +22,7 @@ var attachment = (function() {
       pageReadyForQuery(false);
       repository.load(applicationId(), undefined, undefined, true);
     } else {
+      lupapisteApp.setTitle(lupapisteApp.models.application._js.title);
       pageReadyForQuery(true);
     }
   });

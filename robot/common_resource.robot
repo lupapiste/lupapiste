@@ -378,6 +378,11 @@ Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
 
+Select From List by test id and index
+  [Arguments]  ${id}  ${index}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
+  Select From List By Index  xpath=//select[@data-test-id="${id}"]  ${index}
+
 Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]

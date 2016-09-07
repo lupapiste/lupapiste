@@ -155,7 +155,7 @@
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states
+   :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
   [{{attachments :attachments :as application} :application}]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
