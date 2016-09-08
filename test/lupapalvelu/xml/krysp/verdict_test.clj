@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.verdict-test
-  (:use [lupapalvelu.xml.krysp.verdict]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.xml.krysp.verdict :refer :all]))
 
 (facts "verdict mapping"
   (facts "by id"

@@ -107,8 +107,8 @@
 (defn- archival-query [user]
   (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
                      (organization/earliest-archive-enabled-ts))
-        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven"]}} {:archived.application nil}]}
-                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven"]}} {:archived.completed nil}]}]}]
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil}]}
+                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil}]}]}]
     (if from-ts
       {$and [base-query
              {:submitted {$gte from-ts}}]}
@@ -192,12 +192,9 @@
     (concat frontend-fields indicator-fields)))
 
 
-(defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
+(defn- enrich-row [app]
   (-> app
-      (assoc :kind (cond
-                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
-                     infoRequest "applications.inforequest"
-                     :else       "applications.application"))
+      app-utils/with-application-kind
       app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant

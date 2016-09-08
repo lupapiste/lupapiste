@@ -6,6 +6,7 @@
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
             [sade.env :as env]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]))
 
 (apply-remote-minimal)
@@ -344,11 +345,15 @@
       (fact "new attachment has been created"
         (count attachments) => (+ expected-att-cnt 1)
         (count (:versions appeal-attachment)) => 1          ; only one version, even if PDF/A converted
-        (fact "txt is converted to pdf/a"
-          (-> appeal-attachment :latestVersion :fileId) =not=> file-id-1
-          (-> appeal-attachment :latestVersion :originalFileId) => file-id-1
-          (-> appeal-attachment :latestVersion :contentType) => "application/pdf"
-          (-> appeal-attachment :latestVersion :archivable) => true))
+
+        (if (libre/enabled?)
+          (fact "txt is converted to pdf/a"
+            (-> appeal-attachment :latestVersion :fileId) =not=> file-id-1
+            (-> appeal-attachment :latestVersion :originalFileId) => file-id-1
+            (-> appeal-attachment :latestVersion :contentType) => "application/pdf"
+            (-> appeal-attachment :latestVersion :archivable) => true)
+          (println "Skipped appeail-itest libreoffice tests!")))
+
       (fact "attachment type is correct"
         (:type appeal-attachment) => {:type-group "muutoksenhaku"
                                       :type-id    "valitus"})

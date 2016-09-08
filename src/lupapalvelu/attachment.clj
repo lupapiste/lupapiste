@@ -398,7 +398,7 @@
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application user attachment options)
                                 (build-version-updates user attachment version-model options))
-           update-result (update-application (application->command application) mongo-query mongo-updates true)]
+           update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
              (do (remove-old-files! attachment version-model)
@@ -666,3 +666,30 @@
                 :approved (->approval new-state user created file-id)}]
       (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
     (fail :error.attachment.id)))
+
+(defn convert-existing-to-pdfa! [application user attachment]
+  {:pre [(map? application) (:id application) (:attachments application)]}
+  (let [{:keys [archivable contentType]} (last (:versions attachment))]
+    (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
+      (fail :error.attachment.id)
+      ;; else
+      (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
+            temp-pdf (File/createTempFile fileId ".tmp")
+            file-content (mongo/download fileId)]
+        (if (nil? file-content)
+          (do
+            (error "PDF/A conversion: No mongo file for fileId" fileId)
+            (fail :error.not-found))
+          (try
+            (with-open [content ((:content file-content))]
+              (io/copy content temp-pdf)
+              (upload-and-attach! {:application application :user user}
+                                  {:attachment-id (:id attachment)
+                                   :comment-text nil
+                                   :required false
+                                   :created created
+                                   :stamped stamped
+                                   :original-file-id fileId}
+                                  {:content temp-pdf :filename filename}))
+            (finally
+              (io/delete-file temp-pdf :silently))))))))

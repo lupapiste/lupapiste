@@ -125,8 +125,8 @@
 
   var model = function(params) {
     var self = this;
-    self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
-    self.applicationId = params.application.id;
+    self.attachmentId = ko.unwrap(params.attachmentId);
+    self.applicationId = ko.unwrap(params.application.id);
     self.metadata = params.metadata;
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable();
@@ -179,13 +179,13 @@
       var command;
       if (params.caseFile) {
         command = "store-tos-metadata-for-process";
-      } else if (self.attachmentId()) {
+      } else if (self.attachmentId) {
         command = "store-tos-metadata-for-attachment";
       } else {
         command = "store-tos-metadata-for-application";
       }
       ajax.command(command)
-        .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
+        .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
         .success(function(data) {
           self.metadata(ko.mapping.fromJS(data.metadata));
           self.editedMetadata(constructEditableMetadata(data.metadata, self.schema(), roles));

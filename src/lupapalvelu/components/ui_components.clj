@@ -261,8 +261,9 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing]
+   :attachment   {:depends [:services :common-html :repository :signing]
                   :js ["attachment-multi-select.js"
+                       "attachment-model.js"
                        "targeted-attachments-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"
@@ -284,13 +285,14 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js"]
+                        "reservation-slot-reserve-bubble-model.js"
+                        "book-appointment-filter.js"]
                    :html ["reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
-
                           "authority-calendar-template.html" "applicant-calendar-template.html"
                           "calendar-message-items-template.html"
-                          "reservation-slot-reserve-bubble-template.html"]}
+                          "reservation-slot-reserve-bubble-template.html"
+                          "book-appointment-filter-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view]
@@ -389,13 +391,17 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
+   :new-appointment {:depends [:calendar-view]
+                     :js ["new-appointment.js"]
+                     :html ["new-appointment.html"]}
+
    :applicant-app {:depends []
                    :js ["applicant.js"]}
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company :footer :ui-components]}
+                             :company :analytics :register-company :footer :new-appointment :ui-components]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]

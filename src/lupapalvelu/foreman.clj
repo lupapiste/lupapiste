@@ -58,6 +58,9 @@
                                              "data.henkilotiedot.hetu.value" foreman-hetu}}}
                     [:created :documents :municipality]))))
 
+(defn get-foreman-documents [foreman-application]
+  (domain/get-document-by-name foreman-application "tyonjohtaja-v2"))
+
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
   the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
@@ -128,7 +131,28 @@
   (-> (select-keys application [:id :state :auth :documents])
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
+(defn get-linked-foreman-applications [id]
+  (let [app-link-resp (mongo/select :app-links {:link {$in [id]}})
+        apps-linking-to-us (filter #(= (:type ((keyword id) %)) "linkpermit") app-link-resp)
+        foreman-application-links (filter #(= "tyonjohtajan-nimeaminen-v2"
+                                              (get-in % [(keyword (first (:link %))) :apptype]))
+                                          apps-linking-to-us)
+        foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
+        applications (mongo/select :applications {:_id {$in foreman-application-ids}} [:id :state :auth :documents])
+        mapped-applications (map foreman-application-info applications)]
+    (sort-by :id mapped-applications)))
+
 (defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+
+(defn foreman-in-foreman-app [application user]
+  (and (auth/has-auth-role? application (:id user) :foreman) (foreman-app? application)))
+
+(defn allow-foreman-only-in-foreman-app
+  "If user has :forman role in current application, check that the application is a forman application."
+  [{:keys [application user]}]
+  (when (and (auth/has-auth-role? application (:id user) :foreman)
+             (not (foreman-app? application)))
+    unauthorized))
 
 (defn notice?
   "True if application is foreman application and of type notice (ilmoitus)"

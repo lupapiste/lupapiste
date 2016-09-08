@@ -14,10 +14,11 @@ Initialize foreman
   Set Suite Variable  ${foremanApps}
 
 Create project application
+  [Arguments]  ${state}=draft
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  foreman-app${secs}
   Append To List  ${applications}  ${appname}
-  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
+  Create application with state  ${appname}  753-416-25-22  kerrostalo-rivitalo  ${state}
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Append To List  ${applicationIds}  ${newApplicationId}
 

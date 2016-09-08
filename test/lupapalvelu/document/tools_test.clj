@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.tools-test
-  (:use [lupapalvelu.document.tools]
-        [midje.sweet]
-        [midje.util :only [expose-testables]]))
+  (:require [lupapalvelu.document.tools :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [expose-testables]]))
 
 (expose-testables lupapalvelu.document.tools)
 
@@ -42,6 +42,10 @@
 ;;
 ;; Public api
 ;;
+
+(facts "body"
+  (fact "flattens stuff into lists"    (body 1 2 [3 4] 5) => [1 2 3 4 5])
+  (fact "does not flatten recursively" (body 1 2 [3 4 [5]]) => [1 2 3 4 [5]]))
 
 (fact "wrapped defaults to :value key"
   (wrapped nil) => {:value nil}

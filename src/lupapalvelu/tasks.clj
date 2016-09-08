@@ -143,6 +143,7 @@
            :order 1
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
@@ -163,6 +164,7 @@
            :section-help "authority-fills"
            :i18name "task-katselmus"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
@@ -183,6 +185,7 @@
            :section-help "authority-fills"
            :i18name "task-katselmus"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "katselmus/pitoPvm" "katselmus/pitaja" "vaadittuLupaehtona"]
            {:h2 "task-katselmus.huomautukset"}

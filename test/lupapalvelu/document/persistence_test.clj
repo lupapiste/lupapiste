@@ -5,7 +5,9 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.document.persistence empty-op-attachments-ids)
+(testable-privates lupapalvelu.document.persistence
+                   empty-op-attachments-ids
+                   validate-readonly-removes!)
 
 (def some-time 123456789)
 
@@ -142,4 +144,9 @@
        (fact "Zero-pad-4 hello" (transform-value :zero-pad-4 "hello") => "hello")
        (fact "Zero-pad-4 nil" (transform-value :zero-pad-4 nil) => nil)
        (fact "Zero-pad-4 " (transform-value :zero-pad-4 "") => "")
-       (fact "Zero-pad-4 -56" (transform-value :zero-pad-4 "-56") => "-56"))
+       (fact "Zero-pad-4 -56" (transform-value :zero-pad-4 "-56") => "-56")
+       (facts "Strings are trimmed before transform"
+              (fact "Default" (transform-value :foobar " Foobar   ") => "Foobar")
+              (fact "Upper-case" (transform-value :upper-case " Foobar ") => "FOOBAR")
+              (fact "Lower-case" (transform-value :lower-case " FooBar ") => "foobar")
+              (fact "Zero-pad-4" (transform-value :zero-pad-4 " 1  ") => "0001")))

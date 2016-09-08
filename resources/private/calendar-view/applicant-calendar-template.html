@@ -7,38 +7,16 @@
     <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
 
     <!-- book-appointment -->
-    <div>
-      <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
-    </div>
+    <book-appointment-filter params="model: bookAppointmentParams"></book-appointment-filter>
 
-    <div class="times-filter-group">
-      <span class="form-entry">
-        <label class="form-label tip" data-bind="ltext: 'application.calendar.select-authority'"></label>
-        <select class="form-input combobox tip" data-test-id="attendee-select"
-                data-bind="options: authorities,
-                           optionsText: function(item) { return util.partyFullName(item); },
-                           optionsCaption: loc('choose'),
-                           value: selectedParty">
-        </select>
-      </span>
-      <span class="form-entry">
-        <label class="form-label tip" data-bind="ltext: 'application.calendar.reservation-type'"></label>
-        <select class="form-input combobox tip" data-test-id="reservation-type-select"
-                data-bind="options: reservationTypes,
-                           optionsValue: function(item) { return _.get(item, 'id'); },
-                           optionsText: function(item) { return _.get(item, 'name'); },
-                           optionsCaption: loc('choose'),
-                           value: selectedReservationType">
-        </select>
-      </span>
-    </div>
-
-    <calendar-view params="searchConditions: { client: client,
-                                               authority: selectedParty,
-                                               reservationTypeId: selectedReservationType },
+    <calendar-view params="searchConditions: { client: bookAppointmentParams.client,
+                                               authority: bookAppointmentParams.selectedParty,
+                                               reservationType: bookAppointmentParams.selectedReservationType },
                            view: 'applicationView',
-                           reservationTypes: reservationTypes,
-                           defaultLocation: defaultLocation">
+                           currentRole: 'applicant',
+                           applicationModel: bookAppointmentParams.application,
+                           reservationTypes: bookAppointmentParams.reservationTypes,
+                           defaultLocation: bookAppointmentParams.defaultLocation">
     </calendar-view>
 
     <div>

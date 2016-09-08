@@ -154,10 +154,6 @@ var taskPageController = (function() {
 
         service.addDocument(task());
         t.addedToService( true );
-
-        // var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-        // docgen.displayDocuments("taskDocgen", application, [t], authorizationModel, options);
-
       });
     } else {
       error("Task not found", application.id, currentTaskId);

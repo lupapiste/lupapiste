@@ -132,7 +132,7 @@
       :else (into (conj results start)
               (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
 
-(def verdict-given-states #{:verdictGiven :foremanVerdictGiven})
+(def verdict-given-states #{:verdictGiven :foremanVerdictGiven :acknowledged})
 
 (def post-verdict-states
  (let [graphs (filter (comp (partial some verdict-given-states) keys) all-graphs)]
@@ -188,6 +188,8 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
+(def all-with-acknowledged-but-not-draft-or-terminal
+  (conj all-but-draft-or-terminal :acknowledged))
 
 (comment
   (require ['rhizome.viz :as 'viz])

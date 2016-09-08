@@ -85,7 +85,6 @@ Mikko logs back in and browses to the Attachments tab
 
 Mikko selects not needed for valtakirja attachment
   Click not needed  hakija.valtakirja
-  Positive indicator should be visible
 
 Mikko adds pdf attachment to the attachment template added by Sonja
   Add attachment file  tr[data-test-type='muut.muu']  ${PDF_TESTFILE_PATH}

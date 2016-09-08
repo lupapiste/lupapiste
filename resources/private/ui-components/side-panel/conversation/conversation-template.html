@@ -112,7 +112,7 @@
               <span class="target" data-bind="if: target.id">
                 <!-- ko if: target.attachmentType -->
                 <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId() + '/' + target.id},
-                              text: target.attachmentType"></a>
+                              ltext: $parent.getAttachmentTypeLocKey($data)"></a>
                 <!-- /ko -->
                 <!-- ko ifnot: target.attachmentType -->
                 <span class="deleted" data-bind="ltext: 'attachment.removed'"></span>

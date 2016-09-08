@@ -1,0 +1,32 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachments-change-type-template">
+
+  <div class="window autosized" id="change-type-dialog">
+    <div class="dialog-header">
+      <p data-bind="ltext: 'attachment.changeType'"></p>
+      <p class="dialog-close close lupicon-remove"></p>
+    </div>
+    <div class="form-entry change-type">
+      <label for="attachment-type-select" class="form-label">
+        <img src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
+      </label>
+      <div>
+        <select id="attachment-type-select"
+                class="long"
+                data-bind="enable: $data.changingTypeAllowed,
+                           value: $data.attachmentType,
+                           foreach: $data.selectableAttachmentTypes">
+          <optgroup data-bind="attr: {label: label}, foreach: types">
+            <option data-bind="text: label, value: value"></option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn btn-primary btn-dialog"
+              data-test-id="confirm-yes"
+              style="position:relative"
+              data-bind="ltext: 'button.ok', click: $data.ok"></button>
+    </div>
+  </div>
+</script>

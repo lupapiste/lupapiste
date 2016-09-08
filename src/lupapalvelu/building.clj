@@ -1,6 +1,5 @@
 (ns lupapalvelu.building
   (:require [monger.operators :refer :all]
-            [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]

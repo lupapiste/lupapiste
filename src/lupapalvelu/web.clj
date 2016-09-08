@@ -14,7 +14,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
-            [monger.operators :refer [$set]]
+            [monger.operators :refer [$set $push]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
             [sade.http :as http]
@@ -25,8 +25,10 @@
             [sade.session :as ssess]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-search-api]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
@@ -663,20 +665,27 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect] :as query-params}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect state] :as query-params}
     (let [request (request/ring-request)
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
-          response (execute-command "create-application" params request)]
+          {application-id :id :as response} (execute-command "create-application" params request)
+          user (user/current-user request)]
       (if (core/ok? response)
-        (do
-          (when-let [opt-data (not-empty (select-keys query-params [:state]))]
-            (do
-              (mongo/update-by-id :applications (:id response) {$set opt-data})))
+        (let [command (-> (domain/get-application-no-access-checking application-id)
+                          action/application->command
+                          (assoc :user user, :created (now)))]
+          (cond
+            (= state "submitted")
+            (application/do-submit command)
+
+            (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
+            (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))
+
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role (user/current-user request)))
-                                                "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
-            (resp/status 200 (:id response))))
+            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role user))
+                                                "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
+            (resp/status 200 application-id)))
         (resp/status 400 (str response)))))
 
   (defn- create-app-and-publish-bulletin []

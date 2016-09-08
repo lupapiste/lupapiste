@@ -55,9 +55,9 @@
     (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
       (try
         (io/copy content temp)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
+        (let [processing-result (pdf-conversion/convert-to-pdf-a (files/temp-file-input-stream temp) {:application application :filename filename})]
           (cond
-            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
+            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content (:output-file processing-result)}
             (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
             (:pdfa? processing-result) {:archivable true
                                         :filename (files/filename-for-pdfa filename)

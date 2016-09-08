@@ -1,5 +1,6 @@
 (ns lupapalvelu.authorization
-  (:require [lupapalvelu.user :as usr]
+  (:require [clojure.set :refer [union]]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.application-schema :as aps]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
@@ -12,10 +13,10 @@
 (def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
 
-(def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader :guest :guestAuthority))
+(def default-authz-writer-roles #{:owner :writer})
+(def default-authz-reader-roles (conj default-authz-writer-roles :foreman :reader :guest :guestAuthority))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader :guest :guestAuthority))
+(def all-authz-roles (union all-authz-writer-roles default-authz-reader-roles))
 
 (def default-org-authz-roles #{:authority :approver})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
@@ -123,3 +124,8 @@
   [requested-authz-roles {organization :organization} user]
   (let [user-org-authz (org-authz organization user)]
     (and (usr/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
+
+(defn application-authority?
+  "Returns true if the user is an authority in the organization that processes the application"
+  [application user]
+  (has-organization-authz-roles? #{:authority :approver} application user))

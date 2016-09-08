@@ -197,6 +197,9 @@
 (def- common-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "rakennusjatesuunnitelma"]) ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 (def- mini-rakval-schemas ["hankkeen-kuvaus-rakennuslupa" "paatoksen-toimitus-rakval" "maksaja" "rakennuspaikka-ilman-ilmoitusta" "suunnittelija"])  ;; TODO: hankkeen-kuvaus-rakennuslupa -> hankkeen-kuvaus, LPK-1448
 
+(def- puun-kaataminen-schemas (filterv (partial not= "suunnittelija")
+                                        mini-rakval-schemas))
+
 (def- optional-rakval-schemas #{"hakijan-asiamies"})
 
 (def- optional-mini-rakval-schemas #{"paasuunnittelija" "hakijan-asiamies"})
@@ -797,7 +800,7 @@
    :puun-kaataminen             {:schema "maisematyo"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
-                                 :required mini-rakval-schemas
+                                 :required puun-kaataminen-schemas
                                  :optional optional-mini-rakval-schemas
                                  :attachments [:paapiirustus [:asemapiirros]]
                                  :add-operation-allowed true
@@ -864,6 +867,7 @@
                                  :required ["tyonjohtaja" "maksaja"]
                                  :attachments []
                                  :attachment-op-selector false
+                                 :attachments-readonly-after-sent true
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -879,6 +883,7 @@
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
                                  :attachment-op-selector false
+                                 :attachments-readonly-after-sent true
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -1065,7 +1070,7 @@
     kt-operations
     mm-operations))
 
-(def Operation
+(sc/defschema Operation
   {; Documents
    :schema sc/Str
    :required [sc/Str]
@@ -1073,8 +1078,14 @@
    (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :schema-data) [sc/Any]
 
+   ; Attachment groups and types
    :attachments [sc/Any]
 
+   ; Attachments are read only for applicants after the application has been sent
+   ; to municipality backend (state is :sent or later)
+   (sc/optional-key :attachments-readonly-after-sent) sc/Bool
+
+   ; Allow selecting attachment operation
    (sc/optional-key :attachment-op-selector) sc/Bool
 
    ; Type and workflow

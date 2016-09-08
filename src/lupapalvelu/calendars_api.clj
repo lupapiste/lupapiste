@@ -1,7 +1,7 @@
 (ns lupapalvelu.calendars-api
   (:require [sade.core :refer :all]
             [taoensso.timbre :as timbre :refer [info error]]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand notify] :as action]
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.calendar :as cal :refer [api-query post-command put-command delete-command]]
