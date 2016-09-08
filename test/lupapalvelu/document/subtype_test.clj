@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype-test
-  (:use [lupapalvelu.document.subtype]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.document.subtype :refer :all]))
 
 (facts "Facts about generic subtype validation"
   (fact (subtype-validation {} "what-ever") => nil?)
