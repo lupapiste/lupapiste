@@ -20,10 +20,10 @@
 
 (defcommand info-link-delete
   {:description "Remove an application-specific info-link"
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}
    :parameters [id linkId]
    :input-validators [(partial action/non-blank-parameters [:linkId])]
-   :org-authz-roles #{:authority}
    :states states/all-states}
   [command]
   (println "Poistetaan linkki id:llä " linkId)
@@ -33,11 +33,11 @@
 
 (defcommand info-link-reorder
    {:description "Reorder application-specific info-links"
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}
    :parameters [id linkIds]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    ;:input-validators [(partial action/non-blank-parameters [:linkIds])] ;; todo: check why this fails in unexpected way
-   :org-authz-roles #{:authority}
    :states states/all-states}
   [command]
   (let [ids (map #(Integer/parseInt % 10) linkIds)]
@@ -47,12 +47,12 @@
 
 (defcommand info-link-upsert
   {:description "Add or update application-specific info-link"
-   :user-roles #{:authority :applicant}
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}
    :parameters [id text url]
    :optional-parameters [linkId]
    :input-validators [(partial action/non-blank-parameters [:text]) 
                       (partial action/non-blank-parameters [:url])] 
-   :org-authz-roles #{:authority}
    :states      states/all-states}
   [command]
   (let [app (:application command)
