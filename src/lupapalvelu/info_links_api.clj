@@ -57,8 +57,8 @@
   [command]
   (let [app (:application command)
         res (if linkId
-              (info-links/update-info-link! app linkId text url (:user command))
-              (info-links/add-info-link! app text url (:user command)))]
+              (info-links/update-info-link! app linkId text url)
+              (info-links/add-info-link! app text url))]
      (if res
         (info-links/mark-links-seen! command))
      (ok :linkId res)))
@@ -71,5 +71,5 @@
   [command]
   (let [app (:application command)]
      (info-links/mark-links-seen! command)
-     (ok :links (info-links/info-links-with-new-flag app (:user command)))))
+     (ok :links (info-links/info-links-with-flags app (:user command)))))
 

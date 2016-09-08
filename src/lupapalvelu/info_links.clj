@@ -17,6 +17,10 @@
 
 ;; info-link: {linkId num, :text text, :url url, :modified timestamp-ms, owner: user-id-sym} 
 
+(defn- link-editor-role? [role]
+   (or (= :authority role)
+       (= :statementGiver role)))
+ 
 (defn last-seen-date [app user]
    (get (:_info-links-seen-by app) (keyword (:id user)) 0))
 
@@ -40,11 +44,13 @@
 (defn info-links [app]
    (or (:info-links app) []))
 
-(defn info-links-with-new-flag [app user]
+(defn info-links-with-flags [app user]
    (let [last-read (last-seen-date app user)]
-     (println "user " (:id user) " read the info links last time at " last-read)
      (map
-        (fn [link] (assoc link :isNew (< last-read (:modified link))))
+        (fn [link] 
+           (-> link
+              (assoc :isNew (< last-read (:modified link)))
+              (assoc :canEdit (link-editor-role? (:role user)))))
         (info-links app))))
 
 (defn get-info-link [app link-id]
@@ -54,10 +60,10 @@
 (defn update-info-links! [app links]
    (mongo/update-by-id :applications (:id app) {$set {:info-links links}}))
 
-(defn add-info-link! [app text url user]
+(defn add-info-link! [app text url]
    (let [links (info-links app)
          new-id (free-link-id links)
-         link-node {:linkId new-id :text text :url url :modified (now) :owner (:id user)}]
+         link-node {:linkId new-id :text text :url url :modified (now)}]
       (update-info-links! app (cons link-node links))
       new-id))
 
@@ -65,9 +71,9 @@
    (update-info-links! app
       (remove (fn [x] (= link-id (:linkId x))) (info-links app))))
 
-(defn update-info-link! [app link-id text url user]
+(defn update-info-link! [app link-id text url]
    (let [links (info-links app)
-         link-node {:linkId link-id :text text :url url :modified (now) :owner (:id user)}
+         link-node {:linkId link-id :text text :url url :modified (now)}
          new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
         (update-info-links! app new-links)
         link-id))

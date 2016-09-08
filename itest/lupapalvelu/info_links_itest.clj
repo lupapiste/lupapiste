@@ -27,10 +27,11 @@
 
        (let [response (query sonja :info-links :id application-id)]
           response => ok?
-          (fact "Sonja sees the infolink and it is not new"
+          (fact "Sonja sees the infolink, it is not new and is editable"
               (:text (first (:links response))) => "link text"
               (:url  (first (:links response))) => "http://www.host.tla"
-              (:isNew (first (:links response))) => false))
+              (:isNew (first (:links response))) => false
+              (:canEdit (first (:links response))) => false))
         
        (let [response (command sonja :info-link-upsert :id application-id :text "second" :url "http://second.org")]
           response => ok?
@@ -61,6 +62,10 @@
           (fact "Sonja can delete infolinks" 
              response => ok?))
        
+       (let [response (command pena :info-link-delete :id application-id :linkId "1")]
+          (fact "Pena can't delete infolinks" 
+             response =not=> ok?))
+       
        (let [response (query sonja :info-links :id application-id)]
           response => ok?
           (fact "Sonja no longer sees the deleted link"
@@ -68,8 +73,9 @@
         
        (let [response (query pena :info-links :id application-id)]
           response => ok?
-          (fact "Pena hasn't seen the links yet"
-              (map :isNew (:links response)) => [true true]))
+          (fact "Pena hasn't seen the links yet and sees he cant' modify them"
+              (map :isNew (:links response)) => [true true]
+              (map :canEdit (:links response)) => [false false]))
 
        (let [response (query pena :info-links :id application-id)]
           response => ok?
