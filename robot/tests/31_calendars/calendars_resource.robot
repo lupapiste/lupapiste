@@ -31,10 +31,12 @@ Add reservation type
   Wait until  Element should be visible  //table[@data-test-id='organization-reservation-types']//td[text()='${name}']
 
 Goto following week in calendar view
+  Wait for jQuery
   ${monday}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
   Click by test id  calendar-view-following-week
   ${monday}=  Evaluate  ${monday}+604800000
   Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${monday}']
+  Wait for jQuery
 
 Assign application to
   [Arguments]  ${to}
