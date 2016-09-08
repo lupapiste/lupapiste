@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1473256632592');
+@import url('main-blessed1.css?z=1473325168885');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 .col--vertical label {
@@ -8134,84 +8134,91 @@ ul.appeals-files li span.appeals-files__size {
 }
 /* line 285, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-panel-container {
+  height: 100%;
   margin-left: 12px;
   margin-right: 12px;
 }
-/* line 289, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 290, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-panel-container h2 {
   font-size: 18px;
   margin-top: 2em;
 }
-/* line 293, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 294, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-panel-container ul {
   list-style: none;
   padding-left: 0;
 }
-/* line 297, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 298, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-panel-container td.spacehog {
   width: 100%;
 }
+/* line 301, ../../../private/common-html/sass/views/_side_panel.scss */
+.info-panel-container .info-links-content {
+  overflow-y: scroll;
+  height: 100%;
+  padding-bottom: 80px;
+}
 
-/* line 318, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 324, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view {
   border: none;
   margin-bottom: 0;
 }
-/* line 319, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 325, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view td {
   padding-left: 0;
 }
-/* line 305, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 311, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view tr {
   background-color: transparent;
   border: none;
 }
-/* line 308, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 314, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view tr:hover {
   background-color: transparent;
   border: none;
 }
-/* line 312, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 318, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view tr:hover:nth-child(even) {
   background: transparent;
 }
-/* line 323, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 329, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view a.link-btn--passive:active {
   color: #f39129;
 }
 
-/* line 329, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 335, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view.info-link-divider {
   border-bottom: 1px solid #555555;
 }
 
-/* line 333, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 339, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-link-drop-zone {
   border: 1px dashed #fbc732;
   min-height: 40px;
   width: 100%;
 }
 
-/* line 341, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 347, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view.dragging {
   display: none;
 }
 
-/* line 346, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 352, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-view + .dragging {
   display: block !important;
   max-width: 30em;
   background-color: #333333;
 }
 
-/* line 358, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 364, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text {
   max-width: 20em;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
-/* line 362, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 368, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text-wide {
   max-width: 28em;
   overflow-x: hidden;
@@ -8219,56 +8226,56 @@ span.info-link-text-wide {
 }
 
 @media all and (max-width: 991px) {
-  /* line 368, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 374, ../../../private/common-html/sass/views/_side_panel.scss */
   table.info-link-editor-view + .dragging {
     max-width: 24em;
   }
 
-  /* line 371, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 377, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text {
     max-width: 14em;
   }
 
-  /* line 375, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 381, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text-wide {
     max-width: 22em;
   }
 }
-/* line 380, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 386, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-link-link {
   margin-bottom: .5em;
 }
 
-/* line 387, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 393, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit {
   border: none;
   margin-bottom: 0;
   margin-bottom: 2px;
 }
-/* line 305, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 311, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr {
   background-color: white;
   border: none;
 }
-/* line 308, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 314, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:hover {
   background-color: white;
   border: none;
 }
-/* line 312, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 318, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:hover:nth-child(even) {
   background: white;
 }
-/* line 390, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 396, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:nth-child(odd) {
   border-bottom: 1px solid #dddddd;
 }
-/* line 393, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 399, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit td {
   padding-left: 5px;
   padding-right: 5px;
 }
-/* line 399, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 405, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit input {
   box-sizing: border-box;
   font-size: 16px;
@@ -8277,7 +8284,7 @@ table.info-link-editor-edit input {
   padding-bottom: 2px;
   padding-top: 2px;
 }
-/* line 409, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 415, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit button.ghost {
   border: none;
   padding-left: 4px;

@@ -11,6 +11,8 @@ LUPAPISTE.InfoService = function() {
 
   self.showStar = ko.observable();
 
+  // The guard for mark-seen command.
+  var markedSeen = false;
 
   // Todo: ajax query
   self.organizationLinks = ko.pureComputed( function() {
@@ -71,7 +73,7 @@ LUPAPISTE.InfoService = function() {
                                     function( link ) {
                                       return _.set( link, "isNew", false );
                                     }),
-                             _.map( _.range( 2 ), function() {
+                             _.map( _.range( 20 ), function() {
                                var id = _.uniqueId( "Link-");
                                return {id: id,
                                        text: id,
@@ -83,17 +85,21 @@ LUPAPISTE.InfoService = function() {
     infoLinks( _.map( newLinks, function( link ) {
       return ko.observable( _.merge( link, oldStates[link.id]));
     }));
-    if( options.markSeen ) {
-      // Todo: ajax query
-    }
+
     if( options.reset) {
       self.showStar( _.some( infoLinks(),
                              _.ary( _.partialRight( util.getIn, ["isNew"]),
                                     1)));
     }
+
+    markedSeen = false;
+
+    if( options.markSeen ) {
+      markSeen();
+    }
   }
 
-  var latestAppId = "This is not a real application id.";
+  var latestAppId = null;
 
   ko.computed( function() {
     // Id guard to avoid unnecessary fetching (and reset), since
@@ -109,6 +115,14 @@ LUPAPISTE.InfoService = function() {
     // Todo: auth model
     return lupapisteApp.models.currentUser.isAuthority();
   });
+
+  function markSeen() {
+    if( !markedSeen ) {
+      // Todo ajax command
+      self.showStar( false );
+      markedSeen = true;
+    }
+  }
 
   function isTarget( targetId, link ) {
     return link().id === targetId;
@@ -131,13 +145,15 @@ LUPAPISTE.InfoService = function() {
   }
 
   function makeParams( data ) {
-    var params = {id: appId,
+    var params = {id: latestAppId,
                   text: _.trim( data.text ),
                   url: _.trim( data.url )};
     return self.isTemporaryId( data.id )
       ? params
       : _.assign( params, {linkId: data.id} );
   }
+
+  // Hub subscriptions
 
   hubscribe( "new", function() {
     // Todo: ajax reorder command, followed by fetch
@@ -163,4 +179,6 @@ LUPAPISTE.InfoService = function() {
   });
 
   hubscribe( "fetch-info-links", fetchInfoLinks );
+
+  hubscribe( "mark-seen", markSeen);
 };

@@ -7,32 +7,35 @@
                        params: {lhtml: 'info.help.html'}}">
       </span>
     </div>
-    <!-- ko if: _.size( organizationLinks() ) -->
-    <h2 data-bind="ltext: 'info.organization.links'"></h2>
-    <ul data-bind="foreach: organizationLinks">
-      <li>
-        <a class="link-btn"
-           target="_blank"
-           data-bind="attr: {href: url}">
-          <span data-bind="text: text"></span>
-          <i class="lupicon-circle-star"
-             data-bind="visible: isNew"></i>
-        </a>
-      </li>
-    </ul>
-    <!-- /ko -->
-    <!-- ko if: _.size( infoLinks() ) -->
-    <h2 data-bind="ltext: 'info.info.links'"></h2>
-    <div id="side-panel-info-links" 
-         data-bind="foreach: infoLinks">
-      <info-link params="id: $data.id"></info-link>
+    <div class="info-links-content">
+      <!-- ko if: _.size( organizationLinks() ) -->
+      <h2 data-bind="ltext: 'info.organization.links'"></h2>
+      <ul data-bind="foreach: organizationLinks">
+        <li>
+          <a class="link-btn"
+             target="_blank"
+             data-bind="attr: {href: url}">
+            <span data-bind="text: text"></span>
+            <i class="lupicon-circle-star"
+               data-bind="visible: isNew"></i>
+          </a>
+        </li>
+      </ul>
+      <!-- /ko -->
+      <h2 data-bind="visible:showInfoTitle,
+                     ltext: 'info.info.links'"></h2>
+      <!-- ko if: _.size( infoLinks() ) -->
+      <div id="side-panel-info-links" 
+           data-bind="foreach: infoLinks">
+        <info-link params="id: $data.id"></info-link>
+      </div>
+      <!-- /ko -->
+      <button class="ghost top-marginM"
+              data-bind="visible: canAdd,
+                         click: _.partial( _.ary( hub.send, 1), 'infoService::new')">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'info.add-link'"></span>
+      </button>
     </div>
-    <!-- /ko -->
-    <button class="ghost top-marginM"
-            data-bind="visible:lupapisteApp.services.infoService.canEdit,
-                       click: _.partial( _.ary( hub.send, 1), 'infoService::new')">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'info.add-link'"></span>
-    </button>
-  </div>
+</div>
 </script>

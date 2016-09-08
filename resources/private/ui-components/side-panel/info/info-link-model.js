@@ -1,3 +1,7 @@
+// Model of an info link. The link is displayed differently depending
+// on the context (being edited, can be edited, view only).
+// Parameters:
+// id: Link id
 LUPAPISTE.InfoLinkModel = function( params ) {
   "use strict";
   var self = this;
@@ -95,6 +99,8 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     }
   };
 
+  // Save-edit-state event is used by infoService to collect the edit
+  // information from the link models.
   self.addEventListener( service.serviceName,
                          "save-edit-state",
                          function( data ) {

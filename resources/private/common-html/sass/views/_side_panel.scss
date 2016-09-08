@@ -283,6 +283,7 @@
 //
 
 .info-panel-container {
+  height: 100%;
   margin: {left: $marginM;
            right: $marginM;
           }
@@ -296,6 +297,11 @@
   }
   td.spacehog {
     width: 100%;
+  }
+  .info-links-content {
+    overflow-y: scroll;
+    height: 100%;
+    padding-bottom: 2 * $btn-height;    
   }
 }
 
