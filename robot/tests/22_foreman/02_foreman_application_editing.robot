@@ -182,10 +182,6 @@ On second thought, complement is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
 
-Verdict can't be given
-  Open tab  verdict
-  Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
-
 Foreman state has reset on base app
   Go back to project application
   Wait Until  Application state should be  verdictGiven
