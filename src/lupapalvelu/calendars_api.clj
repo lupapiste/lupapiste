@@ -36,7 +36,7 @@
    :location  (:location r)
    :applicationId (:contextId r)
    :reservedBy (:reservedBy r)
-   :participants (map usr/get-user-by-id reservation-participants)})
+   :participants (map usr/get-user-by-id (reservation-participants r))})
 
 (defn Reservations->FrontendSlots
   [status reservations]
@@ -423,7 +423,7 @@
   [{:keys [reservations] :as appl}]
   (let [appl-without-reservations (dissoc appl :reservations)
         reservation-fields [:id :status :reservationStatus :reservationType :startTime :endTime
-                            :comment :location :applicationId :reservedBy]
+                            :comment :location :reservedBy]
         participant-fields [:firstName :lastName :id]
         id->participant (comp (fn [u] (select-keys u participant-fields)) usr/get-user-by-id)]
     (map #(merge (select-keys % reservation-fields)

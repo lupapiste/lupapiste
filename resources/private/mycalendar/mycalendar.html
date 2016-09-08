@@ -30,7 +30,7 @@
       <!-- /ko -->
       <!-- ko ifnot: noCalendarsFound -->
         <div class="view-toggle">
-          Lista / Kalenteri (<span data-bind="text: viewMode"></span>)<br />
+          Lista / Kalenteri<br />
           <button data-bind="click: setViewMode('list')">
             <i class="lupicon-list"></i>
           </button>
@@ -40,6 +40,7 @@
         </div>
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'list' -->
         <div>Listanäyttö</div>
+        <div data-bind="template: { name: 'calendar-message-items-template', data: { items: calendarNotificationsByDay } }"></div>
         <!-- /ko -->
 
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'calendar' -->

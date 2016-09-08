@@ -17,7 +17,8 @@
             </div>
             <div class="titlebar">
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
-              <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>: <span data-bind="text: $component.appointmentParticipants($data)"></span>
+              <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>:
+                    <span data-bind="text: _.map(participants(), function (p) { return util.partyFullName(p); }).join(', ')"></span>
             </div>
 
 
