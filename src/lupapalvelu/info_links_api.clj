@@ -26,10 +26,8 @@
    :input-validators [(partial action/non-blank-parameters [:linkId])]
    :states states/all-states}
   [command]
-  (println "Poistetaan linkki id:llä " linkId)
-  (println " - numerona " (Integer/parseInt linkId 10))
   (ok :res (info-links/delete-info-link! (:application command) 
-     (Integer/parseInt linkId 10))))
+    (Integer/parseInt linkId 10))))
 
 (defcommand info-link-reorder
    {:description "Reorder application-specific info-links"
@@ -37,13 +35,12 @@
    :user-authz-roles #{:statementGiver}
    :parameters [id linkIds]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
-   ;:input-validators [(partial action/non-blank-parameters [:linkIds])] ;; todo: check why this fails in unexpected way
    :states states/all-states}
   [command]
   (let [ids (map #(Integer/parseInt % 10) linkIds)]
-     (if (empty? (remove number? ids))
-        (ok :res (info-links/reorder-info-links! (:application command) ids))
-        (ok :res false))))
+    (if (empty? (remove number? ids))
+      (ok :res (info-links/reorder-info-links! (:application command) ids))
+      (ok :res false))))
 
 (defcommand info-link-upsert
   {:description "Add or update application-specific info-link"
@@ -59,9 +56,9 @@
         res (if linkId
               (info-links/update-info-link! app linkId text url)
               (info-links/add-info-link! app text url))]
-     (if res
-        (info-links/mark-links-seen! command))
-     (ok :linkId res)))
+    (if res
+      (info-links/mark-links-seen! command))
+    (ok :linkId res)))
 
 (defquery info-links
   {:description "Return a list of application-specific info-links"
@@ -70,6 +67,6 @@
    :states      states/all-states}
   [command]
   (let [app (:application command)]
-     (info-links/mark-links-seen! command)
-     (ok :links (info-links/info-links-with-flags app (:user command)))))
+    (info-links/mark-links-seen! command)
+    (ok :links (info-links/info-links-with-flags app (:user command)))))
 
