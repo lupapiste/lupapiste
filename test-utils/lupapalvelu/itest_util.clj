@@ -147,7 +147,7 @@
 (defn raw [apikey action & args]
   (http-get
     (str (server-address) "/api/raw/" (name action))
-    {:headers {"authorization" (str "apikey=" apikey)}
+    {:oauth-token apikey
      :query-params (apply hash-map args)
      :throw-exceptions false
      :follow-redirects false}))
@@ -156,8 +156,8 @@
   (decode-response
     (http-get
       (str (server-address) "/api/query/" (name query-name))
-      {:headers {"authorization" (str "apikey=" apikey)
-                 "accepts" "application/json;charset=utf-8"}
+      {:headers {"accepts" "application/json;charset=utf-8"}
+       :oauth-token apikey
        :query-params (apply hash-map args)
        :follow-redirects false
        :throw-exceptions false})))
@@ -180,8 +180,8 @@
 
             cookie-store (:cookie-store args)
             args (dissoc args :cookie-store)]
-        {:headers {"authorization" (str "apikey=" apikey)
-                   "content-type" "application/json;charset=utf-8"}
+        {:headers {"content-type" "application/json;charset=utf-8"}
+         :oauth-token apikey
          :body (json/encode args)
          :follow-redirects false
          :cookie-store cookie-store
@@ -589,8 +589,8 @@
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
         resp (http-post uri
-               {:headers {"authorization" (str "apikey=" apikey)
-                          "content-type" "application/json;charset=utf-8"}
+               {:headers {"content-type" "application/json;charset=utf-8"}
+                :oauth-token apikey
                 :body (json/encode {:id id
                                     :attachmentIds [attachmentId]
                                     :password password})
@@ -611,7 +611,7 @@
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
-                               {:headers {"authorization" (str "apikey=" apikey)}
+                               {:oauth-token apikey
                                 :multipart (remove nil?
                                              [{:name "applicationId"  :content application-id}
                                               {:name "text"           :content text}
@@ -646,7 +646,7 @@
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
+                      {:oauth-token apikey
                        :multipart (remove nil?
                                     [{:name "applicationId"  :content application-id}
                                      {:name "Content/type"   :content "text/plain"}
@@ -673,7 +673,7 @@
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/user-attachment")
         resp        (http-post uri
-                               {:headers {"authorization" (str "apikey=" apikey)}
+                               {:oauth-token apikey
                                 :multipart [{:name "attachmentType"  :content attachment-type}
                                             {:name "files[]"         :content uploadfile}]})
         body        (:body (decode-response resp))]
@@ -717,7 +717,7 @@
     (:body
       (decode-response
         (http-post uri
-                   {:headers {"authorization" (str "apikey=" apikey)}
+                   {:oauth-token apikey
                     :multipart [{:name "files[]" :content uploadfile}]
                     :throw-exceptions false})))))
 
@@ -831,7 +831,7 @@
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/raw/organization-area")]
     (http-post uri
-               {:headers {"authorization" (str "apikey=" apikey)}
+               {:oauth-token apikey
                 :multipart [{:name "files[]" :content uploadfile}]
                 :throw-exceptions false})))
 

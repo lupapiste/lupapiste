@@ -416,14 +416,8 @@
 ;; Apikey-authentication
 ;;
 
-(defn- parse [required-key header-value]
-  (when (and required-key header-value)
-    (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
-      (if (= k required-key) v))))
-
 (defn- get-apikey [request]
-  (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+  (http/parse-bearer request))
 
 (defn- authentication [handler request]
   (let [api-key (get-apikey request)
