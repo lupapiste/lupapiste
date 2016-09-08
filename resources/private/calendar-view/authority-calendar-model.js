@@ -69,10 +69,23 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
       self.noCalendarFoundForOrganization(true);
     }
   });
+  
+  self.cancelReservation = function(reservation) {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("reservation.confirm-cancel"), {title: loc("yes"), fn: function() {
+      ajax
+        .command("cancel-reservation", { id: lupapisteApp.models.application.id(), reservationId: reservation.id() })
+        .success(function() {
+          hub.send("indicator", { style: "positive" });
+          reservation.acknowledged("canceled");
+        })
+        .error(function(e) {
+          hub.send("indicator", {style: "negative", message: e.text});
+        }).call();
+    }});
+  };
 
   self.appointmentParticipants = function(r) {
     return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
   };
-
 
 };
