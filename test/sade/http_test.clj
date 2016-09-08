@@ -34,3 +34,30 @@
   (http/secure-headers {:headers {"cookie" 1 "Set-Cookie" 1 "server" 1 "Host" 1
                                   "connection" 1 "X-Powered-By" "LOL PHP"
                                   "User-Agent" "007"}}) => {:headers {"User-Agent" "007"}})
+
+(facts "Bearer auth"
+
+  (fact "Examle from RFC 6750"
+    (http/parse-bearer {:headers {"authorization" "Bearer mF_9.B5f-4.1JqM"}}) => "mF_9.B5f-4.1JqM")
+
+  (fact "x"
+    (http/parse-bearer {:headers {"authorization" "Bearer x"}}) => "x")
+
+  (fact "empty or blank returns nil"
+    (http/parse-bearer nil) => nil
+    (http/parse-bearer {:headers nil}) => nil
+    (http/parse-bearer {:headers {"authorization" nil}}) => nil
+    (http/parse-bearer {:headers {"authorization" ""}}) => nil
+    (http/parse-bearer {:headers {"authorization" " "}}) => nil
+    (http/parse-bearer {:headers {"authorization" "Bearer"}}) => nil
+    (http/parse-bearer {:headers {"authorization" "Bearer "}}) => nil
+    (http/parse-bearer {:headers {"authorization" "Bearer  "}}) => nil)
+
+  (fact "non-ascii chars not supported"
+    (http/parse-bearer {:headers {"authorization" "Bearer vesist\u00f6"}}) => nil)
+
+  (fact "must not be in lower case"
+    (http/parse-bearer {:headers {"authorization" "bearer x"}}) => nil)
+
+  (fact "Basic auth return nil"
+    (http/parse-bearer {:headers {"authorization" "Basic x"}}) => nil))
