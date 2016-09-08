@@ -37,7 +37,7 @@
 
 (facts "Bearer auth"
 
-  (fact "Examle from RFC 6750"
+  (fact "Example from RFC 6750"
     (http/parse-bearer {:headers {"authorization" "Bearer mF_9.B5f-4.1JqM"}}) => "mF_9.B5f-4.1JqM")
 
   (fact "x"
@@ -59,5 +59,5 @@
   (fact "must not be in lower case"
     (http/parse-bearer {:headers {"authorization" "bearer x"}}) => nil)
 
-  (fact "Basic auth return nil"
+  (fact "Basic auth returns nil"
     (http/parse-bearer {:headers {"authorization" "Basic x"}}) => nil))
