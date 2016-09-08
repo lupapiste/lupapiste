@@ -83,7 +83,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     states/all-states}
   [{app :application}]
-  (ok :auth (app/enrich-auth-information app)))
+  (ok :auth (auth/enrich-auth-information app)))
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
