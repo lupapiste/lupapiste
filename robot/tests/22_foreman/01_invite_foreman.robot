@@ -208,7 +208,7 @@ Applicant can start invite flow from tasks tab
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog
 
-Applicant can invite additional foremans to application with verdict
+Applicant can invite additional foremen to application with verdict
   Wait and click   xpath=//div[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
