@@ -15,9 +15,10 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
+;; info-link: {linkId num, :text text, :url url, :modified timestamp-ms, owner: user-id-sym} 
+
 (defn last-seen-date [app user]
-   ;; take from app -> _seen_info-links_user -> timestamp
-   42)
+   (get (:_info-links-seen-by app) (keyword (:id user)) 0))
 
 (defn mark-links-seen! [command]
    (update-application command
@@ -39,6 +40,13 @@
 (defn info-links [app]
    (or (:info-links app) []))
 
+(defn info-links-with-new-flag [app user]
+   (let [last-read (last-seen-date app user)]
+     (println "user " (:id user) " read the info links last time at " last-read)
+     (map
+        (fn [link] (assoc link :isNew (< last-read (:modified link))))
+        (info-links app))))
+
 (defn get-info-link [app link-id]
    (let [links (:info-links app)]
       (take-first (fn [link] (= link-id (:id link))) (info-links app) nil)))
@@ -46,11 +54,10 @@
 (defn update-info-links! [app links]
    (mongo/update-by-id :applications (:id app) {$set {:info-links links}}))
 
-(defn add-info-link! [app text url]
+(defn add-info-link! [app text url user]
    (let [links (info-links app)
          new-id (free-link-id links)
-         foo (println new-id)
-         link-node {:linkId new-id :text text :url url :modified (now)}]
+         link-node {:linkId new-id :text text :url url :modified (now) :owner (:id user)}]
       (update-info-links! app (cons link-node links))
       new-id))
 
@@ -58,9 +65,9 @@
    (update-info-links! app
       (remove (fn [x] (= link-id (:linkId x))) (info-links app))))
 
-(defn update-info-link! [app link-id text url]
+(defn update-info-link! [app link-id text url user]
    (let [links (info-links app)
-         link-node {:linkId link-id :text text :url url :modified (now)}
+         link-node {:linkId link-id :text text :url url :modified (now) :owner (:id user)}
          new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
         (update-info-links! app new-links)
         link-id))

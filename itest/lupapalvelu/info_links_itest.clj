@@ -11,7 +11,7 @@
 (facts "info links"
    
     (let [{application-id :id :as response} 
-            (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")
+            (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
           application (query-application pena application-id)]
          
        response => ok?
@@ -27,9 +27,10 @@
 
        (let [response (query pena :info-links :id application-id)]
           response => ok?
-          (fact "Pena sees the infolink"
+          (fact "Pena sees the infolink and it is not new"
               (:text (first (:links response))) => "link text"
-              (:url  (first (:links response))) => "http://www.host.tla"))
+              (:url  (first (:links response))) => "http://www.host.tla"
+              (:isNew (first (:links response))) => false))
         
        (let [response (command pena :info-link-upsert :id application-id :text "second" :url "http://second.org")]
           response => ok?
@@ -64,6 +65,16 @@
           response => ok?
           (fact "Pena no longer sees the deleted link"
               (map :linkId (:links response)) => [3 1]))
+        
+       (let [response (query sonja :info-links :id application-id)]
+          response => ok?
+          (fact "Sonja hasn't seen the links yet"
+              (map :isNew (:links response)) => [true true]))
+
+       (let [response (query sonja :info-links :id application-id)]
+          response => ok?
+          (fact "Sonja has seen the links now."
+              (map :isNew (:links response)) => [false false]))
           
        ;; näkyvyys muille ja luetun trackays puuttuu
 ))
