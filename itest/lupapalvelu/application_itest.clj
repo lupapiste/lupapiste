@@ -616,3 +616,47 @@
                         (contains? applications luukas-canceled) => false)
                   (fact "Created draft is listed"
                         (contains? applications luukas-draft) => true)))))
+
+
+(facts "application-auth-roles"
+  (let [application      (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id   (:id application)
+        paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
+        suunnittelija    (domain/get-document-by-name application "suunnittelija")
+        hakija           (domain/get-applicant-document (:documents application))
+        maksaja          (domain/get-document-by-name application "maksaja")]
+
+    (facts "initially only pena has auth"
+      (let [resp (query pena :application-auth-roles :id application-id)]
+        resp => ok?
+        (fact "pena it is"
+          (map :username (:auth resp)) => ["pena"])
+        (fact "party-roles is empty"
+          (map :party-roles (:auth resp)) => [[]])))
+
+    ;; Invite & approve Teppo
+    (command pena :invite-with-role :id application-id :email (email-for-key teppo) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+    (command teppo :approve-invite :id application-id) => ok?
+
+    (facts "teppo is added in auth"
+      (let [resp (query pena :application-auth-roles :id application-id)]
+        resp => ok?
+        (fact "pena and teppo in auth"
+          (map :username (:auth resp)) => ["pena" (email-for-key teppo)])
+        (fact "party-roles is empty"
+          (map :party-roles (:auth resp)) => [[] []])))
+
+    ;; Set users to documents
+    (command pena :set-user-to-document :id application-id :documentId (:id hakija) :userId pena-id :path "henkilo") => ok?
+    (command pena :set-user-to-document :id application-id :documentId (:id paasuunnittelija) :userId teppo-id :path "") => ok?
+    (command pena :set-user-to-document :id application-id :documentId (:id maksaja) :userId teppo-id :path "henkilo") => ok?
+
+    (facts "party roles updated"
+      (let [resp (query pena :application-auth-roles :id application-id)]
+        resp => ok?
+        (fact "pena and teppo in auth"
+          (map :username (:auth resp)) => ["pena" (email-for-key teppo)])
+        (fact "pena is hakija"
+          (-> resp :auth first :party-roles) => ["hakija"])
+        (fact "teppo is maksaja ja paasuunnittelija"
+          (-> resp :auth second :party-roles) => (just #{"maksaja" "paasuunnittelija"} :in-any-order))))))
