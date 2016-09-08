@@ -10,11 +10,10 @@
 
 (facts "info links"
  
-  (let [{application-id :id :as response} 
-          (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
-         application (query-application pena application-id)]
-     
-    response => ok?
+  (let [{application-id :id :as app} 
+          (create-application pena :propertyId sipoo-property-id)]
+   
+    application-id => truthy
    
     (let [response (query pena :info-links :id application-id)]
       response => ok?
