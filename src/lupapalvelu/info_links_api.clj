@@ -23,24 +23,21 @@
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
    :parameters [id linkId]
-   :input-validators [(partial action/non-blank-parameters [:linkId])]
+   :input-validators [(partial action/number-parameters [:linkId])]
    :states states/all-states}
   [command]
-  (ok :res (info-links/delete-info-link! (:application command) 
-    (Integer/parseInt linkId 10))))
+  (ok :res (info-links/delete-info-link! (:application command) linkId)))
 
 (defcommand info-link-reorder
    {:description "Reorder application-specific info-links"
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
    :parameters [id linkIds]
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
+   :input-validators [(partial action/vector-parameter-of :linkIds number?)]
+   ;:input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    :states states/all-states}
   [command]
-  (let [ids (map #(Integer/parseInt % 10) linkIds)]
-    (if (empty? (remove number? ids))
-      (ok :res (info-links/reorder-info-links! (:application command) ids))
-      (ok :res false))))
+  (ok :res (info-links/reorder-info-links! (:application command) linkIds)))
 
 (defcommand info-link-upsert
   {:description "Add or update application-specific info-link"
@@ -49,9 +46,11 @@
    :parameters [id text url]
    :optional-parameters [linkId]
    :input-validators [(partial action/non-blank-parameters [:text]) 
-                      (partial action/non-blank-parameters [:url])] 
+                      (partial action/non-blank-parameters [:url])
+                      (partial action/optional-parameter-of :linkId number?)]
    :states      states/all-states}
   [command]
+  ;(println "upsert: id " linkId " numberness is " (number? linkId)) ;; debug, check interpretation issue before merge
   (let [app (:application command)
         res (if linkId
               (info-links/update-info-link! app linkId text url)
