@@ -366,11 +366,10 @@
 
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            var name = application.primaryOperation.name;
-            if (name) {
-              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
-            } else {
+            if (authorizationModel.ok("tasks-tab-visible")) {
               return "tasks";
+            } else {
+              return "applicationSummary";
             }
           } else {
             return "info";
