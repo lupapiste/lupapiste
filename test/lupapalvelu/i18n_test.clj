@@ -70,3 +70,18 @@
              => "Ei")
        (fact "Nil fallbacks to default language"
              (localize-fallback nil "no") => "Ei"))
+
+(facts "Missing translations"
+       (let [localization-map
+             {:languages [:fi :sv :en]
+              :translations
+              {'avain1 {:fi "Vain suomeksi"}
+               'avain2 {:fi "Suomeksi ja ruotsiksi" :sv "Finska och svenska"}
+               'avain3 {:fi "Kaikki" :sv "Alla" :en "All"}
+               'avain4 {:fi "Suomeksi ja englanniksi" :en "Finnish and English"}}}
+             missing-sv (missing-translations localization-map :sv)
+             missing-en (missing-translations localization-map :en)]
+         (:languages missing-sv) => (contains [:fi :sv])
+         (map first (:translations missing-sv)) => (contains ['avain1 'avain4] :in-any-order)
+         (:languages missing-en) => (contains [:fi :en])
+         (map first (:translations missing-en)) => (contains ['avain1 'avain2] :in-any-order)))

@@ -145,6 +145,25 @@
     {}
     lines))
 
+(defn- merge-localization-maps [loc-maps]
+  {:languages    (distinct (apply concat (map :languages loc-maps)))
+   :translations (apply merge-with conj (map :translations loc-maps))})
+
+(defn- txt-files->map [files]
+  (->> files
+       (map commons-resources/txt->map)
+       merge-localization-maps))
+
+(defn- default-i18n-files []
+  (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$"))
+
+(defn missing-translations [localization-map lang]
+  (update (commons-resources/missing-translations localization-map
+                                                  (keyword lang))
+          :translations
+          (util/fn->> (remove (comp ss/blank? :fi second))
+                      (sort-by first))))
+
 (defn missing-localizations-excel
   "Writes missing localizations of given language to excel file.
    If file is not provided, will create the file to user home dir."
@@ -156,17 +175,10 @@
                        ".xlsx")]
         (missing-localizations-excel (io/file filename) lang)))
   ([file lang]
-    (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
-          loc-maps     (map commons-resources/txt->map i18n-files)
-          langs        (distinct (apply concat (map :languages loc-maps)))
-          translations (apply merge-with conj (map :translations loc-maps))
-          loc-map      {:languages langs :translations translations}
-          missing      (commons-resources/missing-translations loc-map (keyword lang))
-          cleaned      (update missing :translations (util/fn->>
-                                                       (remove (comp ss/blank? :fi second))
-                                                       ;(map (fn [[k & rest]] (cons (ss/replace k #"!$" "") rest)))
-                                                       (sort-by first)))]
-    (commons-resources/write-excel cleaned file))))
+   (-> (default-i18n-files)
+       (txt-files->map)
+       (missing-translations lang)
+       (commons-resources/write-excel file))))
 
 (defn merge-translations-from-excels
   "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
