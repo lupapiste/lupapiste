@@ -1,7 +1,18 @@
 (ns lupapalvelu.document.tools-test
-  (:use [lupapalvelu.document.tools]
-        [midje.sweet]
-        [midje.util :only [expose-testables]]))
+  (:require [lupapalvelu.document.tools :refer :all]
+            [midje.sweet :refer :all]
+            [midje.util :refer [expose-testables]]
+            [lupapalvelu.document.data-schema :as data-schema]
+            [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.test.check.properties :as prop]
+            [clojure.test.check.generators :as gen]
+            [sade.schema-generators :as ssg]
+            [lupapalvelu.document.schemas :as schemas]
+            ;; ensure all schemas are loaded
+            [lupapalvelu.document.poikkeamis-schemas]
+            [lupapalvelu.document.vesihuolto-schemas]
+            [lupapalvelu.document.ymparisto-schemas]
+            [lupapalvelu.document.yleiset-alueet-schemas]))
 
 (expose-testables lupapalvelu.document.tools)
 
@@ -101,4 +112,56 @@
   (get-update-item-value updates "non-existing") => nil
   )
 
+(def party-doc-schemas
+  (->> (vals (first (vals (schemas/get-all-schemas))))
+       (filter (comp #{:party} :type :info))))
 
+(def non-party-doc-schemas
+  (->> (vals (first (vals (schemas/get-all-schemas))))
+       (remove (comp #{:party} :type :info))))
+
+(defspec party-doc-user-id-spec
+  (prop/for-all [doc (gen/bind (->> (map (comp :name :info) party-doc-schemas)
+                                    gen/elements)
+                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+                (if (= "tyonjohtaja-v2" (doc-name doc))
+                  (nil? (party-doc-user-id doc))
+                  (party-doc-user-id doc))))
+
+(defspec party-doc-user-id_non-party-docs-spec
+  (prop/for-all [doc (gen/bind (->> (map (comp :name :info) non-party-doc-schemas)
+                                    gen/elements)
+                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+                (nil? (party-doc-user-id doc))))
+
+(def special-subtypes #{:hakija :hakijan-asiamies :maksaja})
+
+(defspec party-doc->user-role_special-subtypes-spec
+  (prop/for-all [doc (gen/bind (->> party-doc-schemas
+                                    (filter (comp special-subtypes :subtype :info))
+                                    (map (comp :name :info))
+                                    gen/elements)
+                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+                (= (get-in doc [:schema-info :subtype]) (party-doc->user-role doc))))
+
+(def special-names #{"tyonjohtaja-v2"})
+
+(fact "party-doc->user-role - foreman"
+  (->> (ssg/generate (data-schema/doc-data-schema "tyonjohtaja-v2" true))
+       party-doc->user-role) => :tyonjohtaja)
+
+(defspec party-doc->user-role_default-spec
+  (prop/for-all [doc (gen/bind (->> party-doc-schemas
+                                    (remove (comp special-subtypes :subtype :info))
+                                    (remove (comp special-names :name :info))
+                                    (map (comp :name :info))
+                                    gen/elements)
+                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+                (= (keyword (get-in doc [:schema-info :name])) (party-doc->user-role doc))))
+
+(defspec party-doc->user-role_non-party-doc-spec
+  (prop/for-all [doc (gen/bind (->> non-party-doc-schemas
+                                    (map (comp :name :info))
+                                    gen/elements)
+                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+                (nil? (party-doc->user-role doc))))
