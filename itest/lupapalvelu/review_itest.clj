@@ -10,7 +10,7 @@
                                    :taskName taskname :schemaName "task-katselmus"
                                    :taskSubtype "muu tarkastus")]
     (fact "Upload review attachment"
-          (upload-attachment-to-target sonja application-id nil true task-id "task") => true)
+          (upload-attachment-to-target sonja application-id nil true task-id "task") => truthy)
     task-id))
 
 (defn task-deleted-check

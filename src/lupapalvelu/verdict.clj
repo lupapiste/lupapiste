@@ -559,8 +559,7 @@
         (fail :error.invalid-task-type))
       ;; else
       (let [update-result (update-application command (util/deep-merge task-updates building-updates))
-            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
-            ]
+            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))]
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
            updated-application

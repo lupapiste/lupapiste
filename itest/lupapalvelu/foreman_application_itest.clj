@@ -415,7 +415,7 @@
             recipients => (just ["heppu@example.com" ; foreman is invited to original application also
                                  "heppu@example.com"
                                  "foo@example.com"
-                                 "Kaino Solita <kaino@solita.fi>"])))))
+                                 "Kaino Solita <kaino@solita.fi>"] :in-any-order)))))
 
     (fact "Create foreman application with the applicant as foreman"
           (let [{application-id :id} (create-and-submit-application apikey :operation "kerrostalo-rivitalo") => truthy
@@ -479,3 +479,155 @@
            (fact "Teppo is owner" (:username (some #(when (= (:role %) "owner") %) auth-array)) => "teppo@example.com")
            (fact "Teppo is not double authed"
                  (count (filter #(= (:username %) "teppo@example.com") auth-array)) => 1)))))
+
+(facts "foreman rights"
+  (let [applicant pena
+        foreman    teppo
+        foreman-email (email-for-key foreman)
+
+        {application-id :id :as main-application} (create-and-submit-application applicant :operation "kerrostalo-rivitalo")
+        main-attachment-1 (-> main-application :attachments first)
+
+        ; Verdict is given so that the foreman application can be created by applicant
+        _ (give-verdict sonja application-id :verdictId "321-2016")
+
+        resp (command applicant :create-foreman-application :id application-id
+               :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
+        {foreman-app-id :id} resp
+        foreman-application (query-application applicant foreman-app-id)
+
+        foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+        foreman-applicant-doc (domain/get-document-by-name foreman-application "hakija-tj")]
+
+    (fact "sanity checks"
+      resp => ok?
+      main-attachment-1 => map?
+      foreman-doc => map?
+      (:id foreman-doc) => truthy
+      foreman-applicant-doc => map?
+      (:id foreman-applicant-doc) => truthy)
+
+    (fact "no commant rights before invites are accepted"
+      (comment-application foreman application-id) => unauthorized?
+      (comment-application foreman foreman-app-id) => unauthorized?)
+
+    (fact "accept invites"
+      (command foreman :approve-invite :id application-id) => ok?
+      (command foreman :approve-invite :id foreman-app-id) => ok?)
+
+    (fact "foreman can NOT add parteis"
+      (command foreman :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? "error.command-illegal-state") ; verdict has been given
+      (command foreman :create-doc :id foreman-app-id :schemaName "hakija-tj") => unauthorized?)
+
+    (fact "applicant can add parties"
+      (command applicant :create-doc :id foreman-app-id :schemaName "hakija-tj") => ok?)
+
+    (fact "foreman CAN read comments on the main application"
+      (query foreman :comments :id application-id) => ok?)
+
+    (fact "foreman can NOT comment on the main application"
+      (comment-application foreman application-id) => unauthorized?)
+
+    (fact "foreman CAN read & write comments on the main application"
+      (query foreman :comments :id foreman-app-id) => ok?
+      (comment-application foreman foreman-app-id) => ok?)
+
+    (fact "foreman can NOT invite writers"
+      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "writer") => unauthorized?
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "writer") => unauthorized?)
+    (fact "foreman can NOT invite other foremen"
+      (command foreman :invite-with-role :id application-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "foreman") => unauthorized?
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "foreman") => unauthorized?)
+
+    (fact "foreman can NOT invite guest to the main application"
+      (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => unauthorized?)
+
+    (fact "foreman CAN invite guest to the foreman application"
+      (command foreman :invite-with-role :id foreman-app-id :email "foo@example.com" :text "" :documentName ""
+                       :documentId "" :path "" :role "guest") => fail?
+      (command foreman :invite-guest :id foreman-app-id :email "foo@example.com" :role "guest") => ok?)
+
+    (fact "applicant CAN update applicant document on foreman application"
+      (command applicant :update-doc :id foreman-app-id :doc (:id foreman-applicant-doc)  :collection "documents"
+                         :updates [["henkilo.yhteystiedot.email" "foo@example.com"]]) => ok?)
+
+    (fact "foreman can NOT update applicant document on foreman application"
+      (command foreman :update-doc :id foreman-app-id :doc (:id foreman-applicant-doc)  :collection "documents"
+                       :updates [["henkilo.yhteystiedot.email" "foo@example.com"]]) => unauthorized?)
+
+
+    (fact "both applicant ans foreman CAN update foreman document on foreman application"
+      (command applicant :update-doc :id foreman-app-id :doc (:id foreman-doc) :collection "documents"
+                         :updates [["yhteystiedot.email" "foo@example.com"]]) => ok?
+      (command foreman :update-doc :id foreman-app-id :doc (:id foreman-doc) :collection "documents"
+                       :updates [["yhteystiedot.email" "foo2@example.com"]]) => ok?)
+
+    (fact "foreman can NOT set his own info to applicatn document on foreman application"
+      (command foreman :set-current-user-to-document :id foreman-app-id :documentId (:id foreman-applicant-doc) :path "") => unauthorized?)
+
+    (fact "foreman CAN set his own info to foreman document on foreman application"
+      (command foreman :set-current-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :path "") => ok?)
+
+    (fact "foreman CAN submit the foreman application"
+      (fact "Update subtype to 'tyonjohtaja-hakemus'"
+        (command foreman :change-permit-sub-type :id foreman-app-id :permitSubtype "tyonjohtaja-hakemus") => ok?)
+      (command foreman :submit-application :id foreman-app-id) => ok?)
+
+    (facts "attachments"
+     (let [new-main-attachment (upload-attachment foreman application-id nil true :filename "dev-resources/test-pdf.pdf")
+           attachment-by-foreman (upload-attachment foreman foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")
+           attachment-by-applicant (upload-attachment applicant foreman-app-id nil true :filename "dev-resources/test-pdf.pdf")]
+       (fact "foreman CAN upload a new attachment to main application" new-main-attachment => ss/not-blank?)
+       (fact "foreman CAN upload a new version on main application"
+         (upload-attachment foreman application-id {:id new-main-attachment} true) => new-main-attachment)
+
+       (fact "foreman CAN upload a new attachment to foreman application" attachment-by-foreman => ss/not-blank?)
+       (fact "applicant CAN upload a new attachment to foreman application" attachment-by-applicant => ss/not-blank?)
+
+       (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
+         (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
+       (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
+         (upload-attachment foreman foreman-app-id {:id attachment-by-applicant} false) => attachment-by-applicant)
+
+       (let [{actions-by-id :actionsById :as resp} (query foreman :allowed-actions-for-category :category "attachments" :id foreman-app-id)
+             actions-for-foreman-att (get actions-by-id (keyword attachment-by-foreman))
+             actions-for-applicant-att (get actions-by-id (keyword attachment-by-applicant))
+             actions [:upload-attachment :delete-attachment :delete-attachment-version :rotate-pdf
+                      :set-attachment-type :set-attachment-meta :set-attachment-visibility]]
+
+         (fact "Foreman can edit own attachment"
+           (doseq [action actions]
+             (fact {:midje/description (name action)}
+               (action actions-for-foreman-att) => ok?)))
+
+         (fact "Foreman can not edit applicant's attachment"
+           (doseq [action actions]
+             (fact {:midje/description (name action)}
+               (action actions-for-applicant-att) =not=> ok?))))
+
+       (fact "Foreman CAN set attachment meta data"
+         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents"}) => ok?)
+
+       (give-verdict sonja foreman-app-id) => ok?
+
+       (fact "Foreman can NOT upload new attachment after verduct is given"
+         (upload-attachment foreman foreman-app-id nil false))
+
+       (fact "Authority CAN upload new attachment after verduct is given"
+         (upload-attachment sonja foreman-app-id nil true))
+
+       (fact "Foreman can NOT set attachment meta data after verdict is given"
+         (command foreman :set-attachment-meta :id foreman-app-id :attachmentId attachment-by-foreman :meta {:contents "kontents2"}) => fail?)))
+
+    (fact "Foreman can not upgrade own role"
+      (command foreman :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => unauthorized?)
+
+    (fact "Applicant upgrades foreman role to writer on main application"
+      (command applicant :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => ok?
+
+      (fact "Foreman can now  invite guest to the main application"
+        (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => ok?))))

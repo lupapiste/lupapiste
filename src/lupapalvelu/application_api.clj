@@ -14,7 +14,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -53,15 +52,13 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
-  [{:keys [application user]}]
+  [{:keys [application user] :as command}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (->> (att-type/get-attachment-types-for-application application)
-                                                              (att-type/->grouped-array)))]
-      (ok :application (app/post-process-app app user)
-          :authorities (if (usr/authority? user)
-                         (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users app "authority"))
-                         [])
-          :permitSubtypes (app/resolve-valid-subtypes app)))
+    (ok :application (app/post-process-app command)
+        :authorities (if (usr/authority? user)
+                       (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users application "authority"))
+                       [])
+        :permitSubtypes (app/resolve-valid-subtypes application))
     (fail :error.not-found)))
 
 (defquery application-authorities
@@ -225,10 +222,10 @@
 
 ;; Submit
 
-(defn- do-submit [command application created]
+(defn do-submit [{:keys [application created user] :as command} ]
   (let [history-entries (remove nil?
-                          [(when-not (:opened application) (app/history-entry :open created (:user command)))
-                           (app/history-entry :submitted created (:user command))])]
+                          [(when-not (:opened application) (app/history-entry :open created user))
+                           (app/history-entry :submitted created user)])]
     (update-application command
       {$set {:state     :submitted
              :modified  created
@@ -284,20 +281,21 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)]
    :pre-checks       [domain/validate-owner-or-write-access
+                      foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application organization created] :as command}]
+  [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do-submit command application created))))
-
+      (do-submit command))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -445,6 +443,7 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :op-id])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
@@ -456,6 +455,7 @@
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
@@ -478,10 +478,12 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [app/validate-has-subtypes
                 app/pre-check-permit-subtype
+                foreman/allow-foreman-only-in-foreman-app
                 app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
@@ -602,6 +604,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
                       app/validate-authority-in-drafts]

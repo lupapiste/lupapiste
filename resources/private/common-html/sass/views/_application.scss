@@ -724,9 +724,6 @@ $app-gray-darkest: $gray187;
 .parties-list {
   width: 100%;
   margin-bottom: $marginS;
-  button {
-    margin: $marginM 0;
-  }
   .party {
     display: table-row;
     .person {
@@ -734,10 +731,6 @@ $app-gray-darkest: $gray187;
       padding-right: $marginM;
     }
     .invite-state {
-      display: table-cell;
-      padding-right: $marginM;
-    }
-    .invite-action {
       display: table-cell;
       padding-right: $marginM;
     }

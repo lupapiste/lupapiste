@@ -151,10 +151,8 @@
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."
   ([command changes]
-    (update-application command {} changes false))
-  ([command mongo-query changes]
-    (update-application command mongo-query changes false))
-  ([command mongo-query changes return-count?]
+    (update-application command {} changes))
+  ([command mongo-query changes & {:keys [return-count?]}]
 
     (when-let [new-state (get-in changes [$set :state])]
       (assert
@@ -279,7 +277,8 @@
     (reduce strip-field command [:password :newPassword :oldPassword])))
 
 (defn get-meta [name]
-  ((keyword name) (get-actions)))
+  ; Using wrapper function to enable mock actions it test
+  (get (get-actions) (keyword name)))
 
 (defn executed
   ([command] (executed (:action command) command))
@@ -425,8 +424,6 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
-(def categories [:attachments])
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -435,8 +432,8 @@
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
-   ;; Array of categories for use of allowed-actions-for-cateory
-   (sc/optional-key :categories)   [(apply sc/enum categories)]
+   ; Set of categories for use of allowed-actions-for-cateory
+   (sc/optional-key :categories)   #{sc/Keyword}
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
@@ -546,3 +543,43 @@
 (defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
+
+
+(defn foreach-action [web user application data]
+  (map
+    #(when-let [{type :type categories :categories} (get-meta %)]
+       (assoc
+         (action % :type type :data data :user user)
+         :application application
+         :web web
+         :categories categories))
+   (remove nil? (keys @actions))))
+
+(defn- validated [command]
+  {(:action command) (validate command)})
+
+
+(def validate-actions
+  (if (env/dev-mode?)
+    (util/fn->> (map validated) (into {}))
+    (util/fn->> (map validated) (filter (comp :ok first vals)) (into {}))))
+
+(defn filter-actions-by-category [category actions]
+  {:pre [(keyword? category)]}
+  (filter #(some-> % :categories category) actions))
+
+(defmulti allowed-actions-for-category (util/fn-> :data :category keyword))
+
+(defmethod allowed-actions-for-category :default
+  [_]
+  nil)
+
+(defn allowed-actions-for-collection
+  [collection-key command-builder {:keys [web user application] :as command}]
+  (let [coll (get application collection-key)]
+    (->> (map (partial command-builder application) coll)
+         (map (partial foreach-action web user application))
+         (map (partial filter-actions-by-category collection-key))
+         (map validate-actions)
+         (zipmap (map :id coll)))))
+

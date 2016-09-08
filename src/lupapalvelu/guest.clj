@@ -183,7 +183,7 @@
     application :application
     user :user
     :as command}]
-  (let [authority? (auth/has-organization-authz-roles? #{:authority} application user)
+  (let [authority? (auth/application-authority? application user)
         writer?    (auth/user-authz? #{:owner :writer} application user)
         guest?     (-> (username-auth application username) :role (= "guest"))
         own?       (= (:username user) username)]

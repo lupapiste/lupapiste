@@ -599,7 +599,15 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type operation-id :op-id} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
+(defn- parse-attachment-id-from-location [location]
+  (->> (ss/split (ss/suffix location "#")  #"&") ; currently only one parameter, but future proof for more
+       (map #(ss/split % #"="))
+       (reduce (fn [acc [k v]] (assoc acc (keyword k) v)) {})
+       :attachmentId))
+
+(defn upload-attachment
+  "Returns attachment ID"
+  [apikey application-id {attachment-id :id attachment-type :type operation-id :op-id} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
@@ -609,20 +617,29 @@
                                               {:name "text"           :content text}
                                               {:name "Content/type"   :content "image/gif"}
                                               {:name "attachmentType" :content (str
-                                                                                 (:type-group attachment-type) "."
-                                                                                 (:type-id attachment-type))}
+                                                                                 (get attachment-type :type-group "muut") "."
+                                                                                 (get attachment-type :type-id "muu"))}
                                               {:name "operationId"    :content (or operation-id "")}
                                               (when attachment-id {:name "attachmentId"   :content attachment-id})
-                                              {:name "upload"         :content uploadfile}])})]
+                                              {:name "upload"         :content uploadfile}])})
+        location (get-in resp [:headers "location"])]
     (if expect-to-succeed
-      (facts "Upload succesfully"
-             (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
-      (facts "Upload should fail"
-             (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
+      (and
+        (facts "Upload succesfully"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
+        ; Return the attachment id, can be new or existing attachment
+        (parse-attachment-id-from-location location))
+      (and
+        (facts "Upload should fail"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => #"/lp-static/html/upload-[\d\.]+\.html?.*errorMessage=.+"))
+        ; Return the original id
+        attachment-id))))
 
-(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
+(defn upload-attachment-to-target
+  "Returns attachment ID"
+  [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
@@ -637,14 +654,19 @@
                                      (when attachment-id {:name "attachmentId"   :content attachment-id})
                                      {:name "upload"         :content uploadfile}
                                      {:name "targetId"       :content target-id}
-                                     {:name "targetType"     :content target-type}])})]
+                                     {:name "targetType"     :content target-type}])})
+        location (get-in resp [:headers "location"])]
     (if expect-to-succeed
-      (facts "upload to target succesfully"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
-      (facts "upload to target should fail"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
+      (do
+        (facts "upload to target succesfully"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
+        (parse-attachment-id-from-location location))
+      (do
+        (facts "upload to target should fail"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => #"/lp-static/html/upload-[\d\.]+\.html?.*errorMessage=.+"))
+        attachment-id))))
 
 (defn upload-user-attachment [apikey attachment-type expect-to-succeed & [filename]]
   (let [filename    (or filename "dev-resources/test-attachment.txt")
