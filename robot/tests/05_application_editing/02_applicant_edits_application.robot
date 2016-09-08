@@ -106,18 +106,6 @@ Mikko goes to parties tab of an application
   Open tab  parties
   Open accordions  parties
 
-Mikko unsubscribes notifications
-  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']  1
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-  Click by test id  unsubscribeNotifications
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
-
-Mikko subscribes notifications
-  Click by test id  subscribeNotifications
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-
 Mikko inputs bad postal code for hakija-r
   Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
   Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]

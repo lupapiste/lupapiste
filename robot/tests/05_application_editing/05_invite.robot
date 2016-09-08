@@ -94,7 +94,18 @@ Mikko can see that Teppo has accepted invitation
   Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
 
 Only one unsubscribe button
-  Xpath Should Match X Times  //*[@data-test-id='unsubscribeNotifications']  1
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']  1
+
+Mikko unsubscribes notifications
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
+  Click by test id  unsubscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='subscribeNotifications']
+
+Mikko subscribes notifications
+  Click by test id  subscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='subscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
 
 Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
