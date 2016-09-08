@@ -28,15 +28,29 @@ LUPAPISTE.SidePanelModel = function(params) {
     return obs( false );
   }
 
-  self.disposedComputed( function() {
+  function track( event ) {
+    hub.send( "track-click", {category: "side-panel",
+                              label: "side-panel",
+                              event: event});
+  }
+
+    self.showConversationPanel.subscribe( function() {
+    if( self.showNoticePanel()) {
+      track( "openConversation");
+    }
+  });
+
+  self.showNoticePanel.subscribe( function() {
     if( self.showNoticePanel()) {
       hub.send( "SidePanelService::NoticeSeen");
+      track( "openNotice");
     }
   });
 
   self.showInfoPanel.subscribe( function( flag ) {
     if( flag ) {
       hub.send( "infoService::mark-seen");
+      track( "openInfo");
     } else {
       hub.send( "infoService::fetch-info-links",{reset: true});
     }

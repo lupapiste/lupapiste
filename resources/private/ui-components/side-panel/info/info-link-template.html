@@ -55,7 +55,8 @@
           <input type="text"
                  data-bind="lplaceholder: 'info.edit.text',
                             textInput: textInput,
-                            hasFocus: textFocus">
+                            hasFocus: textFocus,
+                            disable: waiting">
         </td>
         <td><button class="ghost positive"
                     data-bind="enable: canSave,
@@ -64,9 +65,12 @@
           </button>
         </td>
         <td><button class="ghost primary"
-                    data-bind="click: cancel">
+                    data-bind="click: cancel,
+                               disable: waiting,
+                               css: {waiting: waiting}">
             <i data-bind="css: {'lupicon-undo': !isTemporary(),
                           'lupicon-remove': isTemporary}" ></i>
+            <i class="lupicon-refresh spin wait"></i>
         </button></td>
       </tr>
       <tr>
@@ -74,7 +78,8 @@
         <td class="spacehog" colspan="3">
           <input type="text" data-bind="lplaceholder: 'info.edit.url',
                                         textInput: urlInput,
-                                        hasFocus: urlFocus">
+                                        hasFocus: urlFocus,
+                                        disable: waiting">
         </td>
       </tr>
     </table>

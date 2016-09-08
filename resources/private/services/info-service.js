@@ -44,9 +44,9 @@ LUPAPISTE.InfoService = function() {
   // (default falsey)
   // [originator]: id of the event originator. The originators editing
   // state is not retained.
-  // [star]: if true then showStar observable is updated (default falsey)
+  // [waiting]: Pending observable
   function fetchInfoLinks( options ) {
-    options = options || {};
+    options = _.defaults( options, {waiting: _.noop});
     var tmpLinks = [];
     var oldStates = options.reset
           ? []
@@ -55,7 +55,8 @@ LUPAPISTE.InfoService = function() {
                        if( self.isTemporaryId( link().id)) {
                          tmpLinks.push( {id: link().id});
                        }
-                       return _.set( acc, link().id, {isNew: link().isNew});
+                       return _.set( acc, link().id, {isNew: link().isNew,
+                                                      canEdit: link().canEdit});
                      }, {});
 
     if( !options.reset) {
@@ -85,6 +86,7 @@ LUPAPISTE.InfoService = function() {
     infoLinks( _.map( newLinks, function( link ) {
       return ko.observable( _.merge( link, oldStates[link.id]));
     }));
+    options.waiting( false );
 
     if( options.reset) {
       self.showStar( _.some( infoLinks(),
@@ -162,7 +164,12 @@ LUPAPISTE.InfoService = function() {
                                    }));
   });
 
-  hubscribe( "save", function( data ) {
+  // Data contents [optional]:
+  // id: link id
+  // text: link text
+  // url: link url
+  // [waiting]: pending/fuse observable
+  function save( data ) {
     var params = makeParams( data );
     // Todo: ajax upsert, receive real id.
     var id = self.isTemporaryId( data.id ) ? _.uniqueId( "id") : data.id;
@@ -170,8 +177,14 @@ LUPAPISTE.InfoService = function() {
                                text: params.text,
                                url: params.url });
     fetchInfoLinks( {originator: id,
-                     markSeen: true});
-  });
+                     markSeen: true,
+                     waiting: _.get( data, "waiting", _.noop )});
+  }
+
+  hubscribe( "save", function( data ) {
+    data.waiting( true );
+    _.delay( save, 10000, data);
+  } );
 
   hubscribe( "delete", function( data ) {
     infoLinks.remove( self.infoLink( data.id ));

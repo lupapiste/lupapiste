@@ -22,6 +22,7 @@ LUPAPISTE.InfoLinkModel = function( params ) {
 
   var editing = ko.observable( self.isTemporary() || Boolean(self.link().editing));
 
+  self.waiting   = ko.observable();
   self.textFocus = ko.observable( editing());
   self.urlFocus  = ko.observable();
 
@@ -51,7 +52,9 @@ LUPAPISTE.InfoLinkModel = function( params ) {
   });
 
   self.canSave = self.disposedComputed( function() {
-    return _.trim( self.textInput() ) && _.trim( self.urlInput());
+    return !self.waiting()
+      && _.trim( self.textInput() )
+      && _.trim( self.urlInput());
   });
 
   self.save = function() {
@@ -60,7 +63,8 @@ LUPAPISTE.InfoLinkModel = function( params ) {
                       "save",
                       {id: self.link().id,
                        text: self.textInput(),
-                       url: self.urlInput()});
+                       url: self.urlInput(),
+                       waiting: self.waiting});
     }
   };
 
