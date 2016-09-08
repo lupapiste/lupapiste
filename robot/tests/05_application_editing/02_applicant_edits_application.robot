@@ -6,12 +6,17 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko opens an application
-  Mikko logs in
+Init...
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
+  Set Suite Variable  ${paasuunnittelijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='paasuunnittelija']
+  Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
+  Set Suite Variable  ${asiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
+
+Mikko opens an application
+  Mikko logs in
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
@@ -118,13 +123,9 @@ Mikko changes hakija-r country and postal code becomes valid
 Mikko can't delete paasuunnittelija, as it's only removable by authority
   Element should not be visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
 
-Mikko decides to delete maksaja
-  Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
-  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  0
+# LPK-LPK-1997
+Mikko can't delete maksaja, as it's only removable by authority
+  Element should not be visible  xpath=//section[@data-doc-type='maksaja']//button[@data-test-class='delete-schemas.maksaja']
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
@@ -134,8 +135,7 @@ Mikko adds party maksaja using dialog
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Open accordions  parties
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
@@ -146,7 +146,7 @@ Mikko adds party hakijan-asiamies using dialog
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+  Wait until  Xpath Should Match X Times  ${asiamiesXpath}  1
 
 
 Mikko adds party hakija-r using button
@@ -190,6 +190,24 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
+  [Teardown]  Logout
+
+Authority deletes paasuunnittelija
+  Sonja logs in
+  Open application  ${newName}  ${propertyId}
+  Open tab  parties
+  Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
+  Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
+  Execute Javascript  $("button[data-test-class='delete-schemas.paasuunnittelija']").click();
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
+
+Authority deletes maksaja
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
+  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing
   There are no frontend errors

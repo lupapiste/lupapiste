@@ -1465,6 +1465,7 @@
            :repeating true
            :order 6
            :removable true
+           :removable-only-by-authority true
            :approvable true
            :subtype :maksaja
            :accordion-fields hakija-accordion-paths
