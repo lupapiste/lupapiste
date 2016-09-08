@@ -2,7 +2,8 @@
   (:require [clojure.walk :as walk]
             [clojure.zip :as zip]
             [clojure.edn :as edn]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :refer [fn->>] :as util]))
 
 (defn nil-values [_] nil)
 
@@ -284,3 +285,25 @@
        (map #(-> % name edn/read-string))
        sort
        (map #(-> % str keyword row-map))))
+
+(defn doc-type [doc]
+  (keyword (get-in doc [:schema-info :type])))
+
+(defn doc-subtype [doc]
+  (keyword (get-in doc [:schema-info :subtype])))
+
+(defn doc-name [doc]
+  (get-in doc [:schema-info :name]))
+
+(def party-doc-user-id-paths
+  [[:henkilo :userId]
+   [:userId]])
+
+(defn party-doc-user-id [doc]
+  (some (fn->> (cons :data) (get-in doc) :value) party-doc-user-id-paths))
+
+(defn party-doc->user-role [doc]
+  (cond
+    (#{:hakija :hakijan-asiamies :maksaja} (doc-subtype doc)) (doc-subtype doc)
+    (#{"tyonjohtaja" "tyonjohtaja-v2"}     (doc-name doc))    :tyonjohtaja
+    (= :party (doc-type doc))                                 (keyword (doc-name doc))))

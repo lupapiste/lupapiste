@@ -78,6 +78,13 @@
   [{app :application}]
   (ok :authorities (app/application-org-authz-users app "authority" "commenter")))
 
+(defquery application-auth-roles
+  {:parameters [:id]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :states     states/all-states}
+  [{app :application}]
+  (ok :auth (app/enrich-auth-information app)))
+
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
     (let [rakennuspaikka-docs (domain/get-documents-by-type application :location)]

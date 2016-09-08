@@ -109,6 +109,17 @@
 ;; Helpers
 ;;
 
+(defn party-document? [doc]
+  (= :party (tools/doc-type doc)))
+
+(defn- enrich-auth-info-with-parties [parties-docs auth-info]
+  (->> (filter (comp #{(:id auth-info)} tools/party-doc-user-id) parties-docs)
+       (map tools/party-doc->user-role)
+       (assoc auth-info :party-roles)))
+
+(defn enrich-auth-information [{auth :auth docs :documents}]
+  (map (partial enrich-auth-info-with-parties (filter party-document? docs)) auth))
+
 (defn user-role
   "User role within the application."
   [user {:keys [organization]}]
@@ -125,10 +136,6 @@
             (let [schema-info (:info (schemas/get-schema schema-version schema-name))]
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
-
-(defn party-document? [doc]
-  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
-    (= (:type schema-info) :party)))
 
 (defn last-history-item
   [{history :history}]
