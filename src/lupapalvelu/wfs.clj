@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error errorf]]
             [ring.util.codec :as codec]
             [net.cgrand.enlive-html :as enlive]
             [sade.http :as http]
@@ -333,20 +333,20 @@
          task (future* (exec-http http-fn url request))
          [status data error-body] (deref task timeout [:timeout])
          error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
-     (case status
-       :timeout (error "error.integration - wfs timeout while requesting" url)
-       :error   (case data
-                  400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
-                  (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
-       :ok      (let [xml (if (= url nearestfeature)
-                            (parse-features-as-latin1 data)
-                            (->features data sxml/startparse-sax-no-doctype))
-                      member-list (xml-> xml :gml:featureMember)]
-                  ; Differences in WFS implementations:
-                  ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
-                  (if (seq member-list)
-                    member-list
-                    (xml-> xml :gml:featureMembers)))))))
+      (case status
+        :timeout (error "error.integration - wfs timeout while requesting" url)
+        :error   (case data
+                   400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                   (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
+        :ok      (let [xml (if (= url nearestfeature)
+                             (parse-features-as-latin1 data)
+                             (->features data sxml/startparse-sax-no-doctype))
+                       member-list (xml-> xml :gml:featureMember)]
+                   ; Differences in WFS implementations:
+                   ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+                   (if (seq member-list)
+                     member-list
+                     (xml-> xml :gml:featureMembers)))))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -424,20 +424,27 @@
 (defn address-by-point-from-municipality [x y {:keys [url credentials no-bbox-srs]}]
   (let [x_d (util/->double x)
         y_d (util/->double y)
-        radius 50
-        corners [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50)]
-        ; Queries to some bockends must have the SRS defined at the end of BBOX,
-        ; but some bockends return NO RESULTS if it is defened!
-        bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))]
-    (exec :get url
-      credentials
-      {:REQUEST "GetFeature"
-       :SERVICE "WFS"
-       :VERSION "1.1.0"
-       :TYPENAME "mkos:Osoite"
-       :SRSNAME "EPSG:3067"
-       :BBOX   bbox
-       :MAXFEATURES "20"})))
+        radii [25 50 100 250 500 1000]]
+    (some identity
+      ; Searching by point is not directly supported.
+      ; Try searching with increasing radius.
+      (for [radius radii
+            :let [corners [(- x_d radius) (- y_d radius) (+ x_d radius) (+ y_d radius)]
+                  ; Queries to some bockends must have the SRS defined at the end of BBOX,
+                  ; but some bockends return NO RESULTS if it is defened!
+                  bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))
+                  results (exec :get url credentials
+                            {:REQUEST "GetFeature"
+                             :SERVICE "WFS"
+                             :VERSION "1.1.0"
+                             :TYPENAME "mkos:Osoite"
+                             :SRSNAME "EPSG:3067"
+                             :BBOX bbox
+                             :MAXFEATURES "50"})]]
+        (if (seq results)
+          results
+          (warnf "No results for x/y %s/%s within radius of %d. %s"
+            x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...")))))))
 
 (defn property-id-by-point [x y]
   (post ktjkii
