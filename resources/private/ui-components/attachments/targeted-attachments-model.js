@@ -9,20 +9,22 @@ LUPAPISTE.TargetedAttachmentsModel = function( params ) {
   self.typeSelector = params.typeSelector;
   self.canAdd = params.canAdd || true;
 
+  var service = lupapisteApp.services.attachmentsService;
+
   function dataView( target ) {
     return ko.mapping.toJS( _.pick( ko.unwrap( target ), ["id", "type"]));
   }
 
   self.attachments = self.disposedPureComputed( function() {
-    return _.filter(lupapisteApp.services.attachmentsService.attachments(),
-                              function(attachment) {
-                                return _.isEqual(dataView(attachment().target),
-                                                 dataView(self.target()));
-                              });
+    return _.filter(service.attachments(),
+                    function(attachment) {
+                      return _.isEqual(dataView(attachment().target),
+                                       dataView(self.target()));
+                    });
   });
 
   self.canUpload = self.disposedPureComputed( function() {
-    return lupapisteApp.models.globalAuthModel.ok( "upload-attachment");
+    return service.authModel.ok( "upload-attachment");
   });
 
   self.newAttachment = function() {
