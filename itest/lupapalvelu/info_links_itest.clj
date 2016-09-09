@@ -29,7 +29,7 @@
       (fact "Sonja sees the infolink, it is not new and is editable"
         (:text (first (:links response))) => "link text"
         (:url  (first (:links response))) => "http://example.org/1"
-        (:isNew (first (:links response))) => false
+        ;(:isNew (first (:links response))) => false
         (:canEdit (first (:links response))) => true))
      
     (let [response (command sonja :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
@@ -76,10 +76,10 @@
         (map :isNew (:links response)) => [true true]
         (map :canEdit (:links response)) => [false false]))
 
-    (let [response (query pena :info-links :id application-id)]
+    (let [resp (command pena :mark-seen :id application-id :type "info-links")
+          response (query pena :info-links :id application-id)]
       response => ok?
-      (fact "Penja has seen the links now"
-        (map :isNew (:links response)) => [false false]))
+      (fact "Pena has seen the links after calling mark-seen" (map :isNew (:links response)) => [false false]))
   
     (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId 1)]
       response => ok?
@@ -88,7 +88,7 @@
   
     (let [response (query pena :info-links :id application-id)]
       response => ok?
-      (fact "Pena sees the new updated link as new"
+      (fact "Pena sees the new updated link as a new one"
         (:isNew (nth (:links response) 1)) => true
         (:url (nth (:links response) 1)) => "http://example.org/1-new"
         (:text (nth (:links response) 1)) => "new text"))

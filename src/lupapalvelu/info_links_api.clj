@@ -55,8 +55,6 @@
         res (if linkId
               (info-links/update-info-link! app linkId text url)
               (info-links/add-info-link! app text url))]
-    (if res
-      (info-links/mark-links-seen! command))
     (ok :linkId res)))
 
 (defquery info-links
@@ -66,6 +64,5 @@
    :states      states/all-states}
   [command]
   (let [app (:application command)]
-    (info-links/mark-links-seen! command)
     (ok :links (info-links/info-links-with-flags app (:user command)))))
 
