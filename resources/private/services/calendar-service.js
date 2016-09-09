@@ -142,10 +142,10 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _unseenCalendarUpdates = hub.subscribe("calendarService::fetchUnseenUpdates", function() {
-    ajax.query("unseen-reservation-updates")
+  var _unseenCalendarUpdates = hub.subscribe("calendarService::fetchCalendarActionsRequired", function() {
+    ajax.query("calendar-actions-required")
       .success(function(data) {
-        hub.send("calendarService::unseenUpdatesFetched", {updates: data.reservationUpdates});
+        hub.send("calendarService::calendarActionsRequiredFetched", {actionsRequired: data.actionsRequired});
       }).error(function() {
         hub.send("calendarService::serviceNotAvailable");
       })
@@ -232,6 +232,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
     hub.unsubscribe(_fetchApplicationCalendarConfig);
-    hub.unsubscribe(_fetchUnseenUpdates);
+    hub.unsubscribe(_fetchCalendarActionsRequired);
   };
 };

@@ -278,13 +278,13 @@
 
       pendingCalendarNotifications = _.map(pendingCalendarNotifications,
         function(n) {
-          n.acknowledged = "none";
-          return ko.mapping.fromJS(n);
+          n.acknowledged = ko.observable("none");
+          return n;
         });
 
       applicationModel.calendarNotificationsPending(
         _.transform(
-          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
           function (result, value, key) {
             return result.push({ day: _.parseInt(key), notifications: value });
           }, []));

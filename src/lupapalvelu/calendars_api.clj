@@ -422,21 +422,21 @@
 (defn- process-application-with-reservation-updates
   [{:keys [reservations] :as appl}]
   (let [appl-without-reservations (dissoc appl :reservations)
-        reservation-fields [:id :status :reservationStatus :reservationType :startTime :endTime
-                            :comment :location :reservedBy]
+        reservation-fields [:id :applicationId :status :reservationStatus :reservationType :startTime :endTime
+                            :comment :location :reservedBy :from :to]
         participant-fields [:firstName :lastName :id]
         id->participant (comp (fn [u] (select-keys u participant-fields)) usr/get-user-by-id)]
     (map #(merge (select-keys % reservation-fields)
                  {:application appl-without-reservations
                   :participants (map id->participant (reservation-participants %))}) reservations)))
 
-(defquery unseen-reservation-updates
+(defquery calendar-actions-required
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus
    :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
   [{user :user}]
-  (ok :reservationUpdates (mapcat process-application-with-reservation-updates
-                                  (cal/applications-with-unseen-reservation-updates user))))
+  (ok :actionsRequired (mapcat process-application-with-reservation-updates
+                               (cal/applications-with-calendar-actions-required user))))
 
 (defcommand mark-reservation-update-seen
   {:user-roles       #{:authority :applicant}

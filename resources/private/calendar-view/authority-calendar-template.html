@@ -4,7 +4,7 @@
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
     </div>
 
-    <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
+    <calendar-notification-list params="items: pendingNotifications"></calendar-notification-list>
 
     <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>

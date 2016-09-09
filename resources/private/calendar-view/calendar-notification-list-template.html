@@ -1,4 +1,4 @@
-<script class="ko-template" type="text/x-jquery-tmpl" id="calendar-message-items-template">
+<script class="ko-template" type="text/x-jquery-tmpl" id="calendar-notification-list-template">
   <!-- ko ifnot: _.isEmpty(items()) -->
   <div style="margin-bottom: 36px">
     <div>
@@ -18,7 +18,7 @@
             <div class="titlebar">
               <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
               <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>:
-                    <span data-bind="text: _.map(participants(), function (p) { return util.partyFullName(p); }).join(', ')"></span>
+                    <span data-bind="text: _.map(participants, function (p) { return util.partyFullName(p); }).join(', ')"></span>
             </div>
 
 
@@ -26,7 +26,7 @@
                  data-bind="css: { 'buttons-box': acknowledged() === 'none',
                                    'undo-link': acknowledged() !== 'none' }">
               <!-- ko if: acknowledged() === 'none' -->
-                <!-- ko if: (reservationStatus() === 'ACCEPTED' || reservationStatus() === 'DECLINED') -->
+                <!-- ko if: (reservationStatus === 'ACCEPTED' || reservationStatus === 'DECLINED') -->
                 <button class="positive"
                         data-bind="click: $component.markSeen.bind($data),
                                    attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
@@ -36,7 +36,7 @@
                 </button>
                 <!-- /ko -->
 
-                <!-- ko if: reservationStatus() === 'PENDING' -->
+                <!-- ko if: reservationStatus === 'PENDING' -->
                 <button class="positive"
                         data-bind="click: $component.acceptReservation.bind($data),
                                    attr: { 'data-test-id': 'accept-reservation-btn-' + $index() }">
@@ -71,16 +71,16 @@
             </div>
 
 
-            <!-- ko if: reservationStatus() === 'PENDING' -->
+            <!-- ko if: reservationStatus === 'PENDING' -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.invited'"></div>
             <!-- /ko -->
-            <!-- ko if: reservationStatus() === 'ACCEPTED' && from() === lupapisteApp.models.currentUser.id() -->
+            <!-- ko if: reservationStatus === 'ACCEPTED' && from === lupapisteApp.models.currentUser.id() -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
             <!-- /ko -->
-            <!-- ko if: reservationStatus() === 'DECLINED' && from() === lupapisteApp.models.currentUser.id() -->
+            <!-- ko if: reservationStatus === 'DECLINED' && from === lupapisteApp.models.currentUser.id() -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
             <!-- /ko -->
-            <!-- ko if: reservationStatus() === 'ACCEPTED' && from() !== lupapisteApp.models.currentUser.id() -->
+            <!-- ko if: reservationStatus === 'ACCEPTED' && from !== lupapisteApp.models.currentUser.id() -->
             <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
             <!-- /ko -->
 

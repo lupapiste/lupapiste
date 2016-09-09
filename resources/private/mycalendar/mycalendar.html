@@ -38,9 +38,9 @@
             <i class="lupicon-calendar"></i>
           </button>
         </div>
+
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'list' -->
-        <div>Listanäyttö</div>
-        <div data-bind="template: { name: 'calendar-message-items-template', data: { items: calendarNotificationsByDay } }"></div>
+        <calendar-notification-list params="items: calendarNotificationsByDay"></calendar-notification-list>
         <!-- /ko -->
 
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'calendar' -->

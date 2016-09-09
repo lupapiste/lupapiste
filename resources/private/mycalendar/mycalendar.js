@@ -16,7 +16,7 @@
     self.setViewMode = function(mode) {
       if (mode === "list") {
         self.calendarNotificationsByDay([]);
-        hub.send("calendarService::fetchUnseenUpdates");
+        hub.send("calendarService::fetchCalendarActionsRequired");
       }
       self.viewMode(mode);
     }
@@ -32,14 +32,15 @@
       }
     });
 
-    hub.subscribe("calendarService::unseenUpdatesFetched", function(event) {
-      var notifications = _.map(event.updates,
+    // Show notifications for calendar-related actions required by this user
+    hub.subscribe("calendarService::calendarActionsRequiredFetched", function(event) {
+      var actionsRequired = _.map(event.actionsRequired,
         function(n) {
-          n.acknowledged = "none";
-          return ko.mapping.fromJS(n);
+          n.acknowledged = ko.observable("none");
+          return n;
         });
       self.calendarNotificationsByDay(_.transform(
-        _.groupBy(notifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
+        _.groupBy(actionsRequired, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
         function (result, value, key) {
           return result.push({ day: _.parseInt(key), notifications: value });
         }, []));

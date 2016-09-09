@@ -221,7 +221,7 @@
 (defn- filter-reservations-for-user [user rs]
   (filter #(util/contains-value? (:action-required-by %) (:id user)) rs))
 
-(defn applications-with-unseen-reservation-updates
+(defn applications-with-calendar-actions-required
   [user]
   (let [query      (search/make-query
                      (domain/applications-containing-reservations-requiring-action-query-for user)
