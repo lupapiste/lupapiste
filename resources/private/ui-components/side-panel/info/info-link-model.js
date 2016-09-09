@@ -20,7 +20,8 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     return service.canEdit();
   });
 
-  var editing = ko.observable( self.isTemporary() || Boolean(self.link().editing));
+  var editing = ko.observable( self.isTemporary()
+                               || Boolean(self.link().editing));
 
   self.waiting   = ko.observable();
   self.textFocus = ko.observable( editing());
@@ -81,6 +82,10 @@ LUPAPISTE.InfoLinkModel = function( params ) {
     }
   };
 
+  // Typically esc closes the side panel. However, if editing is
+  // ongoing, the intuitive action is cancel. Thus, side panel queries
+  // via hub, if anyone objects the closing. The side panel is closed
+  // if the data.canClose is ultimately true.
   self.addHubListener( "side-panel-esc-pressed",
                        function( data ) {
                          if( self.editorEdit()
@@ -105,16 +110,21 @@ LUPAPISTE.InfoLinkModel = function( params ) {
 
   // Save-edit-state event is used by infoService to collect the edit
   // information from the link models.
+  // Data contains:
+  // states: object that is updated
+  // skipId: if the value matches link id, no save.
   self.addEventListener( service.serviceName,
                          "save-edit-state",
                          function( data ) {
                            var id = self.link().id;
-                           var obj = _.get( data.states, id, {});
-                           if( self.editorEdit() ) {
-                             data.states[id] = _.set( obj, "editing",
-                                                      {text: self.textInput(),
-                                                       url: self.urlInput()});
+                           if( id !== data.skipId ) {
+                             var obj = _.get( data.states, id, {});
+                             if( self.editorEdit() ) {
+                               data.states[id] = _.set( obj, "editing",
+                                                        {text: self.textInput(),
+                                                         url: self.urlInput()});
 
+                             }
                            }
                          });
 

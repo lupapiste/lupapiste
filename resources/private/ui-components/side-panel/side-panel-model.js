@@ -49,10 +49,10 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showInfoPanel.subscribe( function( flag ) {
     if( flag ) {
-      hub.send( "infoService::mark-seen");
+      hub.send( "infoService::fetch-info-links", {markSeen: true});
       track( "openInfo");
     } else {
-      hub.send( "infoService::fetch-info-links",{reset: true});
+      hub.send( "infoService::fetch-info-links", {reset: true});
     }
   });
 

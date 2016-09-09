@@ -3,16 +3,12 @@ LUPAPISTE.InfoService = function() {
   var self = this;
 
   self.serviceName = "infoService";
-  var tmpPrefix = ":tmp:";
-
+  var tmpPrefix    = ":tmp:";
+  var latestAppId  = null;
+  self.showStar    = ko.observable();
   self.isTemporaryId = function( id ) {
     return _.startsWith( id, tmpPrefix );
   };
-
-  self.showStar = ko.observable();
-
-  // The guard for mark-seen command.
-  var markedSeen = false;
 
   // Todo: ajax query
   self.organizationLinks = ko.pureComputed( function() {
@@ -24,10 +20,7 @@ LUPAPISTE.InfoService = function() {
                   });
   });
 
-  // Todo: ajax query
-  var infoLinks = ko.observableArray([ko.observable({id: "a", text: "First link", url: "http://example.com/first", isNew: _.random( 1 ), canEdit: _.random( 1 )}),
-                                      ko.observable({id: "b", text: "Second link with a ridiculously long title that does not fit into panel. This should either be truncated or wrapped.", url: "http://example.com/third", isNew: true, canEdit: _.random( 1 )}),
-                                       ko.observable({id: "c", text: "Third link", url: "http://example.com/fourth", isNew: _.random( 1 ), canEdit: _.random( 1 )})]);
+  var infoLinks = ko.observableArray();
 
   self.infoLinks = infoLinks;
 
@@ -43,7 +36,7 @@ LUPAPISTE.InfoService = function() {
   // editing states and temporary ids. updates showStar observable
   // (default falsey)
   // [originator]: id of the event originator. The originators editing
-  // state is not retained.
+  // state is not retained
   // [waiting]: Pending observable
   function fetchInfoLinks( options ) {
     options = _.defaults( options, {waiting: _.noop});
@@ -55,53 +48,39 @@ LUPAPISTE.InfoService = function() {
                        if( self.isTemporaryId( link().id)) {
                          tmpLinks.push( {id: link().id});
                        }
-                       return _.set( acc, link().id, {isNew: link().isNew,
-                                                      canEdit: link().canEdit});
+                       return _.set( acc, link().id, {isNew: Boolean(link().isNew)});
                      }, {});
 
     if( !options.reset) {
-      hub.send( self.serviceName + "::save-edit-state", {states: oldStates});
+      hub.send( self.serviceName + "::save-edit-state", {states: oldStates,
+                                                         skipId: options.originator});
     }
 
-    // Todo: ajax query
+    ajax.query( "info-links", {id: latestAppId})
+      .pending( options.waiting )
+      .success( function( res ) {
+        var newLinks = _.concat( _.map( res.links,
+                                        function( raw ) {
+                                          return _.set( _.omit( raw, ["modified", "linkId"]),
+                                                        "id", raw.linkId);
+                                        }), tmpLinks );
+        infoLinks( _.map( newLinks, function( link ) {
+          return ko.observable( _.merge( link, oldStates[link.id]));
+        }));
 
-    delete oldStates[options.originator];
-
-    var cleanedOldies = _.filter(ko.mapping.toJS(infoLinks),
-                                 _.flow( _.ary(_.partialRight( _.get, "id"), 1),
-                                         _.negate(self.isTemporaryId) ));
-    var newLinks = _.concat( _.map( cleanedOldies,
-                                    function( link ) {
-                                      return _.set( link, "isNew", false );
-                                    }),
-                             _.map( _.range( 20 ), function() {
-                               var id = _.uniqueId( "Link-");
-                               return {id: id,
-                                       text: id,
-                                       url: "http://example.com/" + id,
-                                       isNew: true,
-                                       canEdit: _.random( 1 )};
-                             } ),
-                           tmpLinks);
-    infoLinks( _.map( newLinks, function( link ) {
-      return ko.observable( _.merge( link, oldStates[link.id]));
-    }));
-    options.waiting( false );
-
-    if( options.reset) {
-      self.showStar( _.some( infoLinks(),
-                             _.ary( _.partialRight( util.getIn, ["isNew"]),
-                                    1)));
-    }
-
-    markedSeen = false;
-
-    if( options.markSeen ) {
-      markSeen();
-    }
+        if( options.reset) {
+          self.showStar( _.some( infoLinks(),
+                                 _.ary( _.partialRight( util.getIn, ["isNew"]),
+                                        1)));
+        }
+        if( options.markSeen ) {
+          markSeen();
+        }
+      })
+      .call();
   }
 
-  var latestAppId = null;
+  
 
   ko.computed( function() {
     // Id guard to avoid unnecessary fetching (and reset), since
@@ -114,16 +93,16 @@ LUPAPISTE.InfoService = function() {
   });
 
   self.canEdit = ko.pureComputed( function() {
-    // Todo: auth model
-    return lupapisteApp.models.currentUser.isAuthority();
+    return lupapisteApp.models.applicationAuthModel.ok( "info-link-upsert");
   });
 
   function markSeen() {
-    if( !markedSeen ) {
-      // Todo ajax command
-      self.showStar( false );
-      markedSeen = true;
-    }
+      ajax.command( "mark-seen", {id: latestAppId,
+                                  type: "info-links"})
+        .success( function() {
+          self.showStar( false );
+        })
+        .call();
   }
 
   function isTarget( targetId, link ) {
@@ -137,8 +116,23 @@ LUPAPISTE.InfoService = function() {
       _.remove( links, _.partial( isTarget, moveId ) );
       links.splice( _.findIndex( links, _.partial( isTarget, afterId)) + 1,
                     0, mover );
-      // Todo ajax query
+      // We update the view immediately, but also make info-links query later.
       self.infoLinks( links );
+
+      ajax.command( "info-link-reorder", {id: latestAppId,
+                                          linkIds: _(links)
+                                          .map( function( link ) {
+                                            return link().id;
+                                          })
+                                          .filter( _.negate( self.isTemporaryId))
+                                          .value()})
+        .success( function() {
+          // Note: if there are links with tempIds, those are always
+          // appended to the end of link list. Fortunately those
+          // cannot be reordered either (no drop zone in editors).
+          fetchInfoLinks( {markSeen: true});
+        })
+        .call();
     }
   };
 
@@ -146,10 +140,13 @@ LUPAPISTE.InfoService = function() {
     hub.subscribe( self.serviceName + "::" + event, fun );
   }
 
+  var urlRe = /http[s]?:\/\//i;
+
   function makeParams( data ) {
+    var url = _.trim( data.url );
     var params = {id: latestAppId,
                   text: _.trim( data.text ),
-                  url: _.trim( data.url )};
+                  url: urlRe.test( url ) ? url : "http://" + url};
     return self.isTemporaryId( data.id )
       ? params
       : _.assign( params, {linkId: data.id} );
@@ -158,7 +155,6 @@ LUPAPISTE.InfoService = function() {
   // Hub subscriptions
 
   hubscribe( "new", function() {
-    // Todo: ajax reorder command, followed by fetch
     infoLinks.push( ko.observable( {id: _.uniqueId( tmpPrefix ),
                                     text: "", url: ""
                                    }));
@@ -170,25 +166,30 @@ LUPAPISTE.InfoService = function() {
   // url: link url
   // [waiting]: pending/fuse observable
   function save( data ) {
+    var waiting = data.waiting || _.noop;
     var params = makeParams( data );
-    // Todo: ajax upsert, receive real id.
-    var id = self.isTemporaryId( data.id ) ? _.uniqueId( "id") : data.id;
-    self.infoLink( data.id )( {id: id,
-                               text: params.text,
-                               url: params.url });
-    fetchInfoLinks( {originator: id,
-                     markSeen: true,
-                     waiting: _.get( data, "waiting", _.noop )});
+    ajax.command( "info-link-upsert", makeParams( data ))
+      .fuse( waiting )
+      .success( function( res ) {
+        self.infoLink( data.id )( {id: res.linkId,
+                                   text: params.text,
+                                   url: params.url });
+        fetchInfoLinks( {originator: res.linkId,
+                         markSeen: true,
+                         waiting: _.get( data, "waiting", _.noop )});
+      })
+      .call();
   }
 
-  hubscribe( "save", function( data ) {
-    data.waiting( true );
-    _.delay( save, 10000, data);
-  } );
+  hubscribe( "save", save);
 
   hubscribe( "delete", function( data ) {
     infoLinks.remove( self.infoLink( data.id ));
-    // Todo: ajax delete
+    if( !self.isTemporaryId( data.id )) {
+      ajax.command( "info-link-delete", {id: latestAppId,
+                                         linkId: data.id})
+        .call();
+    }
   });
 
   hubscribe( "fetch-info-links", fetchInfoLinks );
