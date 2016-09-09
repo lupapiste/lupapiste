@@ -71,17 +71,70 @@
        (fact "Nil fallbacks to default language"
              (localize-fallback nil "no") => "Ei"))
 
-(facts "Missing translations"
-       (let [localization-map
-             {:languages [:fi :sv :en]
-              :translations
-              {'avain1 {:fi "Vain suomeksi"}
-               'avain2 {:fi "Suomeksi ja ruotsiksi" :sv "Finska och svenska"}
-               'avain3 {:fi "Kaikki" :sv "Alla" :en "All"}
-               'avain4 {:fi "Suomeksi ja englanniksi" :en "Finnish and English"}}}
-             missing-sv (missing-translations localization-map :sv)
-             missing-en (missing-translations localization-map :en)]
-         (:languages missing-sv) => (contains [:fi :sv])
-         (map first (:translations missing-sv)) => (contains ['avain1 'avain4] :in-any-order)
-         (:languages missing-en) => (contains [:fi :en])
-         (map first (:translations missing-en)) => (contains ['avain1 'avain2] :in-any-order)))
+(def localization-map
+  {:languages [:fi :sv :en]
+   :translations
+   {'avain1 {:fi "Vain suomeksi"}
+    'avain2 {:fi "Suomeksi ja ruotsiksi" :sv "Finska och svenska"}
+    'avain3 {:fi "Kaikki" :sv "Alla" :en "All"}
+    'avain4 {:fi "Suomeksi ja englanniksi" :en "Finnish and English"}}})
+
+(def new-translations-map
+  {:languages [:fi :en]
+   :translations
+   {'avain1 {:fi "Vain suomeksi" :en "Only in Finnish"}
+    'avain2 {:fi "Suomeksi ja ruotsiksi" :en "In finnish and in Swedish"}
+    'avain3 {:fi "Kaikki" :en "All, Mk.2"}}})
+
+(defn translations-unchanged-for [loc-map lang]
+  (fn [actual]
+    (every? identity
+            (apply map (fn [old new]
+                         (= (get old lang)
+                            (get new lang)))
+                   (map (comp (apply juxt (keys (:translations loc-map)))
+                              :translations)
+                        [loc-map actual])))))
+
+(defn localization-for [loc-map key lang]
+  (-> loc-map :translations key lang))
+
+(fact "Missing translations"
+      (let [missing-sv (missing-translations localization-map :sv)
+            missing-en (missing-translations localization-map :en)]
+        (:languages missing-sv)                => (contains [:fi :sv])
+        (map first (:translations missing-sv)) => (contains ['avain1 'avain4] :in-any-order)
+        (:languages missing-en)                => (contains [:fi :en])
+        (map first (:translations missing-en)) => (contains ['avain1 'avain2] :in-any-order)))
+
+(facts "Merging in new translations"
+      (let [merged-map (merge-new-translations localization-map
+                                               new-translations-map
+                                               :en)]
+        (fact "The merged map contains fi, sv and en languages"
+              (:languages merged-map) => (contains [:fi :sv :en] :in-any-order))
+        (fact "Merging only changes the translations for one language"
+              merged-map => (translations-unchanged-for localization-map :fi)
+              merged-map => (translations-unchanged-for localization-map :sv))
+        (fact "New translations are added if there was no previous translation"
+              (localization-for merged-map 'avain1 :en) => (localization-for new-translations-map 'avain1 :en))
+        (fact "New translations overwrite the old ones"
+              (localization-for merged-map 'avain3 :en) => (localization-for new-translations-map 'avain3 :en))))
+
+(facts "Error handling when merging translations"
+       (fact "Exception is thrown when unexpected translation is encountered"
+             (merge-new-translations localization-map
+                                     new-translations-map
+                                     :sv) => (throws #"unexpected language"))
+       (fact "Exception is thrown when the Finnish text differs in original and translation"
+             (merge-new-translations localization-map
+                                     (assoc-in new-translations-map
+                                               [:translations 'avain1 :fi]
+                                               "Suomen teksti muuttunut")
+                                     :en) => (throws #"does not match"))
+       (fact "Exception is thrown when Finnish text is missing in original"
+             (merge-new-translations (assoc-in localization-map
+                                               [:translations 'avain1 :fi]
+                                               nil)
+                                     new-translations-map
+                                     :en) => (throws #"text not found")))

@@ -180,6 +180,29 @@
        (missing-translations lang)
        (commons-resources/write-excel file))))
 
+(defn merge-new-translations [source new lang]
+  {:languages    (distinct (apply concat (map :languages [source new])))
+   :translations (apply merge-with
+                        (fn [source new]
+                          (cond (not= (set (keys new)) #{:fi lang})
+                                (throw (ex-info "new translation map contains unexpected language(s)"
+                                                {:expected-language lang
+                                                 :translations      new}))
+
+                                (nil? (:fi source))
+                                (throw (ex-info "Finnish text not found in the source"
+                                                {:source source
+                                                 :new    new}))
+
+
+                                (not= (:fi source) (:fi new))
+                                (throw (ex-info "Finnish text used for translation does not match the one found in current source"
+                                                {:source source
+                                                 :new    new}))
+
+                                :else (conj source new)))
+                        (map :translations [source new]))})
+
 (defn merge-translations-from-excels
   "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
   [& paths]
