@@ -26,8 +26,8 @@
 
     <div class="review-done help-box" data-bind="ltext: 'task.review-done.help', visible: $root.authorization.ok('review-can-be-marked-done')"></div>
 
-    <div id="taskAttachments" >
-      <div data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, addAttachmentDisabled: $root.addAttachmentDisabled, authorization: $root.authorization}}"></div>
+    <div id="taskAttachments"
+         data-bind="component: {name: 'targeted-attachments', params: $parent.attachmentsModel}">      
     </div>
 
     <!-- ko if: $data.addedToService -->

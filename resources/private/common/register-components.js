@@ -132,7 +132,8 @@ jQuery(document).ready(function() {
     {name: "suti-display"},
     {name: "change-email"},
     {name: "side-panel-info"},
-    {name: "info-link"}
+    {name: "info-link"},
+    {name: "targeted-attachments"}
 ];
 
   ko.registerLupapisteComponents(components);

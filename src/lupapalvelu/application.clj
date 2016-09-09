@@ -145,7 +145,7 @@
        keyword))
 
 ; Seen updates
-(def collections-to-be-seen #{"comments" "statements" "verdicts", "authority-notices"})
+(def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
 (defn mark-collection-seen-update [{id :id} timestamp collection]
   {:pre [(collections-to-be-seen collection) id timestamp]}

@@ -264,12 +264,10 @@
    :attachment   {:depends [:services :common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "attachment-model.js"
-                       "targeted-attachments-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
-                  :html ["targetted-attachments-template.html"
-                         "attachment.html"
+                  :html ["attachment.html"
                          "upload.html"
                          "move-attachment-to-backing-system.html"
                          "move-attachment-to-case-management.html"]}

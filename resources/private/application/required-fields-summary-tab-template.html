@@ -109,9 +109,12 @@
                     <div class="like-btn">
                         <i class="lupicon-circle-attention"></i>
                         <span class="required-field-error-element-name"
-                              data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                              data-bind="attachmentType: $data">
+                        </span>
                     </div>
-                    <a data-bind="click: $root.application.moveToMissingRequiredAttachment, ltext: 'view'" href="#"></a>
+                    <a data-bind="ltext: 'view',
+                                  testId: 'missing-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id']),
+                                  attr: {href: lupapisteApp.services.ramService.attachmentUrl( $data.id)}"></a>
                 </div>
               <!-- /ko -->
             <!-- /ko -->

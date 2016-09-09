@@ -254,9 +254,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Required attachments
 
-  self.missingRequiredAttachments = ko.observable([]);
+  self.missingRequiredAttachments = ko.pureComputed( function() {
+    return _.get( lupapisteApp, "services.attachmentsService.missingRequiredAttachments", _.noop)();
+  });
+
   self.hasMissingRequiredAttachments = ko.pureComputed(function() {
-    return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
+    return !_.isEmpty( self.missingRequiredAttachments());
   });
 
   self.missingSomeInfo = ko.pureComputed(function() {
@@ -706,29 +709,9 @@ LUPAPISTE.ApplicationModel = function() {
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
 
-  self.moveToMissingRequiredAttachment = function(fieldInfo) {
-    var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
-    self.targetTab({tab: "attachments", id: targetId});
-  };
-
-  function extractMissingAttachments(attachments) {
-    var missingAttachments = _.filter(attachments, function(a) {
-      var required = a.required ? a.required() : false;
-      var notNeeded = a.notNeeded ? a.notNeeded() : false;
-      var noVersions = _.isEmpty(ko.unwrap(a.versions));
-      return required && !notNeeded && noVersions;
-    });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
-    missingAttachments = _.map(_.keys(missingAttachments), function(k) {
-      return [k, missingAttachments[k]];
-    });
-    return missingAttachments;
-  }
-
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
-    self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
     fetchApplicationSubmittable();
   };
 

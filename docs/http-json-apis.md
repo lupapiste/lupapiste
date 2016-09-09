@@ -12,10 +12,14 @@ Istunnossa on lisäksi välitettävä `anti-csrf-token` -niminen cookie ja
 `x-anti-forgery-token` -niminen header. Cookien ja headerin arvojen on vastattava
 toisiaan.
 
-API-key autentikaatio tapahtuu lähettämällä jokaisen HTTP-otsikkotiedoissa Authorization-header.
-Arvo on muotoa apikey=salainen avain. Esim.
+API-key autentikaatio tapahtuu lähettämällä jokaisen HTTP-otsikkotiedoissa
+OAuth 2.0 mukainen Authorization-header. Arvo on muotoa "Bearer salainen-avain",
+avain sisältää ascii-kirjanmerkkejä, numeroita, viivoja ja pisteitä ja voi päättyä
+yhtääsuuruunmerkkeihin. Avainta ei enkoodata. Esimerkiksi:
 
-    Authorization: apikey=minun-avaimeni
+    Authorization: Bearer minun-avaimeni
+
+Tarkempi määritys: https://tools.ietf.org/html/rfc6750#page-5
 
 API-keyta käytettessä csrf-tokenia ei tarvita.
 

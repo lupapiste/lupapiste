@@ -45,6 +45,8 @@ Sonja creates verdict with adds comment
   Title Should Be  ${appname} - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
+
+Sonja adds attachment to verdict
   Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
   Wait test id visible  targetted-attachments-table
 

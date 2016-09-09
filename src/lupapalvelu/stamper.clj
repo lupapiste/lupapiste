@@ -158,9 +158,10 @@
                     (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
                 (- (:right sides) (:left sides))
                 (:right sides))
-        min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
-                (:bottom page-size)
-                (:bottom sides))
+        min-y (cond
+                (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box)))) 0.0
+                (and (= 180 page-rotation) (neg? (:bottom sides))) 0.0 ; LP-6213
+                :else (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
     (debugf "Rotation %s, crop-box with rotation: %s, page-box with rotation: %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
