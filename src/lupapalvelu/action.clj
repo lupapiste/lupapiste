@@ -117,6 +117,11 @@
     (when-not (every? pred (get-in command [:data param]))
       (fail :error.unknown-type :parameters param))))
 
+(defn optional-parameter-of [param pred command]
+  (let [val (get-in command [:data param])]
+    (when-not (or (nil? val) (pred val))
+      (fail :error.unknown-type :parameters param))))
+
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
