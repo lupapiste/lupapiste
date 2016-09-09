@@ -204,6 +204,13 @@
     }
   };
 
+  ko.bindingHandlers.testId = {
+    update: function( element, valueAccessor) {
+      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+      $(element).attr( "data-test-id", value );
+    }
+  };
+
   ko.bindingHandlers.lhtml = {
     update: _.partial(localized, "html")
   };
@@ -313,6 +320,18 @@
         var data = ko.mapping.toJS( v );
         $(element).html( attachmentVersionTemplate( _.merge( data, {contentText: loc( data.contentType),
                                                                     sizeText: sizeString( data.size )})));
+      }
+    }
+  };
+
+  // Fully resolved attachmentType localized text.
+  ko.bindingHandlers.attachmentType = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        $(element).text( loc(["attachmentType",
+                              util.getIn( v, ["type", "type-group"]),
+                              util.getIn( v, ["type", "type-id"])]));
       }
     }
   };

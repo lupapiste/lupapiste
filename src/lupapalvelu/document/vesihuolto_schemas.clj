@@ -1,6 +1,5 @@
 (ns lupapalvelu.document.vesihuolto-schemas
-   (:require [lupapalvelu.document.schemas :refer :all]
-             [lupapalvelu.document.tools :refer :all]))
+   (:require [lupapalvelu.document.schemas :as schemas :refer [defschemas]]))
 
 (def vesihuolto-rakennuspaikka [{:name "kiinteisto"
                                  :type :group
@@ -23,7 +22,7 @@
                                                         {:name "Saunarakennus"}
                                                         {:name "Lomarakennus"}
                                                         {:name "Asuinrakennus"}
-                                                        ei-tiedossa]}
+                                                        schemas/ei-tiedossa]}
                                                 {:name "rakennusvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size :s}
                                                 {:name "vapautus" :type :checkbox}
                                                 {:name "kohteenVarustelutaso" :type :group
@@ -42,7 +41,7 @@
    {:info {:name "hankkeen-kuvaus-vesihuolto"
            :approvable true
            :order 1}
-    :body [kuvaus]}
+    :body [schemas/kuvaus]}
    {:info {:name "hulevedet"
            :approvable false
            :order 3
@@ -67,11 +66,11 @@
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "johdetaan paineellisena vesijohtoa pitkin rakennukseen"}
-                   ei-tiedossa]}
+                   schemas/ei-tiedossa]}
            {:name "riittavyys" :type :select :sortBy :displayname
             :body [{:name "vesi ajoittain v\u00e4hiss\u00e4"}
                    {:name "vesi riitt\u00e4\u00e4 talouden tarpeisiin"}
-                   ei-tiedossa
+                   schemas/ei-tiedossa
                    ]}]}
    {:info {:name "jatevedet"
            :approvable false

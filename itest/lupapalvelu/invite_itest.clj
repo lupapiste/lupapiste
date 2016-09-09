@@ -105,6 +105,12 @@
     (fact "Teppo can not comment on Mikko's application before accepting the invite"
       (comment-application teppo application-id true) => unauthorized?)
 
+    (fact "Teppo can not downgrade Mikko's authtorization"
+      (command teppo :change-auth :id application-id :role "writer" :userId (id-for-key mikko)) => unauthorized?)
+
+    (fact "Teppo can not change own authtorization"
+      (command teppo :change-auth :id application-id :role "foreman" :userId (id-for-key teppo)) => unauthorized?)
+
     (fact "Mikko prefils Teppo's company name"
       (command mikko :update-doc :id application-id :doc suunnittelija-doc  :collection "documents" :updates [["yritys.yritysnimi" "Tepon saneeraus"]]) => ok?)
 

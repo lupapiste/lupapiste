@@ -140,9 +140,8 @@
    :user-roles #{:authority}
    :states states/all-application-states-but-draft-or-terminal}
   [{:keys [application user created lang] :as command}]
-  (let [new-state {:state :mark-done :user user :created created}
-        response (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})]
-    response))
+  (let [new-state {:state :mark-done :user user :created created}]
+    (update-application command {:neighbors {$elemMatch {:id neighborId}}} {$push {:neighbors.$.status new-state}})))
 
 (defn- append-doc-schemas [{schema-info :schema-info :as document}]
   (assoc document :schema (schemas/get-schema schema-info)))

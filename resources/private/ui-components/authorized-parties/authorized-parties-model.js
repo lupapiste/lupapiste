@@ -69,6 +69,67 @@ LUPAPISTE.AuthorizedPartiesModel = function() {
     return application().isNotOwner( role );
   };
 
+  var roleChangeMap = {"foreman":"writer", "writer":"foreman"};
+
+  self.changeAuth = function(model) {
+    var userId = model.id();
+    var id = application().id();
+    var role = roleChangeMap[model.role()];
+    var name = _.escape(_.filter([model.firstName(), model.lastName()]).join("\u00a0"));
+
+    if (role && hasAuth("change-auth") ) {
+      hub.send("track-click", {category:"Application", label:"", event:"changeAuth"});
+      hub.send("show-dialog", {ltitle: "areyousure",
+        size: "medium",
+        component: "yes-no-dialog",
+        componentParams: {text: loc("application.grant-writer-access.confirm", name),
+                          yesFn: function() {
+                            ajax.command("change-auth", { id: id, userId: userId, role: role})
+                            .success(function() {
+                              application().lightReload();
+                              hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
+                            })
+                            .processing(application().processing)
+                            .call();
+                            return false;
+                          },
+                          noFn: function() {
+                            hub.send("track-click", {category:"Application", label:"", event:"authChangeCanceled"});
+                          }}});
+      return false;
+    }
+  };
+
+  self.showChangeAuth = function( model ) {
+    return hasAuth("change-auth") && model.role() === "foreman";
+  };
+
+  self.removeAuth = function(model) {
+    var username = model.username();
+    var id = application().id();
+    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
+
+    hub.send("show-dialog", {ltitle: "areyousure",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {ltext: "areyousure.message",
+                        yesFn: function() {
+                          ajax.command("remove-auth", { id: id, username: username})
+                          .success(function() {
+                            application().lightReload();
+                            hub.send("track-click", {category:"Application", label:"", event:"authChanged"});
+                          })
+                          .processing(application().processing)
+                          .call();
+                          return false;
+                        },
+                        noFn: function() {
+                          hub.send("track-click", {category:"Application", label:"", event:"authChangeCanceled"});
+                        }}});
+    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
+    return false;
+  };
+
   self.showRemove = function( role ) {
     return hasAuth( "remove-auth") && self.isNotOwner( role );
   };

@@ -867,6 +867,7 @@
                                  :required ["tyonjohtaja" "maksaja"]
                                  :attachments []
                                  :attachment-op-selector false
+                                 :attachments-readonly-after-sent true
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -882,6 +883,7 @@
                                  :required ["hankkeen-kuvaus-minimum"]
                                  :attachments []
                                  :attachment-op-selector false
+                                 :attachments-readonly-after-sent true
                                  :add-operation-allowed false
                                  :min-outgoing-link-permits 1
                                  :max-outgoing-link-permits 1
@@ -1068,7 +1070,7 @@
     kt-operations
     mm-operations))
 
-(def Operation
+(sc/defschema Operation
   {; Documents
    :schema sc/Str
    :required [sc/Str]
@@ -1076,8 +1078,14 @@
    (sc/optional-key :optional) #{sc/Str}
    (sc/optional-key :schema-data) [sc/Any]
 
+   ; Attachment groups and types
    :attachments [sc/Any]
 
+   ; Attachments are read only for applicants after the application has been sent
+   ; to municipality backend (state is :sent or later)
+   (sc/optional-key :attachments-readonly-after-sent) sc/Bool
+
+   ; Allow selecting attachment operation
    (sc/optional-key :attachment-op-selector) sc/Bool
 
    ; Type and workflow

@@ -128,7 +128,7 @@
                                 ["rakennuksenOmistajat.0.henkilo.yhteystiedot.puhelin"   "040-2345678"]]) => ok?
 
         (fact "Pena adds second paapiirrustus and set's it not public"
-          (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus" :type-id "pohjapiirustus"}} true) => true
+          (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus" :type-id "pohjapiirustus"}} true) => truthy
           (let [{attachments :attachments} (query-application pena application-id)
                 new-att (last attachments)]
             (fact "now two pohjapiirustus attachemnts exist"

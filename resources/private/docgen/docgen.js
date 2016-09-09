@@ -19,7 +19,7 @@ var docgen = (function () {
     $(containerSelector).empty();
   }
 
-  function displayDocuments(containerId, application, documents, authorizationModel, options) {
+  function displayDocuments(containerId, application, documents, options) {
     var docgenDiv = $("#" + containerId);
     var isDisabled = options && options.disabled;
 
@@ -37,6 +37,12 @@ var docgen = (function () {
 
     _.each(documents, function (doc) {
       var schema = doc.schema;
+      // Use given authorization model or create new one from current document
+      if (!options.authorizationModel && _.isEmpty(doc.allowedActions)) {
+        error("No authorization model, form will be disabled!", containerId, doc.id);
+      }
+      var authorizationModel = options.authorizationModel ? options.authorizationModel : authorization.create(doc.allowedActions);
+
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
       docModels[containerId].push(docModel);
       docModel.triggerEvents();

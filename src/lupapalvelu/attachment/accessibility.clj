@@ -64,8 +64,15 @@
     (filter (partial can-access-attachment? user application) attachments-with-auth)))
 
 (defn has-attachment-auth [{user :user {attachment-id :attachmentId} :data app :application}]
-  (when (and attachment-id (not (user/authority? user)))
-    (if-let [{auth :auth} (util/find-first #(= (:id %) attachment-id) (:attachments app))]
-      (when (and auth (not (auth/has-auth? {:auth auth} (:id user))))
+  (when (and attachment-id (not (auth/application-authority? app user)))
+    (if-let [attachment (util/find-by-id attachment-id (:attachments app))]
+      (when (and (seq (:auth attachment)) (not (auth/has-auth? attachment (:id user))))
+        (fail :error.attachment.no-auth))
+      (fail :error.unknown-attachment))))
+
+(defn has-attachment-auth-role [role {user :user {attachment-id :attachmentId} :data app :application}]
+  (when (and attachment-id (not (auth/application-authority? app user)))
+    (if-let [attachment (util/find-by-id attachment-id (:attachments app))]
+      (when (and (seq (:auth attachment)) (not (auth/has-auth-role? attachment (:id user) role)))
         (fail :error.attachment.no-auth))
       (fail :error.unknown-attachment))))

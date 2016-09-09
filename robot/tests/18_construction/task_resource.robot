@@ -44,7 +44,7 @@ Edit YA katselmus
 Open review
   [Arguments]  ${index}
   Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
-  Wait test id visible  review-done
+  Element should be visible by test id  review-done
 
 Return from review
   Scroll and click test id  back-to-application-from-task

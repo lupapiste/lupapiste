@@ -2,6 +2,7 @@
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
             [midje.sweet :refer :all]
@@ -315,7 +316,7 @@
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
-      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true))
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy))
 
     (facts "Authority"
       (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
@@ -340,7 +341,7 @@
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
-      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy)
       (let [{attachments :attachments :as attachments-resp} (query sonja :attachments :id application-id)
             attachment-id (->> attachments (filter (comp #{"verdict"} :type :target)) first :id)]
         (fact "all attachments" attachments-resp => ok?)
@@ -482,47 +483,49 @@
                 (fact "version number is not changed" (:version v2) => (:version v1))
                 (fact "Auto conversion flag is preserved" (:autoConversion v2) => true))))))
 
-(facts "Convert attachment to PDF/A with Libre"
-  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
-        application-id (:id application)
-        attachment (first (:attachments application))]
+(if (libre/enabled?)
+  (facts "Convert attachment to PDF/A with Libre"
+   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+         application-id (:id application)
+         attachment (first (:attachments application))]
 
-    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+     (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
 
-    (let [attachment (first (:attachments (query-application sonja application-id)))]
-      (fact "One version, but original file id points to original file"
-        (count (:versions attachment)) => 1
-        (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
+     (let [attachment (first (:attachments (query-application sonja application-id)))]
+       (fact "One version, but original file id points to original file"
+         (count (:versions attachment)) => 1
+         (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
 
-      (fact "Conversion flags"
-        (fact "Auto conversion to PDF/A should be done to txt -file"
-          (get-in attachment [:latestVersion :autoConversion]) => true
-          (get-in attachment [:latestVersion :archivable]) => true
-          (get-in attachment [:latestVersion :archivabilityError]) => nil
-          (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-          (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
+       (fact "Conversion flags"
+         (fact "Auto conversion to PDF/A should be done to txt -file"
+           (get-in attachment [:latestVersion :autoConversion]) => true
+           (get-in attachment [:latestVersion :archivable]) => true
+           (get-in attachment [:latestVersion :archivabilityError]) => nil
+           (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+           (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
 
 
-      (fact "Latest version should be 0.1 after conversion"
-        (get-in attachment [:latestVersion :version :major]) => 0
-        (get-in attachment [:latestVersion :version :minor]) => 1)
+       (fact "Latest version should be 0.1 after conversion"
+         (get-in attachment [:latestVersion :version :major]) => 0
+         (get-in attachment [:latestVersion :version :minor]) => 1)
 
-      (fact "Preview image is created"
-        (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
+       (fact "Preview image is created"
+         (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
 
-    (fact "Invalid mime not converted with Libre"
-      (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
+     (fact "Invalid mime not converted with Libre"
+       (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
 
-      (let [attachment (second (:attachments (query-application sonja application-id)))]
-        (fact "One version, but original file id points to original file"
-          (count (:versions attachment)) => 1
-          (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
+       (let [attachment (second (:attachments (query-application sonja application-id)))]
+         (fact "One version, but original file id points to original file"
+           (count (:versions attachment)) => 1
+           (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
 
-        (fact "Conversion flags for invalid-mime-type"
-          (get-in attachment [:latestVersion :autoConversion]) => falsey
-          (get-in attachment [:latestVersion :archivable]) => falsey
-          (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
-          (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+         (fact "Conversion flags for invalid-mime-type"
+           (get-in attachment [:latestVersion :autoConversion]) => falsey
+           (get-in attachment [:latestVersion :archivable]) => falsey
+           (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
+           (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+  (println "Skipped attachment-itest libreoffice tests!"))
 
 (when (or pdfa/pdf2pdf-enabled? dev-env?)
   (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
@@ -685,7 +688,7 @@
         (util/find-by-id aid1 attachments) => (contains {:metadata {:nakyvyys "julkinen"}})))
 
     (facts "Mikko uploads personal CV"
-      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
       (let [{attachments :attachments} (query-application mikko application-id)
             mikko-att (last attachments)]
         (fact "Mikko has auth"
@@ -713,7 +716,7 @@
 
     (fact "Veikko uploads only-authority attachment"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => true)
+                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => truthy)
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att (last attachments)]
       (count attachments) => 6
@@ -730,13 +733,13 @@
 
     (fact "Veikko uploads attachment for parties"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                  :type-id "naapurin_suostumus"}} true) => true)
+                                                                  :type-id "naapurin_suostumus"}} true) => truthy)
 
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att-id (:id (last attachments))
           _ (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "asiakas-ja-viranomainen") => ok?
           _ (upload-attachment pena application-id {:id veikko-att-id :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                             :type-id "naapurin_suostumus"}} true) => true
+                                                                             :type-id "naapurin_suostumus"}} true) => truthy
           mikko-app (query-application mikko application-id)
           latest-attachment (last (:attachments mikko-app))]
       (fact "Mikko sees Veikko's/Pena's attachment"
@@ -790,7 +793,7 @@
       (-> (query-application pena application-id) :attachments first))
 
     (fact "Upload file to attachment"
-          (upload-attachment pena application-id base-attachment true) => true)
+          (upload-attachment pena application-id base-attachment true) => truthy)
 
     (fact "Assign application to Ronja"
       (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
@@ -827,7 +830,7 @@
           => (partial expected-failure? :error.ram-linked))
 
     (facts "Pena uploads new post-verdict attachment and corresponding RAM attachment"
-          (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+          (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
           (let [base (latest-attachment)]
             (fact "RAM creation fails do to unapproved base attachment"
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
@@ -837,7 +840,7 @@
                   (command sonja :approve-attachment :id application-id
                            :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
-            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
             (fact "Applicant cannot delete base attachment"
                   (command pena :delete-attachment :id application-id :attachmentId (:id base))
                   => (partial expected-failure? :error.ram-linked))
@@ -881,7 +884,7 @@
           (fact "Sonja cannot delete base attachment"
                 (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => (partial expected-failure? :error.ram-linked))
           (fact "Fill and approve RAM and create one more link"
-                (upload-attachment pena application-id (latest-attachment) true) => true
+                (upload-attachment pena application-id (latest-attachment) true) => truthy
                 (let [middle (latest-attachment)]
                   (command sonja :approve-attachment :id application-id
                            :fileId (-> middle :latestVersion :fileId)) => ok?

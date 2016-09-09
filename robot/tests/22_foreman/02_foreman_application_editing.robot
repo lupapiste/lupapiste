@@ -8,7 +8,8 @@ Suite Teardown  Logout
 
 *** Keywords ***
 Sonja creates an application and invites foreman
-  Create project application
+  # Create application directly to submitted state to speed up the test
+  Create project application  submitted
   Sonja invites foreman to application
 
 Open linking dialog
@@ -21,18 +22,20 @@ Sonja inits applications
   Sonja logs in
   Sonja creates an application and invites foreman
   Sonja creates an application and invites foreman
-
-Submit the base apps
-  Submit foreman base app  0
-  Submit foreman base app  1
   [Teardown]  Logout
 
-Foreman fills personal information and submits the first foreman application
+Foreman fills personal information
   Foreman logs in
   Foreman applies personal information to the foreman application  0
 
+Foreman can not fill applicant information
+  # No inputs that are missing a readoly attribute. In other words, all inputs are read only.
+  Xpath Should Match X Times  //section[@data-doc-type='hakija-tj']//input[not(@readonly)]  0
+
+Foreman selects application type and submits the first foreman application
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
+
   Submit application
 
 Foreman cannot see related projects
@@ -50,6 +53,41 @@ Foreman application can be submitted
   Select From List By Value  permitSubtypeSelect  tyonjohtaja-hakemus
   Positive indicator should be visible
   Submit application
+
+Foreman can comment foreman application
+  Add comment  Hakemus on nyt jätetty
+
+Foreman could only add guests to foreman application
+  Open tab  parties
+  Wait test id visible  application-guest-add
+  Element should not be visible by test id  application-invite-person
+
+Foreman can not add parties to foreman application
+  Element should not be visible by test id  hakija-tj_append_btn
+  Element should not be visible by test id  add-party
+
+Foreman could add attachment to foreman application
+  Open tab  attachments
+  Element should be visible by test id  add-attachment
+
+Foreman only read comments on project application
+  Open project application
+  Confirm yes no dialog
+  Open side panel  conversation
+  Element should not be visible by test id  application-new-comment-text
+  Element should not be visible by test id  application-new-comment-btn
+
+Foreman can not invite anyone to the project application
+  Open accordions  parties
+  Element should not be visible by test id  application-invite-person
+  Element should not be visible by test id  application-guest-add
+
+Foreman can not add parties to the project application
+  Element should not be visible by test id  add-party
+
+Foreman could add attachment to project application
+  Open tab  attachments
+  Element should be visible by test id  add-attachment
   [Teardown]  Logout
 
 Sonja logs in and gets verdict for the first foreman application
@@ -68,8 +106,6 @@ Foreman logs in and checks related projects on the second foreman application
 
 Can not link base app to foreman application
   Open project application
-  Confirm yes no dialog
-
   Open linking dialog
 
   ${app} =   Get From List  ${applications}  1
@@ -146,10 +182,6 @@ On second thought, complement is needed
   Click enabled by test id  request-for-complement
   Wait Until  Application state should be  complementNeeded
 
-Verdict can't be given
-  Open tab  verdict
-  Element should not be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
-
 Foreman state has reset on base app
   Go back to project application
   Wait Until  Application state should be  verdictGiven
@@ -191,3 +223,4 @@ Foreman state has reset again on base app
   Go back to project application
   Open tab  tasks
   Wait Until  Required foreman state is  Vastaava työnjohtaja  new
+
