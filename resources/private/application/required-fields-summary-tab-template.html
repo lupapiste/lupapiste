@@ -109,9 +109,7 @@
                     <div class="like-btn">
                         <i class="lupicon-circle-attention"></i>
                         <span class="required-field-error-element-name"
-                              data-bind="text: loc(['attachmentType', 
-                                         util.getIn( $data, ['type', 'type-group']), 
-                                         util.getIn( $data, ['type', 'type-id'])])">
+                              data-bind="attachmentType: $data">
                         </span>
                     </div>
                     <a data-bind="ltext: 'view',
