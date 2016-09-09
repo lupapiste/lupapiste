@@ -17,8 +17,8 @@
 (defn- proxy-request [apikey proxy-name & args]
   (:body (http-post
            (str (server-address) "/proxy/" (name proxy-name))
-           {:headers {"authorization" (str "apikey=" apikey)
-                      "content-type" "application/json;charset=utf-8"}
+           {:headers {"content-type" "application/json;charset=utf-8"}
+            :oauth-token apikey
             :socket-timeout 10000
             :conn-timeout 10000
             :body (json/encode (apply hash-map args))

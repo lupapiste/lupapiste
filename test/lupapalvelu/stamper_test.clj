@@ -75,3 +75,10 @@
      x => (roughly (:right crop-box))
      y => (roughly (:bottom crop-box))))
 
+(fact "LP-6213"
+  (let [page-box {:top 0.0, :right 1792.32, :bottom -846.0, :left 0.0, :width 1792.32, :height 846.0}
+        crop-box {:top 0.0, :right 1792.32, :bottom -846.0, :left 0.0, :width 1792.32, :height 846.0}
+        rotation 180
+        [x y] (calculate-x-y page-box crop-box rotation 0.0 0 0)]
+    x => (roughly (:right crop-box))
+    y => (roughly 0)))

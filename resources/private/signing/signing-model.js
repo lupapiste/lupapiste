@@ -28,7 +28,9 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
 
   self.init = function(application) {
     var app = ko.toJS(application);
-    var attachments = _(app.attachments || []).filter(function(a) {return a.versions && a.versions.length;}).map(normalizeAttachment).value();
+    var attachments = _(ko.mapping.toJS(lupapisteApp.services.attachmentsService.attachments))
+          .filter(function(a) {return a.versions && a.versions.length;})
+          .map(normalizeAttachment).value();
 
     self.application = app;
     self.password("");
@@ -50,6 +52,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
         .success(function() {
           self.password("");
           repository.load(id);
+          hub.send("attachments-signed", {id: id, attachments: attachmentIds});
           LUPAPISTE.ModalDialog.close();
           if (self.confirmSuccess) {
             LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));

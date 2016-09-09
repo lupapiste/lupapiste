@@ -1,0 +1,7 @@
+"info.button"  "fi"  "Ohje"
+"info.title"  "fi"  "Ohjeistus"
+"info.organization.links" "fi" "Tutustu kunnan ohjeisiin:"
+"info.info.links" "fi" "Hankekohtaiset ohjeet"
+"info.edit.text" "fi" "Kirjoita linkin teksti tähän..."
+"info.edit.url" "fi" "Kopioi linkin verkko-osoite tähän..."
+"info.add-link" "fi" "Lisää uusi linkki"

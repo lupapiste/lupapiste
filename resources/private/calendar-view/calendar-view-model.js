@@ -110,11 +110,10 @@ LUPAPISTE.CalendarViewModel = function (params) {
       return;
     }
     if (params.view === "applicationView") {
-      var app = ko.unwrap(self.applicationModel);
       var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
                    authorityId: _.get(self.authority(), "id"),
                    reservationTypeId: _.get(self.reservationType(), "id"),
-                   applicationId: _.isEmpty(app) ? undefined : ko.unwrap(app.id),
+                   applicationId: _.get(self.applicationModel(), "id"),
                    week: self.startOfWeek().isoWeek(),
                    year: self.startOfWeek().year(),
                    weekObservable: self.calendarWeekdays };

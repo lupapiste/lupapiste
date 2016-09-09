@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.schema-validation
-  (:require [schema.core :refer [defschema] :as sc]))
+  (:require [schema.core :refer [defschema] :as sc]
+            [lupapalvelu.authorization :as auth]))
 
 (def opt sc/optional-key)
 
@@ -267,6 +268,7 @@
           (opt :removable)                   sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
+          (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :construction-time)           sc/Bool    ;; Is a construction time doc
           (opt :exclude-from-pdf)            sc/Bool    ;;

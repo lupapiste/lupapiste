@@ -1,10 +1,6 @@
 (ns lupapalvelu.document.schemas-test
-  (:use [lupapalvelu.document.schemas]
-        [midje.sweet]))
-
-(facts "body"
-  (fact "flattens stuff into lists"    (body 1 2 [3 4] 5) => [1 2 3 4 5])
-  (fact "does not flatten recursively" (body 1 2 [3 4 [5]]) => [1 2 3 4 [5]]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.document.schemas :refer [repeatable update-in-body]]))
 
 (facts "repeatable"
   (fact (repeatable "beers" {:name :beer

@@ -5,11 +5,11 @@
 
     <script type="text/x-jquery-tmpl" id="statements-table-template">
 
-      <div data-bind="ifnot: $data.statements && $data.statements().length > 0">
+      <div data-bind="if: !$data.statements || _.isEmpty($data.statements())">
           <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-statements"></p>
       </div>
 
-      <div data-bind="if: $data.statements && $data.statements().length > 0">
+      <div data-bind="if: $data.statements && !_.isEmpty($data.statements())">
           <table class="table table-striped tablesorter" data-test-id="application-statements">
               <thead>
                   <tr>

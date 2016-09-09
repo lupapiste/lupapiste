@@ -1,6 +1,6 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
-  (:require [taoensso.timbre :refer [debug]]
+  (:require [taoensso.timbre :refer [debug error errorf]]
             [clojure.string :refer [blank? join trim split]]
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
@@ -58,8 +58,11 @@
                                                  :model-fn create-prev-permit-invite-email-model
                                                  :subject-key "invite"})
 
+(def settable-roles #{:writer :foreman})
+(def changeable-roles #{:writer :foreman})
+
 (defn- valid-role [role]
-  (#{:writer :foreman :guest} (keyword role)))
+  (settable-roles (keyword role)))
 
 (defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
@@ -89,6 +92,7 @@
 
 (defcommand invite-with-role
   {:parameters [:id :email :text :documentName :documentId :path :role]
+   :categories #{:documents}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
@@ -165,6 +169,36 @@
   [command]
   (do-remove-auth command username))
 
+(defcommand change-auth
+  {:parameters [:id userId role]
+   :input-validators [(partial action/non-blank-parameters [:userId])
+                      role-validator
+                      (fn [{:keys [data user]}]
+                        (when (= (:id user) (-> data :userId ss/trim))
+                          (fail :error.unauthorized :cause "Own role can not be changes")))
+                      ]
+   :user-roles #{:applicant :authority}
+   :states     (states/all-application-states-but [:canceled])
+   :pre-checks [application/validate-authority-in-drafts
+                (fn [command]
+                  (when-let [user-id (get-in command [:data :userId])]
+                    (if-let [auths (seq (auth/get-auths (:application command) user-id))]
+                      (when-not (some changeable-roles (map (comp keyword :role) auths))
+                        (fail :error.invalid-role :cause (map :role auths)))
+                      (fail :error.user-not-found))))]}
+  [{:keys [application] :as command}]
+  (let [user-id (ss/trim userId)
+        auths (auth/get-auths application user-id)
+        roles (map :role auths)]
+
+    (when (> (count auths) 1)
+      (errorf "More than one authorization for user %s %s, will change first that is changeable"
+             (-> auths first :username), roles))
+
+    (update-application command
+      {:auth {:$elemMatch {:id userId, :role {$in changeable-roles}}}}
+      {$set {:auth.$.role role}})))
+
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
@@ -178,6 +212,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
+   :user-authz-roles auth/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]
@@ -187,6 +222,7 @@
   {:parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:id :username])]
    :user-roles #{:applicant :authority}
+   :user-authz-roles auth/default-authz-reader-roles
    :states states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [command]

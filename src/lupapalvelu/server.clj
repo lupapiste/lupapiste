@@ -54,6 +54,7 @@
             [lupapalvelu.property-api]
             [lupapalvelu.user-notification-api]
             [lupapalvelu.tiedonohjaus-api]
+            [lupapalvelu.info-links-api]
             [lupapalvelu.application-bulletins-api]
             [lupapalvelu.application-tabs-api]
             [lupapalvelu.application-options-api]

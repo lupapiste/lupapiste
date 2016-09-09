@@ -146,7 +146,7 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: _.isFunction($data.readOnly) && !$data.readOnly() -->
+            <!-- ko if: _.isEmpty($data.readOnly) || (_.isFunction($data.readOnly) && !$data.readOnly()) -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
               <div class="contents">

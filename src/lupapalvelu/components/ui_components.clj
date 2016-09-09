@@ -260,14 +260,13 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing]
+   :attachment   {:depends [:services :common-html :repository :signing]
                   :js ["attachment-multi-select.js"
-                       "targeted-attachments-model.js"
+                       "attachment-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
-                  :html ["targetted-attachments-template.html"
-                         "attachment.html"
+                  :html ["attachment.html"
                          "upload.html"
                          "move-attachment-to-backing-system.html"
                          "move-attachment-to-case-management.html"]}

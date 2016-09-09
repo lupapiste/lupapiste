@@ -385,7 +385,7 @@
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
                        {$push {:auth auth}, $set  {:modified (now)}}
-                       true)]
+                       :return-count? true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
                                                  :caller     caller

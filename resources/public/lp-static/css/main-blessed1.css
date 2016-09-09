@@ -6103,6 +6103,96 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
 }
 
 /* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+label.stampbox-label {
+  width: 100%;
+  display: inline-block;
+  color: #333333;
+  padding-left: 7px;
+  padding-right: 7px;
+  padding-bottom: 7px;
+  padding-top: 7px;
+}
+
+/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "";
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: top;
+  color: #f39129;
+  cursor: pointer;
+}
+
+/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-label:hover.stampbox-label:before,
+input:checked + .stampbox-label:hover.stampbox-label:before {
+  color: #fbc732;
+}
+
+/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+input:checked + .stampbox-label:before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'lupapiste' !important;
+  speak: none;
+  font-style: normal;
+  font-size: 22px;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  content: "";
+  color: white;
+}
+
+/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+input:disabled + .stampbox-label:before,
+input:disabled + .stampbox-label:hover.stampbox-label:before {
+  cursor: initial;
+  color: #bbbbbb;
+}
+
+/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper {
+  display: inherit;
+  box-sizing: border-box;
+  border: 1px solid #dddddd;
+}
+/* line 5, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper input[type=checkbox], .stampbox-wrapper input[type=radio] {
+  display: block;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  font-size: 0;
+}
+
+/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper.wrapper--disabled {
+  background-color: #f6f6f6;
+}
+
+/* line 91, ../../../private/common-html/sass/partials/_inputs.scss */
+.stampbox-wrapper {
+  border: none;
+}
+
+/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
 label.radio-label {
   width: 100%;
   display: inline-block;
@@ -6272,17 +6362,17 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 97, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 102, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 102, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 107, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 106, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 111, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -6372,7 +6462,7 @@ input:disabled + .filter-label:hover.filter-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 118, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 123, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6381,34 +6471,34 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 128, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 133, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 132, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 137, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 135, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 139, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 146, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 148, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 153, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
@@ -8927,56 +9017,4 @@ th .icon, td .icon {
 /* line 95, ../../../private/common-html/sass/partials/_tables.scss */
 th.actions a, td.actions a {
   margin-right: 12px;
-}
-/* line 97, ../../../private/common-html/sass/partials/_tables.scss */
-th.actions a:last-child, td.actions a:last-child {
-  margin-right: 0;
-}
-
-/* line 105, ../../../private/common-html/sass/partials/_tables.scss */
-th.action-column .icon, td.action-column .icon {
-  margin: 0;
-}
-
-/* line 111, ../../../private/common-html/sass/partials/_tables.scss */
-tbody td, tfoot td {
-  vertical-align: middle;
-}
-
-/* line 117, ../../../private/common-html/sass/partials/_tables.scss */
-.dataTables_wrapper {
-  position: relative;
-}
-
-/* line 120, ../../../private/common-html/sass/partials/_tables.scss */
-.table-filter {
-  float: right;
-  position: absolute;
-  top: -36px;
-  right: 0;
-}
-
-/* line 127, ../../../private/common-html/sass/partials/_tables.scss */
-table.tasks thead tr:first-child td {
-  padding-left: 0;
-}
-
-/* line 131, ../../../private/common-html/sass/partials/_tables.scss */
-.tasks-content {
-  margin-top: 12px;
-  margin-bottom: 12px;
-}
-
-/* line 137, ../../../private/common-html/sass/partials/_tables.scss */
-table.tasks .task-state {
-  width: 22px;
-}
-/* line 139, ../../../private/common-html/sass/partials/_tables.scss */
-table.tasks .task-state .icon {
-  margin: 12px 6px 6px 6px;
-}
-
-/* line 147, ../../../private/common-html/sass/partials/_tables.scss */
-table.attachments-template-table .center {
-  text-align: center;
 }
