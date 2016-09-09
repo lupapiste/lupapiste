@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.tools :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [expose-testables]]
+            [clojure.set :as s]
             [lupapalvelu.document.data-schema :as data-schema]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
@@ -137,11 +138,9 @@
 (def special-subtypes #{:hakija :hakijan-asiamies :maksaja})
 
 (defspec party-doc->user-role_special-subtypes-spec
-  (prop/for-all [doc (gen/bind (->> party-doc-schemas
-                                    (filter (comp special-subtypes :subtype :info))
-                                    (map (comp :name :info))
-                                    gen/elements)
-                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+  (prop/for-all [doc (gen/elements (->> party-doc-schemas
+                                        (filter (comp special-subtypes :subtype :info))
+                                        (map #(s/rename-keys % {:info :schema-info}))))]
                 (= (get-in doc [:schema-info :subtype]) (party-doc->user-role doc))))
 
 (def special-names #{"tyonjohtaja-v2"})
@@ -151,17 +150,22 @@
        party-doc->user-role) => :tyonjohtaja)
 
 (defspec party-doc->user-role_default-spec
-  (prop/for-all [doc (gen/bind (->> party-doc-schemas
-                                    (remove (comp special-subtypes :subtype :info))
-                                    (remove (comp special-names :name :info))
-                                    (map (comp :name :info))
-                                    gen/elements)
-                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+  (prop/for-all [doc (gen/elements (->> party-doc-schemas
+                                        (remove (comp special-subtypes :subtype :info))
+                                        (remove (comp special-names :name :info))
+                                        (map #(s/rename-keys % {:info :schema-info}))))]
                 (= (keyword (get-in doc [:schema-info :name])) (party-doc->user-role doc))))
 
 (defspec party-doc->user-role_non-party-doc-spec
-  (prop/for-all [doc (gen/bind (->> non-party-doc-schemas
-                                    (map (comp :name :info))
-                                    gen/elements)
-                               #(ssg/generator (data-schema/doc-data-schema % true)))]
+  (prop/for-all [doc (gen/elements (->> non-party-doc-schemas
+                                        (map #(s/rename-keys % {:info :schema-info}))))]
                 (nil? (party-doc->user-role doc))))
+
+(comment
+
+  ;; Get all possible party-roles
+  (->> (map #(s/rename-keys % {:info :schema-info}) party-doc-schemas)
+       (map party-doc->user-role)
+       (distinct))
+
+)
