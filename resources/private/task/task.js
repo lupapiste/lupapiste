@@ -56,12 +56,12 @@ var taskPageController = (function() {
     return authorizationModel.ok("review-done") && _.isEmpty(validationErrors());
   });
 
-  var addAttachmentDisabled = ko.computed(function() {
-    var t = task();
-    return "sent" === _.get(t, "state");
-  });
-
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
+  var attachmentsModel = {target: ko.observable( {type: "task"} ),
+                          type: ko.observable( "muut.muu"),
+                          typeSelector: true,
+                          canAdd: ko.pureComputed( function() {
+                            return "sent" !== _.get(task(), "state");
+                          })};
 
   function returnToApplication() {
     applicationModel.lightReload();
@@ -130,7 +130,7 @@ var taskPageController = (function() {
 
     lupapisteApp.setTitle(applicationModel.title());
 
-    attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
+    attachmentsModel.target({type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
 
@@ -189,8 +189,7 @@ var taskPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       dataService: service,
-      reviewSubmitOk: reviewSubmitOk,
-      addAttachmentDisabled: addAttachmentDisabled
+      reviewSubmitOk: reviewSubmitOk
     });
   });
 

@@ -1,0 +1,51 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="targeted-attachments-template">
+  <div class="targetted-attachments">
+    <h3 data-bind="ltext: 'inforequest.attachments'"></h3>
+    <div data-bind="if: attachments().length">
+      <table class="table" data-test-id="targetted-attachments-table">
+        <thead>
+          <tr>
+            <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+            <th data-bind="ltext: 'application.attachmentFile'"></th>
+            <th data-bind="ltext: 'application.attachmentEditDate'"></th>
+            <th data-bind="ltext: 'application.attachmentSentDate'"></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: attachments">
+          <tr data-bind="with: $data.latestVersion">
+            <td data-bind="attachmentType: $parent"></td>
+            <td>
+              <a data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+              <i data-bind="ltext: contentType"></i>
+              <i data-bind="size: size"></i>
+            </td>
+            <td>
+              <span data-bind="dateString: $parent.modified"></span>
+              <span data-bind="fullName: user"></span>
+            </td>
+            <td>
+              <span data-bind="dateString: $parent.sent"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="spacerM" data-bind="ifnot: attachments().length">
+      <i data-bind="ltext: 'no-attachments'"></i>
+    </div>
+
+    <!-- ko if: canAdd -->
+    <button
+       class="positive"
+       data-bind="visible: canUpload,
+                  enabled: canUpload,
+                  click: newAttachment"
+       data-test-id="add-targetted-attachment">
+      <i class="lupicon-circle-plus"></i>
+      <span data-bind="ltext: 'application.attachmentsAdd'"></span>
+    </button>
+    <!-- /ko -->
+  </div>
+</script>
