@@ -40,7 +40,17 @@
         </div>
 
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'list' -->
-        <calendar-notification-list params="items: calendarNotificationsByDay"></calendar-notification-list>
+        <div data-bind="ifnot: _.isEmpty(calendarNotificationsByDay())">
+          <p><b><i class="lupicon-circle-attention"></i>Uudet ja päivittyneet kalenterimerkinnät</b></p>
+        </div>
+
+        <calendar-notification-list params="items: calendarNotificationsByDay, actionRequired: true"></calendar-notification-list>
+
+        <div>
+          <p><b><i class="lupicon-circle-attention"></i>Voimassaolevat ajanvaraukset</b></p>
+        </div>
+        <calendar-notification-list params="items: allAppointmentsByDay, actionRequired: false"></calendar-notification-list>
+
         <!-- /ko -->
 
         <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'calendar' -->

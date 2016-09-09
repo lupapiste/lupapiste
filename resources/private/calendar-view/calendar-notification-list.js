@@ -5,6 +5,7 @@ LUPAPISTE.CalendarNotificationListModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.items = params.items;
+  self.actionRequired = params.actionRequired;
 
   self.acceptReservation = function(r) {
     self.sendEvent("calendarView", "updateOperationCalled");

@@ -218,8 +218,12 @@
   [application reservation-id user-id]
   (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}}))
 
-(defn- filter-reservations-for-user [user rs]
+(defn- select-actions-required-for-user [user rs]
   (filter #(util/contains-value? (:action-required-by %) (:id user)) rs))
+
+(defn- select-where-user-is-participant [user rs]
+  (filter #(or (= (:from %) (:id user))
+               (util/contains-value? (:to %) (:id user))) rs))
 
 (defn applications-with-calendar-actions-required
   [user]
@@ -228,7 +232,19 @@
                      {} user)
         enrich-app (comp app-utils/with-organization-name app-utils/with-application-kind)]
     (->> (mongo/select :applications query)
-         (map (fn [app] (update app :reservations (partial filter-reservations-for-user user))))
+         (map (fn [app] (update app :reservations (partial select-actions-required-for-user user))))
+         (map enrich-app)
+         (map #(select-keys % [:id :kind :municipality :organizationName
+                               :address :primaryOperation :reservations])))))
+
+(defn applications-with-appointments-for-user
+  [user]
+  (let [query      (search/make-query
+                     (domain/applications-containing-reservations-for user)
+                     {} user)
+        enrich-app (comp app-utils/with-organization-name app-utils/with-application-kind)]
+    (->> (mongo/select :applications query)
+         (map (fn [app] (update app :reservations (partial select-where-user-is-participant user))))
          (map enrich-app)
          (map #(select-keys % [:id :kind :municipality :organizationName
                                :address :primaryOperation :reservations])))))

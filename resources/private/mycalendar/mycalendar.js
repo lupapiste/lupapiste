@@ -10,6 +10,7 @@
     self.reservationTypes = ko.observableArray();
 
     self.calendarNotificationsByDay = ko.observableArray([]);
+    self.allAppointmentsByDay = ko.observableArray([]);
 
     self.viewMode = ko.observable("calendar");
 
@@ -17,6 +18,7 @@
       if (mode === "list") {
         self.calendarNotificationsByDay([]);
         hub.send("calendarService::fetchCalendarActionsRequired");
+        hub.send("calendarService::fetchAllAppointments");
       }
       self.viewMode(mode);
     }
@@ -41,6 +43,19 @@
         });
       self.calendarNotificationsByDay(_.transform(
         _.groupBy(actionsRequired, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
+        function (result, value, key) {
+          return result.push({ day: _.parseInt(key), notifications: value });
+        }, []));
+    });
+
+    hub.subscribe("calendarService::allAppointmentsFetched", function(event) {
+      var appointments = _.map(event.appointments,
+        function(n) {
+          n.acknowledged = ko.observable("none");
+          return n;
+        });
+      self.allAppointmentsByDay(_.transform(
+        _.groupBy(appointments, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
         function (result, value, key) {
           return result.push({ day: _.parseInt(key), notifications: value });
         }, []));

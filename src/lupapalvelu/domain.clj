@@ -34,6 +34,10 @@
 (defn applications-with-writer-authz-query-for [user]
   {:auth {$elemMatch {:id (:id user) :role {$in [:owner :writer :foreman]}}}})
 
+(defn applications-containing-reservations-for [user]
+  {:reservations {"$elemMatch" {$or [{:from {"$eq" (:id user)}}
+                                     {:to {"$eq" (:id user)}}]}}})
+
 (defn applications-containing-reservations-requiring-action-query-for [user]
   {:reservations {"$elemMatch" {:action-required-by {"$eq" (:id user)}}}})
 

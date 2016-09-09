@@ -438,6 +438,14 @@
   (ok :actionsRequired (mapcat process-application-with-reservation-updates
                                (cal/applications-with-calendar-actions-required user))))
 
+(defquery applications-with-appointments
+  {:user-roles       #{:authority :applicant}
+   :feature          :ajanvaraus
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
+  [{user :user}]
+  (ok :appointments (mapcat process-application-with-reservation-updates
+                               (cal/applications-with-appointments-for-user user))))
+
 (defcommand mark-reservation-update-seen
   {:user-roles       #{:authority :applicant}
    :feature          :ajanvaraus

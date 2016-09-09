@@ -152,6 +152,16 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
+  var _allAppointmentsByDay = hub.subscribe("calendarService::fetchAllAppointments", function() {
+    ajax.query("applications-with-appointments")
+      .success(function(data) {
+        hub.send("calendarService::allAppointmentsFetched", {appointments: data.appointments});
+      }).error(function() {
+        hub.send("calendarService::serviceNotAvailable");
+      })
+      .call();
+  });
+
   var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
     doFetchCalendarWeek(event);
   });

@@ -1,11 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="calendar-notification-list-template">
   <!-- ko ifnot: _.isEmpty(items()) -->
   <div style="margin-bottom: 36px">
-    <div>
-      <p><b><i class="lupicon-circle-attention"></i>
-      <span data-bind="ltext: 'application.calendar.new-calendar-messages'"></span></b></p>
-    </div>
-
     <div data-bind="foreach: items">
       <div class="calendar-pending-action">
         <h3 data-bind="weekdayAndDate: day"></h3>
@@ -22,66 +17,68 @@
             </div>
 
 
-            <div class="titlebar"
-                 data-bind="css: { 'buttons-box': acknowledged() === 'none',
-                                   'undo-link': acknowledged() !== 'none' }">
-              <!-- ko if: acknowledged() === 'none' -->
-                <!-- ko if: (reservationStatus === 'ACCEPTED' || reservationStatus === 'DECLINED') -->
-                <button class="positive"
-                        data-bind="click: $component.markSeen.bind($data),
-                                   attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
-                  <i class="lupicon-check" style="display: inline;"></i>
-                  <i class="wait spin lupicon-refresh"></i>
-                  <span data-bind="ltext: 'button.ok'"></span>
-                </button>
+            <!-- ko if: $component.actionRequired -->
+              <div class="titlebar"
+                   data-bind="css: { 'buttons-box': acknowledged() === 'none',
+                                     'undo-link': acknowledged() !== 'none' }">
+                <!-- ko if: acknowledged() === 'none' -->
+                  <!-- ko if: (reservationStatus === 'ACCEPTED' || reservationStatus === 'DECLINED') -->
+                  <button class="positive"
+                          data-bind="click: $component.markSeen.bind($data),
+                                     attr: { 'data-test-id': 'mark-seen-reservation-btn-' + $index() }">
+                    <i class="lupicon-check" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.ok'"></span>
+                  </button>
+                  <!-- /ko -->
+
+                  <!-- ko if: reservationStatus === 'PENDING' -->
+                  <button class="positive"
+                          data-bind="click: $component.acceptReservation.bind($data),
+                                     attr: { 'data-test-id': 'accept-reservation-btn-' + $index() }">
+                    <i class="lupicon-check" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.accept'"></span>
+                  </button>
+                  <button class="negative"
+                          data-bind="click: $component.declineReservation.bind($data),
+                                     attr: { 'data-test-id': 'decline-reservation-btn-' + $index() }">
+                    <i class="lupicon-remove" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.decline'"></span>
+                  </button>
+                  <!-- /ko -->
                 <!-- /ko -->
 
-                <!-- ko if: reservationStatus === 'PENDING' -->
-                <button class="positive"
-                        data-bind="click: $component.acceptReservation.bind($data),
-                                   attr: { 'data-test-id': 'accept-reservation-btn-' + $index() }">
-                  <i class="lupicon-check" style="display: inline;"></i>
-                  <i class="wait spin lupicon-refresh"></i>
-                  <span data-bind="ltext: 'button.accept'"></span>
-                </button>
-                <button class="negative"
-                        data-bind="click: $component.declineReservation.bind($data),
-                                   attr: { 'data-test-id': 'decline-reservation-btn-' + $index() }">
-                  <i class="lupicon-remove" style="display: inline;"></i>
-                  <i class="wait spin lupicon-refresh"></i>
-                  <span data-bind="ltext: 'button.decline'"></span>
-                </button>
+                <!-- ko if: acknowledged() === 'seen' -->
+                  <span data-bind="ltext: 'button.ok',
+                                   attr: { 'data-test-id': 'reservation-seen-ack-' + $index() }"></span>
                 <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'accepted' -->
+                  <span data-bind="ltext: 'calendar.accepted',
+                                   attr: { 'data-test-id': 'reservation-accepted-ack-' + $index() }"></span>
+                <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'declined' -->
+                  <span data-bind="ltext: 'calendar.declined',
+                                   attr: { 'data-test-id': 'reservation-declined-ack-' + $index() }"></span>
+                <!-- /ko -->
+              </div>
+
+
+              <!-- ko if: reservationStatus === 'PENDING' -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.invited'"></div>
               <!-- /ko -->
-
-              <!-- ko if: acknowledged() === 'seen' -->
-                <span data-bind="ltext: 'button.ok',
-                                 attr: { 'data-test-id': 'reservation-seen-ack-' + $index() }"></span>
+              <!-- ko if: reservationStatus === 'ACCEPTED' && from === lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
               <!-- /ko -->
-
-              <!-- ko if: acknowledged() === 'accepted' -->
-                <span data-bind="ltext: 'calendar.accepted',
-                                 attr: { 'data-test-id': 'reservation-accepted-ack-' + $index() }"></span>
+              <!-- ko if: reservationStatus === 'DECLINED' && from === lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
               <!-- /ko -->
-
-              <!-- ko if: acknowledged() === 'declined' -->
-                <span data-bind="ltext: 'calendar.declined',
-                                 attr: { 'data-test-id': 'reservation-declined-ack-' + $index() }"></span>
+              <!-- ko if: reservationStatus === 'ACCEPTED' && from !== lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
               <!-- /ko -->
-            </div>
-
-
-            <!-- ko if: reservationStatus === 'PENDING' -->
-            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.invited'"></div>
-            <!-- /ko -->
-            <!-- ko if: reservationStatus === 'ACCEPTED' && from === lupapisteApp.models.currentUser.id() -->
-            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
-            <!-- /ko -->
-            <!-- ko if: reservationStatus === 'DECLINED' && from === lupapisteApp.models.currentUser.id() -->
-            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
-            <!-- /ko -->
-            <!-- ko if: reservationStatus === 'ACCEPTED' && from !== lupapisteApp.models.currentUser.id() -->
-            <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
             <!-- /ko -->
 
           </div>
