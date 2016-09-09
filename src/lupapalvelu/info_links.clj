@@ -17,9 +17,12 @@
 
 ;; info-link: {linkId num, :text text, :url url, :modified timestamp-ms, owner: user-id-sym} 
 
-(defn- link-editor-role? [role]
-  (or (= :authority role)
-     (= :statementGiver role)))
+(defn- can-edit-links? [app user]
+  "Check if the user is an authority or a statement giver for the application"
+  (or (user/authority? user)
+      (contains? 
+         (set (map :id (filter (fn [auth] (= (:role auth) :statementGiver)) (:auth app)))) 
+         (:id user))))
  
 (defn- last-seen-date [app user]
   (get (:_info-links-seen-by app) (keyword (:id user)) 0))
@@ -56,7 +59,7 @@
       (fn [link] 
         (-> link
           (assoc :isNew (< last-read (:modified link)))
-          (assoc :canEdit (link-editor-role? (:role user)))))
+          (assoc :canEdit (can-edit-links? app user))))
       (info-links app))))
 
 (defn add-info-link! [app text url]
