@@ -324,7 +324,7 @@
     }
   };
 
-  // Fully resolved attachmentType ltext.
+  // Fully resolved attachmentType localized text.
   ko.bindingHandlers.attachmentType = {
     update: function( element, valueAccessor) {
       var v = ko.utils.unwrapObservable( valueAccessor());
