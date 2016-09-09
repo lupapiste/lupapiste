@@ -18,4 +18,5 @@
   lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
   lupapisteApp.services.attachmentsService = new LUPAPISTE.AttachmentsService();
   lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
+  lupapisteApp.services.infoService = new LUPAPISTE.InfoService();
 })();

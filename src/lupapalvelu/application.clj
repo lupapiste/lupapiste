@@ -137,7 +137,7 @@
 (defn get-previous-app-state
   "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
   [{history :history}]
-  (->> (filter :state history)                              ; only history elements that regard state change
+  (->> (filter :state history)         ; only history elements that regard state change
        (sort-by :ts)
        butlast
        last
@@ -145,7 +145,7 @@
        keyword))
 
 ; Seen updates
-(def collections-to-be-seen #{"comments" "statements" "verdicts" "info-links"})
+(def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
 (defn mark-collection-seen-update [{id :id} timestamp collection]
   {:pre [(collections-to-be-seen collection) id timestamp]}

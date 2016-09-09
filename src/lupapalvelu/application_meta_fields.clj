@@ -88,6 +88,12 @@
                           (not (ss/blank? (:text comment)))))
                    (:comments app)))))
 
+(defn- unseen-notice? [user {:keys [authorityNoticeEdited _authority-notices-seen-by]}]
+  (boolean (and (user/authority? user)
+                (and (number? authorityNoticeEdited)
+                    (< (get-in _authority-notices-seen-by [(keyword (:id user))] 0)
+                       authorityNoticeEdited)))))
+
 (defn- count-unseen-statements [user app]
   (if-not (:infoRequest app)
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
@@ -154,6 +160,7 @@
                             {:field :unseenComments :fn count-unseen-comments}
                             {:field :unseenStatements :fn count-unseen-statements}
                             {:field :unseenVerdicts :fn count-unseen-verdicts}
+                            {:field :unseenAuthorityNotice :fn unseen-notice?}
                             {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
                             {:field :indicators :fn indicator-sum}])
 
