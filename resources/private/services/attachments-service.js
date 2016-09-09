@@ -467,4 +467,29 @@ LUPAPISTE.AttachmentsService = function() {
       .map(_.last)
       .value();
   };
+
+  //
+  // Missing required attachments
+  //
+
+  function extractMissingAttachments(attachments) {
+    var missingAttachments = _.filter(attachments, function(a) {
+      var required  = util.getIn( a, ["required"]);
+      var notNeeded = util.getIn( a, ["notNeeded"]);
+      var noVersions = _.isEmpty( util.getIn( a, ["versions"]));
+      return required && !notNeeded && noVersions;
+    });
+    missingAttachments = _.groupBy(missingAttachments,
+                                   _.partialRight(  util.getIn,
+                                                   ["type", "type-group"]));
+    missingAttachments = _.map(_.keys(missingAttachments), function(k) {
+      return [k, missingAttachments[k]];
+    });
+    return missingAttachments ;
+  }
+
+  self.missingRequiredAttachments = ko.pureComputed( function() {
+    return extractMissingAttachments( self.attachments());
+  });
+
 };

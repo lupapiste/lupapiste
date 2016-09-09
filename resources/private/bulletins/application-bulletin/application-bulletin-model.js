@@ -82,7 +82,7 @@ LUPAPISTE.ApplicationBulletinModel = function(params) {
       self.proclamationEndsAt(bulletin.proclamationEndsAt);
       map.clear().updateSize().center(location[0], location[1]).add({x: location[0], y: location[1]});
       // This can be called only once
-      docgen.displayDocuments("bulletinDocgen", bulletin, bulletin.documents, params.auth, {disabled: true});
+      docgen.displayDocuments("bulletinDocgen", bulletin, bulletin.documents, {disabled: true, authorizationModel: params.auth});
     }
   });
 

@@ -204,6 +204,13 @@
     }
   };
 
+  ko.bindingHandlers.testId = {
+    update: function( element, valueAccessor) {
+      var value = ko.utils.unwrapObservable( valueAccessor() ) ;
+      $(element).attr( "data-test-id", value );
+    }
+  };
+
   ko.bindingHandlers.lhtml = {
     update: _.partial(localized, "html")
   };

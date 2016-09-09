@@ -4,6 +4,17 @@
             [clojure.edn :as edn]
             [sade.strings :as ss]))
 
+(defn body
+  "Shallow merges stuff into vector"
+  [& rest]
+  (reduce
+    (fn [a x]
+      (let [v (if (sequential? x)
+                x
+                (vector x))]
+        (concat a v)))
+    [] rest))
+
 (defn nil-values [_] nil)
 
 (defn type-verifier [{:keys [type] :as element}]

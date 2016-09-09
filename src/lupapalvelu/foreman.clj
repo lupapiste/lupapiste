@@ -144,6 +144,16 @@
 
 (defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
 
+(defn foreman-in-foreman-app [application user]
+  (and (auth/has-auth-role? application (:id user) :foreman) (foreman-app? application)))
+
+(defn allow-foreman-only-in-foreman-app
+  "If user has :forman role in current application, check that the application is a forman application."
+  [{:keys [application user]}]
+  (when (and (auth/has-auth-role? application (:id user) :foreman)
+             (not (foreman-app? application)))
+    unauthorized))
+
 (defn notice?
   "True if application is foreman application and of type notice (ilmoitus)"
   [application]

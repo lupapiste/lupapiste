@@ -10,7 +10,6 @@
             [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
-(testable-privates lupapalvelu.actions-api foreach-action)
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement

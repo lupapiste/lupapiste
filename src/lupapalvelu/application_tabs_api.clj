@@ -4,6 +4,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :as action :refer [defquery]]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
 
 (defquery tasks-tab-visible
@@ -13,6 +14,7 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(fn [{:keys [application]}]
                     (when (foreman/foreman-app? application)
-                      (fail :error.foreman.no-tasks)))]}
+                      (fail :error.foreman.no-tasks)))
+                (permit/validate-permit-type-is permit/R permit/P permit/YA)]}
   [_])
 

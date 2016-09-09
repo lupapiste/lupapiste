@@ -36,9 +36,6 @@ Mikko can't reinvite Teppo
   Click by test id  application-invite-submit
   Error message is present on invite form
   Invite count is  1
-
-# TODO: cant remove auth for owner
-# TODO: can remove auth for someone else
   [Teardown]  logout
 
 Teppo declines invitation
@@ -96,8 +93,19 @@ Mikko can see that Teppo has accepted invitation
   # Check that invite accepted timestamp span is present
   Element should be visible  xpath=//*[@data-test-id='invite-accepted-span']
 
-Only one unsubscribe link
-  Xpath Should Match X Times  //a[contains(text(),'Peruuta sähköposti-ilmoitukset')]  1
+Only one unsubscribe button
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']  1
+
+Mikko unsubscribes notifications
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
+  Click by test id  unsubscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='subscribeNotifications']
+
+Mikko subscribes notifications
+  Click by test id  subscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='subscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='unsubscribeNotifications']
 
 Mikko can see invite paasuunnittelija button again
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
@@ -152,10 +160,9 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 # TODO: should create new user "oskari@example.com" and make sure he has access
 
 
-#  TODO: Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
-#        Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
+# Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
+# Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
 Mikko creates a new tyonjohtaja application
-  #Mikko logs in
   Create application the fast way  ${appname}-tj  ${propertyId}  tyonjohtajan-nimeaminen
 
 Mikko invites previously unknown user Unto as tyonjohtaja
@@ -170,6 +177,14 @@ Mikko invites previously unknown user Unto as tyonjohtaja
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
   Wait until  Invite count is  1
+
+Unto hasn't accepted auth, so it can't be upgreded
+  Element should not be visible by test id  change-auth-unto@example.com
+
+Mikko deletes auhtorzation from Unto
+  Click by test id  remove-auth-unto@example.com
+  Confirm yes no dialog
+  Wait until  Invite count is  0
 
 *** Keywords ***
 
