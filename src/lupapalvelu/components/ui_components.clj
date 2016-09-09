@@ -193,7 +193,6 @@
                    "verdict-appeal-service.js"
                    "scroll-service.js"
                    "ram-service.js"
-                   "auth-service.js"
                    "calendar-service.js"
                    "attachments-service.js"
                    "suti-service.js"]}
