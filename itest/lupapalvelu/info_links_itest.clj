@@ -81,14 +81,22 @@
       response => ok?
       (fact "Pena has seen the links after calling mark-seen" (map :isNew (:links response)) => [false false]))
   
+    (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId "one")]
+      (fact "Sonja fails to update link with bad id"
+         response =not=> ok?))
+  
     (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId 1)]
       response => ok?
       (fact "Sonja updates an infolink"
         (:linkId response) => 1))
   
+    (let [response (command pena :info-link-upsert :id application-id :text "new text bad" :url "http://example.org/1-bad" :linkId 1)]
+      (fact "Pena fails to update an infolink"
+        response =not=> ok?))
+  
     (let [response (query pena :info-links :id application-id)]
       response => ok?
-      (fact "Pena sees the new updated link as a new one"
+      (fact "Pena sees the new updated link by Sonja as a new one at right position"
         (:isNew (nth (:links response) 1)) => true
         (:url (nth (:links response) 1)) => "http://example.org/1-new"
         (:text (nth (:links response) 1)) => "new text"))

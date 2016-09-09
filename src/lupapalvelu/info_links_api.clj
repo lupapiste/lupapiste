@@ -50,7 +50,6 @@
                       (partial action/optional-parameter-of :linkId number?)]
    :states      states/all-states}
   [command]
-  ;(println "upsert: id " linkId " numberness is " (number? linkId)) ;; debug, check interpretation issue before merge
   (let [app (:application command)
         res (if linkId
               (info-links/update-info-link! app linkId text url)

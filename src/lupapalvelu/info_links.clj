@@ -15,7 +15,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]))
 
-;; info-link: {linkId num, :text text, :url url, :modified timestamp-ms, owner: user-id-sym} 
+;; info-link: {linkId num, :text text, :url url, :modified timestamp}
 
 (defn- can-edit-links? [app user]
   "Check if the user is an authority or a statement giver for the application"
