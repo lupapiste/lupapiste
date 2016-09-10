@@ -74,10 +74,14 @@
 (def localization-map
   {:languages [:fi :sv :en]
    :translations
-   {'avain1 {:fi "Vain suomeksi"}
-    'avain2 {:fi "Suomeksi ja ruotsiksi" :sv "Finska och svenska"}
-    'avain3 {:fi "Kaikki" :sv "Alla" :en "All"}
-    'avain4 {:fi "Suomeksi ja englanniksi" :en "Finnish and English"}}})
+   {(with-meta 'avain1 {:source-name "file1.txt"})
+    {:fi "Vain suomeksi"}
+    (with-meta 'avain2 {:source-name "file1.txt"})
+    {:fi "Suomeksi ja ruotsiksi" :sv "Finska och svenska"}
+    (with-meta 'avain3 {:source-name "file2.txt"})
+    {:fi "Kaikki" :sv "Alla" :en "All"}
+    (with-meta 'avain4 {:source-name "file2.txt"})
+    {:fi "Suomeksi ja englanniksi" :en "Finnish and English"}}})
 
 (def new-translations-map
   {:languages [:fi :en]
@@ -138,3 +142,15 @@
                                                nil)
                                      new-translations-map
                                      :en) => (throws #"text not found")))
+
+(defn keys-for-file [file keys]
+  (comp (contains (sort keys))
+        #(get % file)))
+
+(facts "Splitting translations back to their respective source files"
+       (let [merged-map (merge-new-translations localization-map
+                                                new-translations-map
+                                                :en)
+             grouped-by-source (group-translations-by-source merged-map)]
+         (map first (get grouped-by-source "file1.txt")) => (contains ['avain1 'avain2])
+         (map first (get grouped-by-source "file2.txt")) => (contains ['avain3 'avain4])))
