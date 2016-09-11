@@ -11,7 +11,7 @@
 (facts "info links"
  
   (let [{application-id :id :as app} 
-          (create-application pena :propertyId sipoo-property-id)]
+        (create-and-open-application pena :propertyId sipoo-property-id)]
    
     application-id => truthy
    
