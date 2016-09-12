@@ -24,7 +24,8 @@
                     data-bind="visible: removeVisible,
                                click: remove,
                                enable: removeEnabled,
-                               css: {waiting: waitingRemove}">
+                               css: {waiting: waitingRemove},
+                               attr: {'data-test-id': prefix + 'bubble-dialog-remove'}">
               <i class="lupicon-remove"></i>
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: removeText"></span>
