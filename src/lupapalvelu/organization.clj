@@ -55,7 +55,8 @@
 
 (sc/defschema Link
   {:url  ssc/OptionalHttpUrl
-   :name {:fi sc/Str, :sv sc/Str}})
+   :name {:fi sc/Str, :sv sc/Str}
+   (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
   {(sc/optional-key :url)       ssc/OptionalHttpUrl
