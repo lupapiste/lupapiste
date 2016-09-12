@@ -167,11 +167,8 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.primaryOperationName = ko.pureComputed(function() {
-    var op = ko.unwrap(self.primaryOperation());
-    if (op) {
-      return "operations." + ko.unwrap(op.name);
-    }
-    return "";
+    var opName = util.getIn(self.primaryOperation, ["name"]);
+    return !_.isEmpty(opName) ? "operations." + opName : "";
   });
 
   self.foremanTasks = ko.observable();
