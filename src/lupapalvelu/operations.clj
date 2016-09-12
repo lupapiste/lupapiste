@@ -462,7 +462,7 @@
     states/tj-hakemus-state-graph))
 
 (def- r-operations
-  {:asuinrakennus               {:schema "uusiRakennus"
+  {:asuinrakennus               {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
@@ -473,7 +473,7 @@
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false} ;TODO old op-tree, remove later
+                                 :asianhallinta false}
    :kerrostalo-rivitalo         {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -518,7 +518,7 @@
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
-   :julkinen-rakennus           {:schema "uusiRakennus"
+   :julkinen-rakennus           {:schema "uusiRakennus" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
@@ -527,7 +527,7 @@
                                  :attachments uuden_rakennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false} ;TODO old op-tree, remove later
+                                 :asianhallinta false}
    :teollisuusrakennus          {:schema "uusiRakennus"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
@@ -549,7 +549,7 @@
                                  :min-outgoing-link-permits 0
                                  :asianhallinta false}
 
-   :laajentaminen               {:schema "rakennuksen-laajentaminen"
+   :laajentaminen               {:schema "rakennuksen-laajentaminen" ; Deprecated operation. Not in current operation tree, but in use in legacy applications.
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R
                                  :required common-rakval-schemas
@@ -557,7 +557,7 @@
                                  :attachments rakennuksen_laajennuksen_liitteet
                                  :add-operation-allowed true
                                  :min-outgoing-link-permits 0
-                                 :asianhallinta false} ;TODO old op-tree, remove later
+                                 :asianhallinta false}
    :kerrostalo-rt-laaj          {:schema "rakennuksen-laajentaminen"
                                  :permit-type permit/R
                                  :applicant-doc-schema applicant-doc-schema-name-R

@@ -131,6 +131,8 @@ jQuery(document).ready(function() {
     {name: "filters"},
     {name: "suti-display"},
     {name: "change-email"},
+    {name: "side-panel-info"},
+    {name: "info-link"},
     {name: "targeted-attachments"}
 ];
 

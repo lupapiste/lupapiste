@@ -134,6 +134,55 @@
         (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "Valmisteilla"}
         (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {}))
 
+    (fact "case file report generation should skip tasks without creation ts"
+          (generate-case-file-data (update-in application [:tasks 0] dissoc :created) :fi)
+          => [{:action    "Valmisteilla"
+               :start     100
+               :user      "Testaaja Testi"
+               :documents [{:type     :hakemus
+                            :category :document
+                            :ts       100
+                            :user     "Testaaja Testi"
+                            :id       "1-application"}
+                           {:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
+                            :category :document
+                            :version  {:major 1 :minor 0}
+                            :ts       200
+                            :user     "Testaaja Testi"
+                            :contents "Great attachment"
+                            :id       "2"}]}
+              {:action    "Vireilletulo"
+               :start     523238400000
+               :user      "Testaaja Testi"
+               :documents [{:type     {:type-group "paapiirustus" :type-id "pohjapiirros"}
+                            :category :document
+                            :version {:major 0 :minor 1}
+                            :ts       623238400000
+                            :user     "Testaaja Testi"
+                            :contents nil
+                            :id       "3"}
+                           {:category :request-statement, :ts 643238400000, :text "Rakennussuunnittelu", :user ""}
+                           {:category :request-statement, :ts 653238400000, :text "Pelastusviranomainen", :user ""}
+                           {:type     {:type-group "paapiirustus" :type-id "asemapiirros"}
+                            :category :document
+                            :version  {:major 2 :minor 2}
+                            :ts       663238400000
+                            :user     "Testaaja Testi"
+                            :contents "Great attachment"
+                            :id       "2"}
+                           {:text     "Joku naapurin nimi"
+                            :category :request-neighbor
+                            :ts       923238400000
+                            :user     " "}]}
+              {:action (i18n/localize :fi "caseFile.complementNeeded")
+               :start 1462060800000
+               :user "Hepokatti Heikki"
+               :documents []}]
+          (provided
+            (toimenpide-for-state "753-R" "10 03 00 01" "submitted") => {:name "Vireilletulo"}
+            (toimenpide-for-state "753-R" "10 03 00 01" "open") => {:name "Valmisteilla"}
+            (toimenpide-for-state "753-R" "10 03 00 01" "complementNeeded") => {}))
+
     (fact "case file report can be generated as xml"
       (xml-case-file application :fi) => "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><lp:CaseFile xmlns:lp=\"http://www.lupapiste.fi/onkalo/schemas/sahke2-case-file/2016/6/1\"><lp:Created>1970-01-01+02:00</lp:Created><lp:NativeId>1</lp:NativeId><lp:Language>fi</lp:Language><lp:Restriction><lp:PublicityClass>Julkinen</lp:PublicityClass><lp:PersonalData>ei sis\u00e4ll\u00e4 henkil\u00f6tietoja</lp:PersonalData></lp:Restriction><lp:Title>K\u00e4sittelyprosessi: 1</lp:Title><lp:RetentionPeriod>999999</lp:RetentionPeriod><lp:Status>valmis</lp:Status><lp:ClassificationScheme><lp:MainFunction><lp:Title>Maank\u00e4ytt\u00f6, Rakentaminen ja Asuminen</lp:Title><lp:FunctionCode>10</lp:FunctionCode><lp:FunctionClassification><lp:Title>Rakentaminen, yll\u00e4pito ja k\u00e4ytt\u00f6</lp:Title><lp:FunctionCode>10 03</lp:FunctionCode><lp:SubFunction><lp:Title>Rakennusvalvonta</lp:Title><lp:FunctionCode>10 03 00</lp:FunctionCode><lp:SubFunction><lp:Title>Rakennuslupamenettely</lp:Title><lp:FunctionCode>10 03 00 01</lp:FunctionCode></lp:SubFunction></lp:SubFunction></lp:FunctionClassification></lp:MainFunction></lp:ClassificationScheme><lp:Function>10 03 00 01</lp:Function><lp:Agent><lp:Role>responsible</lp:Role><lp:Name>Monni Tiskaa</lp:Name></lp:Agent><lp:Action><lp:Created>1970-01-01+02:00</lp:Created><lp:Title>Valmisteilla</lp:Title><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent><lp:Type>Valmisteilla</lp:Type><lp:Record><lp:Created>1970-01-01+02:00</lp:Created><lp:NativeId>1-application</lp:NativeId><lp:Title>Hakemus</lp:Title><lp:Type>hakemus</lp:Type><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent></lp:Record><lp:Record><lp:Created>1970-01-01+02:00</lp:Created><lp:NativeId>2</lp:NativeId><lp:Description>Great attachment</lp:Description><lp:Title>Asemapiirros</lp:Title><lp:Type>paapiirustus.asemapiirros</lp:Type><lp:Version>1.0</lp:Version><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent></lp:Record></lp:Action><lp:Action><lp:Created>1986-08-01+03:00</lp:Created><lp:Title>Vireilletulo</lp:Title><lp:Custom><lp:ActionEvent><lp:Description>Vaatimus lis\u00e4tty: rakennuksen paikan tarkastaminen</lp:Description><lp:Type>request-review</lp:Type><lp:Created>1990-01-25+02:00</lp:Created><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Suku Etu</lp:Name></lp:Agent></lp:ActionEvent><lp:ActionEvent><lp:Description>Lausuntopyynt\u00f6 tehty: Rakennussuunnittelu</lp:Description><lp:Type>request-statement</lp:Type><lp:Created>1990-05-21+03:00</lp:Created></lp:ActionEvent><lp:ActionEvent><lp:Description>Lausuntopyynt\u00f6 tehty: Pelastusviranomainen</lp:Description><lp:Type>request-statement</lp:Type><lp:Created>1990-09-13+03:00</lp:Created></lp:ActionEvent><lp:ActionEvent><lp:Description>Naapurin kuuleminen tehty: Joku naapurin nimi</lp:Description><lp:Type>request-neighbor</lp:Type><lp:Created>1999-04-04+03:00</lp:Created></lp:ActionEvent></lp:Custom><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent><lp:Type>Vireilletulo</lp:Type><lp:Record><lp:Created>1989-10-01+02:00</lp:Created><lp:NativeId>3</lp:NativeId><lp:Title>Pohjapiirros</lp:Title><lp:Type>paapiirustus.pohjapiirros</lp:Type><lp:Version>0.1</lp:Version><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent></lp:Record><lp:Record><lp:Created>1991-01-07+02:00</lp:Created><lp:NativeId>2</lp:NativeId><lp:Description>Great attachment</lp:Description><lp:Title>Asemapiirros</lp:Title><lp:Type>paapiirustus.asemapiirros</lp:Type><lp:Version>2.2</lp:Version><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Testaaja Testi</lp:Name></lp:Agent></lp:Record></lp:Action><lp:Action><lp:Created>2016-05-01+03:00</lp:Created><lp:Title>Palautettu t\u00e4ydennett\u00e4v\u00e4ksi</lp:Title><lp:Agent><lp:Role>registrar</lp:Role><lp:Name>Hepokatti Heikki</lp:Name></lp:Agent><lp:Type>Palautettu t\u00e4ydennett\u00e4v\u00e4ksi</lp:Type></lp:Action></lp:CaseFile>"
 

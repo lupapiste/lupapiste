@@ -19,36 +19,36 @@
 ;;
 
 (defcommand info-link-delete
-  {:description "Remove an application-specific info-link"
-   :user-roles #{:authority}
+  {:description      "Remove an application-specific info-link"
+   :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
-   :parameters [id linkId]
+   :parameters       [id linkId]
    :input-validators [(partial action/number-parameters [:linkId])]
-   :states states/all-states}
+   :states           (states/all-states-but :draft)}
   [command]
   (ok :res (info-links/delete-info-link! (:application command) linkId)))
 
 (defcommand info-link-reorder
-   {:description "Reorder application-specific info-links"
-   :user-roles #{:authority}
+  {:description      "Reorder application-specific info-links"
+   :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
-   :parameters [id linkIds]
+   :parameters       [id linkIds]
    :input-validators [(partial action/vector-parameter-of :linkIds number?)]
    ;:input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
-   :states states/all-states}
+   :states           (states/all-states-but :draft)}
   [command]
   (ok :res (info-links/reorder-info-links! (:application command) linkIds)))
 
 (defcommand info-link-upsert
-  {:description "Add or update application-specific info-link"
-   :user-roles #{:authority}
-   :user-authz-roles #{:statementGiver}
-   :parameters [id text url]
+  {:description         "Add or update application-specific info-link"
+   :user-roles          #{:authority :applicant}
+   :user-authz-roles    #{:statementGiver}
+   :parameters          [id text url]
    :optional-parameters [linkId]
-   :input-validators [(partial action/non-blank-parameters [:text]) 
-                      (partial action/non-blank-parameters [:url])
-                      (partial action/optional-parameter-of :linkId number?)]
-   :states      states/all-states}
+   :input-validators    [(partial action/non-blank-parameters [:text])
+                         (partial action/non-blank-parameters [:url])
+                         (partial action/optional-parameter-of :linkId number?)]
+   :states              (states/all-states-but :draft)}
   [command]
   (let [app (:application command)
         res (if linkId
@@ -57,10 +57,12 @@
     (ok :linkId res)))
 
 (defquery info-links
-  {:description "Return a list of application-specific info-links"
-   :parameters [id]
-   :user-roles #{:authority :applicant}
-   :states      states/all-states}
+  {:description      "Return a list of application-specific info-links"
+   :parameters       [id]
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
+   :states           states/all-states}
   [command]
   (let [app (:application command)]
     (ok :links (info-links/info-links-with-flags app (:user command)))))

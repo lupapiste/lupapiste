@@ -2,12 +2,22 @@
   (:require [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.application :as app]
             [lupapalvelu.states :as states]
             [monger.operators :refer :all]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]
   (when-not (#{"normal" "urgent" "pending"} urgency)
     (fail :error.unknown-urgency-state)))
+
+(defn update-notice-data
+  "Updates application notice data and bookkeeping. Data is map."
+  [{:keys [user created] :as command} data]
+  (update-application command {$set (merge data
+                                           {:authorityNoticeEdited created}
+                                           (app/mark-collection-seen-update user
+                                                                            created
+                                                                            "authority-notices"))}))
 
 (defcommand change-urgency
   {:parameters [id urgency]
@@ -16,7 +26,7 @@
    :user-authz-roles #{:statementGiver}
    :input-validators [validate-urgency]}
   [command]
-  (update-application command {$set {:urgency urgency}}))
+  (update-notice-data command {:urgency urgency}))
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
@@ -25,7 +35,7 @@
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority}}
   [command]
-  (update-application command {$set {:authorityNotice authorityNotice}}))
+  (update-notice-data command {:authorityNotice authorityNotice}))
 
 (defcommand add-application-tags
   {:parameters [id tags]
@@ -36,7 +46,7 @@
   [{organization :organization :as command}]
   (let [org-tag-ids (map :id (:tags @organization))]
     (if (every? (set org-tag-ids) tags)
-      (update-application command {$set {:tags tags}})
+      (update-notice-data command {:tags tags})
       (fail :error.unknown-tags))))
 
 (defquery authority-notice

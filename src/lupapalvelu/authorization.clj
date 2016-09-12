@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [union]]
             [lupapalvelu.user :as usr]
             [lupapalvelu.application-schema :as aps]
+            [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
@@ -129,3 +130,20 @@
   "Returns true if the user is an authority in the organization that processes the application"
   [application user]
   (has-organization-authz-roles? #{:authority :approver} application user))
+
+;;
+;; Enrich auth array
+;;
+
+(defn party-document? [doc]
+  (= :party (doc-tools/doc-type doc)))
+
+(defn- enrich-auth-info-with-parties [sorted-parties-docs auth-info]
+  (->> (filter (comp #{(:id auth-info)} doc-tools/party-doc-user-id) sorted-parties-docs)
+       (map doc-tools/party-doc->user-role)
+       (assoc auth-info :party-roles)))
+
+(defn enrich-auth-information [{auth :auth docs :documents}]
+  (let [parties-docs (->> (filter party-document? docs)
+                          (sort-by (comp :order :schema-info)))]
+    (map (partial enrich-auth-info-with-parties parties-docs) auth)))

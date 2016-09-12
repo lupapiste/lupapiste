@@ -170,10 +170,6 @@ LUPAPISTE.ConversationModel = function(params) {
   // handle outside authorities correctly. The more robust approach
   // would be to resolve the role in the backend.
   self.commentRole = function( data ) {
-    var role = data.type;
-    if( role === "system" ) {
-      role = _.get( data, "user.role" );
-    }
-    return role;
+    return "applicationRole." + _.get(data, "user.application-role", "unknown");
   };
 };
