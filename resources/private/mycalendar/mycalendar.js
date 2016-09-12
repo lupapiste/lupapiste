@@ -21,7 +21,7 @@
         hub.send("calendarService::fetchAllAppointments");
       }
       self.viewMode(mode);
-    }
+    };
 
     hub.subscribe("calendarService::myCalendarsFetched", function(event) {
       self.calendars(event.calendars);

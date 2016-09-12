@@ -1,5 +1,5 @@
 LUPAPISTE.CalendarNotificationListModel = function(params) {
-  "use strict"
+  "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());

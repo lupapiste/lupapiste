@@ -242,6 +242,7 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
     hub.unsubscribe(_fetchApplicationCalendarConfig);
-    hub.unsubscribe(_fetchCalendarActionsRequired);
+    hub.unsubscribe(_unseenCalendarUpdates);
+    hub.unsubscribe(_allAppointmentsByDay);
   };
 };
