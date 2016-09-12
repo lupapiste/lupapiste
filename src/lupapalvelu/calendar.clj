@@ -186,10 +186,11 @@
 
 (defn update-mongo-for-reservation-state-change
   [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
-  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED))]}
+  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED) (= new-state :CANCELED))]}
   (let [type (cond
-               :ACCEPTED "reservation-accepted"
-               :DECLINED "reservation-declined")
+               (= :ACCEPTED new-state) "reservation-accepted"
+               (= :DECLINED new-state) "reservation-declined"
+               (= :CANCELED new-state) "reservation-canceled")
         comment-update (comment/comment-mongo-update (:state application)
                                                      (:comment reservation)
                                                      {:type type
@@ -215,6 +216,11 @@
   [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
   (post-command (str "reservations/" reservation-id "/decline"))
   (update-mongo-for-reservation-state-change application reservation :DECLINED user (usr/get-user-by-id to-user-id) timestamp))
+
+(defn cancel-reservation
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/cancel"))
+  (update-mongo-for-reservation-state-change application reservation :CANCELED user (usr/get-user-by-id to-user-id) timestamp))
 
 (defn mark-reservation-update-seen
   [application reservation-id user-id]

@@ -15,7 +15,7 @@
 
 ; -- coercions between LP Frontend <-> Calendars API <-> Ajanvaraus Backend
 
-(defn- reservation-participants [res] (flatten (vals (select-keys res [:from :to]))))
+(defn- reservation-participants [res] (flatten (vals (select-keys res [:from :to :externalRef :clientId]))))
 
 (defn- ->FrontendCalendar [calendar user]
   {:id               (:id calendar)
@@ -445,6 +445,19 @@
   [{user :user}]
   (ok :appointments (mapcat process-application-with-reservation-updates
                                (cal/applications-with-appointments-for-user user))))
+
+(defcommand cancel-reservation
+  {:user-roles       #{:authority}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
+   :on-success       (notify :decline-appointment)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
+    (info "Canceling reservation" reservationId)
+    (cal/cancel-reservation application reservation user timestamp)
+    (ok :reservationId reservationId)))
 
 (defcommand mark-reservation-update-seen
   {:user-roles       #{:authority :applicant}
