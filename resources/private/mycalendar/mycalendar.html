@@ -30,13 +30,12 @@
         <div data-bind="ifnot: _.isEmpty(calendarNotificationsByDay())">
           <h3 style="font-weight: bold;"><i class="lupicon-circle-attention negative"></i>&nbsp;<span data-bind="ltext: 'mycalendar.notifications.title'"></span> </h3>
         </div>
-
-        <calendar-notification-list params="items: calendarNotificationsByDay, actionRequired: true"></calendar-notification-list>
+        <calendar-notification-list params="items: calendarNotificationsByDay, actionRequired: true, linkToApplication: true"></calendar-notification-list>
 
         <div>
           <h3 style="font-weight: bold;"><i class="lupicon-circle-attention positive"></i>&nbsp;<span data-bind="ltext: 'mycalendar.all-appointments.title'"></span></h3>
         </div>
-        <calendar-notification-list params="items: allAppointmentsByDay, actionRequired: false"></calendar-notification-list>
+        <calendar-notification-list params="items: allAppointmentsByDay, actionRequired: false, linkToApplication: true"></calendar-notification-list>
 
         <!-- /ko -->
 

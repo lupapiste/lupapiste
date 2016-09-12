@@ -6,6 +6,7 @@ LUPAPISTE.CalendarNotificationListModel = function(params) {
 
   self.items = params.items;
   self.actionRequired = params.actionRequired;
+  self.linkToApplication = params.linkToApplication;
 
   self.acceptReservation = function(r) {
     self.sendEvent("calendarView", "updateOperationCalled");
