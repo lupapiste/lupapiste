@@ -70,10 +70,10 @@
 
 (defn add-info-link! 
   "add a new info link"
-  [app text url]
+  [app text url timestamp]
   (let [links (info-links app)
         new-id (free-link-id links)
-        link-node {:linkId new-id :text text :url url :modified (now)}]
+        link-node {:linkId new-id :text text :url url :modified timestamp}]
     (update-info-links! app (concat links (list link-node)))
     new-id))
 
@@ -85,9 +85,9 @@
 
 (defn update-info-link! 
   "update and existing info link" 
-  [app link-id text url]
+  [app link-id text url timestamp]
   (let [links (info-links app)
-      link-node {:linkId link-id :text text :url url :modified (now)}
+      link-node {:linkId link-id :text text :url url :modified timestamp}
       new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
       (update-info-links! app new-links)
       link-id))

@@ -23,7 +23,6 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkId]
-   ;:input-validators [(partial action/number-parameters [:linkId])]
    :input-validators [(partial action/non-blank-parameters [:linkId])]
    :states           (states/all-states-but :draft)}
   [command]
@@ -34,7 +33,6 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkIds]
-   ;:input-validators [(partial action/vector-parameter-of :linkIds number?)]
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    :states           (states/all-states-but :draft)}
   [command]
@@ -49,16 +47,15 @@
    :optional-parameters [linkId]
    :input-validators    [(partial action/non-blank-parameters [:text])
                          (partial action/non-blank-parameters [:url])
-                         ;(partial action/optional-parameter-of :linkId number?)
                          (partial action/optional-parameter-of :linkId #(not (= "" %)))
                          ]
    :states              (states/all-states-but :draft)}
   [command]
-  ;; fixme: pass created of command 
   (let [app (:application command)
+        timestamp (:created command)
         res (if linkId
-              (info-links/update-info-link! app linkId text url)
-              (info-links/add-info-link! app text url))]
+              (info-links/update-info-link! app linkId text url timestamp)
+              (info-links/add-info-link! app text url timestamp))]
     (ok :linkId res)))
 
 (defquery info-links
