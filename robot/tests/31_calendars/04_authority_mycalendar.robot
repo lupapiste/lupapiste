@@ -60,5 +60,10 @@ Authority suggests an appointment
   Click by test id  reservation-slot-reserve-bubble-dialog-ok
   Positive indicator should be visible
   Wait until  Element should be visible by test id  reservation-PENDING-Friday-1000
+
+Appointment is visible in mycalendar list view
+  Go to page  mycalendar
+  Click by test id  view-toggle-list
+  Wait until  Element should be visible  xpath=//div[@class='calendar-pending-action-item']
   Logout
 

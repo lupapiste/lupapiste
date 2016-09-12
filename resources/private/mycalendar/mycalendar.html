@@ -18,10 +18,10 @@
       <!-- /ko -->
       <!-- ko ifnot: noCalendarsFound -->
         <div class="view-toggle">
-          <button data-bind="click: setViewMode('list')">
+          <button data-bind="click: setViewMode('list')" data-test-id="view-toggle-list">
             <i class="lupicon-list"></i>
           </button>
-          <button data-bind="click: setViewMode('calendar')">
+          <button data-bind="click: setViewMode('calendar')" data-test-id="view-toggle-calendar">
             <i class="lupicon-calendar"></i>
           </button>
         </div>

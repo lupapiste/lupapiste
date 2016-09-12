@@ -62,7 +62,7 @@
 "mycalendar.title" "sv" "Min kalender"
 "mycalendar.notifications.title" "fi" "Uudet ja päivittyneet kalenterimerkinnät"
 "mycalendar.notifications.title" "sv" ""
-"mycalendar.all-appointments.title" "fi" "Uudet ja päivittyneet kalenterimerkinnät"
+"mycalendar.all-appointments.title" "fi" "Voimassaolevat ajanvaraukset"
 "mycalendar.all-appointments.title" "sv" ""
 "calendar.reserve.slot" "fi" "Varaa"
 "calendar.reserve.slot" "sv" "Reservera"
