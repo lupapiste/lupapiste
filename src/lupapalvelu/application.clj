@@ -109,6 +109,9 @@
 ;; Helpers
 ;;
 
+(defn party-document? [doc]
+  (= :party (tools/doc-type doc)))
+
 (defn user-role
   "User role within the application."
   [user {:keys [organization]}]
@@ -125,10 +128,6 @@
             (let [schema-info (:info (schemas/get-schema schema-version schema-name))]
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
-
-(defn party-document? [doc]
-  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
-    (= (:type schema-info) :party)))
 
 (defn last-history-item
   [{history :history}]
