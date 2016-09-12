@@ -166,24 +166,31 @@
                 result => ok?
                 (count (:availableSlots result)) => 3
                 (fact "Make an appointment in the first available slot"
-                      (let [first-slot (first (:availableSlots result))
-                            result (command pena :reserve-calendar-slot
-                                            :clientId pena-id
-                                            :authorityId authority-id
-                                            :reservationTypeId (get varaustyypit :Testityyppi)
-                                            :id app-id
-                                            :slotId (:id first-slot)
-                                            :comment "Hakijan tekem\u00e4 varaus"
-                                            :location "paikka")
-                            reservation-id (:reservationId result)]
-                        result => ok?
-                        (fact "my-reserved-slots for applicant includes the new reservation"
-                              (let [reservation (->> (query authority :my-reserved-slots :year current-year :week current-week)
-                                                     :reservations
-                                                     (filter #(= reservation-id (get-in % [:reservation :id])))
-                                                     first)]
-                                reservation =not=> nil?
-                                (get-in reservation [:reservation :reservationStatus]) => "ACCEPTED"))))))
+                  (let [first-slot (first (:availableSlots result))
+                        result (command pena :reserve-calendar-slot
+                                        :clientId pena-id
+                                        :authorityId authority-id
+                                        :reservationTypeId (get varaustyypit :Testityyppi)
+                                        :id app-id
+                                        :slotId (:id first-slot)
+                                        :comment "Hakijan tekem\u00e4 varaus"
+                                        :location "paikka")
+                        reservation-id (:reservationId result)]
+                    result => ok?
+                    (fact "my-reserved-slots for applicant includes the new reservation"
+                      (let [reservation (->> (query authority :my-reserved-slots :year current-year :week current-week)
+                                             :reservations
+                                             (filter #(= reservation-id (get-in % [:reservation :id])))
+                                             first)]
+                        reservation =not=> nil?
+                        (get-in reservation [:reservation :reservationStatus]) => "ACCEPTED"))
+                    (fact "Authority gets the pending action in calendar-actions-required"
+                      (let [reservation (->> (query authority :calendar-actions-required)
+                                             :actionsRequired
+                                             (filter #(= reservation-id (get-in % [:id])))
+                                             first)]
+                        reservation =not=> nil?
+                        (get-in reservation [:reservationStatus]) => "ACCEPTED"))))))
             (fact "Find available slots as applicant without the correct application in context should fail"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
