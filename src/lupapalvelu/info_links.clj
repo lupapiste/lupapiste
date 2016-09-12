@@ -80,17 +80,25 @@
 (defn delete-info-link! 
   "remove an info link"
   [app link-id]
-  (update-info-links! app
-    (remove (fn [x] (= link-id (:linkId x))) (info-links app))))
+  (let [links (info-links app)
+        new-links (remove (fn [x] (= link-id (:linkId x))) (info-links app))]
+     (if (= (count links) (count new-links))
+       false
+       (do
+         (update-info-links! app new-links)
+         true))))
 
 (defn update-info-link! 
   "update and existing info link" 
   [app link-id text url timestamp]
   (let [links (info-links app)
-      link-node {:linkId link-id :text text :url url :modified timestamp}
-      new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
-      (update-info-links! app new-links)
-      link-id))
+        link-node {:linkId link-id :text text :url url :modified timestamp}
+        new-links (map (fn [x] (if (= (:linkId x) link-id) link-node x)) links)]
+    (if (= links new-links)
+      false
+      (do
+        (update-info-links! app new-links)
+        link-id))))
 
 (defn reorder-info-links! 
   "set the order of info links"
@@ -99,6 +107,6 @@
     ;; depending on UI needs could just sort the intersection
     (if (= (set link-ids) (set (map :linkId links)))
       (do (update-info-links! app (order-links links link-ids))
-         true)
+          true)
       false)))
 

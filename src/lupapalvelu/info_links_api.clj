@@ -26,7 +26,9 @@
    :input-validators [(partial action/non-blank-parameters [:linkId])]
    :states           (states/all-states-but :draft)}
   [command]
-  (ok :res (info-links/delete-info-link! (:application command) linkId)))
+  (if (info-links/delete-info-link! (:application command) linkId)
+    (ok :res true)
+    (fail :error.badlink)))
 
 (defcommand info-link-reorder
   {:description      "Reorder application-specific info-links"
@@ -37,7 +39,9 @@
    :states           (states/all-states-but :draft)}
   [command]
   (println "Reordering links by " linkIds)
-  (ok :res (info-links/reorder-info-links! (:application command) linkIds)))
+  (if (info-links/reorder-info-links! (:application command) linkIds)
+    (ok :res true)
+    (fail :error.badlinks)))
 
 (defcommand info-link-upsert
   {:description         "Add or update application-specific info-link"
@@ -56,7 +60,9 @@
         res (if linkId
               (info-links/update-info-link! app linkId text url timestamp)
               (info-links/add-info-link! app text url timestamp))]
-    (ok :linkId res)))
+    (if res
+       (ok :linkId res)
+       (fail :error.badlink))))
 
 (defquery info-links
   {:description      "Return a list of application-specific info-links"

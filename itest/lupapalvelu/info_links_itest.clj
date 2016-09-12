@@ -16,7 +16,11 @@
   (let [{application-id :id :as app} 
         (create-and-open-application pena :propertyId sipoo-property-id)]
    
-    application-id => truthy
+   application-id => truthy
+   
+   (fact "Invite statement giver" 
+      (command sonja :request-for-statement :id application-id :functionCode nil :selectedPersons 
+         [{:email "teppo@example.com" :text "Hello" :name "Tepanderi"}]) => ok?) 
    
     (let [response (query pena :info-links :id application-id)]
       response => ok?
@@ -35,9 +39,9 @@
         (:isNew (first (:links response))) => true
         (:canEdit (first (:links response))) => true))
      
-    (let [response (command sonja :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
+    (let [response (command ronja :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
       response => ok?
-      (fact "Sonja adds another info-link"
+      (fact "Statementgiver Ronja adds another info-link"
          (:linkId response) => string?))
 
     (let [response (command sonja :info-link-upsert :id application-id :text "third url" :url "http://example.org/3")]
@@ -61,6 +65,11 @@
          (fact "Sonja sees ordered links"
            (map :url (:links response)) => ["http://example.org/3" "http://example.org/2" "http://example.org/1"]))
   
+       (let [response (query teppo :info-links :id application-id)]
+          response => ok?
+          (fact "Statement giver sees the links"
+             (map :linkId (:links response)) => [l3-id l2-id l1-id]))
+          
        (let [response (command sonja :info-link-delete :id application-id :linkId l2-id)]
          (fact "Sonja can delete infolinks" 
            response => ok?))
@@ -85,9 +94,9 @@
          response => ok?
          (fact "Pena has seen the links after calling mark-seen" (map :isNew (:links response)) => [false false]))
   
-       ;(let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId "one")]
-       ;  (fact "Sonja fails to update link with bad id"
-       ;     response =not=> ok?))
+       (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/one-new" :linkId "one")]
+         (fact "Sonja fails to update link with bad id"
+            (:ok response) => false))
   
        (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId l1-id)]
          (fact "Sonja can update an infolink"
