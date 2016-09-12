@@ -100,16 +100,15 @@
 (defn organization-links
   "The fallback language for links is Finnish."
   [org-id user-id lang]
-  (for [{:keys [url name modified]} (-> org-id
-                                        org/get-organization
-                                        :links)
-        :let [text ((keyword lang) name)
-              user (usr/get-user-by-id user-id)]]
-    {:url url
-     :text (or text (:fi name))
-     ;; Unseen links without timestamps are considered new.
-     :isNew (> (or modified 1)
-               (get-in user [:seen-organization-links (keyword org-id)] 0))}))
+  (let [user (usr/get-user-by-id user-id)]
+    (for [{:keys [url name modified]} (-> org-id
+                                          org/get-organization
+                                          :links)]
+      {:url url
+       :text ((keyword lang) name (:fi name ""))
+       ;; Unseen links without timestamps are considered new.
+       :isNew (> (or modified 1)
+                 (get-in user [:seen-organization-links (keyword org-id)] 0))})))
 
 (defn mark-seen-organization-links
   "For organization links the mark-seen information is stored under user."
