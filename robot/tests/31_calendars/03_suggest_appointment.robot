@@ -16,9 +16,8 @@ Library  Collections
 Admin sets up the calendar
   Sipoo logs in
   Go to page  organization-calendars
+  Set up the calendar for authority  Sibbo Sonja
   Set default reservation location  Foobarbaz
-  Wait Until  Element should be visible  xpath=//tr[@data-test-authority-name='Sibbo Sonja']
-  Select Checkbox  xpath=//tr [@data-test-authority-name='Sibbo Sonja']//td//input[@type='checkbox']
   Add reservation type  Foobar
   Logout
 
@@ -54,12 +53,9 @@ Authority opens and assigns application to herself
   Open application  ${appname}  ${propertyId}
   Assign application to  Sibbo Sonja
 
-Authority opens the calendar tab
-  Wait until  Element should be visible by test id  application-open-calendar-tab
+Authority suggests an appointment
   Open tab  calendar
   Wait until  Element should be visible by test id  calendar-weekday-0
-
-Authority suggests an appointment
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
   Goto following week in calendar view
