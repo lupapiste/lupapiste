@@ -18,6 +18,8 @@
 "applicationRole.owner" "sv" "ansökan uppgjord av"
 "applicationRole.paasuunnittelija" "fi" "pääsuunnittelija"
 "applicationRole.paasuunnittelija" "sv" "huvudprojekterare"
+"applicationRole.statementGiver" "fi" "lausunnonantaja"
+"applicationRole.statementGiver" "sv" "givare av utlåtande"
 "applicationRole.suunnittelija" "fi" "suunnittelija"
 "applicationRole.suunnittelija" "sv" "projekterare"
 "applicationRole.tyomaastaVastaava" "fi" "työmaasta vastaava"
