@@ -164,10 +164,6 @@
           (util/fn->> (remove (comp ss/blank? :fi second))
                       (sort-by first))))
 
-(defn- default-localization-map []
-  (-> (default-i18n-files)
-      (txt-files->map)))
-
 (defn missing-localizations-excel
   "Writes missing localizations of given language to excel file.
    If file is not provided, will create the file to user home dir."
@@ -179,7 +175,8 @@
                        ".xlsx")]
         (missing-localizations-excel (io/file filename) lang)))
   ([file lang]
-   (-> (default-localization-map)
+   (-> (default-i18n-files)
+       (txt-files->map)
        (missing-translations lang)
        (commons-resources/write-excel file))))
 
@@ -211,7 +208,7 @@
 
                                  :else [k (merge v v-new)]))))})
 
-(defn- sort-by-translation-key [map-of-translations]
+(defn- sort-by-translation-entry [map-of-translations]
   (into {}
         (for [[k v] map-of-translations]
           [k (sort-by first v)])))
@@ -220,7 +217,7 @@
   (->> localization-map
        :translations
        (group-by (comp :source-name meta first))
-       (sort-by-translation-key)))
+       (sort-by-translation-entry)))
 
 (defn- read-translation-excel [path]
   (let [file (io/file path)]
@@ -239,16 +236,18 @@
 
 (defn merge-translations-from-excels-into-source-files [translation-files-dir-path paths]
   "Merges translation excel files into the current translation source files."
-  (let [current-loc-map (default-localization-map)
+  (let [translation-txt-files (util/get-files-by-regex translation-files-dir-path
+                                                       #".+\.txt$")
+        current-loc-map (-> translation-txt-files (txt-files->map))
         translation-maps (map read-translation-excel paths)
         new-loc-map (reduce merge-translation-from-excel
                             current-loc-map
-                            translation-maps)
-        grouped-by-source (group-translations-by-source new-loc-map)]
-    (for [[filepath translations] grouped-by-source]
-      (do (println filepath)
-          (commons-resources/write-txt {:translations translations}
-                                       (io/file translation-files-dir-path filepath))))))
+                            translation-maps)]
+    (doseq [[filepath translations] (group-translations-by-source new-loc-map)]
+      (commons-resources/write-txt {:translations (for [[k v] translations]
+                                                    [k (sort v)])}
+                                   (io/file translation-files-dir-path
+                                            filepath)))))
 
 (defn merge-translations-from-excels
   "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
