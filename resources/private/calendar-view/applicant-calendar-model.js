@@ -3,6 +3,7 @@ LUPAPISTE.ApplicantCalendarModel = function () {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.BaseCalendarModel());
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.bookAppointmentParams = { // for compatibility reasons client is an observable

@@ -39,6 +39,12 @@
                                                      reservationType: $component.reservationType,
                                                      defaultLocation: $component.defaultLocation"></reservation-slot-reserve-bubble>
           </div>
+          <div style="position: relative;">
+            <reserved-slot-bubble params="client: $component.client,
+                                          authority: $component.authority,
+                                          reservationType: $component.reservationType,
+                                          weekdays: $component.calendarWeekdays"></reserved-slot-bubble>
+          </div>
         </td>
       </tr>
       </thead>
@@ -91,7 +97,8 @@
                                                                          height: $component.slotHeight($data) },
                                                                 css: { 'accepted': $data.reservation.reservationStatus === 'ACCEPTED' },
                                                                 with: $data.reservation,
-                                                                attr: { 'data-test-id': moment($data.startTime).format('[reservation-'+$data.reservation.reservationStatus+'-]dddd-HHmm') }">
+                                                                attr: { 'data-test-id': moment($data.startTime).format('[reservation-'+$data.reservation.reservationStatus+'-]dddd-HHmm') },
+                                                                click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'booked-slot')">
                 <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
                 <div data-bind="text: location, attr: {'title': location}"></div>
                 <div data-bind="text: applicationId, attr: {'title': applicationId}"></div>

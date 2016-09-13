@@ -143,7 +143,13 @@
        (map doc-tools/party-doc->user-role)
        (assoc auth-info :party-roles)))
 
-(defn enrich-auth-information [{auth :auth docs :documents}]
+(defn- enrich-authority-auth-info [authority-id auth-info]
+  (if (and authority-id (= (:id auth-info) authority-id))
+    (update auth-info :other-roles conj :authority)
+    auth-info))
+
+(defn enrich-auth-information [{auth :auth docs :documents {authority-id :id} :authority}]
   (let [parties-docs (->> (filter party-document? docs)
                           (sort-by (comp :order :schema-info)))]
-    (map (partial enrich-auth-info-with-parties parties-docs) auth)))
+    (map (partial enrich-auth-info-with-parties parties-docs) auth)
+    (map (partial enrich-authority-auth-info authority-id) auth)))
