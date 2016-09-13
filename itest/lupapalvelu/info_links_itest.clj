@@ -39,9 +39,9 @@
         (:isNew (first (:links response))) => true
         (:canEdit (first (:links response))) => true))
      
-    (let [response (command ronja :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
+    (let [response (command teppo :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
       response => ok?
-      (fact "Statementgiver Ronja adds another info-link"
+      (fact "Statement giver Teppo adds another info-link"
          (:linkId response) => string?))
 
     (let [response (command sonja :info-link-upsert :id application-id :text "third url" :url "http://example.org/3")]
@@ -55,7 +55,7 @@
           l3-id (:linkId (nth links 2))]
           
        (fact "Last link is last in list"
-          (:url (nth links 2)) = "http://example.org/3")
+          (:url (last links)) = "http://example.org/3")
        
        (fact "Sonja can reorder links"
          (:res (command sonja :info-link-reorder :id application-id :linkIds [l3-id l2-id l1-id])) => true)
@@ -67,7 +67,7 @@
   
        (let [response (query teppo :info-links :id application-id)]
           response => ok?
-          (fact "Statement giver sees the links"
+          (fact "Statement giver Teppo sees the links"
              (map :linkId (:links response)) => [l3-id l2-id l1-id]))
           
        (let [response (command sonja :info-link-delete :id application-id :linkId l2-id)]

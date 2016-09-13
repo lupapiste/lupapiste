@@ -13,15 +13,13 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user])
-  (:import
-            [org.bson.types ObjectId]))
+            [lupapalvelu.user :as usr]))
 
-;; info-link: {linkId num, :text text, :url url, :modified timestamp}
+;; info-link = {linkId mongoid, :text text, :url url, :modified timestamp}
 
 (defn- can-edit-links? [app user]
   "Check if the user is an authority or a statement giver for the application"
-  (or (user/authority? user)
+  (or (usr/authority? user)
       (contains? 
          (set (map :id (filter (fn [auth] (= (:role auth) :statementGiver)) (:auth app)))) 
          (:id user))))
@@ -36,10 +34,6 @@
       (pred (first lst)) (first lst)
       :else (recur (rest lst)))))
 
-(defn- free-link-id [links]
-  ;(+ 1 (reduce max 0 (map :linkId links)))
-  (str (ObjectId.)))
-
 (defn- order-links [links ids]
   (map (fn [id] (take-first (fn [x] (= (:linkId x) id)) links nil)) ids))
 
@@ -49,12 +43,6 @@
 ;; external api also adds some flags  
 (defn- info-links [app]
   (or (:info-links app) []))
-
-(defn mark-links-seen! 
-  "mark info-links seen by the current user"
-  [command]
-  (update-application command
-    {$set (app/mark-collection-seen-update (:user command) (now) "info-links")}))
  
 (defn info-links-with-flags 
   "get the info links and flags whether they are editable and seen by the given user"
@@ -72,7 +60,7 @@
   "add a new info link"
   [app text url timestamp]
   (let [links (info-links app)
-        new-id (free-link-id links)
+        new-id (mongo/create-id)
         link-node {:linkId new-id :text text :url url :modified timestamp}]
     (update-info-links! app (concat links (list link-node)))
     new-id))

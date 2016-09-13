@@ -11,8 +11,7 @@
             [lupapalvelu.info-links :as info-links]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.states :as states]))
 
 ;;
 ;; API
@@ -38,7 +37,6 @@
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    :states           (states/all-states-but :draft)}
   [command]
-  (println "Reordering links by " linkIds)
   (if (info-links/reorder-info-links! (:application command) linkIds)
     (ok :res true)
     (fail :error.badlinks)))
