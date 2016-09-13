@@ -93,10 +93,10 @@
   </form>
   <!-- /ko -->
   <!-- ko ifnot: canEdit -->
-  <div class="info-link-link"
-       data-bind="testId: 'just-link-' + index">
+  <div class="info-link-link">
     <a class="link-btn"
-       data-bind="attr: {href: link().url}">
+       data-bind="attr: {href: link().url},
+                  testId: 'just-link-' + index">
       <span class="info-link-text-wide"
             data-bind="text: link().text"></span>
       <i class="lupicon-circle-star"
