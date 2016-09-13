@@ -1,10 +1,9 @@
-LUPAPISTE.ApplicantCalendarModel = function () {
+LUPAPISTE.ApplicantCalendarModel = function (params) {
 
   "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.BaseCalendarModel());
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.bookAppointmentParams = { // for compatibility reasons client is an observable
                                  client: ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
@@ -12,26 +11,19 @@ LUPAPISTE.ApplicantCalendarModel = function () {
                                                          id: lupapisteApp.models.currentUser.id(),
                                                          partyType: [] }),
                                  application: ko.observable(),
-                                 authorities: ko.observableArray([]),
+                                 authorities: params.calendarConfig.authorities,
                                  selectedParty: ko.observable(),
-                                 reservationTypes: ko.observableArray([]),
+                                 reservationTypes: params.calendarConfig.reservationTypes,
                                  selectedReservationType: ko.observable(),
-                                 defaultLocation: ko.observable() };
+                                 defaultLocation: params.calendarConfig.defaultLocation };
 
   self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
 
   self.disposedComputed(function() {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
-      self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
       self.bookAppointmentParams.application({id: id, organizationName: lupapisteApp.models.application.organizationName()});
     }
-  });
-
-  self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
-    self.bookAppointmentParams.authorities(event.authorities);
-    self.bookAppointmentParams.reservationTypes(event.reservationTypes);
-    self.bookAppointmentParams.defaultLocation(event.defaultLocation);
   });
 
   self.acceptReservation = function(r) {

@@ -13,14 +13,6 @@ Library  Collections
 
 *** Test Cases ***
 
-Admin sets up the calendar
-  Sipoo logs in
-  Go to page  organization-calendars
-  Set up the calendar for authority  Sibbo Sonja
-  Set default reservation location  Foobarbaz
-  Add reservation type  Foobar
-  Logout
-
 Applicant opens an application
   Mikko logs in
   ${secs} =  Get Time  epoch
@@ -31,6 +23,22 @@ Applicant opens an application
 
 Applicant submits application and logs out
   Submit application
+  Logout
+
+Authority without calendar should not see the calendar tab
+  Sonja logs in
+  Go to page  applications
+  Request should be visible  ${appname}
+  Open application  ${appname}  ${propertyId}
+  Element should not be visible by test id  application-open-calendar-tab
+  Logout
+
+Admin sets up the calendar
+  Sipoo logs in
+  Go to page  organization-calendars
+  Set up the calendar for authority  Sibbo Sonja
+  Set default reservation location  Foobarbaz
+  Add reservation type  Foobar
   Logout
 
 Authority logs in and allocates free calendar slots

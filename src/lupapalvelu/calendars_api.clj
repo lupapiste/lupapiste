@@ -342,9 +342,13 @@
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
   [{{:keys [organization] :as appl} :application}]
-  (ok :authorities (cal/find-application-authz-with-calendar appl)
-      :reservationTypes (reservation-types organization)
-      :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
+  (try
+    (ok :authorities (cal/find-application-authz-with-calendar appl)
+        :reservationTypes (reservation-types organization)
+        :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] ""))
+    (catch Exception e (ok :authorities []
+                           :reservationTypes []
+                           :defaultLocation ""))))
 
 (defn- get-reservation [id]
   (->FrontendReservation (api-query (str "reservations/" id))))

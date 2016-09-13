@@ -482,6 +482,30 @@
     }
   };
 
+  function CalendarConfigModel() {
+    var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+    self.reservationTypes = ko.observableArray([]);
+    self.defaultLocation = ko.observable();
+    self.authorities = ko.observableArray([]);
+    self.initialized = ko.observable(false);
+
+    self.disposedComputed(function() {
+      var id = applicationModel.id();
+      if (!_.isEmpty(id) && authorizationModel.ok("calendars-enabled")) {
+        self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+      }
+    });
+
+    self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
+      self.initialized(event.authorities.length > 0);
+      self.reservationTypes(event.reservationTypes);
+      self.defaultLocation(event.defaultLocation);
+      self.authorities(event.authorities);
+    });
+  }
+
+  var calendarConfigModel = new CalendarConfigModel();
 
   $(function() {
     var bindings = {
@@ -512,7 +536,8 @@
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions,
-      sidePanelService: lupapisteApp.services.sidePanelService
+      sidePanelService: lupapisteApp.services.sidePanelService,
+      calendarConfig: calendarConfigModel
     };
 
     $("#application").applyBindings(bindings);
