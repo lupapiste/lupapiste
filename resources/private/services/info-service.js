@@ -103,7 +103,7 @@ LUPAPISTE.InfoService = function() {
             return ko.observable( _.merge( link, oldStates[link.id]));
           }));
 
-          markSeenNeeded.info = hasNewLinks( infoLinks());
+          markSeenNeeded.info = hasNewLinks( infoLinks()) || options.originator;
           finalizeFetch( options );
         })
         .call();

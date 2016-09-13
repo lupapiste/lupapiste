@@ -20,7 +20,8 @@
       <td><a class="link-btn link-btn--passive">
           <i class="lupicon-arrows-up-down"></i>
       </a></td>
-      <td class="spacehog">
+      <td class="spacehog"
+          data-bind="testId: 'view-link-' + index">
         <a class="link-btn"
            target="_blank"
            data-bind="attr: {href: link().url}">
@@ -32,11 +33,13 @@
       </td>
       <td><a class="link-btn"
              data-bind="toggleClick: editorEdit,
-                        visible: link().canEdit">
+                        visible: link().canEdit,
+                        testId: 'view-link-edit-' + index">
           <i class="lupicon-pen"></i></a></td>
       <td><a class="link-btn"
              data-bind="click: remove,
-                        visible: link().canEdit">
+                        visible: link().canEdit,
+                        testId: 'view-link-remove-' + index">
           <i class="lupicon-remove"></i></a></td>
     </tr>
     <tr data-bind="visible: showZone">
@@ -56,18 +59,21 @@
                  data-bind="lplaceholder: 'info.edit.text',
                             textInput: textInput,
                             hasFocus: textFocus,
-                            disable: waiting">
+                            disable: waiting,
+                            testId: 'edit-link-text-' + index">
         </td>
         <td><button class="ghost positive"
                     data-bind="enable: canSave,
-                               click: save">
+                               click: save,
+                               testId: 'edit-link-save-' + index">
             <i class="lupicon-save"></i>
           </button>
         </td>
         <td><button class="ghost primary"
                     data-bind="click: cancel,
                                disable: waiting,
-                               css: {waiting: waiting}">
+                               css: {waiting: waiting},
+                               testId: 'edit-link-cancel-' + index">
             <i data-bind="css: {'lupicon-undo': !isTemporary(),
                           'lupicon-remove': isTemporary}" ></i>
             <i class="lupicon-refresh spin wait"></i>
@@ -79,7 +85,8 @@
           <input type="text" data-bind="lplaceholder: 'info.edit.url',
                                         textInput: urlInput,
                                         hasFocus: urlFocus,
-                                        disable: waiting">
+                                        disable: waiting,
+                                        testId: 'edit-link-url-' + index">
         </td>
       </tr>
     </table>
@@ -88,7 +95,8 @@
   <!-- ko ifnot: canEdit -->
   <div class="info-link-link">
     <a class="link-btn"
-       data-bind="attr: {href: link().url}">
+       data-bind="attr: {href: link().url},
+                  testId: 'just-link-' + index">
       <span class="info-link-text-wide"
             data-bind="text: link().text"></span>
       <i class="lupicon-circle-star"
