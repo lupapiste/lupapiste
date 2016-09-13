@@ -36,7 +36,7 @@ Check organization link
   Javascript?  $("${a}").attr("href") === "${url}"
   Javascript?  Boolean($("${a} i.lupicon-circle-star:visible").length) === ${new}
 
-Check view link
+Check info link
   [Arguments]  ${index}  ${text}  ${url}  ${new}  ${canEdit}
   Wait test id visible  view-link-${index}
   ${a}=  Set Variable  td[data-test-id=view-link-${index}] a

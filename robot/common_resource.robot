@@ -360,6 +360,9 @@ SolitaAdmin logs in
 Jarvenpaa authority logs in
   Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
 
+Jussi logs in
+  Authority logs in  jussi  jussi  Jussi Viranomainen
+
 
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
