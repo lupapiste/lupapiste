@@ -40,6 +40,14 @@
                                                         :role :applicant
                                                         :application-role :clown}}))
 
+  (fact "application role determined by other-role (authority)"
+    (let [auth    [{:id "user-id1" :role :owner :party-roles [:clown :batman] :other-roles [:foobar :authority]}]
+          comment {:text "comment text" :user {:id "user-id1" :role :authority}}]
+      (enrich-user-information auth comment) => {:text "comment text"
+                                                 :user {:id "user-id1"
+                                                        :role :authority
+                                                        :application-role :authority}}))
+
   (fact "no matching auth role for applicant"
     (let [auth    [{:id "user-id2" :role :owner :party-roles [:clown :batman]}]
           comment {:text "comment text" :user {:id "user-id1" :role :applicant}}]
