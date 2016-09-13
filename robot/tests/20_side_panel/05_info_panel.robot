@@ -5,6 +5,8 @@ Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 Resource        info_resource.robot
 Resource        ../10_authority_admin/authority_admin_resource.robot
+Resource       ../29_guests/guest_resource.robot
+Resource       ../13_statements/statement_resource.robot
 
 *** Variables ***
 ${appname}     Linklater
@@ -15,6 +17,9 @@ ${oopis}       http://oopis.if
 ${example}     http://www.example.org
 ${bar}         https://bar.baz
 ${twitter}     http://twitter.com
+${beijing}     http://beijing.cn
+${shanghai}    http://shanghai.cn  
+${tampere}     http://tampere.fi
 
 *** Test Cases ***
 
@@ -135,13 +140,11 @@ Pena logs in and sees new organization and Ronja's links
   Check just link  0  Bar  ${bar}  true
 
 Pena visits conversation panel and comes back
-  Click element  open-conversation-side-panel
-  Wait until  Element should be visible  conversation-panel
-  Click element  open-info-side-panel
-  No info panel stars
+  Clear stars and close panel
 
-Pena submits application
-  Submit application
+Pena invites Mikko as guest
+  Open tab  parties
+  Invite application guest  mikko@example.com  Link guest
   [Teardown]  Logout
 
 # ------------------------
@@ -162,7 +165,14 @@ Sonja edits Ronja's link
   Edit info link  0  Bar  ${bar}
   Fill link  0  Beijing  beijing.cn
   Save link  0
-  Check view link  0  Beijing  http://beijing.cn  false  true
+  Check view link  0  Beijing  ${beijing}  false  true  
+  Close info panel
+  Wait until  Star is not shown
+  
+Sonja invites Jussi as statement giver
+  Open tab  statement
+  Scroll and click test id  add-statement
+  Invite 'manual' statement giver  1  Official  Jussi  jussi.viranomainen@tampere.fi  ${EMPTY}
   [Teardown]  Logout
 
 # ------------------------
@@ -178,19 +188,128 @@ Ronja logs in and sees Sonja's edit
   Check organization link  0  Sipoo  ${oopis}
   Check organization link  1  Rakennusvalvonta  ${rakval}
   Check organization link  2  Titityy  ${twitter}
-  Check view link  0  Beijing  http://beijing.cn  true  true
+  Check view link  0  Beijing  ${beijing}  true  true
 
 Ronja adds link
-  #[Tags]  fail  # New links are currently added on top
   Add info link  1  Shanghai  shanghai.cn
   Save link  1
-  Check view link  1  Shanghai  http://shanghai.cn  false  true
+  Check view link  1  Shanghai  ${shanghai}  false  true
+  Close info panel
+
+Ronja invites Teppo as statement giver
+  Open tab  statement
+  Scroll and click test id  add-statement
+  Invite 'manual' statement giver  1  Laoban  Teppo  teppo@example.com  ${EMPTY}
   [Teardown]  Logout
   
+# ------------------------
+# Teppo (statement giver)
+# ------------------------
 
+Teppo logs in and sees stars
+  Teppo logs in
+  Later visit
 
+Teppo cannot edit existing links
+  Cannot edit links
 
+Teppo adds link
+  Add info link  2  Tampee  ${tampere}
+  Save link  2
+  Check view link  2  Tampee  ${tampere}  false  true
 
+Teppo can edit his link
+  Edit info link  2  Tampee  ${tampere}
+  Fill link  2  Tampere  ${tampere}
+  Save link  2
+  Check info link  2  Tampere  ${tampere}  false  true
+  [Teardown]  Logout
 
+# ------------------------
+# Jussi (statement giver)
+# ------------------------
 
+Jussi logs in and sees stars
+  Jussi logs in
+  Later visit
+  Check info link  2  Tampere  ${tampere}  true  false
 
+Jussi cannot edit existing links
+  Cannot edit links
+
+Jussi adds link
+  Add info link  3  Turu  ${turku}
+  Save link  3
+  Check info link  3  Turu  ${turku}  false  true
+
+Jussi can edit his link
+  Edit info link  3  Turu  ${turku}
+  Fill link  3  Turku  ${turku}
+  Save link  3
+  Check view link  3  Turku  ${turku}  false  true
+  [Teardown]  Logout
+
+# ------------------------
+# Sonja
+# ------------------------
+
+Sonja logs in one more time and sees stars
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Star is shown
+  Open info panel
+  Check organization link  0  Sipoo  ${oopis}
+  Check organization link  1  Rakennusvalvonta  ${rakval}
+  Check organization link  2  Titityy  ${twitter}
+  Check view link  0  Beijing  ${beijing}  false  true
+  Check view link  1  Shanghai  ${shanghai}  true  true
+  Check info link  2  Tampere  ${tampere}  true  true
+  Check view link  3  Turku  ${turku}  true  true
+
+Sonja can edit statemen giver's links
+  Edit info link  2  Tampere  ${tampere}  
+  Fill link  2  Tampere  www.tampere.fi
+  Save link  2
+  Check info link  2  Tampere  http://www.tampere.fi  false  true
+  Edit info link  3  Tukru  ${turku}
+  Fill link  3  Turku  www.turku.fi
+  Save link  3
+  Check view link  3  Turku  http://www.turku.fi  true  true
+  [Teardown]  Logout
+
+# ------------------------
+# Mikko (guest)
+# ------------------------
+
+Mikko logs in and sees stars
+  Mikko logs in
+  Read only visit
+  [Teardown]  Logout
+    
+# --------------------------
+# Luukas (reader authority)
+# --------------------------
+
+Luukas logs in and sees stars
+  Luukas logs in
+  Read only visit
+  [Teardown]  Logout
+
+*** Keywords ***
+
+Later visit
+  Open application  ${appname}  ${propertyId}
+  Star is shown
+  Open info panel
+  Check organization link  0  Sipoo  ${oopis}  true
+  Check organization link  1  Rakennusvalvonta  ${rakval}  true
+  Check organization link  2  Titityy  ${twitter}  true
+
+Read only visit
+  Later visit  
+  Check view link  0  Beijing  ${beijing}  true false
+  Check view link  1  Shanghai  ${shanghai}  true  false
+  Check info link  2  Tampere  http://www.tampere.fi  true  false
+  Check view link  3  Turku  http://www.turku.fi  true  false
+  Cannot edit anything
+  Clear stars and close panel

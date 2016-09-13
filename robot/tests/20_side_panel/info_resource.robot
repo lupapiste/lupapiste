@@ -20,7 +20,13 @@ Open info panel
 
 Close info panel
   Click element  open-info-side-panel
-  
+
+Clear stars and close panel
+  Click element  open-conversation-side-panel
+  Wait until  Element should be visible  conversation-panel
+  Click element  open-info-side-panel
+  No info panel stars
+  Close info panel
 
 Check organization link
   [Arguments]  ${index}  ${text}  ${url}  ${new}=false
@@ -77,3 +83,11 @@ Add info link
 Delete info link
   [Arguments]  ${index}
   Scroll and click test id  view-link-remove-${index}
+
+Cannot edit links
+  Wait until  element should not be visible  jquery=table.info-link-editor-view i.lupicon-pen
+  Wait until  element should not be visible  jquery=table.info-link-editor-view i.lupicon-remove
+
+Cannot edit anything
+  Cannot edit links
+  No such test id  add-info-link
