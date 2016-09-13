@@ -3,11 +3,30 @@ LUPAPISTE.AttachmentMultiSelect = function() {
 
   var self = this;
 
+  // Overwrite this if needed
+  self.filterAttachments = function(attachments) {
+    return _(attachments)
+      .filter(function(a) {
+        var versions = util.getIn(a, ["versions"]);
+        var sent = util.getIn(a, ["sent"]);
+        return (!_.isEmpty(versions) &&
+          (!sent || ko.unwrap(_.last(versions).created) > sent) &&
+          !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
+      })
+      .map(function(a) {
+        return _.defaults( {selected:true}, ko.mapping.toJS(a));
+      })
+      .value();
+  };
+
   self.model = {
     selectingMode: ko.observable(false),
     authorization: undefined,
     appModel: undefined,
-    filteredAttachments: undefined,
+    filteredAttachments: ko.computed(function() {
+      var attachments = lupapisteApp.services.attachmentsService.attachments();
+      return self.filterAttachments(attachments);
+    }),
 
     moveAttachmets: undefined,
 
@@ -22,11 +41,9 @@ LUPAPISTE.AttachmentMultiSelect = function() {
   };
 
   self.hash = undefined;
-  self.filterAttachments = undefined;
 
   self.init = function(appModel) {
     self.model.appModel = appModel;
-    self.model.filteredAttachments = self.filterAttachments(appModel._js.attachments);
     self.model.authorization = lupapisteApp.models.applicationAuthModel;
 
     window.location.hash = self.hash + self.model.appModel.id();
@@ -44,10 +61,6 @@ LUPAPISTE.AttachmentMultiSelect = function() {
 
           self.model.authorization = lupapisteApp.models.applicationAuthModel;
           self.model.appModel = lupapisteApp.models.application;
-
-          ko.mapping.fromJS(application, {}, self.model.appModel);
-
-          self.model.filteredAttachments = self.filterAttachments(application.attachments);
 
           self.model.selectingMode(true);
         });
