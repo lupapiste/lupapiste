@@ -772,6 +772,8 @@
 "info.paatos-future-date" "sv" "Beslutet kunde inte hittas: beslutsdatum ligger fortfarande inte i det förgångna."
 "info.section-required-in-verdict" "fi" "Päätöksen hakeminen epäonnistui: Päätöksen pakollinen pykälätieto puuttui."
 "info.section-required-in-verdict" "sv" "Sökningen av beslutet misslyckades: Beslutets obligatoriska paragraf fattades."
+"info.title" "fi" "Hakemuksella muuttuneita tietoja"
+"info.title" "sv" "Ändrade uppgifter på ansökan"
 "info.tj-suunnittelija-paatos-details-missing" "fi" "Päätöksen hakeminen epäonnistui. Päätökseltä puuttuu tyyppi, päivämäärä tai sijaistustieto."
 "info.tj-suunnittelija-paatos-details-missing" "sv" "Sökningen av beslut misslyckades. Typ, datum eller plats saknas för beslutet."
 "infoRequest" "fi" "Neuvontapyyntö:"
