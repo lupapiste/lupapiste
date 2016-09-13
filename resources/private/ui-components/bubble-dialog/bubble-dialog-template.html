@@ -8,13 +8,14 @@
           <div class="error"
                data-bind="visible: error,
                           ltext: error,
-                          attr: {'data-test-id': prefix + 'bubble-dialog-error'}"></div>
+                          testId: prefix + 'bubble-dialog-error'"></div>
           <div class="left-buttons">
             <button class="positive"
-                    data-bind="click: ok,
+                    data-bind="visible: okVisible,
+                               click: ok,
                                enable: okEnabled,
                                css: {waiting: waiting},
-                               attr: {'data-test-id': prefix + 'bubble-dialog-ok'}">
+                               testId: prefix + 'bubble-dialog-ok'">
               <i data-bind="css: buttonIcon"></i>
               <i class="wait spin lupicon-refresh"></i>
               <span data-bind="ltext: buttonText"></span>
@@ -23,16 +24,17 @@
                     data-bind="visible: removeVisible,
                                click: remove,
                                enable: removeEnabled,
-                               css: {waiting: waitingRemove}">
+                               css: {waiting: waitingRemove},
+                               testId: prefix + 'bubble-dialog-remove'">
               <i class="lupicon-remove"></i>
               <i class="wait spin lupicon-refresh"></i>
-              <span data-bind="ltext: 'remove'"></span>
+              <span data-bind="ltext: removeText"></span>
             </button>
             <button class="secondary"
                     data-bind="click: cancel,
-                               attr: {'data-test-id': prefix + 'bubble-dialog-cancel'}">
+                               testId: prefix + 'bubble-dialog-cancel'">
               <i class="lupicon-remove"></i>
-              <span data-bind="ltext: 'cancel'"></span>
+              <span data-bind="ltext: cancelText"></span>
             </button>
           </div>
         </div>

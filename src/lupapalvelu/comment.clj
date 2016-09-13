@@ -19,8 +19,10 @@
 (defn- enrich-user-information [auth {user :user :as comment}]
   (let [user-auths  (filter (comp #{(:id user)} :id) auth)
         party-roles (:party-roles (first user-auths))
+        other-roles (:other-roles (first user-auths))
         auth-roles  (map (comp keyword :role) user-auths)]
-    (->> (or (first party-roles)
+    (->> (or (some (set other-roles) [:authority])
+             (first party-roles)
              (some (set auth-roles) [:foreman :owner :statementGiver])
              (when (not-empty auth-roles) :other-auth)
              (when (usr/authority? user)  :authority)

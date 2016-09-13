@@ -15,6 +15,6 @@
    :pre-checks [(fn [{:keys [application]}]
                     (when (foreman/foreman-app? application)
                       (fail :error.foreman.no-tasks)))
-                (permit/validate-permit-type-is permit/R permit/P permit/YA)]}
+                (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 

@@ -109,12 +109,9 @@
     self.primaryOperation = ko.observable();
     self.secondaryOperations = ko.observableArray();
 
-    self.primaryOperationName = ko.computed(function() {
-      var op = ko.unwrap(self.primaryOperation());
-      if (op) {
-        return "operations." + ko.unwrap(op.name);
-      }
-      return "";
+    self.primaryOperationName = ko.pureComputed(function() {
+      var opName = util.getIn(self.primaryOperation, ["name"]);
+      return !_.isEmpty(opName) ? "operations." + opName : "";
     });
 
     self.send = function() {

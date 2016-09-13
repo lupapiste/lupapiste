@@ -13,7 +13,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]))
+            [lupapalvelu.user :as usr]
+            [lupapalvelu.organization :as org]))
 
 ;; info-link = {linkId mongoid, :text text, :url url, :modified timestamp}
 
@@ -98,3 +99,26 @@
           true)
       false)))
 
+;;
+;; Organization links
+;;
+
+(defn organization-links
+  "The fallback language for links is Finnish."
+  [org-id user-id lang]
+  (let [user (usr/get-user-by-id user-id)]
+    (for [{:keys [url name modified]} (-> org-id
+                                          org/get-organization
+                                          :links)]
+      {:url url
+       :text ((keyword lang) name (:fi name ""))
+       ;; Unseen links without timestamps are considered new.
+       :isNew (> (or modified 1)
+                 (get-in user [:seen-organization-links (keyword org-id)] 0))})))
+
+(defn mark-seen-organization-links
+  "For organization links the mark-seen information is stored under user."
+  [org-id user-id created]
+  (mongo/update-by-id :users
+                      user-id
+                      {$set {(str "seen-organization-links." org-id) created}}))

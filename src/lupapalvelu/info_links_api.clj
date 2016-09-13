@@ -6,12 +6,13 @@
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.info-links :as info-links]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.i18n :as i18n]))
 
 ;;
 ;; API
@@ -73,3 +74,28 @@
   (let [app (:application command)]
     (ok :links (info-links/info-links-with-flags app (:user command)))))
 
+(defquery organization-links
+  {:description      "Authority admin defined organization links."
+   :parameters       [id lang]
+   :input-validators [i18n/valid-language]
+   :user-roles       #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
+   :states           states/all-states}
+  [{:keys [application user]}]
+  (ok :links (info-links/organization-links (:organization application)
+                                            (:id user)
+                                            lang)))
+
+(defcommand mark-seen-organization-links
+  {:description      "The user has seen the application's organization links."
+   :user-roles       #{:authority :applicant}
+   :parameters       [id]
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
+   :states           states/all-states
+   :pre-checks       [app/validate-authority-in-drafts]}
+  [{:keys [application user created]}]
+  (info-links/mark-seen-organization-links (:organization application)
+                                           (:id user)
+                                           created))

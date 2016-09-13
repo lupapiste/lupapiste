@@ -58,7 +58,7 @@ LUPAPISTE.CalendarService = function() {
       .success(function(data) {
         slots = slots.concat(data.reservations);
 
-        notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+        notifyView(event, _weekdays(null, slots, startOfWeekMoment));
 
         if (event.clientId && event.applicationId) {
           var queryParams = { clientId: event.clientId,
@@ -79,7 +79,7 @@ LUPAPISTE.CalendarService = function() {
                 _.map(
                    _.filter(data.readOnlySlots, function(r) { return _.isEmpty(slots) || !_.includes(_.map(slots, "id"), r.id); }),
                    function(r) { return _.set(r, "status", "read-only"); }));
-              notifyView(event, _weekdays(event, slots, startOfWeekMoment));
+              notifyView(event, _weekdays(null, slots, startOfWeekMoment));
             })
             .error(function(e) {
               hub.send("indicator", {style: "negative", message: e.text});
@@ -209,6 +209,20 @@ LUPAPISTE.CalendarService = function() {
       })
       .call();
   });
+  
+  var _cancelReservation = hub.subscribe("calendarService::cancelReservation", function(event) {
+    ajax
+      .command("cancel-reservation", { id: event.applicationId, reservationId: event.reservationId })
+      .success(function() {
+        hub.send("indicator", { style: "positive" });
+        doFetchApplicationCalendarWeek({ clientId: event.clientId, authorityId: event.authorityId,
+                                         reservationTypeId: event.reservationTypeId, weekObservable: event.weekObservable });
+      })
+      .error(function(e) {
+        hub.send("indicator", {style: "negative", message: e.text});
+      })
+      .call();
+  });
 
   self.dispose = function() {
     hub.unsubscribe(_fetchOrgCalendars);
@@ -222,5 +236,6 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
     hub.unsubscribe(_fetchApplicationCalendarConfig);
+    hub.unsubscribe(_cancelReservation);
   };
 };

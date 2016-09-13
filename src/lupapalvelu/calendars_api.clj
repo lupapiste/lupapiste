@@ -34,7 +34,7 @@
    :location  (:location r)
    :applicationId (:contextId r)
    :reservedBy (:reservedBy r)
-   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to]))))})
+   :participants (map usr/get-user-by-id (flatten (vals (select-keys r [:from :to :externalRef :clientId]))))})
 
 (defn Reservations->FrontendSlots
   [status reservations]
@@ -415,6 +415,19 @@
   (let [reservation (util/find-by-id reservationId (:reservations application))]
     (info "Declining reservation" reservationId)
     (cal/decline-reservation application reservation user timestamp)
+    (ok :reservationId reservationId)))
+
+(defcommand cancel-reservation
+  {:user-roles       #{:authority}
+   :feature          :ajanvaraus
+   :parameters       [reservationId :id]
+   :input-validators [(partial action/number-parameters [:reservationId])]
+   :pre-checks       [(partial cal/calendars-enabled-api-pre-check #{:authority})]
+   :on-success       (notify :decline-appointment)}
+  [{{userId :id :as user} :user {:keys [id organization] :as application} :application timestamp :created :as command}]
+  (let [reservation (util/find-by-id reservationId (:reservations application))]
+    (info "Canceling reservation" reservationId)
+    (cal/cancel-reservation application reservation user timestamp)
     (ok :reservationId reservationId)))
 
 (defcommand mark-reservation-update-seen

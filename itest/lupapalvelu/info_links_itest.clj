@@ -111,7 +111,77 @@
          (fact "Pena sees the new updated link by Sonja as a new one at right position"
            (:isNew (nth (:links response) 1)) => true
            (:url (nth (:links response) 1)) => "http://example.org/1-new"
-           (:text (nth (:links response) 1)) => "new text"))
+           (:text (nth (:links response) 1)) => "new text")))))
 
-)))  
-
+(fact "Organization links"
+      (let [app-id (create-app-id pena :propertyId sipoo-property-id :operation "pientalo")]
+        (fact "Unseen default minimal links (no timestamps)"
+              (query pena :organization-links :id app-id :lang "fi")
+              => {:ok true
+                  :links [{:url "http://sipoo.fi"
+                           :text "Sipoo"
+                           :isNew true}
+                          {:url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"
+                           :text "Rakennusvalvonta"
+                           :isNew true}]})
+        (fact "Swedish links"
+              (-> (query pena :organization-links :id app-id :lang "sv")
+                  :links first :text)=> "Sibbo")
+        (fact "No language falls back to Finnish"
+              (let [result (query pena :organization-links :id app-id :lang "")]
+                (-> result
+                    :links first :text) => "Sipoo"))
+        (fact "Mark seen"
+              (command pena :mark-seen-organization-links :id app-id) => ok?)
+        (fact "Links are no longer new"
+              (->> (query pena :organization-links :id app-id :lang "fi")
+                   :links (map :isNew))=> '(false false))
+        (fact "Update the first link"
+              (command sipoo :update-organization-link
+                       :url "http://example.com"
+                       :nameFi "Esimerkki" :nameSv "Exempel"
+                       :index 0)
+              => ok?)
+        (fact "Now the first link is new again"
+              (-> (query pena :organization-links :id app-id :lang "fi")
+                  :links first) => {:url "http://example.com" :text "Esimerkki" :isNew true})
+        (fact "Add new link"
+              (command sipoo :add-organization-link
+                       :url "http://www.lupapiste.fi"
+                       :nameFi "Lupapiste" :nameSv "Lupapiste"))
+        (fact "There are two new links"
+              (->> (query pena :organization-links :id app-id :lang "fi")
+                   :links (map :isNew))=> '(true false true))
+        (fact "Mark seen again"
+              (command pena :mark-seen-organization-links :id app-id) => ok?)
+        (fact "Links are no longer new  again"
+              (->> (query pena :organization-links :id app-id :lang "fi")
+                   :links (map :isNew))=> '(false false false))
+        (fact "Authorities can see the organization links in draft state"
+              (query sonja :organization-links :id app-id :lang "fi") => ok?
+              (query luukas :organization-links :id app-id :lang "fi") => ok?)
+        (fact "Authorities can see the application info links in draft state"
+              (query sonja :info-links :id app-id) => ok?
+              (query luukas :info-links :id app-id) => ok?)
+                (facts "Statement giver"
+               (fact "Submit application"
+                     (command pena :submit-application :id app-id) => ok?)
+               (fact "Invite statement giver"
+                     (command sonja :request-for-statement
+                              :id app-id
+                              :functionCode nil
+                              :selectedPersons [{:email "teppo@example.com"
+                                                 :text "Hello"
+                                                 :name "Tepanderi"}]) => ok?)
+               (fact "Statement giver sees all new links"
+                     (->> (query teppo :organization-links :id app-id :lang "fi")
+                          :links (map :isNew))=> '(true true true))
+               (fact "Mark seen"
+                     (command teppo :mark-seen-organization-links :id app-id) => ok?
+                     (->> (query teppo :organization-links :id app-id :lang "fi")
+                          :links (map :isNew))=> '(false false false))))
+      (fact "Organization without links"
+            (let [app-id (create-app-id veikko
+                                        :propertyId tampere-property-id
+                                        :operation "ya-katulupa-vesi-ja-viemarityot")]
+              (query veikko :organization-links :id app-id :lang "fi") => (contains {:links []}))))

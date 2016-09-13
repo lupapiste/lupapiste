@@ -367,7 +367,7 @@
   (fact "address-by-point-proxy"
     (let [response (address-by-point-proxy {:params {:lang "fi" :x "279444.75" :y "6703424.390625"}})
           body (json/decode (:body response) true)]
-      (fact (:street body) => "Nikkiläntie")
+      (fact (:street body) => "Nikkil\u00e4ntie")
       (fact (:number body) => "33")
       (fact (:fi (:name body)) => "Salo")
       )))
