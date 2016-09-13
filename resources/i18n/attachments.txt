@@ -25,7 +25,7 @@
 "attachment.conversation" "fi" "Keskustele liitteestä"
 "attachment.conversation" "sv" "Diskutera bilagan"
 "attachment.converted" "fi" "Tiedosto on muunnettu automaattisesti PDF/A-muotoon"
-"attachment.converted" "sv" "Filen är automatiskt modifierad till PDF/A-format"
+"attachment.converted" "sv" "Filen är automatiskt ändrad till PDF/A-form"
 "attachment.delete" "fi" "Poista liite"
 "attachment.delete" "sv" "Radera bilaga"
 "attachment.delete.header" "fi" "Poista liite"
