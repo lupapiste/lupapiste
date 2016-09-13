@@ -21,7 +21,7 @@
    (fact "Invite statement giver" 
       (command sonja :request-for-statement :id application-id :functionCode nil :selectedPersons 
          [{:email "teppo@example.com" :text "Hello" :name "Tepanderi"}]) => ok?) 
-   
+
     (let [response (query pena :info-links :id application-id)]
       response => ok?
       (fact "Initially Pena sees no links" (:links response) => []))
@@ -39,6 +39,12 @@
         (:isNew (first (:links response))) => true
         (:canEdit (first (:links response))) => true))
      
+    (let [response (query teppo :info-links :id application-id)]
+      response => ok?
+      (fact "Statementgiver Teppo sees the infolink and it is editable"
+        (:text (first (:links response))) => "link text"
+        (:canEdit (first (:links response))) => true))
+
     (let [response (command teppo :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
       response => ok?
       (fact "Statement giver Teppo adds another info-link"

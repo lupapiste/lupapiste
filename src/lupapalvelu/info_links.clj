@@ -20,10 +20,10 @@
 
 (defn- can-edit-links? [app user]
   "Check if the user is an authority or a statement giver for the application"
-  (or (usr/authority? user)
-      (contains? 
-         (set (map :id (filter (fn [auth] (= (:role auth) :statementGiver)) (:auth app)))) 
-         (:id user))))
+  (or (usr/user-is-authority-in-organization? user (:organization app))
+      (let [statement-givers
+            (filter (fn [auth] (= (:role auth) "statementGiver")) (:auth app))]
+         (contains? (set (map :id statement-givers)) (:id user)))))
  
 (defn- last-seen-date [app user]
   (get (:_info-links-seen-by app) (keyword (:id user)) 0))
