@@ -19,12 +19,15 @@
         account {:type "TEST", :price "BILLIONS!"}
         pdf-stream (docx/yritystilisopimus company contact account 0)
         pdf-file (File/createTempFile "docx-test" "temp")]
-    (io/copy pdf-stream pdf-file)
-    (let [pdf-content (pdfbox/extract pdf-file)]
-      (fact "PDF contains date"
-        pdf-content => (contains "01.01.1970"))
+    (try
+      (io/copy pdf-stream pdf-file)
+      (let [pdf-content (pdfbox/extract pdf-file)]
+        (fact "PDF contains date"
+          pdf-content => (contains "01.01.1970"))
 
-      (fact "PDF contains all model data"
-        (doseq [[k v] (merge company contact account)]
-          (fact {:midje/description k}
-            (ss/contains? pdf-content v) => true))))))
+        (fact "PDF contains all model data"
+          (doseq [[k v] (merge company contact account)]
+            (fact {:midje/description k}
+              (ss/contains? pdf-content v) => true))))
+      (finally
+        (io/delete-file pdf-file)))))

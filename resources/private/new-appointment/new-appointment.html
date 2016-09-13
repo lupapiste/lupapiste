@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page" id="new-appointment">
+
+  <div class="container">
+    <button class="secondary" data-bind="click: function() { history.go(-1); }">
+      <i class="lupicon-chevron-start"></i>
+      <span data-bind="ltext: 'back'"></span>
+    </button>
+
+    <div>
+      <h1 data-bind="ltext: 'new-appointment.page-title'" style="margin-top: 24px;"></h1>
+      <p><span data-bind="ltext: 'new-appointment.book-appointment.intro'"></span> </p>
+    </div>
+
+    <div data-bind="with: model">
+      <h3 data-bind="ltext: 'book-appointment.title'" style="font-weight: bold; margin-bottom: 12px;"></h3>
+      <span class="form-entry">
+        <label class="form-label tip" data-bind="ltext: 'new-appointment.application-select.label'"></label>
+        <select class="form-input combobox tip" data-test-id="application-select"
+                style="width: auto;"
+                data-bind="options: applications,
+                           optionsText: function(item) {
+                               return [item.id, item.address, loc('municipality.'+item.municipality),
+                                       loc(item.primaryOperation.name+'._group_label')].join(', '); },
+                           optionsCaption: loc('choose'),
+                           value: selectedApplication">
+        </select>
+      </span>
+
+      <book-appointment-filter params="model: bookAppointmentParams"></book-appointment-filter>
+
+      <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'new-appointment' -->
+      <calendar-view params="searchConditions: { client: bookAppointmentParams.client,
+                                                 authority: bookAppointmentParams.selectedParty,
+                                                 reservationType: bookAppointmentParams.selectedReservationType },
+                             view: 'applicationView',
+                             applicationModel: selectedApplication,
+                             reservationTypes: bookAppointmentParams.reservationTypes,
+                             defaultLocation: bookAppointmentParams.defaultLocation">
+      </calendar-view>
+      <!-- /ko -->
+    </div>
+    <div>
+      <div id="legend-orangebox"></div><span data-bind="ltext: 'application.calendar.legend.accepted-appointment'"></span>
+      <div id="legend-greenbox"></div><span data-bind="ltext: 'application.calendar.legend.waiting-for-acceptance'"></span>
+
+      <div style="display: inline-block;">
+        <div id="triangle-topright"></div>
+      </div>
+
+      <span data-bind="ltext: 'application.calendar.legend.other-appointments-in-this-application'"></span>
+    </div>
+
+  </div>
+
+</section>
+</body>
+</html>

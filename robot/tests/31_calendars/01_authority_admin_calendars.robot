@@ -10,17 +10,14 @@ Resource       ./calendars_resource.robot
 *** Test Cases ***
 
 Admin sets default reservation location
-  [Tags]  fail
   Sipoo logs in
   Go to page  organization-calendars
   Set default reservation location  Foobarbaz
 
 Admin adds reservation type for organization
-  [Tags]  fail
   Add reservation type  Foobar
 
 Admin enables calendar
-  [Tags]  fail
   Wait until  Element should be visible by test id  calendar-checkbox-0
   Positive indicator should not be visible
   Checkbox Should Not Be Selected  xpath=//input[@data-test-id='calendar-checkbox-0']
@@ -28,7 +25,6 @@ Admin enables calendar
   Positive indicator should be visible
 
 Admin disables calendar
-  [Tags]  fail
   Wait until  Element should be visible by test id  calendar-checkbox-0
   Positive indicator should not be visible
   Checkbox Should Be Selected  xpath=//input[@data-test-id='calendar-checkbox-0']

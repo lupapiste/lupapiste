@@ -88,7 +88,11 @@
     (let [application-id (create-app-id pena :operation :puun-kaataminen)]
       (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => ok?
       (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
-      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
+      (fact "application for puun-kaataminen does not contain 'suunnittelija' document"
+        (let [application (query-application pena application-id)]
+          (domain/get-document-by-name (:documents application)
+                                       "suunnittelija") => falsey)))))
 
 (facts "facts about remove-document-data command"
   (let [application-id             (create-app-id pena)

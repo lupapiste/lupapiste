@@ -73,10 +73,10 @@
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(a.documents, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
-      var options = {disabled: true, validate: false};
+      var options = {disabled: true, validate: false, authorizationModel: lupapisteApp.models.applicationAuthModel};
 
-      docgen.displayDocuments("neighborDocgen", a, sortedNonpartyDocs, lupapisteApp.models.applicationAuthModel, options);
-      docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, lupapisteApp.models.applicationAuthModel, options);
+      docgen.displayDocuments("neighborDocgen", a, sortedNonpartyDocs, options);
+      docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {

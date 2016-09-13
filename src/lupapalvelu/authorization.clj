@@ -1,6 +1,8 @@
 (ns lupapalvelu.authorization
-  (:require [lupapalvelu.user :as usr]
+  (:require [clojure.set :refer [union]]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.application-schema :as aps]
+            [lupapalvelu.document.tools :as doc-tools]
             [schema.core :refer [defschema] :as sc]
             [sade.schemas :as ssc]
             [sade.strings :as ss]))
@@ -12,10 +14,10 @@
 (def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
 (def all-user-roles (conj all-authenticated-user-roles :anonymous :rest-api :trusted-etl))
 
-(def default-authz-writer-roles #{:owner :writer :foreman})
-(def default-authz-reader-roles (conj default-authz-writer-roles :reader :guest :guestAuthority))
+(def default-authz-writer-roles #{:owner :writer})
+(def default-authz-reader-roles (conj default-authz-writer-roles :foreman :reader :guest :guestAuthority))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
-(def all-authz-roles (conj all-authz-writer-roles :reader :guest :guestAuthority))
+(def all-authz-roles (union all-authz-writer-roles default-authz-reader-roles))
 
 (def default-org-authz-roles #{:authority :approver})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))
@@ -123,3 +125,31 @@
   [requested-authz-roles {organization :organization} user]
   (let [user-org-authz (org-authz organization user)]
     (and (usr/authority? user) requested-authz-roles (some requested-authz-roles user-org-authz))))
+
+(defn application-authority?
+  "Returns true if the user is an authority in the organization that processes the application"
+  [application user]
+  (has-organization-authz-roles? #{:authority :approver} application user))
+
+;;
+;; Enrich auth array
+;;
+
+(defn party-document? [doc]
+  (= :party (doc-tools/doc-type doc)))
+
+(defn- enrich-auth-info-with-parties [sorted-parties-docs auth-info]
+  (->> (filter (comp #{(:id auth-info)} doc-tools/party-doc-user-id) sorted-parties-docs)
+       (map doc-tools/party-doc->user-role)
+       (assoc auth-info :party-roles)))
+
+(defn- enrich-authority-auth-info [authority-id auth-info]
+  (if (and authority-id (= (:id auth-info) authority-id))
+    (update auth-info :other-roles conj :authority)
+    auth-info))
+
+(defn enrich-auth-information [{auth :auth docs :documents {authority-id :id} :authority}]
+  (let [parties-docs (->> (filter party-document? docs)
+                          (sort-by (comp :order :schema-info)))]
+    (map (partial enrich-auth-info-with-parties parties-docs) auth)
+    (map (partial enrich-authority-auth-info authority-id) auth)))

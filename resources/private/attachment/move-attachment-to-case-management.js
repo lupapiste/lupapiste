@@ -35,20 +35,6 @@
     );
   };
 
-  multiSelect.filterAttachments = function(attachments) {
-    return _(attachments)
-      .filter(function(a) {
-        return (a.versions.length > 0 &&
-          (!a.sent || _.last(a.versions).created > a.sent) &&
-          !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
-      })
-      .map(function(a) {
-        a.selected = true;
-        return a;
-      })
-      .value();
-  };
-
   hub.onPageLoad(pageName, function() {
     multiSelect.onPageLoad();
   });

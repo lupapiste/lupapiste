@@ -30,12 +30,20 @@
                                                   reservationTypes: $component.reservationTypes"></reservation-slot-edit-bubble>
           </div>
           <div style="position: relative;">
-            <reservation-slot-reserve-bubble params="client: $component.client,
+            <reservation-slot-reserve-bubble params="applicationModel: $component.applicationModel,
+                                                     role: $component.currentRole,
+                                                     client: $component.client,
                                                      authority: $component.authority,
                                                      weekdays: $component.calendarWeekdays,
                                                      reservationTypes: $component.reservationTypes,
-                                                     reservationTypeId: $component.reservationTypeId,
+                                                     reservationType: $component.reservationType,
                                                      defaultLocation: $component.defaultLocation"></reservation-slot-reserve-bubble>
+          </div>
+          <div style="position: relative;">
+            <reserved-slot-bubble params="client: $component.client,
+                                          authority: $component.authority,
+                                          reservationType: $component.reservationType,
+                                          weekdays: $component.calendarWeekdays"></reserved-slot-bubble>
           </div>
         </td>
       </tr>
@@ -73,7 +81,8 @@
                                                                             height: $component.slotHeight($data) }">
                 <button class="reserve-slot"
                         data-test-id="reserve-slot"
-                        data-bind="click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent,
+                        data-bind="attr: { 'data-test-id': moment($data.startTime).format('[reserve-slot-]dddd-HHmm') },
+                                   click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent,
                                                                          clientId: $parents[1].clientId,
                                                                          reservationTypeId: $parents[1].reservationTypeId }, 'available-slot')">
                   <div>
@@ -87,7 +96,9 @@
               <div class="calendar-slot reservation" data-bind="style: { top: $component.slotPositionTop($data),
                                                                          height: $component.slotHeight($data) },
                                                                 css: { 'accepted': $data.reservation.reservationStatus === 'ACCEPTED' },
-                                                                with: $data.reservation">
+                                                                with: $data.reservation,
+                                                                attr: { 'data-test-id': moment($data.startTime).format('[reservation-'+$data.reservation.reservationStatus+'-]dddd-HHmm') },
+                                                                click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'booked-slot')">
                 <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
                 <div data-bind="text: location, attr: {'title': location}"></div>
                 <div data-bind="text: applicationId, attr: {'title': applicationId}"></div>

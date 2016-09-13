@@ -16,7 +16,7 @@
   post-submitted-states =not=> (contains #{:open :submitted}))
 
 (fact "post-verdict-states"
-  post-verdict-states => (contains #{:verdictGiven :foremanVerdictGiven :constructionStarted :closed})
+  post-verdict-states => (contains #{:verdictGiven :foremanVerdictGiven :constructionStarted :closed :acknowledged})
   post-verdict-states =not=> (contains #{:sent :complementNeeded :canceled :submitted}))
 
 (fact "all states"
@@ -32,3 +32,10 @@
 
 (fact "terminal states"
   terminal-states => #{:answered :canceled :closed :final :extinct :registered :acknowledged})
+
+(fact "all with acknowledged but not draft or terminal"
+      all-with-acknowledged-but-not-draft-or-terminal => #{:acknowledged :appealed :complementNeeded
+                                                           :constructionStarted :foremanVerdictGiven :hearing
+                                                           :inUse :info :onHold :open :proposal :proposalApproved
+                                                           :sent :sessionHeld :sessionProposal :submitted
+                                                           :survey :verdictGiven})

@@ -335,9 +335,6 @@
                               </div>
                             </div>
                         </div>
-                        <div class="organizationLinks"
-                             data-bind="template: 'organization-links-template'">
-                        </div>
                         <p class="top-marginM" data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
                         <div class="application_section">
@@ -517,7 +514,7 @@
 
                     <!-- Attachments tab -->
                     <!-- ko if: selectedTabName() === 'attachments' -->
-                    <div id="application-attachments-tab" class="tab-content feature--no-border">
+                    <div id="application-attachments-tab" class="tab-content">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->

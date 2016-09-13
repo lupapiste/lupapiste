@@ -1,6 +1,6 @@
 (ns lupapalvelu.components.core-test
-  (:use [lupapalvelu.components.core]
-        [midje.sweet]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.components.core :refer :all]))
 
 (def test-components
   {:root  {:js ["root.js"]}

@@ -7,8 +7,18 @@ LUPAPISTE.SidePanelService = function() {
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
-  self.urgency = ko.pureComputed(function() {
-    return ko.unwrap(self.application.urgency);
+  var latestUrgency = ko.observable({});
+
+  self.urgency = ko.computed({
+    read: function() {
+      return latestUrgency().id !== self.application.id()
+        ? ko.unwrap(self.application.urgency)
+        : latestUrgency().urgency;
+    },
+    write: function( urgency ) {
+      latestUrgency( {id: self.application.id(),
+                      urgency: urgency});
+    }
   });
 
   self.authorityNotice = ko.pureComputed(function() {
@@ -17,6 +27,22 @@ LUPAPISTE.SidePanelService = function() {
 
   self.tags = ko.pureComputed(function() {
     return ko.toJS(self.application.tags);
+  });
+
+  var noticeSeenAppId = ko.observable();
+
+  self.unseenNotice = ko.pureComputed( function() {
+    return noticeSeenAppId() !== self.application.id()
+      && ko.unwrap( self.application.unseenAuthorityNotice);
+  });
+
+  hub.subscribe("SidePanelService::NoticeSeen", function() {
+    if( self.unseenNotice() ) {
+      noticeSeenAppId( self.application.id());
+      ajax.command( "mark-seen", {id: self.application.id(),
+                                  type: "authority-notices"})
+        .call();
+    }
   });
 
   var changeNoticeInfo = _.debounce(function(command, data) {
@@ -33,6 +59,7 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::UrgencyChanged", function(event) {
     changeNoticeInfo("change-urgency", _.pick(event, "urgency"));
+    self.urgency( event.urgency );
   });
 
   hub.subscribe("SidePanelService::AuthorityNoticeChanged", function(event) {
@@ -44,7 +71,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   // Conversation
-  self.comments = ko.observableArray([]);
+  var allComments = lupapisteApp.services.commentService.comments;
 
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
@@ -60,7 +87,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   self.comments = ko.pureComputed(function() {
-    return _(ko.mapping.toJS(self.application.comments))
+    return _(allComments())
       .filter(
          function(comment) {
            return self.showAllComments()
@@ -149,7 +176,7 @@ LUPAPISTE.SidePanelService = function() {
                                  size: "small",
                                  componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
-      repository.load(ko.unwrap(self.application.id));
+      repository.load(ko.unwrap(self.application.id)); // TODO: use comments query instead ?
     })
     .call();
   });

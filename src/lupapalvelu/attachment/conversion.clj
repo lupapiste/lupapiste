@@ -55,9 +55,9 @@
     (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
       (try
         (io/copy content temp)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
+        (let [processing-result (pdf-conversion/convert-to-pdf-a (files/temp-file-input-stream temp) {:application application :filename filename})]
           (cond
-            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
+            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content (:output-file processing-result)}
             (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
             (:pdfa? processing-result) {:archivable true
                                         :filename (files/filename-for-pdfa filename)
@@ -72,8 +72,9 @@
   (let [valid? (tiff-validation/valid-tiff? content)]
     {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
 
-(defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
-  (if (env/feature? :convert-all-attachments)
+(defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
+  (if (and (env/feature? :convert-all-attachments)
+           (pdf-conversion/pdf-a-required? (:organization application)))
     (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
           pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
           pdf-title filename]
@@ -85,6 +86,8 @@
          :autoConversion true
          :content (files/temp-file-input-stream pdf-file)
          :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+        (catch Exception e
+          {:archivable false :archivabilityError :not-validated})
         (finally
           (io/delete-file tmp-file :silently))))
     {:archivable false :archivabilityError :not-validated}))

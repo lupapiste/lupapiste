@@ -13,4 +13,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --include ie8 --exclude integration --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://$remote:$ieport/wd/hub --variable SERVER:$server $target
+pybot -d target --include ie8 --exclude integration --exclude ajanvaraus --exclude fail --variable BROWSER:internetexplorer --variable WAIT_DELAY:15 --variable SELENIUM:http://$remote:$ieport/wd/hub --variable SERVER:$server $target

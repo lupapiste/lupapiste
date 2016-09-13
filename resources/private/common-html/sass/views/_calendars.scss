@@ -293,6 +293,10 @@
   }
 }
 
+#mycalendar .container, #new-appointment .container {
+  padding: $baseline/2 $baseline;
+}
+
 #mycalendar h1 {
   margin-top: $baseline;
 }

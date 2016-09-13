@@ -111,6 +111,13 @@ LUPAPISTE.ConversationModel = function(params) {
     return util.getIn(comment, ["target", "type"]) === "attachment";
   };
 
+  self.getAttachmentTypeLocKey = function(comment) {
+    return ["attachmentType",
+            util.getIn(comment, ["target", "attachmentType", "type-group"]),
+            util.getIn(comment, ["target", "attachmentType", "type-id"])]
+      .join(".");
+  };
+
   function isPreparationComment(comment) {
     // verdict's comments
     return util.getIn(comment, ["roles", 0]) === "authority";
@@ -163,10 +170,6 @@ LUPAPISTE.ConversationModel = function(params) {
   // handle outside authorities correctly. The more robust approach
   // would be to resolve the role in the backend.
   self.commentRole = function( data ) {
-    var role = data.type;
-    if( role === "system" ) {
-      role = _.get( data, "user.role" );
-    }
-    return role;
+    return "applicationRole." + _.get(data, "user.application-role", "unknown");
   };
 };

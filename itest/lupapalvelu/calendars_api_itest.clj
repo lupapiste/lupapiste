@@ -173,7 +173,7 @@
                                             :reservationTypeId (get varaustyypit :Testityyppi)
                                             :id app-id
                                             :slotId (:id first-slot)
-                                            :comment "Hakijan tekemä varaus"
+                                            :comment "Hakijan tekem\u00e4 varaus"
                                             :location "paikka")
                             reservation-id (:reservationId result)]
                         result => ok?

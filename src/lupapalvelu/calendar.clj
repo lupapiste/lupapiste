@@ -178,12 +178,14 @@
     {:reservations {$elemMatch {:id reservation-id}}}
     changes))
 
+(def state->comment-type {:ACCEPTED "reservation-accepted"
+                          :DECLINED "reservation-declined"
+                          :CANCELED "reservation-canceled"})
+
 (defn update-mongo-for-reservation-state-change
   [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
-  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED))]}
-  (let [type (cond
-               :ACCEPTED "reservation-accepted"
-               :DECLINED "reservation-declined")
+  {:pre [(contains? state->comment-type new-state)]}
+  (let [type (new-state state->comment-type)
         comment-update (comment/comment-mongo-update (:state application)
                                                      (:comment reservation)
                                                      {:type type
@@ -198,7 +200,7 @@
       comment-update)
     (update-reservation application reservation-id {$set {:reservations.$.reservationStatus (name new-state)}})
     (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}})
-    (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
+    (update-reservation application reservation-id {$push {:reservations.$.action-required-by (:id to-user)}})))
 
 (defn accept-reservation
   [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
@@ -209,6 +211,11 @@
   [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
   (post-command (str "reservations/" reservation-id "/decline"))
   (update-mongo-for-reservation-state-change application reservation :DECLINED user (usr/get-user-by-id to-user-id) timestamp))
+
+(defn cancel-reservation
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/cancel"))
+  (update-mongo-for-reservation-state-change application reservation :CANCELED user (usr/get-user-by-id to-user-id) timestamp))
 
 (defn mark-reservation-update-seen
   [application reservation-id user-id]

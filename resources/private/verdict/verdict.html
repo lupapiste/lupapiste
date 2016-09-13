@@ -62,7 +62,8 @@
         </div>
       </form>
 
-      <section data-bind="template: {name: 'targetted-attachments-template', data: {attachmentsModel: $root.attachmentsModel, authorization: $root.authorization}}" class="attachments"></section>
+      <section data-bind="component: {name: 'targeted-attachments', params: $root.targeted}">
+      </section>
 
       <section>
         <h2 data-bind="ltext: 'verdict.terms'"></h2>

@@ -13,7 +13,7 @@
             [sade.util :as util]
             [sade.validators :as v]
             [sade.schemas :as ssc]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -66,10 +66,10 @@
            (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
            (sc/optional-key :phone)               (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
-           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
            (sc/optional-key :graduatingYear)      (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
            (sc/optional-key :fise)                (ssc/max-length-string 255)
-           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
+           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
            (sc/optional-key :companyName)         (ssc/max-length-string 255)
            (sc/optional-key :companyId)           (sc/if ss/blank? ssc/BlankStr ssc/FinnishY)
            (sc/optional-key :allowDirectMarketing) sc/Bool
@@ -91,7 +91,8 @@
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema})
+           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :seen-organization-links) {sc/Str ssc/Timestamp}})
 
 (def RegisterUser {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
@@ -99,10 +100,10 @@
                    :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
                    :phone                            (sc/maybe (ssc/max-length-string 255))
                    (sc/optional-key :architect)      sc/Bool
-                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
                    (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
                    (sc/optional-key :fise)           (ssc/max-length-string 255)
-                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
+                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
                    :allowDirectMarketing             sc/Bool
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))

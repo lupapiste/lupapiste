@@ -644,6 +644,7 @@ Tarkastuslista:
  - Tilan nimi ja lokalisaatio on viety DW:n lataustiedostoon
  - Tyylit lisätty resources/private/common-html/sass/views/_application.scss
    tiedostoon ja tiedosto käännetty compassilla
+ - Tila lisätty haluttuun kohtaan järjestystä TOJ:n editorissa (lupapiste-toj.components.editor/state-presentation-order-map)
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)
 

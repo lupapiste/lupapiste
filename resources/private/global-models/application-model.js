@@ -83,6 +83,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
   self.unseenComments = ko.observable();
+  self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
 
   // Application metadata fields
@@ -250,9 +251,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Required attachments
 
-  self.missingRequiredAttachments = ko.observable([]);
+  self.missingRequiredAttachments = ko.pureComputed( function() {
+    return _.get( lupapisteApp, "services.attachmentsService.missingRequiredAttachments", _.noop)();
+  });
+
   self.hasMissingRequiredAttachments = ko.pureComputed(function() {
-    return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
+    return !_.isEmpty( self.missingRequiredAttachments());
   });
 
   self.missingSomeInfo = ko.pureComputed(function() {
@@ -448,27 +452,6 @@ LUPAPISTE.ApplicationModel = function() {
       component: "neighbors-owners-dialog",
       componentParams: {applicationId: self.id()} });
     hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
-    return false;
-  };
-
-  self.removeAuth = function(model) {
-    var username = model.username();
-    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.message"),
-      {title: loc("yes"),
-       fn:  function() {
-         ajax.command("remove-auth", { id: self.id(), username: username})
-           .success(self.reload)
-           .processing(self.processing)
-           .call();
-          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
-         return false;
-      }},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
     return false;
   };
 
@@ -723,29 +706,9 @@ LUPAPISTE.ApplicationModel = function() {
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
 
-  self.moveToMissingRequiredAttachment = function(fieldInfo) {
-    var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
-    self.targetTab({tab: "attachments", id: targetId});
-  };
-
-  function extractMissingAttachments(attachments) {
-    var missingAttachments = _.filter(attachments, function(a) {
-      var required = a.required ? a.required() : false;
-      var notNeeded = a.notNeeded ? a.notNeeded() : false;
-      var noVersions = _.isEmpty(ko.unwrap(a.versions));
-      return required && !notNeeded && noVersions;
-    });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
-    missingAttachments = _.map(_.keys(missingAttachments), function(k) {
-      return [k, missingAttachments[k]];
-    });
-    return missingAttachments;
-  }
-
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
-    self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
     fetchApplicationSubmittable();
   };
 

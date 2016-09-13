@@ -17,8 +17,8 @@ Mikko goes to empty attachments tab
   Open tab  attachments
 
 Mikko sees all "not needed" checkboxes as enabled and not selected
-  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
-  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
+  Wait until  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
+  Wait until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
   Not needed should not be selected  hakija.valtakirja
   Not needed should not be selected  paapiirustus.asemapiirros
   Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
@@ -27,13 +27,9 @@ Mikko sees all "not needed" checkboxes as enabled and not selected
 Mikko sets asemapiirros not needed
   Click not needed  paapiirustus.asemapiirros
   Not needed should be selected  paapiirustus.asemapiirros
-  Positive indicator should be visible
-  Not needed should be selected  paapiirustus.asemapiirros
 
 Mikko unsets asemapiirros not needed
   Click not needed  paapiirustus.asemapiirros
-  Not needed should not be selected  paapiirustus.asemapiirros
-  Positive indicator should be visible
   Not needed should not be selected  paapiirustus.asemapiirros
 
 As an applicant Mikko does not see approve or reject columns
@@ -78,7 +74,7 @@ Mikko deletes attachment version
   Wait until  Element should not be visible  show-attachment-versions
 
 Mikko deletes also the attachment template
-  Return to application  
+  Return to application
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
@@ -177,7 +173,7 @@ Comment is added
 Change attachment type
   [Tags]  attachments
   Click enabled by test id  change-attachment-type
-  Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
+  Select from list  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
@@ -202,10 +198,10 @@ Signature is visible
   [Tags]  attachments
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
-  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
-  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-bind="fullName: user"]  Intonen Mikko
-  Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
-  Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-bind="dateTimeString: created"]
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  1
+  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
+  Element text should be  xpath=//section[@id="attachment"]//*/span[@data-test-id="attachment-signature-version"]  1.0
+  Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-date"]
 
 Sign single attachment
   [Tags]  attachments
@@ -217,7 +213,7 @@ Sign single attachment
 
 Two signatures are visible
   [Tags]  attachments
-  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  2
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  2
 
 Switch to authority
   [Tags]  attachments
@@ -236,7 +232,7 @@ Sonja goes to attachments tab
   [Tags]  attachments
   Wait Until  Element should be visible  jquery=a[data-test-id='back-to-application-from-attachment']
   Scroll to test id  back-to-application-from-attachment
-  Return to application  
+  Return to application
   Open tab  attachments
 
 As an authority Sonja sees approve and reject columns
@@ -342,7 +338,7 @@ Create new application
 Authority adds png attachment without comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application  
+  Return to application
 
 Signature icon is not visible to authority
   [Tags]  attachments
@@ -415,4 +411,3 @@ Not needed should not be visible
 Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
-

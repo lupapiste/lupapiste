@@ -10,7 +10,6 @@ Resource       ./calendars_resource.robot
 *** Test Cases ***
 
 Admin enables calendar fo Ronja
-  [Tags]  fail
   Sipoo logs in
   Go to page  organization-calendars
   Add reservation type  Foobar
@@ -20,25 +19,21 @@ Admin enables calendar fo Ronja
   Logout
 
 Sonja tries to look at her own calendar but gets an error message
-  [Tags]  fail
   Sonja logs in
   Go to page  mycalendar
   Wait until  Element should be visible by test id  mycalendar-no-active-calendar-error
   Logout
 
 Ronja looks at her own calendar
-  [Tags]  fail
   Ronja logs in
   Go to page  mycalendar
   Wait until  Element should be visible by test id  calendar-view-calendar-table
   Wait until  Element should be visible by test id  timeline-slot-Friday-1000
 
 Goto following week view
-  [Tags]  fail
   Goto following week in calendar view
 
 Create reservation slots for Friday next week
-  [Tags]  fail
   Element should not be visible  xpath=//div[@class='calendar-slot-bubble']//h3
   Click by test id  timeline-slot-Friday-1000
   Wait until  Element should be visible by test id  reservation-slot-create-amount

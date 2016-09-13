@@ -3,6 +3,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.BaseCalendarModel());
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.authority = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
@@ -15,6 +16,8 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
   self.defaultLocation = ko.observable();
+
+  self.applicationModel = ko.observable();
 
   self.noCalendarFoundForOrganization = ko.observable();
   self.pendingNotifications = lupapisteApp.models.application.calendarNotificationsPending;
@@ -30,6 +33,7 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
       self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+      self.applicationModel({id: id, organizationName: lupapisteApp.models.application.organizationName()});
     }
   });
 
@@ -65,19 +69,26 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
       self.noCalendarFoundForOrganization(true);
     }
   });
-
-  self.markSeen = function(r) {
-    ajax
-      .command("mark-reservation-update-seen", {id: lupapisteApp.models.application.id(), reservationId: r.id()})
-      .success(function() {
-        r.acknowledged("seen");
-      })
-      .call();
+  
+  self.cancelReservation = function(reservation) {
+    hub.send("show-dialog", {ltitle: "areyousure",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {ltext: "reservation.confirm-cancel",
+                        yesFn: function() {
+                          ajax
+                            .command("cancel-reservation", { id: lupapisteApp.models.application.id(), reservationId: reservation.id() })
+                            .success(function(response) {
+                              util.showSavedIndicator(response);
+                              reservation.acknowledged("canceled");
+                            })
+                            .error(util.showSavedIndicator).call();
+                          return false;
+                        }}});
   };
 
   self.appointmentParticipants = function(r) {
     return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
   };
-
 
 };

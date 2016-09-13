@@ -4,6 +4,7 @@ Documentation   Guests and guest authorities
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource       ../13_statements/statement_resource.robot
 Resource        guest_resource.robot
 
 *** Test Cases ***
@@ -36,7 +37,7 @@ Luukas cannot be guest authority
   Add bad authority  luukas.lukija@sipoo.fi  Luukas  Lukija  -
 
 Create new statement giver and add it as guest authority
-  Create statement person  statement@giver.net  Statue
+  Create statement giver  statement@giver.net  Statue
   Wait test id visible  guest-authority-add
   Add new statement giver as authority  statement@giver.net  Statement  Giver  Geiwoba
 

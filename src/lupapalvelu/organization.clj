@@ -29,7 +29,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.geojson :as geo]
             [me.raynes.fs :as fs]
@@ -55,7 +55,8 @@
 
 (sc/defschema Link
   {:url  ssc/OptionalHttpUrl
-   :name {:fi sc/Str, :sv sc/Str}})
+   :name {:fi sc/Str, :sv sc/Str}
+   (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
   {(sc/optional-key :url)       ssc/OptionalHttpUrl
@@ -424,7 +425,7 @@
 
 (defmethod waste-ads :rss [org-id _ lang]
   (let [ads         (waste-ads org-id)
-        columns     (map :name schemas/availableMaterialsRow)
+        columns     (map :name waste-schemas/availableMaterialsRow)
         loc         (fn [prefix term] (if (ss/blank? term)
                                         term
                                         (i18n/with-lang lang (i18n/loc (str prefix term)))))

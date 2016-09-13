@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer [$set $push]]
+            [swiss.arrows :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
@@ -25,7 +26,10 @@
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
-        expected-seen-bys {"_comments-seen-by.pena" timestamp, "_statements-seen-by.pena" timestamp, "_verdicts-seen-by.pena" timestamp}
+        expected-seen-bys (-<>> ["comments" "statements" "verdicts"
+                                 "authority-notices" "info-links"]
+                               (map (partial format "_%s-seen-by.pena"))
+                               (zipmap <> (repeat timestamp)))
         expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
         expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
     (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys

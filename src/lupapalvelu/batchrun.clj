@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
@@ -18,10 +18,12 @@
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [lupapalvelu.attachment :as attachment]
             [sade.util :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [clj-time.coerce :as c]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -412,3 +414,42 @@
 (defn check-review-for-id [& args]
   (mongo/connect!)
   (poll-verdicts-for-reviews (first args)))
+
+(defn pdfa-convert-review-pdfs [& args]
+  (mongo/connect!)
+  (debug "# of applications with background generated tasks:"
+           (mongo/count :applications {:tasks.source.type "background"}))
+  (let [orgs-by-id (orgs-for-review-fetch)
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+    (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
+      (let [command (assoc (application->command application) :user eraajo-user :created (now))]
+        (doseq [task (:tasks application)]
+          (if (= "background" (:type (:source task)))
+            (do
+              (doseq [att (:attachments application)]
+                (if (= (:id task) (:id (:source att)))
+                  (do
+                    (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
+                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+
+(defn pdf-to-pdfa-conversion [& args]
+  (info "Starting pdf to pdf/a conversion")
+  (mongo/connect!)
+  (let [organization (first args)
+        start-ts (c/to-long (c/from-string (second args)))
+        end-ts (c/to-long (c/from-string (second (next args))))]
+  (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
+    (let [command (application->command application)
+          last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
+    (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
+      (info "Converting attachments of application" (:id application))
+      (doseq [attachment (:attachments application)]
+        (when-not (get-in attachment [:latestVersion :archivable])
+          (when (= (get-in attachment [:type :type-group]) "paapiirustus")
+            (do
+              (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+              (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
+                (if (:archivabilityError result)
+                  (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
+                  (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application)))))))))))))
+

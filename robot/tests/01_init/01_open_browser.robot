@@ -10,7 +10,7 @@ The shared browser is opened
   Open browser to login page
 
 The shared browser is opened for integration tests
-  [Tags]  integration
+  [Tags]  integration  ajanvaraus
   Open browser to login page
 
 #Disable proxy

@@ -15,3 +15,7 @@ Close all browsers
 Close all browsers
   [Tags]  integration
   Close all browsers
+
+Close all browsers
+  [Tags]  ajanvaraus
+  Close all browsers

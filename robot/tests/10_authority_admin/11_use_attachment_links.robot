@@ -5,11 +5,7 @@ Resource       ../../common_resource.robot
 
 *** Test Cases ***
 
-#Setting maps enabled for these tests
-#  Set integration proxy on
-
 Authority admin enables attachment links
-  Open browser to login page
   Sipoo logs in
   Go to page  backends
   Toggle links
@@ -34,7 +30,3 @@ Authority admin sees attachment links disabled
 Toggle links
   Click label  attachments-as-links-enabled
   Positive indicator should be visible
-
-
-#Setting maps disabled again after the tests
-#  Set integration proxy off

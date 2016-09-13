@@ -4,16 +4,19 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="side-panel-template">
       <!-- dummy div for catching keypress events -->
-      <div data-bind="visible: false, documentEvent: {keypress: closeSidePanel, key: 27}"></div>
+      <div data-bind="visible: false, documentEvent: {keypress: closeOnEsc, key: 27}"></div>
       <!-- ko if: enableSidePanel -->
       <div id="side-panel" data-bind="visible: showSidePanel, transition: sidePanelOpen, class: 'show-side-panel'">
         <div class="buttons">
             <button id="open-conversation-side-panel"
-                    class="primary vertical caps btn-conversation"
+                    class="vertical caps btn-conversation"
                     data-bind="click: toggleConversationPanel,
                                visible: authorization.ok('comments') || authorization.ok('can-target-comment-to-authority') || authorization.ok('can-mark-answered'),
-                               css: {active: showConversationPanel}">
-                <i class="lupicon-conversation"></i>
+                               css: {active: showConversationPanel,
+                               positive: unseenComments,
+                               primary: !unseenComments()}">
+              <i data-bind="visible: !unseenComments()"
+                 class="lupicon-conversation"></i>
                 <div data-bind="visible: unseenComments,
                                  text: unseenComments"
                      id="applicationUnseenComments" class="unseen-comments">
@@ -21,12 +24,24 @@
                 <span class="btn-title" data-bind="lspaced: 'conversation.title'"></span>
             </button>
             <button id="open-notice-side-panel"
-                    class="primary vertical caps btn-notice"
+                    class="vertical caps btn-notice"
                     data-bind="click: toggleNoticePanel,
                                visible: authorization.ok('authority-notice'),
-                               css: {active: showNoticePanel}">
-                <i class="lupicon-document-list"></i>
+                               css: {active: showNoticePanel,
+                               primary: !unseenNotice(),
+                               positive: unseenNotice}">
+                <i data-bind="attr: {'class': noticeIcon}"></i>
                 <span class="btn-title" data-bind="lspaced: 'notice.title'"></span>
+            </button>
+            <button id="open-info-side-panel"
+                    class="vertical caps btn-notice"
+                    data-bind="click: toggleInfoPanel,
+                               css: {active: showInfoPanel,
+                               primary: !showStar(),
+                               positive: showStar}">
+              <i data-bind="css: {'lupicon-circle-info': !showStar(),
+                            'lupicon-circle-star': showStar}"></i>
+                <span class="btn-title" data-bind="lspaced: 'info.button'"></span>
             </button>
         </div>
         <div class="content-wrapper">
@@ -62,6 +77,7 @@
                                                        authorityNotice: sidePanelService.authorityNotice}}"></div>
               </div>
               <!-- /ko -->
+              <side-panel-info data-bind="visible: showInfoPanel"></side-panel-info>
           </div>
         </div>
       </div>

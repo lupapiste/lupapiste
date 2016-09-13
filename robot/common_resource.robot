@@ -360,6 +360,9 @@ SolitaAdmin logs in
 Jarvenpaa authority logs in
   Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
 
+Jussi logs in
+  Authority logs in  jussi  jussi  Jussi Viranomainen
+
 
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
@@ -377,6 +380,11 @@ Input text with jQuery
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
+
+Select From List by test id and index
+  [Arguments]  ${id}  ${index}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
+  Select From List By Index  xpath=//select[@data-test-id="${id}"]  ${index}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -730,7 +738,7 @@ Add attachment file
   Wait Until     Element should be visible  jquery=${row}
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
-  
+
 
 Open attachments tab and unselect post verdict filter
   Open tab  attachments
@@ -1016,17 +1024,6 @@ Invite count is
 #
 # Authority admin
 #
-
-Create statement person
-  [Arguments]  ${email}  ${text}
-  Scroll to test id  create-statement-giver
-  Click enabled by test id  create-statement-giver
-  Wait until  Element should be visible  //label[@for='statement-giver-email']
-  Input text  statement-giver-email  ${email}
-  Input text  statement-giver-email2  ${email}
-  Input text  statement-giver-text  ${text}
-  Click enabled by test id  create-statement-giver-save
-
 
 Invite company to application
   [Arguments]  ${company}

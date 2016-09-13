@@ -1,7 +1,7 @@
 (ns lupapalvelu.foreman-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.itest-util :refer [expected-failure?]]
+            [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.foreman :as f]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.data-schema :as dds]
@@ -95,3 +95,18 @@
       (let [other-docs (remove (comp #{"tyonjohtaja-v2" "hakija-tj" "hankkeen-kuvaus-minimum"} :name :schema-info) (:documents result-doc))]
         (count other-docs) => 1
         (-> other-docs first) => rj-doc))))
+
+(facts "allow-foreman-only-in-foreman-app"
+  (let [foreman-app-with-auth (assoc foreman-app :auth [{:id "1" :role "foreman"}])
+        non-foreman-app (assoc-in foreman-app-with-auth [:primaryOperation :name] "kerrostalo-rivitalo")
+        fm-command {:application foreman-app-with-auth, :user {:id "1"}}
+        non-fm-command {:application non-foreman-app, :user {:id "1"}}]
+
+    (fact "meta"
+      (f/foreman-app? foreman-app-with-auth) => true
+      (f/foreman-app? non-foreman-app) => false)
+
+    (fact "has auth"      (f/allow-foreman-only-in-foreman-app fm-command) => nil)
+    (fact "other user ok" (f/allow-foreman-only-in-foreman-app (assoc fm-command :user {:id "2"})) => nil)
+    (fact "no access to other kind of application"
+      (f/allow-foreman-only-in-foreman-app non-fm-command) => unauthorized?)))

@@ -123,7 +123,7 @@
 (defn find-companies
   "Returns all data off all companies"
   []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :reference :document] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :netbill :reference :document] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -385,7 +385,7 @@
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
                        {$push {:auth auth}, $set  {:modified (now)}}
-                       true)]
+                       :return-count? true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
                                                  :caller     caller
