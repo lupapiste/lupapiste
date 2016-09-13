@@ -71,17 +71,20 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   });
   
   self.cancelReservation = function(reservation) {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("reservation.confirm-cancel"), {title: loc("yes"), fn: function() {
-      ajax
-        .command("cancel-reservation", { id: lupapisteApp.models.application.id(), reservationId: reservation.id() })
-        .success(function() {
-          hub.send("indicator", { style: "positive" });
-          reservation.acknowledged("canceled");
-        })
-        .error(function(e) {
-          hub.send("indicator", {style: "negative", message: e.text});
-        }).call();
-    }});
+    hub.send("show-dialog", {ltitle: "areyousure",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {ltext: "reservation.confirm-cancel",
+                        yesFn: function() {
+                          ajax
+                            .command("cancel-reservation", { id: lupapisteApp.models.application.id(), reservationId: reservation.id() })
+                            .success(function(response) {
+                              util.showSavedIndicator(response);
+                              reservation.acknowledged("canceled");
+                            })
+                            .error(util.showSavedIndicator).call();
+                          return false;
+                        }}});
   };
 
   self.appointmentParticipants = function(r) {

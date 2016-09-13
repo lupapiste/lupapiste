@@ -446,9 +446,11 @@
       (debug "Converting attachments of application" (:id application))
       (doseq [attachment (:attachments application)]
         (when-not (get-in attachment [:latestVersion :archivable])
-          (do
-            (debug "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
-            (let [result (attachment/convert-existing-to-pdfa! (:application command) (:user command) attachment)]
-              (if (:archivabilityError result)
-                (error "Conversion of attachment" (:id attachment) "failed with error:" (:archivabilityError result))
-                (debug "Conversion succeed")))))))))))
+          (when (= (get-in attachment [:latestVersion :contentType]) "application/pdf")
+            (do
+              (debug "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+              (let [result (attachment/convert-existing-to-pdfa! (:application command) (:user command) attachment)]
+                (if (:archivabilityError result)
+                  (error "Conversion of attachment" (:id attachment) "failed with error:" (:archivabilityError result))
+                  (debug "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application)))))))))))))
+
