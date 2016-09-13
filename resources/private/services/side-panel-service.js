@@ -71,20 +71,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   // Conversation
-  var allComments = ko.observableArray([]);
-  self.queryComments = function() {
-    if (self.authorization.ok("comments")) {
-      ajax
-        .query("comments", {id: self.application.id()})
-        .success(function (res) {
-          allComments(res.comments);
-        })
-        .call();
-    }
-  };
-  hub.subscribe("application-model-updated", self.queryComments);
-  hub.subscribe("upload-done", self.queryComments);
-  hub.subscribe("attachmentsService::remove", self.queryComments);
+  var allComments = lupapisteApp.services.commentService.comments;
 
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);

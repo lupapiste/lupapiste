@@ -179,6 +179,7 @@
    :analytics    {:js ["analytics.js"]}
 
    :services {:js ["area-filter-service.js"
+                   "comment-service.js"
                    "tag-filter-service.js"
                    "operation-filter-service.js"
                    "organization-filter-service.js"
@@ -283,7 +284,7 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" 
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js"
                         "book-appointment-filter.js" "base-calendar-model.js"]
                    :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
