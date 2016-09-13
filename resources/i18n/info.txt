@@ -10,5 +10,5 @@
 "info.info.links" "sv" "Projektspecifika instruktioner"
 "info.organization.links" "fi" "Tutustu kunnan ohjeisiin:"
 "info.organization.links" "sv" "Bekanta dig med kommunens föreskrifter:"
-"info.title" "fi" "Ohjeistus"
-"info.title" "sv" "Ändrade uppgifter på ansökan"
+"info.maintitle" "fi" "Ohjeistus"
+"info.maintitle" "sv" "Instruktioner"
