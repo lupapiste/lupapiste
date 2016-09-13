@@ -86,6 +86,8 @@
          :autoConversion true
          :content (files/temp-file-input-stream pdf-file)
          :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+        (catch Exception e
+          {:archivable false :archivabilityError :not-validated})
         (finally
           (io/delete-file tmp-file :silently))))
     {:archivable false :archivabilityError :not-validated}))

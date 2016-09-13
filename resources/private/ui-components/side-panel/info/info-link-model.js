@@ -2,6 +2,7 @@
 // on the context (being edited, can be edited, view only).
 // Parameters:
 // id: Link id
+// index: Index to be used in test ids (e.g., link-url-2).
 LUPAPISTE.InfoLinkModel = function( params ) {
   "use strict";
   var self = this;
@@ -9,6 +10,8 @@ LUPAPISTE.InfoLinkModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var service = lupapisteApp.services.infoService;
+
+  self.index = ko.unwrap(params.index);
 
   self.link = service.infoLink( params.id );
 
