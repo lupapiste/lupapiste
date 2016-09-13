@@ -1,9 +1,12 @@
 (ns lupapalvelu.i18n-test
   (:require [lupapalvelu.i18n :refer :all]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.mime :as mime]
             [sade.strings :as ss]
             [sade.env :as env]))
+
+(testable-privates lupapalvelu.i18n merge-localization-maps)
 
 (facts
   (fact "in dev-mode messy placeholder is returned"
@@ -154,3 +157,9 @@
              grouped-by-source (group-translations-by-source merged-map)]
          (map first (get grouped-by-source "file1.txt")) => (contains ['avain1 'avain2])
          (map first (get grouped-by-source "file2.txt")) => (contains ['avain3 'avain4])))
+
+(fact "An error is thrown when duplicate key is encountered"
+      (merge-localization-maps [{:translations {'avain {:fi "avain"}}}
+                                {:translations {'ei-liity {:fi "jotain muuta"}}}
+                                {:translations {'avain {:fi "aivan"}}}])
+      => (throws #"same key appears in multiple sources"))

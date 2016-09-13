@@ -145,7 +145,26 @@
     {}
     lines))
 
+(defn ensure-no-duplicate-keys! [loc-maps]
+  (let [keys (mapcat (comp keys :translations) loc-maps)
+        sources-and-keys (map (comp (juxt (comp :source-name meta)
+                                          identity))
+                              keys)
+        keys (map second sources-and-keys)]
+
+    (when (not (apply distinct? keys))
+      (let [duplicates (map first
+                            (filter #(> (second %) 1)
+                                    (frequencies keys)))]
+        (throw (ex-info
+                "The same key appears in multiple sources"
+                {:duplicate-keys (->> sources-and-keys
+                                      (filter (comp (set duplicates)
+                                                    second))
+                                      (sort-by second))}))))))
+
 (defn- merge-localization-maps [loc-maps]
+  (ensure-no-duplicate-keys! loc-maps)
   {:languages    (distinct (apply concat (map :languages loc-maps)))
    :translations (apply merge-with conj (map :translations loc-maps))})
 
@@ -181,15 +200,14 @@
        (commons-resources/write-excel file))))
 
 ; merge-with is not used because the translation maps from commons-resources are
-; actually ordered maps, where normal merge with vanilla Clojure map
-; does not play nice with key metadata. Assu
+; actually ordered maps, where normal merge with vanilla Clojure map does not
+; play nice with key metadata.
 (defn merge-new-translations [source new lang]
   {:languages    (distinct (apply concat (map :languages [source new])))
    :translations (into {}
                        (for [[k v] (:translations source)]
-                         (let [v-new (k (:translations new))]
+                         (let [[k-new v-new] (find (:translations new) k)]
                            (cond (nil? v-new) [k v]
-
                                  (not= (set (keys v-new)) #{:fi lang})
                                  (throw (ex-info "new translation map contains unexpected language(s)"
                                                  {:expected-language lang
@@ -229,10 +247,9 @@
 (defn- merge-translation-from-excel [acc {:keys [languages] :as translation-map}]
   (assert (= (count languages) 2))
   (let [lang (first (remove (partial = :fi) languages))]
-    (let [merged (merge-new-translations acc
-                                         translation-map
-                                         lang)]
-      merged)))
+    (merge-new-translations acc
+                            translation-map
+                            lang)))
 
 (defn merge-translations-from-excels-into-source-files [translation-files-dir-path paths]
   "Merges translation excel files into the current translation source files."
