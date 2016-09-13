@@ -72,8 +72,9 @@
   (let [valid? (tiff-validation/valid-tiff? content)]
     {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
 
-(defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
-  (if (env/feature? :convert-all-attachments)
+(defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
+  (if (and (env/feature? :convert-all-attachments)
+           (pdf-conversion/pdf-a-required? (:organization application)))
     (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
           pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
           pdf-title filename]

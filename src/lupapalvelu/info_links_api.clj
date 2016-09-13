@@ -23,21 +23,24 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkId]
-   :input-validators [(partial action/number-parameters [:linkId])]
+   :input-validators [(partial action/non-blank-parameters [:linkId])]
    :states           (states/all-states-but :draft)}
   [command]
-  (ok :res (info-links/delete-info-link! (:application command) linkId)))
+  (if (info-links/delete-info-link! (:application command) linkId)
+    (ok :res true)
+    (fail :error.badlink)))
 
 (defcommand info-link-reorder
   {:description      "Reorder application-specific info-links"
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkIds]
-   :input-validators [(partial action/vector-parameter-of :linkIds number?)]
-   ;:input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    :states           (states/all-states-but :draft)}
   [command]
-  (ok :res (info-links/reorder-info-links! (:application command) linkIds)))
+  (if (info-links/reorder-info-links! (:application command) linkIds)
+    (ok :res true)
+    (fail :error.badlinks)))
 
 (defcommand info-link-upsert
   {:description         "Add or update application-specific info-link"
@@ -47,14 +50,18 @@
    :optional-parameters [linkId]
    :input-validators    [(partial action/non-blank-parameters [:text])
                          (partial action/non-blank-parameters [:url])
-                         (partial action/optional-parameter-of :linkId number?)]
+                         (partial action/optional-parameter-of :linkId #(not (= "" %)))
+                         ]
    :states              (states/all-states-but :draft)}
   [command]
   (let [app (:application command)
+        timestamp (:created command)
         res (if linkId
-              (info-links/update-info-link! app linkId text url)
-              (info-links/add-info-link! app text url))]
-    (ok :linkId res)))
+              (info-links/update-info-link! app linkId text url timestamp)
+              (info-links/add-info-link! app text url timestamp))]
+    (if res
+       (ok :linkId res)
+       (fail :error.badlink))))
 
 (defquery info-links
   {:description      "Return a list of application-specific info-links"

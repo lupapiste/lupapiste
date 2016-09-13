@@ -41,7 +41,7 @@ Sonja sets contents description for the attachment
   Input text by test id  attachment-contents-input  Muu muu muu liite
   Click by test id  back-to-application-from-attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
-  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
+  Wait until  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 Sonja disables verdict attachment using multiselect view
   Click by test id  mark-verdict-attachments
@@ -90,7 +90,8 @@ Sonja opens the kopiolaitos order dialog on Verdict tab
   Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
-  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  1
+  # Three verdict attachments: 2 sample verdict files from KRYSP and one that was marked
+  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  3
   Element should be visible  verdict-attachment-prints-order-info
 
 Sonja checks the kopiolaitos order

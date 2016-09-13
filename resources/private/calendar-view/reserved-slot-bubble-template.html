@@ -1,0 +1,79 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="reserved-slot-bubble-template">
+  <div class="calendar-slot-bubble"
+       data-bind="style: { position: 'absolute',
+                           top: positionTop,
+                           'z-index': 1000 },
+                  css: weekdayCss ">
+
+    <bubble-dialog params="visible: bubbleVisible,
+                           okVisible: false,
+                           okEnabled: false,
+                           okFun: _.noop,
+                           removeVisible: removeVisible,
+                           removeFun: cancelReservation,
+                           removeEnabled: true,
+                           removeText: 'reservation.cancel',
+                           cancelText: 'close',
+                           error: error,
+                           prefix: 'reserved-slot',
+                           waiting: waiting">
+      <!--ko if: $parent.reservation-->
+      <div>
+        <h3 data-bind="ltext: 'calendar.reserve-slot.title'"></h3>
+
+        <div class="form-grid no-padding" style="min-width: 450px">
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="ltext: 'application.calendar.reservation.time'"></span>:
+            </div>
+            <div class="col-3">
+              <span data-bind="dateTimeString: $parent.reservation().startTime"></span>&nbsp;-&nbsp;<span data-bind="text: $parent.endHour"></span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="ltext: 'application.calendar.reservation.location'"></span>:
+            </div>
+            <div class="col-3">
+              <span data-bind="text: $parent.reservation().location" style="width: 100%"/>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="ltext: 'application.calendar.reservation-type'"></span>:
+            </div>
+            <div class="col-3">
+              <span data-bind="text: $parent.reservation().reservationType.name"></span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="ltext: 'application.calendar.reservation.participants'"></span>:
+            </div>
+            <div class="col-3">
+              <!--ko foreach: $parent.reservation().participants-->
+                <span data-bind="text: util.partyFullName($data)" style="display: block"></span>
+              <!--/ko-->
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-1">
+              <span data-bind="ltext: 'application.calendar.reservation.additional.information'"></span>:
+            </div>
+            <div class="col-3">
+              <span data-bind="text: $parent.reservation().comment" data-test-id="reservation-comment-textarea" />
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <!--/ko-->
+    </bubble-dialog>
+  </div>
+</script>
+

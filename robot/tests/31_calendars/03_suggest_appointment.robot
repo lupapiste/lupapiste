@@ -80,11 +80,20 @@ Applicant declines appointment
   Click by test id  decline-reservation-btn-0
   Wait until  Element should be visible by test id  reservation-declined-ack-0
   Logout
-
-Authority suggests another appointment
+  
+Authority sees 'appointment declined' notification and marks it seen
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Wait until  Element should be visible by test id  mark-seen-reservation-btn-0
+  Click by test id  mark-seen-reservation-btn-0
+  Open tab  parties
+  Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Element should not be visible by test id  mark-seen-reservation-btn-0
+
+Authority suggests another appointment
   Wait until  Element should be visible by test id  calendar-weekday-0
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Mikko Intonen
@@ -109,10 +118,28 @@ Applicant accepts appointment
   Wait until  Element should be visible by test id  reservation-accepted-ack-0
   Goto following week in calendar view
   Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
+  Logout
+  
+Authority sees 'appointment accepted' notification and marks it seen
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Wait until  Element should be visible by test id  mark-seen-reservation-btn-0
+  Click by test id  mark-seen-reservation-btn-0
+  Wait until  Element should be visible by test id  reservation-seen-ack-0
+  Open tab  parties
+  Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Element should not be visible by test id  mark-seen-reservation-btn-0
+  Logout
   
 Applicant reserves slot from authority's calendar
+  Mikko logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
   Wait until  Select From List by test id  reservation-type-select  Foobar
   Wait until  Select From List by test id  attendee-select  Sonja Sibbo
+  Goto following week in calendar view
   Wait Until  Element should be visible by test id  reserve-slot-Friday-1200
   Click by test id  reserve-slot-Friday-1200
   Wait Until  Element should be visible by test id  reservation-comment-textarea
@@ -149,5 +176,23 @@ Applicant reserves an appointment via new appointment page
   Fill test id  reservation-comment-textarea  diibadaabakommenttia
   Click by test id  reservation-slot-reserve-bubble-dialog-ok
   Positive indicator should be visible
-  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1100
+  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1500
+  Logout
+  
+Authority cancels most recent reservation
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  calendar
+  Wait until  Element should be visible by test id  calendar-weekday-0
+  Goto following week in calendar view
+  Wait until  Element should be visible  xpath=//*[@data-test-id='reservation-type-select']/option[contains(.,'Foobar')]
+  Wait until  Element should be visible by test id  reservation-ACCEPTED-Friday-1500
+  Click by test id  reservation-ACCEPTED-Friday-1500
+  Wait Until  Element should be visible by test id  reservation-comment-textarea
+  Wait until  Element should be visible by test id  reserved-slot-bubble-dialog-remove
+  Click by test id  reserved-slot-bubble-dialog-remove
+  #Confirm yes no dialog
+  Click by test id  confirm-yes
+  Positive indicator should be visible
+  Wait until  Element should not be visible by test id  reservation-ACCEPTED-Friday-1500
   Logout
