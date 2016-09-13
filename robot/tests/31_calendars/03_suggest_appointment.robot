@@ -191,7 +191,8 @@ Authority cancels most recent reservation
   Wait Until  Element should be visible by test id  reservation-comment-textarea
   Wait until  Element should be visible by test id  reserved-slot-bubble-dialog-remove
   Click by test id  reserved-slot-bubble-dialog-remove
-  Confirm  dynamic-yes-no-confirm-dialog
+  #Confirm yes no dialog
+  Click by test id  confirm-yes
   Positive indicator should be visible
   Wait until  Element should not be visible by test id  reservation-ACCEPTED-Friday-1500
   Logout

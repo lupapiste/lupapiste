@@ -178,13 +178,14 @@
     {:reservations {$elemMatch {:id reservation-id}}}
     changes))
 
+(def state->comment-type {:ACCEPTED "reservation-accepted"
+                          :DECLINED "reservation-declined"
+                          :CANCELED "reservation-canceled"})
+
 (defn update-mongo-for-reservation-state-change
   [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
-  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED) (= new-state :CANCELED))]}
-  (let [type (cond
-               (= :ACCEPTED new-state) "reservation-accepted"
-               (= :DECLINED new-state) "reservation-declined"
-               (= :CANCELED new-state) "reservation-canceled")
+  {:pre [(contains? state->comment-type new-state)]}
+  (let [type (new-state state->comment-type)
         comment-update (comment/comment-mongo-update (:state application)
                                                      (:comment reservation)
                                                      {:type type
