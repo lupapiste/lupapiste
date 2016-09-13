@@ -39,19 +39,13 @@
       display: block;
       font-weight: bold;
       margin: 0 0 $marginM 0;
-
+      
       .unseen-comments {
-        @include spite-bg;
-        background-position: 1px -5396px;
-        width: $lupicon-size;
-        margin: {
-          top: 10px;
-          bottom: -4px;
-        }
-        height: 30px;
-        padding-top: 3px;
-        color: $color-text;
-        text-shadow: none;
+        color: $green-dark;
+        font-size: 14px;
+        background-color: white;
+        padding: 2px 2px 2px 2px;
+        min-width: $lupicon-size;
       }
     }
 
@@ -63,8 +57,7 @@
   .content-wrapper {
     float: left;
     height: 100%;
-    background:  fade-out($lp-dark-grey, 0.1);
-    background: $lp-dark-grey \9; /* IE 8 and below */
+    background-color: $gray69; 
     padding: $marginS;
     width: 500px;
   }
@@ -285,3 +278,145 @@
   }
 }
 
+//
+// Info side panel
+//
+
+.info-panel-container {
+  height: 100%;
+  margin: {left: $marginM;
+           right: $marginM;
+          }
+  h2 {
+    font-size: 18px;
+    margin-top: 2em;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  td.spacehog {
+    width: 100%;
+  }
+  .info-links-content {
+    overflow-y: scroll;
+    height: 100%;
+    padding-bottom: 2 * $btn-height;    
+  }
+}
+
+@mixin info-table( $bg ) {
+  border: none;
+  margin-bottom: 0;
+  tr {
+    background-color: $bg;
+    border: none;
+    &:hover {
+      background-color: $bg;
+      border: none;
+    }
+    &:hover:nth-child(even) {
+      background: $bg;
+    }    
+  }
+}
+
+table.info-link-editor-view {
+  td {
+    padding-left: 0;
+  }
+  @include info-table( transparent ) {}
+  a.link-btn--passive:active {
+    // In Firefox the active state gets stuck after drag'n'drop.
+    color: $orange-dark;
+  }
+}
+
+table.info-link-editor-view.info-link-divider {
+  border-bottom: 1px solid $gray85;
+}
+
+.info-link-drop-zone {
+  border: 1px dashed $orange-light;
+  min-height: $btn-height;
+  width: 100%;
+  
+}
+
+// Dragged link within list
+table.info-link-editor-view.dragging {
+  display: none;
+}
+
+// Drag element
+table.info-link-editor-view + .dragging {
+  display: block !important;
+  max-width: 30em;  
+  background-color: $gray51;
+}
+
+@mixin link-text( $max-width) {
+  max-width: $max-width;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}
+
+span.info-link-text {
+  @include link-text( 20em );
+}
+
+span.info-link-text-wide {
+  @include link-text( 28em );
+}
+
+
+@media all and (max-width: $narrow-breakpoint) {
+  table.info-link-editor-view + .dragging {
+    max-width: 24em;
+  }
+  span.info-link-text {
+    max-width: 14em;
+  }
+  
+  span.info-link-text-wide {
+    max-width: 22em;
+  }
+}
+
+.info-link-link {
+  margin-bottom: .5em;
+}
+
+
+
+
+table.info-link-editor-edit {
+  @include info-table( white );
+  margin-bottom: 2px;
+  tr:nth-child(odd) {
+    border-bottom: 1px solid $grid-border-color;
+  }  
+  td {
+    padding: {
+    left: 5px;
+    right: 5px;
+  }
+  }
+  input {
+    box-sizing: border-box;
+    font-size: 16px;
+    border: none;
+    width: 100%;
+    padding: {
+      bottom: 2px;
+      top: 2px;      
+    }
+  }
+  button.ghost {
+    border: none;
+    padding: {
+      left: 4px;
+      right: 4px;
+    }
+  }
+}

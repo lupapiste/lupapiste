@@ -178,8 +178,11 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
                       (partial validate-optional-url :url)]}
-  [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
+  [{user :user created :created}]
+  (org/update-organization (usr/authority-admins-organization-id user)
+                           {$push {:links {:name {:fi nameFi :sv nameSv}
+                                           :url (ss/trim url)
+                                           :modified created}}})
   (ok))
 
 (defcommand update-organization-link
@@ -189,8 +192,11 @@
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
                       (partial validate-optional-url :url)
                       (partial number-parameters [:index])]}
-  [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
+  [{user :user created :created}]
+  (org/update-organization (usr/authority-admins-organization-id user)
+                           {$set {(str "links." index) {:name {:fi nameFi :sv nameSv}
+                                                        :url (ss/trim url)
+                                                        :modified created}}})
   (ok))
 
 (defcommand remove-organization-link

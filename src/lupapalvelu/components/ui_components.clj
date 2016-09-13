@@ -130,7 +130,7 @@
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "register-lupapiste-components.js"]}
+   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -195,7 +195,8 @@
                    "ram-service.js"
                    "calendar-service.js"
                    "attachments-service.js"
-                   "suti-service.js"]}
+                   "suti-service.js"
+                   "info-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -263,12 +264,10 @@
    :attachment   {:depends [:services :common-html :repository :signing]
                   :js ["attachment-multi-select.js"
                        "attachment-model.js"
-                       "targeted-attachments-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
-                  :html ["targetted-attachments-template.html"
-                         "attachment.html"
+                  :html ["attachment.html"
                          "upload.html"
                          "move-attachment-to-backing-system.html"
                          "move-attachment-to-case-management.html"]}
@@ -284,9 +283,9 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js"
-                        "book-appointment-filter.js"]
-                   :html ["reservation-slot-edit-bubble-template.html"
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" 
+                        "book-appointment-filter.js" "base-calendar-model.js"]
+                   :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
                           "authority-calendar-template.html" "applicant-calendar-template.html"
                           "calendar-message-items-template.html"

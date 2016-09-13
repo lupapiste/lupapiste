@@ -91,7 +91,8 @@
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema})
+           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :seen-organization-links) {sc/Str ssc/Timestamp}})
 
 (def RegisterUser {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))

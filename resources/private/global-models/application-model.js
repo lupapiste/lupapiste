@@ -83,6 +83,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
   self.unseenComments = ko.observable();
+  self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
 
   // Application metadata fields
@@ -167,11 +168,8 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.primaryOperationName = ko.pureComputed(function() {
-    var op = ko.unwrap(self.primaryOperation());
-    if (op) {
-      return "operations." + ko.unwrap(op.name);
-    }
-    return "";
+    var opName = util.getIn(self.primaryOperation, ["name"]);
+    return !_.isEmpty(opName) ? "operations." + opName : "";
   });
 
   self.foremanTasks = ko.observable();

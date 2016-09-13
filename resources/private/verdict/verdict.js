@@ -157,7 +157,9 @@ LUPAPISTE.verdictPageController = (function($) {
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({});
+  var targeted = {target: ko.observable(),
+                  type: ko.observable(),
+                  typeSelector: null};
   var createTaskController = LUPAPISTE.createTaskController;
   var authorities = ko.observableArray([]);
 
@@ -175,7 +177,8 @@ LUPAPISTE.verdictPageController = (function($) {
       .query("verdict-attachment-type", {id: currentApplicationId})
       .success(function(result) {
         var type = [result.attachmentType["type-group"], result.attachmentType["type-id"]].join(".");
-        attachmentsModel.refresh(application, target, type);
+        targeted.target( target );
+        targeted.type( type );
       })
       .call();
 
@@ -209,8 +212,8 @@ LUPAPISTE.verdictPageController = (function($) {
     $("#verdict").applyBindings({
       verdictModel: verdictModel,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel,
       createTask: createTaskController,
+      targeted: targeted,
       authorities: authorities, // Authorities for comment template
       application: {} // Dummy application for comment template
     });

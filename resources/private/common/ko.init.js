@@ -324,6 +324,18 @@
     }
   };
 
+  // Fully resolved attachmentType localized text.
+  ko.bindingHandlers.attachmentType = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        $(element).text( loc(["attachmentType",
+                              util.getIn( v, ["type", "type-group"]),
+                              util.getIn( v, ["type", "type-id"])]));
+      }
+    }
+  };
+
   var viewWithDownloadTemplate =
         _.template(
           "<div class='view-with-download'><a target='_blank' "

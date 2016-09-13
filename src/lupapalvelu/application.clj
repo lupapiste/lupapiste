@@ -109,6 +109,9 @@
 ;; Helpers
 ;;
 
+(defn party-document? [doc]
+  (= :party (tools/doc-type doc)))
+
 (defn user-role
   "User role within the application."
   [user {:keys [organization]}]
@@ -126,10 +129,6 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn party-document? [doc]
-  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
-    (= (:type schema-info) :party)))
-
 (defn last-history-item
   [{history :history}]
   (last (sort-by :ts history)))
@@ -137,7 +136,7 @@
 (defn get-previous-app-state
   "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
   [{history :history}]
-  (->> (filter :state history)                              ; only history elements that regard state change
+  (->> (filter :state history)         ; only history elements that regard state change
        (sort-by :ts)
        butlast
        last
@@ -145,7 +144,7 @@
        keyword))
 
 ; Seen updates
-(def collections-to-be-seen #{"comments" "statements" "verdicts"})
+(def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
 (defn mark-collection-seen-update [{id :id} timestamp collection]
   {:pre [(collections-to-be-seen collection) id timestamp]}

@@ -105,6 +105,7 @@
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles  ;; For info-links
    :states           states/all-states
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]

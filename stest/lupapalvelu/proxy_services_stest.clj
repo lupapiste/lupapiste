@@ -359,3 +359,15 @@
 
   (fact "Jalasjarvi, as of 2016 part of Kurikka and shoud return Kurikka's code"
     (municipality-by-point 281160 6936532.8125001) => "301"))
+
+
+(facts "Get address from Salo"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx"})
+
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "279444.75" :y "6703424.390625"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Nikkil\u00e4ntie")
+      (fact (:number body) => "33")
+      (fact (:fi (:name body)) => "Salo")
+      )))
