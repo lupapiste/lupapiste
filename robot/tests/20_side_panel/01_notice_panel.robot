@@ -3,6 +3,10 @@
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
 
+*** Variables ***
+  
+${notice}  Hakmuss on tosi kiirreeliene!
+
 *** Test Cases ***
 
 Mikko opens an application
@@ -30,14 +34,20 @@ Sonja can add tags
   Select From Autocomplete  div[@id="notice-panel"]  ylämaa
 
 Sonja can leave notice
-  Open side panel  notice
-  Input text  xpath=//div[@id='notice-panel']//textarea[@data-test-id='application-authority-notice']  Hakmuss on tosi kiirreeliene!
+  #  Fill test id  application-authority-notice  
+  Press key  application-authority-notice  ${notice}
+  Sleep  1s
+  # The following letter is missed by Selenium
+  Press key  application-authority-notice  a    
+  
 
 Sonja can set application urgency to urgent
-  Open side panel  notice
   Select From List by id  application-authority-urgency  urgent
   # wait for debounce
-  Sleep  1
+  Sleep  2
+  Wait for jquery
+  Check notice  ylämaa  urgent  ${notice}a
+  Close side panel  notice
   Logout
 
 Ronja can see urgent application
@@ -47,6 +57,7 @@ Ronja can see urgent application
 Ronja can click notice icon -> application page is opened with notice panel open
   Click element  xpath=//td[@data-test-col-name='urgent']/div
   Wait until  Element should be visible  notice-panel
+  Check notice  ylämaa  urgent  ${notice}
   Logout
 
 Sonja can set application urgency to pending
@@ -63,3 +74,14 @@ Ronja can see pending application
   Request should be visible  ${appname}
   Wait until  Element should be visible  //div[contains(@class, 'pending')]
   Logout
+
+
+*** Keywords ***
+
+Check notice
+  [Arguments]  ${tag}  ${urgency}  ${note}
+  # Tags do not work yet with Selenium
+  #Wait Until  Element text should be  jquery=li.tag span.tag-label  ${tag}  
+  Wait Until  List Selection Should Be  application-authority-urgency  ${urgency}
+  Textarea value should be  application-authority-notice  ${note}
+  
