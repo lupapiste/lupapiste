@@ -590,6 +590,10 @@
        (fact "applicant CAN upload a new attachment to foreman application"
          (upload-attachment applicant foreman-app-id {:id ""} true) => ss/not-blank?)
 
+       (fact "foreman CAN copy own attachments to foreman-application"
+         (command foreman :update-user :firstName "Teppo" :lastName "Nieminen" :architect true) => ok?
+         (command foreman :copy-user-attachments-to-application :id foreman-app-id) => ok?)
+
        (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"
          (upload-attachment foreman application-id main-attachment-1 false) => (:id main-attachment-1))
        (fact "foreman can NOT upload a new version to applicants attachment on foreman application"
