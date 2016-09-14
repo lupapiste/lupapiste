@@ -23,7 +23,7 @@
               <span data-bind="ltext: 'newRequest.newApplication'"></span>
             </button>
 
-            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+            <!-- ko if: features.enabled('ajanvaraus') && lupapisteApp.models.currentUser.isApplicant -->
             <a href="#!/new-appointment">
               <button data-test-id="applications-goto-new-appointment"
                     class="positive application-create">
