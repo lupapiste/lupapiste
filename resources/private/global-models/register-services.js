@@ -1,5 +1,8 @@
 ;(function() {
   "use strict";
+  // Provide application comments for other services
+  lupapisteApp.services.commentService = new LUPAPISTE.CommentService();
+
   lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
   lupapisteApp.services.applicationFiltersService = new LUPAPISTE.ApplicationFiltersService();
   lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService(lupapisteApp.services.applicationFiltersService);

@@ -5,13 +5,14 @@
       <h1 data-bind="ltext: 'info.maintitle'"></h1>
     </div>
     <div class="info-links-content">
-      <!-- ko if: _.size( organizationLinks() ) -->
+      <!-- ko if: _.some( organizationLinks() ) -->
       <h2 data-bind="ltext: 'info.organization.links'"></h2>
       <ul data-bind="foreach: organizationLinks">
         <li>
           <a class="link-btn"
              target="_blank"
-             data-bind="attr: {href: url}">
+             data-bind="attr: {href: url},
+                        testId: 'organization-link-' + $index()">
             <span data-bind="text: text"></span>
             <i class="lupicon-circle-star"
                data-bind="visible: isNew"></i>
@@ -24,11 +25,12 @@
       <!-- ko if: _.size( infoLinks() ) -->
       <div id="side-panel-info-links" 
            data-bind="foreach: infoLinks">
-        <info-link params="id: $data.id"></info-link>
+        <info-link params="id: $data.id, index: $index"></info-link>
       </div>
       <!-- /ko -->
       <button class="ghost top-marginM"
               data-bind="visible: canAdd,
+                         testId: 'add-info-link',
                          click: _.partial( _.ary( hub.send, 1), 'infoService::new')">
         <i class="lupicon-circle-plus"></i>
         <span data-bind="ltext: 'info.add-link'"></span>
