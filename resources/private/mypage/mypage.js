@@ -161,7 +161,7 @@
       return self;
     };
 
-    self.uploadDoneSubscription = hub.subscribe("MyPage::UploadDone", self.updateAttachments);
+    self.uploadDoneSubscription = hub.subscribe("user-attachments-chenged", self.updateAttachments);
 
     self.clear = function() {
       return self.saved(false).error(null);
@@ -201,7 +201,7 @@
     self.doRemove = function() {
       ajax
         .command("remove-user-attachment", {"attachment-id": self.fileToRemove})
-        .success(self.updateAttachments)
+        .success(function() {hub.send("user-attachments-chenged");})
         .call();
     };
 
@@ -356,7 +356,7 @@
       }
 
       if (state === self.stateDone) {
-        hub.send("MyPage::UploadDone");
+        hub.send("user-attachments-chenged");
       }
     });
   }
