@@ -151,5 +151,6 @@
 (defn enrich-auth-information [{auth :auth docs :documents {authority-id :id} :authority}]
   (let [parties-docs (->> (filter party-document? docs)
                           (sort-by (comp :order :schema-info)))]
-    (map (partial enrich-auth-info-with-parties parties-docs) auth)
-    (map (partial enrich-authority-auth-info authority-id) auth)))
+    (->> auth
+         (map (partial enrich-auth-info-with-parties parties-docs))
+         (map (partial enrich-authority-auth-info authority-id)))))
