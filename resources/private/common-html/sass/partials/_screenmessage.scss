@@ -38,6 +38,10 @@
         margin-right: $marginL;
         a {
           color: white;
+          text-decoration: underline;
+        }
+        a:hover {
+          text-decoration: none;
         }
         &:last-child {
           margin-bottom: 0px;
