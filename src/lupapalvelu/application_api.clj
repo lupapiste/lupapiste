@@ -412,8 +412,7 @@
         (notifications/notify! :inforequest-invite {:application created-application})))
     (try
       (autofill-rakennuspaikka created-application created)
-      (catch java.io.IOException e
-        (error "KTJ data was not updated:" (.getMessage e))))
+      (catch Exception e (warn "Could not get KTJ data for the new application")))
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [{application :application}]
@@ -517,7 +516,7 @@
                                  :title      (ss/trim address)
                                  :modified   created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception e (error e "KTJ data was not updated."))))
+           (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
@@ -769,7 +768,7 @@
                                   :modified               created}
                            $push {:attachments {$each (app/make-attachments created op @organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
-         (catch Exception e (error e "KTJ data was not updated")))))
+         (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application")))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]
