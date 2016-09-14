@@ -590,7 +590,7 @@
        (fact "applicant CAN upload a new attachment to foreman application"
          (upload-attachment applicant foreman-app-id {:id ""} true) => ss/not-blank?)
 
-       (fact "foreman CAN copy own attachments to foreman-application"
+       (fact "foreman CAN copy own attachments to foreman application"
          (command foreman :update-user :firstName "Teppo" :lastName "Nieminen" :architect true) => ok?
          (command foreman :copy-user-attachments-to-application :id foreman-app-id) => ok?)
 
@@ -632,8 +632,22 @@
     (fact "Foreman can not upgrade own role"
       (command foreman :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => unauthorized?)
 
+    (fact "Foreman can NOT cancel the main application"
+      (command foreman :cancel-application :id application-id :lang "fi" :text "") => fail?)
+
     (fact "Applicant upgrades foreman role to writer on main application"
       (command applicant :change-auth :id application-id :userId (id-for-key foreman) :role "writer") => ok?
 
       (fact "Foreman can now  invite guest to the main application"
-        (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => ok?))))
+        (command foreman :invite-guest :id application-id :email "foo@example.com" :role "guest") => ok?))
+
+    (fact "Applicant creates another foreman appplication"
+      (let [resp (command applicant :create-foreman-application :id application-id
+                   :taskId "" :foremanRole "ei tiedossa" :foremanEmail foreman-email)
+            {foreman-app2 :id} resp]
+        resp => ok?
+        (command foreman :approve-invite :id foreman-app2) => ok?
+
+        (fact "Foreman CAN cancel foreman application"
+          (command foreman :cancel-application :id foreman-app2 :lang "fi" :text "") => ok?)))
+    ))
