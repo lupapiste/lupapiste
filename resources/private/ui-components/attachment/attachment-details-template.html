@@ -245,7 +245,7 @@
                                    enable: $data.setVisibilityAllowed()"></select>
               </div>
 
-              <div data-bind="if: $data.permanentArchviveVisible && $data.hasVersion()">
+              <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
                   <div>
