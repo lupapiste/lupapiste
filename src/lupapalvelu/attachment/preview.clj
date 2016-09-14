@@ -1,5 +1,5 @@
 (ns lupapalvelu.attachment.preview
-  (:require [taoensso.timbre :refer [debugf error errorf]]
+  (:require [taoensso.timbre :refer [debugf warnf error errorf]]
             [com.netflix.hystrix.core :as hystrix]
             [me.raynes.fs :as fs]
             [sade.util :as util]
@@ -51,7 +51,7 @@
                                         :filename preview-filename
                                         :content  preview-content}
                                        :application application-id))
-            (errorf "Preview generation failed: id=%s, type=%s file=%s" file-id content-type filename)))))
+            (warnf "Preview image of %s file '%s' (id=%s) was not generated" content-type filename file-id )))))
     (catch Throwable t
       (error "Preview generation failed" t))))
 
