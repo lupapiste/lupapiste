@@ -7,26 +7,31 @@ LUPAPISTE.SidePanelService = function() {
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
-  var latestUrgency = ko.observable({});
+  // Observables will have objects with id and value.
+  var noticeLatest = {urgency: ko.observable({}),
+                      authorityNotice: ko.observable({})};
 
-  self.urgency = ko.computed({
-    read: function() {
-      return latestUrgency().id !== self.application.id()
-        ? ko.unwrap(self.application.urgency)
-        : latestUrgency().urgency;
-    },
-    write: function( urgency ) {
-      latestUrgency( {id: self.application.id(),
-                      urgency: urgency});
-    }
-  });
 
-  self.authorityNotice = ko.pureComputed(function() {
-    return ko.unwrap(self.application.authorityNotice);
-  });
+  function latestNotice( field ) {
+    return ko.computed({
+      read: function() {
+        var latest = noticeLatest[field]();
+        return latest.id !== self.application.id()
+          ? ko.mapping.toJS(self.application[field])
+          : latest.value;
+      },
+      write: function( value ) {
+        noticeLatest[field]( {id: self.application.id(),
+                              value: value});
+      }
+    });
+  }
 
-  self.tags = ko.pureComputed(function() {
-    return ko.toJS(self.application.tags);
+  self.urgency = latestNotice( "urgency");
+  self.authorityNotice = latestNotice( "authorityNotice");
+
+  self.tags = ko.pureComputed( function() {
+    return ko.toJS( self.application.tags );
   });
 
   var noticeSeenAppId = ko.observable();
@@ -43,6 +48,12 @@ LUPAPISTE.SidePanelService = function() {
                                   type: "authority-notices"})
         .call();
     }
+  });
+
+  hub.subscribe( "application-loaded", function() {
+    noticeLatest.urgency({} );
+    noticeLatest.authorityNotice( {} );
+    noticeSeenAppId("");
   });
 
   var changeNoticeInfo = _.debounce(function(command, data) {
@@ -64,6 +75,7 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::AuthorityNoticeChanged", function(event) {
     changeNoticeInfo("add-authority-notice", _.pick(event, "authorityNotice"));
+    self.authorityNotice( event.authorityNotice );
   });
 
   hub.subscribe("SidePanelService::TagsChanged", function(event) {
