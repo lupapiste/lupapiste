@@ -12,7 +12,13 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.strings :as str]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.application-search :as search]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-utils :as app-utils]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]))
 
 ; -- API Call helpers
 
@@ -220,6 +226,41 @@
 (defn mark-reservation-update-seen
   [application reservation-id user-id]
   (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}}))
+
+(defn- select-actions-required-for-user [user rs]
+  (filter #(util/contains-value? (:action-required-by %) (:id user)) rs))
+
+(defn- select-where-in-future [rs]
+  (filter #(>= (:endTime %) (tc/to-long (t/now))) rs))
+
+(defn- select-where-user-is-participant [user rs]
+  (filter #(or (= (:from %) (:id user))
+               (util/contains-value? (:to %) (:id user))) rs))
+
+(defn applications-with-calendar-actions-required
+  [user]
+  (let [query      (search/make-query
+                     (domain/applications-containing-reservations-requiring-action-query-for user)
+                     {} user)
+        enrich-app (comp app-utils/with-organization-name app-utils/with-application-kind)]
+    (->> (mongo/select :applications query)
+         (map (fn [app] (update app :reservations (partial select-actions-required-for-user user))))
+         (map enrich-app)
+         (map #(select-keys % [:id :kind :municipality :organizationName
+                               :address :primaryOperation :reservations])))))
+
+(defn applications-with-appointments-for-user
+  [user]
+  (let [query      (search/make-query
+                     (domain/applications-containing-future-reservations-for user)
+                     {} user)
+        enrich-app (comp app-utils/with-organization-name app-utils/with-application-kind)]
+    (->> (mongo/select :applications query)
+         (map (fn [app] (update app :reservations (partial select-where-user-is-participant user))))
+         (map (fn [app] (update app :reservations select-where-in-future)))
+         (map enrich-app)
+         (map #(select-keys % [:id :kind :municipality :organizationName
+                               :address :primaryOperation :reservations])))))
 
 ; -- Configuration
 

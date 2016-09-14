@@ -142,6 +142,26 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
+  var _unseenCalendarUpdates = hub.subscribe("calendarService::fetchCalendarActionsRequired", function() {
+    ajax.query("calendar-actions-required")
+      .success(function(data) {
+        hub.send("calendarService::calendarActionsRequiredFetched", {actionsRequired: data.actionsRequired});
+      }).error(function() {
+        hub.send("calendarService::serviceNotAvailable");
+      })
+      .call();
+  });
+
+  var _allAppointmentsByDay = hub.subscribe("calendarService::fetchAllAppointments", function() {
+    ajax.query("applications-with-appointments")
+      .success(function(data) {
+        hub.send("calendarService::allAppointmentsFetched", {appointments: data.appointments});
+      }).error(function() {
+        hub.send("calendarService::serviceNotAvailable");
+      })
+      .call();
+  });
+
   var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
     doFetchCalendarWeek(event);
   });
@@ -236,6 +256,8 @@ LUPAPISTE.CalendarService = function() {
     hub.unsubscribe(_reserveSlot);
     hub.unsubscribe(_fetchApplicationCalendarSlots);
     hub.unsubscribe(_fetchApplicationCalendarConfig);
+    hub.unsubscribe(_unseenCalendarUpdates);
+    hub.unsubscribe(_allAppointmentsByDay);
     hub.unsubscribe(_cancelReservation);
   };
 };

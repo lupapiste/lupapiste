@@ -9,7 +9,8 @@
     {name: "applicant-calendar"},
     {name: "reserved-slot-bubble"},
     {name: "book-appointment-filter"},
-    {name: "reservation-slot-reserve-bubble"}
+    {name: "reservation-slot-reserve-bubble"},
+    {name: "calendar-notification-list"}
   ];
 
   $(_.partial(ko.registerLupapisteComponents, components));

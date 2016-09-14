@@ -34,6 +34,14 @@
 (defn applications-with-writer-authz-query-for [user]
   {:auth {$elemMatch {:id (:id user) :role {$in [:owner :writer :foreman]}}}})
 
+(defn applications-containing-future-reservations-for [user]
+  {:reservations {$elemMatch {$and [{$or [{:from {"$eq" (:id user)}}
+                                          {:to {"$eq" (:id user)}}]}
+                                    {:endTime {$gte (clj-time.coerce/to-long (clj-time.core/now))}}]}}})
+
+(defn applications-containing-reservations-requiring-action-query-for [user]
+  {:reservations {$elemMatch {:action-required-by {"$eq" (:id user)}}}})
+
 (defn application-query-for [user]
   (merge
     (basic-application-query-for user)
