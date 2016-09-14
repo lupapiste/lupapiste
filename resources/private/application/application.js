@@ -391,7 +391,10 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
   hub.onPageUnload( "application", function() {
-    currentId = null;
+    if( currentId && !_.includes( _.get( window, "location.hash"),
+                                  currentId)) {
+      currentId = null;
+    }
   });
 
   hub.subscribe("application-loaded", function(e) {
