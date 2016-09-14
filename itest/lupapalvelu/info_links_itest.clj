@@ -11,7 +11,7 @@
 (defn link-id [links url]
    (:id (first (filter #(= url (:url %)) links))))
 
-(facts "info links"
+(facts "Application info links"
  
   (let [{application-id :id :as app} 
         (create-and-open-application pena :propertyId sipoo-property-id)]
@@ -41,14 +41,20 @@
      
     (let [response (query teppo :info-links :id application-id)]
       response => ok?
-      (fact "Statementgiver Teppo sees the infolink and it is editable"
+      (fact "Statementgiver Teppo sees the infolink and it is not editable"
         (:text (first (:links response))) => "link text"
-        (:canEdit (first (:links response))) => true))
+        (:canEdit (first (:links response))) => false))
 
     (let [response (command teppo :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
       response => ok?
       (fact "Statement giver Teppo adds another info-link"
          (:linkId response) => string?))
+   
+    (let [response (query teppo :info-links :id application-id)]
+      response => ok?
+      (fact "Statementgiver Teppo sees his own infolink and it is editable"
+        (:text (second (:links response))) => "second"
+        (:canEdit (second (:links response))) => true))
 
     (let [response (command sonja :info-link-upsert :id application-id :text "third url" :url "http://example.org/3")]
       response => ok?
@@ -56,9 +62,9 @@
         (:linkId response) => string?))
        
     (let [links (:links (query sonja :info-links :id application-id))
-          l1-id (:linkId (nth links 0))
-          l2-id (:linkId (nth links 1))
-          l3-id (:linkId (nth links 2))]
+          l1-id (:linkId (nth links 0))   ;; by sonja
+          l2-id (:linkId (nth links 1))   ;; by teppo
+          l3-id (:linkId (nth links 2))]  ;; by sonja
           
        (fact "Last link is last in list"
           (:url (last links)) = "http://example.org/3")
@@ -73,20 +79,31 @@
   
        (let [response (query teppo :info-links :id application-id)]
           response => ok?
-          (fact "Statement giver Teppo sees the links"
-             (map :linkId (:links response)) => [l3-id l2-id l1-id]))
+          (fact "Statement giver Teppo sees the links and the middle one is editable"
+             (map :linkId (:links response)) => [l3-id l2-id l1-id]
+             (map :canEdit (:links response)) => [false true false]))
           
        (let [response (command sonja :info-link-delete :id application-id :linkId l2-id)]
-         (fact "Sonja can delete infolinks" 
+         (fact "Sonja can delete all infolinks" 
            response => ok?))
     
        (let [response (command pena :info-link-delete :id application-id :linkId (:linkId l1-id))]
-         (fact "Pena can't delete infolinks" 
+         (fact "Pena can't delete Sonja's infolinks" 
+           response =not=> ok?))
+  
+       (fact "Pena can't update Sonja's infolink"
+         (command pena :info-link-upsert :id application-id :text "bad text" :url "http://example.org/1-bad" :linkId l1-id) =not=> ok?)
+      
+       (fact "Teppo can't update Sonja's infolink"
+          (command teppo :info-link-upsert :id application-id :text "bad text 2" :url "http://example.org/1-bad-2" :linkId l1-id) =not=> ok?)
+   
+       (let [response (command teppo :info-link-delete :id application-id :linkId (:linkId l1-id))]
+         (fact "Teppo can't delete Sonja's infolinks either" 
            response =not=> ok?))
     
        (let [response (query sonja :info-links :id application-id)]
          response => ok?
-         (fact "Sonja no longer sees the deleted link"
+         (fact "Sonja no longer sees the link deleted by her"
            (map :linkId (:links response)) => [l3-id l1-id]))
      
        (let [response (query pena :info-links :id application-id)]
