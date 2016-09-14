@@ -149,6 +149,14 @@
     }
   }
 
+  function refreshAuthorizationModel() {
+    if (currentId) {
+      authorizationModel.refresh({id: currentId});
+    } else {
+      authorizationModel.setData({});
+    }
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -388,6 +396,8 @@
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
+  // User details can affect what she can do to the application
+  hub.subscribe("reload-current-user", refreshAuthorizationModel);
 
   function NeighborStatusModel() {
     var self = this;
