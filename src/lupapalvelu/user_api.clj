@@ -748,16 +748,6 @@
                       unauthorized)))]}
   [_])
 
-(defquery permanent-archive-enabled
-  {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
-                  (let [org-set (if organization
-                                  #{organization}
-                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-                      unauthorized)))]}
-  [_])
-
 (defquery calendars-enabled
   {:user-roles #{:authority :authorityAdmin :applicant}
    :pre-checks [(fn [_]
