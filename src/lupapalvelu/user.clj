@@ -6,7 +6,7 @@
             [camel-snake-kebab.core :as csk]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -32,7 +32,7 @@
    :username  "dummy@example.com"
    :enabled   false})
 
-(def SearchFilter
+(defschema SearchFilter
   {:id        sc/Str
    :title     sc/Str
    :sort     {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
@@ -43,7 +43,10 @@
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]}})
 
-(def User {:id                                    sc/Str
+(def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+
+(defschema User
+          {:id                                    Id
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
            :role                                  (sc/enum "applicant"
@@ -94,7 +97,8 @@
            (sc/optional-key :language)            i18n/supported-language-schema
            (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}})
 
-(def RegisterUser {:email                            ssc/Email
+(defschema RegisterUser
+                  {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
                    :city                             (sc/maybe (ssc/max-length-string 255))
                    :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
@@ -122,7 +126,7 @@
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
-(def SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
+(defschema SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
 
 (defn summary
   "Returns common information about the user or nil"
