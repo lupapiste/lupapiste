@@ -449,7 +449,7 @@
 
 (when (or pdfa/pdf2pdf-enabled? dev-env?)
   (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
-          (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+          (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
                 application-id (:id application)
                 type {:type-group "paapiirustus" :type-id "asemapiirros"}
                 resp (command raktark-jarvenpaa
@@ -761,7 +761,7 @@
       )))
 
 (facts "Uploading PDF should not create duplicate comments"
-  (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+  (let [application    (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         application-id (:id application)
         _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/invalid-pdfa.pdf")
         {attachments :attachments comments :comments} (query-application pena application-id)
