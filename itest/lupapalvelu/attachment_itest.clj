@@ -529,7 +529,7 @@
 
 (when (or pdfa/pdf2pdf-enabled? dev-env?)
   (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
-    (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+    (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
           application-id (:id application)
           type {:type-group "paapiirustus" :type-id "asemapiirros"}
           resp (command raktark-jarvenpaa
