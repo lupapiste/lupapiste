@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1473680175528');
+@import url('main-blessed1.css?z=1473940019396');
 
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
@@ -4059,14 +4059,19 @@ ul.no-bullets {
 /* line 39, ../../../private/common-html/sass/partials/_screenmessage.scss */
 #sys-notification .notification-list ul li a {
   color: white;
+  text-decoration: underline;
 }
-/* line 42, ../../../private/common-html/sass/partials/_screenmessage.scss */
+/* line 43, ../../../private/common-html/sass/partials/_screenmessage.scss */
+#sys-notification .notification-list ul li a:hover {
+  text-decoration: none;
+}
+/* line 46, ../../../private/common-html/sass/partials/_screenmessage.scss */
 #sys-notification .notification-list ul li:last-child {
   margin-bottom: 0px;
   border-bottom: none;
 }
 
-/* line 51, ../../../private/common-html/sass/partials/_screenmessage.scss */
+/* line 55, ../../../private/common-html/sass/partials/_screenmessage.scss */
 .screenmessagebutton {
   width: 170px;
 }

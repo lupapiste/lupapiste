@@ -245,7 +245,7 @@
                                    enable: $data.setVisibilityAllowed()"></select>
               </div>
 
-              <div data-bind="if: $data.permanentArchviveVisible && $data.hasVersion()">
+              <div data-bind="if: $data.permanentArchiveEnabled() && $data.hasVersion()">
                 <div class="archive-valid"
                      data-bind="with: $data.attachment().latestVersion">
                   <div>
@@ -303,12 +303,11 @@
 
           <!-- ko if: $data.permanentArchiveEnabled() && !_.isEmpty($data.attachment().metadata) && $data.tosOperationsEnabled() -->
           <div style="margin-top: 15px;">
-            <button id="show-tos-metadata"
-                    class="btn"
-                    data-bind="toggleClick: $data.showTosMetadata">
+            <button class="btn"
+                    data-bind="toggleClick: $data.showTosMetadata, testId: 'show-attachment-tos-metadata'">
               <i data-bind="css: {'lupicon-chevron-small-right': !$data.showTosMetadata(),
                             'lupicon-chevron-small-down': $data.showTosMetadata}"></i>
-              <span data-bind="ltext: '$data.attachment().showTosMetadata'"></span>
+              <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
             </button>
 
             <div class="tos-metadata-content"

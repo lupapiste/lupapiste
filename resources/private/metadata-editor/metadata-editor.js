@@ -127,7 +127,7 @@
     var self = this;
     self.attachmentId = ko.unwrap(params.attachmentId);
     self.applicationId = ko.unwrap(params.application.id);
-    self.metadata = params.metadata;
+    self.metadata = ko.isObservable(params.metadata) ? params.metadata : ko.observable(params.metadata);
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable();
     self.schema = ko.observableArray();

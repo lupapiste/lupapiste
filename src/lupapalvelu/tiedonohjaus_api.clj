@@ -201,5 +201,6 @@
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}
+   :categories #{:attachments}
    :states states/all-application-states}
   (ok))
