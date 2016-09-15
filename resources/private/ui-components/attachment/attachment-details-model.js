@@ -149,21 +149,23 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Meta
   function groupToString(group) {
-    return _.filter([_.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
+    return _.filter([_.get(group, "id") ? "operation" : _.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
   }
+  var groupMapping = {};
   self.selectableGroups = self.disposedComputed(function() {
-    // Replace corresponding option with selected value to initialize selection properly
-    var selectedValueString = groupToString(self.attachment().group());
-    return _.map(self.groupTypes(), function(group) {
-      return _.isEqual(groupToString(group), selectedValueString) ? self.attachment().group() : group;
-    });
+    // Use group strings in group selector
+    groupMapping = _.keyBy(self.groupTypes(), groupToString);
+    return _.keys(groupMapping);
+  });
+  self.selectedGroup = ko.observable(groupToString(self.attachment().group()));
+  self.disposedSubscribe(self.selectedGroup, function(groupString) {
+    self.attachment().group(_.get(groupMapping, groupString));
   });
   self.hasOperationSelector = _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
-  self.getGroupOptionsText = function(item) {
+  self.getGroupOptionsText = function(itemStr) {
+    var item = _.get(groupMapping, itemStr);
     if (_.get(item, "groupType") === "operation") {
-      return item.description ?
-        loc([item.name, "_group_label"]) + " - " + item.description :
-        loc([item.name, "_group_label"]);
+      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
     } else if (_.get(item, "groupType")) {
       return loc([item.groupType, "_group_label"]);
     }
