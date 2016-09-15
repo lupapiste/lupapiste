@@ -629,6 +629,10 @@
                                 :url "http://www.jarvenpaa.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                 :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
+                       :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
+                                                                      [:paapiirustus :pohjapiirustus]
+                                                                      [:hakija :valtakirja]
+                                                                      [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]]}
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled true
