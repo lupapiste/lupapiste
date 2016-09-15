@@ -1,7 +1,6 @@
 LUPAPISTE.CalendarService = function() {
   "use strict";
-  var self = this,
-      params = LUPAPISTE.config.calendars;
+  var params = LUPAPISTE.config.calendars;
 
   var _weekdays = function(calendarId, slots, startOfWeekMoment) {
     var now = moment();
@@ -92,7 +91,7 @@ LUPAPISTE.CalendarService = function() {
       }).call();
   };
 
-  var _fetchCalendar = hub.subscribe("calendarService::fetchCalendar", function(event) {
+  hub.subscribe("calendarService::fetchCalendar", function(event) {
     ajax.query("calendar", {calendarId: event.calendarId, userId: event.user})
       .success(function(data) {
         if (event.calendarObservable) {
@@ -102,7 +101,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _fetchOrgCalendars = hub.subscribe("calendarService::fetchOrganizationCalendars", function() {
+  hub.subscribe("calendarService::fetchOrganizationCalendars", function() {
     ajax.query("calendars-for-authority-admin")
       .success(function(d) {
         hub.send("calendarService::organizationCalendarsFetched", { calendars: d.users || [] });
@@ -110,7 +109,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
    });
 
-  var _fetchApplicationCalendarConfig = hub.subscribe("calendarService::fetchApplicationCalendarConfig", function(event) {
+  hub.subscribe("calendarService::fetchApplicationCalendarConfig", function(event) {
     ajax.query("application-calendar-config", {id: event.applicationId})
       .success(function(d) {
         hub.send("calendarService::applicationCalendarConfigFetched",
@@ -121,7 +120,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _fetchReservationTypes = hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
+  hub.subscribe("calendarService::fetchOrganizationReservationTypes", function(event) {
     ajax.query("reservation-types-for-organization", {organizationId: event.organizationId})
       .success(function (data) {
         var obj = {};
@@ -132,7 +131,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _fetchMyCalendars = hub.subscribe("calendarService::fetchMyCalendars", function() {
+  hub.subscribe("calendarService::fetchMyCalendars", function() {
     ajax.query("my-calendars")
       .success(function(data) {
         hub.send("calendarService::myCalendarsFetched", {calendars: data.calendars});
@@ -142,7 +141,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _unseenCalendarUpdates = hub.subscribe("calendarService::fetchCalendarActionsRequired", function() {
+  hub.subscribe("calendarService::fetchCalendarActionsRequired", function() {
     ajax.query("calendar-actions-required")
       .success(function(data) {
         hub.send("calendarService::calendarActionsRequiredFetched", {actionsRequired: data.actionsRequired});
@@ -152,7 +151,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _allAppointmentsByDay = hub.subscribe("calendarService::fetchAllAppointments", function() {
+  hub.subscribe("calendarService::fetchAllAppointments", function() {
     ajax.query("applications-with-appointments")
       .success(function(data) {
         hub.send("calendarService::allAppointmentsFetched", {appointments: data.appointments});
@@ -162,15 +161,15 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _fetchSlots = hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
+  hub.subscribe("calendarService::fetchCalendarSlots", function(event) {
     doFetchCalendarWeek(event);
   });
 
-  var _fetchApplicationCalendarSlots = hub.subscribe("calendarService::fetchApplicationCalendarSlots", function(event) {
+  hub.subscribe("calendarService::fetchApplicationCalendarSlots", function(event) {
     doFetchApplicationCalendarWeek(event);
   });
 
-  var _createSlots = hub.subscribe("calendarService::createCalendarSlots", function(event) {
+  hub.subscribe("calendarService::createCalendarSlots", function(event) {
     ajax
       .command("create-calendar-slots", {calendarId: event.calendarId, slots: event.slots})
       .success(function() {
@@ -184,7 +183,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _updateSlot = hub.subscribe("calendarService::updateCalendarSlot", function(event) {
+  hub.subscribe("calendarService::updateCalendarSlot", function(event) {
     ajax
       .command("update-calendar-slot", {slotId: event.id, reservationTypeIds: event.reservationTypes})
       .success(function() {
@@ -198,7 +197,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _deleteSlot = hub.subscribe("calendarService::deleteCalendarSlot", function(event) {
+  hub.subscribe("calendarService::deleteCalendarSlot", function(event) {
     ajax
       .command("delete-calendar-slot", {slotId: event.id})
       .success(function() {
@@ -212,7 +211,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
 
-  var _reserveSlot = hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
+  hub.subscribe("calendarService::reserveCalendarSlot", function(event) {
     ajax
       .command("reserve-calendar-slot", { clientId: event.clientId, slotId: event.slot().id, reservationTypeId: event.reservationTypeId,
                                           comment: event.comment(), location: event.location(), id: event.applicationId })
@@ -230,7 +229,7 @@ LUPAPISTE.CalendarService = function() {
       .call();
   });
   
-  var _cancelReservation = hub.subscribe("calendarService::cancelReservation", function(event) {
+  hub.subscribe("calendarService::cancelReservation", function(event) {
     ajax
       .command("cancel-reservation", { id: event.applicationId, reservationId: event.reservationId })
       .success(function() {
@@ -243,21 +242,4 @@ LUPAPISTE.CalendarService = function() {
       })
       .call();
   });
-
-  self.dispose = function() {
-    hub.unsubscribe(_fetchOrgCalendars);
-    hub.unsubscribe(_fetchReservationTypes);
-    hub.unsubscribe(_fetchCalendar);
-    hub.unsubscribe(_fetchMyCalendars);
-    hub.unsubscribe(_fetchSlots);
-    hub.unsubscribe(_createSlots);
-    hub.unsubscribe(_updateSlot);
-    hub.unsubscribe(_deleteSlot);
-    hub.unsubscribe(_reserveSlot);
-    hub.unsubscribe(_fetchApplicationCalendarSlots);
-    hub.unsubscribe(_fetchApplicationCalendarConfig);
-    hub.unsubscribe(_unseenCalendarUpdates);
-    hub.unsubscribe(_allAppointmentsByDay);
-    hub.unsubscribe(_cancelReservation);
-  };
 };
