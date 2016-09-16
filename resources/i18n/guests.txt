@@ -48,5 +48,6 @@
 "guest-authority.remove-title" "sv" "Stryk projektspecifik läsrätt"
 "guest-authority.remove-body" "fi" "Oletko varma? Samalla käyttäjältä poistetaan jo annetut hankekohtaiset lukuoikeudet tämän organisaation hakemuksilta."
 "guest-authority.remove-body" "sv" "Är du säker? I ansökningar från denna organisation stryks samtidigt alla projektspecifika läsrättigheter som redan har beviljats för denna användare."
-"email.title.guest-invite" "fi" "kutsu"
-"email.title.guest-invite" "sv" "inbjudan"
+"email.title.guest-invite" "fi" "Lupapiste: {{address}}, {{city}} - lukuoikeus hankkeelle"
+"email.title.guest-invite" "sv" "Lupapiste: {{address}}, {{city}} - läsrättigheter för projekt"
+"email.title.guest-invite" "en" "Lupapiste: {{address}}, {{city}} - read-only access to a project"
