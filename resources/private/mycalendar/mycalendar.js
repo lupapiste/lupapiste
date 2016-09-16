@@ -34,6 +34,17 @@
       }
     });
 
+    function calendarActionsTransform(actions) {
+      return _.transform(_.groupBy(actions, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
+        function (result, value, key) {
+          return result.push({ day: _.parseInt(key),
+                               notifications: _.transform(value, function(acc, n) {
+                                                n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
+                                                acc.push(n);
+                                              }, [])});
+        }, []);
+    }
+
     // Show notifications for calendar-related actions required by this user
     hub.subscribe("calendarService::calendarActionsRequiredFetched", function(event) {
       var actionsRequired = _.map(event.actionsRequired,
@@ -41,11 +52,7 @@
           n.acknowledged = ko.observable("none");
           return n;
         });
-      self.calendarNotificationsByDay(_.transform(
-        _.groupBy(actionsRequired, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
-        function (result, value, key) {
-          return result.push({ day: _.parseInt(key), notifications: value });
-        }, []));
+      self.calendarNotificationsByDay(calendarActionsTransform(actionsRequired));
     });
 
     hub.subscribe("calendarService::allAppointmentsFetched", function(event) {
@@ -54,16 +61,7 @@
           n.acknowledged = ko.observable("none");
           return n;
         });
-      self.allAppointmentsByDay(_.transform(
-        _.groupBy(appointments, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
-        function (result, value, key) {
-          return result.push({ day: _.parseInt(key),
-                               notifications: _.transform(value, function(acc, n) {
-                                                n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
-                                                acc.push(n);
-                                              }, [])
-                             });
-        }, []));
+      self.allAppointmentsByDay(calendarActionsTransform(appointments));
     });
 
     self.selectedCalendar.subscribe(function(val) {
