@@ -13,25 +13,45 @@
         <h1 data-bind="ltext: 'mycalendar.title'"></h1>
       </div>
 
-      <!-- ko if: calendars().length > 0 -->
-        <div class="form-entry">
-          <span data-bind="ltext: 'mycalendar.in-organization'"></span>:
-          <select class="form-input combobox tip"
-                  data-bind="options: calendars,
-                             optionsText: function(item) { return _.get(item, 'organizationName.' + loc.currentLanguage); },
-                             optionsCaption: loc('choose'),
-                             value: selectedCalendar">
-          </select>
-        </div>
-      <!-- /ko -->
-
       <!-- ko if: noCalendarsFound -->
         <div class="context-error" data-test-id="mycalendar-no-active-calendar-error" data-bind="ltext: 'mycalendar.no-active-calendar'"></div>
       <!-- /ko -->
       <!-- ko ifnot: noCalendarsFound -->
-        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' -->
+        <div class="view-toggle">
+          <button data-bind="click: setViewMode('list')" data-test-id="view-toggle-list">
+            <i class="lupicon-list"></i>
+          </button>
+          <button data-bind="click: setViewMode('calendar')" data-test-id="view-toggle-calendar">
+            <i class="lupicon-calendar"></i>
+          </button>
+        </div>
+
+        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'list' -->
+        <div data-bind="ifnot: _.isEmpty(calendarNotificationsByDay())">
+          <h3 style="font-weight: bold;"><i class="lupicon-circle-attention negative"></i>&nbsp;<span data-bind="ltext: 'mycalendar.notifications.title'"></span> </h3>
+        </div>
+        <calendar-notification-list params="items: calendarNotificationsByDay, actionRequired: true, linkToApplication: true"></calendar-notification-list>
+
+        <div>
+          <h3 style="font-weight: bold;"><i class="lupicon-circle-attention positive"></i>&nbsp;<span data-bind="ltext: 'mycalendar.all-appointments.title'"></span></h3>
+        </div>
+        <calendar-notification-list params="items: allAppointmentsByDay, actionRequired: false, linkToApplication: true"></calendar-notification-list>
+
+        <!-- /ko -->
+
+        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'mycalendar' && viewMode() === 'calendar' -->
+        <div class="form-entry">
+          <span data-bind="ltext: 'mycalendar.in-organization'"></span>:
+          <select class="form-input combobox tip"
+                  data-bind="options: calendars,
+                                 optionsText: function(item) { return _.get(item, 'organizationName.' + loc.currentLanguage); },
+                                 optionsCaption: loc('choose'),
+                                 value: selectedCalendar">
+          </select>
+        </div>
+
         <calendar-view params="searchConditions: { calendarId: selectedCalendarId,
-                                                   userId: lupapisteApp.models.currentUser.id },
+                                                       userId: lupapisteApp.models.currentUser.id },
                                reservationTypes: reservationTypes"
                        visible="selectedCalendar() !== undefined"></calendar-view>
         <!-- /ko -->

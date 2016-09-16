@@ -12,10 +12,9 @@ Resource       ./calendars_resource.robot
 Admin enables calendar fo Ronja
   Sipoo logs in
   Go to page  organization-calendars
+  Set up the calendar for authority  Sibbo Ronja
+  Set default reservation location  Foobarbaz
   Add reservation type  Foobar
-  Wait until  Element should be visible by test id  calendar-checkbox-0
-  Select Checkbox  xpath=//input[@data-test-id='calendar-checkbox-0']
-  Positive indicator should be visible
   Logout
 
 Sonja tries to look at her own calendar but gets an error message

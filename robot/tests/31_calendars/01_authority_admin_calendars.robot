@@ -30,3 +30,4 @@ Admin disables calendar
   Checkbox Should Be Selected  xpath=//input[@data-test-id='calendar-checkbox-0']
   Unselect Checkbox  xpath=//input[@data-test-id='calendar-checkbox-0']
   Positive indicator should be visible
+  Logout

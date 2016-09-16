@@ -4,7 +4,11 @@
       <h1 data-bind="ltext: 'Ajanvaraus'"></h1>
     </div>
 
-    <div data-bind="template: { name: 'calendar-message-items-template', data: { items: pendingNotifications } }"></div>
+    <div data-bind="ifnot: pendingNotifications().length == 0">
+      <h3 style="font-weight: bold"><i class="lupicon-circle-attention negative"></i>&nbsp;<span data-bind="ltext: 'application.calendar.new-calendar-messages'"></span></h3>
+    </div>
+
+    <calendar-notification-list params="items: pendingNotifications, actionRequired: true, linkToApplications: false"></calendar-notification-list>
 
     <div>
       <h2 data-bind="ltext: 'application.calendar.suggest-appointment.title'"></h2>
