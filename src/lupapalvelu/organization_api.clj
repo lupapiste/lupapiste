@@ -708,3 +708,20 @@
                               :section
                               (ss/trim operationId)
                               flag))
+
+(defcommand update-3d-map-server-details
+    {:parameters [organizationId url username password]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])
+                      (partial action/validate-optional-url :url)]
+   :user-roles #{:admin}}
+  [_]
+  (org/update-organization-3d-map-server organizationId
+                                         (ss/trim url) username password))
+
+(defcommand set-3d-map-enabled
+  {:parameters [organizationId flag]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])
+                      (partial action/boolean-parameters [:flag])]
+   :user-roles #{:admin}}
+  [_]
+  (org/update-organization organizationId {$set {:3d-map.enabled flag}}))

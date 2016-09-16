@@ -112,7 +112,9 @@
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
-                               (sc/optional-key :operations) [sc/Str]}})
+                               (sc/optional-key :operations) [sc/Str]}
+   (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
+                              (sc/optional-key :server)  Server}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -360,6 +362,9 @@
 
 (def update-organization-suti-server (partial update-organization-server :suti.server))
 
+;; 3D Map
+
+(def update-organization-3d-map-server (partial update-organization-server :3d-map.server))
 
 ;;
 ;; Construction waste feeds

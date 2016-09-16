@@ -1492,6 +1492,8 @@
 "organization.openinforequest.enabled" "sv" "Öppen begäran om rådgivning på"
 "organization.scope" "fi" "Konf"
 "organization.scope" "sv" "Konf"
+"organization.3d-map.enabled" "fi" "3D-kartat käytössä"
+"organization.3d-map.server.header" "fi" "3D-karttajärjestelmän asetukset"
 "osapuoli.muutHankkeet._append_label" "fi" "Lisää rivi"
 "osapuoli.muutHankkeet._append_label" "sv" "Tillägg rad"
 "osapuoli.muutHankkeet._copy_label" "fi" "Kopioi viimeinen rivi"
