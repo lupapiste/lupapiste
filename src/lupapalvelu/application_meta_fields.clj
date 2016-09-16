@@ -118,11 +118,12 @@
           requires-authority-action (partial state-base-filter "requires_authority_action")
           attachment-indicator-reset (or _attachment_indicator_reset 0)]
       (count
-       (case (keyword (:role user))
-         :applicant (filter requires-user-action attachments)
-         :authority (filter #(and (requires-authority-action %)
-                               (> (get-in % [:latestVersion :created] 0) attachment-indicator-reset)) attachments)
-        nil)))
+        (case (keyword (:role user))
+          :applicant (filter requires-user-action attachments)
+          :authority (filter #(and (requires-authority-action %)
+                                (not= (get-in % [:latestVersion :user :id]) (:id usr/batchrun-user-data)) ; LPK-2207
+                                (> (get-in % [:latestVersion :created] 0) attachment-indicator-reset)) attachments)
+          nil)))
     0))
 
 (defn- count-document-modifications-per-doc [user app]
