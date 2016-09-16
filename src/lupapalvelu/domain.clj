@@ -11,7 +11,9 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.verdict :as verdict]))
+            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 ;;
 ;; application mongo querys
@@ -37,7 +39,7 @@
 (defn applications-containing-future-reservations-for [user]
   {:reservations {$elemMatch {$and [{$or [{:from {"$eq" (:id user)}}
                                           {:to {"$eq" (:id user)}}]}
-                                    {:endTime {$gte (clj-time.coerce/to-long (clj-time.core/now))}}]}}})
+                                    {:endTime {$gte (tc/to-long (t/now))}}]}}})
 
 (defn applications-containing-reservations-requiring-action-query-for [user]
   {:reservations {$elemMatch {:action-required-by {"$eq" (:id user)}}}})

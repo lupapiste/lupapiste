@@ -283,7 +283,12 @@
         _.transform(
           _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
           function (result, value, key) {
-            return result.push({ day: _.parseInt(key), notifications: value });
+            return result.push({ day: _.parseInt(key),
+                                 notifications: _.transform(value, function(acc, n) {
+                                                  n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
+                                                  acc.push(n);
+                                                }, [])});
+
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
 

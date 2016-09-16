@@ -423,12 +423,11 @@
   [{:keys [reservations] :as appl}]
   (let [appl-without-reservations (dissoc appl :reservations)
         reservation-fields [:id :applicationId :status :reservationStatus :reservationType :startTime :endTime
-                            :comment :location :reservedBy :from :to]
-        participant-fields [:firstName :lastName :id]
-        id->participant (comp (fn [u] (select-keys u participant-fields)) usr/get-user-by-id)]
+                            :comment :location :reservedBy :from :to :participants]
+        participant-fields [:firstName :lastName :id]]
     (map #(merge (select-keys % reservation-fields)
                  {:application appl-without-reservations
-                  :participants (map id->participant (reservation-participants %))}) reservations)))
+                  :participants (map (fn [u] (select-keys u participant-fields)) (:participants %))}) reservations)))
 
 (defquery calendar-actions-required
   {:user-roles       #{:authority :applicant}
