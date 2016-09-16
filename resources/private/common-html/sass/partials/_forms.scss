@@ -1469,6 +1469,10 @@ textarea.grid-style-input {
   white-space: nowrap;
 }
 
+.wrapped_text {
+  white-space: pre-wrap;
+}
+
 .cell-span {
   line-height: $btn-height;
 }
