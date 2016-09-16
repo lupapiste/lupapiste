@@ -38,28 +38,11 @@
 
 (def default-application-state-graph common-states/default-application-state-graph)
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tj-ilmoitus-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted  [:acknowledged :canceled]
-     ; must be for tj-hakemus-state-graph compatibility:
-     ; if foreman application is in complementNeeded state it can be converted
-     ; to use this state graph
-     :complementNeeded [:acknowledged :canceled]
-     :acknowledged [:complementNeeded]}))
+(def ^{:doc "See default-application-state-graph"}
+  tj-ilmoitus-state-graph common-states/tj-ilmoitus-state-graph)
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tj-hakemus-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted    [:sent :canceled]
-     :sent         [:foremanVerdictGiven :complementNeeded :canceled]
-     :complementNeeded [:sent :canceled]
-     :foremanVerdictGiven [:canceled :appealed]
-     :appealed [:foremanVerdictGiven :canceled]}))
+(def ^{:doc "See default-application-state-graph"}
+  tj-hakemus-state-graph common-states/tj-hakemus-state-graph)
 
 ; TODO draft versions this forward
 
@@ -74,18 +57,8 @@
      :final        [] ; Lain voimainen
      }))
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tonttijako-application-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted [:hearing :canceled]
-     :hearing [:proposal :canceled]
-     :proposal [:proposalApproved :canceled]
-     :proposalApproved [:final :appealed :canceled]
-     :appealed [:final :canceled] ; Oikaisuvaatimus
-     :final    [] ; Lain voimainen
-     }))
+(def ^{:doc "See default-application-state-graph"}
+  tonttijako-application-state-graph common-states/tonttijako-application-state-graph)
 
 (def
   ^{:doc "See default-application-state-graph"}
