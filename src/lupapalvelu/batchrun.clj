@@ -441,15 +441,16 @@
   (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
     (let [command (application->command application)
           last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
-    (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
-      (info "Converting attachments of application" (:id application))
-      (doseq [attachment (:attachments application)]
-        (when-not (get-in attachment [:latestVersion :archivable])
-          (when (= (get-in attachment [:type :type-group]) "paapiirustus")
-            (do
-              (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
-              (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
-                (if (:archivabilityError result)
-                  (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
-                  (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application)))))))))))))
+      (logging/with-logging-context {:applicationId (:id application)}
+        (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
+          (info "Converting attachments of application" (:id application))
+          (doseq [attachment (:attachments application)]
+            (when (:latestVersion attachment)
+              (when-not (get-in attachment [:latestVersion :archivable])
+                  (do
+                    (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+                    (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
+                      (if (:archivabilityError result)
+                        (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
+                        (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
 
