@@ -8,10 +8,10 @@
         <span data-bind="visible: inVerdictGivenState() || inFinalState() , ltext: 'application.tabInstructions.verdictGiven'"></span>
       </h3>
       <!-- ko if: proclaimedText -->
-      <pre class="bulletin_text" data-bind="text: proclaimedText"></pre>
+      <pre class="wrapped_text" data-bind="text: proclaimedText"></pre>
       <!-- /ko -->
       <!-- ko if: verdictGivenText -->
-      <pre class="bulletin_text" data-bind="text: verdictGivenText"></pre>
+      <pre class="wrapped_text" data-bind="text: verdictGivenText"></pre>
       <!-- /ko -->
     </script>
   </section>

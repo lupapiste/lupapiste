@@ -57,7 +57,12 @@
       self.allAppointmentsByDay(_.transform(
         _.groupBy(appointments, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
         function (result, value, key) {
-          return result.push({ day: _.parseInt(key), notifications: value });
+          return result.push({ day: _.parseInt(key),
+                               notifications: _.transform(value, function(acc, n) {
+                                                n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
+                                                acc.push(n);
+                                              }, [])
+                             });
         }, []));
     });
 
@@ -66,9 +71,9 @@
       self.selectedCalendarId(_.get(val, "id", undefined));
     });
 
-      self.appointmentParticipants = function(r) {
-        return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
-      };
+    self.appointmentParticipants = function(r) {
+      return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");
+    };
 
   }
 
