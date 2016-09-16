@@ -306,7 +306,7 @@
             (:editable (last appeals-after)) => true))))))
 
 (facts "appeals with attachments"
-  (let [{app-id :id} (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId jarvenpaa-property-id)
+  (let [{app-id :id} (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         {:keys [attachments]} (query-application pena app-id)
         created (now)
         {vid :verdict-id :as resp0} (give-verdict raktark-jarvenpaa app-id :verdictId "321-2016")

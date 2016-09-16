@@ -11,7 +11,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.user :as user]))
+            [lupapalvelu.user :as usr]))
 
 ;;
 ;; Common
@@ -32,7 +32,7 @@
 
 (defschema StatementGiver
   "Statement giver user summary"
-  {:userId                          ssc/ObjectIdStr ;; id for user
+  {:userId                          usr/Id          ;; id for user
    (sc/optional-key :id)            sc/Str          ;; 'official' statement giver id in organization
    :text                            sc/Str          ;; text field describing statement giver role or job
    :email                           ssc/Email       ;; email
@@ -40,7 +40,7 @@
 
 (defschema Reply
   "Statement reply"
-  {:editor-id                       ssc/ObjectIdStr ;; id of the user last edited the reply
+  {:editor-id                       usr/Id          ;; id of the user last edited the reply
    (sc/optional-key :saateText)     sc/Str          ;; cover note for statement reply, written by authority
    :nothing-to-add                  sc/Bool         ;; indicator that user has read the statement and has nothing to add
    (sc/optional-key :text)          sc/Str})        ;; reply text that user has written
@@ -58,7 +58,7 @@
    (sc/optional-key :modified)      ssc/Timestamp   ;; last modified
    (sc/optional-key :duedate-reminder-sent) ssc/Timestamp ;; for reminders sent after due date exceeded
    (sc/optional-key :modify-id)     sc/Str          ;; id for restrict overlapping modifications
-   (sc/optional-key :editor-id)     sc/Str          ;; id of the user last edited the statement
+   (sc/optional-key :editor-id)     usr/Id          ;; id of the user last edited the statement
    (sc/optional-key :reply)         Reply
    :person                          StatementGiver
    (sc/optional-key :metadata)      {sc/Any sc/Any}})
@@ -78,7 +78,7 @@
 
 (defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user application :application}]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
-    (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
+    (when-not (= (usr/canonize-email statement-email) (usr/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
 (defn authority-or-statement-owner-applicant [{{role :role} :user :as command}]

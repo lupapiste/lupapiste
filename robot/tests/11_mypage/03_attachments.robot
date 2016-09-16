@@ -33,7 +33,7 @@ Mikko copies his attachments to application
   [Tags]  firefox
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
-  Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  open
+  Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
   Open tab  attachments
   Click by test id  copy-user-attachments
   Confirm yes no dialog
@@ -49,12 +49,11 @@ Copy own attachments button is not shown to non-architect
   Wait until  Page should contain element  jquery=button[data-test-id=add-attachment]
   Page should not contain element  jquery=button[data-test-id=copy-own-attachments]
 
-Mikko deletes own attachment from application and submits
+Mikko deletes own attachment from application
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Delete attachment  osapuolet.cv
   Wait Until  Element should not be visible  jquery=div#application-attachments-tab a:contains('${PDF_TESTFILE_NAME}')
-  Submit application
   Logout
 
 Sonja asks for the cv
@@ -68,18 +67,22 @@ Sonja asks for the cv
   Set Suite Variable  ${cvIndex}  ${index}
   Logout
 
-Mikko logs in and sets himself architect
+Mikko can't copy own attachments yet
   As Mikko
+  Open application  ${appname}  753-416-25-30
+  Open tab  attachments
+  Element should not be visible by test id  copy-own-attachments
+
+Mikko sets himself architect
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Wait until  Click Element  architect
   Save User Data
-  Reload Page
-  Wait Until  Checkbox Should Be Selected  architect
+
+Mikko returns to application
+  Scroll and click test id  back-button
 
 Mikko copies own CV to application
-  Open application  ${appname}  753-416-25-30
-  Open tab  attachments
   Click by test id  copy-user-attachments
   Confirm yes no dialog
 

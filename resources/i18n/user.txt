@@ -24,3 +24,5 @@
 "applicationRole.suunnittelija" "sv" "projekterare"
 "applicationRole.tyomaastaVastaava" "fi" "työmaasta vastaava"
 "applicationRole.tyomaastaVastaava" "sv" "ansvarig för byggplatsen"
+"applicationRole.tyonjohtaja" "fi" "työnjohtaja"
+"applicationRole.tyonjohtaja" "sv" "arbetsledaren"

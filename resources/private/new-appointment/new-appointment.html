@@ -3,6 +3,7 @@
 <body>
 <section class="page" id="new-appointment">
 
+  <!-- ko if: features.enabled('ajanvaraus') -->
   <div class="container">
     <button class="secondary" data-bind="click: function() { history.go(-1); }">
       <i class="lupicon-chevron-start"></i>
@@ -54,6 +55,7 @@
     </div>
 
   </div>
+  <!-- /ko -->
 
 </section>
 </body>

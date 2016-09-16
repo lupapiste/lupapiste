@@ -7,11 +7,13 @@ Variables      variables.py
 
 *** Test Cases ***
 
-Mikko creates application
+Mikko creates application to Jarvenpaa
+  # Jarvenpaa has archive
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
+  Set Suite Variable  ${propertyid}  186-416-25-30
   Mikko logs in
-  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyid}  kerrostalo-rivitalo
 
 Mikko edits operation description
   Open accordions  info
@@ -76,15 +78,14 @@ Mikko can change contents
   Input text by test id  attachment-contents-input  PuuCee
   Positive indicator icon should be visible
 
-Mikko goes to fresh attachments tab
+Mikko goes to attachments tab
   Go Back
-  Reload Page
 
 Mikko sees that contents metadata is visible in attachments list
   Wait Until  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
 
 Mikko sees that attachments are grouped by operations
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  4
+  Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  4
 
 Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
   Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"])[last()]//span[@class="rollup-status__text"]  MUUN RAKENNUKSEN RAKENTAMINEN - TALO B
@@ -96,3 +97,26 @@ Mikko opens attachment and sees that attachment label metadata is set
   Page should contain  B0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
   Page should contain  1:200
+  Go Back
+  Tab should be visible  attachments
+
+Mikko submits
+  Submit application
+  [Teardown]  Logout
+
+Authority opens attachment details
+  # Jarvenpaa has archive
+  Jarvenpaa authority logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  attachments
+  Open attachment details  muut.muu
+  Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
+
+Open archive metadata editor
+  Click enabled by test id  show-attachment-tos-metadata
+  Click by test id  editMatadata
+  Element Should Be Disabled  xpath=//section[@id="attachment"]//button[@data-test-id='saveMetadata']
+
+Cancel editing
+  Click by test id  cancelMatadataEdit
+  [Teardown]  Logout

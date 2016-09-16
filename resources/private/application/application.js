@@ -149,6 +149,14 @@
     }
   }
 
+  function refreshAuthorizationModel() {
+    if (currentId) {
+      authorizationModel.refresh({id: currentId});
+    } else {
+      authorizationModel.setData({});
+    }
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -382,12 +390,20 @@
 
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
+  hub.onPageUnload( "application", function() {
+    if( currentId && !_.includes( _.get( window, "location.hash"),
+                                  currentId)) {
+      currentId = null;
+    }
+  });
 
   hub.subscribe("application-loaded", function(e) {
     showApplication(e.applicationDetails, e.lightLoad);
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
+  // User details can affect what she can do to the application
+  hub.subscribe("reload-current-user", refreshAuthorizationModel);
 
   function NeighborStatusModel() {
     var self = this;

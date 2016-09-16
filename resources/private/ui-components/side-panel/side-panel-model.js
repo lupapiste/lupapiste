@@ -112,10 +112,13 @@ LUPAPISTE.SidePanelModel = function(params) {
     self.enableSidePanel(self.application && _.includes(pages, ko.unwrap(self.currentPage)));
   });
 
-  self.addEventListener("side-panel", "show-conversation", function() {
-    if (!self.showConversationPanel()) {
-      self.toggleConversationPanel();
-    }
+  self.addEventListener("side-panel", "show-conversation", function( opts ) {
+    _.delay( function() {
+      if (!self.showConversationPanel()) {
+        self.toggleConversationPanel();
+      }
+    }, _.get( opts, "delay", 1 ));
+
   });
 
   self.toggleInfoPanel = function() {
