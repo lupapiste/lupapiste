@@ -29,10 +29,10 @@
   (cond
     (not (info-links/can-edit-link? (:application command) linkId (:user command)))
       (fail :error.not-authorized)
-    (info-links/delete-info-link! (:application command) linkId)
-      (ok :res true)
+    (not (info-links/delete-info-link! (:application command) linkId))
+      (fail :error.badlink)
     :else
-       (fail :error.badlink)))
+      (ok :res true)))
 
 (defcommand info-link-reorder
   {:description      "Reorder application-specific info-links"
@@ -66,10 +66,9 @@
     (cond
       (not linkId)
         (if (info-links/can-add-links? app (:user command))
-          (let [idp (info-links/add-info-link! app text url timestamp (:user command))]
-            (if idp
-              (ok :linkId idp)
-              (fail :error.unknown)))
+          (if-let [idp (info-links/add-info-link! app text url timestamp (:user command))]
+            (ok :linkId idp)
+            (fail :error.unknown))
           (fail :error.unauthorized))
       (info-links/can-edit-link? app linkId (:user command))
          (if (info-links/update-info-link! app linkId text url timestamp)
