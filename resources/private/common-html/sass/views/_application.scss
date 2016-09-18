@@ -97,14 +97,14 @@ $app-gray-darkest: $gray187;
       margin: $marginM;
     }
     .application-map-actions {
-      position: absolute;
-      z-index: 1000;
-      left: 0;
-      top: 256px;
-      //bottom: 0;
-      text-align: center;
+      margin-top: $marginS;
+      // position: absolute;
+      // z-index: 1000;
+      // left: 0;
+      // top: 256px;
+      //text-align: center;
       display:block;
-      background: $lp-green;
+      //background: $lp-green;
       .map-search-button {
         color: white;
         padding: 0 $marginL;

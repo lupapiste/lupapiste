@@ -769,4 +769,28 @@
                                             {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
                                              :downloaded "\\/Date(1467364927456)\\/"}
                                             {:name "Three" :expired false :expirydate nil :downloaded nil}]}))))
+
+  ;; Development (mockup) functionality of 3D map server, both backend and frontend
+  ;; Username / password: 3dmap / 3dmap
+  (defonce lupapisteKeys (atom {}))
+
+  (defpage [:post "/dev/3dmap"] []
+    (let [req-map (request/ring-request)
+          [username password] (http/decode-basic-auth req-map)]
+      (if (= username password "3dmap")
+        (let [keyId (mongo/create-id)]
+          (swap! lupapisteKeys assoc keyId (select-keys (:params req-map) [:applicationId :apikey]))
+          (resp/redirect (str "/dev/show-3dmap?lupapisteKey=" keyId)))
+        (resp/status 401 "Unauthorized"))))
+
+  (defpage [:get "/dev/show-3dmap"] {:keys [lupapisteKey]}
+    (let [{:keys [applicationId apikey]} (get @lupapisteKeys lupapisteKey)
+          banner " $$$$$$\\  $$$$$$$\\        $$\\      $$\\  $$$$$$\\  $$$$$$$\\        $$\\    $$\\ $$$$$$\\ $$$$$$$$\\ $$\\      $$\\ \n$$ ___$$\\ $$  __$$\\       $$$\\    $$$ |$$  __$$\\ $$  __$$\\       $$ |   $$ |\\_$$  _|$$  _____|$$ | $\\  $$ |\n\\_/   $$ |$$ |  $$ |      $$$$\\  $$$$ |$$ /  $$ |$$ |  $$ |      $$ |   $$ |  $$ |  $$ |      $$ |$$$\\ $$ |\n  $$$$$ / $$ |  $$ |      $$\\$$\\$$ $$ |$$$$$$$$ |$$$$$$$  |      \\$$\\  $$  |  $$ |  $$$$$\\    $$ $$ $$\\$$ |\n  \\___$$\\ $$ |  $$ |      $$ \\$$$  $$ |$$  __$$ |$$  ____/        \\$$\\$$  /   $$ |  $$  __|   $$$$  _$$$$ |\n$$\\   $$ |$$ |  $$ |      $$ |\\$  /$$ |$$ |  $$ |$$ |              \\$$$  /    $$ |  $$ |      $$$  / \\$$$ |\n\\$$$$$$  |$$$$$$$  |      $$ | \\_/ $$ |$$ |  $$ |$$ |               \\$  /   $$$$$$\\ $$$$$$$$\\ $$  /   \\$$ |\n \\______/ \\_______/       \\__|     \\__|\\__|  \\__|\\__|                \\_/    \\______|\\________|\\__/     \\__|\n"
+          ]
+      (hiccup.core/html [:html
+                         [:head [:title "3D Map View"]]
+                         [:body {:style "background-color: red; color: white"} [:pre banner]
+                          [:ul
+                                 [:li (str "Application ID: " applicationId)]
+                                 [:li (str "Apikey: " apikey)]]]])))
   )

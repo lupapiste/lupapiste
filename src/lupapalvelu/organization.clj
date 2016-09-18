@@ -17,7 +17,7 @@
             [hiccup.core :as hiccup]
             [clj-rss.core :as rss]
             [schema.core :as sc]
-            [sade.core :refer [fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -32,6 +32,7 @@
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.geojson :as geo]
+            [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
             [clojure.walk :refer [keywordize-keys]]))
 
@@ -365,6 +366,34 @@
 ;; 3D Map
 
 (def update-organization-3d-map-server (partial update-organization-server :3d-map.server))
+
+(defn three-d-map-enabled
+  "Pre-checker for making sure that the organization has the 3D map enabled."
+  [command]
+  (when-let [org-id (-> command :application :organization)]
+    (when-not (-> org-id get-organization :3d-map :enabled)
+      (fail :error.3d-map-disabled))))
+
+(defn redirect-to-3d-map
+  "Makes POST request to the 3D map server and returns the Location header value."
+  [{email :email} {:keys [id organization]}]
+  (let [{:keys [url username password crypto-iv]} (-> organization
+                                                      get-organization
+                                                      :3d-map
+                                                      :server)
+        response (http/post url
+                   (merge {:throw-exceptions false
+                           :form-params {:applicationId id
+                                         :apikey (or (usr/get-apikey email)
+                                                     (usr/create-apikey email))}}
+                          (when (ss/not-blank? crypto-iv)
+                            {:basic-auth [username
+                                          (decode-credentials password
+                                                              crypto-iv)]})))
+        location (-> response :headers :location)]
+    (if (ss/blank? location)
+      (fail :error.3d-map-not-found)
+      (ok :location location))))
 
 ;;
 ;; Construction waste feeds

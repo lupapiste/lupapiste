@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1474020631781');
+@import url('main-blessed1.css?z=1474206228621');
 
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
@@ -633,9 +633,9 @@
 }
 /* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100.0%;
-  min-width: 100.0%;
-  max-width: 100.0%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
@@ -5430,13 +5430,8 @@ span.icon_clear:before {
 }
 /* line 99, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application-map-container .application-map-actions {
-  position: absolute;
-  z-index: 1000;
-  left: 0;
-  top: 256px;
-  text-align: center;
+  margin-top: 6px;
   display: block;
-  background: #04c714;
 }
 /* line 108, ../../../private/common-html/sass/views/_application.scss */
 .application_summary .application-map-container .application-map-actions .map-search-button {

@@ -133,7 +133,8 @@ jQuery(document).ready(function() {
     {name: "change-email"},
     {name: "side-panel-info"},
     {name: "info-link"},
-    {name: "targeted-attachments"}
+    {name: "targeted-attachments"},
+    {name: "open-3d-map"}
 ];
 
   ko.registerLupapisteComponents(components);

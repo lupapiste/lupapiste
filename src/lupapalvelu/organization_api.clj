@@ -710,18 +710,35 @@
                               flag))
 
 (defcommand update-3d-map-server-details
-    {:parameters [organizationId url username password]
+  {:description      "3D map backend server details. If user is blank (when
+  trimmed), then the basic authentication will not be used."
+   :parameters       [organizationId url username password]
    :input-validators [(partial action/non-blank-parameters [:organizationId])
-                      (partial action/validate-optional-url :url)]
-   :user-roles #{:admin}}
+                      (partial action/validate-optional-https-url :url)]
+   :user-roles       #{:admin}}
   [_]
   (org/update-organization-3d-map-server organizationId
                                          (ss/trim url) username password))
 
 (defcommand set-3d-map-enabled
-  {:parameters [organizationId flag]
+  {:description      "Toggle 3D map support for the organization."
+   :parameters       [organizationId flag]
    :input-validators [(partial action/non-blank-parameters [:organizationId])
                       (partial action/boolean-parameters [:flag])]
-   :user-roles #{:admin}}
+   :user-roles       #{:admin}}
   [_]
   (org/update-organization organizationId {$set {:3d-map.enabled flag}}))
+
+(defcommand redirect-to-3d-map
+  {:description "Makes a properly formatted (auth, apikey) request to
+  the 3D map backend server and returns the location information of
+  the redirect response."
+   :parameters       [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles  auth/reader-org-authz-roles
+   :states           states/all-application-states
+   :pre-checks       [org/three-d-map-enabled]}
+  [{:keys [application user]}]
+  (org/redirect-to-3d-map user application))

@@ -22,7 +22,7 @@
     self.threeDMapServerParams = {
       channel: {},
       server: ko.observable({}),
-      readOnly: self.threeDMapEnabled,
+      readOnly: ko.pureComputed( _.negate( self.threeDMapEnabled ) ),
       waiting: ko.observable(false),
       header: "organization.3d-map.server.header",
       urlLabel: "auth-admin.suti-api-settings.urlLabel",
