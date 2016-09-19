@@ -27,7 +27,7 @@
       header: "organization.3d-map.server.header",
       urlLabel: "auth-admin.suti-api-settings.urlLabel",
       saveLabel: "save",
-      prefix: "suti",
+      prefix: "3d-map",
       // define mandatory keys, but the default ajax error handling is used
       error: null,
       errorMessageTerm: null
@@ -37,6 +37,7 @@
       ajax.command( command,
                     _.merge(params,
                             {organizationId: self.organization().id()}))
+        .pending( self.threeDMapServerParams.waiting)
         .success( util.showSavedIndicator )
         .error( util.showSavedIndicator )
         .call();
