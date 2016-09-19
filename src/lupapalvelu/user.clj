@@ -213,14 +213,17 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
-(defn batchrun-user [org-ids]
+(def batchrun-user-data
   {:id "-"
    :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"
-   :role "authority"
-   :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)})
+   :role "authority"})
+
+(defn batchrun-user [org-ids]
+  (let [org-authz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)]
+    (assoc batchrun-user-data :orgAuthz org-authz)))
 
 ;;
 ;; ==============================================================================
