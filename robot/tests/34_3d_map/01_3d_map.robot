@@ -53,13 +53,13 @@ Admin edits 3D maps
   Test id disabled  3d-map-send
   [Teardown]  Logout
 
-Pena logs in and no longer see 3D map button
+Pena logs in and no longer sees 3D map button
   Pena logs in
   Open application  ${appname}  ${propertyid}
   No such test id  open-3d-map
   [Teardown]  Logout
 
-Mikko logs in and no longer see 3D map button
+Mikko logs in and no longer sees 3D map button
   Mikko logs in
   Open inforequest  ${infoname}  ${infoid}
   No such test id  open-3d-map

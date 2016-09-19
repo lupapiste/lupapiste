@@ -791,6 +791,6 @@
                          [:head [:title "3D Map View"]]
                          [:body {:style "background-color: #008b00; color: white; padding: 4em"} [:pre banner]
                           [:ul
-                                 [:li (format "Application ID: %s (%s)" applicationId address)]
-                                 [:li (format "Apikey: %s (%s %s)" apikey firstName lastName)]]]])))
+                           [:li (format "Application ID: %s (%s)" applicationId address)]
+                           [:li (format "User: %s %s" firstName lastName)]]]])))
   )

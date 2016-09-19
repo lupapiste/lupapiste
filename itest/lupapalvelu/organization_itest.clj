@@ -850,7 +850,7 @@
          (fact "The 3D maps are supported for Sipoo-R inforequests too"
                (command pena :redirect-to-3d-map :id info-id) => good-map)
          (fact "Admin disables 3D maps for Sipoo-R"
-               (command admin :set-3d-map-enabled :organizationId "753-R" :flag false))
+               (command admin :set-3d-map-enabled :organizationId "753-R" :flag false) => ok?)
          (fact "Sipoo-R applications and inforequests no longer can access 3D maps"
                (command pena :redirect-to-3d-map :id r-id) => fail?
                (command pena :redirect-to-3d-map :id info-id) => fail?)
