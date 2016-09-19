@@ -1,5 +1,6 @@
 (ns lupapalvelu.notification-itest
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
@@ -33,4 +34,16 @@
     (fact "pena resubscribes, emails start again"
       (command pena :subscribe-notifications :id id :username "pena") => ok?
       (comment-application sonja id false) => ok?
-      (:to (last-email)) => (contains (email-for "pena")))))
+      (:to (last-email)) => (contains (email-for "pena")))
+    
+    (fact "admin disables pena, no more email"
+      (command admin :set-user-enabled :email "pena@example.com" :enabled "false") => ok?
+      (comment-application sonja id false) => ok?
+      (command admin :set-user-enabled :email "pena@example.com" :enabled "true") => ok?
+      (last-email) => nil?)
+   
+    (fact "pena sees mails after being enabled again"
+      (comment-application sonja id false) 
+      (:to (last-email)) => (contains (email-for "pena")))
+ ))
+

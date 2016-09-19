@@ -394,7 +394,11 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
+(defn user-enabled? [user]
+  (:enabled (get-user-by-id (:id user))))
 
+(defn user-removed? [x]
+   (not (user-enabled? x)))
 
 ;;
 ;; ==============================================================================
