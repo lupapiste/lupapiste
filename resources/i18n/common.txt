@@ -476,6 +476,8 @@
 "hankkeen-kuvaus.kuvaus" "sv" "Redogörelse för byggnadsprojektet eller åtgärd"
 "hankkeen-kuvaus.poikkeamat" "fi" "Poikkeamiset säännöksistä perusteluineen"
 "hankkeen-kuvaus.poikkeamat" "sv" "Avvikelse från bestämmelserna med motiveringar"
+"hankkeen-kuvaus.poikkeamat.help!" "fi" "Tässä kohdassa on lueteltava kaikki määräykset, joista haetaan luvan yhteydessä vähäistä poikkeamista. Lisäksi on esitettävä perustelut jokaiselle poikkeamiselle. Vähäistä poikkeamista ei voida myöntää ilman perusteluja."
+"hankkeen-kuvaus.poikkeamat.help!" "sv" ""
 "hearing" "fi" "Maanomistajien kuuleminen"
 "hearing" "sv" "Hörande av markägare"
 "help.AddForeman" "fi" "Työnjohtaja ilmoitetaan aina erillisellä ilmoituksella."

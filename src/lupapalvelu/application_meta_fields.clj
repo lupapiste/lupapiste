@@ -8,7 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -60,7 +60,7 @@
 
 (defn get-applicant-phone [_ app]
   (let [owner (first (auth/get-auths-by-role app :owner))
-        user (user/get-user-by-id (:id owner))]
+        user (usr/get-user-by-id (:id owner))]
     (:phone user)))
 
 (defn foreman-name-from-doc [doc]
@@ -89,7 +89,7 @@
                    (:comments app)))))
 
 (defn- unseen-notice? [user {:keys [authorityNoticeEdited _authority-notices-seen-by]}]
-  (boolean (and (user/authority? user)
+  (boolean (and (usr/authority? user)
                 (and (number? authorityNoticeEdited)
                     (< (get-in _authority-notices-seen-by [(keyword (:id user))] 0)
                        authorityNoticeEdited)))))
@@ -99,12 +99,12 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (user/canonize-email (get-in statement [:person :email])) (user/canonize-email (:email user)))))
+                            (not= (usr/canonize-email (get-in statement [:person :email])) (usr/canonize-email (:email user)))))
                      (:statements app))))
     0))
 
 (defn- count-unseen-verdicts [user app]
-  (if (and (user/applicant? user) (not (:infoRequest app)))
+  (if (and (usr/applicant? user) (not (:infoRequest app)))
     (let [last-seen (get-in app [:_verdicts-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
@@ -118,21 +118,22 @@
           requires-authority-action (partial state-base-filter "requires_authority_action")
           attachment-indicator-reset (or _attachment_indicator_reset 0)]
       (count
-       (case (keyword (:role user))
-         :applicant (filter requires-user-action attachments)
-         :authority (filter #(and (requires-authority-action %)
-                               (> (get-in % [:latestVersion :created] 0) attachment-indicator-reset)) attachments)
-        nil)))
+        (case (keyword (:role user))
+          :applicant (filter requires-user-action attachments)
+          :authority (filter #(and (requires-authority-action %)
+                                (not= (get-in % [:latestVersion :user :id]) (:id usr/batchrun-user-data)) ; LPK-2207
+                                (> (get-in % [:latestVersion :created] 0) attachment-indicator-reset)) attachments)
+          nil)))
     0))
 
 (defn- count-document-modifications-per-doc [user app]
-  (if (and (user/authority? user) (not (:infoRequest app)))
+  (if (and (usr/authority? user) (not (:infoRequest app)))
     (into {} (map (fn [doc] [(:id doc) (model/modifications-since-approvals doc)]) (:documents app)))
     {}))
 
 
 (defn- count-document-modifications [user app]
-  (if (and (user/authority? user) (not (:infoRequest app)))
+  (if (and (usr/authority? user) (not (:infoRequest app)))
     (reduce + 0 (vals (:documentModificationsPerDoc app)))
     0))
 
