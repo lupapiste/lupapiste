@@ -31,9 +31,8 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
-            [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
@@ -111,10 +110,10 @@
    :host       (host request)})
 
 (defn- logged-in? [request]
-  (not (nil? (:id (user/current-user request)))))
+  (not (nil? (:id (usr/current-user request)))))
 
 (defn- in-role? [role request]
-  (= role (keyword (:role (user/current-user request)))))
+  (= role (keyword (:role (usr/current-user request)))))
 
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
@@ -146,7 +145,7 @@
 ;;
 
 (defn enriched [m request]
-  (merge m {:user (user/current-user request)
+  (merge m {:user (usr/current-user request)
             :lang *lang*
             :session (:session request)
             :web  (web-stuff request)}))
@@ -310,11 +309,11 @@
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
 
 (defn- landing-page
-  ([]     (landing-page default-lang (user/current-user (request/ring-request))))
-  ([lang] (landing-page lang         (user/current-user (request/ring-request))) )
+  ([]     (landing-page default-lang (usr/current-user (request/ring-request))))
+  ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
   ([lang user]
    (let [lang (get user :language lang)]
-     (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
+     (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
@@ -356,17 +355,17 @@
 ;;
 
 (defn- user-to-application-page [user lang]
-  (ssess/merge-to-session (request/ring-request) (landing-page lang user) {:user (user/session-summary user)}))
+  (ssess/merge-to-session (request/ring-request) (landing-page lang user) {:user (usr/session-summary user)}))
 
 (defn- logout! []
   (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
   {:session nil})
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (let [session-user (user/current-user (request/ring-request))]
+  (let [session-user (usr/current-user (request/ring-request))]
     (if (:impersonating session-user)
       ; Just stop impersonating
-      (user-to-application-page (user/get-user {:id (:id session-user), :enabled true}) lang)
+      (user-to-application-page (usr/get-user {:id (:id session-user), :enabled true}) lang)
       ; Actually kill the session
       (merge (logout!) (redirect-after-logout lang)))))
 
@@ -421,11 +420,11 @@
 
 (defn- authentication [handler request]
   (let [api-key (get-apikey request)
-        api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+        api-key-auth (when-not (ss/blank? api-key) (usr/get-user-with-apikey api-key))
         session-user (get-in request [:session :user])
         expires (:expires session-user)
-        expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
-        updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
+        expired? (and expires (not (usr/virtual-user? session-user)) (< expires (now)))
+        updated-user (and expired? (usr/session-summary (usr/get-user {:id (:id session-user), :enabled true})))
         user (or api-key-auth updated-user session-user (autologin/autologin request) )]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
@@ -499,7 +498,7 @@
 (defjson "/api/alive" []
   (cond
     (control/lockdown?) (fail :error.service-lockdown)
-    (user/current-user (request/ring-request)) (ok)
+    (usr/current-user (request/ring-request)) (ok)
     :else (fail :error.unauthorized)))
 
 ;;
@@ -536,7 +535,7 @@
 (defn- csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
-     :userId        (:id (user/current-user request) "???")}
+     :userId        (:id (usr/current-user request) "???")}
     (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
@@ -664,7 +663,7 @@
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
           {application-id :id :as response} (execute-command "create-application" params request)
-          user (user/current-user request)]
+          user (usr/current-user request)]
       (if (core/ok? response)
         (let [command (-> (domain/get-application-no-access-checking application-id)
                           action/application->command
@@ -677,7 +676,7 @@
             (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))
 
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role user))
+            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
                                                 "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
             (resp/status 200 application-id)))
         (resp/status 400 (str response)))))
@@ -786,11 +785,12 @@
   (defpage [:get "/dev/show-3dmap"] {:keys [lupapisteKey]}
     (let [{:keys [applicationId apikey]} (get @lupapisteKeys lupapisteKey)
           banner " $$$$$$\\  $$$$$$$\\        $$\\      $$\\  $$$$$$\\  $$$$$$$\\        $$\\    $$\\ $$$$$$\\ $$$$$$$$\\ $$\\      $$\\ \n$$ ___$$\\ $$  __$$\\       $$$\\    $$$ |$$  __$$\\ $$  __$$\\       $$ |   $$ |\\_$$  _|$$  _____|$$ | $\\  $$ |\n\\_/   $$ |$$ |  $$ |      $$$$\\  $$$$ |$$ /  $$ |$$ |  $$ |      $$ |   $$ |  $$ |  $$ |      $$ |$$$\\ $$ |\n  $$$$$ / $$ |  $$ |      $$\\$$\\$$ $$ |$$$$$$$$ |$$$$$$$  |      \\$$\\  $$  |  $$ |  $$$$$\\    $$ $$ $$\\$$ |\n  \\___$$\\ $$ |  $$ |      $$ \\$$$  $$ |$$  __$$ |$$  ____/        \\$$\\$$  /   $$ |  $$  __|   $$$$  _$$$$ |\n$$\\   $$ |$$ |  $$ |      $$ |\\$  /$$ |$$ |  $$ |$$ |              \\$$$  /    $$ |  $$ |      $$$  / \\$$$ |\n\\$$$$$$  |$$$$$$$  |      $$ | \\_/ $$ |$$ |  $$ |$$ |               \\$  /   $$$$$$\\ $$$$$$$$\\ $$  /   \\$$ |\n \\______/ \\_______/       \\__|     \\__|\\__|  \\__|\\__|                \\_/    \\______|\\________|\\__/     \\__|\n"
-          ]
+          address ((mongo/select-one :applications {:_id applicationId}) :address)
+          {:keys [firstName lastName]} (usr/get-user-with-apikey apikey)]
       (hiccup.core/html [:html
                          [:head [:title "3D Map View"]]
-                         [:body {:style "background-color: red; color: white"} [:pre banner]
+                         [:body {:style "background-color: #008b00; color: white; padding: 4em"} [:pre banner]
                           [:ul
-                                 [:li (str "Application ID: " applicationId)]
-                                 [:li (str "Apikey: " apikey)]]]])))
+                                 [:li (format "Application ID: %s (%s)" applicationId address)]
+                                 [:li (format "Apikey: %s (%s %s)" apikey firstName lastName)]]]])))
   )

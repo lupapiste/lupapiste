@@ -1044,6 +1044,7 @@
 "map.open" "sv" "Öppna kartan"
 "map.open-3d" "fi" "Avaa 3D-kartta"
 "map.open-3d" "sv" "Öppna 3D-kartan"
+"map.open-3d.wait" "fi" "Karttaa avataan..."
 "markatilan-laajentaminen._group_label" "fi" "Märkätilan muuttaminen tai laajentaminen"
 "markatilan-laajentaminen._group_label" "sv" "Ändring eller utbyggnad av våtutrymme"
 "masto-tms._group_label" "fi" "Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen"

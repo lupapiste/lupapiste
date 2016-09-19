@@ -2,8 +2,12 @@
         id="open-3d-map-template">
   <!-- ko if: showButton -->
   <button class="function"
-          data-bind="click: open3dMap">
+          data-test-id="open-3d-map"
+          data-bind="click: open3dMap,
+                     disable waiting,
+                     css: {waiting: waiting}">
     <i class="lupicon-location"></i>
+    <i class="wait spin lupicon-refresh"></i>
     <span data-bind="ltext: 'map.open-3d'"></span>
   </button>
   <!-- /ko -->

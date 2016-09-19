@@ -738,7 +738,7 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles
-   :states           states/all-application-states
+   :states           states/all-states
    :pre-checks       [org/three-d-map-enabled]}
   [{:keys [application user]}]
   (org/redirect-to-3d-map user application))
