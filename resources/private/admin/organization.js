@@ -17,6 +17,41 @@
     self.allowedAutologinIps = ko.observableArray();
     self.ssoKeys = ko.observableArray();
 
+    self.threeDMapEnabled = ko.observable();
+
+    self.threeDMapServerParams = {
+      channel: {},
+      server: ko.observable({}),
+      readOnly: ko.pureComputed( _.negate( self.threeDMapEnabled ) ),
+      waiting: ko.observable(false),
+      header: "organization.3d-map.server.header",
+      urlLabel: "auth-admin.suti-api-settings.urlLabel",
+      saveLabel: "save",
+      prefix: "3d-map",
+      // define mandatory keys, but the default ajax error handling is used
+      error: null,
+      errorMessageTerm: null
+    };
+
+    function organizationCommand( command, params ) {
+      ajax.command( command,
+                    _.merge(params,
+                            {organizationId: self.organization().id()}))
+        .pending( self.threeDMapServerParams.waiting)
+        .success( util.showSavedIndicator )
+        .error( util.showSavedIndicator )
+        .call();
+    }
+
+    self.threeDMapServerParams.channel.send = function( serverDetails ) {
+      organizationCommand( "update-3d-map-server-details", serverDetails );
+    };
+
+    self.threeDMapEnabled.subscribe( function( value ) {
+      organizationCommand( "set-3d-map-enabled", {flag: Boolean( value )});
+    });
+
+
     function updateSsoKeys() {
       _.forEach(self.ssoKeys(), function(ssoKey) {
         ssoKey.selected(_.includes(self.allowedAutologinIps(), ssoKey.ip));
@@ -52,6 +87,8 @@
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
           self.calendarsEnabled(result.data["calendars-enabled"]);
+          self.threeDMapEnabled( _.get(result, "data.3d-map.enabled"));
+          self.threeDMapServerParams.server(_.get( result, "data.3d-map.server"));
           isLoading = false;
         })
         .call();

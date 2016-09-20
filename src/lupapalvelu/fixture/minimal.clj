@@ -6,6 +6,7 @@
             [sade.core :refer :all]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
+(def- local-3d-map "http://localhost:8000/dev/3dmap")
 
 (def users
   [;; Solita admin:  admin / admin
@@ -717,7 +718,17 @@
                                                            [25.2605085377224, 60.3669529618652]
                                                            [25.2346903951971, 60.3699135383472]]]]
                                                   :type "MultiPolygon"}
-                                                 :type "Feature"}]}}
+                                                 :type "Feature"}]}
+                       ;; Admin admin enforces HTTPS requirement for
+                       ;; 3D map server backend. Thus, the development
+                       ;; backend must be set in the minimal
+                       :3d-map {:enabled true
+                                :server {:url local-3d-map
+                                         :username "3dmap"
+                                         :password "Xma8r8GMkPvibmg9PoclOA=="
+                                         :crypto-iv "vOztjZQ8O2Szk8uI13844g=="}
+                                }
+                       }
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
@@ -853,6 +864,7 @@
                                {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
+
 
                       ;; Loppi R
                       ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.

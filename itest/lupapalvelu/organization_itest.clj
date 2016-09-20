@@ -13,8 +13,7 @@
             [monger.operators :refer :all]
             [sade.core :as sade]
             [sade.schemas :as ssc]
-            [sade.schema-generators :as ssg]
-            [lupapalvelu.itest-util :as util]))
+            [sade.schema-generators :as ssg]))
 
 (apply-remote-minimal)
 
@@ -358,15 +357,15 @@
 
 (facts "Organization areas zip file upload"
   (fact "only authorityAdmin can upload"
-    (:body (util/upload-area pena)) => "unauthorized"
-    (:body (util/upload-area sonja)) => "unauthorized")
+    (:body (upload-area pena)) => "unauthorized"
+    (:body (upload-area sonja)) => "unauthorized")
 
   (fact "text file is not ok (zip required)"
-        (-> (decode-response (util/upload-area sipoo "dev-resources/test-attachment.txt"))
+        (-> (decode-response (upload-area sipoo "dev-resources/test-attachment.txt"))
             :body
             :text) => "error.illegal-shapefile")
 
-  (let [resp (util/upload-area sipoo)
+  (let [resp (upload-area sipoo)
         body (:body (decode-response resp))]
 
     (fact "zip file with correct shape file can be uploaded by auth admin"

@@ -1352,6 +1352,11 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+# Alternative to Wait Test Id Visible. Does not scroll
+Test id visible
+  [Arguments]  ${id}
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1

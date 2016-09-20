@@ -577,6 +577,11 @@
     (when-not (= n 1) (fail! :error.user-not-found))
     apikey))
 
+(defn get-apikey
+  "User's apikey or nil."
+  [email]
+  (get-in (find-user {:email email}) [:private :apikey]))
+
 ;;
 ;; ==============================================================================
 ;; Change password:
