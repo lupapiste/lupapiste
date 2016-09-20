@@ -125,15 +125,13 @@
                                         :location "paikka")
                         reservation-id (:reservationId result)]
                     result => ok?
-                    (fact "Email notifications with calendar event have been sent"
+                    (fact "Email notifications have been sent but without the calendar part"
                       (let [emails (sent-emails)]
                         (count emails) => 2
                         (:to (first emails)) => (contains "Sonja Sibbo")
-                        (:calendar (:body (first emails))) => (every-checker (contains "BEGIN:VCALENDAR")
-                                                                             (contains "METHOD:REQUEST"))
+                        (:calendar (:body (first emails))) => nil
                         (:to (last emails)) => (contains "Pena Panaani")
-                        (:calendar (:body (last emails))) => (every-checker (contains "BEGIN:VCALENDAR")
-                                                                            (contains "METHOD:REQUEST"))))
+                        (:calendar (:body (last emails))) => nil))
                     (fact "my-reserved-slots for authority includes the new reservation"
                       (->> (query authority :my-reserved-slots :year current-year :week current-week)
                            :reservations
@@ -154,7 +152,14 @@
                     (fact "Pena declines the invitation"
                       (command pena :decline-reservation
                                     :reservationId reservation-id
-                                    :id app-id) => ok?)))))
+                                    :id app-id) => ok?
+                      (fact "Email notifications have been sent but without the calendar part"
+                            (let [emails (sent-emails)]
+                                 (count emails) => 2
+                                 (:to (first emails)) => (contains "Sonja Sibbo")
+                                 (:calendar (:body (first emails))) => nil
+                                 (:to (last emails)) => (contains "Pena Panaani")
+                                 (:calendar (:body (last emails))) => nil)))))))
             (fact "Find available slots as applicant"
               (let [result (query pena :available-calendar-slots
                                   :authorityId       authority-id
@@ -177,6 +182,13 @@
                                         :location "paikka")
                         reservation-id (:reservationId result)]
                     result => ok?
+                    (fact "Email notifications have been containing the calendar part"
+                          (let [emails (sent-emails)]
+                               (count emails) => 2
+                               (:to (first emails)) => (contains "Sonja Sibbo")
+                               (:calendar (:body (first emails))) => (every-checker (contains "BEGIN:VCALENDAR"))
+                               (:to (last emails)) => (contains "Pena Panaani")
+                               (:calendar (:body (last emails))) => (every-checker (contains "BEGIN:VCALENDAR"))))
                     (fact "my-reserved-slots for applicant includes the new reservation"
                       (let [reservation (->> (query authority :my-reserved-slots :year current-year :week current-week)
                                              :reservations

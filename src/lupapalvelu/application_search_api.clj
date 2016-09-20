@@ -37,11 +37,11 @@
                    {:organizations (org/organizations-with-calendars-enabled)} user)
         skip   (or (util/->long (:skip data)) 0)
         limit  (or (util/->long (:limit data)) Integer/MAX_VALUE)
-        apps   (search/search query fields (search/make-sort data) skip limit)]
+        apps   (search/search query fields (search/make-sort data) skip limit)
+        apps   (app-utils/enrich-applications-with-organization-name apps)] ; Mapping of org ids to names
     (ok :data (map #(-> (mongo/with-id %)
                         (domain/filter-application-content-for user)
                         app-utils/with-application-kind
-                        app-utils/with-organization-name
                         (select-keys fields))
                    apps))))
 

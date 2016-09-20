@@ -13,24 +13,29 @@ Library  Collections
 
 *** Test Cases ***
 
-Admin sets up the calendar
-  Sipoo logs in
-  Go to page  organization-calendars
-  Set up the calendar for authority  Sibbo Sonja
-  Set default reservation location  Foobarbaz
-  Add reservation type  Foobar
-  Logout
-
 Applicant opens an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
-  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+  Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  submitted
+  Logout
 
-Applicant submits application and logs out
-  Submit application
+Authority without calendar should not see the calendar tab
+  Sonja logs in
+  Go to page  applications
+  Request should be visible  ${appname}
+  Open application  ${appname}  ${propertyId}
+  Element should not be visible by test id  application-open-calendar-tab
+  Logout
+
+Admin sets up the calendar
+  Sipoo logs in
+  Go to page  organization-calendars
+  Set up the calendar for authority  Sibbo Sonja
+  Set default reservation location  Foobarbaz
+  Add reservation type  Foobar
   Logout
 
 Authority logs in and allocates free calendar slots

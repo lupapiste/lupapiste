@@ -267,7 +267,7 @@
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
                             <!-- Can be shown if calendars are active in the target municipality and sector -->
-                            <li data-bind="if: $root.authorization.ok('calendars-enabled'), css: {'active': $parent.selectedTabName() === 'calendar'}">
+                            <li data-bind="if: $root.calendarConfig.initialized, css: {'active': $parent.selectedTabName() === 'calendar'}">
                               <a data-bind="click: changeTab" href="#" data-target="calendar" data-test-id="application-open-calendar-tab" class="link-btn">
                                 <span data-bind="ltext: 'application.tabCalendar'"></span>
                                 <span data-bind="if: calendarNotificationIndicator">
@@ -1141,13 +1141,13 @@
                     <!-- /ko -->
 
                     <!-- Calendars tab -->
-                    <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
-                    <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
+                    <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' && calendarConfig.initialized -->
+                    <div id="application-calendar-tab" data-bind="visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
                       <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-                        <application-authority-calendar/>
+                        <application-authority-calendar params="calendarConfig: calendarConfig" />
                       <!-- /ko -->
                       <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
-                        <applicant-calendar/>
+                        <applicant-calendar params="calendarConfig: calendarConfig"/>
                       <!-- /ko -->
                     </div>
                     <!-- /ko -->

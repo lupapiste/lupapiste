@@ -337,14 +337,21 @@
                             (usr/applicant? user) (cal/reservations-for-application applicationId {:year year :week week}))))))
 
 (defquery application-calendar-config
-  {:user-roles #{:applicant :authority}
+  {:description "Returns application and organization specific configuration items for the calendar tab. If an exception occurs, \\
+                 returning an empty response so that the calendar tab is hidden in the UI but still other operations are possible \\
+                 in the application page."
+   :user-roles #{:applicant :authority}
    :parameters [:id]
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}
   [{{:keys [organization] :as appl} :application}]
-  (ok :authorities (cal/find-application-authz-with-calendar appl)
-      :reservationTypes (reservation-types organization)
-      :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] "")))
+  (try
+    (ok :authorities (cal/find-application-authz-with-calendar appl)
+        :reservationTypes (reservation-types organization)
+        :defaultLocation (get-in (o/get-organization organization) [:reservations :default-location] ""))
+    (catch Exception e (ok :authorities []
+                           :reservationTypes []
+                           :defaultLocation ""))))
 
 (defn- get-reservation [id]
   (->FrontendReservation (api-query (str "reservations/" id))))

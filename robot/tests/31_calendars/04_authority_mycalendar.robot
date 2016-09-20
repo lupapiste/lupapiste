@@ -24,10 +24,7 @@ Applicant opens an application
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
-  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
-
-Applicant submits application and logs out
-  Submit application
+  Create application with state  ${appname}  ${propertyId}  kerrostalo-rivitalo  submitted
   Logout
 
 Authority logs in and allocates free calendar slots
