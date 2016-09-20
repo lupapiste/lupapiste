@@ -9,7 +9,7 @@
 (defn three-d-map-enabled
   "Pre-checker for making sure that the organization has the 3D map enabled."
   [{organization :organization}]
-  (when-not (-> @organization :3d-map :enabled)
+  (when-not (and organization (-> @organization :3d-map :enabled))
     (fail :error.3d-map-disabled)))
 
 (defn redirect-to-3d-map
