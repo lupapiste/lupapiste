@@ -33,7 +33,7 @@
   (map usr/get-user-by-id (flatten (vals (select-keys reservation [:from :to])))))
 
 (def suggest-appointment-model
-  (fn [{application :application result :result user :user} _ recipient]
+  (fn [{application :application result :result} _ recipient]
     (let [reservation (util/find-by-id (:reservationId result) (:reservations application))]
       {:reservation      {:startTime       (util/to-local-datetime (:startTime reservation))
                           :participants    (display-names (reservation-participants reservation))
@@ -46,22 +46,31 @@
        :link-calendar-sv (notifications/get-application-link application "calendar" "sv" recipient)
        :user-first-name  (:firstName recipient)})))
 
-(def calendar-request
+(defn calendar-request
+  [method partstat]
   (fn [{application :application result :result} recipient]
     (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
           reservation (assoc reservation :title (str "[Lupapiste] " (get-in reservation [:reservationType :name])
                                                      " " (:address application))
-                                         :attendee recipient
+                                         :attendee (if partstat
+                                                     (assoc recipient :partstat partstat)
+                                                     recipient)
                                          :unique-id (if (:unique-id reservation)
                                                       (:unique-id reservation)
                                                       (generate-unique-id))
-                                         :sequence 0
-                                         :method Method/REQUEST)]
-      (cal/update-reservation application
-                              (:reservationId result)
-                              {$set {:reservations.$.unique-id (:unique-id reservation)
-                                     :reservations.$.sequence  (:sequence reservation)}})
-      (ical/create-calendar-event reservation))))
+                                         :sequence (if (:sequence reservation)
+                                                     (inc (:sequence reservation))
+                                                     0)
+                                         :method method)]
+      ; ICAL part not sent for reservations pending approval by the applicant,
+      ; OR if the reservation is declined unless the ICAL part was previously sent
+      (when-not (or (#{"PENDING"} (:reservationStatus reservation))
+                    (and (#{"DECLINED"} (:reservationStatus reservation)) (= 0 (:sequence reservation))))
+        (cal/update-reservation application
+                                (:reservationId result)
+                                {$set {:reservations.$.unique-id (:unique-id reservation)
+                                       :reservations.$.sequence  (:sequence reservation)}})
+        (ical/create-calendar-event reservation)))))
 
 (defn filtered-recipients-fn
   [pred]
@@ -74,7 +83,7 @@
   :suggest-appointment-authority
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  calendar-request
+   :calendar-fn                  (calendar-request Method/REQUEST nil)
    :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient _] (usr/authority? recipient)))
@@ -84,7 +93,7 @@
   :suggest-appointment-from-applicant
   {:subject-key                  "application.calendar.appointment.new"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  calendar-request
+   :calendar-fn                  (calendar-request Method/REQUEST nil)
    :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
@@ -96,7 +105,7 @@
   :suggest-appointment-to-applicant
   {:subject-key                  "application.calendar.appointment.suggestion"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  calendar-request
+   :calendar-fn                  (calendar-request Method/REQUEST nil)
    :show-municipality-in-subject true
    :recipients-fn                (filtered-recipients-fn
                                    (fn [recipient reservation]
@@ -108,18 +117,7 @@
   :decline-appointment
   {:subject-key                  "application.calendar.appointment.decline"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :title (str "[Lupapiste] " (get-in reservation [:reservationType :name])
-                                                                                    " " (:address application))
-                                                                        :attendee (assoc recipient :partstat PartStat/DECLINED)
-                                                                        :unique-id (:unique-id reservation)
-                                                                        :sequence (inc (:sequence reservation))
-                                                                        :method Method/CANCEL)]
-                                     (cal/update-reservation application
-                                                             (:reservationId result)
-                                                             {$set {:reservations.$.sequence (:sequence reservation)}})
-                                     (ical/create-calendar-event reservation)))
+   :calendar-fn                  (calendar-request Method/CANCEL PartStat/DECLINED)
    :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})
@@ -128,18 +126,7 @@
   :accept-appointment
   {:subject-key                  "application.calendar.appointment.accept"
    :application-fn               (fn [{id :id}] (domain/get-application-no-access-checking id))
-   :calendar-fn                  (fn [{application :application result :result} recipient]
-                                   (let [reservation (util/find-by-id (:reservationId result) (:reservations application))
-                                         reservation (assoc reservation :title (str "[Lupapiste] " (get-in reservation [:reservationType :name])
-                                                                                    " " (:address application))
-                                                                        :attendee (assoc recipient :partstat PartStat/ACCEPTED)
-                                                                        :unique-id (:unique-id reservation)
-                                                                        :sequence (inc (:sequence reservation))
-                                                                        :method Method/REQUEST)]
-                                     (cal/update-reservation application
-                                                             (:reservationId result)
-                                                             {$set {:reservations.$.sequence (:sequence reservation)}})
-                                     (ical/create-calendar-event reservation)))
+   :calendar-fn                  (calendar-request Method/REQUEST PartStat/ACCEPTED)
    :show-municipality-in-subject true
    :recipients-fn                (recipients-fn)
    :model-fn                     model})

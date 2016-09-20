@@ -39,6 +39,13 @@
             <span data-bind="saveIndicator: indicator"></span>
           </div>
 
+          <div class="3d-map-setting">
+            <label data-bind="ltext: 'organization.3d-map.enabled'" for="3d-map-enabled"></label>
+            <input type="checkbox" data-bind="checked: threeDMapEnabled" id="3d-map-enabled">
+            <div data-bind="component: {name: 'server-settings',
+                            params: threeDMapServerParams}"></div>
+          </div>
+
           <h2>Hakemustyypit</h2>
           <div data-bind="with: organization"><div data-bind="foreach: $data.scope">
             <h3><span data-bind="text: loc(['municipality', $data.municipality()])"></span>: <span data-bind="ltext: $data.permitType"></span></h3>

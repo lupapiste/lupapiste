@@ -151,8 +151,9 @@
     (when-not (util/find-by-id op-id (app/get-operations application))
       (fail :error.illegal-attachment-operation))))
 
-(defn- foreman-must-be-uploader [{:keys [user application] :as command}]
-  (when (auth/has-auth-role? application (:id user) :foreman)
+(defn- foreman-must-be-uploader [{:keys [user application data] :as command}]
+  (when (and (auth/has-auth-role? application (:id user) :foreman)
+             (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
 ;;

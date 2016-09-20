@@ -360,6 +360,9 @@ SolitaAdmin logs in
 Jarvenpaa authority logs in
   Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
 
+Jussi logs in
+  Authority logs in  jussi  jussi  Jussi Viranomainen
+
 
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
@@ -443,13 +446,6 @@ Click by test id
   Wait For Condition  return ${selector}.length===1;  10
   Execute Javascript  ${selector}[0].click();
 
-Click enabled by test id
-  [Arguments]  ${id}
-  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait Until  Element Should Be Visible  ${path}
-  Wait Until  Element Should Be Enabled  ${path}
-  Click by test id  ${id}
-
 Element should be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
@@ -457,6 +453,12 @@ Element should be visible by test id
 Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Click enabled by test id
+  [Arguments]  ${id}
+  Element should be visible by test id  ${id}
+  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
+  Click by test id  ${id}
 
 # Workaround for HTML5 inputs
 Value should be
@@ -1349,6 +1351,11 @@ Javascript? helper
 Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
+
+# Alternative to Wait Test Id Visible. Does not scroll
+Test id visible
+  [Arguments]  ${id}
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}

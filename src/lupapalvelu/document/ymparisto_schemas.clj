@@ -53,7 +53,7 @@
                     {:name "tapahtuma" :type :group
                      :body [{:name "nimi" :type :string :size :m}
                             {:name "ulkoilmakonsertti" :type :checkbox}
-                            {:name "kuvaus" :type :text}] }
+                            {:name "kuvaus" :type :text :max-len 4000}] }
                     {:name "melu" :type :group
                      :body [{:name "melu10mdBa" :type :string :size :s}
                             {:name "paivalla" :type :string :size :s}

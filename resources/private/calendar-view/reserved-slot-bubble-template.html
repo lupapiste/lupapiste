@@ -22,6 +22,15 @@
         <h3 data-bind="ltext: 'calendar.reserve-slot.title'"></h3>
 
         <div class="form-grid no-padding" style="min-width: 450px">
+          <div class="row" data-bind="if: $parent.relatedToOtherApplication">
+            <div class="col-4">
+              <span data-bind="ltext: 'application.calendar.reservation.relates-to-application'"></span>:
+              <span data-bind="text: $parent.reservation().applicationId"></span><br />
+              <a data-bind="ltext: 'application.calendar.reservation.relates-to-application.open',
+                            attr: { href: pageutil.buildPageHash('application', $parent.reservation().applicationId) }"></a>
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-1">
               <span data-bind="ltext: 'application.calendar.reservation.time'"></span>:

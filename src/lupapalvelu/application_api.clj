@@ -157,11 +157,13 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)
-                      action/outside-authority-only]}
+                      action/outside-authority-only
+                      foreman/allow-foreman-only-in-foreman-app]}
   [command]
   (app/cancel-application command))
 
@@ -410,8 +412,7 @@
         (notifications/notify! :inforequest-invite {:application created-application})))
     (try
       (autofill-rakennuspaikka created-application created)
-      (catch java.io.IOException e
-        (error "KTJ data was not updated:" (.getMessage e))))
+      (catch Exception e (warn "Could not get KTJ data for the new application")))
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [{application :application}]
@@ -515,7 +516,7 @@
                                  :title      (ss/trim address)
                                  :modified   created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception e (error e "KTJ data was not updated."))))
+           (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
@@ -767,7 +768,7 @@
                                   :modified               created}
                            $push {:attachments {$each (app/make-attachments created op @organization (:state application) (:tosFunction application))}}}))
     (try (autofill-rakennuspaikka application created)
-         (catch Exception e (error e "KTJ data was not updated")))))
+         (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application")))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]

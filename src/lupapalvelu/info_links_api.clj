@@ -23,21 +23,32 @@
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkId]
-   :input-validators [(partial action/number-parameters [:linkId])]
+   :input-validators [(partial action/non-blank-parameters [:linkId])]
    :states           (states/all-states-but :draft)}
   [command]
-  (ok :res (info-links/delete-info-link! (:application command) linkId)))
+  (cond
+    (not (info-links/can-edit-link? (:application command) linkId (:user command)))
+      (fail :error.not-authorized)
+    (not (info-links/delete-info-link! (:application command) linkId))
+      (fail :error.badlink)
+    :else
+      (ok :res true)))
 
 (defcommand info-link-reorder
   {:description      "Reorder application-specific info-links"
    :user-roles       #{:authority :applicant}
    :user-authz-roles #{:statementGiver}
    :parameters       [id linkIds]
-   :input-validators [(partial action/vector-parameter-of :linkIds number?)]
-   ;:input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:linkIds])]
    :states           (states/all-states-but :draft)}
   [command]
-  (ok :res (info-links/reorder-info-links! (:application command) linkIds)))
+  (cond
+    (not (info-links/can-reorder-links? (:application command) (:user command)))
+      (fail :error.not-authorized)
+    (info-links/reorder-info-links! (:application command) linkIds)
+      (ok :res true)
+    :else
+      (fail :error.badlinks)))
 
 (defcommand info-link-upsert
   {:description         "Add or update application-specific info-link"
@@ -47,14 +58,24 @@
    :optional-parameters [linkId]
    :input-validators    [(partial action/non-blank-parameters [:text])
                          (partial action/non-blank-parameters [:url])
-                         (partial action/optional-parameter-of :linkId number?)]
+                         (partial action/optional-parameter-of :linkId #(not (= "" %)))]
    :states              (states/all-states-but :draft)}
   [command]
   (let [app (:application command)
-        res (if linkId
-              (info-links/update-info-link! app linkId text url)
-              (info-links/add-info-link! app text url))]
-    (ok :linkId res)))
+        timestamp (:created command)]
+    (cond
+      (not linkId)
+        (if (info-links/can-add-links? app (:user command))
+          (if-let [idp (info-links/add-info-link! app text url timestamp (:user command))]
+            (ok :linkId idp)
+            (fail :error.unknown))
+          (fail :error.unauthorized))
+      (info-links/can-edit-link? app linkId (:user command))
+         (if (info-links/update-info-link! app linkId text url timestamp)
+            (ok :linkId linkId :res true)
+            (fail :error.bad-link))
+      :else
+         (fail :error.unauthorized))))
 
 (defquery info-links
   {:description      "Return a list of application-specific info-links"

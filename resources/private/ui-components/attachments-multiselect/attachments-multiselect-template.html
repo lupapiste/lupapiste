@@ -32,7 +32,7 @@
           <button data-bind="click: start,
                              ltext: params.okLoc,
                              clickBubble: false,
-                             enable: $parent.authorization.ok(params.authKey)"
+                             enable: $parent.authorization && $parent.authorization.ok(params.authKey)"
             class="btn btn-primary"
             data-test-id="multiselect-action-button">
           </button>
@@ -72,7 +72,7 @@
             <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow,
                                                                              clickBubble: false,
                                                                              css: {selected: selected}">
-              <td class="attachment-state-icons" 
+              <td class="attachment-state-icons"
                   data-bind="foreach: lupapisteApp.services.attachmentsService.stateIcons( $data )">
                 <i data-bind="attr: {'class': $data.css,
                               'data-test-icon':  $data.icon + '-icon'}"></i>

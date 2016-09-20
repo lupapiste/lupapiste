@@ -17,7 +17,7 @@
             [hiccup.core :as hiccup]
             [clj-rss.core :as rss]
             [schema.core :as sc]
-            [sade.core :refer [fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -112,7 +112,9 @@
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
-                               (sc/optional-key :operations) [sc/Str]}})
+                               (sc/optional-key :operations) [sc/Str]}
+   (sc/optional-key :3d-map) {:enabled sc/Bool
+                              :server  Server}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -360,6 +362,9 @@
 
 (def update-organization-suti-server (partial update-organization-server :suti.server))
 
+;; 3D Map. See also 3d-map and 3d-map-api namespaces.
+
+(def update-organization-3d-map-server (partial update-organization-server :3d-map.server))
 
 ;;
 ;; Construction waste feeds

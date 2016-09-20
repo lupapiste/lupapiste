@@ -72,12 +72,12 @@ LUPAPISTE.ConversationModel = function(params) {
   var previousPage = self.currentPage();
 
   function highlightConversation() {
-    self.sendEvent("side-panel", "show-conversation");
+    self.sendEvent("side-panel", "show-conversation", {delay: 300});
     self.textSelected(true);
     self.highlightConversation(true);
     setTimeout(function() {
       self.highlightConversation(false);
-    }, 2000);
+    }, 2500);
   }
 
   self.disposedComputed(function() {

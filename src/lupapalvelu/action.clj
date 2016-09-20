@@ -62,6 +62,13 @@
     (when-not (ss/blank? url)
       (validate-url url))))
 
+(defn validate-optional-https-url [param command]
+  (let [url (ss/trim (get-in command [:data param]))]
+    (when-not (ss/blank? url)
+      (or (validate-url url)
+          (when-not (ss/starts-with-i url "https://")
+            (fail :error.only-https-allowed))))))
+
 ;; Notificator
 
 (defn notify

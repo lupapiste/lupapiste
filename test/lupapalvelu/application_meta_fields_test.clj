@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-meta-fields-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.test-util :as test-util]
             [lupapalvelu.application-meta-fields :as amf]))
 
@@ -65,6 +66,7 @@
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1}, :versions [{:version {}}]}]}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1 :user usr/batchrun-user-data}, :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 1, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 1
   (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 2, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 0
   (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0

@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
@@ -433,24 +433,24 @@
                     (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
 
 (defn pdf-to-pdfa-conversion [& args]
-  (debug "Starting pdf to pdf/a conversion")
+  (info "Starting pdf to pdf/a conversion")
   (mongo/connect!)
   (let [organization (first args)
         start-ts (c/to-long (c/from-string (second args)))
         end-ts (c/to-long (c/from-string (second (next args))))]
   (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
-    (let [eraajo-user (user/batchrun-user organization)
-          command (assoc (application->command application) :user eraajo-user :created (now))
+    (let [command (application->command application)
           last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
-    (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
-      (debug "Converting attachments of application" (:id application))
-      (doseq [attachment (:attachments application)]
-        (when-not (get-in attachment [:latestVersion :archivable])
-          (when (= (get-in attachment [:latestVersion :contentType]) "application/pdf")
-            (do
-              (debug "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
-              (let [result (attachment/convert-existing-to-pdfa! (:application command) (:user command) attachment)]
-                (if (:archivabilityError result)
-                  (error "Conversion of attachment" (:id attachment) "failed with error:" (:archivabilityError result))
-                  (debug "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application)))))))))))))
+      (logging/with-logging-context {:applicationId (:id application)}
+        (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
+          (info "Converting attachments of application" (:id application))
+          (doseq [attachment (:attachments application)]
+            (when (:latestVersion attachment)
+              (when-not (get-in attachment [:latestVersion :archivable])
+                  (do
+                    (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+                    (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
+                      (if (:archivabilityError result)
+                        (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
+                        (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
 

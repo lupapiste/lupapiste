@@ -1,21 +1,20 @@
-LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
+LUPAPISTE.ApplicationAuthorityCalendarModel = function (params) {
 
   "use strict";
   var self = this;
 
   ko.utils.extend(self, new LUPAPISTE.BaseCalendarModel());
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.authority = ko.observable({ firstName: lupapisteApp.models.currentUser.firstName(),
                                    lastName: lupapisteApp.models.currentUser.lastName(),
                                    id: lupapisteApp.models.currentUser.id() });
 
   self.authorizedParties = ko.observableArray([]);
-  self.reservationTypes = ko.observableArray([]);
-
   self.selectedParty = ko.observable();
   self.selectedReservationType = ko.observable();
-  self.defaultLocation = ko.observable();
+
+  self.defaultLocation = params.calendarConfig.defaultLocation;
+  self.reservationTypes = params.calendarConfig.reservationTypes;
 
   self.applicationModel = ko.observable();
 
@@ -32,14 +31,8 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
   self.disposedComputed(function() {
     var id = lupapisteApp.models.application.id();
     if (!_.isEmpty(id)) {
-      self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
       self.applicationModel({id: id, organizationName: lupapisteApp.models.application.organizationName()});
     }
-  });
-
-  self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
-    self.reservationTypes(event.reservationTypes);
-    self.defaultLocation(event.defaultLocation);
   });
 
   function isGuest( p ) {
@@ -69,23 +62,6 @@ LUPAPISTE.ApplicationAuthorityCalendarModel = function () {
       self.noCalendarFoundForOrganization(true);
     }
   });
-  
-  self.cancelReservation = function(reservation) {
-    hub.send("show-dialog", {ltitle: "areyousure",
-      size: "medium",
-      component: "yes-no-dialog",
-      componentParams: {ltext: "reservation.confirm-cancel",
-                        yesFn: function() {
-                          ajax
-                            .command("cancel-reservation", { id: lupapisteApp.models.application.id(), reservationId: reservation.id() })
-                            .success(function(response) {
-                              util.showSavedIndicator(response);
-                              reservation.acknowledged("canceled");
-                            })
-                            .error(util.showSavedIndicator).call();
-                          return false;
-                        }}});
-  };
 
   self.appointmentParticipants = function(r) {
     return _.map(r.participants(), function (p) { return util.partyFullName(p); }).join(", ");

@@ -33,13 +33,13 @@ var attachmentUtils = (function() {
   var fSortByAllowedAttachmentType = function(allowedAttachmentTypes, a, b) {
     var types = _.flatten(allowedAttachmentTypes, true);
 
-    var atg = a.type["type-group"];
+    var atg = util.getIn(a, ["type", "type-group"]);
     var atgIdx = _.indexOf(types, atg);
-    var atid = a.type["type-id"];
+    var atid = util.getIn(a, ["type", "type-id"]);
 
-    var btg = b.type["type-group"];
+    var btg = util.getIn(b, ["type", "type-group"]);
     var btgIdx = _.indexOf(types, btg);
-    var btid = b.type["type-id"];
+    var btid = util.getIn(b, ["type", "type-id"]);
 
     if ( atg === btg ) {
       // flattened array of allowed attachment types.

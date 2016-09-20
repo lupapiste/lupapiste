@@ -51,6 +51,7 @@ Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
+  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
   #Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko returns to application
@@ -64,6 +65,7 @@ Mikko deletes attachment immediately by using remove icon
 Mikko adds txt attachment without comment again
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
 
 Mikko deletes attachment version
@@ -81,6 +83,7 @@ Mikko deletes also the attachment template
 Mikko adds again txt attachment with comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Return to application
   Wait Until  Comment count is  1

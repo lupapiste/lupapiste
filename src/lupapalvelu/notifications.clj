@@ -137,9 +137,10 @@
   #{"rest-api" "trusted-etl"})
 
 (defn invalid-recipient? [rec]
-  "Notifications are not sent to certain roles, or to users who do not 
-   have a valid email address."
+  "Notifications are not sent to certain roles, users who do not 
+   have a valid email address, or registered but removed users."
   (or (ss/blank? (:email rec))
+      (not (u/email-recipient? rec))
       (contains? non-notified-roles (:role rec))))
 
 (defn notify! [template-name command & [result]]

@@ -104,11 +104,15 @@ Sonja types in draft
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
-Sonja adds and removes attachment to statement draft
+Sonja adds attachment to statement draft
   Wait test id visible  statement-attachments-no-attachments
   Scroll and click test id  add-statement-attachment
   Add attachment  statement  ${PDF_TESTFILE_PATH}  Important note
+
+Attachment comment appears
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+
+Sonja removes attachment from statement draft
   Scroll to test id  add-statement-attachment
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog

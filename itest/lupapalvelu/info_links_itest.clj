@@ -8,100 +8,120 @@
 
 (apply-remote-minimal)
 
-(facts "info links"
+(facts "Application info links"
  
   (let [{application-id :id :as app} 
         (create-and-open-application pena :propertyId sipoo-property-id)]
    
-    application-id => truthy
+   application-id => truthy
    
+   (fact "Invite statement giver" 
+      (command sonja :request-for-statement :id application-id :functionCode nil :selectedPersons 
+         [{:email "teppo@example.com" :text "Hello" :name "Tepanderi"}]) => ok?) 
+
     (let [response (query pena :info-links :id application-id)]
       response => ok?
       (fact "Initially Pena sees no links" (:links response) => []))
 
-    (let [response (command sonja :info-link-upsert :id application-id :text "link text" :url "http://example.org/1")]
+    (let [response (command sonja :info-link-upsert :id application-id :text "sonja-1" :url "http://example.org/1")]
       response => ok?
       (fact "Sonja can add an info-link"
-        (:linkId response) => 1))
+        (:linkId response) => string?))
 
     (let [response (query sonja :info-links :id application-id)]
       response => ok?
-      (fact "Sonja sees the infolink, it is not new and is editable"
-        (:text (first (:links response))) => "link text"
+      (fact "Sonja sees the infolink, it is new and is editable"
+        (:text (first (:links response))) => "sonja-1"
         (:url  (first (:links response))) => "http://example.org/1"
-        ;(:isNew (first (:links response))) => false
+        (:isNew (first (:links response))) => true
         (:canEdit (first (:links response))) => true))
      
-    (let [response (command sonja :info-link-upsert :id application-id :text "second" :url "http://example.org/2")]
+    (let [response (query teppo :info-links :id application-id)]
       response => ok?
-      (fact "Sonja adds another info-link"
-         (:linkId response) => 2))
+      (fact "Statementgiver Teppo sees the infolink and it is not editable"
+        (:text (first (:links response))) => "sonja-1"
+        (:canEdit (first (:links response))) => false))
 
-    (let [response (command sonja :info-link-upsert :id application-id :text "third url" :url "http://example.org/3")]
+    (let [response (command teppo :info-link-upsert :id application-id :text "teppo-2" :url "http://example.org/2")]
+      response => ok?
+      (fact "Statement giver Teppo adds another info-link"
+         (:linkId response) => string?))
+   
+    (let [response (query teppo :info-links :id application-id)]
+      response => ok?
+      (fact "Statementgiver Teppo sees his own infolink and it is editable"
+        (:text (second (:links response))) => "teppo-2"
+        (:canEdit (second (:links response))) => true))
+
+    (let [response (command sonja :info-link-upsert :id application-id :text "sonja-3" :url "http://example.org/3")]
       response => ok?
       (fact "Sonja adds a third info-link"
-        (:linkId response) => 3))
+        (:linkId response) => string?))
        
-    (let [response (command sonja :info-link-reorder :id application-id :linkIds [3 2 1])]
-      response => ok?
-      (fact "Sonja reorders the links"
-        (:res response) => true))
+    (let [links (:links (query sonja :info-links :id application-id))
+          l1-id (:linkId (nth links 0))   ;; by sonja
+          l2-id (:linkId (nth links 1))   ;; by teppo
+          l3-id (:linkId (nth links 2))]  ;; by sonja
+        
+       (fact "Sonja sees the correct links in correct order"
+          (map :text links) = ["sonja-1" "teppo-2" "sonja-3"]) 
+          
+       (fact "Sonja can reorder links"
+         (command sonja :info-link-reorder :id application-id :linkIds [l3-id l2-id l1-id]) => ok?)
 
-    (let [response (query sonja :info-links :id application-id)]
-      response => ok?
-      (fact "Sonja sees ordered links"
-        (map :linkId (:links response)) => [3 2 1]))
+       (fact "Sonja sees the reordered links in order"
+          (map :text (:links (query sonja :info-links :id application-id))) = ["sonja-3" "teppo-2" "sonja-1"]) 
+       
+       (fact "Pena sees no links as editable"
+          (map :canEdit (:links (query pena :info-links :id application-id))) = [false false false])
+       
+       (fact "Teppo sees only his link as editable"
+          (map :canEdit (:links (query teppo :info-links :id application-id))) = [false true false])
+       
+       (fact "Sonja sees all links as editable"
+          (map :canEdit (:links (query sonja :info-links :id application-id))) = [true true true])
          
-    (let [response (command sonja :info-link-reorder :id application-id :linkIds [1 1 2 5])]
-      response => ok?
-      (fact "Sonja reorders the links badly"
-        (:res response) => false))
-
-    (let [response (command sonja :info-link-delete :id application-id :linkId 2)]
-      (fact "Sonja can delete infolinks" 
-        response => ok?))
-    
-    (let [response (command pena :info-link-delete :id application-id :linkId 1)]
-      (fact "Pena can't delete infolinks" 
-        response =not=> ok?))
-    
-    (let [response (query sonja :info-links :id application-id)]
-      response => ok?
-      (fact "Sonja no longer sees the deleted link"
-        (map :linkId (:links response)) => [3 1]))
+       (fact "Pena can't update Sonja's infolink"
+         (command pena :info-link-upsert :id application-id :text "bad text" :url "http://example.org/1-bad" :linkId l1-id) =not=> ok?)
+      
+       (fact "Pena can't delete Sonja's infolink"
+         (command pena :info-link-delete :id application-id :linkId (:linkId l3-id)) =not=> ok?)
      
-    (let [response (query pena :info-links :id application-id)]
-      response => ok?
-      (fact "Pena hasn't seen the links yet and sees he cant' modify them"
-        (map :isNew (:links response)) => [true true]
-        (map :canEdit (:links response)) => [false false]))
-
-    (let [resp (command pena :mark-seen :id application-id :type "info-links")
-          response (query pena :info-links :id application-id)]
-      response => ok?
-      (fact "Pena has seen the links after calling mark-seen" (map :isNew (:links response)) => [false false]))
+       (fact "Teppo can't update Sonja's infolink"
+         (command teppo :info-link-upsert :id application-id :text "bad text" :url "http://example.org/1-bad" :linkId l1-id) =not=> ok?)
+      
+       (fact "Teppo can't delete Sonja's infolink"
+         (command teppo :info-link-delete :id application-id :linkId (:linkId l3-id)) =not=> ok?)
+      
+       (fact "Sonja still sees the correct links"
+          (map :text (:links (query sonja :info-links :id application-id))) = ["sonja-3" "teppo-2" "sonja-1"]) 
+       
+       (fact "Sonja can delete Teppo's link"
+         (command sonja :info-link-delete :id application-id :linkId l2-id) => ok?)
+      
+       (fact "Sonja sees the link was removed"
+          (map :text (:links (query sonja :info-links :id application-id))) = ["sonja-3" "sonja-1"]) 
   
-    (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId "one")]
-      (fact "Sonja fails to update link with bad id"
-         response =not=> ok?))
+       (fact "Pena thinks the links are new before calling mark-seen"
+          (map :isNew (:links (query pena :info-links :id application-id))) = [true true])
+      
+       (fact "Pena can mark info links as seen"
+           (command pena :mark-seen :id application-id :type "info-links") => ok?)
+        
+       (fact "Pena has now seen the links"
+          (map :isNew (:links (query pena :info-links :id application-id))) = [false false])
+ 
+       (fact "Sonja can't update a non-existent link"
+          (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/one-new" :linkId "one") =not=> ok?)
+ 
+       (fact "Sonja can update an existing link" 
+          (command sonja :info-link-upsert :id application-id :text "sonja-1-new" :url "http://example.org/1-new" :linkId l1-id) => ok?)
   
-    (let [response (command sonja :info-link-upsert :id application-id :text "new text" :url "http://example.org/1-new" :linkId 1)]
-      response => ok?
-      (fact "Sonja updates an infolink"
-        (:linkId response) => 1))
-  
-    (let [response (command pena :info-link-upsert :id application-id :text "new text bad" :url "http://example.org/1-bad" :linkId 1)]
-      (fact "Pena fails to update an infolink"
-        response =not=> ok?))
-  
-    (let [response (query pena :info-links :id application-id)]
-      response => ok?
-      (fact "Pena sees the new updated link by Sonja as a new one at right position"
-        (:isNew (nth (:links response) 1)) => true
-        (:url (nth (:links response) 1)) => "http://example.org/1-new"
-        (:text (nth (:links response) 1)) => "new text"))
-
-    ))
+       (fact "Pena now hasn't seen the updated link"
+          (map :isNew (:links (query pena :info-links :id application-id))) = [false true])
+       
+       (fact "Pena sees the change made by Sonja"
+          (map :text (:links (query pena :info-links :id application-id))) = ["sonja-3" "sonja-1-new"]))))
 
 (fact "Organization links"
       (let [app-id (create-app-id pena :propertyId sipoo-property-id :operation "pientalo")]

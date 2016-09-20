@@ -1,15 +1,15 @@
 (ns lupapalvelu.archiving-api
-  (:require [lupapalvelu.states :as states]
+  (:require [clojure.set :as set]
+            [cheshire.core :as json]
+            [sade.core :refer [ok unauthorized fail]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
             [lupapalvelu.archiving :as archiving]
-            [sade.core :refer [ok unauthorized fail]]
-            [lupapalvelu.user :as user]
-            [clojure.set :as set]
             [lupapalvelu.organization :as organization]
-            [cheshire.core :as json]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]))
 
 (defn check-user-is-archivist [{user :user {:keys [organization]} :application}]
-  (let [archive-orgs (user/organization-ids-by-roles user #{:archivist})
+  (let [archive-orgs (usr/organization-ids-by-roles user #{:archivist})
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
       unauthorized)))
@@ -61,3 +61,14 @@
    :states     states/all-application-states
    :pre-checks [check-user-is-archivist]}
   (ok))
+
+(defquery permanent-archive-enabled
+  {:user-roles #{:applicant :authority}
+   :categories #{:attachments}
+   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
+                  (let [org-set (if organization
+                                  #{organization}
+                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
+                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
+                      unauthorized)))]}
+  [_])

@@ -179,6 +179,7 @@
    :analytics    {:js ["analytics.js"]}
 
    :services {:js ["area-filter-service.js"
+                   "comment-service.js"
                    "tag-filter-service.js"
                    "operation-filter-service.js"
                    "organization-filter-service.js"
@@ -283,12 +284,12 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" 
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" "calendar-notification-list.js"
                         "book-appointment-filter.js" "base-calendar-model.js"]
                    :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
                           "authority-calendar-template.html" "applicant-calendar-template.html"
-                          "calendar-message-items-template.html"
+                          "calendar-notification-list-template.html"
                           "reservation-slot-reserve-bubble-template.html"
                           "book-appointment-filter-template.html"]}
 
@@ -429,7 +430,8 @@
 
    :admin-app {:depends []
                :js ["admin.js"]}
-   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer
+                         :ui-components :authority-admin-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js" "logs.js"]
                :html ["index.html" "admin.html" "organization.html"

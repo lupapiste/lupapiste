@@ -6,7 +6,7 @@
             [camel-snake-kebab.core :as csk]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -32,7 +32,7 @@
    :username  "dummy@example.com"
    :enabled   false})
 
-(def SearchFilter
+(defschema SearchFilter
   {:id        sc/Str
    :title     sc/Str
    :sort     {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
@@ -43,7 +43,10 @@
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]}})
 
-(def User {:id                                    sc/Str
+(def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+
+(defschema User
+          {:id                                    Id
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
            :role                                  (sc/enum "applicant"
@@ -92,9 +95,10 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/supported-language-schema
-           (sc/optional-key :seen-organization-links) {sc/Str ssc/Timestamp}})
+           (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}})
 
-(def RegisterUser {:email                            ssc/Email
+(defschema RegisterUser
+                  {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
                    :city                             (sc/maybe (ssc/max-length-string 255))
                    :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
@@ -122,7 +126,7 @@
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
-(def SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
+(defschema SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
 
 (defn summary
   "Returns common information about the user or nil"
@@ -209,14 +213,17 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
-(defn batchrun-user [org-ids]
+(def batchrun-user-data
   {:id "-"
    :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"
-   :role "authority"
-   :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)})
+   :role "authority"})
+
+(defn batchrun-user [org-ids]
+  (let [org-authz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)]
+    (assoc batchrun-user-data :orgAuthz org-authz)))
 
 ;;
 ;; ==============================================================================
@@ -390,7 +397,14 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
-
+(defn email-recipient?
+  "Check that a user is not a removed one, meaning it either hasn't got an id at all, is a dummy one, or is a real active one."
+  [user]
+  (let [id (:id user)]
+    (or (not id)
+        (let [user (get-user-by-id (:id user))]
+          (or (:enabled user)
+              (= "dummy" (:role user)))))))
 
 ;;
 ;; ==============================================================================
@@ -565,6 +579,11 @@
         n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
     (when-not (= n 1) (fail! :error.user-not-found))
     apikey))
+
+(defn get-apikey
+  "User's apikey or nil."
+  [email]
+  (get-in (find-user {:email email}) [:private :apikey]))
 
 ;;
 ;; ==============================================================================

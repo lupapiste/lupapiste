@@ -47,10 +47,10 @@
    (sc/optional-key :text)           sc/Str})
 
 (defschema CompanyInvite
-  {:user {:id ssc/ObjectIdStr}})
+  {:user {:id usr/Id}})
 
 (defschema Auth
-  {:id                               (sc/if ss/in-lower-case? ssc/Username ssc/ObjectIdStr)
+  {:id                               usr/Id
    :username                         ssc/Username
    :firstName                        sc/Str
    :lastName                         sc/Str
@@ -62,7 +62,7 @@
    (sc/optional-key :statementId)    ssc/ObjectIdStr
    (sc/optional-key :invite)         (sc/if :email Invite CompanyInvite)
    (sc/optional-key :inviteAccepted) ssc/Timestamp
-   (sc/optional-key :inviter)        (sc/if map? usr/SummaryUser ssc/ObjectIdStr)})
+   (sc/optional-key :inviter)        (sc/if map? usr/SummaryUser usr/Id)})
 
 ;;
 ;; Auth utils
@@ -151,5 +151,6 @@
 (defn enrich-auth-information [{auth :auth docs :documents {authority-id :id} :authority}]
   (let [parties-docs (->> (filter party-document? docs)
                           (sort-by (comp :order :schema-info)))]
-    (map (partial enrich-auth-info-with-parties parties-docs) auth)
-    (map (partial enrich-authority-auth-info authority-id) auth)))
+    (->> auth
+         (map (partial enrich-auth-info-with-parties parties-docs))
+         (map (partial enrich-authority-auth-info authority-id)))))

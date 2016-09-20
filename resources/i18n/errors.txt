@@ -502,3 +502,5 @@
 "error.vrk:CR342" "sv" "El som bränsle kräver en elanslutning"
 "error.vrk:CR343" "fi" "Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö"
 "error.vrk:CR343" "sv" "Om uppvärmningssättet är elvärme, måste bränslet vara el."
+"error.only-https-allowed" "fi" "Ainoastaan HTTPS-protokolla on sallittu."
+"error.3d-map-not-found" "fi"  "3D-karttaa ei löydy."

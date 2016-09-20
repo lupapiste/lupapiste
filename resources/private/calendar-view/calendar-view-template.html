@@ -40,7 +40,8 @@
                                                      defaultLocation: $component.defaultLocation"></reservation-slot-reserve-bubble>
           </div>
           <div style="position: relative;">
-            <reserved-slot-bubble params="client: $component.client,
+            <reserved-slot-bubble params="applicationModel: $component.applicationModel,
+                                          client: $component.client,
                                           authority: $component.authority,
                                           reservationType: $component.reservationType,
                                           weekdays: $component.calendarWeekdays"></reserved-slot-bubble>
@@ -92,19 +93,19 @@
                 </button>
               </div>
               <!-- /ko -->
-              <!--ko if: $data.status === 'booked' -->
+              <!-- ko if: $data.status === 'booked' -->
               <div class="calendar-slot reservation" data-bind="style: { top: $component.slotPositionTop($data),
                                                                          height: $component.slotHeight($data) },
                                                                 css: { 'accepted': $data.reservation.reservationStatus === 'ACCEPTED' },
                                                                 with: $data.reservation,
-                                                                attr: { 'data-test-id': moment($data.startTime).format('[reservation-'+$data.reservation.reservationStatus+'-]dddd-HHmm') },
+                                                                testId: moment($data.startTime).format('[reservation-'+$data.reservation.reservationStatus+'-]dddd-HHmm'),
                                                                 click: $component.clickHandler.bind({ slot: $data, calendarWeekday: $parent }, 'booked-slot')">
                 <div data-bind="text: reservationType.name, attr: {'title': reservationType.name}"></div>
                 <div data-bind="text: location, attr: {'title': location}"></div>
                 <div data-bind="text: applicationId, attr: {'title': applicationId}"></div>
               </div>
               <!-- /ko -->
-              <!--ko if: $component.view === "applicationView" && $data.status === 'read-only' -->
+              <!-- ko if: $component.view === "applicationView" && $data.status === 'read-only' -->
               <div class="calendar-slot reservation read-only"
                    data-bind="style: { top: $component.slotPositionTop($data),
                                        height: $component.slotHeight($data) },

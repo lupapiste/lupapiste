@@ -8,10 +8,10 @@
         <div class="editor-header">
           <div data-bind="ltext: 'attachment.tosMetadata'"></div>
           <div class="edit-button-container" data-bind="if: modificationAllowed">
-            <div class="edit-button" data-bind="click: edit, if: !editable()">
+            <div class="edit-button" data-bind="click: edit, if: !editable(), testId: 'editMatadata'">
               <i class="lupicon-pen edit"></i>
             </div>
-            <div class="edit-button" data-bind="click: cancelEdit, if: editable">
+            <div class="edit-button" data-bind="click: cancelEdit, if: editable, testId: 'cancelMatadataEdit'">
               <i class="lupicon-circle-remove edit"></i>
             </div>
           </div>
@@ -24,7 +24,7 @@
           </div>
 
           <div data-bind="if: editable" class="editor-buttons">
-            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
+            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0, testId:'saveMetadata'"></button>
           </div>
         </div>
       </div>

@@ -37,21 +37,20 @@
                                                data: $root.service.data,
                                                commands: $root.service.commands['reply-request'],
                                                authModel: $root.authModel } },
-                        visible: $root.selectedTab() === 'reply-request'"></div> 
+                        visible: $root.selectedTab() === 'reply-request'"></div>
         <div data-bind="component: { name: 'statement-edit-reply',
                                      params: { applicationTitle: $root.service.applicationTitle,
                                                data: $root.service.data,
                                                commands: $root.service.commands['reply'],
                                                authModel: $root.authModel } },
-                        visible: $root.selectedTab() === 'reply'"></div> 
+                        visible: $root.selectedTab() === 'reply'"></div>
       </div>
       <div id="statement-attachments-container">
         <div data-bind="component: { name: 'statement-attachments',
                                      params: { applicationId: $root.service.applicationId,
                                                statementId: $root.service.statementId,
-                                               application: application,
                                                authModel: $root.authModel,
-                                               selectedTab: $root.selectedTab } }"></div> 
+                                               selectedTab: $root.selectedTab } }"></div>
       </div>
       <div id="statement-control-button-container">
         <div data-bind="component: { name: 'statement-control-buttons',
@@ -60,7 +59,7 @@
                                                authModel: $root.authModel,
                                                submitAllowed: $root.service.submitAllowed,
                                                commands: $root.service.commands,
-                                               selectedTab: $root.selectedTab } }"></div> 
+                                               selectedTab: $root.selectedTab } }"></div>
       </div>
     </div>
     <!-- /ko -->
