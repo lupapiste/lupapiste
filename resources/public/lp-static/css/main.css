@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1474355835663');
+@import url('main-blessed1.css?z=1474377631913');
 
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
@@ -633,9 +633,9 @@
 }
 /* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
-  width: 100.0%;
-  min-width: 100.0%;
-  max-width: 100.0%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 /* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
@@ -4050,7 +4050,7 @@ ul.no-bullets {
 }
 /* line 30, ../../../private/common-html/sass/partials/_screenmessage.scss */
 #sys-notification .notification-list ul {
-  width: 80%;
+  width: 95%;
   list-style: none;
   font-size: 1.2em;
   padding-left: 0;
