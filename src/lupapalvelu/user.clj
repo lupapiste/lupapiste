@@ -378,6 +378,18 @@
     (get-user-by-email $)
     (and $ (not (dummy? $)))))
 
+;; note: new user registration messages need to send a message even though
+;; the user is not enabled, and some messages are intentionally sent directly 
+;; to an email address without having an associated user id to check.
+(defn email-recipient?
+  "If :id is present, check that the corresponding user is enabled or a dummy one. True otherwise."
+  [user]
+  (let [id (:id user)]
+    (or (not id)
+      (if-let [user (get-user-by-id id)]
+         (or (= (:role user) "dummy")
+             (:enabled user))))))
+
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
     (let [user (find-user {:username username})]
@@ -396,15 +408,6 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
-
-(defn email-recipient?
-  "Check that a user is not a removed one, meaning it either hasn't got an id at all, is a dummy one, or is a real active one."
-  [user]
-  (let [id (:id user)]
-    (or (not id)
-        (let [user (get-user-by-id (:id user))]
-          (or (:enabled user)
-              (= "dummy" (:role user)))))))
 
 ;;
 ;; ==============================================================================

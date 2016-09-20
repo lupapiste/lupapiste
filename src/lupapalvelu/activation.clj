@@ -23,7 +23,9 @@
                   (let [new-key (security/random-password)]
                     (mongo/insert :activation {:user-id userid :email email :activation-key new-key :_created (now)})
                     new-key))]
-    (notifications/notify! :account-activation {:user user :data {:key key}})))
+    (notifications/notify! :account-activation 
+       {:user (dissoc user :id) ;; user is not yet enabled, so avoid checking it by removing the id
+        :data {:key key}})))
 
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
