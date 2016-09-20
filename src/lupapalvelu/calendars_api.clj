@@ -337,10 +337,10 @@
                             (usr/applicant? user) (cal/reservations-for-application applicationId {:year year :week week}))))))
 
 (defquery application-calendar-config
-  "Returns application and organization specific configuration items for the calendar tab. If an exception occurs, \\
-   returning an empty response so that the calendar tab is hidden in the UI but still other operations are possible \\
-   in the application page."
-  {:user-roles #{:applicant :authority}
+  {:description "Returns application and organization specific configuration items for the calendar tab. If an exception occurs, \\
+                 returning an empty response so that the calendar tab is hidden in the UI but still other operations are possible \\
+                 in the application page."
+   :user-roles #{:applicant :authority}
    :parameters [:id]
    :feature    :ajanvaraus
    :pre-checks [(partial cal/calendars-enabled-api-pre-check #{:applicant :authority})]}

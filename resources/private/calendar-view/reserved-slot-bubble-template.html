@@ -27,7 +27,7 @@
               <span data-bind="ltext: 'application.calendar.reservation.relates-to-application'"></span>:
               <span data-bind="text: $parent.reservation().applicationId"></span><br />
               <a data-bind="ltext: 'application.calendar.reservation.relates-to-application.open',
-                            attr: { href: '#!/application/' + $parent.reservation().applicationId }"></a>
+                            attr: { href: pageutil.buildPageHash('application', $parent.reservation().applicationId) }"></a>
             </div>
           </div>
 

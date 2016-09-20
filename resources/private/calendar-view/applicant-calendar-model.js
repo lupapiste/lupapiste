@@ -1,3 +1,8 @@
+// Input params:
+// * calendarConfig: JSON object consisting of application specific calendar configuration:
+//     - authorities: observable array of selectable authorities
+//     - reservationTypes: observable array of selectable reservation types
+//     - defaultLocation: observable containing the organization's default location for appointments  
 LUPAPISTE.ApplicantCalendarModel = function (params) {
 
   "use strict";
