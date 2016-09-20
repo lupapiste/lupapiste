@@ -13,15 +13,15 @@
             [lupapalvelu.ya-extension :as yax]))
 
 (defquery ya-extensions
-  {:description "Extension periods for the given main YA application. "
-   :parameters [id]
-   :user-roles #{:applicant :authority}
+  {:description      "Extension periods for the given main YA application. "
+   :parameters       [id]
+   :user-roles       #{:applicant :authority}
    :user-authz-roles auth/all-authz-roles
-   :org-authz-roles auth/reader-org-authz-roles
-   :states states/all-application-states
-   :pre-checks [app/validate-authority-in-drafts
-                (partial permit/valid-permit-types {:YA :all})
-                yax/no-ya-backend
-                yax/has-extension-link-permits]}
+   :org-authz-roles  auth/reader-org-authz-roles
+   :states           states/post-verdict-states
+   :pre-checks       [app/validate-authority-in-drafts
+                      (partial permit/valid-permit-types {:YA :all})
+                      yax/no-ya-backend
+                      yax/has-extension-link-permits]}
   [{application :application}]
   (ok :extensions (yax/extensions-details application)))

@@ -14,8 +14,8 @@
 
 (defn- extension-link-permits [application]
   (filter #(su/=as-kw (:operation %) :ya-jatkoaika)
-          (or (:linkPermitData application)
-              (:linkPermitData (meta-fields/enrich-with-link-permit-data
+          (or (:appsLinkingToUs application)
+              (:appsLinkingToUs (meta-fields/enrich-with-link-permit-data
                                 application)))))
 
 (defn has-extension-link-permits

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1474377631913');
+=======
+@import url('main-blessed1.css?z=1474382052995');
+>>>>>>> Extension applications frontend.
 
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
@@ -5953,13 +5957,17 @@ span.icon_clear:before {
   margin-top: 12px;
   margin-bottom: 12px;
 }
+/* line 489, ../../../private/common-html/sass/views/_application.scss */
+#application-tasks-tab h2 {
+  margin-top: 1.5em;
+}
 
-/* line 491, ../../../private/common-html/sass/views/_application.scss */
+/* line 494, ../../../private/common-html/sass/views/_application.scss */
 #construction-time-documents {
   margin-top: 24px;
 }
 
-/* line 495, ../../../private/common-html/sass/views/_application.scss */
+/* line 498, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask {
   display: none;
   position: absolute;
@@ -5970,270 +5978,270 @@ span.icon_clear:before {
   height: 100%;
   background: #fff;
 }
-/* line 504, ../../../private/common-html/sass/views/_application.scss */
+/* line 507, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content {
   display: table;
   margin: 0 auto;
 }
-/* line 507, ../../../private/common-html/sass/views/_application.scss */
+/* line 510, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content img {
   display: table;
   margin: 0 auto;
 }
-/* line 511, ../../../private/common-html/sass/views/_application.scss */
+/* line 514, ../../../private/common-html/sass/views/_application.scss */
 .ajax-loading-mask .content div {
   margin-top: 25px;
 }
 
-/* line 517, ../../../private/common-html/sass/views/_application.scss */
+/* line 520, ../../../private/common-html/sass/views/_application.scss */
 .process-nav {
   margin-top: 24px;
 }
-/* line 519, ../../../private/common-html/sass/views/_application.scss */
+/* line 522, ../../../private/common-html/sass/views/_application.scss */
 .process-nav .process-next {
   float: right;
 }
 
-/* line 524, ../../../private/common-html/sass/views/_application.scss */
+/* line 527, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last {
   font-size: 15px;
 }
-/* line 526, ../../../private/common-html/sass/views/_application.scss */
+/* line 529, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last li {
   font-size: 15px;
 }
-/* line 529, ../../../private/common-html/sass/views/_application.scss */
+/* line 532, ../../../private/common-html/sass/views/_application.scss */
 #create .tree-last .attachments-list {
   padding-left: 25px;
 }
 
-/* line 534, ../../../private/common-html/sass/views/_application.scss */
+/* line 537, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section {
   margin-top: 24px;
   margin-bottom: 24px;
   padding: 24px;
   border: 1px solid #b5b5b5;
 }
-/* line 540, ../../../private/common-html/sass/views/_application.scss */
+/* line 543, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section #choose-statement-givers-title {
   font-weight: bold;
 }
-/* line 543, ../../../private/common-html/sass/views/_application.scss */
+/* line 546, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section #invite-statement-giver-saateText {
   resize: none;
   width: 99%;
 }
-/* line 547, ../../../private/common-html/sass/views/_application.scss */
+/* line 550, ../../../private/common-html/sass/views/_application.scss */
 #invite-statement-givers-section button {
   margin-top: 24px;
 }
 
-/* line 552, ../../../private/common-html/sass/views/_application.scss */
+/* line 555, ../../../private/common-html/sass/views/_application.scss */
 .statement-over-due {
   color: red;
 }
 
-/* line 557, ../../../private/common-html/sass/views/_application.scss */
+/* line 560, ../../../private/common-html/sass/views/_application.scss */
 #neighbors .map {
   width: 100%;
   height: 700px;
 }
 
-/* line 563, ../../../private/common-html/sass/views/_application.scss */
+/* line 566, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors {
   padding-top: 20px;
 }
-/* line 565, ../../../private/common-html/sass/views/_application.scss */
+/* line 568, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td {
   vertical-align: top;
 }
-/* line 567, ../../../private/common-html/sass/views/_application.scss */
+/* line 570, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td a.command {
   display: block;
 }
-/* line 570, ../../../private/common-html/sass/views/_application.scss */
+/* line 573, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-name {
   font-weight: bold;
 }
-/* line 573, ../../../private/common-html/sass/views/_application.scss */
+/* line 576, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-street {
   display: block;
   padding-left: 8px;
 }
-/* line 577, ../../../private/common-html/sass/views/_application.scss */
+/* line 580, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-zip {
   padding-left: 8px;
 }
-/* line 580, ../../../private/common-html/sass/views/_application.scss */
+/* line 583, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .owner-email {
   display: block;
   font-style: italic;
 }
-/* line 584, ../../../private/common-html/sass/views/_application.scss */
+/* line 587, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .status-state {
   font-weight: bold;
 }
-/* line 587, ../../../private/common-html/sass/views/_application.scss */
+/* line 590, ../../../private/common-html/sass/views/_application.scss */
 .application-neighbors td .status-time {
   display: block;
   font-style: italic;
 }
 
-/* line 595, ../../../private/common-html/sass/views/_application.scss */
+/* line 598, ../../../private/common-html/sass/views/_application.scss */
 .neighbors .command {
   margin-right: 6px;
 }
 
-/* line 601, ../../../private/common-html/sass/views/_application.scss */
+/* line 604, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .dialog-content, #dialog-verdict-attachment-prints-order-history .dialog-content {
   padding-left: 15px;
 }
-/* line 604, ../../../private/common-html/sass/views/_application.scss */
+/* line 607, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .order-amount, #dialog-verdict-attachment-prints-order-history .order-amount {
   width: 18px;
 }
-/* line 607, ../../../private/common-html/sass/views/_application.scss */
+/* line 610, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .btn-prints-dialog-ok, #dialog-verdict-attachment-prints-order-history .btn-prints-dialog-ok {
   margin-left: 15px;
 }
-/* line 611, ../../../private/common-html/sass/views/_application.scss */
+/* line 614, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .context-error, #dialog-verdict-attachment-prints-order-history .context-error {
   max-width: 820px;
   word-wrap: break-word;
 }
-/* line 625, ../../../private/common-html/sass/views/_application.scss */
+/* line 628, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers, #dialog-verdict-attachment-prints-order-history .fixed-headers {
   width: 820px;
   table-layout: fixed;
   margin-right: 20px;
 }
-/* line 630, ../../../private/common-html/sass/views/_application.scss */
+/* line 633, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers .center, #dialog-verdict-attachment-prints-order-history .fixed-headers .center {
   text-align: center;
 }
-/* line 634, ../../../private/common-html/sass/views/_application.scss */
+/* line 637, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td, #dialog-verdict-attachment-prints-order-history .fixed-headers td {
   word-wrap: break-word;
 }
-/* line 638, ../../../private/common-html/sass/views/_application.scss */
+/* line 641, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(1) {
   width: 200px;
   max-width: 200px;
 }
-/* line 642, ../../../private/common-html/sass/views/_application.scss */
+/* line 645, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(2) {
   width: 200px;
   max-width: 200px;
 }
-/* line 646, ../../../private/common-html/sass/views/_application.scss */
+/* line 649, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(3) {
   width: 300px;
   max-width: 300px;
 }
-/* line 650, ../../../private/common-html/sass/views/_application.scss */
+/* line 653, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(4) {
   width: 120px;
   max-width: 120px;
 }
-/* line 656, ../../../private/common-html/sass/views/_application.scss */
+/* line 659, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers thead tr, #dialog-verdict-attachment-prints-order-history .fixed-headers thead tr {
   display: block;
   position: relative;
 }
-/* line 661, ../../../private/common-html/sass/views/_application.scss */
+/* line 664, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers tbody, #dialog-verdict-attachment-prints-order-history .fixed-headers tbody {
   display: block;
   overflow: auto;
   width: 100%;
   max-height: 200px;
 }
-/* line 669, ../../../private/common-html/sass/views/_application.scss */
+/* line 672, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper {
   max-height: 200px;
   width: 820px;
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 674, ../../../private/common-html/sass/views/_application.scss */
+/* line 677, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper tbody, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper tbody {
   height: auto;
 }
 
-/* line 679, ../../../private/common-html/sass/views/_application.scss */
+/* line 682, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-dialog-description {
   margin-bottom: 12px;
 }
-/* line 683, ../../../private/common-html/sass/views/_application.scss */
+/* line 686, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items {
   margin-top: 6px;
   overflow-y: auto;
   max-height: 500px;
 }
-/* line 688, ../../../private/common-html/sass/views/_application.scss */
+/* line 691, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items .history-item {
   margin: 6px 0;
 }
 
-/* line 695, ../../../private/common-html/sass/views/_application.scss */
+/* line 698, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 700, ../../../private/common-html/sass/views/_application.scss */
+/* line 703, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 706, ../../../private/common-html/sass/views/_application.scss */
+/* line 709, ../../../private/common-html/sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
 
-/* line 710, ../../../private/common-html/sass/views/_application.scss */
+/* line 713, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 712, ../../../private/common-html/sass/views/_application.scss */
+/* line 715, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 718, ../../../private/common-html/sass/views/_application.scss */
+/* line 721, ../../../private/common-html/sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 721, ../../../private/common-html/sass/views/_application.scss */
+/* line 724, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 723, ../../../private/common-html/sass/views/_application.scss */
+/* line 726, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 727, ../../../private/common-html/sass/views/_application.scss */
+/* line 730, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 735, ../../../private/common-html/sass/views/_application.scss */
+/* line 738, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 740, ../../../private/common-html/sass/views/_application.scss */
+/* line 743, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 745, ../../../private/common-html/sass/views/_application.scss */
+/* line 748, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -6249,165 +6257,165 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 760, ../../../private/common-html/sass/views/_application.scss */
+/* line 763, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 766, ../../../private/common-html/sass/views/_application.scss */
+/* line 769, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 768, ../../../private/common-html/sass/views/_application.scss */
+/* line 771, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 773, ../../../private/common-html/sass/views/_application.scss */
+/* line 776, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 777, ../../../private/common-html/sass/views/_application.scss */
+/* line 780, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
 }
-/* line 780, ../../../private/common-html/sass/views/_application.scss */
+/* line 783, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 784, ../../../private/common-html/sass/views/_application.scss */
+/* line 787, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 788, ../../../private/common-html/sass/views/_application.scss */
+/* line 791, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 792, ../../../private/common-html/sass/views/_application.scss */
+/* line 795, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 795, ../../../private/common-html/sass/views/_application.scss */
+/* line 798, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 804, ../../../private/common-html/sass/views/_application.scss */
+/* line 807, ../../../private/common-html/sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 809, ../../../private/common-html/sass/views/_application.scss */
+/* line 812, ../../../private/common-html/sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 813, ../../../private/common-html/sass/views/_application.scss */
+/* line 816, ../../../private/common-html/sass/views/_application.scss */
 .info-line {
   display: table-row;
 }
-/* line 815, ../../../private/common-html/sass/views/_application.scss */
+/* line 818, ../../../private/common-html/sass/views/_application.scss */
 .info-line span, .info-line a {
   display: table-cell;
 }
-/* line 818, ../../../private/common-html/sass/views/_application.scss */
+/* line 821, ../../../private/common-html/sass/views/_application.scss */
 .info-line a {
   padding-left: 12px;
 }
-/* line 821, ../../../private/common-html/sass/views/_application.scss */
+/* line 824, ../../../private/common-html/sass/views/_application.scss */
 .info-line .required-field-error-element-name {
   padding-left: 6px;
 }
-/* line 824, ../../../private/common-html/sass/views/_application.scss */
+/* line 827, ../../../private/common-html/sass/views/_application.scss */
 .info-line .lupicon-circle-attention {
   color: #e34319;
 }
-/* line 828, ../../../private/common-html/sass/views/_application.scss */
+/* line 831, ../../../private/common-html/sass/views/_application.scss */
 .info-line.warning .lupicon-circle-attention {
   color: #f39129;
 }
 
-/* line 834, ../../../private/common-html/sass/views/_application.scss */
+/* line 837, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 836, ../../../private/common-html/sass/views/_application.scss */
+/* line 839, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 838, ../../../private/common-html/sass/views/_application.scss */
+/* line 841, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 846, ../../../private/common-html/sass/views/_application.scss */
+/* line 849, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 849, ../../../private/common-html/sass/views/_application.scss */
+/* line 852, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 855, ../../../private/common-html/sass/views/_application.scss */
+/* line 858, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 858, ../../../private/common-html/sass/views/_application.scss */
+/* line 861, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 864, ../../../private/common-html/sass/views/_application.scss */
+/* line 867, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 869, ../../../private/common-html/sass/views/_application.scss */
+/* line 872, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 874, ../../../private/common-html/sass/views/_application.scss */
+/* line 877, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 877, ../../../private/common-html/sass/views/_application.scss */
+/* line 880, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 882, ../../../private/common-html/sass/views/_application.scss */
+/* line 885, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 885, ../../../private/common-html/sass/views/_application.scss */
+/* line 888, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 891, ../../../private/common-html/sass/views/_application.scss */
+/* line 894, ../../../private/common-html/sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 896, ../../../private/common-html/sass/views/_application.scss */
+/* line 899, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 901, ../../../private/common-html/sass/views/_application.scss */
+/* line 904, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 903, ../../../private/common-html/sass/views/_application.scss */
+/* line 906, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -6427,30 +6435,30 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
-/* line 910, ../../../private/common-html/sass/views/_application.scss */
+/* line 913, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
 }
-/* line 913, ../../../private/common-html/sass/views/_application.scss */
+/* line 916, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata {
   max-width: 875px;
 }
-/* line 915, ../../../private/common-html/sass/views/_application.scss */
+/* line 918, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 922, ../../../private/common-html/sass/views/_application.scss */
+/* line 925, ../../../private/common-html/sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 927, ../../../private/common-html/sass/views/_application.scss */
+/* line 930, ../../../private/common-html/sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
 
-/* line 931, ../../../private/common-html/sass/views/_application.scss */
+/* line 934, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
 }
