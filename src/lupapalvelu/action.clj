@@ -66,7 +66,7 @@
   (let [url (ss/trim (get-in command [:data param]))]
     (when-not (ss/blank? url)
       (or (validate-url url)
-          (when-not (re-find #"(?i)^https://" url)
+          (when-not (ss/starts-with-i url "https://")
             (fail :error.only-https-allowed))))))
 
 ;; Notificator

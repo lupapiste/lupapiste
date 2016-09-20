@@ -21,16 +21,15 @@ Open the 3D map view
   Wait until  Title should be  3D Map View
   Close window
   Select window  main
-  [Teardown]  Logout
 
-Mikko logs in and creates inforequest
+
+Pena creates inforequest
   Set Suite Variable  ${infoname}  Info Dee 3
   Set Suite Variable  ${infoid}  753-416-25-30
-  Mikko logs in
   Create inforequest the fast way  ${infoname}  360603.153  6734222.95  ${infoid}  pientalo  Hen youyisi!
 
 Open 3D map button is visible for inforequest too
-  Test id visible?  open-3d-map
+  Test id visible  open-3d-map
   [Teardown]  Logout
 
 Solita admin sees the list of organizations
@@ -53,14 +52,12 @@ Admin edits 3D maps
   Test id disabled  3d-map-send
   [Teardown]  Logout
 
-Pena logs in and no longer sees 3D map button
+Pena logs in and no longer sees 3D map button in the application
   Pena logs in
   Open application  ${appname}  ${propertyid}
   No such test id  open-3d-map
-  [Teardown]  Logout
 
-Mikko logs in and no longer sees 3D map button
-  Mikko logs in
+... nor in the inforequest
   Open inforequest  ${infoname}  ${infoid}
   No such test id  open-3d-map
   [Teardown]  Logout

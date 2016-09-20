@@ -1353,9 +1353,9 @@ Javascript?
   Wait Until  Javascript? helper  ${expression}
 
 # Alternative to Wait Test Id Visible. Does not scroll
-Test id visible?
+Test id visible
   [Arguments]  ${id}
-  Wait Until  Javascript?  $("[data-test-id=${id}]:visible").length > 0
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}

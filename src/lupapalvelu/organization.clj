@@ -32,7 +32,6 @@
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.geojson :as geo]
-            [lupapalvelu.user :as usr]
             [me.raynes.fs :as fs]
             [clojure.walk :refer [keywordize-keys]]))
 
@@ -114,8 +113,8 @@
    (sc/optional-key :use-attachment-links-integration) sc/Bool
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
                                (sc/optional-key :operations) [sc/Str]}
-   (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
-                              (sc/optional-key :server)  Server}})
+   (sc/optional-key :3d-map) {:enabled sc/Bool
+                              :server  Server}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -363,37 +362,9 @@
 
 (def update-organization-suti-server (partial update-organization-server :suti.server))
 
-;; 3D Map
+;; 3D Map. See also 3d-map and 3d-map-api namespaces.
 
 (def update-organization-3d-map-server (partial update-organization-server :3d-map.server))
-
-(defn three-d-map-enabled
-  "Pre-checker for making sure that the organization has the 3D map enabled."
-  [command]
-  (when-let [org-id (-> command :application :organization)]
-    (when-not (-> org-id get-organization :3d-map :enabled)
-      (fail :error.3d-map-disabled))))
-
-(defn redirect-to-3d-map
-  "Makes POST request to the 3D map server and returns the Location header value."
-  [{email :email} {:keys [id organization]}]
-  (let [{:keys [url username password crypto-iv]} (-> organization
-                                                      get-organization
-                                                      :3d-map
-                                                      :server)
-        response (http/post url
-                   (merge {:throw-exceptions false
-                           :form-params {:applicationId id
-                                         :apikey (or (usr/get-apikey email)
-                                                     (usr/create-apikey email))}}
-                          (when (ss/not-blank? crypto-iv)
-                            {:basic-auth [username
-                                          (decode-credentials password
-                                                              crypto-iv)]})))
-        location (-> response :headers :location)]
-    (if (ss/blank? location)
-      (fail :error.3d-map-not-found)
-      (ok :location location))))
 
 ;;
 ;; Construction waste feeds
