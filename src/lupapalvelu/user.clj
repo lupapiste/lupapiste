@@ -397,11 +397,14 @@
        (fail! :error.user-not-found :email ~email))
      ~@body))
 
-(defn user-enabled? [user]
-  (:enabled (get-user-by-id (:id user))))
-
-(defn user-removed? [x]
-   (not (user-enabled? x)))
+(defn email-recipient?
+  "Check that a user is not a removed one, meaning it either hasn't got an id at all, is a dummy one, or is a real active one."
+  [user]
+  (let [id (:id user)]
+    (or (not id)
+        (let [user (get-user-by-id (:id user))]
+          (or (:enabled user)
+              (= "dummy" (:role user)))))))
 
 ;;
 ;; ==============================================================================
