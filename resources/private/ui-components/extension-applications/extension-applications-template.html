@@ -2,7 +2,7 @@
         id="extension-applications-template">
   <!-- ko ifnot: _.isEmpty( extensions() ) -->
   <h2 data-bind="ltext: 'application.extension'"></h2>
-  <table class="extensions-table">
+  <table data-test-id="extensions-table">
     <thead>
       <tr>
         <th data-bind="ltext: 'application.extension.start'"></th>

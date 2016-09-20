@@ -1,8 +1,8 @@
 *** Settings ***
 
-Documentation  3D map support
-Suite Teardown  Apply minimal fixture now
-Resource       ../../common_resource.robot
+Documentation   3D map support
+Suite Setup     Apply minimal fixture now
+Resource        ../../common_resource.robot
 
 *** Test Cases ***
 

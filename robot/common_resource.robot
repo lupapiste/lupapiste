@@ -341,6 +341,9 @@ Pekka logs in
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
+Sipoo-ya logs in
+  Authority-admin logs in  sipoo-ya  sipoo  Simo YA-Suurvisiiri
+
 Oulu Ymp logs in
   Authority-admin logs in  ymp-admin@oulu.fi  oulu  Oulu Ymp Admin
 
