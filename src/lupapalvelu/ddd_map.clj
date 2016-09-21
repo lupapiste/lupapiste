@@ -20,6 +20,7 @@
                                                       :server)
         response (http/post url
                    (merge {:throw-exceptions false
+                           :follow-redirects false
                            :form-params {:applicationId app-id
                                          :apikey (or (usr/get-apikey email)
                                                      (usr/create-apikey email))}}

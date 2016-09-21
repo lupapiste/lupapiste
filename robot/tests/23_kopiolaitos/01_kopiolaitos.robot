@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Variables      ../06_attachments/variables.py
 
+
 *** Test Cases ***
 
 
@@ -74,13 +75,15 @@ Sonja gives verdict
   Open tab  verdict
   Fetch verdict
 
-An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
+Order verdict attachments button has appeared into Attachments tab
   Open tab  attachments
   Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 The print order dialog can be opened by selecting from the dropdown
   Click by test id  order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
+
+Sonja cancels ordering prints
   Click Link  xpath=//*[@data-test-id='test-order-verdict-attachment-prints-cancel']
   Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
@@ -90,9 +93,16 @@ Sonja opens the kopiolaitos order dialog on Verdict tab
   Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
-  # Three verdict attachments: 2 sample verdict files from KRYSP and one that was marked
-  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  3
+
+There is one attachment marked as verdict attachment
+  Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  1
   Element should be visible  verdict-attachment-prints-order-info
+
+Attachment data is visible
+  Element should contain  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=type]  Muu liite
+  Element should contain  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=contents]  Muu muu muu liite
+  Element should contain  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=filename]  robotframework-testfile-06_attachments.png
+  Textfield value should be  jquery=div#dialog-verdict-attachment-prints-order tr[data-test-id=order-prints-attachment-row-muut-muu] td[data-test-col=amount] input  2
 
 Sonja checks the kopiolaitos order
   # Some input values come from organization data set in minimal fixture
