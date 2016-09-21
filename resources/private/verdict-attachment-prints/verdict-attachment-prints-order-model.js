@@ -16,7 +16,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.errorMessage = ko.observable();
   self.attachments = self.disposedPureComputed(function() {
     return _(self.attachmentsService.attachments() || [])
-      .map(ko.unwrap)
+      .map(ko.toJS)
       .filter(printableAttachment)
       .map(enrichAttachment)
       .value();
