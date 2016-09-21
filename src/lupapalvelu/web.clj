@@ -779,7 +779,7 @@
       (if (= username password "3dmap")
         (let [keyId (mongo/create-id)]
           (swap! lupapisteKeys assoc keyId (select-keys (:params req-map) [:applicationId :apikey]))
-          (resp/redirect (str "/dev/show-3dmap?lupapisteKey=" keyId)))
+          (resp/redirect (str "/dev/show-3dmap?lupapisteKey=" keyId) :see-other))
         (resp/status 401 "Unauthorized"))))
 
   (defpage [:get "/dev/show-3dmap"] {:keys [lupapisteKey]}
