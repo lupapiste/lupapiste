@@ -6,12 +6,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-meta-fields :as meta-fields]))
 
-(defn no-ya-extension-application
-  "Prechecker that fails if the application permit is not non-extension YA."
-  [{application :application}]
-  (when (su/=as-kw (-> application :primaryOperation :name) :ya-jatkoaika)
-    (fail :error.operation-not-supported)))
-
 (defn- extension-link-permits [application]
   (filter #(su/=as-kw (:operation %) :ya-jatkoaika)
           (or (:appsLinkingToUs application)

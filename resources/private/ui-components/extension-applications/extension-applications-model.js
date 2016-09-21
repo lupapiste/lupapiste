@@ -6,8 +6,6 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
 
   self.extensions = ko.observableArray();
 
-  var latestAppId = null;
-
   function hasAuth() {
     return lupapisteApp.models.applicationAuthModel.ok( "ya-extensions");
   }
@@ -17,10 +15,11 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
     return m.isValid() ? m : null;
   }
 
-  function fetchExtensions() {
+  function fetchExtensions( opts ) {
+    var appId = _.get( opts, "applicationId");
     self.extensions([]);
-    if( hasAuth() ) {
-      ajax.query( "ya-extensions", {id: latestAppId})
+    if( hasAuth() && appId) {
+      ajax.query( "ya-extensions", {id: appId})
         .success( function( res ) {
           self.extensions(_( res.extensions )
                           .map( function( ext ) {
@@ -37,13 +36,10 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
     }
   }
 
-  self.disposedComputed( function() {
-    var appId = lupapisteApp.models.application.id();
-    if( appId
-        && appId !== latestAppId
-        && pageutil.hashApplicationId() === appId ) {
-      latestAppId = appId;
-      fetchExtensions();
-    }
-  });
+  hub.subscribe( "contextService::enter", fetchExtensions);
+
+  // Explicit initialization, since the model may have missed the
+  // original enter event.
+  fetchExtensions( {applicationId:
+                    lupapisteApp.services.contextService.applicationId()});
 };

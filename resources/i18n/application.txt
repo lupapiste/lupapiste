@@ -618,6 +618,6 @@
 "applications.welcome" "sv" "<div style='padding: 50px'>Välkommen! Du kan börja genom att utreda projektets tillståndsbehov genom att klicka på knappen <i>Nytt projekt</i> . Efter att du utrett tillståndsbehovet kan du kontakta myndigheterna. </div>"
 "application.extension" "fi" "Jatkoaika"
 "application.extension.start" "fi" "Alkaa"
-"application.extension.start" "sv" "Börja"
+"application.extension.start" "sv" "Börjar"
 "application.extension.end" "fi" "Päättyy"
 "application.extension.end" "sv" "Slutar"

@@ -992,7 +992,7 @@
 
                         <extension-applications></extension-applications>
                         
-                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
+                        <div data-bind="if: _.some( _js.buildings ) && $root.authorization.ok('inform-building-construction-started')">
                           <h2 data-bind="ltext:'application.aloitusilmoitukset'"></h2>
                             <table>
                                 <thead>
