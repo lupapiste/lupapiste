@@ -49,6 +49,7 @@ temp
 # Test files
 robot/local-ie8-test.bat
 robot/pabot*
+robot/output.xml
 *-leima.pdf
 
 # Misc
