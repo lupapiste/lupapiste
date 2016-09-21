@@ -621,3 +621,5 @@
 "application.extension.start" "sv" "Börjar"
 "application.extension.end" "fi" "Päättyy"
 "application.extension.end" "sv" "Slutar"
+"application.extension.approve" "fi" "Hyväksy hakemus"
+"applicaiton.extension.approve-confirmation" "fi" "Hakemuksen hyväksyminen siirtää sen samalla taustajärjestelmään."
