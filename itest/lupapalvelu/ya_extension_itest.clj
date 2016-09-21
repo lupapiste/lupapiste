@@ -25,6 +25,9 @@
          (fact "Submit"
                (command pena :submit-application :id r-id) => ok?
                (command pena :submit-application :id ya-id) => ok?)
+         (fact "Extension pseudo query fails"
+               (query sonja :approve-ya-extension :id ya-id) => (err :error.unsupported-primary-operation)
+               (query sonja :approve-ya-extension :id r-id) => (err :error.unsupported-primary-operation))
          (fact "Create and invite statement givers for YA application"
                (command sipoo-ya :create-statement-giver
                         :email "ronja.sibbo@sipoo.fi"
@@ -82,4 +85,8 @@
                  (fact "Statement giver authority can call query"
                        (query ronja :ya-extensions :id ya-id) => ok?)
                  (fact "Statement giver can call query"
-                       (query teppo :ya-extensions :id ya-id) => ok?)))))
+                       (query teppo :ya-extensions :id ya-id) => ok?)
+                 (fact "Submit extension application"
+                       (command pena :submit-application :id ext-id) => ok?)
+                 (fact "Approve extension pseudo query"
+                       (query sonja :approve-ya-extension :id ext-id) => ok?)))))

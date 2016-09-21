@@ -152,3 +152,17 @@
                    state-seq)}]
     (fact "only entries with :state are regarded"
       (get-previous-app-state history) => :two)))
+
+(facts "Primary operation prechecks"
+       (let [app {:application {:primaryOperation {:name "foobar"}}}
+             err {:ok false :text "error.unsupported-primary-operation"}]
+         (fact "Allow"
+               ((allow-primary-operations #{:hii :foobar}) app) => nil?
+               ((allow-primary-operations #{:foobar}) app) => nil?
+               ((allow-primary-operations #{:hii}) app) => err
+               ((allow-primary-operations #{}) app) => err)
+         (fact "Reject"
+               ((reject-primary-operations #{:hii :foobar}) app) => err
+               ((reject-primary-operations #{:foobar}) app) => err
+               ((reject-primary-operations #{:hii}) app) => nil?
+               ((reject-primary-operations #{}) app) => nil?)))

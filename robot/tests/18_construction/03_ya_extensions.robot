@@ -43,6 +43,23 @@ The extensions are listed according to the start date
 Second link leads to the first extension
   Scroll and click test id  state-link-1
   Test id text is  application-title  EXTENSION YI
+ 
+Pena submits extension
+  Submit application
+  [Teardown]  Logout
+  
+Sonja cannot approve application but extension
+  Sonja logs in
+  Open application  ${ext1}  ${propertyid}
+  No such test id  approve-application
+  Scroll and click test id  approve-extension
+  Deny  dynamic-yes-no-confirm-dialog
+
+The same is true in the required field summary tab
+  Open tab  requiredFieldSummary  
+  No such test id  approve-application-summaryTab
+  Scroll and click test id  approve-extension-summaryTab
+  Deny  dynamic-yes-no-confirm-dialog
   [Teardown]  Logout
 
 *** Keywords ***

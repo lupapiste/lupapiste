@@ -105,6 +105,26 @@
 (defn submitted? [{:keys [state]}]
   (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
 
+(defn- contains-primary-operation? [application op-set]
+  {:pre [(set? op-set)]}
+  (contains? op-set (-> application :primaryOperation :name keyword)))
+
+(defn allow-primary-operations
+  "Prechecker (factory, no partial needed) that fails if the current
+  primary operation is not contained in the operation set (keywords)"
+  [operation-set]
+  (fn [{application :application}]
+    (when-not (contains-primary-operation? application operation-set)
+      (fail :error.unsupported-primary-operation))))
+
+(defn reject-primary-operations
+  "Prechecker (factory, no partial needed) that fails if the current
+  primary operation is contained in the operation set (keywords)"
+  [operation-set]
+  (fn [{application :application}]
+    (when (contains-primary-operation? application operation-set)
+      (fail :error.unsupported-primary-operation))))
+
 ;;
 ;; Helpers
 ;;

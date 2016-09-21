@@ -23,3 +23,13 @@
                       yax/has-extension-link-permits]}
   [{application :application}]
   (ok :extensions (yax/extensions-details application)))
+
+(defquery approve-ya-extension
+  {:description     "Pseudo query for checking whether an :ya-jatkoaika
+  application can be approved."
+   :parameters      [id]
+   :user-roles      #{:authority}
+   :org-authz-roles #{:approver}
+   :states          #{:submitted :complementNeeded}
+   :pre-checks      [(app/allow-primary-operations #{:ya-jatkoaika})]}
+  [_])
