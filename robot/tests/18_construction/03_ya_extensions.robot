@@ -7,7 +7,9 @@ Resource        ../../common_resource.robot
 *** Variables ***
 ${appname}     Roadcrew
 ${propertyid}  753-416-88-88
-${ext1}        Extension 1
+${ext1}        Extension yi
+${ext2}        Extension er
+${ext3}        Extension san
 
 *** Test Cases ***
 
@@ -19,16 +21,10 @@ Extensions table is not visible
   Open tab  tasks
   No such test id  extensions-table
 
-Pena requests extension
-  Scroll and click test id  continuation-period-create-btn
-  Confirm  dynamic-yes-no-confirm-dialog
-  Change address  ${ext1}
+Pena requests first extension
+  Create extension  ${ext1}  20.09.2016  10.10.2016
 
-Pena sets dates for the extension
-  Set dates  20.09.2016  10.10.2016
-  
 The extensions table is still not shown in the original application
-  Follow link permit
   Open tab  tasks
   No such test id  extensions-table
   [Teardown]  Logout
@@ -46,10 +42,34 @@ Pena now sees extensions table
   Open application  ${appname}  ${propertyid}
   Open tab  tasks
   Check row  0  20.9.2016  10.10.2016  Luonnos  
-    
 
+Pena creates second extension
+  Create extension  ${ext2}  01.08.2016  09.09.2016  
+
+Pena creates third extension
+  Create extension  ${ext3}  11.11.2016  12.12.2016
+
+The extensions are listed according to the start date
+  Open tab  tasks
+  Check row  0  1.8.2016  9.9.2016  Luonnos
+  Check row  1  20.9.2016  10.10.2016  Luonnos  
+  Check row  2  11.11.2016  12.12.2016  Luonnos
+
+Second link leads to the first extension
+  Scroll and click test id  state-link-1
+  Test id text is  application-title  EXTENSION YI
+  [Teardown]  Logout
 
 *** Keywords ***
+
+Create extension
+  [Arguments]  ${address}  ${start}  ${end}
+  Scroll and click test id  continuation-period-create-btn
+  Confirm  dynamic-yes-no-confirm-dialog
+  Change address  ${address}
+  Set dates  ${start}  ${end}
+  Follow link permit
+  
 
 Follow link permit
   Scroll and click test id  test-application-link-permit-lupapistetunnus
