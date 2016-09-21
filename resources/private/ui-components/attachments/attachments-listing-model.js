@@ -209,50 +209,52 @@ LUPAPISTE.AttachmentsListingModel = function() {
     });
   }
 
-  function getOperationLocalization(operationId) {
-    var operation = _.find(lupapisteApp.models.application._js.allOperations, ["id", operationId]);
+  function getOperationLocalization(operationId, allOperations) {
+    var operation = ko.toJS(_.find(allOperations, function(op) {
+      return util.getIn(op, ["id"]) === operationId;
+    }));
     return operation
       ? _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ")
       : "";
   }
 
-  function groupToAccordionName(groupPath) {
+  function groupToAccordionName(groupPath, allOperations) {
     var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
         key = _.last(groupPath);
     if (opIdRegExp.test(key)) {
-      return getOperationLocalization(opIdRegExp.exec(key)[1]);
+      return getOperationLocalization(opIdRegExp.exec(key)[1], allOperations);
     } else {
       return loc(["application", "attachments", key]);
     }
   }
 
-  function getDataForAccordion(groupPath) {
+  function getDataForAccordion(groupPath, allOperations) {
     return {
-      name: groupToAccordionName(groupPath),
+      name: groupToAccordionName(groupPath, allOperations),
       path: groupPath,
       open: ko.observable(),
       data: ko.pureComputed(function() {
         return modelForSubAccordion({
-          name: groupToAccordionName(groupPath),
+          name: groupToAccordionName(groupPath, allOperations),
           attachmentIds: getAttachmentsForGroup(groupPath)
         });
       })
     };
   }
 
-  function attachmentTypeLayout(groupPath, tagGroups) {
+  function attachmentTypeLayout(groupPath, tagGroups, allOperations) {
     if (tagGroups.length) {
       return {
-        name: groupToAccordionName(groupPath),
+        name: groupToAccordionName(groupPath, allOperations),
         path: groupPath,
         open: ko.observable(),
         data: getDataForGroup(groupPath),
         accordions: _.map(tagGroups, function(tagGroup) {
-          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup));
+          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup), allOperations);
         })
       };
     } else {
-      return getDataForAccordion(groupPath);
+      return getDataForAccordion(groupPath, allOperations);
     }
   }
 
@@ -285,8 +287,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   // entry point for templates to access model data
   self.groups = ko.computed(function() {
-    if (self.service.tagGroups().length) {
-      return attachmentTypeLayout([], self.service.tagGroups());
+    var tagGroups = self.service.tagGroups();
+    var allOperations = lupapisteApp.models.application.allOperations();
+    if (!_.isEmpty(tagGroups)) {
+      return attachmentTypeLayout([], tagGroups, allOperations);
     } else {
       return {};
     }

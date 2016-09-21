@@ -172,6 +172,18 @@ LUPAPISTE.ApplicationModel = function() {
     return !_.isEmpty(opName) ? "operations." + opName : "";
   });
 
+  hub.subscribe("op-description-changed", function(e) {
+    var opid = e["op-id"];
+    var desc = e["op-desc"];
+
+    if (e.appId === self.id()) {
+      var operations = _.map(self.allOperations(), function(op) {
+        return op.id() === opid ? op.description(desc) : op;
+      });
+      self.allOperations(operations);
+    }
+  });
+
   self.foremanTasks = ko.observable();
 
   self.nonpartyDocumentIndicator = ko.observable(0);
