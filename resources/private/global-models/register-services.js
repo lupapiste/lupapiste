@@ -22,4 +22,6 @@
   lupapisteApp.services.attachmentsService = new LUPAPISTE.AttachmentsService();
   lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
   lupapisteApp.services.infoService = new LUPAPISTE.InfoService();
+  lupapisteApp.services.contextService = new LUPAPISTE.ContextService();
+
 })();

@@ -616,3 +616,8 @@
 "applications.updated" "sv" "Uppdaterad"
 "applications.welcome" "fi" "<div style='padding: 50px'>Tervetuloa! Voit aloittaa selvittämällä hankkeesi luvan tarpeen painamalla <i>Uusi hanke</i> painiketta. Selvitettyäsi luvan tarpeen voit ottaa yhteyttä viranomaisiin . </div>"
 "applications.welcome" "sv" "<div style='padding: 50px'>Välkommen! Du kan börja genom att utreda projektets tillståndsbehov genom att klicka på knappen <i>Nytt projekt</i> . Efter att du utrett tillståndsbehovet kan du kontakta myndigheterna. </div>"
+"application.extension" "fi" "Jatkoaika"
+"application.extension.start" "fi" "Alkaa"
+"application.extension.start" "sv" "Börjar"
+"application.extension.end" "fi" "Päättyy"
+"application.extension.end" "sv" "Slutar"

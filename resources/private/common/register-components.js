@@ -134,7 +134,8 @@ jQuery(document).ready(function() {
     {name: "side-panel-info"},
     {name: "info-link"},
     {name: "targeted-attachments"},
-    {name: "open-3d-map"}
+    {name: "open-3d-map"},
+    {name: "extension-applications"}
 ];
 
   ko.registerLupapisteComponents(components);

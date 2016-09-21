@@ -989,11 +989,13 @@
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
                                          }"></span>
-                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
+                        <extension-applications></extension-applications>
+                        
+                        <div data-bind="if: _.some( _js.buildings ) && $root.authorization.ok('inform-building-construction-started')">
+                          <h2 data-bind="ltext:'application.aloitusilmoitukset'"></h2>
                             <table>
                                 <thead>
-                                    <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
                                     <tr>
                                         <th data-bind="ltext: 'application.buildingStatus'"></th>
                                         <th data-bind="ltext: 'application.buildingOperation'"></th>
@@ -1021,9 +1023,9 @@
 
                         <!-- YA: Info about construction started and construction ready occasions -->
                         <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed'], $data.state())">
+                          <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
                             <table>
                                 <thead>
-                                    <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
                                     <tr>
                                         <th data-bind="ltext: 'application.constructionStateChangeOperation'"></th>
                                         <th data-bind="ltext: 'application.constructionStateChangeDate'"></th>
@@ -1088,7 +1090,7 @@
 
                         <div class="tasks-content">
                             <div data-bind="foreach: taskGroups">
-                                <h2 data-bind="text: name" style="padding-top:1em"></h2>
+                                <h2 data-bind="text: name"></h2>
                                 <div class="stacked legends">
                                     <div class="like-btn">
                                         <i class="lupicon-circle-check"></i>

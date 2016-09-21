@@ -197,7 +197,8 @@
                    "calendar-service.js"
                    "attachments-service.js"
                    "suti-service.js"
-                   "info-service.js"]}
+                   "info-service.js"
+                   "context-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

@@ -1,0 +1,28 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="extension-applications-template">
+  <!-- ko ifnot: _.isEmpty( extensions() ) -->
+  <h2 data-bind="ltext: 'application.extension'"></h2>
+  <table data-test-id="extensions-table">
+    <thead>
+      <tr>
+        <th data-bind="ltext: 'application.extension.start'"></th>
+        <th data-bind="ltext: 'application.extension.end'"></th>
+        <th data-bind="ltext: 'tila'"></th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: extensions">
+      <tr>
+        <td data-bind="dateString: startDate,
+                       testId: 'start-date-' + $index()"></td>
+        <td data-bind="dateString: endDate,
+                       testId: 'end-date-' + $index()"></td>
+        <td>
+          <a data-bind="ltext: state,
+                        attr: {href: url},
+                        testId: 'state-link-' + $index()"></a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- /ko -->
+</script>

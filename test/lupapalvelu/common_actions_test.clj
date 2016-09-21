@@ -68,7 +68,8 @@
                           :info-link-upsert
                           :organization-links
                           :mark-seen-organization-links
-                          :redirect-to-3d-map}
+                          :redirect-to-3d-map
+                          :ya-extensions}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {} user application {})
@@ -111,7 +112,8 @@
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
                            :get-building-info-from-wfs :tasks-tab-visible
                            :mark-seen :info-links :organization-links :mark-seen-organization-links
-                           :pdfa-casefile :suti-application-data :suti-application-products :redirect-to-3d-map
+                           :pdfa-casefile :suti-application-data :suti-application-products
+                           :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
