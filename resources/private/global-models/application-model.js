@@ -37,9 +37,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.closed = ko.observable();
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
-  self.hasAttachment = ko.computed(function() {
-    return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
-  });
+
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
@@ -794,14 +792,10 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Saved from the old LUPAPISTE.AttachmentsTabModel, used in info request
   self.deleteSingleAttachment = function(a) {
-    var attId = ko.unwrap(a.id);
-    var versions = ko.unwrap(a.versions);
+    var versions = util.getIn(a, ["versions"]);
     var doDelete = function() {
-      ajax.command("delete-attachment", {id: self.id(), attachmentId: attId})
-        .success(self.lightReload)
-        .processing(self.processing)
-        .call();
-        hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
+      lupapisteApp.services.attachmentsService.removeAttachment(util.getIn(a, ["id"]));
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
       return false;
     };
     hub.send("show-dialog", {ltitle: "attachment.delete.header",

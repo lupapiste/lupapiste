@@ -120,30 +120,31 @@
              data-bind="template: {name: 'organization-links-template', data: application}">
         </div>
         <h2 data-bind="ltext: 'inforequest.attachments'"></h2>
-        <div data-bind="if: application.hasAttachment">
+
+        <div data-bind="if: lupapisteApp.services.attachmentsService.hasAttachments">
           <table class="table" data-test-id="inforequest-attachments-table">
-            <tbody>
+            <thead>
               <tr>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
                 <th></th>
               </tr>
-              <!-- ko foreach: application.attachments -->
+            </thead>
+            <tbody>
+              <!-- ko foreach: lupapisteApp.services.attachmentsService.attachments -->
               <!-- ko if: $data.latestVersion && latestVersion.filename -->
-              <tr>
+              <tr data-bind="with: latestVersion">
                 <td>
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId()}"></a><br/>
-                    <i data-bind="ltext: latestVersion.contentType"></i>
-                    <i data-bind="size: latestVersion.size"></i>
+                    <a href="#" data-bind="text: filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId}"></a><br/>
+                    <i data-bind="ltext: contentType"></i>
+                    <i data-bind="size: size"></i>
                 </td>
                 <td>
-                  <span data-bind="dateString: modified"></span>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="fullName: latestVersion.user"></span>
-                  </span>
+                  <span data-bind="dateString: $parent.modified"></span>
+                  <span data-bind="fullName: user"></span>
                 </td>
                 <td>
-                  <div data-bind="visible: $root.authorization.ok('delete-attachment')">
+                  <div data-bind="visible: $root.authorization.ok('delete-attachment'), with: $parent">
                       <span class="primary lupicon-remove"
                             data-bind="click: $root.application.deleteSingleAttachment,
                                      clickBubble: false,

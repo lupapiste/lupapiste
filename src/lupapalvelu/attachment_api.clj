@@ -166,7 +166,7 @@
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
-   :states states/all-application-states}
+   :states states/all-states}
   [{{attachments :attachments :as application} :application}]
   (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
 

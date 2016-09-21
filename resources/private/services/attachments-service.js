@@ -176,6 +176,11 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
+  self.hasAttachments = ko.computed(function() {
+    var attachments = self.attachments();
+    return _.some(attachments, function(a) {return !_.isEmpty(util.getIn(a, ["versions"]));});
+  });
+
   function orderByTags(attachments, tagGroups) {
     if (_.isEmpty(tagGroups)) {
       return attachments;
@@ -236,7 +241,11 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
     return false;
   };
-  hub.subscribe("upload-done", function() { self.authModel.refresh({id: self.applicationId()}); });
+
+  hub.subscribe("upload-done", function(data) {
+    self.queryOne(data.attachmentId);
+    self.authModel.refresh({id: self.applicationId()});
+  });
 
   self.copyUserAttachments = function(hubParams) {
     var params = {id: self.applicationId()};
