@@ -37,10 +37,16 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  self.applicationId.subscribe(function(val) {
+  self.applicationId.subscribe(function(id) {
+    clearData();  // Just in case
     // to avoid retaining old filter states when going to different application
     self.internedObservables = {};
-  self.authModel.refresh({id: val});
+    if (id) {
+      self.queryAll();
+      self.authModel.refresh({id: id});
+    } else {
+      self.authModel.setData({});
+    }
   });
 
   function clearData() {
@@ -51,13 +57,6 @@ LUPAPISTE.AttachmentsService = function() {
     self.tagGroups([]);
     self.groupTypes([]);
   }
-
-  ko.computed(function() {
-    if(self.applicationId()) {
-      clearData();  // Just in case
-      self.queryAll();
-    }
-  });
 
   function queryData(queryName, responseJsonKey, dataSetter, params, hubParams) {
     if (self.authModel.ok(queryName)) {
