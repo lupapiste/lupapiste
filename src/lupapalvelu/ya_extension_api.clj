@@ -20,7 +20,6 @@
    :org-authz-roles  auth/reader-org-authz-roles
    :states           states/post-verdict-states
    :pre-checks       [(partial permit/valid-permit-types {:YA :all})
-                      yax/no-ya-backend
                       yax/has-extension-link-permits]}
   [{application :application}]
   (ok :extensions (yax/extensions-details application)))

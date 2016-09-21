@@ -19,13 +19,6 @@
   (when (empty? (extension-link-permits application))
     (fail :error.no-extension-applications)))
 
-(defn no-ya-backend
-  "Prechecker that fails if the organisation has defined backend
-  system for YA applications."
-  [{organization :organization}]
-  (when (ss/not-blank? (-> @organization :krysp :YA :url))
-    (fail :error.has-ya-backend)))
-
 (defn- details [app-id]
   (let [app (domain/get-application-no-access-checking app-id)
         doc (domain/get-document-by-name app  :tyo-aika-for-jatkoaika)]

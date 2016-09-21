@@ -43,14 +43,6 @@
                (command sonja :check-for-verdict :id ya-id) => ok?)
          (fact "No extensions for R application"
                (query pena :ya-extensions :id r-id) => fail?)
-         (fact "Has backend, no extensions"
-               (query pena :ya-extensions :id ya-id)
-               => (err :error.has-ya-backend))
-         (fact "Clear YA backend"
-               (command sipoo-ya :set-krysp-endpoint
-                        :url "" :permitType "YA"
-                        :username "" :password ""
-                        :version ""))
          (fact "No extensions yet established"
                (query pena :ya-extensions :id ya-id)
                => (err :error.no-extension-applications))

@@ -24,22 +24,7 @@ Extensions table is not visible
 Pena requests first extension
   Create extension  ${ext1}  20.09.2016  10.10.2016
 
-The extensions table is still not shown in the original application
-  Open tab  tasks
-  No such test id  extensions-table
-  [Teardown]  Logout
-
-Sipoo-ya logs in and removes YA KRYSP endpoint
-  Sipoo-ya logs in
-  Go to page  backends
-  Click link  edit-wfs-for-YA
-  Input text  edit-wfs  ${EMPTY}
-  Click button  wfs-submit
-  [Teardown]  Logout
-
 Pena now sees extensions table
-  Pena logs in
-  Open application  ${appname}  ${propertyid}
   Open tab  tasks
   Check row  0  20.9.2016  10.10.2016  Luonnos  
 
