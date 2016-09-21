@@ -444,6 +444,15 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
+  self.approveExtension = function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.extension.approve"),
+      loc("application.extension.approve-confirmation"),
+      {title: loc("ok"), fn: self.approveApplication},
+      {title: loc("cancel")}
+    );
+  };
+
   self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {

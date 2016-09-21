@@ -24,22 +24,7 @@ Extensions table is not visible
 Pena requests first extension
   Create extension  ${ext1}  20.09.2016  10.10.2016
 
-The extensions table is still not shown in the original application
-  Open tab  tasks
-  No such test id  extensions-table
-  [Teardown]  Logout
-
-Sipoo-ya logs in and removes YA KRYSP endpoint
-  Sipoo-ya logs in
-  Go to page  backends
-  Click link  edit-wfs-for-YA
-  Input text  edit-wfs  ${EMPTY}
-  Click button  wfs-submit
-  [Teardown]  Logout
-
 Pena now sees extensions table
-  Pena logs in
-  Open application  ${appname}  ${propertyid}
   Open tab  tasks
   Check row  0  20.9.2016  10.10.2016  Luonnos  
 
@@ -58,6 +43,23 @@ The extensions are listed according to the start date
 Second link leads to the first extension
   Scroll and click test id  state-link-1
   Test id text is  application-title  EXTENSION YI
+ 
+Pena submits extension
+  Submit application
+  [Teardown]  Logout
+  
+Sonja cannot approve application but extension
+  Sonja logs in
+  Open application  ${ext1}  ${propertyid}
+  No such test id  approve-application
+  Scroll and click test id  approve-extension
+  Deny  dynamic-yes-no-confirm-dialog
+
+The same is true in the required field summary tab
+  Open tab  requiredFieldSummary  
+  No such test id  approve-application-summaryTab
+  Scroll and click test id  approve-extension-summaryTab
+  Deny  dynamic-yes-no-confirm-dialog
   [Teardown]  Logout
 
 *** Keywords ***

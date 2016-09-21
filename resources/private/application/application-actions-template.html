@@ -2,13 +2,22 @@
     <div class="stacked" data-bind="with: application">
         <!-- ko if: !hasInvites() -->
             <button data-bind="click: approveApplication,
-                           visible: $root.authorization.ok('approve-application'),
-                           enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application'),
+                           visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                           enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            attr: {'title': loc('tooltip.approveApplication')}"
                     data-test-id="approve-application"
                     class="positive caps">
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.approveApplication'"></span>
+            </button>
+            <button data-bind="click: approveExtension,
+                           visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                           enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                           attr: {'title': loc('tooltip.approveApplication')}"
+                    data-test-id="approve-extension"
+                    class="positive caps">
+                <i class="lupicon-circle-check"></i>
+                <span data-bind="ltext: 'application.extension.approve'"></span>
             </button>
             <div data-bind="component: {name: 'export-attachments'}"></div>
             <button class="positive caps"
