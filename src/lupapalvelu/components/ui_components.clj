@@ -298,9 +298,9 @@
                             :signing :invites :verdict-attachment-prints :calendar-view]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
+                       "add-party.js" "archival-summary.js" "case-file.js"
                        "application.js"]
-                  :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
+                  :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
                          "required-fields-summary-tab-template.html"

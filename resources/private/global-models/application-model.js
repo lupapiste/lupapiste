@@ -791,4 +791,23 @@ LUPAPISTE.ApplicationModel = function() {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::open-application", permit);
     }};
+
+  // Saved from the old LUPAPISTE.AttachmentsTabModel, used in info request
+  self.deleteSingleAttachment = function(a) {
+    var attId = ko.unwrap(a.id);
+    var versions = ko.unwrap(a.versions);
+    var doDelete = function() {
+      ajax.command("delete-attachment", {id: self.id(), attachmentId: attId})
+        .success(self.lightReload)
+        .processing(self.processing)
+        .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
+      return false;
+    };
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: doDelete}});
+  };
 };

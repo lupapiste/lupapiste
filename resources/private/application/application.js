@@ -52,7 +52,6 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -188,8 +187,6 @@
 
       verdictAttachmentPrintsOrderModel.refresh();
       verdictAttachmentPrintsOrderHistoryModel.refresh();
-
-      attachmentsTab.refresh();
 
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
@@ -554,7 +551,6 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions,
       sidePanelService: lupapisteApp.services.sidePanelService,
@@ -574,7 +570,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    attachmentsTab.attachmentTemplatesModel.init();
   });
 
 })();

@@ -192,7 +192,7 @@
                           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
                           <div class="application-map-actions" data-bind="with: application">
                             <!-- ko if: location() -->
-                            <button data-bind="click: openOskariMap, 
+                            <button data-bind="click: openOskariMap,
                                                ltext:'map.open'"
                                     class="function" ></button>
                             <open-3d-map></open-3d-map>
@@ -229,13 +229,6 @@
                             <li data-bind="css: {'active': $parent.selectedTabName() === 'attachments'}">
                                 <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabAttachments'"></span>
-                                    <span data-bind="if: attachmentsRequiringAction">
-                                        <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
-
-                            <li data-bind="feature: 'attachments-poc',
-                                           css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
-                                <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
-                                    <span>Suunnitelmat ja liitteet, Vanha sivu</span>
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
@@ -416,104 +409,6 @@
                             </a>
                         </div>
                     </div>
-
-                    <!-- Attachments tab -->
-                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
-                    <div id="application-attachmentsPOC-tab" class="tab-content"
-                         data-bind="with: $root.attachmentsTab, feature: 'attachments-poc'">
-                        <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-                        <span data-bind="component: {
-                                         name: 'help-toggle',
-                                         params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
-                                         }"></span>
-                        <div class="clear"></div>
-                        <div class="stacked">
-                            <div class="like-btn">
-                                <i class="lupicon-circle-check"></i>
-                                <span data-bind="ltext: 'ok.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-star"></i>
-                                <span data-bind="ltext: 'new.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-attention"></i>
-                                <span data-bind="ltext: 'missing.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-pen"></i>
-                                <span data-bind="ltext: 'attachment.signed'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-arrow-up"></i>
-                                <span data-bind="ltext: 'application.attachmentSentDate'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-stamp"></i>
-                                <span data-bind="ltext: 'attachment.stamped'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-section-sign"></i>
-                                <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-lock"></i>
-                                <span data-bind="ltext: 'attachment.not-public-attachment'"></span>
-                            </div>
-                        </div>
-
-                        <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
-                            <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
-                        </div>
-
-                        <!-- ko if: showPostAttachmentsActions -->
-                        <div data-bind="template: {name: 'attachment-actions-template',
-                                        data: {appModel: $data.appModel,
-                                        attachmentsOperation: $data.attachmentsOperation,
-                                        attachmentsOperations: $data.attachmentsOperations,
-                                        testId: 'upper'}}"></div>
-
-                        <div data-bind="component: {name: 'export-attachments'}"></div>
-                        <!-- /ko -->
-                        <suti-display></suti-display>
-
-                        <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
-                            <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- ko if: !$root.application.inPostVerdictState() -->
-                        <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- /ko -->
-
-                        <div data-bind="template: {name: 'attachment-actions-template',
-                                        data: {appModel: $data.appModel,
-                                        attachmentsOperation: $data.attachmentsOperation,
-                                        attachmentsOperations: $data.attachmentsOperations,
-                                        testId: 'lower'}}"></div>
-
-                        <div data-bind="component: {name: 'export-attachments'}"></div>
-
-                        <!-- ko if: $root.application.inPostVerdictState() -->
-                        <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-                            <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- /ko -->
-
-                        <div class="process-nav">
-                            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
-                                <span data-bind="ltext: 'application.next-tab'"></span>
-                                <i class="lupicon-chevron-right"></i>
-                            </a>
-                            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
-                                <i class="lupicon-chevron-left"></i>
-                                <span data-bind="ltext: 'application.previous-tab'"></span>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- /ko -->
 
                     <!-- Attachments tab -->
                     <!-- ko if: selectedTabName() === 'attachments' -->
