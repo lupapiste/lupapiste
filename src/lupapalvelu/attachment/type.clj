@@ -45,7 +45,9 @@
    {:type-id :patevyystodistus :type-group :osapuolet}
    {:type-id :cv               :type-group :osapuolet}
    {:type-id :valtakirja       :type-group :hakija}
-   {:type-id :muu              :type-group :muut}])
+   {:type-id :muu              :type-group :muut}
+   {:type-id :paatos           :type-group :paatoksenteko}
+   {:type-id :paatosote        :type-group :paatoksenteko}])
 
 (defn- for-operations [attachment-type]
   (cond-> #{}
