@@ -19,8 +19,7 @@
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles
    :states           states/post-verdict-states
-   :pre-checks       [app/validate-authority-in-drafts
-                      (partial permit/valid-permit-types {:YA :all})
+   :pre-checks       [(partial permit/valid-permit-types {:YA :all})
                       yax/no-ya-backend
                       yax/has-extension-link-permits]}
   [{application :application}]

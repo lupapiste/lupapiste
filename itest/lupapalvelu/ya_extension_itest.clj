@@ -22,9 +22,23 @@
              link-id (create-app-id pena
                                     :propertyId sipoo-property-id
                                     :operation "ya-katulupa-vesi-ja-viemarityot")]
-         (fact "Submit and give verdicts"
+         (fact "Submit"
                (command pena :submit-application :id r-id) => ok?
-               (command pena :submit-application :id ya-id) => ok?
+               (command pena :submit-application :id ya-id) => ok?)
+         (fact "Create and invite statement givers for YA application"
+               (command sipoo-ya :create-statement-giver
+                        :email "ronja.sibbo@sipoo.fi"
+                        :text "Ronja") => ok?
+               (command sonja :request-for-statement
+                        :id ya-id
+                        :functionCode nil
+                        :selectedPersons [{:email "teppo@example.com"
+                                           :text "User statement giver"
+                                           :name "Teppo"}
+                                          {:email "ronja.sibbo@sipoo.fi"
+                                           :text "Authority statement giver"
+                                           :name "Ronja"}]) => ok?)
+         (fact "Fetch verdicts"
                (command sonja :check-for-verdict :id r-id) => ok?
                (command sonja :check-for-verdict :id ya-id) => ok?)
          (fact "No extensions for R application"
@@ -66,4 +80,14 @@
                          => (contains {:extensions [{:id ext-id
                                                      :startDate "20.09.2016"
                                                      :endDate "10.10.2016"
-                                                     :state "open"}]})))))))
+                                                     :state "open"}]})))
+                 (fact "Reader can call query"
+                       (command sipoo-ya :update-user-organization
+                                :email "luukas.lukija@sipoo.fi"
+                                :firstName "Luukas" :lastName "Lukija"
+                                :roles ["reader"]) => ok?
+                       (query luukas :ya-extensions :id ya-id) => ok?)
+                 (fact "Statement giver authority can call query"
+                       (query ronja :ya-extensions :id ya-id) => ok?)
+                 (fact "Statement giver can call query"
+                       (query teppo :ya-extensions :id ya-id) => ok?)))))
