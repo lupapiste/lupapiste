@@ -33,11 +33,11 @@
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: attachments" data-test-id="verdict-attachments-tbody">
-                  <tr>
-                    <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
-                    <td data-bind="text: contents"></td>
-                    <td data-bind="text: filename"></td>
-                    <td class="center"><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
+                  <tr data-bind="testId: 'order-prints-attachment-row-' + type['type-group'] + '-' + type['type-id']">
+                    <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])" data-test-col="type"></td>
+                    <td data-bind="text: contents" data-test-col="contents"></td>
+                    <td data-bind="text: filename" data-test-col="filename"></td>
+                    <td class="center" data-test-col="amount"><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
                   </tr>
                 </tbody>
               </table>
