@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-tabs-api
   "Pseudo queries to handle application's tabs' visibility in UI"
   (:require [sade.core :refer :all]
+            [sade.util :refer [fn->]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :as action :refer [defquery]]
             [lupapalvelu.foreman :as foreman]
@@ -18,3 +19,25 @@
                 (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 
+(defn- state-before-last-canceled [{{state-history :history} :application}]
+  (->> (map (comp keyword :state) state-history)
+       (remove #{:canceled})
+       last))
+
+(defquery non-party-docs-tab-visible
+  {:parameters [id]
+   :states states/all-application-states
+   :user-roles #{:authority :applicant}
+   :pre-checks [(fn-> state-before-last-canceled
+                      states/pre-verdict-states
+                      (when-not (fail! :error.tabs.no-non-party-docs)))]}
+  [_])
+
+(defquery application-summary-tab-visible
+  {:parameters [id]
+   :states states/all-application-states
+   :user-roles #{:authority :applicant}
+   :pre-checks [(fn-> state-before-last-canceled
+                      states/post-verdict-states
+                      (when-not (fail! :error.tabs.no-application-summary)))]}
+  [_])
