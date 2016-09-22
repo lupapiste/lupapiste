@@ -19,6 +19,12 @@ Mikko opens an application
   Mikko logs in
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
+Application info tab is visible
+  Element should be visible  jquery=a[data-test-id=application-open-info-tab]
+
+Application summary tab is hidden
+  Page should not contain element  jquery=a[data-test-id=application-open-applicationSummary-tab]
+
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
 # Note: The test browser must be active or the case will fail.

@@ -124,7 +124,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.comments = ko.observable([]);
 
   self.summaryAvailable = ko.pureComputed(function() {
-    return self.inPostVerdictState() || self.state() === "canceled";
+    return lupapisteApp.models.applicationAuthModel.ok("application-summary-tab-visible");
   });
 
   self.openTask = function( taskId ) {
