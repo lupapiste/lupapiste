@@ -199,6 +199,14 @@
        (missing-translations lang)
        (commons-resources/write-excel file))))
 
+(defn- contains-no-translations [k-new v-new]
+  (when (every? (partial = "") (vals v-new))
+    (warn (str "No translations for key " k-new))
+    true))
+
+(defn- contains-unexpected-languages [v-new lang]
+  (not= (set (keys v-new)) #{:fi lang}))
+
 ; merge-with is not used because the translation maps from commons-resources are
 ; actually ordered maps, where normal merge with vanilla Clojure map does not
 ; play nice with key metadata.
@@ -208,10 +216,11 @@
                        (for [[k v] (:translations source)]
                          (let [[k-new v-new] (find (:translations new) k)]
                            (cond (nil? v-new) [k v]
-                                 (not= (set (keys v-new)) #{:fi lang})
+                                 (contains-no-translations k-new v-new) [k v]
+                                 (contains-unexpected-languages v-new lang)
                                  (throw (ex-info "new translation map contains unexpected language(s)"
                                                  {:expected-language lang
-                                                  :translations      v-new}))
+                                                  :translations      {k-new v-new}}))
 
                                  (nil? (:fi v))
                                  (throw (ex-info "Finnish text not found in the source"
@@ -221,8 +230,8 @@
 
                                  (not= (:fi v) (:fi v-new))
                                  (throw (ex-info "Finnish text used for translation does not match the one found in current source"
-                                                 {:source v
-                                                  :new    v-new}))
+                                                 {:source {k v}
+                                                  :new    {k-new v-new}}))
 
                                  :else [k (merge v v-new)]))))})
 
