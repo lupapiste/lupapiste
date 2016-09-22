@@ -34,7 +34,7 @@ LUPAPISTE.verdictPageController = (function($) {
       self.applicationTitle(application.title);
 
       if (application.permitType === "YA") {
-        self.statuses([1,2,21,37]); // 1 = Myönnetty, 2 = Hyväksytty, 21 = Evätty, 37 = Peruutettu
+        self.statuses([1,2,21,37]);
       }
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
