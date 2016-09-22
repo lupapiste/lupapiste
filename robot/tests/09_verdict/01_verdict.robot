@@ -33,6 +33,12 @@ Sonja fetches verdict from municipality KRYSP service
   Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
 
+Application summary tab is visible
+  Element should be visible  jquery=a[data-test-id=application-open-applicationSummary-tab]
+
+Application info tab is hidden
+  Page should not contain element  jquery=a[data-test-id=application-open-info-tab]
+
 Check task counts
   Open tab  tasks
   # 3+3+3 tasks from backend
