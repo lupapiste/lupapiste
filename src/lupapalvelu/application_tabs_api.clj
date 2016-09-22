@@ -24,13 +24,13 @@
        (remove #{:canceled})
        last))
 
-(defquery non-party-docs-tab-visible
+(defquery application-info-tab-visible
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
    :pre-checks [(fn-> state-before-last-canceled
                       states/pre-verdict-states
-                      (when-not (fail! :error.tabs.no-non-party-docs)))]}
+                      (when-not (fail! :error.tabs.no-application-info)))]}
   [_])
 
 (defquery application-summary-tab-visible

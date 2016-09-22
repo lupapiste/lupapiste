@@ -206,7 +206,7 @@
                     <!-- Tabs: -->
                     <div class="tabs-container" data-bind="with: application">
                         <ul class="tabs" id="applicationTabs">
-                            <li data-bind="if: $root.authorization.ok('non-party-docs-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
+                            <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabInfo'"></span>
                                     <span data-bind="if: nonpartyDocumentIndicator">
