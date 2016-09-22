@@ -158,7 +158,8 @@
 (defcommand create-rest-api-user
   {:description "Creates REST API user for organization. Admin only."
    :parameters [username]
-   :input-validators [(partial action/string-parameters [:username])]
+   :input-validators [(partial action/string-parameters [:username])
+                      (partial action/ascii-parameters  [:username])]
    :user-roles #{:admin}}
   [{user-data :data caller :user :as command}]
   (let [rest-user-email (str username "@example.com")

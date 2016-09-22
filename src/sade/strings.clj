@@ -60,6 +60,8 @@
   (when s (let [normalized (Normalizer/normalize s Normalizer$Form/NFD)]
     (clojure.string/replace normalized #"\p{InCombiningDiacriticalMarks}+" ""))))
 
+(def ascii-pattern #"^[\p{ASCII}]+$")
+
 (def non-printables #"[\p{Cntrl}]")
 
 (defn strip-non-printables [^String s] (when s (s/replace s non-printables "")))
@@ -100,6 +102,9 @@
 (defn numeric?
   "http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
   [s] (and (string? s) (StringUtils/isNumeric s)))
+
+(defn ascii? [s]
+  (not (nil? (re-matches ascii-pattern s))))
 
 (defn substring [^String s  ^Integer start ^Integer end]
   (StringUtils/substring s start end))

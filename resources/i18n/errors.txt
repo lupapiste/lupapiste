@@ -504,3 +504,4 @@
 "error.vrk:CR343" "sv" "Om uppvärmningssättet är elvärme, måste bränslet vara el."
 "error.only-https-allowed" "fi" "Ainoastaan HTTPS-protokolla on sallittu."
 "error.3d-map-not-found" "fi"  "3D-karttaa ei löydy."
+"error.illegal-value:not-ascii-string" "fi" "Tarkista, ettei syötteessä ole esimerkiksi ääkkösiä."
