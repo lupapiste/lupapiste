@@ -201,12 +201,12 @@
        (missing-translations lang)
        (commons-resources/write-excel file))))
 
-(defn- contains-no-translations [k-new v-new]
-  (when (every? (partial = "") (vals v-new))
+(defn- contains-no-translations? [k-new v-new lang]
+  (when (= "" (get v-new lang ""))
     (warn (str "No translations for key " k-new))
     true))
 
-(defn- contains-unexpected-languages [v-new lang]
+(defn- contains-unexpected-languages? [v-new lang]
   (not= (set (keys v-new)) #{:fi lang}))
 
 ; merge-with is not used because the translation maps from commons-resources are
@@ -218,8 +218,8 @@
                        (for [[k v] (:translations source)]
                          (let [[k-new v-new] (find (:translations new) k)]
                            (cond (nil? v-new) [k v]
-                                 (contains-no-translations k-new v-new) [k v]
-                                 (contains-unexpected-languages v-new lang)
+                                 (contains-no-translations? k-new v-new lang) [k v]
+                                 (contains-unexpected-languages? v-new lang)
                                  (throw (ex-info "new translation map contains unexpected language(s)"
                                                  {:expected-language lang
                                                   :translations      {k-new v-new}}))
@@ -256,7 +256,8 @@
         (apply commons/merge-translations (map commons-resources/sheet->map sheets))))))
 
 (defn- merge-translation-from-excel [acc {:keys [languages] :as translation-map}]
-  (assert (= (count languages) 2))
+  (assert (= (count languages) 2)
+          (str "Actual languages" languages))
   (let [lang (first (remove (partial = :fi) languages))]
     (merge-new-translations acc
                             translation-map
