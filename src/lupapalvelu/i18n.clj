@@ -207,6 +207,7 @@
     true))
 
 (defn- contains-unexpected-languages? [v-new lang]
+  (println v-new lang)
   (not= (set (keys v-new)) #{:fi lang}))
 
 ; merge-with is not used because the translation maps from commons-resources are
@@ -218,11 +219,12 @@
                        (for [[k v] (:translations source)]
                          (let [[k-new v-new] (find (:translations new) k)]
                            (cond (nil? v-new) [k v]
-                                 (contains-no-translations? k-new v-new lang) [k v]
                                  (contains-unexpected-languages? v-new lang)
                                  (throw (ex-info "new translation map contains unexpected language(s)"
                                                  {:expected-language lang
                                                   :translations      {k-new v-new}}))
+
+                                 (contains-no-translations? k-new v-new lang) [k v]
 
                                  (nil? (:fi v))
                                  (throw (ex-info "Finnish text not found in the source"
