@@ -35,6 +35,10 @@ Sonja logs in and gives verdict
 Sonja opens the attachment tab and unselects post verdict filter
   Open attachments tab and unselect post verdict filter
 
+There are no RAM filters
+  No such test id  ram-filter-label
+  No such test id  no-ram-filter-label
+  
 Sonja opens attachment details
   Open attachment details  muut.muu
   No such test id  ram-links-table
@@ -71,6 +75,19 @@ Sonja clicks RAM link and opens old attachment details
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Element should not be visible  jquery=td[data-test-id=ram-link-type-0] a
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
+
+Sonja returns to attachments and sees RAM filters
+  Scroll and click test id  back-to-application-from-attachment
+  Wait test id visible  ram-filter-label
+  Wait test id visible  no-ram-filter-label
+  ${all}=  Execute Javascript  return $("tr[data-test-type]:visible").length;
+  Scroll and click test id  ram-filter-label
+  Javascript?  $("tr[data-test-type]").length === 1
+  Wait test id visible  ram-indicator
+  Scroll and click test id  ram-filter-label
+  Scroll and click test id  no-ram-filter-label    
+  No such test id  ram-indicator
+  Javascript?  $("tr[data-test-type]:visible").length === ${all} - 1
   [Teardown]  Logout
 
 Mikko logs in and unselects post verdict filter
