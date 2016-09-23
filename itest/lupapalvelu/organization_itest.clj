@@ -10,12 +10,18 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.i18n :as i18n]
             [monger.operators :refer :all]
             [sade.core :as sade]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
 
 (apply-remote-minimal)
+
+(defn- language-map [langs suffix]
+  (into {} (map (juxt identity
+                      #(str (name %) " " suffix))
+                langs)))
 
 (facts
   (let [uri "http://127.0.0.1:8000/dev/krysp"]
@@ -819,20 +825,27 @@
     (command admin :update-organization-name :org-id "753-R" :name {:fi ""}) => (partial expected-failure? :error.empty-organization-name))
 
   (facts "organization name is changed only for languages that are specified in command data"
+    (let [change-all-map (language-map i18n/supported-langs "modified")]
+      (fact "all languages"
+        (command admin :update-organization-name :org-id "753-R" :name change-all-map) => ok?
+        (get-in (query sipoo :organization-by-user) [:organization :name]) => change-all-map)
 
-    (fact "fi + sv + en"
-      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified" :sv "sv modified" :en "en modified"}) => ok?
-      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified" :sv "sv modified" :en "en modified"})
-
-    (fact "fi + sv"
-      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified again" :sv "sv modified again"}) => ok?
-      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified again" :sv "sv modified again" :en "en modified"})))
+      (fact "all but one language"
+        (let [unchanged (first i18n/supported-langs)
+              changed (rest i18n/supported-langs)
+              change-map (language-map changed "modified again")
+              expected-response (merge (select-keys change-all-map [unchanged])
+                                       change-map)]
+          (command admin :update-organization-name :org-id "753-R" :name change-map) => ok?
+          (get-in (query sipoo :organization-by-user) [:organization :name]) => expected-response)))))
 
 
 (facts organization-names-by-user
+  (let [organization-name-map (select-keys {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}
+                                           i18n/supported-langs)]
+    (command admin :update-organization-name :org-id "753-R"
+             :name organization-name-map) => ok?
 
-  (command admin :update-organization-name :org-id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}) => ok?
-
-  (fact "query returns organization names for all languages"
-    (query sipoo :organization-name-by-user) => {:ok true :id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}})
-  )
+    (fact "query returns organization names for all languages"
+      (query sipoo :organization-name-by-user) => {:ok true :id "753-R"
+                                                   :name organization-name-map})))
