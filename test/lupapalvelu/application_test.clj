@@ -102,6 +102,7 @@
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
     (fact "update"
       (state-transition-update :open 1 {:created 0} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :open 1 {:opened nil} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
       (state-transition-update :submitted 2 {:created 0 :opened 1} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
       (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
 
