@@ -1396,6 +1396,15 @@ Test id select is
 
 # Frontend error log
 
+Print frontend error texts
+  [Arguments]  ${ROW_XPATH}  ${ERROR_LEVEL}
+  # Print 10 first rows if there are errors
+  :FOR  ${elem_idx}  IN RANGE  1  10
+  \  ${ELEM_COUNT}=  Get Matching Xpath Count  ${ROW_XPATH}[${elem_idx}]
+  \  Exit for loop if  ${ELEM_COUNT} == 0
+  \  ${VAL}=  Get Text  ${ROW_XPATH}[${elem_idx}]/td[2]
+  \  Log To Console  ${ERROR_LEVEL}: ${VAL}
+
 There are no frontend errors
   Go to login page
   SolitaAdmin logs in
@@ -1404,6 +1413,13 @@ There are no frontend errors
   # Allow log to load
   Sleep  1
   Wait for jQuery
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr  0
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr  0
+  Set test variable  ${FATAL_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr
+  Set test variable  ${ERROR_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr
+  ${FATAL_COUNT}=  Get Matching Xpath Count  ${FATAL_LOG_XPATH}
+  ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
+  Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
+  Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
+  # These test cases will fail
+  Xpath Should Match X Times  ${FATAL_LOG_XPATH}  0
+  Xpath Should Match X Times  ${ERROR_LOG_XPATH}  0
   [Teardown]  Logout
