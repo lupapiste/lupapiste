@@ -30,7 +30,7 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(fn-> state-before-last-canceled
                       states/pre-verdict-states
-                      (when-not (fail! :error.tabs.no-application-info)))]}
+                      (when-not (fail :error.tabs.no-application-info)))]}
   [_])
 
 (defquery application-summary-tab-visible
@@ -39,5 +39,5 @@
    :user-roles #{:authority :applicant}
    :pre-checks [(fn-> state-before-last-canceled
                       states/post-verdict-states
-                      (when-not (fail! :error.tabs.no-application-summary)))]}
+                      (when-not (fail :error.tabs.no-application-summary)))]}
   [_])
