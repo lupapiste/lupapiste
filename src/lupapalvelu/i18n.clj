@@ -14,7 +14,9 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
-(def supported-langs [:fi :sv :en])
+(def supported-langs (if (env/feature? :english)
+                       [:fi :sv :en]
+                       [:fi :sv]))
 (def default-lang (first supported-langs))
 
 (defn- read-translations-txt [name-or-file]
@@ -58,7 +60,7 @@
 (defn get-localizations []
   (get-or-load-localizations))
 
-(def languages (-> (get-localizations) keys set))
+(def languages (-> supported-langs set))
 
 (def supported-language-schema (apply sc/enum (map name languages)))
 
