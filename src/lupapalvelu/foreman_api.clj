@@ -78,7 +78,7 @@
     (if task
       (let [updates [[[:asiointitunnus] foremanAppId]]]
         (doc-persistence/persist-model-updates application "tasks" task updates created))
-      (fail :error.not-found))))
+      (fail :error.task-not-found))))
 
 (defquery foreman-history
   {:user-roles #{:authority}
@@ -90,7 +90,7 @@
   [{application :application user :user :as command}]
   (if application
     (ok :projects (foreman/get-foreman-history-data application))
-    (fail :error.not-found)))
+    (fail :error.application-not-found)))
 
 (defquery reduced-foreman-history
   {:user-roles #{:authority}
@@ -102,7 +102,7 @@
   [{application :application user :user :as command}]
   (if application
     (ok :projects (foreman/get-foreman-reduced-history-data application))
-    (fail :error.not-found)))
+    (fail :error.application-not-found)))
 
 (defquery foreman-applications
   {:user-roles #{:applicant :authority :oirAuthority}
