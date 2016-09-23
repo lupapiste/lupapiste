@@ -36,13 +36,11 @@ LUPAPISTE.ServerSettingsModel = function(params) {
   self.prefix = params.prefix;
 
   self.disposedComputed( function() {
-    var server = params.server();
-    if(server) {
-      self.url(server.url);
-      self.username(server.username);
-      if (server.username) {
-        self.passwordPlaceholder("********");
-      }
+    var server = params.server() || {};
+    self.url(server.url);
+    self.username(server.username);
+    if (server.username) {
+      self.passwordPlaceholder("********");
     }
   });
 
