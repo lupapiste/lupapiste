@@ -167,4 +167,4 @@
 (fact "english is a supported language iff feature.english = true"
       (or (and (env/feature? :english)
                (contains? (set supported-langs) :en))
-          (not (contains? (set supported-langs :en)))) => truthy)
+          (not (contains? (set supported-langs) :en))) => truthy)
