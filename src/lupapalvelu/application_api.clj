@@ -199,7 +199,7 @@
   (update-application command
                       {:state :canceled}
                       (merge
-                        (app/state-transition-update (app/get-previous-app-state application) created user)
+                        (app/state-transition-update (app/get-previous-app-state application) created application user)
                         {$unset {:canceled 1}})))
 
 
@@ -211,7 +211,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
-  (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
+  (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created application user))))
 
 (defcommand cleanup-krysp
   {:description      "Removes application KRYSP messages. The cleanup
@@ -523,16 +523,16 @@
   {:description      "Changes application state. The tranistions happen
   between post-verdict (excluding verdict given)states. In addition,
   the transition from appealed to a verdict given state is supported."
-   :parameters       [state]
+   :parameters       [id state]
    :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :pre-checks       [permit/valid-permit-types-for-state-change app/valid-new-state]
    :notified         true
    :on-success       (notify :application-state-change)}
-  [{:keys [user] :as command}]
+  [{:keys [user application] :as command}]
   (update-application command
-                      (app/state-transition-update (keyword state) (now) user)))
+                      (app/state-transition-update (keyword state) (now) application user)))
 
 (defquery change-application-state-targets
   {:description "List of possible target states for
@@ -756,19 +756,18 @@
    :user-roles #{:applicant :authority}
    :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
-  [{:keys [user created application organization] :as command}]
-  (let [op (:primaryOperation application)]
-    (update-application command
-                        (util/deep-merge
-                          (app/state-transition-update :open created user)
-                          {$set  {:infoRequest            false
-                                  :openInfoRequest        false
-                                  :convertedToApplication created
-                                  :documents              (app/make-documents user created op application)
-                                  :modified               created}
-                           $push {:attachments {$each (app/make-attachments created op @organization (:state application) (:tosFunction application))}}}))
-    (try (autofill-rakennuspaikka application created)
-         (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application")))))
+  [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
+  (update-application command
+                      (util/deep-merge
+                       (app/state-transition-update :open created app user)
+                       {$set  {:infoRequest            false
+                               :openInfoRequest        false
+                               :convertedToApplication created
+                               :documents              (app/make-documents user created op app)
+                               :modified               created}
+                        $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
+  (try (autofill-rakennuspaikka app created)
+       (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]

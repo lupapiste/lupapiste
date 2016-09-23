@@ -273,7 +273,7 @@
                   (when-not has-old-verdict-tasks {:tasks tasks})
                   (when extras-reader (extras-reader app-xml application)))}
           (when-not (states/post-verdict-states (keyword (:state application)))
-            (application/state-transition-update (sm/verdict-given-state application) created user)))))))
+            (application/state-transition-update (sm/verdict-given-state application) created application user)))))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
@@ -283,7 +283,7 @@
                          doc osapuoli-type target-kuntaRoolikoodi)]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (util/deep-merge
-        (application/state-transition-update (sm/verdict-given-state application) created user)
+        (application/state-transition-update (sm/verdict-given-state application) created application user)
         {$set {:verdicts verdicts-with-attachments}}))))
 
 (defn- get-tj-suunnittelija-doc-name

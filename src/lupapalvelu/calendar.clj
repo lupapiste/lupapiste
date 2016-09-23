@@ -171,7 +171,7 @@
                                                      timestamp)
         reservation-push {$push {:reservations reservation}}
         state-change (case (keyword (:state application))
-                       :draft (application/state-transition-update :open timestamp user)
+                       :draft (application/state-transition-update :open timestamp application user)
                        nil)]
     (update-application
       (application->command application)
@@ -266,5 +266,3 @@
   (let [m (get (env/get-config) :calendar)]
     ; convert keys to camel-case-keywords
     (zipmap (map (comp keyword str/to-camel-case name) (keys m)) (vals m))))
-
-

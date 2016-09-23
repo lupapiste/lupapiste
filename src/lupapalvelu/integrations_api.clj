@@ -277,8 +277,8 @@
    :on-success (action/notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
-  [{:keys [application created user organization]:as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
+  [{orig-app :application created :created user :user org :organization :as command}]
+  (let [application (meta-fields/enrich-with-link-permit-data orig-app)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
                       (update-in application
                                  [:linkPermitData]
@@ -290,12 +290,12 @@
 
         app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
         indicator-updates (application/mark-indicators-seen-updates application user created)
-        file-ids (ah/save-as-asianhallinta application lang submitted-application @organization) ; Writes to disk
+        file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
-                          (application/state-transition-update (sm/next-state application) created user)
+                          (application/state-transition-update (sm/next-state application) orig-app created user)
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
