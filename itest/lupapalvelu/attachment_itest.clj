@@ -354,7 +354,7 @@
 
         (facts "Applicant does not see the verdict attachment"
           (let [{attachment :attachment :as query-resp} (query pena :attachment :id application-id :attachmentId attachment-id)]
-            query-resp => (partial expected-failure? "error.not-found")))
+            query-resp => (partial expected-failure? "error.attachment-not-found")))
 
         (fact "Unauthorized"
           (let [query-resp (query mikko :attachment :id application-id :attachmentId attachment-id)]

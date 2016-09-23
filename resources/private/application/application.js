@@ -508,8 +508,7 @@
     self.authorities = ko.observableArray([]);
     self.initialized = ko.observable(false);
 
-    self.disposedComputed(function() {
-      var id = applicationModel.id();
+    self.disposedSubscribe(applicationModel.id, function(id) {
       if (!_.isEmpty(id) && authorizationModel.ok("calendars-enabled")) {
         self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
       }

@@ -26,7 +26,7 @@
                                     "kukka" "kakka"})
 
 (fact "every supported mime type has a display name"
-  (doseq [lang [:fi :sv]
+  (doseq [lang [:fi :sv :en]
           allowed-mime (filter #(re-matches mime/mime-type-pattern %) (vals mime/mime-types))]
     (fact {:midje/description (str (name lang) ": " allowed-mime)}
       (has-term? lang allowed-mime) => true
@@ -163,3 +163,8 @@
                                 {:translations {'ei-liity {:fi "jotain muuta"}}}
                                 {:translations {'avain {:fi "aivan"}}}])
       => (throws #"same key appears in multiple sources"))
+
+(fact "english is a supported language iff feature.english = true"
+      (or (and (env/feature? :english)
+               (contains? (set supported-langs) :en))
+          (not (contains? (set supported-langs) :en))) => truthy)

@@ -36,7 +36,7 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
     }
   }
 
-  hub.subscribe( "contextService::enter", fetchExtensions);
+  self.addHubListener( "contextService::enter", fetchExtensions);
 
   // Explicit initialization, since the model may have missed the
   // original enter event.

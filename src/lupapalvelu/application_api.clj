@@ -59,7 +59,7 @@
                        (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users application "authority"))
                        [])
         :permitSubtypes (app/resolve-valid-subtypes application))
-    (fail :error.not-found)))
+    (fail :error.application-not-found)))
 
 (defquery application-authorities
   {:user-roles #{:authority}
