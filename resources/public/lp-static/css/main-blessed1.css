@@ -6020,7 +6020,7 @@ button:focus {
   pointer-events: none;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.arrow-label {
   width: 100%;
   display: inline-block;
@@ -6031,7 +6031,7 @@ label.arrow-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6053,13 +6053,13 @@ label.arrow-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-label:hover.arrow-label:before,
 input:checked + .arrow-label:hover.arrow-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .arrow-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6077,14 +6077,14 @@ input:checked + .arrow-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .arrow-label:before,
 input:disabled + .arrow-label:hover.arrow-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6097,15 +6097,16 @@ input:disabled + .arrow-label:hover.arrow-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.checkbox-label {
   width: 100%;
   display: inline-block;
@@ -6116,7 +6117,7 @@ label.checkbox-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6138,13 +6139,13 @@ label.checkbox-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-label:hover.checkbox-label:before,
 input:checked + .checkbox-label:hover.checkbox-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6162,14 +6163,14 @@ input:checked + .checkbox-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .checkbox-label:before,
 input:disabled + .checkbox-label:hover.checkbox-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6182,15 +6183,16 @@ input:disabled + .checkbox-label:hover.checkbox-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.docgen-checkbox-label {
   width: 100%;
   display: inline-block;
@@ -6201,7 +6203,7 @@ label.docgen-checkbox-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6223,13 +6225,13 @@ label.docgen-checkbox-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-label:hover.docgen-checkbox-label:before,
 input:checked + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .docgen-checkbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6247,14 +6249,14 @@ input:checked + .docgen-checkbox-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .docgen-checkbox-label:before,
 input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper {
   display: block;
   box-sizing: border-box;
@@ -6267,15 +6269,16 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.sectionbox-label {
   width: 100%;
   display: inline-block;
@@ -6286,7 +6289,7 @@ label.sectionbox-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6308,13 +6311,13 @@ label.sectionbox-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-label:hover.sectionbox-label:before,
 input:checked + .sectionbox-label:hover.sectionbox-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .sectionbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6332,14 +6335,14 @@ input:checked + .sectionbox-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .sectionbox-label:before,
 input:disabled + .sectionbox-label:hover.sectionbox-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6352,15 +6355,16 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.stampbox-label {
   width: 100%;
   display: inline-block;
@@ -6371,7 +6375,7 @@ label.stampbox-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6393,13 +6397,13 @@ label.stampbox-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-label:hover.stampbox-label:before,
 input:checked + .stampbox-label:hover.stampbox-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .stampbox-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6417,14 +6421,14 @@ input:checked + .stampbox-label:before {
   color: white;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .stampbox-label:before,
 input:disabled + .stampbox-label:hover.stampbox-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6437,20 +6441,21 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 91, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 92, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   border: none;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.radio-label {
   width: 100%;
   display: inline-block;
@@ -6461,7 +6466,7 @@ label.radio-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6483,13 +6488,13 @@ label.radio-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-label:hover.radio-label:before,
 input:checked + .radio-label:hover.radio-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .radio-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6507,14 +6512,14 @@ input:checked + .radio-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .radio-label:before,
 input:disabled + .radio-label:hover.radio-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6527,15 +6532,16 @@ input:disabled + .radio-label:hover.radio-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.radio-field-label {
   width: 100%;
   display: inline;
@@ -6546,7 +6552,7 @@ label.radio-field-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6568,13 +6574,13 @@ label.radio-field-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-label:hover.radio-field-label:before,
 input:checked + .radio-field-label:hover.radio-field-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .radio-field-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6592,14 +6598,14 @@ input:checked + .radio-field-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .radio-field-label:before,
 input:disabled + .radio-field-label:hover.radio-field-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   display: inline;
   box-sizing: border-box;
@@ -6612,30 +6618,31 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 102, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 103, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 107, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 108, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 111, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 112, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
 
-/* line 33, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.filter-label {
   width: 100%;
   display: inline-block;
@@ -6646,7 +6653,7 @@ label.filter-label {
   padding-top: 7px;
 }
 
-/* line 44, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 45, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6668,13 +6675,13 @@ label.filter-label {
   cursor: pointer;
 }
 
-/* line 54, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 55, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-label:hover.filter-label:before,
 input:checked + .filter-label:hover.filter-label:before {
   color: #fbc732;
 }
 
-/* line 59, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 60, ../../../private/common-html/sass/partials/_inputs.scss */
 input:checked + .filter-label:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -6692,14 +6699,14 @@ input:checked + .filter-label:before {
   color: #f39129;
 }
 
-/* line 65, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 66, ../../../private/common-html/sass/partials/_inputs.scss */
 input:disabled + .filter-label:before,
 input:disabled + .filter-label:hover.filter-label:before {
   cursor: initial;
   color: #bbbbbb;
 }
 
-/* line 71, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 72, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6712,15 +6719,16 @@ input:disabled + .filter-label:hover.filter-label:before {
   width: 0;
   height: 0;
   margin: 0;
+  position: absolute;
   font-size: 0;
 }
 
-/* line 78, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 79, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 123, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 124, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6729,34 +6737,34 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 133, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 134, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 137, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 138, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 141, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 145, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 151, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 152, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 153, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 154, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 157, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
