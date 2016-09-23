@@ -129,6 +129,9 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
+(defn state-history-entries [history]
+  (filter :state history)) ; only history elements that regard state change
+
 (defn last-history-item
   [{history :history}]
   (last (sort-by :ts history)))
@@ -136,7 +139,7 @@
 (defn get-previous-app-state
   "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
   [{history :history}]
-  (->> (filter :state history)         ; only history elements that regard state change
+  (->> (state-history-entries history)
        (sort-by :ts)
        butlast
        last

@@ -4,6 +4,7 @@
             [sade.util :refer [fn->]]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.action :as action :refer [defquery]]
+            [lupapalvelu.application :as app]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]))
@@ -19,8 +20,9 @@
                 (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 
-(defn- state-before-last-canceled [{{state-history :history} :application}]
-  (->> (map (comp keyword :state) state-history)
+(defn- state-before-last-canceled [{{history :history} :application}]
+  (->> (app/state-history-entries history)
+       (map (comp keyword :state))
        (remove #{:canceled})
        last))
 
