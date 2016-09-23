@@ -39,9 +39,8 @@ LUPAPISTE.ServerSettingsModel = function(params) {
     var server = params.server() || {};
     self.url(server.url);
     self.username(server.username);
-    if (server.username) {
-      self.passwordPlaceholder("********");
-    }
+    self.password( null );
+    self.passwordPlaceholder(server.username ? "********" : null);
   });
 
   self.updateServerDetails = function() {
