@@ -4,7 +4,8 @@
             [clj-time.format :as tf]
             [clojure.test :refer [is]]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools])
+            [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n])
   (:import [clojure.lang ExceptionInfo]
            [java.lang AssertionError]))
 
@@ -24,22 +25,27 @@
     {:schema-info (:info schema)
      :data        data}))
 
-(defmacro assert-validation-error 
+(defmacro assert-validation-error
   "Catches schema validation error and checks that validation is failed in right place."
   [schema-path & body]
-  `(try ~@body        
+  `(try ~@body
         (is false "Did not throw validation error!")
-        (catch ExceptionInfo e# 
+        (catch ExceptionInfo e#
           (is (get-in (.getData e#) [:error ~@schema-path])
               (str "No validation error with schema path " ~schema-path "!")))))
 
-(defmacro assert-assertion-error 
+(defmacro assert-assertion-error
   "Catches assertion error and check that there is right parameter name in error message.
   Convenient to use in test-check test to check that pre-check is triggered."
   [param-name & body]
   `(try ~@body
         (is false "Did not throw assertion error!")
-        (catch AssertionError e# 
+        (catch AssertionError e#
           (is (->> (.getMessage e#) (re-matches (re-pattern (str ".*" (name ~param-name) ".*"))))
               (str "Cannot find param name \"" (name ~param-name) "\" in error message!")))))
 
+; FIXME: this is a temporary arrangement due to missing English
+; translations. It should be the case that
+; test-languages = i18n/languages
+(def test-languages (remove (partial = :en)
+                            i18n/languages))

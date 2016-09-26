@@ -12,12 +12,6 @@
             [clojure.java.io :as io])
   (:import (java.io File FileOutputStream)))
 
-; FIXME: this is a temporary arrangement due to missing English
-; translations. It should be the case that
-; test-languages = i18n/languages
-(def ^:private test-languages (remove (partial = :en)
-                                      i18n/languages))
-
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
                        "hulevedet"
@@ -92,7 +86,7 @@
                                                              :state "draft"})
              file (File/createTempFile "test" ".pdf")]
 
-         (doseq [lang test-languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (pdf-export/generate application lang file)
                   (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
@@ -120,7 +114,7 @@
                                                              :statements dummy-statements
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang test-languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-statement-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
@@ -150,7 +144,7 @@
                                                              :neighbors dummy-neighbours
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang test-languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-neighbor-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
@@ -178,7 +172,7 @@
                                                              :tasks dummy-tasks
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang test-languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-tasks-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]

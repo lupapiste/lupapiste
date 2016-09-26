@@ -4,13 +4,14 @@
     [taoensso.timbre :refer [trace debug]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
+    [lupapalvelu.test-util :as test-util]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-statement :as statement]
     [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
   (:import (java.io File)))
 
 (facts "Statement fodt export "
-       (doseq [lang i18n/languages]
+       (doseq [lang test-util/test-languages]
          (let [tmp-file (File/createTempFile (str "statement-" (name lang) "-") ".fodt")]
            (statement/write-statement-libre-doc application2 "101" lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
