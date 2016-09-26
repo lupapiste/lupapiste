@@ -51,6 +51,6 @@
     (when krysp?
       (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command (util/deep-merge
-                                  (application/state-transition-update :closed orig-app created user)
+                                  (application/state-transition-update :closed created orig-app user)
                                   {$set app-updates}))
     (ok :integrationAvailable krysp?)))

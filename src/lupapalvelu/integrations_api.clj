@@ -295,7 +295,7 @@
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
-                          (application/state-transition-update (sm/next-state application) orig-app created user)
+                          (application/state-transition-update (sm/next-state application) created orig-app user)
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
