@@ -34,5 +34,5 @@ Mikko returns to inforequest
 Mikko deletes inforequest attachment
   Click element  xpath=//table[@data-test-id='inforequest-attachments-table']/tbody//span[@title='Poista liite']
   Confirm yes no dialog
-  XPath should match X times  //table[@data-test-id='inforequest-attachments-table']/tbody/tr  0
+  Wait until  XPath should match X times  //table[@data-test-id='inforequest-attachments-table']/tbody/tr  0
   Element should not be visible by test id  inforequest-attachments-table

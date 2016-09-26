@@ -274,7 +274,6 @@ LUPAPISTE.AttachmentsService = function() {
       .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
       .error(function(response) {
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
-        error("Unable to update attachment: ", response.text);
         notify.ajaxError(response);
       })
       .call();
