@@ -274,5 +274,7 @@
 (defn valid-permit-types-for-state-change
   "Convenience pre-checker."
   [command]
-  (-> (util/map-values :allow-state-change (permit-types))
-      (valid-permit-types command)))
+  (valid-permit-types (->> (permit-types)
+                           (util/map-keys keyword)
+                           (util/map-values :allow-state-change))
+                      command))

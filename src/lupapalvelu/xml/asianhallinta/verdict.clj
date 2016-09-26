@@ -80,7 +80,7 @@
      (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
 
 (defn- check-application-is-in-correct-state! [{application-id :id current-state :state :as application}]
-  (when-not (#{:constructionStarted :sent (sm/verdict-given-state application)} current-state)
+  (when-not (#{:constructionStarted :sent (sm/verdict-given-state application)} (keyword current-state))
     (error-and-fail!
      (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state)))
 
