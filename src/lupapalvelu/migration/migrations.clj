@@ -2388,6 +2388,11 @@
                   {$pull {:documents {:schema-info.name "suunnittelija"}}}
                   :multi true))
 
+(defmigration organization-name-english-defaults
+   {:apply-when (pos? (mongo/count  :organizations {:name.en {$exists false}}))}
+   (doseq [organization (mongo/select :organizations {:name.en {$exists false}})]
+     (mongo/update-by-id :organizations (:id organization)
+                         {$set {:name.en (-> organization :name :fi)}})))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections
