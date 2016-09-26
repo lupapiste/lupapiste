@@ -121,7 +121,7 @@
         (update-application command
                             {:verdicts {$elemMatch {:id id}}}
                             (util/deep-merge
-                             (application/state-transition-update next-state timestamp (:user command))
+                             (application/state-transition-update next-state timestamp application user)
                              {$set {:verdicts.$.draft false}}))
         (when (seq doc-updates)
           (update-application command

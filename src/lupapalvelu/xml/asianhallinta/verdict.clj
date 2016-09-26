@@ -72,53 +72,57 @@
                                     :size file-size
                                     :content file})))
 
+(defn- check-ftp-user-has-right-to-modify-app! [ftp-user {application-id :id municipality :municipality permit-type :permitType}]
+  (when-not (-> (org/resolve-organization-scope municipality permit-type)
+                (get-in [:caseManagement :ftpUser])
+                (= ftp-user))
+    (error-and-fail!
+     (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
+
+(defn- check-application-is-in-correct-state! [{application-id :id current-state :state :as application}]
+  (when-not (#{:constructionStarted :sent (sm/verdict-given-state application)} (keyword current-state))
+    (error-and-fail!
+     (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state)))
+
 (defn process-ah-verdict [path-to-zip ftp-user system-user]
   (let [tmp-dir (fs/temp-dir (str "ah"))]
     (try
       (let [unzipped-path (unzip-file path-to-zip tmp-dir)
             xmls (fs/find-files unzipped-path #".*xml$")
             timestamp (core/now)]
-        ; path must contain exactly one xml
+        ;; path must contain exactly one xml
         (when-not (= (count xmls) 1)
           (error-and-fail! (str "Expected to find one xml, found " (count xmls) " for user " ftp-user) :error.integration.asianhallinta-wrong-number-of-xmls))
 
-                                        ; parse XML
+        ;; parse XML
         (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
               attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
                               (util/ensure-sequential :Liite)
                               :Liite)
               application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])]
-                                        ; Check that all referenced attachments were included in zip
+          ;; Check that all referenced attachments were included in zip
           (ensure-attachments-present! unzipped-path attachments)
 
           (when-not application-id
             (error-and-fail! (str "ah-verdict - Application id is nil for user " ftp-user) :error.integration.asianhallinta.no-application-id))
 
-                                        ; Create verdict
-                                        ; -> fetch application
+          ;; Create verdict
+          ;; -> fetch application
           (let [application (domain/get-application-no-access-checking application-id)
-                current-state (keyword (:state application))
-                verdict-given-state (sm/verdict-given-state application)
-                org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))]
+                verdict-given-state (sm/verdict-given-state application)]
 
-                                        ; -> check ftp-user has right to modify app
-            (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
-              (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
+            (check-ftp-user-has-right-to-modify-app! ftp-user application)
+            (check-application-is-in-correct-state! application)
 
-                                        ; -> check that application is in correct state
-            (when-not (#{:constructionStarted :sent verdict-given-state} current-state)
-              (error-and-fail!
-               (str "Application " application-id " in wrong state (" current-state ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state))
-
-                                        ; -> build update clause
-                                        ; -> update-application
+            ;; -> build update clause
+            ;; -> update-application
             (let [new-verdict   (build-verdict parsed-xml timestamp)
                   command       (action/application->command application)
                   poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
                   update-clause (util/deep-merge
                                  {$push {:verdicts new-verdict}, $set  {:modified timestamp}}
                                  (when (= :sent (keyword (:state application)))
-                                   (application/state-transition-update verdict-given-state timestamp system-user)))]
+                                   (application/state-transition-update verdict-given-state timestamp application system-user)))]
 
               (action/update-application command update-clause)
               (doseq [attachment attachments]

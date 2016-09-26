@@ -224,8 +224,9 @@
         state => "submitted"
         canceled => nil
         (fact "new submitted history entry is added"
-          (-> history last :state) => "submitted"
-          (> submitted intial-submitted) => true)
+          (-> history last :state) => "submitted")
+        (fact "timestamp is not updated"
+          (= submitted intial-submitted)) => true
         (fact "old canceled history entry is preserved"
           (-> history butlast last :state) => "canceled")))))
 

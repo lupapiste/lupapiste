@@ -538,11 +538,11 @@
 
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
-  [to-state timestamp user]
-  {$set (merge
-          {:state to-state, :modified timestamp}
-          (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
-   $push {:history (history-entry to-state timestamp user)}})
+  [to-state timestamp application user]
+  (let [ts-key (timestamp-key to-state)]
+    {$set (merge {:state to-state, :modified timestamp}
+                 (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
+     $push {:history (history-entry to-state timestamp user)}}))
 
 (defn change-application-state-targets
   "Namesake query implementation."
@@ -570,30 +570,21 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn cancel-inforequest [{:keys [created user data] :as command}]
+(defn cancel-inforequest [{:keys [created user data application] :as command}]
   {:pre [(seq (:application command))]}
-  (action/update-application command (state-transition-update :canceled created user))
+  (action/update-application command (state-transition-update :canceled created application user))
   (remove-app-links (:id data))
   (ok))
 
 (defn cancel-application
-  [{:keys [created application user data] :as command}]
-  (let [{:keys [lang text]} data]
-   (action/update-application command
-                              (util/deep-merge
-                               (state-transition-update :canceled created user)
-                               (when (seq text)
-                                 (comment/comment-mongo-update
-                                  (:state application)
-                                  (str
-                                   (i18n/localize lang "application.canceled.text") ". "
-                                   (i18n/localize lang "application.canceled.reason") ": "
-                                   text)
-                                  {:type "application"}
-                                  (user :role)
-                                  false
-                                  user
-                                  nil
-                                  created)))))
-  (remove-app-links (:id application))
+  [{created :created {:keys [id state] :as application} :application {:keys [role] :as user} :user {:keys [lang text]} :data :as command}]
+  (let [comment-text (str (i18n/localize lang "application.canceled.text") ". "
+                          (i18n/localize lang "application.canceled.reason") ": "
+                          text)]
+    (->> (util/deep-merge
+          (state-transition-update :canceled created application user)
+          (when (seq text)
+            (comment/comment-mongo-update state comment-text {:type "application"} role false user nil created)))
+         (action/update-application command)))
+  (remove-app-links id)
   (ok))
