@@ -1164,9 +1164,9 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
-  [Arguments]  ${targetState}=verdictGiven
+  [Arguments]  ${targetState}=verdictGiven  ${targetStatus}=6
   Go to give new verdict
-  Input verdict  -  6  01.05.2018  01.06.2018  -
+  Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
