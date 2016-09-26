@@ -192,7 +192,7 @@
    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
          filename (str (System/getProperty "user.home")
                        "/lupapiste_translations_"
-                       date-str
+                       date-str "_" (name lang)
                        ".xlsx")]
         (missing-localizations-excel (io/file filename) lang)))
   ([file lang]
