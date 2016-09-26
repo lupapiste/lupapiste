@@ -183,7 +183,7 @@
   (let [attachment (attachment/get-attachment-info application attachmentId)]
     (if attachment
       (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
-      (fail :error.not-found))))
+      (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
   {:description "Get all attachment groups for application"

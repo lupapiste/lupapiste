@@ -28,6 +28,11 @@
     :notNeeded
     :needed))
 
+(defn- tag-by-ram [{ram :ramLink}]
+  (if ram
+    :ram
+    :no-ram))
+
 (defn- op-id->tag [op-id]
   (when op-id
     (str "op-id-" op-id)))
@@ -51,6 +56,7 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
+              tag-by-ram
               tag-by-type)
         attachment)
        (remove nil?)))
@@ -121,8 +127,14 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
+(defn- ram-filters [{attachments :attachments}]
+  (when (-> (map tag-by-ram attachments) set :ram)
+    [{:tag :ram :default false}
+     {:tag :no-ram :default false}]))
+
+
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
   [application]
-  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters ram-filters) application)
        (remove nil?)))

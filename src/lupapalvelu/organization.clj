@@ -113,8 +113,8 @@
    (sc/optional-key :use-attachment-links-integration) sc/Bool
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
                                (sc/optional-key :operations) [sc/Str]}
-   (sc/optional-key :3d-map) {:enabled sc/Bool
-                              :server  Server}})
+   (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
+                              (sc/optional-key :server)  Server}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles

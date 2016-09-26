@@ -679,7 +679,7 @@
         (if (nil? file-content)
           (do
             (error "PDF/A conversion: No mongo file for fileId" fileId)
-            (fail :error.not-found))
+            (fail :error.attachment-not-found))
           (try
             (with-open [content ((:content file-content))]
               (io/copy content temp-pdf)

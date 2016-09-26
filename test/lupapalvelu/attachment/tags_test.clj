@@ -15,23 +15,26 @@
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-    (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded :no-ram} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-    (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed :no-ram} :in-any-order :gaps-ok))
 
   (fact "defaults"
-    (attachment-tags {}) => (just #{:preVerdict :general :needed} :in-any-order :gaps-ok))
+    (attachment-tags {}) => (just #{:preVerdict :general :needed :no-ram} :in-any-order :gaps-ok))
 
   (fact "parties"
-    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :parties :needed} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :parties :needed :no-ram} :in-any-order :gaps-ok))
 
   (fact "operation"
-    (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other :no-ram} :in-any-order :gaps-ok))
 
   (fact "type"
-    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup} :in-any-order :gaps-ok)
-    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)))
+    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup :no-ram} :in-any-order :gaps-ok)
+    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))
+
+  (fact "verdictGiven - RAM"
+        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:postVerdict :general :needed :ram} :in-any-order :gaps-ok)))
 
 (facts type-groups-for-operation
   (fact "one attachment"
