@@ -44,10 +44,10 @@ As an applicant Mikko does not see approve or reject columns
 Dropdown options for attachment actions should look correct for Mikko
   [Tags]  attachments
   # TODO: Check that correct action buttons are visible
-  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='newAttachmentTemplates']
-  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsMoveToBackingSystem']
+  :FOR  ${cmdButton}  IN  stamp-attachments  order-attachment-prints  mark-verdict-attachments
+  \  Element should not be visible  xpath=//div[@id='application-attachments-tab']//button[@data-test-id='${cmdButton}']
 
-Mikko adds txt attachment without comment
+Mikko adds png attachment without comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
@@ -62,7 +62,7 @@ Mikko deletes attachment immediately by using remove icon
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
-Mikko adds txt attachment without comment again
+Mikko adds png attachment without comment again
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
@@ -80,7 +80,7 @@ Mikko deletes also the attachment template
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
-Mikko adds again txt attachment with comment
+Mikko adds again png attachment with comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
@@ -150,7 +150,7 @@ Comment is present after delete
   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
   Close side panel  conversation
 
-Mikko adds txt attachment with comment
+Mikko adds png attachment with comment
   [Tags]  attachments
   Add attachment  application  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
   Return to application
@@ -189,13 +189,37 @@ Signature icon is not visible
   [Tags]  attachments
   Wait Until  Attachment indicator icon should not be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
 
+Mikko adds another attachment and signs it as single attachment
+  [Tags]  attachments
+  Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  type=hakija.valtakirja  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Click enabled by test id  signLatestAttachmentVersion
+  Wait Until   Element should be visible  signSingleAttachmentPassword
+  Input text by test id  signSingleAttachmentPassword  mikko123
+  Click enabled by test id  do-sign-attachment
+  Wait Until   Element should not be visible  signSingleAttachmentPassword
+
+One signature is visible in attachment page
+  [Tags]  attachments
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  1
+  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
+  Element text should be  xpath=//section[@id="attachment"]//*/span[@data-test-id="attachment-signature-version"]  1.0
+  Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-date"]
+  Return to application
+
+Signature icon is visible in attachments tab, and only one
+  [Tags]  attachments
+  Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  1
+
 Mikko signs all attachments
   [Tags]  attachments
   Sign all attachments  mikko123
 
 Signature icon is visible
   [Tags]  attachments
+  Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
   Wait Until  Attachment indicator icon should be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  2
 
 Signature is visible
   [Tags]  attachments
@@ -205,17 +229,12 @@ Signature is visible
   Element text should be  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  Intonen Mikko
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-test-id="attachment-signature-version"]  1.0
   Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-test-id="attachment-signature-date"]
-
-Sign single attachment
-  [Tags]  attachments
-  Click enabled by test id  signLatestAttachmentVersion
-  Wait Until   Element should be visible  signSingleAttachmentPassword
-  Input text by test id  signSingleAttachmentPassword  mikko123
-  Click enabled by test id  do-sign-attachment
-  Wait Until   Element should not be visible  signSingleAttachmentPassword
+  Return to application
 
 Two signatures are visible
   [Tags]  attachments
+  Wait until  Tab should be visible  attachments
+  Open attachment details  hakija.valtakirja
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-test-id="attachment-signature-fullname"]  2
 
 Switch to authority

@@ -409,7 +409,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.signAttachments = function() {
-    hub.send("sign-attachments", {application: self.appModel});
+    hub.send("sign-attachments", {application: self.appModel, attachments: lupapisteApp.services.attachmentsService.attachments});
   };
 
   self.canSign = function() {
