@@ -303,6 +303,13 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-visibility", {"value": visibility}, hubParams);
   };
 
+  self.manuallySetConstructionTime = function(attachmentId) {
+    return self.authModels()[attachmentId].ok("attachment-manually-set-construction-time");
+  };
+  self.setConstructionTime = function(attachmentId, value, hubParams) {
+    self.updateAttachment(attachmentId, "set-attachment-as-construction-time", {"value": value}, hubParams);
+  };
+
   self.setMeta = function(attachmentId, metadata, hubParams) {
     self.updateAttachment(attachmentId, "set-attachment-meta", {meta: metadata}, hubParams);
   };
