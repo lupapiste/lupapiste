@@ -4,12 +4,13 @@
     <rollup params="open: $data.open"
             data-bind="attr: {'data-test-level': 'accordion-level-' + $parent.level}">
       <rollup-status-button
-         params="open: $parent.open,
-                 style: {'secondary': $parent.level === 0,
-                         'tertiary': $parent.level > 0,
-                         'attachments-accordion': true},
-                 status: $parent.data().status,
-                 text: $parent.name">
+        data-bind="attr: {'data-test-name': $parent.name}"
+        params="open: $parent.open,
+                style: {'secondary': $parent.level === 0,
+                'tertiary': $parent.level > 0,
+                'attachments-accordion': true},
+                status: $parent.data().status,
+                text: $parent.name">
       </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
         <!-- ko if: $parent.data().type === "main" -->
