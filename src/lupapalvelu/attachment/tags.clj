@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment.tags
-  (:require [lupapalvelu.states :as states]
+  (:require [sade.util :refer [fn->>]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]))
 
 (def attachment-groups [:parties :building-site :operation])
@@ -18,20 +19,17 @@
 (defn attachment-groups-for-application [application]
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
-(defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
-  (if (states/post-verdict-states (keyword app-state))
-    :postVerdict
-    :preVerdict))
+(defn- tag-by-applicationState [{ram :ramLink app-state :applicationState :as attachment}]
+  (cond
+    ram :ram
+    (states/post-verdict-states (keyword app-state)) :postVerdict
+    :else :preVerdict))
+
 
 (defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
   (if not-needed
     :notNeeded
     :needed))
-
-(defn- tag-by-ram [{ram :ramLink}]
-  (if ram
-    :ram
-    :no-ram))
 
 (defn- op-id->tag [op-id]
   (when op-id
@@ -56,7 +54,6 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              tag-by-ram
               tag-by-type)
         attachment)
        (remove nil?)))
@@ -107,11 +104,13 @@
        (mapcat (partial tag-grouping-for-group-type application))))
 
 (defn- application-state-filters [{attachments :attachments state :state}]
-  (let [existing-state-tags (-> (map tag-by-applicationState attachments) set)]
-    (when (or (states/post-verdict-states (keyword state))
-              (existing-state-tags :postVerdict))
-      [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
-       {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))}])))
+  (let [states (-> (map tag-by-applicationState attachments) set)]
+    (->> [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
+          (when (or (states/post-verdict-states (keyword state)) (:postVerdict states))
+            {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))})
+          (when (:ram states)
+            {:tag :ram :default true})]
+         (remove nil?))))
 
 (defn- group-and-type-filters [{attachments :attachments}]
   (let [existing-groups-and-types (->> (mapcat (juxt tag-by-type tag-by-group-type) attachments)
@@ -127,14 +126,9 @@
       [{:tag :needed    :default true}
        {:tag :notNeeded :default false}])))
 
-(defn- ram-filters [{attachments :attachments}]
-  (when (-> (map tag-by-ram attachments) set :ram)
-    [{:tag :ram :default false}
-     {:tag :no-ram :default false}]))
-
-
 (defn attachments-filters
   "Get all possible filters with default values for attachments based on attachment data."
   [application]
-  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters ram-filters) application)
-       (remove nil?)))
+  (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
+       (remove nil?)
+       (filter (fn->> count (< 1)))))
