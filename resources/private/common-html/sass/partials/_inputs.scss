@@ -8,6 +8,7 @@
     width: 0;
     height: 0;
     margin: 0;
+    position: absolute;
     font-size: 0;
   }
 }
@@ -16,7 +17,7 @@
 // Defines the following classes:
 // .cls-label
 // .cls-wrapper
-// and the definition 
+// and the definition
 // .cls-wrapper.wrapper--disabled
 @mixin toggle-helper ($cls, $on, $off,
                       $size: $lupicon-size,
@@ -113,7 +114,7 @@
 }
 
 .wrapper--block {
-  
+
 }
 
 
@@ -156,7 +157,7 @@
   input {
     // Forcefully override the .form-grid styles.
     width: 50% !important;
-    -webkit-appearance: textfield !important;        
+    -webkit-appearance: textfield !important;
   }
 }
 

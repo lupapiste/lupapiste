@@ -4,6 +4,7 @@
     [taoensso.timbre :refer [trace debug]]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
+    [lupapalvelu.test-util :as test-util]
     [lupapalvelu.organization :refer :all]
     [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
     [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
@@ -82,7 +83,7 @@
   (first (filter #(s/ends-with? % (str "text:name=\"" key "\"/>")) fields)))
 
 (facts "YA Verdict publish export "
-       (doseq [lang i18n/languages]
+       (doseq [lang test-util/test-languages]
          (let [tmp-file (File/createTempFile (str "verdict-ya-" (name lang) "-") ".fodt")
                data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                      :data        {:_selected {:value "yritys"}
@@ -127,7 +128,7 @@
              ))))
 
 (facts "R Verdict publish export "
-       (doseq [lang i18n/languages]
+       (doseq [lang test-util/test-languages]
          (let [tmp-file (File/createTempFile (str "verdict-r-" (name lang) "-") ".fodt")
                data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                      :data        {:_selected {:value "yritys"}
@@ -155,7 +156,7 @@
              ))))
 
 (facts "YA contract publish export "
-       (doseq [lang i18n/languages]
+       (doseq [lang test-util/test-languages]
          (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")

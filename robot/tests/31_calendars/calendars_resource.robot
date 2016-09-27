@@ -10,9 +10,21 @@ Clear ajanvaraus-db
   Wait until  Page should contain  true
   Go to login page
 
+Basic calendar setup for Sonja
+  Go to page  organization-calendars
+  Set up the calendar for authority  Sibbo Sonja
+  Set default reservation location  Foobarbaz
+  Add reservation type  Foobar
+
 Apply minimal fixture and clear ajanvaraus-db
   Apply minimal fixture now
   Clear ajanvaraus-db
+
+Set up the calendar for authority
+  [Arguments]  ${authority}
+  Wait Until  Element should be visible  xpath=//tr[@data-test-authority-name='${authority}']
+  Select Checkbox  xpath=//tr [@data-test-authority-name='${authority}']//td//input[@type='checkbox']
+  Positive indicator should be visible
 
 Set default reservation location
   [Arguments]  ${location}

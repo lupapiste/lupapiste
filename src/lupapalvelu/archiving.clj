@@ -249,7 +249,7 @@
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
-  (if (get-paatospvm application)
+  (if (or (get-paatospvm application) (foreman/foreman-app? application))
     (let [selected-attachments (filter (fn [{:keys [id latestVersion metadata]}]
                                          (and (attachment-ids id) (:archivable latestVersion) (seq metadata)))
                                        attachments)

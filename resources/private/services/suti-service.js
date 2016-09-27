@@ -6,6 +6,7 @@ LUPAPISTE.SutiService = function() {
 
   var suti = ko.observable({});
   var operations = ko.observableArray([]);
+  var authorization = lupapisteApp.models.applicationAuthModel;
 
   self.sutiDetails = ko.pureComputed( function() {
     return _.cloneDeep( suti() );
@@ -122,7 +123,7 @@ LUPAPISTE.SutiService = function() {
     if( clear ) {
       suti({});
     }
-    if (!application.infoRequest()) {
+    if (authorization.ok("suti-application-data")) {
       ajax.query( "suti-application-data", {id: application.id()})
         .pending( waiting || _.noop)
         .success( function( res ) {

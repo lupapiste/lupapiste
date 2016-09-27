@@ -197,7 +197,8 @@
                    "calendar-service.js"
                    "attachments-service.js"
                    "suti-service.js"
-                   "info-service.js"]}
+                   "info-service.js"
+                   "context-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -284,12 +285,12 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js"
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" "calendar-notification-list.js"
                         "book-appointment-filter.js" "base-calendar-model.js"]
                    :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
                           "authority-calendar-template.html" "applicant-calendar-template.html"
-                          "calendar-message-items-template.html"
+                          "calendar-notification-list-template.html"
                           "reservation-slot-reserve-bubble-template.html"
                           "book-appointment-filter-template.html"]}
 
@@ -297,9 +298,9 @@
                             :signing :invites :verdict-attachment-prints :calendar-view]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
+                       "add-party.js" "archival-summary.js" "case-file.js"
                        "application.js"]
-                  :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
+                  :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
                          "required-fields-summary-tab-template.html"
@@ -430,7 +431,8 @@
 
    :admin-app {:depends []
                :js ["admin.js"]}
-   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer
+                         :ui-components :authority-admin-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js" "logs.js"]
                :html ["index.html" "admin.html" "organization.html"

@@ -4,7 +4,10 @@ LUPAPISTE.ReservedSlotBubbleModel = function(params) {
       config = LUPAPISTE.config.calendars;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
-  
+
+  self.currentApplication = params.applicationModel;
+  self.relatedToOtherApplication = ko.observable(false);
+
   self.reservation = ko.observable();
   self.calendarId = ko.observable(params.calendarId);
   self.endHour = ko.observable();
@@ -16,7 +19,7 @@ LUPAPISTE.ReservedSlotBubbleModel = function(params) {
   self.bubbleVisible = ko.observable(false);
 
   self.removeVisible = self.disposedComputed(function() {
-    return lupapisteApp.models.currentUser.isAuthority();
+    return lupapisteApp.models.currentUser.isAuthority() && !self.relatedToOtherApplication();
   });
 
   self.cancelReservation = function() {
@@ -34,6 +37,10 @@ LUPAPISTE.ReservedSlotBubbleModel = function(params) {
   
   self.addEventListener("calendarView", "bookedSlotClicked", function(event) {
     self.reservation(event.slot.reservation);
+    var currentApplicationId = self.currentApplication ? self.currentApplication().id : "";
+    var reservationApplicationId = self.reservation() ? self.reservation().applicationId : "";
+    self.relatedToOtherApplication(!_.isEmpty(currentApplicationId) &&
+        currentApplicationId !== reservationApplicationId);
 
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();

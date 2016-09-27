@@ -1,4 +1,5 @@
 (ns lupapalvelu.attachment.type-test
+  (:refer-clojure :exclude [contains?])
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment.type :refer :all]
@@ -8,8 +9,7 @@
             [clojure.test.check.generators :as gen]
             [clojure.test :refer [is]]
             [schema.core :as sc]
-            [sade.schema-generators :as ssg])
-  (:refer-clojure :exclude [contains?]))
+            [sade.schema-generators :as ssg]))
 
 (testable-privates lupapalvelu.attachment.type attachment-types-by-operation)
 
@@ -56,7 +56,7 @@
     (attachment-types-by-operation "kerrostalo-rivitalo") => (attachment-types-by-permit-type :R))
 
   (fact "foreman application has restricted set of attachment types"
-    (count (attachment-types-by-operation "tyonjohtajan-nimeaminen-v2")) => 5))
+    (count (attachment-types-by-operation "tyonjohtajan-nimeaminen-v2")) => 7))
 
 (fact "All attachment types in default-grouping are valid"
   (->> (mapcat val default-grouping)

@@ -86,7 +86,7 @@
                                                              :state "draft"})
              file (File/createTempFile "test" ".pdf")]
 
-         (doseq [lang i18n/languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (pdf-export/generate application lang file)
                   (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
@@ -114,7 +114,7 @@
                                                              :statements dummy-statements
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang i18n/languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-statement-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
@@ -144,7 +144,7 @@
                                                              :neighbors dummy-neighbours
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang i18n/languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-neighbor-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
@@ -172,7 +172,7 @@
                                                              :tasks dummy-tasks
                                                              :municipality "444"
                                                              :state "draft"})]
-         (doseq [lang i18n/languages]
+         (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
                   (let [file (File/createTempFile (str "export-test-tasks-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]

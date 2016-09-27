@@ -37,10 +37,16 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  self.applicationId.subscribe(function(val) {
+  self.applicationId.subscribe(function(id) {
+    clearData();  // Just in case
     // to avoid retaining old filter states when going to different application
     self.internedObservables = {};
-  self.authModel.refresh({id: val});
+    if (id) {
+      self.queryAll();
+      self.authModel.refresh({id: id});
+    } else {
+      self.authModel.setData({});
+    }
   });
 
   function clearData() {
@@ -51,13 +57,6 @@ LUPAPISTE.AttachmentsService = function() {
     self.tagGroups([]);
     self.groupTypes([]);
   }
-
-  ko.computed(function() {
-    if(self.applicationId()) {
-      clearData();  // Just in case
-      self.queryAll();
-    }
-  });
 
   function queryData(queryName, responseJsonKey, dataSetter, params, hubParams) {
     if (self.authModel.ok(queryName)) {
@@ -177,6 +176,11 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
+  self.hasAttachments = ko.computed(function() {
+    var attachments = self.attachments();
+    return _.some(attachments, function(a) {return !_.isEmpty(util.getIn(a, ["versions"]));});
+  });
+
   function orderByTags(attachments, tagGroups) {
     if (_.isEmpty(tagGroups)) {
       return attachments;
@@ -237,7 +241,11 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
     return false;
   };
-  hub.subscribe("upload-done", function() { self.authModel.refresh({id: self.applicationId()}); });
+
+  hub.subscribe("upload-done", function(data) {
+    self.queryOne(data.attachmentId);
+    self.authModel.refresh({id: self.applicationId()});
+  });
 
   self.copyUserAttachments = function(hubParams) {
     var params = {id: self.applicationId()};

@@ -37,12 +37,22 @@
 
           <div class="auth-actions stacked inner-margins">
               <button data-bind="click: approveApplication,
-                                 visible: $root.authorization.ok('approve-application'),
-                                 enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
+                                 visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'), 
+                                 attr: {'title': loc('tooltip.approveApplication')}"
                       data-test-id="approve-application-summaryTab"
                       class="positive">
                   <i class="lupicon-circle-arrow-right"></i>
                   <span data-bind="ltext: 'application.approveApplication'"></span>
+              </button>
+              <button data-bind="click: approveExtension,
+                                 visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'), 
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-extension-summaryTab"
+                      class="positive">
+                  <i class="lupicon-circle-check"></i>
+                  <span data-bind="ltext: 'application.extension.approve'"></span>
               </button>
 
               <button data-bind="click: toAsianhallinta,

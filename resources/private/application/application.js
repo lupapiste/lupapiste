@@ -52,7 +52,6 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -189,8 +188,6 @@
       verdictAttachmentPrintsOrderModel.refresh();
       verdictAttachmentPrintsOrderHistoryModel.refresh();
 
-      attachmentsTab.refresh();
-
       // authorities
       initAuthoritiesSelectList(applicationDetails.authorities);
 
@@ -283,15 +280,20 @@
 
       pendingCalendarNotifications = _.map(pendingCalendarNotifications,
         function(n) {
-          n.acknowledged = "none";
-          return ko.mapping.fromJS(n);
+          n.acknowledged = ko.observable("none");
+          return n;
         });
 
       applicationModel.calendarNotificationsPending(
         _.transform(
-          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
           function (result, value, key) {
-            return result.push({ day: _.parseInt(key), notifications: value });
+            return result.push({ day: _.parseInt(key),
+                                 notifications: _.transform(value, function(acc, n) {
+                                                  n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
+                                                  acc.push(n);
+                                                }, [])});
+
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
 
@@ -498,6 +500,29 @@
     }
   };
 
+  function CalendarConfigModel() {
+    var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+    self.reservationTypes = ko.observableArray([]);
+    self.defaultLocation = ko.observable();
+    self.authorities = ko.observableArray([]);
+    self.initialized = ko.observable(false);
+
+    self.disposedSubscribe(applicationModel.id, function(id) {
+      if (!_.isEmpty(id) && authorizationModel.ok("calendars-enabled")) {
+        self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+      }
+    });
+
+    self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
+      self.initialized(event.authorities.length > 0);
+      self.reservationTypes(event.reservationTypes);
+      self.defaultLocation(event.defaultLocation);
+      self.authorities(event.authorities);
+    });
+  }
+
+  var calendarConfigModel = new CalendarConfigModel();
 
   $(function() {
     var bindings = {
@@ -525,10 +550,10 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions,
-      sidePanelService: lupapisteApp.services.sidePanelService
+      sidePanelService: lupapisteApp.services.sidePanelService,
+      calendarConfig: calendarConfigModel
     };
 
     $("#application").applyBindings(bindings);
@@ -544,7 +569,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    attachmentsTab.attachmentTemplatesModel.init();
   });
 
 })();

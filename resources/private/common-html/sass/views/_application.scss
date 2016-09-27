@@ -97,14 +97,8 @@ $app-gray-darkest: $gray187;
       margin: $marginM;
     }
     .application-map-actions {
-      position: absolute;
-      z-index: 1000;
-      left: 0;
-      top: 256px;
-      //bottom: 0;
-      text-align: center;
+      margin-top: $marginS;
       display:block;
-      background: $lp-green;
       .map-search-button {
         color: white;
         padding: 0 $marginL;
@@ -491,6 +485,9 @@ $app-gray-darkest: $gray187;
   table {
     margin-top: $marginM;
     margin-bottom: $marginM;
+  }
+  h2 {
+    margin-top: 1.5em;
   }
 }
 

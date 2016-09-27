@@ -37,9 +37,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.closed = ko.observable();
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
-  self.hasAttachment = ko.computed(function() {
-    return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
-  });
+
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
@@ -170,6 +168,18 @@ LUPAPISTE.ApplicationModel = function() {
   self.primaryOperationName = ko.pureComputed(function() {
     var opName = util.getIn(self.primaryOperation, ["name"]);
     return !_.isEmpty(opName) ? "operations." + opName : "";
+  });
+
+  hub.subscribe("op-description-changed", function(e) {
+    var opid = e["op-id"];
+    var desc = e["op-desc"];
+
+    if (e.appId === self.id()) {
+      var operations = _.map(self.allOperations(), function(op) {
+        return op.id() === opid ? op.description(desc) : op;
+      });
+      self.allOperations(operations);
+    }
   });
 
   self.foremanTasks = ko.observable();
@@ -432,6 +442,15 @@ LUPAPISTE.ApplicationModel = function() {
       checkDesigners();
     }
     return false;
+  };
+
+  self.approveExtension = function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.extension.approve"),
+      loc("application.extension.approve-confirmation"),
+      {title: loc("ok"), fn: self.approveApplication},
+      {title: loc("cancel")}
+    );
   };
 
   self.refreshKTJ = function() {
@@ -779,4 +798,19 @@ LUPAPISTE.ApplicationModel = function() {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::open-application", permit);
     }};
+
+  // Saved from the old LUPAPISTE.AttachmentsTabModel, used in info request
+  self.deleteSingleAttachment = function(a) {
+    var versions = util.getIn(a, ["versions"]);
+    var doDelete = function() {
+      lupapisteApp.services.attachmentsService.removeAttachment(util.getIn(a, ["id"]));
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
+      return false;
+    };
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: doDelete}});
+  };
 };

@@ -44,23 +44,11 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
     return authModel.ok("statement-attachment-allowed");
   };
 
-  function deleteAttachmentFromServer(attachmentId) {
-    ajax
-      .command("delete-attachment", {id: applicationId(), attachmentId: attachmentId})
-      .success(function() {
-        repository.load(applicationId());
-        return false;
-      })
-      .call();
-    return false;
-  }
-
   self.deleteAttachment = function(attachmentId) {
-    var deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("attachment.delete.version.header"),
       loc("attachment.delete.version.message"),
-      {title: loc("yes"), fn: deleteAttachmentFromServerProxy},
+      {title: loc("yes"), fn: _.partial(lupapisteApp.services.attachmentsService.removeAttachment, attachmentId)},
       {title: loc("no")}
     );
   };

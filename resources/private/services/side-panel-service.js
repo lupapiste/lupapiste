@@ -42,8 +42,8 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   hub.subscribe("SidePanelService::NoticeSeen", function() {
+    noticeSeenAppId(pageutil.hashApplicationId());
     if( self.unseenNotice() ) {
-      noticeSeenAppId( self.application.id());
       ajax.command( "mark-seen", {id: self.application.id(),
                                   type: "authority-notices"})
         .call();

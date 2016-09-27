@@ -13,7 +13,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.processing = ko.observable();
 
-    self.statuses = _.range(1,43); // 42 different values in verdict in krysp (verdict.clj)
+    self.statuses = ko.observable(_.range(1,43)); // 42 different values in verdict in krysp (verdict.clj)
 
     self.backendId = ko.observable();
     self.draft = ko.observable();
@@ -27,10 +27,15 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.taskGroups = ko.observable();
 
+
     self.refresh = function(application, verdictId) {
       self.refreshing = true;
 
       self.applicationTitle(application.title);
+
+      if (application.permitType === "YA") {
+        self.statuses([1,2,21,37]);
+      }
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
       if (verdict) {

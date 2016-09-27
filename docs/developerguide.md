@@ -203,6 +203,8 @@ Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on ma
 
 ### Frontend end-to-end testit
 
+Katso [browser-testing.md](browser-testing.md).
+
  - `local.sh` / `local.bat` ajaa Robot Frameworkilla paikalliset testit.
    Näissä oletetaan, että  palvelin on käynnissä oletusportissa.
  - `local-integration.sh` / `local-integration.bat`

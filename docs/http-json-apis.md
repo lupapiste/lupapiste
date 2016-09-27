@@ -15,7 +15,7 @@ toisiaan.
 API-key autentikaatio tapahtuu lähettämällä jokaisen HTTP-otsikkotiedoissa
 OAuth 2.0 mukainen Authorization-header. Arvo on muotoa "Bearer salainen-avain",
 avain sisältää ascii-kirjanmerkkejä, numeroita, viivoja ja pisteitä ja voi päättyä
-yhtääsuuruunmerkkeihin. Avainta ei enkoodata. Esimerkiksi:
+yhtäsuuruusmerkkeihin. Avainta ei enkoodata. Esimerkiksi:
 
     Authorization: Bearer minun-avaimeni
 

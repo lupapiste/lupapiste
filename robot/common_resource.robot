@@ -341,6 +341,9 @@ Pekka logs in
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
+Sipoo-ya logs in
+  Authority-admin logs in  sipoo-ya  sipoo  Simo YA-Suurvisiiri
+
 Oulu Ymp logs in
   Authority-admin logs in  ymp-admin@oulu.fi  oulu  Oulu Ymp Admin
 
@@ -1161,9 +1164,9 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
-  [Arguments]  ${targetState}=verdictGiven
+  [Arguments]  ${targetState}=verdictGiven  ${targetStatus}=6
   Go to give new verdict
-  Input verdict  -  6  01.05.2018  01.06.2018  -
+  Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
@@ -1352,6 +1355,11 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+# Alternative to Wait Test Id Visible. Does not scroll
+Test id visible
+  [Arguments]  ${id}
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
@@ -1388,6 +1396,15 @@ Test id select is
 
 # Frontend error log
 
+Print frontend error texts
+  [Arguments]  ${ROW_XPATH}  ${ERROR_LEVEL}
+  # Print 10 first rows if there are errors
+  :FOR  ${elem_idx}  IN RANGE  1  10
+  \  ${ELEM_COUNT}=  Get Matching Xpath Count  ${ROW_XPATH}[${elem_idx}]
+  \  Exit for loop if  ${ELEM_COUNT} == 0
+  \  ${VAL}=  Get Text  ${ROW_XPATH}[${elem_idx}]/td[2]
+  \  Log To Console  ${ERROR_LEVEL}: ${VAL}
+
 There are no frontend errors
   Go to login page
   SolitaAdmin logs in
@@ -1396,6 +1413,13 @@ There are no frontend errors
   # Allow log to load
   Sleep  1
   Wait for jQuery
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr  0
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr  0
+  Set test variable  ${FATAL_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr
+  Set test variable  ${ERROR_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr
+  ${FATAL_COUNT}=  Get Matching Xpath Count  ${FATAL_LOG_XPATH}
+  ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
+  Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
+  Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
+  # These test cases will fail
+  Xpath Should Match X Times  ${FATAL_LOG_XPATH}  0
+  Xpath Should Match X Times  ${ERROR_LOG_XPATH}  0
   [Teardown]  Logout

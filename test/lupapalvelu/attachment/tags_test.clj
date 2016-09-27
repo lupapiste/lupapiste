@@ -15,10 +15,10 @@
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-    (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-    (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
 
   (fact "defaults"
     (attachment-tags {}) => (just #{:preVerdict :general :needed} :in-any-order :gaps-ok))
@@ -31,7 +31,10 @@
 
   (fact "type"
     (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup} :in-any-order :gaps-ok)
-    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)))
+    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))
+
+  (fact "verdictGiven - RAM"
+        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :general :needed} :in-any-order :gaps-ok)))
 
 (facts type-groups-for-operation
   (fact "one attachment"
@@ -143,7 +146,7 @@
                           {:applicationState "draft"}]
             application {:state "open"
                          :attachments attachments}]
-        (application-state-filters application) =>  nil)
+        (application-state-filters application) =>  [{:tag :preVerdict :default true}]))
 
     (fact "pre verdict - with post verdict attachment"
       (let [attachments  [{:applicationState "submitted"}
@@ -161,7 +164,26 @@
             application {:state "verdictGiven"
                          :attachments attachments}]
         (application-state-filters application) =>  [{:tag :preVerdict :default false}
-                                                     {:tag :postVerdict :default true}]))))
+                                                     {:tag :postVerdict :default true}]))
+
+    (fact "pre verdict - with ram"
+      (let [attachments  [{:applicationState "verdictGiven" :ramLink "anyid"}
+                          {:applicationState "open"}
+                          {:applicationState "draft"}]
+            application {:state "open"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default true}
+                                                     {:tag :ram :default true}]))
+
+    (fact "post verdict - with ram"
+      (let [attachments  [{:applicationState "verdictGiven" :ramLink "anyid"}
+                          {:applicationState "open"}
+                          {:applicationState "constructionStarted"}]
+            application {:state "verdictGiven"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default false}
+                                                     {:tag :postVerdict :default true}
+                                                     {:tag :ram :default true}])))
 
   (facts "group and type"
     (fact "with parties group"

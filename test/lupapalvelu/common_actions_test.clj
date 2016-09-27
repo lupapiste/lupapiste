@@ -67,7 +67,9 @@
                           :info-link-reorder
                           :info-link-upsert
                           :organization-links
-                          :mark-seen-organization-links}
+                          :mark-seen-organization-links
+                          :redirect-to-3d-map
+                          :ya-extensions}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {} user application {})
@@ -85,7 +87,8 @@
        (let [allowed-actions #{:invite-guest :delete-guest-application
                                :toggle-guest-subscription :application-guests :decline-invitation
                                :suti-update-id :suti-update-added :set-attachment-contents
-                               :cancel-application :info-links :organization-links}]
+                               :cancel-application :info-links :organization-links
+                               :redirect-to-3d-map}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -110,6 +113,7 @@
                            :get-building-info-from-wfs :tasks-tab-visible
                            :mark-seen :info-links :organization-links :mark-seen-organization-links
                            :pdfa-casefile :suti-application-data :suti-application-products
+                           :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments

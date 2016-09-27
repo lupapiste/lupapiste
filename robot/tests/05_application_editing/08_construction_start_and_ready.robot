@@ -23,7 +23,7 @@ Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
   Open tab  verdict
-  Submit empty verdict
+  Submit empty verdict  verdictGiven  1
 
 Sonja goes to the Rakentaminen tab and sets construction started via a dialog
   Open tab  tasks
@@ -106,4 +106,3 @@ Fill in yritys info
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.osoite.postitoimipaikannimi']  Sipoo
 
   Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
-

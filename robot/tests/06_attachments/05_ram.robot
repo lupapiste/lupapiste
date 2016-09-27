@@ -35,6 +35,10 @@ Sonja logs in and gives verdict
 Sonja opens the attachment tab and unselects post verdict filter
   Open attachments tab and unselect post verdict filter
 
+There are no RAM filters
+  No such test id  ram-filter-label
+  No such test id  no-ram-filter-label
+  
 Sonja opens attachment details
   Open attachment details  muut.muu
   No such test id  ram-links-table
@@ -44,18 +48,18 @@ Sonja cannot add RAM because the attachment has not been approved
 
 Sonja approves the attachment
   Wait Until  Click button  id=test-attachment-approve
-  Wait test id visible  add-ram-attachment
+  Element should be visible by test id  add-ram-attachment
 
 Sonja adds new RAM attachment
   Click by test id  add-ram-attachment
-  Wait test id visible  ram-links-table
-  Wait test id visible  ram-prefix
+  Element should be visible by test id  ram-links-table
+  Element should be visible by test id  ram-prefix
   Delete allowed
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
 
 Sonja adds file to RAM
   Add attachment version  ${PNG_TESTFILE_PATH}
-  Delete allowed  True
+  Delete allowed  False
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  -
 
 Sonja can now approve the attachment
@@ -65,12 +69,25 @@ Sonja can now approve the attachment
 
 Sonja clicks RAM link and opens old attachment details
   Follow ram link  0
-  Wait test id visible  ram-links-table
+  Element should be visible by test id  ram-links-table
   No such test id  ram-prefix
   Delete disallowed
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Element should not be visible  jquery=td[data-test-id=ram-link-type-0] a
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
+
+Sonja returns to attachments and sees RAM filters
+  Scroll and click test id  back-to-application-from-attachment
+  Wait test id visible  ram-filter-label
+  Wait test id visible  no-ram-filter-label
+  ${all}=  Execute Javascript  return $("tr[data-test-type]:visible").length;
+  Scroll and click test id  ram-filter-label
+  Javascript?  $("tr[data-test-type]").length === 1
+  Wait test id visible  ram-indicator
+  Scroll and click test id  ram-filter-label
+  Scroll and click test id  no-ram-filter-label    
+  No such test id  ram-indicator
+  Javascript?  $("tr[data-test-type]:visible").length === ${all} - 1
   [Teardown]  Logout
 
 Mikko logs in and unselects post verdict filter
@@ -85,19 +102,19 @@ Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
   Open attachment details  muut.muu  1
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
-  Wait test id visible  ram-prefix
-  Delete disallowed  True
-  Wait test id visible  add-ram-attachment
+  Element should be visible by test id  ram-prefix
+  Delete disallowed  False
+  Element should be visible by test id  add-ram-attachment
 
 Mikko adds new file version and thus resetting approval state
   Add attachment version  ${PNG_TESTFILE_PATH}
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
-  Delete allowed  True
+  Delete allowed  False
   No such test id  add-ram-attachment
 
 Mikko follows RAM link and cannot delete the base attachment either
   Follow ram link  0
-  Wait test id visible  ram-links-table
+  Element should be visible by test id  ram-links-table
   No such test id  ram-prefix
   No such test id  add-ram-attachment
   Delete disallowed  True
@@ -131,13 +148,13 @@ Mikko logs in and goes to attachment tab
 
 Mikko opens RAM
   Open attachment details  muut.muu  1
-  Wait test id visible  ram-prefix
+  Element should be visible by test id  ram-prefix
 
 Mikko adds new RAM attachment and uploads file
   Click by test id  add-ram-attachment
-  Wait test id visible  ram-link-type-2
+  Element should be visible by test id  ram-link-type-2
   Add attachment version  ${PNG_TESTFILE_PATH}
-  Delete allowed  True
+  Delete allowed  False
   Check link row  2  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
 
 Mikko deletes attachment version
@@ -159,7 +176,7 @@ Sonja goes to attachments tab
 
 Sonja rejects the first RAM but cannot delete it
   Open attachment details  muut.muu  1
-  Wait test id visible  ram-prefix
+  Element should be visible by test id  ram-prefix
   Wait Until  Click button  id=test-attachment-reject
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Delete disallowed
@@ -172,9 +189,9 @@ Mikko goes to attachments tab
 
 Mikko deletes RAM
   Open attachment details  muut.muu  1
-  Wait test id visible  ram-prefix
+  Element should be visible by test id  ram-prefix
   Follow ram link  2
-  Wait test id visible  delete-attachment
+  Element should be visible by test id  delete-attachment
   Click by test id  delete-attachment
   Confirm yes no dialog
   Open attachment details  muut.muu  0
@@ -201,8 +218,8 @@ Delete disallowed
 Delete allowed
   [Arguments]  ${click}=False
   Run keyword if  ${click}  Wait Until  Click button  id=show-attachment-versions
-  Wait test id visible  delete-attachment
-  Run keyword if  ${click}  Wait test id visible  delete-version
+  Element should be visible by test id  delete-attachment
+  Run keyword if  ${click}  Element should be visible by test id  delete-version
 
 Follow ram link
   [Arguments]  ${index}
