@@ -735,7 +735,7 @@
 (defquery attachment-manually-set-construction-time
   {:description "Pseudo query for checking if attachment is manually set as construction time attachment"
    :parameters [id attachmentId]
-   :categories #{:attachment}
+   :categories #{:attachments}
    :user-roles #{:authority :applicant :oirAuthority}
    :states     states/all-application-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
@@ -745,7 +745,7 @@
 (defcommand set-attachment-as-construction-time
   {:description "Sets attachment which is added on application time as construction time attachment"
    :parameters [id attachmentId value]
-   :categories #{:attachment}
+   :categories #{:attachments}
    :user-roles #{:authority}
    :states     states/pre-verdict-states
    :pre-checks [attachment-id-is-present-in-application-or-not-set
