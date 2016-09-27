@@ -26,9 +26,9 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
     };
   }
 
-  self.init = function(application) {
+  self.init = function(application, atts) {
     var app = ko.toJS(application);
-    var attachments = _(ko.mapping.toJS(lupapisteApp.services.attachmentsService.attachments))
+    var normalizedAttachments = _(ko.mapping.toJS(atts))
           .filter(function(a) {return a.versions && a.versions.length;})
           .map(normalizeAttachment).value();
 
@@ -37,7 +37,7 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-    self.attachments(attachments);
+    self.attachments(normalizedAttachments);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
@@ -70,7 +70,9 @@ LUPAPISTE.SigningModel = function(dialogSelector, confirmSuccess) {
   self.selectAll = _.partial(selectAllAttachments, true);
   self.selectNone = _.partial(selectAllAttachments, false);
 
-  var hubId = hub.subscribe( "sign-attachments", _.flow( _.partialRight( _.get, "application"), self.init ) );
+  var hubId = hub.subscribe( "sign-attachments", function(event) {
+      self.init(event.application, event.attachments);
+  });
 
   self.dispose = _.partial(hub.unsubscribe, hubId);
 

@@ -193,7 +193,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.hasSignature = function() { return !_.isEmpty(self.attachment().signatures); };
   self.sign = function() {
     self.disablePreview(true);
-    self.signingModel.init({id: self.applicationId, attachments:[self.attachment]});
+    self.signingModel.init({id: self.applicationId}, [self.attachment]);
   };
   self.signingAllowed = function() { return authModel.ok("sign-attachments"); };
   self.addHubListener({eventType: "attachments-signed", id: self.applicationId}, function(params) {
