@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
+
 *** Test Cases ***
 
 Mikko creates application
@@ -200,6 +201,44 @@ Mikko deletes RAM
   No such test id  ram-link-type-2
   [Teardown]  Logout
 
+Sonja logs in to test filters
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
+  Open attachments tab and unselect post verdict filter 
+
+Add pohjapiirustus file and approve it
+  Add attachment file  tr[data-test-type='paapiirustus.pohjapiirustus']  ${PNG_TESTFILE_PATH}
+  Return to application
+  Approve row  tr[data-test-type='paapiirustus.pohjapiirustus']
+
+Remove vaestonsuojasuunnitelma
+  Remove row  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']
+
+Approve first muut.muu
+  Approve row  tr[data-test-type='muut.muu']:first
+
+Hide RAM attachments
+  Scroll and click test id  no-ram-filter-label
+
+Rollup states
+  Rollup approved  Pääpiirustukset
+  Rollup rejected  Muut suunnitelmat
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+
+Sonja approves RAM
+  Scroll and click test id  no-ram-filter-label
+  Approve row  tr[data-test-type='muut.muu']:last
+  Rollup approved  Pääpiirustukset
+  Rollup approved  Muut suunnitelmat
+  Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
+
+Sonja rejects Pohjapiirustus
+  Reject row  tr[data-test-type='paapiirustus.pohjapiirustus']  
+  Rollup rejected  Pääpiirustukset
+  Rollup approved  Muut suunnitelmat
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+  [Teardown]  Logout
+
 *** Keywords ***
 
 Check link row
@@ -224,3 +263,27 @@ Delete allowed
 Follow ram link
   [Arguments]  ${index}
   Wait until  Click link  jquery=td[data-test-id=ram-link-type-${index}] a
+
+Approve row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button.approve
+
+Reject row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button.reject
+
+Remove row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button[data-test-icon=delete-button]
+  Confirm yes no dialog
+
+Rollup approved
+  [Arguments]  ${name}
+  Scroll to  rollup-status-button[data-test-name='${name}'] button.rollup-button  
+  Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button.positive
+
+Rollup rejected
+  [Arguments]  ${name}
+  Scroll to  rollup-status-button[data-test-name='${name}'] button.rollup-button  
+  Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button
+  Element should not be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button.positive
