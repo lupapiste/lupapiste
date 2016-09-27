@@ -24,6 +24,10 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   self.visibility = ko.observable(buildVisibility(attachmentData));
 
+  var manuallySetConstructionTime_ = self.disposedComputed(_.partial(service.manuallySetConstructionTime, data.id));
+  self.manuallySetConstructionTime = ko.observable(manuallySetConstructionTime_());
+  self.disposedSubscribe(manuallySetConstructionTime_, function(val) { self.manuallySetConstructionTime(val); });
+
   self.reset = function(attachmentData) {
     _.forEach(observableFields, function(field) {
       _.get(self, field)(_.get(attachmentData, field));
@@ -101,6 +105,14 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   });
 
   addSelfUpdateListener("forPrinting");
+
+  self.disposedSubscribe(self.manuallySetConstructionTime, function(val) {
+    if (val !== manuallySetConstructionTime_()) {
+      service.setConstructionTime(self.id, val, {field: "constructionTime"});
+    }
+  });
+
+  addSelfUpdateListener("constructionTime");
 
   //
   // Updates which do not require attachment reload
