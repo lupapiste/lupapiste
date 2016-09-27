@@ -116,7 +116,8 @@
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
    :locked                               sc/Bool            ;;
    (sc/optional-key :readOnly)           sc/Bool            ;;
-   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
+   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
+   (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
    :state                                (apply sc/enum attachment-states) ;; attachment state
    (sc/optional-key :approved)           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
                                           :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
@@ -654,10 +655,10 @@
 
 (defn attachment-array-updates
   "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
-  [app-id pred k v]
-  {$set (as-> app-id $
-          (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
-          (mongo/generate-array-updates :attachments (:attachments $) pred k v))})
+  [app-id pred & kvs]
+  (as-> app-id $
+    (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
+    (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 (defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
@@ -693,3 +694,17 @@
                                   {:content temp-pdf :filename filename}))
             (finally
               (io/delete-file temp-pdf :silently))))))))
+
+(defn attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+  (let [attachment (get-attachment-info application attachmentId)]
+    (when-not (and (states/post-verdict-states (keyword (:applicationState attachment)))
+                   (states/all-application-states (keyword (:originalApplicationState attachment))))
+      (fail :error.attachment-not-manually-set-construction-time))))
+
+(defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
+  (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (get-attachment-info app attachment-id))]
+    (->> (if value
+           {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or orig-app-state app-state) :applicationState :verdictGiven)}
+           {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState orig-app-state)
+            $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)})
+         (update-application command))))

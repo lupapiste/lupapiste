@@ -732,6 +732,33 @@
                                             (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
     (ok)))
 
+(defquery attachment-manually-set-construction-time
+  {:description "Pseudo query for checking if attachment is manually set as construction time attachment"
+   :parameters [id attachmentId]
+   :categories #{:attachment}
+   :user-roles #{:authority :applicant :oirAuthority}
+   :states     states/all-application-states
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
+   :pre-checks [attachment/attachment-manually-set-construction-time]}
+  [_])
+
+(defcommand set-attachment-as-construction-time
+  {:description "Sets attachment which is added on application time as construction time attachment"
+   :parameters [id attachmentId value]
+   :categories #{:attachment}
+   :user-roles #{:authority}
+   :states     states/pre-verdict-states
+   :pre-checks [attachment-id-is-present-in-application-or-not-set
+                app/validate-authority-in-drafts
+                (fn [{{value :value} :data :as command}]
+                  (when (false? value)
+                    (attachment/attachment-manually-set-construction-time command)))]
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])
+                      (partial action/boolean-parameters [:value])]}
+  [command]
+  (attachment/set-attachment-construction-time! command attachmentId value)
+  (ok))
+
 (defcommand set-attachment-visibility
   {:parameters       [id attachmentId value]
    :categories       #{:attachments}

@@ -1,5 +1,6 @@
 (ns lupapalvelu.statement
   (:require [clojure.set]
+            [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
             [sade.core :refer :all]
             [sade.util :as util]
@@ -154,7 +155,7 @@
        (update-statement statement modify-id :state :replyable :reply)))
 
 (defn attachments-readonly-updates [{app-id :id} statement-id]
-  (att/attachment-array-updates app-id (comp #{statement-id} :id :target) :readOnly true))
+  {$set (att/attachment-array-updates app-id (comp #{statement-id} :id :target) :readOnly true)})
 
 (defn validate-selected-persons [{{selectedPersons :selectedPersons} :data}]
   (let [non-blank-string-keys (when (some
