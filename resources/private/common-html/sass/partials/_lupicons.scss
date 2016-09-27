@@ -2,19 +2,10 @@
 // two notable differences:
 //  1. url path starts with /: fonts -> /fonts
 //  2. lupicon-class font-size: 22px
+//  3. Font-face definition is extracted into lupicons.scss
+//  4. Some convenience definitions
 
 $lupicon-size: 22px;
-
-@font-face {
-  font-family: 'lupapiste';
-  src:url('/fonts/lupapiste.eot?yue879');
-  src:url('/fonts/lupapiste.eot?yue879#iefix') format('embedded-opentype'),
-    url('/fonts/lupapiste.ttf?yue879') format('truetype'),
-    url('/fonts/lupapiste.woff?yue879') format('woff'),
-    url('/fonts/lupapiste.svg?yue879#lupapiste') format('svg');
-  font-weight: normal;
-  font-style: normal;
-}
 
 @mixin lupicon-font ($font-size: $lupicon-size ) {
   /* use !important to prevent issues with browser extensions that change fonts */

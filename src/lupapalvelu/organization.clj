@@ -66,7 +66,7 @@
 
 (sc/defschema Organization
   {:id sc/Str
-   :name {:fi sc/Str, :sv sc/Str}
+   :name  {:fi sc/Str, :sv sc/Str (sc/optional-key :en) sc/Str} ;; TODO remote optional when feature.english is toggled off
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool

@@ -207,7 +207,6 @@
     true))
 
 (defn- contains-unexpected-languages? [v-new lang]
-  (println v-new lang)
   (not= (set (keys v-new)) #{:fi lang}))
 
 ; merge-with is not used because the translation maps from commons-resources are
