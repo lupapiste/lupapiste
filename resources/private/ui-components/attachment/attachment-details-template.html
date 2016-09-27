@@ -221,7 +221,20 @@
                                    enable: $data.metaUpdateAllowed()"></select>
               </div>
 
-              <div class="col1 attachment-info-field"
+              <div class="clear attachment-info-field"
+                   data-bind="if: $data.setConstructionTimeVisible()">
+                <label for="attachment-is-manually-set-construction-time"
+                       class="form-label"
+                       data-bind="ltext: 'attachment.label.manuallySetConstructionTime'"></label>
+                <input type="checkbox"
+                       id="attachment-is-manually-set-construction-time"
+                       class="form-input"
+                       data-test-id="is-manually-set-construction-time"
+                       data-bind="checked: $data.attachment().manuallySetConstructionTime,
+                                  enable: $data.setConstructionTimeEnabled"/>
+              </div>
+
+              <div class="clear attachment-info-field"
                    data-bind="if: $data.setForPrintingAllowed()">
                 <label for="attachment-is-verdict-attachment"
                        class="form-label"
