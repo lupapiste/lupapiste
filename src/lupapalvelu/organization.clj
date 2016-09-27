@@ -66,7 +66,8 @@
 
 (sc/defschema Organization
   {:id sc/Str
-   :name {:fi sc/Str, :sv sc/Str}
+   :name (util/assoc-when {:fi sc/Str, :sv sc/Str}
+                          :en (when (env/feature? :english) sc/Str))
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
