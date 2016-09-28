@@ -172,5 +172,6 @@ input[type=text].textinput {
 
 .textinput.textinput--big {
   @include btn-height;
+  line-height: 1;
   font-size: $font-size;
 }

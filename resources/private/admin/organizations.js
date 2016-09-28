@@ -1,7 +1,11 @@
 ;(function() {
   "use strict";
 
-  function isMatch( organization, term ) {
+  // Search term matches, when every subterm is included in
+  // organization id or any of the organization names. Matching is
+  // case-insensitive.  For example, term "sip rak val" matches
+  // "Sipoon rakennusvalvonta".
+  function isSearchMatch( organization, term ) {
     var targets = [];
     var terms = _.split( term, /\s+/ );
     targets.push( organization.id );
@@ -25,7 +29,7 @@
       self.organizations( _.filter( all,
                                     function( org ) {
                                       var term = _.toLower(self.searchTerm());
-                                      return _.trim( term ) && isMatch( org, term);
+                                      return _.trim( term ) && isSearchMatch( org, term);
                                     }));
     };
 
@@ -35,6 +39,8 @@
         .pending(self.pending)
         .success(function(d) {
           all = _.sortBy(d.organizations, function(o) { return o.name[loc.getCurrentLanguage()]; });
+          // Refresh the old results. For example, when returning from
+          // organization view.
           if( self.searchTerm()) {
             self.search();
           } else {
