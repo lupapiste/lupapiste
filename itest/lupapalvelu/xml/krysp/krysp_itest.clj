@@ -230,6 +230,8 @@
 
       (command pena :submit-application :id application-id) => ok?
 
+      (generate-construction-time-attachment application sonja "sonja")
+
       (let [updated-application (generate-statement application-id sonja)]
 
         (fact "updated-application exists" updated-application => truthy)
@@ -254,8 +256,19 @@
               xml (element-to-xml canonical mapping)]
           (fact "xml exists" xml => truthy)))
 
-      (fact "Application is not assigned"
-        (get-in (query-application sonja application-id) [:authority :id]) => nil)
+      (facts "Application"
+        (let [application (query-application sonja application-id)]
+          (fact "is not assigned"
+            (get-in application  [:authority :id]) => nil)
+          (fact "has correct number of attachments with files"
+            (->> (:attachments application)
+                 (filter (comp :fileId :latestVersion))
+                 count) => (if yl-kaataminen 3 4))
+          (fact "one of attachments is post a verdict attachment"
+            (->> (:attachments application)
+                 (filter (comp :fileId :latestVersion))
+                 (filter (comp #{"verdictGiven"} :applicationState))
+                 count) => 1)))
 
       (fact "Approve application"
         (let [resp (command sonja :approve-application :id application-id :lang "fi")]
@@ -264,8 +277,11 @@
 
       (let [approved-application (query-application pena application-id)
             email (last-email)
-            autogenarated-attachment-count 2 ; Two generated application pdf attachments
-            expected-attachment-count (if yl-kaataminen 2 3) ; see generate-attachment, generate-statement+1
+            ;; Two generated application pdf attachments
+            autogenarated-attachment-count 2
+            ;; see generate-attachment and generate-statement
+            ;; gif-attachment + statement + statement attachment (post verdict attachment is not transfered)
+            expected-attachment-count (if yl-kaataminen 2 3)
             expected-sent-attachment-count expected-attachment-count]
         (fact "application is sent" (:state approved-application) => "sent")
         (final-xml-validation approved-application autogenarated-attachment-count expected-attachment-count expected-sent-attachment-count)
