@@ -11,6 +11,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
             [lupapalvelu.xml.krysp.poikkeamis-mapping]
@@ -58,6 +59,12 @@
          (:attachments application))
        (assoc application :attachments)))
 
+(defn- filter-attachments-by-state [current-state {attachments :attachments :as application}]
+  (if (states/pre-verdict-states (keyword current-state))
+    (->> (remove (comp states/post-verdict-states keyword :applicationState) attachments)
+         (assoc application :attachments))
+    application))
+
 (defn- non-approved-designer? [document]
   (let [subtype  (keyword (get-in document [:schema-info :subtype]))
         approval (get-in document [:meta :_approved :value])]
@@ -70,7 +77,7 @@
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
-  [application lang submitted-application organization]
+  [application lang submitted-application organization & {:keys [current-state]}]
   {:pre [(map? application) lang (map? submitted-application) (map? organization)]}
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
@@ -78,8 +85,13 @@
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
-        filtered-app  (-> application remove-unsupported-attachments remove-non-approved-designers)
-        filtered-submitted-app (remove-unsupported-attachments submitted-application)]
+        filtered-app  (->> application
+                           remove-unsupported-attachments
+                           (filter-attachments-by-state current-state)
+                           remove-non-approved-designers)
+        filtered-submitted-app (->> submitted-application
+                                    remove-unsupported-attachments
+                                    (filter-attachments-by-state current-state))]
     (assert krysp-fn "KRYSP mapper function not found/defined?")
     (krysp-fn filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)))
 
