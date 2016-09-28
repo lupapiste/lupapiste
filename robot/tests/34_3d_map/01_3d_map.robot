@@ -22,7 +22,6 @@ Open the 3D map view
   Close window
   Select window  main
 
-
 Pena creates inforequest
   Set Suite Variable  ${infoname}  Info Dee 3
   Set Suite Variable  ${infoid}  753-416-25-30
@@ -32,13 +31,12 @@ Open 3D map button is visible for inforequest too
   Test id visible  open-3d-map
   [Teardown]  Logout
 
-Solita admin sees the list of organizations
+Solita admin edits organization 753-R
   SolitaAdmin logs in
   Click link  Organisaatiot
-  Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
-
-Admin edits organization with id 753-R
-  Scroll and Click test id  edit-organization-753-R
+  Fill test id  organization-search-term  753-r
+  Scroll and click test id  organization-search
+  Scroll and Click test id  edit-organization-753-R   
 
 3D map server backend must be https
   Fill test id  3d-map-url  http://example.org

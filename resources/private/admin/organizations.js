@@ -1,20 +1,61 @@
 ;(function() {
   "use strict";
 
+  function isMatch( organization, term ) {
+    var targets = [];
+    var terms = _.split( term, /\s+/ );
+    targets.push( organization.id );
+    targets = _.map( _.concat( targets, _.values(organization.name)),
+                     _.toLower);
+    return _.every( terms, function( term) {
+      return _.some( targets, function( t ) {
+        return _.includes( t, term );
+      });
+    });
+  }
+
   function OrganizationsModel() {
     var self = this;
 
+    var all = [];
     self.organizations = ko.observableArray([]);
     self.pending = ko.observable();
+    self.searchTerm = ko.observable();
+    self.search = function() {
+      self.organizations( _.filter( all,
+                                    function( org ) {
+                                      var term = _.toLower(self.searchTerm());
+                                      return _.trim( term ) && isMatch( org, term);
+                                    }));
+    };
 
     self.load = function() {
       ajax
         .query("organizations")
         .pending(self.pending)
         .success(function(d) {
-          self.organizations(_.sortBy(d.organizations, function(o) { return o.name[loc.getCurrentLanguage()]; }));
+          all = _.sortBy(d.organizations, function(o) { return o.name[loc.getCurrentLanguage()]; });
+          if( self.searchTerm()) {
+            self.search();
+          } else {
+            if( _.size( self.organizations())) {
+              self.showAll();
+            }
+          }
         })
         .call();
+    };
+    self.countText = function() {
+      var count = _.size( self.organizations());
+      return _.trim( self.searchTerm()) || _.some( self.organizations())
+        ? _.sprintf( "%d organisaatio%s.",
+                     count,
+                     count !== 1 ? "ta" : "")
+      : "";
+    };
+    self.showAll = function() {
+      self.searchTerm("");
+      self.organizations( all );
     };
   }
 
