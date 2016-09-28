@@ -3,13 +3,14 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.permit :as permit]
             [sade.core :refer [now]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]))
 
-(testable-privates lupapalvelu.xml.krysp.application-as-krysp-to-backing-system remove-unsupported-attachments remove-non-approved-designers)
+(testable-privates lupapalvelu.xml.krysp.application-as-krysp-to-backing-system remove-unsupported-attachments remove-non-approved-designers filter-attachments-by-state)
 
 (fact "Remove function removes unsupported attachments"
   (let [application {:attachments [{:type {:type-group :muut
@@ -24,6 +25,32 @@
                                                                    {:type {:type-group :paapiirustus
                                                                            :type-id :asemapiirros}}]
                                                      :id "LP-123456"}))
+
+(fact "filter attachments by state"
+  (let [application {:attachments [{:applicationState "draft"}
+                                   {:applicationState "submitted"}
+                                   {:applicationState "verdictGiven"}
+                                   {:applicationState "constructionStarted"}]
+                     :id "LP-123456"}]
+
+    (fact "post verdict attachments are filtered in  pre verdict state"
+      (filter-attachments-by-state "submitted" application) => {:attachments [{:applicationState "draft"}
+                                                                              {:applicationState "submitted"}]
+                                                                :id "LP-123456"})
+
+    (fact "no filtering in post verdict state"
+      (filter-attachments-by-state "verdictGiven" application) => {:attachments [{:applicationState "draft"}
+                                                                                 {:applicationState "submitted"}
+                                                                                 {:applicationState "verdictGiven"}
+                                                                                 {:applicationState "constructionStarted"}]
+                                                                   :id "LP-123456"})
+
+    (fact "no filtering in unknown state"
+      (filter-attachments-by-state nil application) => {:attachments [{:applicationState "draft"}
+                                                                      {:applicationState "submitted"}
+                                                                      {:applicationState "verdictGiven"}
+                                                                      {:applicationState "constructionStarted"}]
+                                                        :id "LP-123456"})))
 
 (facts "Designer documents that have not been approved are removed"
   (let [documents (mapv #(model/new-document (schemas/get-schema 1 %) 123) ["paasuunnittelija" "suunnittelija" "hakija-r"])
