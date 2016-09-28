@@ -229,9 +229,9 @@
                 <input type="checkbox"
                        id="attachment-is-manually-set-construction-time"
                        class="form-input"
-                       data-test-id="is-manually-set-construction-time"
                        data-bind="checked: $data.attachment().manuallySetConstructionTime,
-                                  enable: $data.setConstructionTimeEnabled"/>
+                                  enable: $data.setConstructionTimeEnabled(),
+                                  testId: 'attachment-is-manually-set-construction-time'"/>
               </div>
 
               <div class="clear attachment-info-field"
