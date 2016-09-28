@@ -188,7 +188,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Manual construction time toggle
   self.setConstructionTimeEnabled = function() { return authModel.ok("set-attachment-as-construction-time"); };
-  self.setConstructionTimeVisible = function() { return service.manuallySetConstructionTime(self.id) || self.setConstructionTimeEnabled(); };
+  self.setConstructionTimeVisible = function() { return self.attachment().manuallySetConstructionTime() || self.setConstructionTimeEnabled(); };
   addUpdateListener("set-attachment-as-construction-time", {ok: true}, util.showSavedIndicatorIcon);
 
   // Permanent archive

@@ -167,8 +167,8 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application}]
-  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
+  [{{attachments :attachments :as application} :application :as command}]
+  (ok :attachments (map attachment/enrich-attachment attachments)))
 
 (defquery attachment
   {:description "Get single attachment"
@@ -179,10 +179,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application}]
+  [{{attachments :attachments :as application} :application :as command}]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
+      (ok :attachment (attachment/enrich-attachment attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
@@ -731,16 +731,6 @@
                                           (when (seq unSelectedAttachmentIds)
                                             (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
     (ok)))
-
-(defquery attachment-manually-set-construction-time
-  {:description "Pseudo query for checking if attachment is manually set as construction time attachment"
-   :parameters [id attachmentId]
-   :categories #{:attachments}
-   :user-roles #{:authority :applicant :oirAuthority}
-   :states     states/all-application-states
-   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]
-   :pre-checks [attachment/attachment-manually-set-construction-time]}
-  [_])
 
 (defcommand set-attachment-as-construction-time
   {:description "Sets attachment which is added on application time as construction time attachment"

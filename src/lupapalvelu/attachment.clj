@@ -695,11 +695,13 @@
             (finally
               (io/delete-file temp-pdf :silently))))))))
 
-(defn attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
-  (let [attachment (get-attachment-info application attachmentId)]
-    (when-not (and (states/post-verdict-states (keyword (:applicationState attachment)))
-                   (states/all-application-states (keyword (:originalApplicationState attachment))))
-      (fail :error.attachment-not-manually-set-construction-time))))
+(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
+  (boolean (and (states/post-verdict-states (keyword app-state))
+                (states/all-application-states (keyword orig-app-state)))))
+
+(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+  (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
+    (fail :error.attachment-not-manually-set-construction-time)))
 
 (defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
   (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (get-attachment-info app attachment-id))]
@@ -708,3 +710,8 @@
            {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState orig-app-state)
             $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)})
          (update-application command))))
+
+(defn enrich-attachment [attachment]
+  (assoc attachment
+         :tags (att-tags/attachment-tags attachment)
+         :manuallySetConstructionTime (manually-set-construction-time attachment)))

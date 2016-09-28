@@ -10,7 +10,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var data = attachmentData;
 
   // Attachment data fields that are mapped as observables
-  var observableFields = ["notNeeded", "contents", "scale", "size", "forPrinting", "type", "op", "groupType"];
+  var observableFields = ["notNeeded", "contents", "scale", "size", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
 
   self.authModel = authModel;
 
@@ -23,10 +23,6 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   self.group = ko.observable(buildGroup(attachmentData));
 
   self.visibility = ko.observable(buildVisibility(attachmentData));
-
-  var manuallySetConstructionTime_ = self.disposedComputed(_.partial(service.manuallySetConstructionTime, data.id));
-  self.manuallySetConstructionTime = ko.observable(manuallySetConstructionTime_());
-  self.disposedSubscribe(manuallySetConstructionTime_, function(val) { self.manuallySetConstructionTime(val); });
 
   self.reset = function(attachmentData) {
     _.forEach(observableFields, function(field) {
@@ -107,9 +103,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   addSelfUpdateListener("forPrinting");
 
   self.disposedSubscribe(self.manuallySetConstructionTime, function(val) {
-    if (val !== manuallySetConstructionTime_()) {
-      service.setConstructionTime(self.id, val, {field: "constructionTime"});
-    }
+    service.setConstructionTime(self.id, val, {field: "constructionTime"});
   });
 
   addSelfUpdateListener("constructionTime");
