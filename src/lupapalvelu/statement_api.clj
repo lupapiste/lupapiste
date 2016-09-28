@@ -16,7 +16,7 @@
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.child-to-attachment :as child-to-attachment]))
 
 ;;
@@ -26,7 +26,7 @@
 (defquery get-organizations-statement-givers
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [org-id (user/authority-admins-organization-id user)]
+  (let [org-id (usr/authority-admins-organization-id user)]
     (statement/fetch-organization-statement-givers org-id)))
 
 (defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
@@ -46,12 +46,12 @@
    :notified   true
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [organization (organization/get-organization (user/authority-admins-organization-id user))
-        email           (user/canonize-email email)
+  (let [organization (organization/get-organization (usr/authority-admins-organization-id user))
+        email           (usr/canonize-email email)
         statement-giver-id (mongo/create-id)]
-    (if-let [{fname :firstName lname :lastName :as user} (user/get-user-by-email email)]
+    (if-let [{fname :firstName lname :lastName :as user} (usr/get-user-by-email email)]
       (do
-        (when-not (user/authority? user) (fail! :error.not-authority))
+        (when-not (usr/authority? user) (fail! :error.not-authority))
         (organization/update-organization (:id organization) {$push
                                                               {:statementGivers
                                                                {:id statement-giver-id
@@ -70,7 +70,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (organization/update-organization
-    (user/authority-admins-organization-id user)
+    (usr/authority-admins-organization-id user)
     {$pull {:statementGivers {:id personId}}}))
 
 ;;
@@ -132,12 +132,13 @@
    :notified true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
   [{{:keys [dueDate saateText]} :data user :user {:keys [organization] :as application} :application now :created :as command}]
-  (let [new-emails  (->> (map :email selectedPersons) (remove user/get-user-by-email) (set))
-        users       (map (comp #(user/get-or-create-user-by-email % user) :email) selectedPersons)
-        persons+uid (map #(assoc %1 :userId (:id %2)) selectedPersons users)
+  (let [persons     (map #(update % :email usr/canonize-email) selectedPersons)
+        new-emails  (->> (map :email persons) (remove usr/get-user-by-email) (set))
+        users       (map (comp #(usr/get-or-create-user-by-email % user) :email) persons)
+        persons+uid (map #(assoc %1 :userId (:id %2)) persons users)
         metadata    (when (seq functionCode) (tos/metadata-for-document organization functionCode "lausunto"))
         statements  (map (partial statement/create-statement now metadata saateText dueDate) persons+uid)
-        auth        (map #(user/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
+        auth        (map #(usr/user-in-role %1 :statementGiver :statementId (:id %2)) users statements)]
     (update-application command {$push {:statements {$each statements}
                                         :auth       {$each auth}}})
     (notifications/notify! :request-statement-new-user (assoc command :recipients (filter (comp new-emails :email) users)))
