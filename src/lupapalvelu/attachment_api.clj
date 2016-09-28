@@ -704,7 +704,8 @@
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
-                attachment-not-requested-by-authority]}
+                attachment-not-requested-by-authority
+                access/has-attachment-auth]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
