@@ -114,6 +114,16 @@
   (walk/postwalk (fn [v] (if (string? v) (s/replace v "\0" "") v)) m))
 
 ;;
+;; Simple cache support
+;;
+
+(defn with-mongo-meta [m]
+  (assoc m :created (java.util.Date.)))
+
+(defn without-mongo-meta [m]
+  (dissoc m :id :_id :created))
+
+;;
 ;; Database Api
 ;;
 
@@ -427,6 +437,8 @@
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
+  (ensure-index :buildingCache {:created 1} {:expireAfterSeconds (* 60 60 12)}) ; 12 h
+  (ensure-index :buildingCache {:propertyId 1} {:unique true})
   (ensure-index :ssoKeys {:ip 1} {:unique true}))
 
 (defn clear! []

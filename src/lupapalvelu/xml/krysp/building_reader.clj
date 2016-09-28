@@ -9,7 +9,8 @@
             [sade.util :as util]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.building :as building]))
+            [lupapalvelu.building :as building]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -56,6 +57,20 @@
         (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
         (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma]))))))
 
+
+(defn building-info-list
+  "Gets buildings info either from cache selection or fetches via WFS."
+  [url credentials propertyId]
+  (if-let [{buildings :buildings} (mongo/select-one :buildingCache {:propertyId propertyId})]
+    buildings
+    (let [kryspxml  (building-xml url credentials propertyId)
+          buildings (->buildings-summary kryspxml)]
+      (try
+        (mongo/insert :buildingCache
+                      (mongo/with-mongo-meta {:propertyId propertyId :buildings buildings})
+                      com.mongodb.WriteConcern/UNACKNOWLEDGED)
+        (catch com.mongodb.DuplicateKeyException _))
+      buildings)))
 
 (def ...notfound... nil)
 (def ...notimplemented... nil)

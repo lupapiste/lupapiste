@@ -251,9 +251,7 @@
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
-    (let [kryspxml    (building-reader/building-xml url credentials propertyId)
-          buildings   (building-reader/->buildings-summary kryspxml)]
-      (ok :data buildings))
+    (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
 
 ;;
