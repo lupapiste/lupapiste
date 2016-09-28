@@ -902,18 +902,14 @@
                                  :originalFileId (-> middle :latestVersion :originalFileId))
                         => (partial expected-failure? :error.ram-linked)))))))))
 
-
 (facts "Marking attachment manually as as construction time attachment"
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
-        attachment (-> (query-application pena application-id) :attachments first)]
+        attachment (-> (query pena :attachments :id application-id) :attachments first)
+        attachment-id (:id attachment)]
 
     (facts "attachment-manually-set-construction-time - not set"
-      (fact "applicant"
-        (query pena :attachment-manually-set-construction-time :id application-id :attachmentId (:id attachment)) => (partial expected-failure? :error.attachment-not-manually-set-construction-time))
-      (fact "authority"
-        (query sonja :attachment-manually-set-construction-time :id application-id :attachmentId (:id attachment)) => (partial expected-failure? :error.attachment-not-manually-set-construction-time)))
-
+      (:manuallySetConstructionTime attachment) => false)
     (fact "applicationState before update"
       (:applicationState attachment) => "draft")
     (fact "originalApplicationState before update"
@@ -926,7 +922,9 @@
         (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?))
 
     (facts "attachment is updated"
-      (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (query-application pena application-id) :attachments first)]
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
         (fact "applicationState"
           app-state => "verdictGiven")
         (fact "originalApplicationState"
@@ -936,23 +934,21 @@
       (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?)
 
     (facts "reset does not change data"
-      (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (query-application pena application-id) :attachments first)]
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
         (fact "applicationState"
           app-state => "verdictGiven")
         (fact "originalApplicationState"
           orig-app-state => "draft")))
 
-    (facts "attachment-manually-set-construction-time - after set"
-      (fact "applicant"
-        (query pena :attachment-manually-set-construction-time :id application-id :attachmentId (:id attachment)) => ok?)
-      (fact "authority"
-        (query sonja :attachment-manually-set-construction-time :id application-id :attachmentId (:id attachment)) => ok?))
-
     (fact "unset attachment as construction time"
       (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value false) => ok?)
 
     (facts "attachment is updated"
-      (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (query-application pena application-id) :attachments first)]
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => false)
         (fact "applicationState"
           app-state => "draft")
         (fact "originalApplicationState"
@@ -967,9 +963,7 @@
       (facts "add attachment"
         (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
               post-verdict-attachment-id (-> resp :attachmentIds first)
-              attachment (->> (query-application sonja application-id)
-                              :attachments
-                              (util/find-by-id post-verdict-attachment-id))]
+              attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
           (fact "added"
             resp => ok?)
           (fact "attachemnt id"
@@ -979,8 +973,8 @@
           (fact "originalApplicationState"
             (:originalApplicationState attachment) => nil)
 
-          (fact "attachment-manually-set-construction-time"
-            (query sonja :attachment-manually-set-construction-time :id application-id :attachmentId (:id attachment)) => (partial expected-failure? :error.attachment-not-manually-set-construction-time))
+          (fact "attachment manually set construction time"
+            (:manuallySetConstructionTime attachment) = false)
 
           (fact "set-attachment-as-construction-time"
             (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
