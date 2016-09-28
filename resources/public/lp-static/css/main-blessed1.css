@@ -6763,6 +6763,26 @@ input:disabled + .filter-label:hover.filter-label:before {
   -webkit-appearance: textfield !important;
 }
 
+/* line 164, ../../../private/common-html/sass/partials/_inputs.scss */
+input[type=text].textinput {
+  box-sizing: border-box;
+  padding: 4px;
+  display: block;
+}
+/* line 168, ../../../private/common-html/sass/partials/_inputs.scss */
+input[type=text].textinput:focus {
+  border-color: #fbc732;
+}
+
+/* line 173, ../../../private/common-html/sass/partials/_inputs.scss */
+.textinput.textinput--big {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  line-height: 1;
+  font-size: 16px;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;
@@ -8217,16 +8237,4 @@ div.alleYli-radioGroup {
 .form-grid .col-9 .col--vertical, .form-grid .col-9 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
-}
-/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-9 .col--vertical label {
-  display: block;
-}
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-9:first-child {
-  padding-left: 0;
-}
-/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-9.col--full > * {
-  width: 100%;
 }

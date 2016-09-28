@@ -161,3 +161,17 @@
   }
 }
 
+input[type=text].textinput {
+  box-sizing: border-box;
+  padding: 4px;
+  display: block;
+  &:focus {
+    border-color: $input-focus-border-color;
+  }
+}
+
+.textinput.textinput--big {
+  @include btn-height;
+  line-height: 1;
+  font-size: $font-size;
+}

@@ -1,5 +1,17 @@
-@import url('main-blessed1.css?z=1474978617872');
+@import url('main-blessed1.css?z=1475063036050');
 
+/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-9 .col--vertical label {
+  display: block;
+}
+/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-9:first-child {
+  padding-left: 0;
+}
+/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-9.col--full > * {
+  width: 100%;
+}
 /* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 {
   position: relative;
@@ -7219,6 +7231,13 @@ td.comment-text {
 /* line 65, ../../../private/common-html/sass/views/_admin.scss */
 .admin #modal-dialog-content-component input[type=text] {
   width: 22.5em;
+}
+
+/* line 72, ../../../private/common-html/sass/views/_admin.scss */
+form.organizations-search input.textinput {
+  display: inline-block;
+  width: 20em;
+  vertical-align: middle;
 }
 
 /* line 2, ../../../private/common-html/sass/views/_authority_admin.scss */
