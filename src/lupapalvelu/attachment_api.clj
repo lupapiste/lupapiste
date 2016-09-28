@@ -742,7 +742,7 @@
                 app/validate-authority-in-drafts
                 (fn [{{value :value} :data :as command}]
                   (when (false? value)
-                    (attachment/attachment-manually-set-construction-time command)))]
+                    (attachment/validate-attachment-manually-set-construction-time command)))]
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])
                       (partial action/boolean-parameters [:value])]}
   [command]
