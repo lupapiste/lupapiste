@@ -3,7 +3,7 @@
 Documentation  Admin edits organization
 Suite Teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
-Library        DebugLibrary  
+
 
 *** Test Cases ***
 
