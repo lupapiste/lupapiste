@@ -17,6 +17,7 @@ Mikko goes to empty attachments tab
   Open tab  attachments
 
 Mikko sees all "not needed" checkboxes as enabled and not selected
+  [Tags]  attachments
   Wait until  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
   Wait until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
   Not needed should not be selected  hakija.valtakirja
@@ -25,14 +26,17 @@ Mikko sees all "not needed" checkboxes as enabled and not selected
   Not needed should not be selected  paapiirustus.pohjapiirustus
 
 Mikko sets asemapiirros not needed
+  [Tags]  attachments
   Click not needed  paapiirustus.asemapiirros
   Not needed should be selected  paapiirustus.asemapiirros
 
 Mikko unsets asemapiirros not needed
+  [Tags]  attachments
   Click not needed  paapiirustus.asemapiirros
   Not needed should not be selected  paapiirustus.asemapiirros
 
 As an applicant Mikko does not see approve or reject columns
+  [Tags]  attachments
   No such test id  approve-column
   No such test id  reject-column
 
@@ -55,6 +59,7 @@ Mikko adds png attachment without comment
   #Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
 Mikko returns to application
+  [Tags]  attachments
   Return to application
 
 Mikko deletes attachment immediately by using remove icon
@@ -70,12 +75,10 @@ Mikko adds png attachment without comment again
 
 Mikko deletes attachment version
   [Tags]  attachments
-  Wait and click  show-attachment-versions
-  Wait and click  jquery=tr[data-test-id='version-row-1.0'] a[data-test-id='delete-version']
-  Confirm yes no dialog
-  Wait until  Element should not be visible  show-attachment-versions
+  Delete attachment version  1.0
 
 Mikko deletes also the attachment template
+  [Tags]  attachments
   Return to application
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
@@ -122,20 +125,55 @@ Not needed should be checked after reload with correct filters
   Wait Until  Not needed should be visible  hakija.valtakirja
   Not needed should not be visible  paapiirustus.asemapiirros
   Scroll to  div.filter-wrapper:last-child label.filter-label
-  Click element  jquery=div.filter-wrapper:last-child label.filter-label
+  Click by test id  notNeeded-filter-label
+  Wait until  Not needed should be visible  paapiirustus.asemapiirros
   Not needed should be selected  paapiirustus.asemapiirros
+  Click by test id  notNeeded-filter-label
+  Wait until  Not needed should not be visible  paapiirustus.asemapiirros
 
-Mikko opens attachment details again
+Mikko opens muut.muu attachment details again
   [Tags]  attachments
   Open attachment details  muut.muu
 
-Mikko does not see Reject-button
+Mikko does not see Reject nor Approve buttons
   [Tags]  attachments
   Element should not be visible  test-attachment-reject
-
-Mikko does not see Approve-button
-  [Tags]  attachments
   Element should not be visible  test-attachment-approve
+
+Not needed not visible as attachment contains file
+  [Tags]  attachments
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+
+Remove version, not needed selectable
+  [Tags]  attachments
+  Delete attachment version  1.0
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//button[@id='add-new-attachment-version']
+
+Checking not needed in attachment page affects attachment listing
+  [Tags]  attachments
+  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//button[@data-test-id='add-new-attachment-version']
+  Return to application
+  Wait until  Not needed should be visible  muut.muu
+  Not needed should be selected  muut.muu
+
+Upload is not possible for notNeeded attachment
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+
+Set attachment back to needed
+  [Tags]  attachments
+  Click not needed  muut.muu
+  Wait until  Not needed should not be selected  muut.muu
+  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+
+Upload new version for muut.muu (attachment page opens)
+  [Tags]  attachments
+  Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}
+  # Not needed not visible when file is present
+  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
 
 Mikko deletes attachment
   [Tags]  attachments
@@ -258,6 +296,7 @@ Sonja goes to attachments tab
   Open tab  attachments
 
 As an authority Sonja sees approve and reject columns
+  [Tags]  attachments
   Wait test id visible  approve-column
   Wait test id visible  reject-column
 
@@ -271,16 +310,19 @@ Sonja sees that new attachment template is visible in attachments list
   Logout
 
 Mikko logs back in and browses to the Attachments tab
+  [Tags]  attachments
   Mikko logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
 
 For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox missing
+  [Tags]  attachments
   Not needed should not be visible  paapiirustus.muu_paapiirustus
   Not needed should not be selected  paapiirustus.muu_paapiirustus
   [Teardown]  Logout
 
 Sonja logs back in and browses to the Attachments tab
+  [Tags]  attachments
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Open tab  attachments
@@ -299,6 +341,7 @@ Sonja opens attachment details
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
 
 Approver info is not visible
+  [Tags]  attachments
   Wait Until  Element Should Not Be Visible  jquery=#attachment .attachment-info span.form-approval-status
 
 Sonja sees Reject-button which is enabled
@@ -326,6 +369,7 @@ Sonja approves attachment
   Click element  test-attachment-approve
 
 Approver info is visible
+  [Tags]  attachments
   Wait Until  Element Should Be Visible  jquery=#attachment .attachment-info span.form-approval-status
   Wait Until  Element Should Contain  jquery=#attachment .attachment-info .approved .is-details  Tiedot OK (Sibbo Sonja
 
@@ -433,3 +477,10 @@ Not needed should not be visible
 Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
+
+Delete attachment version
+  [Arguments]  ${versionNumber}
+  Wait and click  show-attachment-versions
+  Wait and click  jquery=tr[data-test-id='version-row-${versionNumber}'] a[data-test-id='delete-version']
+  Confirm yes no dialog
+  Wait until  Element should not be visible  show-attachment-versions

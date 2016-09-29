@@ -978,3 +978,37 @@
 
           (fact "set-attachment-as-construction-time"
             (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
+
+(facts "Not needed..."
+  (let [application (create-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        att1 (first attachments)]
+    (fact "Initially not needed can be toggled"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?)
+    (fact "If set notNeeded, upload not possible"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 false))
+    (fact "Upload possible when attachment is needed"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 true))
+    (fact "Can't be set notNeeded when file is uploaded"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => fail?)
+    (let [{attachments :attachments} (query-application pena application-id)
+          updated-attachment (first attachments)]
+      (command pena
+               :delete-attachment-version
+               :id application-id
+               :attachmentId (:id updated-attachment)
+               :fileId (get-in updated-attachment [:latestVersion :fileId])
+               :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
+      (fact "Not needed can be set after version deletion"
+        (command pena :set-attachment-not-needed :id application-id :notNeeded true
+                 :attachmentId (:id updated-attachment)) => ok?))
+    ))
