@@ -65,11 +65,12 @@
     buildings
     (let [kryspxml  (building-xml url credentials propertyId)
           buildings (->buildings-summary kryspxml)]
-      (try
-        (mongo/insert :buildingCache
-                      (mongo/with-mongo-meta {:propertyId propertyId :buildings buildings})
-                      com.mongodb.WriteConcern/UNACKNOWLEDGED)
-        (catch com.mongodb.DuplicateKeyException _))
+      (when (not-empty buildings)
+        (try
+          (mongo/insert :buildingCache
+                        (mongo/with-mongo-meta {:propertyId propertyId :buildings buildings})
+                        com.mongodb.WriteConcern/UNACKNOWLEDGED)
+          (catch com.mongodb.DuplicateKeyException _)))
       buildings)))
 
 (def ...notfound... nil)
