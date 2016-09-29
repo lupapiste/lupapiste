@@ -5,14 +5,9 @@
             [lupapalvelu.wfs :as wfs])
   (:import (com.mongodb WriteConcern)))
 
-(defn- with-mongo-meta [property-info]
-  (assoc property-info :created (java.util.Date.)))
-
-(defn- without-mongo-meta [property-info]
-  (dissoc property-info :id :_id :created))
 
 (defn- property-location-from-cache [property-id]
-  (seq (map without-mongo-meta (mongo/select :propertyCache {:kiinttunnus property-id}))))
+  (seq (map mongo/without-mongo-meta (mongo/select :propertyCache {:kiinttunnus property-id}))))
 
 (defn- property-location-from-wfs [property-id]
   (when-let [features (wfs/location-info-by-property-id property-id)]
@@ -20,7 +15,7 @@
       (when (seq location-infos)
         (try
           ; Return right away, let cache be popupulated by chance
-          (mongo/insert-batch :propertyCache (map with-mongo-meta location-infos) WriteConcern/UNACKNOWLEDGED)
+          (mongo/insert-batch :propertyCache (map mongo/with-mongo-meta location-infos) WriteConcern/UNACKNOWLEDGED)
           (catch com.mongodb.DuplicateKeyException ignored)))
       location-infos)))
 
@@ -33,7 +28,7 @@
       (property-location-from-cache property-id)
       (property-location-from-wfs property-id))
     (let [property-ids (set property-id)
-          cached-infos (map without-mongo-meta (mongo/select :propertyCache {:kiinttunnus {$in property-ids}}))
+          cached-infos (map mongo/without-mongo-meta (mongo/select :propertyCache {:kiinttunnus {$in property-ids}}))
           found-ids    (set (map :kiinttunnus cached-infos))
           unfound-ids  (difference property-ids found-ids)]
       (if (zero? (count unfound-ids))
