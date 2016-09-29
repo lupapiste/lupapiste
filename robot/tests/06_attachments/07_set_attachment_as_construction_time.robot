@@ -10,6 +10,7 @@ Variables      variables.py
 
 Mikko creates application and goes to attachments tab
   [Tags]  attachments
+  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Set Suite Variable  ${propertyId}  753-416-6-1
@@ -23,7 +24,7 @@ Mikko adds txt attachment without comment
 
 Mikko does not see checkbox for setting attachment as construction time
   [Tags]  attachments
-  Page should not contain element  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Page should not contain element  ${construction-time-checkbox}
 
 Mikko opens application to authorities and logs out
   Open to authorities  huhuu
@@ -39,8 +40,8 @@ Sonja goes to attachments tab
 Sonja opens attachment and sees set construction time checkbox
   [Tags]  attachments
   Open attachment details  muut.muu
-  Wait until  Page should contain element  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
-  Checkbox should not be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Wait until  Page should contain element  ${construction-time-checkbox}
+  Checkbox should not be selected  ${construction-time-checkbox}
 
 Sonja sets attachment as construction time
   [Tags]  attachments
@@ -65,7 +66,7 @@ Attachment is visible
 Sonja opens the attachment and unsets construction time checkbox
   [Tags]  attachments
   Open attachment details  muut.muu
-  Wait until  Checkbox should be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Wait until  Checkbox should be selected  ${construction-time-checkbox}
   Unselect construction time checkbox
 
 Application state filters are hidden
@@ -77,8 +78,8 @@ Application state filters are hidden
 Sonja sets construction time checkbox again
   [Tags]  attachments
   Open attachment details  muut.muu
-  Wait until  Page should contain element  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
-  Checkbox should not be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Wait until  Page should contain element  ${construction-time-checkbox}
+  Checkbox should not be selected  ${construction-time-checkbox}
   Select construction time checkbox
 
 Sonja logs out
@@ -95,9 +96,9 @@ Mikko logs in and goes to attachments table
 Mikko sees construction time checkbox is checked and disabled
   [Tags]  attachments
   Open attachment details  muut.muu
-  Wait until  Page should contain element  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
-  Element should be disabled  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
-  Checkbox should be selected  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Wait until  Page should contain element  ${construction-time-checkbox}
+  Element should be disabled  ${construction-time-checkbox}
+  Checkbox should be selected  ${construction-time-checkbox}
 
 Mikko logs out
   [Tags]  attachments
@@ -106,9 +107,9 @@ Mikko logs out
 *** Keywords ***
 
 Select construction time checkbox
-  Select checkbox  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Select checkbox  ${construction-time-checkbox}
   Positive indicator icon should be visible
 
 Unselect construction time checkbox
-  Unselect checkbox  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Unselect checkbox  ${construction-time-checkbox}
   Positive indicator icon should be visible
