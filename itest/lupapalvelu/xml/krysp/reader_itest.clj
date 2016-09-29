@@ -181,13 +181,12 @@
 
 (facts "converting ymparisto verdicts  krysp to lupapiste domain model"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
-    (let [reader (permit/get-verdict-reader permit-type)]
 
-      (fact "Verdict reader is set ip" reader => fn?)
+    (let [xml (permit/fetch-xml-from-krysp permit-type local-krysp nil id :application-id false)
+          cases (->verdicts xml (partial permit/read-verdict-xml permit-type))]
 
-      (let [xml (permit/fetch-xml-from-krysp permit-type local-krysp nil id :application-id false) => truthy
-            cases (->verdicts xml reader)]
-        (fact "xml is parsed" cases => truthy)
-        (fact "xml has 1 cases" (count cases) => 1)
-        (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
-        (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))))))
+      (fact "xml is read" xml => truthy)
+      (fact "xml is parsed" cases => not-empty)
+      (fact "xml has 1 cases" (count cases) => 1)
+      (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+      (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-")))))

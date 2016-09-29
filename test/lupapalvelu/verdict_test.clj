@@ -20,7 +20,7 @@
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
     (fact "No verdicts found in the attachment parsing phase"
-      (count (get-verdicts-with-attachments {:permitType "R"} {} (now) xml (permit/get-verdict-reader "R"))) => 0
+      (count (get-verdicts-with-attachments {:permitType "R"} {} (now) xml (partial permit/read-verdict-xml "R"))) => 0
       )))
 
 (def tj-doc {:schema-info {:name "tyonjohtaja-v2"}

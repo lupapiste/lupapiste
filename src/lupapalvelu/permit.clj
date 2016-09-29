@@ -177,12 +177,15 @@
   [permit-type]
   (get-metadata permit-type :review-krysp-mapper))
 
-(defn get-verdict-reader
-  "Returns a function that reads verdicts (sequence) from KRYSP xml.
-   Function takes xml as parameter.
-   Use fetch-xml-from-krysp to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :verdict-krysp-reader))
+(defmulti read-verdict-xml
+  "Reads verdicts (sequence) from KRYSP xml."
+  (fn [permit-type xml-without-ns]
+    (keyword permit-type)))
+
+(defmethod read-verdict-xml :default
+  [permit-type & _]
+  (error "No verdict reader for permit type: " permit-type)
+  nil)
 
 (defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
@@ -197,12 +200,15 @@
   [permit-type]
   (get-metadata permit-type :verdict-extras-krysp-reader))
 
-(defn get-tj-suunnittelija-verdict-reader
-  "Returns a function that reads tj/suunnittelija verdicts from KRYSP xml.
-   Function takes xml, party type and party's kuntaRoolikoodi as parameter.
-   Use fetch-xml-from-krysp to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :tj-suunnittelija-verdict-krysp-reader))
+(defmulti read-tj-suunnittelija-verdict-xml
+  "Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
+  (fn [permit-type doc party-type target-kuntaRoolikoodi xml-without-ns]
+    (keyword permit-type)))
+
+(defmethod read-tj-suunnittelija-verdict-xml :default
+  [permit-type & _]
+  (error "No tj/suunnitelija verdict reader for permit type: " permit-type)
+  nil)
 
 (defmulti fetch-xml-from-krysp
   "Fetches KRYSP XML from municipality backend."

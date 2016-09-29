@@ -359,16 +359,15 @@
                     :poytakirjat poytakirjat}))))
            (select xml-no-ns [:paatostieto :Paatos])))))
 
+(defmethod permit/read-verdict-xml :R    [_ & args] (apply ->standard-verdicts args))
+(defmethod permit/read-verdict-xml :P    [_ & args] (apply ->standard-verdicts args))
+(defmethod permit/read-verdict-xml :YA   [_ & args] (apply ->simple-verdicts args))
+(defmethod permit/read-verdict-xml :YL   [_ & args] (apply ->simple-verdicts args))
+(defmethod permit/read-verdict-xml :MAL  [_ & args] (apply ->simple-verdicts args))
+(defmethod permit/read-verdict-xml :VVVL [_ & args] (apply ->simple-verdicts args))
+(defmethod permit/read-verdict-xml :KT   [_ & args] (apply ->outlier-verdicts args))
 
-(permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
-(permit/register-function permit/P :verdict-krysp-reader ->standard-verdicts)
-(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/KT :verdict-krysp-reader ->outlier-verdicts)
-
-(permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
+(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ & args] (apply ->tj-suunnittelija-verdicts args))
 
 (permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
 (permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)

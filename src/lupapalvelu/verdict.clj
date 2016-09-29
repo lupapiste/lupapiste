@@ -261,7 +261,7 @@
   "Returns a monger update map"
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (permit/get-verdict-reader (:permitType application))
+  (let [verdict-reader (partial permit/read-verdict-xml (:permitType application))
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
@@ -278,9 +278,8 @@
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (partial
-                         (permit/get-tj-suunnittelija-verdict-reader (:permitType application))
-                         doc osapuoli-type target-kuntaRoolikoodi)]
+  (let [verdict-reader (partial permit/read-tj-suunnittelija-verdict-xml (:permitType application)
+                                doc osapuoli-type target-kuntaRoolikoodi)]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (util/deep-merge
         (application/state-transition-update (sm/verdict-given-state application) created application user)
