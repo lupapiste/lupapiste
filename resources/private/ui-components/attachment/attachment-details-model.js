@@ -182,7 +182,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   // Not needed
-  self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed") && editable(); };
+  self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed"); };
+  self.setNotNeededEnabled = editable;
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };

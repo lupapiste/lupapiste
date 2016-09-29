@@ -243,7 +243,8 @@
                        id="attachment-is-not-needed"
                        class="form-input"
                        data-test-id="is-not-needed"
-                       data-bind="checked: $data.attachment().notNeeded"/>
+                       data-bind="checked: $data.attachment().notNeeded,
+                                  enable: $data.setNotNeededEnabled"/>
               </div>
 
               <div class="clear">
