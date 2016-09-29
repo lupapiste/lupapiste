@@ -61,14 +61,13 @@
   (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
     (application-xml common/kt-types path server credentials id raw?)))
 
-(permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
-(permit/register-function permit/P    :xml-from-krysp poik-application-xml)
-(permit/register-function permit/YA   :xml-from-krysp ya-application-xml)
-(permit/register-function permit/YL   :xml-from-krysp yl-application-xml)
-(permit/register-function permit/MAL  :xml-from-krysp mal-application-xml)
-(permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
-(permit/register-function permit/KT   :xml-from-krysp kt-application-xml)
-
+(defmethod permit/fetch-xml-from-krysp :R    [_ & args] (apply rakval-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :P    [_ & args] (apply poik-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :YA   [_ & args] (apply ya-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :YL   [_ & args] (apply yl-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :MAL  [_ & args] (apply mal-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :VVVL [_ & args] (apply vvvl-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :KT   [_ & args] (apply kt-application-xml args))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain

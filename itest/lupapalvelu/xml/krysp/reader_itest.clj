@@ -181,13 +181,11 @@
 
 (facts "converting ymparisto verdicts  krysp to lupapiste domain model"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
-    (let [getter (permit/get-application-xml-getter permit-type)
-          reader (permit/get-verdict-reader permit-type)]
+    (let [reader (permit/get-verdict-reader permit-type)]
 
-      (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
 
-      (let [xml (getter local-krysp nil id :application-id false)
+      (let [xml (permit/fetch-xml-from-krysp permit-type local-krysp nil id :application-id false) => truthy
             cases (->verdicts xml reader)]
         (fact "xml is parsed" cases => truthy)
         (fact "xml has 1 cases" (count cases) => 1)

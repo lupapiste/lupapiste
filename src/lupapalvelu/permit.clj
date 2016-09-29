@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit
-  (:require [taoensso.timbre :as timbre :refer [errorf warn]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf warn]]
             [schema.core :as sc]
             [sade.core :refer [fail]]
             [sade.strings :as ss]
@@ -180,14 +180,14 @@
 (defn get-verdict-reader
   "Returns a function that reads verdicts (sequence) from KRYSP xml.
    Function takes xml as parameter.
-   Use get-application-xml-getter to fetch the XML."
+   Use fetch-xml-from-krysp to fetch the XML."
   [permit-type]
   (get-metadata permit-type :verdict-krysp-reader))
 
 (defn get-verdict-validator
   "Returns a function that validates verdicts from KRYSP xml.
    Function takes xml and organization map as parameters.
-   Use get-application-xml-getter to fetch the XML."
+   Use fetch-xml-from-krysp to fetch the XML."
   [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
 
@@ -200,19 +200,19 @@
 (defn get-tj-suunnittelija-verdict-reader
   "Returns a function that reads tj/suunnittelija verdicts from KRYSP xml.
    Function takes xml, party type and party's kuntaRoolikoodi as parameter.
-   Use get-application-xml-getter to fetch the XML."
+   Use fetch-xml-from-krysp to fetch the XML."
   [permit-type]
   (get-metadata permit-type :tj-suunnittelija-verdict-krysp-reader))
 
-(defn get-application-xml-getter
-  "Returns a function that fetches KRYSP XML from municipality backend.
-   Function parameters: 1) url,
-                        2) credentials [username password],
-                        3) id,
-                        4) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
-                        5) optional boolean parameter: raw form."
-  [permit-type]
-  (get-metadata permit-type :xml-from-krysp))
+(defmulti fetch-xml-from-krysp
+  "Fetches KRYSP XML from municipality backend."
+  (fn [permit-type server-url credentials id search-type raw?]
+    (keyword permit-type)))
+
+(defmethod fetch-xml-from-krysp :default
+  [permit-type & _]
+  (error "No fetch method for permit type: " permit-type)
+  nil)
 
 (defn multiple-parties-allowed? [permit-type]
   (get-metadata permit-type :multiple-parties-allowed))
