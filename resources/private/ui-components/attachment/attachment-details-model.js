@@ -177,9 +177,12 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // For Printing
   self.setForPrintingAllowed = function() { return authModel.ok("set-attachments-as-verdict-attachment"); };
-  addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, function(res) {
-    util.showSavedIndicatorIcon(res);
-  });
+  addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, util.showSavedIndicatorIcon);
+
+  // Not needed
+  self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed"); };
+  self.setNotNeededEnabled = editable;
+  addUpdateListener("set-attachment-not-needed", {ok: true}, util.showSavedIndicatorIcon);
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };

@@ -2394,11 +2394,34 @@
     (doseq [organization (mongo/select :organizations {:name.en {$exists false}})]
       (mongo/update-by-id :organizations (:id organization)
                           {$set {:name.en (-> organization :name :fi)}}))))
+
+(defn not-needed-to-false                                   ;; LP-6232
+  "If there are versions, it doesn't make sense to flag attachment as 'not needed'.
+   Sets notNeeded to false for attachment in such state."
+  [{:keys [notNeeded versions] :as attachment}]
+  (if (and notNeeded (seq versions))
+    (assoc attachment :notNeeded false)
+    attachment))
+
+(defmigration set-attachments-with-versions-to-needed          ;; LP-6232
+  {:apply-when (pos? (mongo/count :applications {:attachments
+                                                 {$elemMatch {$and [{:notNeeded true} ,
+                                                                     {:versions {$exists true,
+                                                                                 $not {$size 0}}}]}}}))}
+  (update-applications-array :attachments
+                             not-needed-to-false
+                             {:attachments
+                              {$elemMatch {$and [{:notNeeded true} ,
+                                                 {:versions {$exists true,
+                                                             $not {$size 0}}}]}}}))
 ;;
 ;; ****** NOTE! ******
-;;  When you are writing a new migration that goes through subcollections
-;;  in the collections "Applications" and "Submitted-applications"
-;;  do not manually write like this
-;;     (doseq [collection [:applications :submitted-applications] ...)
-;;  but use the "update-applications-array" function existing in this namespace.
+;;  1) When you are writing a new migration that goes through subcollections
+;;     in the collections "Applications" and "Submitted-applications"
+;;     do not manually write like this
+;;       (doseq [collection [:applications :submitted-applications] ...)
+;;     but use the "update-applications-array" function existing in this namespace.
+;;
+;;  2) Check if migration needs to be done for "bulletins" (julkipano) also. See update-bulletin-versions.
+;;
 ;; *******************

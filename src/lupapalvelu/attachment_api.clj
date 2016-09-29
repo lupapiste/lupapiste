@@ -79,9 +79,21 @@
     (fail :error.unauthorized
           :desc "Attachment is requested by authority.")))
 
+(defn- attachment-is-needed [{{attachmentId :attachmentId} :data application :application}]
+  (when (and attachmentId (:notNeeded (attachment/get-attachment-info application attachmentId)))
+    (fail :error.attachment.not-needed)))
+
+(defn versions-empty? [application attachmentId]
+  (empty? (:versions (attachment/get-attachment-info application attachmentId))))
+
+(defn- no-versions [{{attachmentId :attachmentId} :data application :application}]
+  (when (and (ss/not-blank? attachmentId)
+             (not (versions-empty? application attachmentId)))
+    (fail :error.attachment.versions-not-empty)))
+
 (defn- has-versions [{{attachmentId :attachmentId} :data application :application}]
   (when (and (ss/not-blank? attachmentId)
-             (empty? (:versions (attachment/get-attachment-info application attachmentId))))
+             (versions-empty? application attachmentId))
     (fail :error.attachment.no-versions)))
 
 (defn any-attachment-has-version [{{attachments :attachments} :application}]
@@ -495,7 +507,8 @@
                 (partial attachment-editable-by-application-state true)
                 validate-attachment-type
                 app/validate-authority-in-drafts
-                validate-operation-in-application]
+                validate-operation-in-application
+                attachment-is-needed]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -704,7 +717,9 @@
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
-                attachment-not-requested-by-authority]}
+                attachment-not-requested-by-authority
+                access/has-attachment-auth
+                no-versions]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))

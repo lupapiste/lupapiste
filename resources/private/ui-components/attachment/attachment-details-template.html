@@ -233,6 +233,20 @@
                        data-bind="checked: $data.attachment().forPrinting"/>
               </div>
 
+              <div class="clear"></div>
+              <div class="col1 attachment-info-field"
+                   data-bind="if: $data.setNotNeededAllowed()">
+                <label for="attachment-is-not-needed"
+                       class="form-label"
+                       data-bind="ltext: 'application.attachmentNotNeeded'"></label>
+                <input type="checkbox"
+                       id="attachment-is-not-needed"
+                       class="form-input"
+                       data-test-id="is-not-needed"
+                       data-bind="checked: $data.attachment().notNeeded,
+                                  enable: $data.setNotNeededEnabled"/>
+              </div>
+
               <div class="clear">
                 <h3 class="left" data-bind="ltext: 'attachment.visibility'"></h3>
                 <span data-bind="component: {name: 'help-toggle',
