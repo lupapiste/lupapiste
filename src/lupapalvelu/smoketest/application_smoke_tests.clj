@@ -88,9 +88,16 @@
                            type-group (update-in [:error :type :type-group] #(list 'invalid-type-group (.value %)))
                            type-id    (update-in [:error :type :type-id]    #(list 'invalid-type-id (.value %))))})))
 
-(defn validate-attachments [{attachments :attachments id :id}]
+(defn validate-not-needed
+  "If there are versions, it doesn't make sense to flag attachment as 'not needed'."
+  [{:keys [id notNeeded versions]}]
+  (when (and notNeeded (not-empty versions))
+    {:attachment-id id
+     :error "Has versions, but marked as not needed"}))
+
+(defn validate-attachments [{attachments :attachments}]
   (->> attachments
-       (mapcat (juxt validate-attachment-against-schema validate-latest-version))
+       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed))
        (remove nil?)
        seq))
 
