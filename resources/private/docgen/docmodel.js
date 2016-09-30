@@ -820,6 +820,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent("construction-waste-report", subSchema, model, path);
   }
 
+  function buildDocgenBuildingSelect( subSchema, model, path ) {
+    return buildGroupComponent( "docgen-building-select", subSchema, model, path );
+  }
+
   function buildRadioGroup(subSchema, model, path) {
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
@@ -1311,7 +1315,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     date: buildDate,
     time: buildTime,
     // element: buildElement,
-    buildingSelector: buildBuildingSelector,
+    //buildingSelector: buildBuildingSelector,
+    buildingSelector: buildDocgenBuildingSelect,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,

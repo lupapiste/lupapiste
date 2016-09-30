@@ -180,9 +180,9 @@
 
 (def tunnus {:name "tunnus" :type :string :required true :hidden true :max-len 6 :identifier true})
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size :xl :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long" :hidden true}
                            {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
