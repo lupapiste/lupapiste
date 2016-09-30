@@ -1,5 +1,5 @@
 (ns lupapalvelu.autologin
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn warnf error errorf fatal]]
             [slingshot.slingshot :refer [throw+ try+]]
             [clojure.core.memoize :as memo]
             [pandect.core :as pandect]
@@ -29,7 +29,7 @@
 (defn- valid-hash? [hash username ip ts secret]
   (if secret
     (let [expected-hash (pandect/sha256-hmac (str username ip ts) secret)]
-      (boolean (or (= hash expected-hash) (error "Expected hash" expected-hash "of" username ip ts "- got" hash ))))
+      (boolean (or (= hash expected-hash) (warn "Expected hash" expected-hash "of" username ip ts "- got" hash ))))
     false))
 
 (def five-min-in-ms (* 5 60 1000))
@@ -48,7 +48,7 @@
           (catch Exception e
             (error "Failed to decrypt" key crypto-iv (.getMessage e))))
         (error "Failed to load master key"))
-      (error "No key for" ip))))
+      (warn "No key for" ip))))
 
 (def load-secret (memo/ttl load-secret-from-db :ttl/threshold cache-ttl))
 
@@ -66,7 +66,7 @@
       (let [user (user/get-user-by-email canonical-email)
             organization-ids (user/organization-ids user)]
 
-        (when-not user (errorf "error.integration - user '%s' not found" canonical-email))
+        (when-not user (warnf "user '%s' not found" canonical-email))
 
         (cond
           (not (:enabled user)) (throw+ {:type ::autologin :text "User not enabled"})
