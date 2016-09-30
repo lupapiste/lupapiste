@@ -369,13 +369,13 @@
 
 (defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ & args] (apply ->tj-suunnittelija-verdicts args))
 
-(permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
-(permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
-(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/YL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/MAL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/KT :verdict-krysp-validator outlier-verdicts-validator)
+(defmethod permit/validate-verdict-xml :R    [_ xml & args] (apply standard-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :P    [_ xml & args] (apply standard-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :YA   [_ xml & args] (apply simple-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :YL   [_ xml & args] (apply simple-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :MAL  [_ xml & args] (apply simple-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :VVVL [_ xml & args] (apply simple-verdicts-validator xml args))
+(defmethod permit/validate-verdict-xml :KT   [_ xml & args] (apply outlier-verdicts-validator xml args))
 
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])

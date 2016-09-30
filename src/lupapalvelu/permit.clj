@@ -187,12 +187,15 @@
   (error "No verdict reader for permit type: " permit-type)
   nil)
 
-(defn get-verdict-validator
-  "Returns a function that validates verdicts from KRYSP xml.
-   Function takes xml and organization map as parameters.
-   Use fetch-xml-from-krysp to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :verdict-krysp-validator))
+(defmulti validate-verdict-xml
+  "[permit-type xml-without-ns] - Reads verdicts (sequence) from KRYSP xml."
+  (fn [permit-type xml-without-ns]
+    (keyword permit-type)))
+
+(defmethod validate-verdict-xml :default
+  [permit-type & _]
+  (error "No verdict validator for permit type: " permit-type)
+  nil)
 
 (defmulti read-verdict-extras-xml
   "[application app-xml] - Reads some extras from verdict KRYSP xml.

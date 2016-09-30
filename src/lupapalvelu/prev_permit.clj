@@ -153,9 +153,8 @@
         dummy-application {:id "" :permitType permit-type :organization organizationId}
         xml               (krysp-fetch/get-application-xml-by-backend-id dummy-application kuntalupatunnus)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-        validator-fn      (permit/get-verdict-validator permit-type)
         organization      (when (:municipality app-info) (organization/resolve-organization (:municipality app-info) permit-type))
-        validation-result (validator-fn xml organization)
+        validation-result (permit/validate-verdict-xml permit-type xml organization)
         location-info     (get-location-info command app-info)
         organizations-match? (when (:municipality app-info)
                                (= organizationId (:id organization)))

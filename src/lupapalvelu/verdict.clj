@@ -421,9 +421,8 @@
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml          (normalize-special-verdict application app-xml)
-          validator-fn     (permit/get-verdict-validator (permit/permit-type application))
           organization     (if organization @organization (org/get-organization (:organization application)))
-          validation-error (or (validator-fn app-xml organization)
+          validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
                                (validate-section-requirement (:primaryOperation application)
                                                              app-xml
                                                              organization))]
