@@ -178,7 +178,7 @@
   (get-metadata permit-type :review-krysp-mapper))
 
 (defmulti read-verdict-xml
-  "Reads verdicts (sequence) from KRYSP xml."
+  "[permit-type xml-without-ns] - Reads verdicts (sequence) from KRYSP xml."
   (fn [permit-type xml-without-ns]
     (keyword permit-type)))
 
@@ -206,7 +206,7 @@
   nil)
 
 (defmulti read-tj-suunnittelija-verdict-xml
-  "Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
+  "[permit-type doc party-type target-kuntaRoolikoodi xml-without-ns] - Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
   (fn [permit-type doc party-type target-kuntaRoolikoodi xml-without-ns]
     (keyword permit-type)))
 
@@ -216,7 +216,7 @@
   nil)
 
 (defmulti fetch-xml-from-krysp
-  "Fetches KRYSP XML from municipality backend."
+  "[permit-type server-url credentials id search-type raw?] - Fetches KRYSP XML from municipality backend."
   (fn [permit-type server-url credentials id search-type raw?]
     (keyword permit-type)))
 
