@@ -99,14 +99,13 @@
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application organization task user lang]
   (let [permit-type   (permit/permit-type application)
-        krysp-fn      (permit/get-review-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
         filtered-app  (remove-unsupported-attachments application)]
     (when (org/krysp-integration? organization permit-type)
-      (assert krysp-fn "KRYSP 'review mapper' function not found/defined?")
-      (krysp-fn filtered-app task user lang krysp-version output-dir begin-of-link))))
+      (or (permit/review-krysp-mapper filtered-app task user lang krysp-version output-dir begin-of-link)
+          (fail! :error.unknown)))))
 
 
 (defn save-unsent-attachments-as-krysp

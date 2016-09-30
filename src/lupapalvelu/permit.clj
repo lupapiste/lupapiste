@@ -172,10 +172,15 @@
   [permit-type]
   (get-metadata permit-type :app-krysp-mapper))
 
-(defn get-review-mapper
-  "Returns a function that maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
-  [permit-type]
-  (get-metadata permit-type :review-krysp-mapper))
+(defmulti review-krysp-mapper
+  "[application review user lang krysp-version output-dir begin-of-link] - Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
+  (fn [{permit-type :permitType :as application} & args]
+    (keyword permit-type)))
+
+(defmethod review-krysp-mapper :default
+  [{permit-type :permitType :as application} & _]
+  (error "KRYSP 'review mapper' method not defined for permit type: " permit-type)
+  nil)
 
 (defmulti read-verdict-xml
   "[permit-type xml-without-ns] - Reads verdicts (sequence) from KRYSP xml."
