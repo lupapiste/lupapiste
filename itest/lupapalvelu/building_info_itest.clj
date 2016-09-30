@@ -1,11 +1,14 @@
 (ns lupapalvelu.building-info-itest
   (:require [midje.sweet :refer :all]
             [monger.operators :refer :all]
+            [clojure.java.io :as io]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.xml.krysp.building-reader :refer [building-info-list]]
-            [sade.core :as sade]))
+            [sade.core :as sade]
+            [sade.xml :as xml]
+            [sade.common-reader :as cr]))
 
 
 (def local-db-name (str "test_building_info_itest_" (sade/now)))
@@ -14,6 +17,11 @@
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
 
 (facts "Building info cache"
+       (against-background [(cr/get-xml anything anything anything anything)
+                            => (-> "krysp/dev/building.xml"
+                                   io/resource
+                                   slurp
+                                   xml/parse)])
        (mongo/with-db local-db-name
          (let [{app-id :id} (create-local-app pena
                                               :propertyId sipoo-property-id
