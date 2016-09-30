@@ -33,4 +33,25 @@ LUPAPISTE.BuildingService = function() {
     // Returns immediately with the view observable.
     return infoView;
   };
+
+  // Options [optional]
+  // documentId: Document id
+  // buildingId: Building id
+  // overwrite: Whether overwrite during merge
+  // [path]: Schema path (default "buildingId")
+  // [collection]: Mongo collection ("documents")
+ hub.subscribe( "buildingService::merge", function( options ) {
+    ajax.command("merge-details-from-krysp",
+                 _.merge( _.pick( options, ["documentId",
+                                            "buildingId",
+                                            "overwrite",
+                                            "path",
+                                            "collection"]),
+                          _.defaults( {id: latestAppId,
+                                       path: "buildingId",
+                                       collection: "documents"})))
+      .success( _.partial( repository.load, latestAppId, _.noop))
+      .onError("error.no-legacy-available", notify.ajaxError)
+      .call();
+  });
 };
