@@ -252,10 +252,10 @@
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml reader]
-  (->> (krysp-reader/->verdicts xml reader)
-    (map (partial verdict-attachments application user timestamp))
-    (filter seq)))
+(defn- get-verdicts-with-attachments [application user timestamp xml reader & reader-args]
+  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader reader-args)
+       (map (partial verdict-attachments application user timestamp))
+       (filter seq)))
 
 (defn- get-task-updates [application created verdicts app-xml]
   (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
@@ -268,9 +268,7 @@
   "Returns a monger update map"
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (when-let [verdicts-with-attachments (->> (partial permit/read-verdict-xml (:permitType application))
-                                            (get-verdicts-with-attachments application user created app-xml)
-                                            seq)]
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml))]
     (util/deep-merge
      {$set {:verdicts verdicts-with-attachments, :modified created}}
      (get-task-updates application created verdicts-with-attachments app-xml)
@@ -281,12 +279,10 @@
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (partial permit/read-tj-suunnittelija-verdict-xml (:permitType application)
-                                doc osapuoli-type target-kuntaRoolikoodi)]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
-      (util/deep-merge
-        (application/state-transition-update (sm/verdict-given-state application) created application user)
-        {$set {:verdicts verdicts-with-attachments}}))))
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-tj-suunnittelija-verdict-xml doc osapuoli-type target-kuntaRoolikoodi))]
+    (util/deep-merge
+     (application/state-transition-update (sm/verdict-given-state application) created application user)
+     {$set {:verdicts verdicts-with-attachments}})))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"

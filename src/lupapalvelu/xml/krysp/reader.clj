@@ -274,7 +274,7 @@
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
       (< timestamp-1-day-ago paatospvm)      (fail :info.paatos-future-date))))
 
-(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
+(defn ->tj-suunnittelija-verdicts [xml-without-ns {{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
     (map (fn [osapuolet-xml-without-ns]
@@ -367,7 +367,7 @@
 (defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns] (->simple-verdicts xml-without-ns))
 (defmethod permit/read-verdict-xml :KT   [_ xml-without-ns] (->outlier-verdicts xml-without-ns))
 
-(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ & args] (apply ->tj-suunnittelija-verdicts args))
+(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args] (apply ->tj-suunnittelija-verdicts xml-without-ns args))
 
 (defmethod permit/validate-verdict-xml :R    [_ xml organization] (standard-verdicts-validator xml organization))
 (defmethod permit/validate-verdict-xml :P    [_ xml organization] (standard-verdicts-validator xml organization))
@@ -390,32 +390,28 @@
        (map ->kuntalupatunnus)
        (remove ss/blank?)))
 
-;; Reads the verdicts
-;; Arguments:
-;; xml: KRYSP with ns.
-;; fun: verdict-krysp-reader for permit.
-(defmulti ->verdicts (fn [_ fun] fun))
+(defmulti ->verdicts
+  "[xml permit-type reader & reader-args] - Reads the verdicts."
+  (fn [xml permit-type reader & reader-args] (keyword permit-type)))
 
 (defmethod ->verdicts :default
-  [xml ->function]
+  [xml permit-type reader & reader-args]
   (map
     (fn [asia]
       (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
-            verdicts      (->> asia
-                           (->function)
-                           (cr/cleanup)
-                           (filter seq))]
+            verdicts      (->> (apply reader permit-type asia reader-args)
+                               (cr/cleanup)
+                               (filter seq))]
         (util/assoc-when-pred verdict-model util/not-empty-or-nil? :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)))
 
 ;; Outliers (KT) do not have kuntalupatunnus
-(defmethod ->verdicts ->outlier-verdicts
-  [xml fun]
+(defmethod ->verdicts :KT
+  [xml _ reader]
   (for [elem (enlive/select (cr/strip-xml-namespaces xml)
                             common/outlier-elem-selector)]
     {:kuntalupatunnus "-"
-     :paatokset (->> elem fun cr/cleanup (filter seq))}))
-
+     :paatokset (->> (reader :KT elem) cr/cleanup (filter seq))}))
 
 ;; Coordinates
 
