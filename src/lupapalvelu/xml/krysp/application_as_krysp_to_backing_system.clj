@@ -81,7 +81,6 @@
   {:pre [(map? application) lang (map? submitted-application) (map? organization)]}
   (assert (= (:id application) (:id submitted-application)) "Not same application ids.")
   (let [permit-type   (permit/permit-type application)
-        krysp-fn      (permit/get-application-mapper permit-type)
         krysp-version (resolve-krysp-version organization permit-type)
         output-dir    (resolve-output-directory organization permit-type)
         begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
@@ -92,8 +91,8 @@
         filtered-submitted-app (->> submitted-application
                                     remove-unsupported-attachments
                                     (filter-attachments-by-state current-state))]
-    (assert krysp-fn "KRYSP mapper function not found/defined?")
-    (krysp-fn filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)))
+    (or (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)
+        (fail! :error.unknown))))
 
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

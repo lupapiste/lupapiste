@@ -167,10 +167,15 @@
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
 
-(defn get-application-mapper
-  "Returns a function that maps application into KRYSP XML and saves the XML to disk."
-  [permit-type]
-  (get-metadata permit-type :app-krysp-mapper))
+(defmulti application-krysp-mapper
+  "[application lang submitted-application krysp-version output-dir begin-of-link] - Maps application into KRYSP XML and saves the XML to disk."
+  (fn [{permit-type :permitType :as application} & args]
+    (keyword permit-type)))
+
+(defmethod application-krysp-mapper :default
+  [{permit-type :permitType :as application} & _]
+  (error "KRYSP 'application mapper' method not defined for permit type: " permit-type)
+  nil)
 
 (defmulti review-krysp-mapper
   "[application review user lang krysp-version output-dir begin-of-link] - Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
