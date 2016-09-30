@@ -161,16 +161,15 @@
    :ya-kayttolupa-mainostus-ja-viitoitus  {:mainostus-viitoitus-tapahtuma-pvm   true
                                            :mainostus-viitoitus-lisatiedot      true}})
 
-
 (defn- get-luvan-tunniste-tiedot [application]
-  (let [link-permits (map
-                       (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}})
-                       (:linkPermitData application))
-        base-id (lupatunnus application)
-        base-with-link (update-in base-id [:LupaTunnus :muuTunnustieto] #(into (vector %) link-permits))
-        kuntalupatunnus-link (some
-                               #(when (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)})
-                               (:linkPermitData application))]
+  (let [link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}})
+                          (:linkPermitData application))
+        base-id (lupatunnus application)]
+    (update-in base-id [:LupaTunnus :muuTunnustieto] #(into (vector %) link-permits))))
+
+(defn- add-kuntalupatunnus-link-in-luvan-tunniste-tiedot [base-with-link application]
+  (let [kuntalupatunnus-link (some #(when (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)})
+                                   (:linkPermitData application))]
     (if kuntalupatunnus-link
       (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
       base-with-link)))
@@ -306,7 +305,9 @@
                            {:lisaaikatieto lisaaikatieto}))]
 
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
-                     :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
+                     :yleinenAlueAsiatieto {permit-name-key
+                                            (-> canonical-body
+                                                (update :luvanTunnisteTiedot add-kuntalupatunnus-link-in-luvan-tunniste-tiedot application))}}}))
 
 
 (defn- get-ya-katselmus [katselmus]
