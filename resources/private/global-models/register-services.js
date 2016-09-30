@@ -23,5 +23,6 @@
   lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
   lupapisteApp.services.infoService = new LUPAPISTE.InfoService();
   lupapisteApp.services.contextService = new LUPAPISTE.ContextService();
+  lupapisteApp.services.buildingService = new LUPAPISTE.BuildingService();
 
 })();
