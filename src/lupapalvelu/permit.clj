@@ -194,11 +194,16 @@
   [permit-type]
   (get-metadata permit-type :verdict-krysp-validator))
 
-(defn get-verdict-extras-reader
-  "Returns a function that reads some extras from verdict KRYSP xml.
-   Function takes xml as parameter and returns a map that should be merged into the application."
-  [permit-type]
-  (get-metadata permit-type :verdict-extras-krysp-reader))
+(defmulti read-verdict-extras-xml
+  "[application app-xml] - Reads some extras from verdict KRYSP xml.
+  Returns application mongo updates.
+  Method is called even if xml validation fails"
+  (fn [{permit-type :permitType :as application} app-xml]
+    (keyword permit-type)))
+
+(defmethod read-verdict-extras-xml :default
+  [& _]
+  nil)
 
 (defmulti read-tj-suunnittelija-verdict-xml
   "Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."

@@ -257,23 +257,26 @@
     (map (partial verdict-attachments application user timestamp))
     (filter seq)))
 
+(defn- get-task-updates [application created verdicts app-xml]
+  (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
+    {$set {:tasks (-> (assoc application
+                             :verdicts verdicts
+                             :buildings (building-reader/->buildings-summary app-xml))
+                      (tasks/verdicts->tasks created))}}))
+
 (defn find-verdicts-from-xml
   "Returns a monger update map"
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (partial permit/read-verdict-xml (:permitType application))
-        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
-      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-            tasks (tasks/verdicts->tasks (assoc application
-                                                :verdicts verdicts-with-attachments
-                                                :buildings  (building-reader/->buildings-summary app-xml)) created)]
-        (util/deep-merge
-          {$set (merge {:verdicts verdicts-with-attachments, :modified created}
-                  (when-not has-old-verdict-tasks {:tasks tasks})
-                  (when extras-reader (extras-reader app-xml application)))}
-          (when-not (states/post-verdict-states (keyword (:state application)))
-            (application/state-transition-update (sm/verdict-given-state application) created application user)))))))
+  (when-let [verdicts-with-attachments (->> (partial permit/read-verdict-xml (:permitType application))
+                                            (get-verdicts-with-attachments application user created app-xml)
+                                            seq)]
+    (util/deep-merge
+     {$set {:verdicts verdicts-with-attachments, :modified created}}
+     (get-task-updates application created verdicts-with-attachments app-xml)
+     (permit/read-verdict-extras-xml application app-xml)
+     (when-not (states/post-verdict-states (keyword (:state application)))
+       (application/state-transition-update (sm/verdict-given-state application) created application user)))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
@@ -388,21 +391,12 @@
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
-(defn- building-mongo-updates
-  "Get buildings from verdict XML and save to application. Updates also operation documents
-   with building data, if applicable."
-  [application buildings]
-  (when buildings
-    (->> (building/building-updates buildings application)
-         (hash-map $set))))
-
 (defn- backend-id-mongo-updates
   [{verdicts :verdicts} backend-ids]
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
-
 
 (defn validate-section-requirement
   "Validator that fails if the organization requires section (pykala)
@@ -435,11 +429,10 @@
                                                              organization))]
       (if-not validation-error
         (save-verdicts-from-xml command app-xml)
-        (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
-                                      (building-mongo-updates application))
+        (let [extras-updates     (permit/read-verdict-extras-xml application app-xml)
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]
-          (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
+          (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
           validation-error)))))
 
 (defn- verdict-task?
@@ -523,8 +516,7 @@
 
   (let [reviews (review-reader/xml->reviews app-xml)
         buildings-summary (building-reader/->buildings-summary app-xml)
-        building-updates (->> (seq buildings-summary)
-                              (building-mongo-updates (assoc application :buildings [])))
+        building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)

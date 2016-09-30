@@ -205,14 +205,7 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn- buildings-summary-for-application
-  "Returns application building updates from xml (if buildings exist)."
-  [xml application]
-  (let [summary (->buildings-summary xml)]
-    (when (seq summary)
-      (building/building-updates summary application))))
-
-(permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
+(defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 
 (defn- parse-buildings
   "Convenience function for debugging KRYSP messages.
