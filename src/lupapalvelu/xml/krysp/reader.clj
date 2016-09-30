@@ -359,13 +359,13 @@
                     :poytakirjat poytakirjat}))))
            (select xml-no-ns [:paatostieto :Paatos])))))
 
-(defmethod permit/read-verdict-xml :R    [_ & args] (apply ->standard-verdicts args))
-(defmethod permit/read-verdict-xml :P    [_ & args] (apply ->standard-verdicts args))
-(defmethod permit/read-verdict-xml :YA   [_ & args] (apply ->simple-verdicts args))
-(defmethod permit/read-verdict-xml :YL   [_ & args] (apply ->simple-verdicts args))
-(defmethod permit/read-verdict-xml :MAL  [_ & args] (apply ->simple-verdicts args))
-(defmethod permit/read-verdict-xml :VVVL [_ & args] (apply ->simple-verdicts args))
-(defmethod permit/read-verdict-xml :KT   [_ & args] (apply ->outlier-verdicts args))
+(defmethod permit/read-verdict-xml :R    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :P    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :YA   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :YL   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :MAL  [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :KT   [_ xml-without-ns] (->outlier-verdicts xml-without-ns))
 
 (defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ & args] (apply ->tj-suunnittelija-verdicts args))
 
