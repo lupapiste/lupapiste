@@ -188,8 +188,8 @@
   nil)
 
 (defmulti validate-verdict-xml
-  "[permit-type xml-without-ns] - Reads verdicts (sequence) from KRYSP xml."
-  (fn [permit-type xml-without-ns]
+  "[permit-type xml-without-ns organization] - Reads verdicts (sequence) from KRYSP xml."
+  (fn [permit-type xml-without-ns organization]
     (keyword permit-type)))
 
 (defmethod validate-verdict-xml :default
