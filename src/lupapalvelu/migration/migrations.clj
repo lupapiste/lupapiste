@@ -2391,10 +2391,12 @@
 
 (when (env/feature? :english)
   (defmigration organization-name-english-defaults
-    {:apply-when (pos? (mongo/count  :organizations {:name.en {$exists false}}))}
-    (doseq [organization (mongo/select :organizations {:name.en {$exists false}})]
-      (mongo/update-by-id :organizations (:id organization)
-                          {$set {:name.en (-> organization :name :fi)}}))))
+    {:apply-when (pos? (mongo/count  :organizations {:name.en nil}))}
+    (let [changed-organizations (mongo/count  :organizations {:name.en nil})]
+      (doseq [organization (mongo/select :organizations {:name.en nil})]
+        (mongo/update-by-id :organizations (:id organization)
+                            {$set {:name.en (-> organization :name :fi)}}))
+      changed-organizations)))
 
 (defn- english-default-for-link [link]
   (if (not (-> link :name :en))
@@ -2406,12 +2408,12 @@
     {:apply-when (pos? (mongo/count :organizations
                                     {$and
                                      [{:links {$exists true}}
-                                      {:links {$elemMatch {:name.en {$exists false}}}}]}))}
+                                      {:links {$elemMatch {:name.en nil}}}]}))}
     (reduce + 0
             (for [organization (mongo/select :organizations
                                              {$and
                                               [{:links {$exists true}}
-                                               {:links {$elemMatch {:name.en {$exists false}}}}]}
+                                               {:links {$elemMatch {:name.en nil}}}]}
                                              {:links 1})]
               (mongo/update-n :organizations
                               {:_id (:id organization)}
@@ -2419,7 +2421,7 @@
                                                  (:links organization))}})))))
 
 (defn- missing-url-map [lang]
-  {(keyword (str "url." (name lang))) {$exists false}})
+  {(keyword (str "url." (name lang))) nil})
 
 (defn- default-urls-for-link [link]
   (let [default-url (if (string? (:url link))
@@ -2427,10 +2429,12 @@
                       (-> link :url :fi))]
     (assert (string? default-url) (str "was actually " default-url))
     (assoc link :url
-           (merge (i18n/localization-schema default-url)
-                  (if (map? (:url link))
-                    (:url link)
-                    {})))))
+           (merge-with (fn [a b]
+                         (or a b))
+                       (i18n/localization-schema default-url)
+                       (if (map? (:url link))
+                         (:url link)
+                         {})))))
 
 (defmigration set-language-defaults-for-organization-link-urls
   {:apply-when (pos? (mongo/count :organizations
