@@ -410,6 +410,18 @@
   (fact "single level"
     (get-leafs [[:foo :bar] [:baz :quu]]) => [:bar :quu])
 
+  (fact "only leaf"
+    (get-leafs :foo) => [:foo])
+
+  (fact "only map as leaf"
+    (get-leafs {:foo :bar}) => [{:foo :bar}])
+
+  (fact "map as leaf in single level tree"
+    (get-leafs [[:hii {:foo :bar}]]) => [{:foo :bar}])
+
+  (fact "only set as leaf"
+    (get-leafs #{:foo :bar}) => [#{:foo :bar}])
+
   (fact "incomplete tree"
     (get-leafs [[:foo] [:bar] [:baz :quu]]) => [nil nil :quu])
 
