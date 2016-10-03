@@ -49,6 +49,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       self.dataProvider.setDefaultSort();
       lupapisteApp.services.applicationFiltersService.reloadDefaultFilter();
     }
+    self.dataProvider.updateApplicationType( val );
   });
 
   self.showForemanSearch = ko.pureComputed(function() {

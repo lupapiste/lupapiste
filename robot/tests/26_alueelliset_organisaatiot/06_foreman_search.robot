@@ -19,13 +19,17 @@ Teppo logs in and creates some applications
   Create application with state  notice-1-${secs}  753-423-2-41  tyonjohtajan-nimeaminen-v2  ${draft}
   Create application with state  notice-2-${secs}  753-423-2-42  tyonjohtajan-nimeaminen-v2  ${open}
   Create application with state  notice-7-${secs}  753-423-2-47  tyonjohtajan-nimeaminen-v2  ${verdictGiven}
+  Go to page  applications
+  Active search tab is  all
   Log out
 
 Sonja logs in and sees some only foreman applications on foreman search tab
   Sonja logs in
   Go to page  applications
+  Active search tab is  application
+  Scroll and click test id  search-tab-all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
-  Click Element  //label[@for="searchTypeForeman"]
+  Switch to foremen  
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
 
 Sonja can see foreman application on verdict tab
@@ -38,8 +42,26 @@ Sonja sees different saved filters on foreman search tab
   Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-Barfoo"]
   Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-Foobar"]
 
-  Click Element  //label[@for="searchTypeApplications"]
+  Switch to applications
   Click by test id  toggle-advanced-filters
   Click by test id  toggle-saved-filters
   Wait Until  Element should be visible  //div[@data-test-id="saved-filter-row-Barfoo"]
   Wait Until  Element should be visible  //div[@data-test-id="saved-filter-row-Foobar"]
+  Click by test id  toggle-advanced-filters
+
+Sonja switches between applications and foremen view
+  Scroll and click test id  search-tab-application
+  Switch to foremen
+  Active search tab is  foremanApplication
+  Scroll and click test id  search-tab-foremanNotice
+  Switch to applications
+  Active search tab is  application
+    
+
+*** Keywords ***
+
+Switch to applications
+  Click element  //label[@for="searchTypeApplications"]
+
+Switch to foremen
+  Click element  //label[@for="searchTypeForeman"]

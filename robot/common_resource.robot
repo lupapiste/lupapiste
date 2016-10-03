@@ -924,6 +924,11 @@ Request should not be visible
   [Arguments]  ${address}
   Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
+Active search tab is
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  jquery=li.active[data-test-id=search-tab-${tab}]  
+
+
 #
 # Comments:
 #
