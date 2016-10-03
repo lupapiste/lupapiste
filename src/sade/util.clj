@@ -526,3 +526,12 @@
        (map name)
        (ss/join ".")
        keyword))
+
+(defn get-in-tree [tree path]
+  (reduce #(second (find-first (comp #{%2} first) %1)) tree path))
+
+(defn get-leafs [tree]
+  (loop [leafs [] t tree]
+    (if-let [children (not-empty (map second t))]
+      (recur (concat leafs (remove coll? children)) (apply concat (filter coll? children)))
+      leafs)))
