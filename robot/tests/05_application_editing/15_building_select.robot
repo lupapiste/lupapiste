@@ -3,7 +3,7 @@
 Documentation   Building selection
 Suite setup     Apply minimal fixture now  
 Resource        ../../common_resource.robot
-Library         DebugLibrary
+
 
 *** Variables ***
 
