@@ -3,6 +3,7 @@
             [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.i18n :as i18n]
             [sade.core :refer :all]))
 
 (def- local-krysp "http://localhost:8000/dev/krysp")
@@ -616,20 +617,27 @@
                                       :calendars-enabled false
                                       :use-attachment-links-integration false})
 
+(defn- names [names-map]
+  (i18n/with-default-localization names-map (:fi names)))
+
+(defn- link [link-names link-url]
+  {:name (names link-names)
+   :url (i18n/with-default-localization {:fi link-url} link-url)})
+
 (def organizations (map
                      (partial merge default-keys-for-organizations)
                      [;; Jarvenpaa R
                       {:id "186-R"
-                       :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"
-                              :sv "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
+                       :name (names {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"
+                                    :sv "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"})
                        :scope [{:municipality "186"
                                 :permitType "R"
                                 :inforequest-enabled true
                                 :new-application-enabled true}]
-                       :links [{:name {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
-                                :url "http://www.jarvenpaa.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
+                       :links [(link {:fi "J\u00E4rvenp\u00E4\u00E4" :sv "Tr\u00E4skenda"}
+                                     "http://www.jarvenpaa.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182" )]
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]
                                                                       [:hakija :valtakirja]
@@ -641,8 +649,8 @@
 
                       ;; Sipoo R
                       {:id "753-R"
-                       :name {:fi "Sipoon rakennusvalvonta"
-                              :sv "Sipoon rakennusvalvonta"}
+                       :name (names {:fi "Sipoon rakennusvalvonta"
+                                     :sv "Sipoon rakennusvalvonta"})
                        :scope [{:municipality "753" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "P" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "YM" :inforequest-enabled true :new-application-enabled true}
@@ -652,10 +660,10 @@
                                {:municipality "753" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "MM" :inforequest-enabled true :new-application-enabled true}]
-                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                                :url "http://sipoo.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                       :links [(link {:fi "Sipoo", :sv "Sibbo"}
+                                     "http://sipoo.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta")]
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]
                                                                       [:hakija :valtakirja]
@@ -733,14 +741,14 @@
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
                       {:id "753-YA"
-                       :name {:fi "Sipoon yleisten alueiden rakentaminen"
-                              :sv "Sipoon yleisten alueiden rakentaminen"}
+                       :name (names {:fi "Sipoon yleisten alueiden rakentaminen"
+                                     :sv "Sipoon yleisten alueiden rakentaminen"})
                        :scope [{:municipality "753"
                                 :permitType "YA"
                                 :inforequest-enabled true
                                 :new-application-enabled true}]
-                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                                :url "http://sipoo.fi"}]
+                       :links [(link {:fi "Sipoo", :sv "Sibbo"}
+                                     "http://sipoo.fi")]
                        :krysp {:YA {:url local-krysp :ftpUser "dev_ya_sipoo" :version "2.2.1"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
@@ -756,20 +764,20 @@
 
                       ;; Kuopio YA
                       {:id "297-YA"
-                       :name {:fi "Kuopio yleisten alueiden kaytto"
-                              :sv "Kuopio yleisten alueiden kaytto"}
+                       :name (names {:fi "Kuopio yleisten alueiden kaytto"
+                                     :sv "Kuopio yleisten alueiden kaytto"})
                        :scope [{:municipality "297"
                                 :permitType "YA"
                                 :inforequest-enabled true
                                 :new-application-enabled true
                                 :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
-                       :links [{:name {:fi "Kuopio", :sv "Kuopio"}
-                                :url "http://www.kuopio.fi"}]
+                       :links [(link {:fi "Kuopio", :sv "Kuopio"}
+                                     "http://www.kuopio.fi")]
                        :krysp {:YA {:url local-krysp :version "2.1.2" :ftpUser "dev_ya_kuopio"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
-                                           :text "Paloviranomainen",
-                                           :email "sonja.sibbo@sipoo.fi",
-                                           :name "Sonja Sibbo"}]
+                                          :text "Paloviranomainen",
+                                          :email "sonja.sibbo@sipoo.fi",
+                                          :name "Sonja Sibbo"}]
                        :operations-attachments ya-default-attachments-for-operations
                        :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
@@ -777,18 +785,18 @@
 
                       ;; Tampere R
                       {:id "837-R"
-                       :name {:fi "Tampereen rakennusvalvonta"
-                              :sv "Tampereen rakennusvalvonta"}
+                       :name (names {:fi "Tampereen rakennusvalvonta"
+                                     :sv "Tampereen rakennusvalvonta"})
                        :scope [{:municipality "837"
                                 :permitType "R"
                                 :inforequest-enabled true
                                 :new-application-enabled true}]
-                       :links [{:name {:fi "Tampere" :sv "Tammerfors"}
-                                :url "http://tampere.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
-                               {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
-                                :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]
+                       :links [(link {:fi "Tampere" :sv "Tammerfors"}
+                                     "http://tampere.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html")
+                               (link {:fi "Lomakkeet" :sv "Lomakkeet"}
+                                     "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html")]
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
                                                                       [:paapiirustus :pohjapiirustus]
                                                                       [:hakija :valtakirja]
@@ -803,8 +811,8 @@
 
                       ;; Tampere YA
                       {:id "837-YA",
-                       :name {:fi "Tampere yleiset alueet"
-                              :sv "Tammerfors yleiset alueet"}
+                       :name (names {:fi "Tampere yleiset alueet"
+                                     :sv "Tammerfors yleiset alueet"})
                        :scope [{:municipality "837"
                                 :permitType "YA"
                                 :inforequest-enabled true
@@ -820,15 +828,15 @@
 
                       ;; Porvoo R
                       {:id "638-R"
-                       :name {:fi "Porvoon rakennusvalvonta"
-                              :sv "Porvoon rakennusvalvonta"}
+                       :name (names {:fi "Porvoon rakennusvalvonta"
+                                     :sv "Porvoon rakennusvalvonta"})
                        :scope [{:municipality "638" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "638" :permitType "YI" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "638" :permitType "YL" :inforequest-enabled true :new-application-enabled true}]
-                       :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
-                                :url "http://www.porvoo.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]
+                       :links [(link {:fi "Porvoo", :sv "Borg\u00e5"}
+                                     "http://www.porvoo.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030")]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
                        :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "109.204.231.126"]
                        :permanent-archive-enabled false
@@ -836,28 +844,28 @@
 
                       ;; Oulu R
                       {:id "564-R"
-                       :name {:fi "Oulun rakennusvalvonta"
-                              :sv "Oulun rakennusvalvonta"}
+                       :name (names {:fi "Oulun rakennusvalvonta"
+                                     :sv "Oulun rakennusvalvonta"})
                        :scope [{:municipality "564" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
-                       :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                                :url "http://www.ouka.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                                :url "http://oulu.ouka.fi/rakennusvalvonta/"}]
+                       :links [(link {:fi "Oulu", :sv "Ule\u00E5borg"}
+                                     "http://www.ouka.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Fastigheter"}
+                                     "http://oulu.ouka.fi/rakennusvalvonta/")]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
                       ;; Naantali R
                       {:id "529-R"
-                       :name {:fi "Naantalin rakennusvalvonta"
-                              :sv "Naantalin rakennusvalvonta"}
+                       :name (names {:fi "Naantalin rakennusvalvonta"
+                                     :sv "Naantalin rakennusvalvonta"})
                        :scope [{:municipality "529" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
 
                       ;; Peruspalvelukuntayhtyma Selanne R
                       {:id "069-R"
-                       :name {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"
-                              :sv "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"}
+                       :name (names {:fi "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"
+                                     :sv "Peruspalvelukuntayhtym\u00E4 Sel\u00E4nne"})
                        :scope [{:municipality "069" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "317" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "626" :permitType "R" :inforequest-enabled true :new-application-enabled true}
@@ -870,8 +878,8 @@
                       ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.
                       ;; Nice address for testing "Ojatie 1, Loppi"
                       {:id "433-R"
-                       :name {:fi "Loppi rakennusvalvonta"
-                              :sv "Loppi rakennusvalvonta"}
+                       :name (names {:fi "Loppi rakennusvalvonta"
+                                     :sv "Loppi rakennusvalvonta"})
                        :scope [{:municipality "433"
                                 :permitType "R"
                                 :new-application-enabled false
@@ -884,8 +892,8 @@
 
                       ;; Turku R with a public WFS server
                       {:id "853-R"
-                       :name {:fi "Turku rakennusvalvonta"
-                              :sv "\u00c5bo byggnadstillsyn"}
+                       :name (names {:fi "Turku rakennusvalvonta"
+                                     :sv "\u00c5bo byggnadstillsyn"})
                        :scope [{:municipality "853"
                                 :permitType "R"
                                 :new-application-enabled false
@@ -899,7 +907,8 @@
 
                       ;; Kuopio R, has case management (asianhallinta) enabled
                       {:id "297-R"
-                       :name {:fi "Kuopio rakennusvalvonta" :sv "Kuopio byggnadstillsyn"}
+                       :name (names {:fi "Kuopio rakennusvalvonta"
+                                     :sv "Kuopio byggnadstillsyn"})
                        :scope [{:open-inforequest-email nil
                                 :open-inforequest false
                                 :new-application-enabled true
@@ -913,19 +922,15 @@
                                 :municipality "297"
                                 :permitType "P"
                                 :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
-                       :links [{:name
-                                {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
-                                 :sv "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"}
-                                :url
-                                "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakentamisen-sahkoiset-lupapalvelut"}
-                               {:name
-                                {:fi "Kuopion alueellinen rakennusvalvonta"
-                                 :sv "Kuopion alueellinen rakennusvalvonta"}
-                                :url "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakennusvalvonta"}
-                               {:name
-                                {:fi "Kuopion kaupunki"
-                                 :sv "Kuopion kaupunki"}
-                                :url "http://www.kuopio.fi"}]
+                       :links [(link {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
+                                      :sv "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"}
+                                     "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakentamisen-sahkoiset-lupapalvelut")
+                               (link {:fi "Kuopion alueellinen rakennusvalvonta"
+                                      :sv "Kuopion alueellinen rakennusvalvonta"}
+                                     "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakennusvalvonta")
+                               (link {:fi "Kuopion kaupunki"
+                                      :sv "Kuopion kaupunki"}
+                                     "http://www.kuopio.fi")]
                        :krysp {:R
                                {:ftpUser "dev_kuopio"
                                 :url "http://localhost:8000/dev/krysp"
@@ -940,16 +945,16 @@
 
                       ;; Helsinki R
                       {:id "091-R"
-                       :name {:fi "Helsingin rakennusvalvontavirasto"
-                              :sv "Helsingfors byggnadstillsynsverket"}
+                       :name (names {:fi "Helsingin rakennusvalvontavirasto"
+                                     :sv "Helsingfors byggnadstillsynsverket"})
                        :scope [{:municipality "091"
                                 :permitType "R"
                                 :new-application-enabled true
                                 :inforequest-enabled true}]
-                       :links [{:name {:fi "Helsinki" :sv "Helsingfors"}
-                                :url "http://www.hel.fi"}
-                               {:name {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
-                                :url "http://www.hel.fi/www/rakvv/fi"}]
+                       :links [(link {:fi "Helsinki" :sv "Helsingfors"}
+                                     "http://www.hel.fi")
+                               (link {:fi "Rakennusvalvontavirasto", :sv "Byggnadstillsynsverket"}
+                                     "http://www.hel.fi/www/rakvv/fi")]
                        :krysp {:R {:url local-krysp :version "2.2.0" :ftpUser "dev_helsinki"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
@@ -962,15 +967,15 @@
                       ;; Ymparisto organisaatiot
                       ;;
                       {:id "564-YMP"
-                       :name {:fi "Oulun ymparisto"
-                              :sv "Oulun ymparisto"}
+                       :name (names {:fi "Oulun ymparisto"
+                                     :sv "Oulun ymparisto"})
                        :scope [{:municipality "564" :permitType "YM" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
                                {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
-                       :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
-                                :url "http://www.ouka.fi"}]
+                       :links [(link {:fi "Oulu", :sv "Ule\u00E5borg"}
+                                     "http://www.ouka.fi")]
                        :statementGivers [{:id "516560d6c2e6f603beccc144"
                                           :text "Paloviranomainen",
                                           :email "olli.uleaborg@ouka.fi",
@@ -984,13 +989,13 @@
 
                       ;; Sipoo R - New applications disabled
                       {:id "997-R-TESTI-1"
-                       :name {:fi "Sipoon rakennusvalvonta"
-                              :sv "Sipoon rakennusvalvonta"}
+                       :name (names {:fi "Sipoon rakennusvalvonta"
+                                     :sv "Sipoon rakennusvalvonta"})
                        :scope [{:municipality "997" :permitType "R" :inforequest-enabled true :new-application-enabled false}]
-                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                                :url "http://sipoo.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                       :links [(link {:fi "Sipoo", :sv "Sibbo"}
+                                     "http://sipoo.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta")]
                        :krysp {:R {:url local-krysp, :version "2.1.2"
                                    :ftpUser "dev_sipoo"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
@@ -1002,13 +1007,13 @@
 
                       ;; Sipoo R - Inforequests disabled
                       {:id "998-R-TESTI-2"
-                       :name {:fi "Sipoon rakennusvalvonta"
-                              :sv "Sipoon rakennusvalvonta"}
+                       :name (names {:fi "Sipoon rakennusvalvonta"
+                                     :sv "Sipoon rakennusvalvonta"})
                        :scope [{:municipality "998" :permitType "R" :inforequest-enabled false :new-application-enabled true}]
-                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                                :url "http://sipoo.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                       :links [(link {:fi "Sipoo", :sv "Sibbo"}
+                                     "http://sipoo.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta")]
                        :krysp {:R {:url local-krysp, :version "2.1.2"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",
@@ -1019,13 +1024,13 @@
 
                       ;; Sipoo R - Both new applications and inforequests disabled
                       {:id "999-R-TESTI-3"
-                       :name {:fi "Sipoon rakennusvalvonta"
-                              :sv "Sipoon rakennusvalvonta"}
+                       :name (names {:fi "Sipoon rakennusvalvonta"
+                                     :sv "Sipoon rakennusvalvonta"})
                        :scope [{:municipality "999" :permitType "R" :inforequest-enabled false :new-application-enabled false}]
-                       :links [{:name {:fi "Sipoo", :sv "Sibbo"}
-                                :url "http://sipoo.fi"}
-                               {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                                :url "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta"}]
+                       :links [(link {:fi "Sipoo", :sv "Sibbo"}
+                                     "http://sipoo.fi")
+                               (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
+                                     "http://sipoo.fi/fi/palvelut/asuminen_ja_rakentaminen/rakennusvalvonta")]
                        :krysp {:R {:url local-krysp :version "2.1.2"}}
                        :statementGivers [{:id "516560d6c2e6f603beb85147"
                                            :text "Paloviranomainen",

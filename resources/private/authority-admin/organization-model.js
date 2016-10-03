@@ -329,7 +329,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   self.rmLink = function() {
     ajax
-      .command("remove-organization-link", {url: this.url, nameFi: this.name.fi, nameSv: this.name.sv})
+      .command("remove-organization-link", {url: this.url.fi, nameFi: this.name.fi, nameSv: this.name.sv})
       .success(self.load)
       .call();
   };

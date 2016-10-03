@@ -54,8 +54,8 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  ssc/OptionalHttpUrl
-   :name {:fi sc/Str, :sv sc/Str}
+  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
+   :name (i18n/localization-schema sc/Str)
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
@@ -66,7 +66,7 @@
 
 (sc/defschema Organization
   {:id sc/Str
-   :name  {:fi sc/Str, :sv sc/Str (sc/optional-key :en) sc/Str} ;; TODO remote optional when feature.english is toggled off
+   :name  (i18n/localization-schema sc/Str)
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool

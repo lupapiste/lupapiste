@@ -18,6 +18,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -2394,6 +2395,57 @@
     (doseq [organization (mongo/select :organizations {:name.en {$exists false}})]
       (mongo/update-by-id :organizations (:id organization)
                           {$set {:name.en (-> organization :name :fi)}}))))
+
+(defn- english-default-for-link [link]
+  (if (not (-> link :name :en))
+    (assoc-in link [:name :en] (-> link :name :fi))
+    link))
+
+(when (env/feature? :english)
+  (defmigration set-english-defaults-for-organization-link-names
+    {:apply-when (pos? (mongo/count :organizations
+                                    {$and
+                                     [{:links {$exists true}}
+                                      {:links {$elemMatch {:name.en {$exists false}}}}]}))}
+    (reduce + 0
+            (for [organization (mongo/select :organizations
+                                             {$and
+                                              [{:links {$exists true}}
+                                               {:links {$elemMatch {:name.en {$exists false}}}}]}
+                                             {:links 1})]
+              (mongo/update-n :organizations
+                              {:_id (:id organization)}
+                              {$set {:links (map english-default-for-link
+                                                 (:links organization))}})))))
+
+(defn- missing-url-map [lang]
+  {(keyword (str "url." (name lang))) {$exists false}})
+
+(defn- default-urls-for-link [link]
+  (let [default-url (if (string? (:url link))
+                      (:url link)
+                      (-> link :url :fi))]
+    (assert (string? default-url) (str "was actually " default-url))
+    (assoc link :url
+           (merge (i18n/localization-schema default-url)
+                  (if (map? (:url link))
+                    (:url link)
+                    {})))))
+
+(defmigration set-language-defaults-for-organization-link-urls
+  {:apply-when (pos? (mongo/count :organizations
+                                  {:links {$elemMatch {$or (map missing-url-map
+                                                                i18n/supported-langs)}}}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {:links {$elemMatch {$or (map missing-url-map
+                                                                         i18n/supported-langs)}}}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map default-urls-for-link
+                                               (:links organization))}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through subcollections

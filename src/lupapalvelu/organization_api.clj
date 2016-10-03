@@ -172,6 +172,13 @@
         (ok))
       (fail :error.organization.duplicate-scope))))
 
+(defn- localized [nameFi nameSv]
+  (i18n/with-default-localization {:fi nameFi :sv nameSv}
+                                  nameFi))
+
+(defn- localized-url [url]
+  (i18n/localization-schema (ss/trim url)))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
@@ -180,8 +187,8 @@
                       (partial validate-optional-url :url)]}
   [{user :user created :created}]
   (org/update-organization (usr/authority-admins-organization-id user)
-                           {$push {:links {:name {:fi nameFi :sv nameSv}
-                                           :url (ss/trim url)
+                           {$push {:links {:name (localized nameFi nameSv)
+                                           :url (localized-url url)
                                            :modified created}}})
   (ok))
 
@@ -194,8 +201,8 @@
                       (partial number-parameters [:index])]}
   [{user :user created :created}]
   (org/update-organization (usr/authority-admins-organization-id user)
-                           {$set {(str "links." index) {:name {:fi nameFi :sv nameSv}
-                                                        :url (ss/trim url)
+                           {$set {(str "links." index) {:name (localized nameFi nameSv)
+                                                        :url (localized-url url)
                                                         :modified created}}})
   (ok))
 
@@ -205,7 +212,9 @@
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (org/update-organization (usr/authority-admins-organization-id user)
+                           {$pull {:links (localized nameFi nameSv)
+                                   :url (localized-url url)}})
   (ok))
 
 (defquery organizations
