@@ -71,10 +71,27 @@ LUPAPISTE.AttachmentsListingModel = function() {
   // Attachments hierarchy
   //
 
+  var filtered =  self.disposedPureComputed( function() {
+    return _(self.service.filteredAttachments())
+      .map ( function( obs ) {
+        return [obs().id, true];
+      })
+      .fromPairs()
+      .value();
+  });
+
+  function isFiltered( attachmentId ) {
+    return Boolean( filtered()[attachmentId]);
+  }
+
+  function filterAttachmentIds( attachmentIds) {
+    return _.filter( attachmentIds, isFiltered );
+  }
+
   // Return attachment ids grouped first by type-groups and then by type ids.
 
   self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.service.filteredAttachments(), ko.utils.unwrapObservable);
+    var attachments = _.map(self.service.attachments(), ko.utils.unwrapObservable);
     return groupAttachmentsByTags(attachments);
   };
 
@@ -93,7 +110,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
   }
 
   function modelForSubAccordion(subGroup) {
-    var attachmentInfos = getAttachmentInfos(subGroup.attachmentIds);
+    var visibleIds = filterAttachmentIds(subGroup.attachmentIds);
+    var attachmentInfos = getAttachmentInfos(visibleIds);
     return {
       type: "sub",
       attachmentInfos: attachmentInfos,
@@ -109,7 +127,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
         });
       }),
       attachmentIds: subGroup.attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, subGroup.attachmentIds),
+      downloadAll: _.partial(self.service.downloadAttachments, visibleIds),
       downloadAllText: ko.pureComputed(function() {
          var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
          return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
@@ -409,7 +427,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   };
 
   self.signAttachments = function() {
-    hub.send("sign-attachments", {application: self.appModel});
+    hub.send("sign-attachments", {application: self.appModel, attachments: lupapisteApp.services.attachmentsService.attachments});
   };
 
   self.canSign = function() {

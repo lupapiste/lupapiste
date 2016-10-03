@@ -690,8 +690,8 @@ Open attachment details
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Click not needed
-  [Arguments]  ${type}  ${nth}=1
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  [Arguments]  ${type}
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] label[data-test-id=not-needed-label]
   Wait until  Element should be visible  jquery=${selector}
   Scroll to  ${selector}
   Click element  jquery=${selector}

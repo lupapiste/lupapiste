@@ -707,6 +707,17 @@
       (when-not aloitusoikeus?
         (sign-attachment apikey id (:id first-attachment) password)))))
 
+(defn generate-construction-time-attachment [{id :id :as application} authority-apikey password]
+  (let [attachment-type {:type-group "muut" :type-id "muu"}
+        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type])
+        attachment-id (-> resp :attachmentIds first)]
+    (fact "attachment created"
+      resp => ok?)
+    (upload-attachment authority-apikey id {:id attachment-id :type attachment-type} true)
+    (sign-attachment authority-apikey id attachment-id password)
+    (fact "set attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id id :attachmentId attachment-id :value true))) => ok?)
+
 ;; File upload
 
 (defn upload-file

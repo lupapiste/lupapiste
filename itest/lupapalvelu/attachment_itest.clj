@@ -901,3 +901,114 @@
                                  :fileId (-> middle :latestVersion :fileId)
                                  :originalFileId (-> middle :latestVersion :originalFileId))
                         => (partial expected-failure? :error.ram-linked)))))))))
+
+(facts "Marking attachment manually as as construction time attachment"
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (-> (query pena :attachments :id application-id) :attachments first)
+        attachment-id (:id attachment)]
+
+    (facts "attachment-manually-set-construction-time - not set"
+      (:manuallySetConstructionTime attachment) => false)
+    (fact "applicationState before update"
+      (:applicationState attachment) => "draft")
+    (fact "originalApplicationState before update"
+      (:originalApplicationState attachment) => nil)
+
+    (facts "set-attachment-as-construction-time"
+      (fact "applicant"
+        (command pena :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.unauthorized))
+      (fact "auhtority"
+        (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?))
+
+    (facts "attachment is updated"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
+        (fact "applicationState"
+          app-state => "verdictGiven")
+        (fact "originalApplicationState"
+          orig-app-state => "draft")))
+
+    (fact "reset attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?)
+
+    (facts "reset does not change data"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
+        (fact "applicationState"
+          app-state => "verdictGiven")
+        (fact "originalApplicationState"
+          orig-app-state => "draft")))
+
+    (fact "unset attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value false) => ok?)
+
+    (facts "attachment is updated"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => false)
+        (fact "applicationState"
+          app-state => "draft")
+        (fact "originalApplicationState"
+          orig-app-state => nil)))
+
+    (fact "unset non construction time attachment"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value false) => (partial expected-failure? :error.attachment-not-manually-set-construction-time))
+
+    (facts "set construction time attachment which is added in post verdict"
+      (fact "Give verdict"
+        (command sonja :check-for-verdict :id application-id) => ok?)
+      (facts "add attachment"
+        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
+              post-verdict-attachment-id (-> resp :attachmentIds first)
+              attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
+          (fact "added"
+            resp => ok?)
+          (fact "attachemnt id"
+            post-verdict-attachment-id => string?)
+          (fact "applicationState"
+            (:applicationState attachment) => "verdictGiven")
+          (fact "originalApplicationState"
+            (:originalApplicationState attachment) => nil)
+
+          (fact "attachment manually set construction time"
+            (:manuallySetConstructionTime attachment) = false)
+
+          (fact "set-attachment-as-construction-time"
+            (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
+
+(facts "Not needed..."
+  (let [application (create-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        att1 (first attachments)]
+    (fact "Initially not needed can be toggled"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?)
+    (fact "If set notNeeded, upload not possible"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 false))
+    (fact "Upload possible when attachment is needed"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 true))
+    (fact "Can't be set notNeeded when file is uploaded"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => fail?)
+    (let [{attachments :attachments} (query-application pena application-id)
+          updated-attachment (first attachments)]
+      (command pena
+               :delete-attachment-version
+               :id application-id
+               :attachmentId (:id updated-attachment)
+               :fileId (get-in updated-attachment [:latestVersion :fileId])
+               :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
+      (fact "Not needed can be set after version deletion"
+        (command pena :set-attachment-not-needed :id application-id :notNeeded true
+                 :attachmentId (:id updated-attachment)) => ok?))
+    ))

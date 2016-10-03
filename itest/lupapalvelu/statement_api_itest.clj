@@ -18,7 +18,7 @@
                            :email pena-email
                            :text "<b>bold</b>"})
 
-(def non-existing-user-email "kirjaamo@museovirasto.example.com")
+(def non-existing-user-email "Kirjaamo@museovirasto.example.com")
 (def statement-giver-non-existing-user {:name "Master of museum"
                                         :email non-existing-user-email
                                         :text "<b>bold</b>"})
@@ -362,17 +362,17 @@
 
 
 (facts "Non-existing user"
-      (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
-        (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
+  (fact "Non-existing user cannot be added as a statement person (in authority admin view)"
+    (command sipoo :create-statement-giver :email non-existing-user-email :text "hello") => (partial expected-failure? "error.user-not-found"))
 
-      (fact "Non-existing user can be requested as a statement person (on the Statements tab)"
+  (fact "Non-existing user can be requested as a statement person (on the Statements tab)"
     (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
           _ (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-non-existing-user] :saateText "saate" :dueDate 1450994400000) => ok?
-              application (query-application ronja application-id)
-              resp (query admin :user-by-email :email non-existing-user-email) => ok?
-              user (:user resp) => truthy]
-          (get-statement-by-user-id application (:id user)) => truthy
-          (auth-contains-statement-giver application (:id user)) => truthy)))
+          application (query-application ronja application-id)
+          resp (query admin :user-by-email :email non-existing-user-email) => ok?
+          user (:user resp) => truthy]
+      (get-statement-by-user-id application (:id user)) => truthy
+      (auth-contains-statement-giver application (:id user)) => truthy)))
 
 (facts "Statement reply"
   (create-statement-giver sipoo veikko-email)

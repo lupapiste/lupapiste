@@ -5,6 +5,7 @@ Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 
+
 *** Test Cases ***
 
 Mikko creates application
@@ -37,7 +38,6 @@ Sonja opens the attachment tab and unselects post verdict filter
 
 There are no RAM filters
   No such test id  ram-filter-label
-  No such test id  no-ram-filter-label
   
 Sonja opens attachment details
   Open attachment details  muut.muu
@@ -76,18 +76,13 @@ Sonja clicks RAM link and opens old attachment details
   Element should not be visible  jquery=td[data-test-id=ram-link-type-0] a
   Element should be visible  jquery=td[data-test-id=ram-link-type-1] a
 
-Sonja returns to attachments and sees RAM filters
+Sonja returns to attachments and sees RAM filter
   Scroll and click test id  back-to-application-from-attachment
   Wait test id visible  ram-filter-label
-  Wait test id visible  no-ram-filter-label
-  ${all}=  Execute Javascript  return $("tr[data-test-type]:visible").length;
-  Scroll and click test id  ram-filter-label
-  Javascript?  $("tr[data-test-type]").length === 1
+  Checkbox wrapper selected by test id  ram-filter-checkbox
+  #Scroll and click test id  ram-filter-label
+  Javascript?  $("tr[data-test-type]:visible").length === 1
   Wait test id visible  ram-indicator
-  Scroll and click test id  ram-filter-label
-  Scroll and click test id  no-ram-filter-label    
-  No such test id  ram-indicator
-  Javascript?  $("tr[data-test-type]:visible").length === ${all} - 1
   [Teardown]  Logout
 
 Mikko logs in and unselects post verdict filter
@@ -99,7 +94,8 @@ RAM indicator is visible for RAM attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] span[data-test-id=ram-indicator]:visible
 
 Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
-  Open attachment details  muut.muu  1
+  # Only RAM is visible
+  Open attachment details  muut.muu  0
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
   Element should be visible by test id  ram-prefix
@@ -126,7 +122,7 @@ Sonja logs in and goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Sonja rejects attachment but could not delete base attachment
-  Open attachment details  muut.muu  1
+  Open attachment details  muut.muu  0
   Follow ram link  0
   No such test id  ram-prefix
   Delete disallowed
@@ -147,7 +143,7 @@ Mikko logs in and goes to attachment tab
   Open attachments tab and unselect post verdict filter
 
 Mikko opens RAM
-  Open attachment details  muut.muu  1
+  Open attachment details  muut.muu  0
   Element should be visible by test id  ram-prefix
 
 Mikko adds new RAM attachment and uploads file
@@ -175,7 +171,7 @@ Sonja goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Sonja rejects the first RAM but cannot delete it
-  Open attachment details  muut.muu  1
+  Open attachment details  muut.muu  0
   Element should be visible by test id  ram-prefix
   Wait Until  Click button  id=test-attachment-reject
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
@@ -188,7 +184,7 @@ Mikko goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Mikko deletes RAM
-  Open attachment details  muut.muu  1
+  Open attachment details  muut.muu  0
   Element should be visible by test id  ram-prefix
   Follow ram link  2
   Element should be visible by test id  delete-attachment
@@ -198,6 +194,48 @@ Mikko deletes RAM
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   No such test id  ram-link-type-2
+  [Teardown]  Logout
+
+Sonja logs in to test filters
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
+  Open attachments tab and unselect post verdict filter 
+  Scroll and click test id  ram-filter-label
+
+Add pohjapiirustus file and approve it
+  Add attachment file  tr[data-test-type='paapiirustus.pohjapiirustus']  ${PNG_TESTFILE_PATH}
+  Return to application
+  Approve row  tr[data-test-type='paapiirustus.pohjapiirustus']
+
+Remove vaestonsuojasuunnitelma
+  Remove row  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']
+
+Approve first muut.muu
+  Approve row  tr[data-test-type='muut.muu']:first
+
+Hide RAM attachments
+  Scroll and click test id  preVerdict-filter-label
+  Scroll and click test id  postVerdict-filter-label
+  Checkbox wrapper not selected by test id  ram-filter-checkbox
+
+Rollup states
+  Rollup approved  Pääpiirustukset
+  Rollup rejected  Muut suunnitelmat
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+
+Sonja approves RAM
+  Scroll and click test id  ram-filter-label
+  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Approve row  tr[data-test-type='muut.muu']:last
+  Rollup approved  Pääpiirustukset
+  Rollup approved  Muut suunnitelmat
+  Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
+
+Sonja rejects Pohjapiirustus
+  Reject row  tr[data-test-type='paapiirustus.pohjapiirustus']  
+  Rollup rejected  Pääpiirustukset
+  Rollup approved  Muut suunnitelmat
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
   [Teardown]  Logout
 
 *** Keywords ***
@@ -224,3 +262,27 @@ Delete allowed
 Follow ram link
   [Arguments]  ${index}
   Wait until  Click link  jquery=td[data-test-id=ram-link-type-${index}] a
+
+Approve row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button.approve
+
+Reject row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button.reject
+
+Remove row
+  [Arguments]  ${row}
+  Scroll and click  ${row} button[data-test-icon=delete-button]
+  Confirm yes no dialog
+
+Rollup approved
+  [Arguments]  ${name}
+  Scroll to  rollup-status-button[data-test-name='${name}'] button.rollup-button  
+  Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button.positive
+
+Rollup rejected
+  [Arguments]  ${name}
+  Scroll to  rollup-status-button[data-test-name='${name}'] button.rollup-button  
+  Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button
+  Element should not be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button.positive

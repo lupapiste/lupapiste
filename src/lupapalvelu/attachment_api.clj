@@ -79,9 +79,21 @@
     (fail :error.unauthorized
           :desc "Attachment is requested by authority.")))
 
+(defn- attachment-is-needed [{{attachmentId :attachmentId} :data application :application}]
+  (when (and attachmentId (:notNeeded (attachment/get-attachment-info application attachmentId)))
+    (fail :error.attachment.not-needed)))
+
+(defn versions-empty? [application attachmentId]
+  (empty? (:versions (attachment/get-attachment-info application attachmentId))))
+
+(defn- no-versions [{{attachmentId :attachmentId} :data application :application}]
+  (when (and (ss/not-blank? attachmentId)
+             (not (versions-empty? application attachmentId)))
+    (fail :error.attachment.versions-not-empty)))
+
 (defn- has-versions [{{attachmentId :attachmentId} :data application :application}]
   (when (and (ss/not-blank? attachmentId)
-             (empty? (:versions (attachment/get-attachment-info application attachmentId))))
+             (versions-empty? application attachmentId))
     (fail :error.attachment.no-versions)))
 
 (defn any-attachment-has-version [{{attachments :attachments} :application}]
@@ -167,8 +179,8 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application}]
-  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
+  [{{attachments :attachments :as application} :application :as command}]
+  (ok :attachments (map attachment/enrich-attachment attachments)))
 
 (defquery attachment
   {:description "Get single attachment"
@@ -179,10 +191,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application}]
+  [{{attachments :attachments :as application} :application :as command}]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
+      (ok :attachment (attachment/enrich-attachment attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
@@ -495,7 +507,8 @@
                 (partial attachment-editable-by-application-state true)
                 validate-attachment-type
                 app/validate-authority-in-drafts
-                validate-operation-in-application]
+                validate-operation-in-application
+                attachment-is-needed]
    :input-validators [(partial action/non-blank-parameters [:id :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -704,7 +717,9 @@
    :states     #{:draft :open :submitted :complementNeeded}
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
-                attachment-not-requested-by-authority]}
+                attachment-not-requested-by-authority
+                access/has-attachment-auth
+                no-versions]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-data! command attachmentId {:notNeeded notNeeded} created :set-app-modified? true :set-attachment-modified? false)
   (ok))
@@ -731,6 +746,23 @@
                                           (when (seq unSelectedAttachmentIds)
                                             (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
     (ok)))
+
+(defcommand set-attachment-as-construction-time
+  {:description "Sets attachment which is added on application time as construction time attachment"
+   :parameters [id attachmentId value]
+   :categories #{:attachments}
+   :user-roles #{:authority}
+   :states     states/pre-verdict-states
+   :pre-checks [attachment-id-is-present-in-application-or-not-set
+                app/validate-authority-in-drafts
+                (fn [{{value :value} :data :as command}]
+                  (when (false? value)
+                    (attachment/validate-attachment-manually-set-construction-time command)))]
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])
+                      (partial action/boolean-parameters [:value])]}
+  [command]
+  (attachment/set-attachment-construction-time! command attachmentId value)
+  (ok))
 
 (defcommand set-attachment-visibility
   {:parameters       [id attachmentId value]

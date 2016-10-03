@@ -177,14 +177,22 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // For Printing
   self.setForPrintingAllowed = function() { return authModel.ok("set-attachments-as-verdict-attachment"); };
-  addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, function(res) {
-    util.showSavedIndicatorIcon(res);
-  });
+  addUpdateListener("set-attachments-as-verdict-attachment", {ok: true}, util.showSavedIndicatorIcon);
+
+  // Not needed
+  self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed"); };
+  self.setNotNeededEnabled = editable;
+  addUpdateListener("set-attachment-not-needed", {ok: true}, util.showSavedIndicatorIcon);
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
   self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility") && editable(); };
   addUpdateListener("set-attachment-visibility", {ok: true}, util.showSavedIndicatorIcon);
+
+  // Manual construction time toggle
+  self.setConstructionTimeEnabled = function() { return authModel.ok("set-attachment-as-construction-time"); };
+  self.setConstructionTimeVisible = function() { return self.attachment().manuallySetConstructionTime() || self.setConstructionTimeEnabled(); };
+  addUpdateListener("set-attachment-as-construction-time", {ok: true}, util.showSavedIndicatorIcon);
 
   // Permanent archive
   self.permanentArchiveEnabled = function() { return authModel.ok("permanent-archive-enabled"); };
@@ -193,7 +201,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.hasSignature = function() { return !_.isEmpty(self.attachment().signatures); };
   self.sign = function() {
     self.disablePreview(true);
-    self.signingModel.init({id: self.applicationId, attachments:[self.attachment]});
+    self.signingModel.init({id: self.applicationId}, [self.attachment]);
   };
   self.signingAllowed = function() { return authModel.ok("sign-attachments"); };
   self.addHubListener({eventType: "attachments-signed", id: self.applicationId}, function(params) {
