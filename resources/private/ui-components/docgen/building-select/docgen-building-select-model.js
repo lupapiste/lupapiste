@@ -24,6 +24,11 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
       : textTemplate( building );
   };
 
+  // Id is needed for focusing support when following a link from the
+  // required fields summary tab.
+  self.otherId = _.sprintf( "%s-%s",
+                            params.documentId,
+                            _.get( params, "schema.other-key"));
   self.otherParams = _.merge( {documentId: params.documentId},
                               _.pick( lupapisteApp.services.documentDataService
                                       .getInDocument( params.documentId,

@@ -13,11 +13,13 @@
                          disable: disabled() || readonly(),
                          css: inputClasses,                     
                          testId: path.join('.')"
-              class="form-input combobox long">
+              class="form-input combobox long"
+              name="buildingId">
       </select>
       <span data-bind="saveIndicator: indicator, label: false"></span>
       <div data-bind="component: {name: 'docgen-string', params: otherParams},
-                      visible: otherSelected"></div>
+                      visible: otherSelected,
+                      attr: {id: otherId}"></div>
     </div>
   </div>
 
