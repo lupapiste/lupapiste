@@ -65,13 +65,28 @@
 
 (ctc/validate-all-documents kaivulupa-application)
 
-(def- link-permit-data {:id "LP-753-2013-00003"
-                                 :type "kuntalupatunnus"
-                                 :operation nil})
+(def- link-permit-data [{:id "LP-753-2013-00003"
+                          :type "kuntalupatunnus"
+                          :operation nil}
+                        {:id "LP-753-2013-00006"
+                         :type "kuntalupatunnus"
+                         :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"}])
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical
-  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija)
+  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija get-linked-sijoituslupa-id)
+
+
+(facts get-linked-sijoituslupa-id
+
+  (fact "without linked sijoituslupa"
+      (get-linked-sijoituslupa-id {:linkPermitData [{:id "LP-753-2013-00003"
+                                                     :type "kuntalupatunnus"
+                                                     :operation nil}]}) => nil)
+
+  (fact "without linked sijoituslupa"
+    (get-linked-sijoituslupa-id {:linkPermitData link-permit-data}) => "LP-753-2013-00006"))
+
 
 (facts* "Kaivulupa canonical model is correct"
   (let [canonical (application-to-canonical kaivulupa-application "fi")
@@ -319,13 +334,12 @@
       (fact "varattava-pinta-ala" pinta-ala => (-> hankkeen-kuvaus :data :varattava-pinta-ala :value))))
 
 
-
 (def kaivulupa-application-with-link-permit-data
-  (merge kaivulupa-application {:linkPermitData [link-permit-data]}))
+  (merge kaivulupa-application {:linkPermitData link-permit-data}))
 
 (ctc/validate-all-documents kaivulupa-application-with-link-permit-data)
 
-(facts* "Kaivulupa canonical model is correct"
+(facts* "Kaivulupa canonical model is correct - with link permit data"
   (let [canonical (application-to-canonical kaivulupa-application-with-link-permit-data "fi")
         YleisetAlueet (:YleisetAlueet canonical) => truthy
         yleinenAlueAsiatieto (:yleinenAlueAsiatieto YleisetAlueet) => truthy
@@ -334,15 +348,20 @@
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
-        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy]
+        viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy
+        Sijoituslupaviite (-> Tyolupa :sijoituslupaviitetieto :Sijoituslupaviite) => truthy]
+
 
     (fact "LP-tunnus"
       (:tunnus lp-muu-tunnus) => (:id kaivulupa-application-with-link-permit-data)
       (:sovellus lp-muu-tunnus) => "Lupapiste")
 
     (fact "Viitelupa"
-      (:tunnus viitelupatunnus) => (:id link-permit-data)
-      (:sovellus viitelupatunnus) => "Viitelupa")))
+      (:tunnus viitelupatunnus) => (:id (first link-permit-data))
+      (:sovellus viitelupatunnus) => "Viitelupa")
+
+    (fact "Sijoituslupaviite"
+      (:tunniste Sijoituslupaviite) => (-> link-permit-data second :id))))
 
 
 (def katselmus
@@ -390,4 +409,3 @@
     (fact "lasnaolijat" lasnaolijat => "paikallaolijat")
     (fact "poikkeamat" poikkeamat => "jotain poikkeamia oli")
     ))
-

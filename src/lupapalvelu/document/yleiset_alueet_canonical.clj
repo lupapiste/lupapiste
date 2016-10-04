@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.operations :as op]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -148,7 +149,7 @@
 (def- configs-per-permit-name
   {:Kayttolupa                            default-config
    :Tyolupa                               (merge default-config
-                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true})
+                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true :sijoituslupa-link true})
    :Sijoituslupa                          (merge default-config
                                             {:tyoaika false :dummy-alku-and-loppu-pvm true})
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
@@ -235,6 +236,11 @@
      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
      :johtoselvitysviitetieto johtoselvitysviitetieto}))
 
+(defn- get-linked-sijoituslupa-id [application]
+  (let [sijoituslupa-operations (op/operations-in ["yleisten-alueiden-luvat" "sijoituslupa"])]
+    (->> (:linkPermitData application)
+         (util/find-first (comp (set sijoituslupa-operations) keyword :operation))
+         :id)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -257,8 +263,9 @@
                     (:varattava-pinta-ala hankkeen-kuvaus))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (:kayttotarkoitus hankkeen-kuvaus))
-        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
+        sijoituslupaviitetieto (when (:sijoituslupa-link config)
+                                 (when-let [tunniste (or (get-linked-sijoituslupa-id application)
+                                                         (:sijoitusLuvanTunniste hankkeen-kuvaus))]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
