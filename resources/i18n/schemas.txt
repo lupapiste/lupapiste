@@ -1783,7 +1783,7 @@
 "maksimi-elainmaara" "en" "Maximum number of animals"
 "maksimi-elainmaara" "fi" "Maksimi eläinmäärä"
 "maksimi-elainmaara" "sv" "Maximalt antal djur"
-"manuaalinen_rakennusnro" "en" "Give a three-digit building number"
+"manuaalinen_rakennusnro" "en" "Enter a three-digit building number"
 "manuaalinen_rakennusnro" "fi" "Syötä kolminumeroinen rakennusnumero""
 "manuaalinen_rakennusnro" "sv" "Ange byggnadsnummer med tre siffror"
 "meluilmoitus._group_label" "en" "Temporary activities causing noise and vibration"

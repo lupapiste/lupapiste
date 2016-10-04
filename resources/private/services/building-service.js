@@ -42,14 +42,14 @@ LUPAPISTE.BuildingService = function() {
   // [collection]: Mongo collection ("documents")
  hub.subscribe( "buildingService::merge", function( options ) {
     ajax.command("merge-details-from-krysp",
-                 _.merge( _.pick( options, ["documentId",
+                 _.defaults( _.pick( options, ["documentId",
                                             "buildingId",
                                             "overwrite",
                                             "path",
                                             "collection"]),
-                          _.defaults( {id: latestAppId,
-                                       path: "buildingId",
-                                       collection: "documents"})))
+                           {id: latestAppId,
+                            path: "buildingId",
+                            collection: "documents"}))
       .success( _.partial( repository.load, latestAppId, _.noop))
       .onError("error.no-legacy-available", notify.ajaxError)
       .call();
