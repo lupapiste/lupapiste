@@ -10,7 +10,6 @@
             [sade.validators :as v]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
-            [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]

@@ -1532,4 +1532,10 @@ div.review-done {
   padding-left: $marginS;
 }
 
- 
+.building-select-container {
+  margin-left: $marginS;
+  .building-select-box {
+    position: relative;
+    width: 30em;
+  }
+}
