@@ -19,7 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
@@ -68,7 +68,7 @@
       (assoc transfer :attachments (map :id attachments)))))
 
 (defn- do-approve [application organization created id current-state lang do-rest-fn]
-  (if (organization/krysp-integration? organization (permit/permit-type application))
+  (if (org/krysp-integration? organization (permit/permit-type application))
     (or
       (application/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
@@ -198,7 +198,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (org/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -250,7 +250,7 @@
    :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
+  (if-let [{url :url credentials :credentials} (org/get-krysp-wfs application)]
     (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
 
@@ -379,14 +379,20 @@
      :error []}))
 
 (defquery integration-messages
-  {:parameters [id]
-   :user-roles #{:authority}
-   :org-authz-roles  #{:approver}
-   :states #{:sent :complementNeeded}}
+  {:parameters      [id]
+   :user-roles      #{:authority}
+   :org-authz-roles #{:approver}
+   :pre-checks      [(fn [{app :application organization :organization}]
+                       (when-let [org (and organization @organization)]
+                         (when-not (or (org/krysp-integration? org (permit/permit-type app))
+                                       (ah/asianhallinta-enabled?
+                                         (org/resolve-organization-scope (:municipality app) (permit/permit-type app) org)))
+                           (fail :error.sftp.user-not-set))))]
+   :states          #{:sent :complementNeeded}}
   [{{municipality :municipality permit-type :permitType} :application org :organization}]
   (let [organization     @org
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
-        ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
+        ah-scope         (org/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
@@ -413,7 +419,7 @@
         dir (case transfer-type
               "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
               "ah" (ah/resolve-output-directory
-                     (organization/resolve-organization-scope municipality permit-type organization)))
+                     (org/resolve-organization-scope municipality permit-type organization)))
         subdir (case file-type
                  "ok" (str env/file-separator "archive" env/file-separator)
                  "error" (str env/file-separator "error" env/file-separator))
