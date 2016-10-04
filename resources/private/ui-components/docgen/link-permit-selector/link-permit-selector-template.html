@@ -5,14 +5,14 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="default-link-permit-selector-template">
 
   <span class="form-entry link-permit-selector">
-    <message-panel params="class: 'errorPanel', show: showMessagePanel, message: linkPermitError"></message-panel>
+    <message-panel params="class: 'errorPanel', show: showMessagePanel, message: errorMessage"></message-panel>
     <message-panel params="class: 'form-help', show: showMessagePanel, message: helpMessage"></message-panel>
 
-    <label data-bind="visible: label, ltext: label, css: enrichedLabelClasses"></label>
+    <label data-bind="visible: label, ltext: label, css: labelClasses"></label>
     <input type="text"
            class="form-input"
            data-bind="textInput: linkedValue,
-                      css: enrichedInputClasses,
+                      css: inputClasses,
                       event: events,
                       disable: disabled,
                       attr: { 'readonly': validLinkPermits().length || readonly,

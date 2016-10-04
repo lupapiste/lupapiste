@@ -26,21 +26,24 @@ LUPAPISTE.LinkPermitSelectorModel = function(params) {
 
   self.linkedValue = self.disposedComputed({
     read: function() {
-      return util.getIn(self.validLinkPermits(), [0, "id"]) || self.value();
+      return util.getIn(self.validLinkPermits, [0, "id"]) || self.value();
     },
     write: self.value
   });
 
-  self.linkPermitError = self.disposedComputed(function() {
-    return self.errorMessage() || (self.validLinkPermits().length > 1) && loc(["error", "multiple-linked-permits-of-type"].concat(self.schema.operationsPath));
+  var baseErrorMessage = self.errorMessage;
+  self.errorMessage = self.disposedComputed(function() {
+    return baseErrorMessage() || (self.validLinkPermits().length > 1) && loc(["error", "multiple-linked-permits-of-type"].concat(self.schema.operationsPath));
   });
 
-  self.enrichedInputClasses = self.disposedComputed(function() {
-    return self.inputClasses() + (self.linkPermitError() ? " warn" : "");
+  var baseInputClasses = self.inputClasses;
+  self.inputClasses = self.disposedComputed(function() {
+    return baseInputClasses() + (self.errorMessage() ? " warn" : "");
   });
 
-  self.enrichedLabelClasses = self.disposedComputed(function() {
-    return self.labelClasses() + (self.linkPermitError() ? " warn" : "");
+  var baseLabelClasses = self.labelClasses;
+  self.labelClasses = self.disposedComputed(function() {
+    return baseLabelClasses() + (self.errorMessage() ? " warn" : "");
   });
 
 };
