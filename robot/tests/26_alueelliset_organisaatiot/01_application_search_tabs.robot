@@ -64,7 +64,7 @@ Teppo Logs out
   Log out
 
 Sonja logs in and navigates to application page
-  Sonja logs in
+  Sonja logs in  False
   Go to page  applications
   Active search tab is  application
 

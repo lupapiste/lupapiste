@@ -24,7 +24,7 @@ Teppo logs in and creates some applications
   Log out
 
 Sonja logs in and sees some only foreman applications on foreman search tab
-  Sonja logs in
+  Sonja logs in  False
   Go to page  applications
   Active search tab is  application
   Scroll and click test id  search-tab-all
