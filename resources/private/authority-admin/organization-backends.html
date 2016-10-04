@@ -9,17 +9,19 @@
         <table data-test-id="organization-links-table">
           <thead>
             <tr>
-              <th data-bind="ltext: 'auth-admin.link.fi'"></th>
-              <th data-bind="ltext: 'auth-admin.link.sv'"></th>
+              <!-- ko foreach: loc.supported -->
+              <th data-bind="ltext: 'auth-admin.link.' + $data"></th>
               <th data-bind="ltext: 'auth-admin.link.url'"></th>
+              <!-- /ko -->
               <th data-bind="ltext: 'auth-admin.actions'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: organization.links">
             <tr>
-              <td data-bind="text: name.fi"></td>
-              <td data-bind="text: name.sv"></td>
-              <td><a href="#" data-bind="text: url.fi, attr: {href: url.fi}" target="_blank"></a></td>
+              <!-- ko foreach: loc.supported -->
+              <td data-bind="text: $parent.name[$data]"></td>
+              <td><a href="#" data-bind="text: $parent.url[$data], attr: {href: $parent.url[$data]}" target="_blank"></a></td>
+              <!-- /ko -->
               <td>
                 <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
                   [<a href="#" data-bind="click: $root.organization.editLink.bind($data, $index), ltext: 'edit'"
@@ -196,12 +198,16 @@
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.organization.editLinkModel">
-            <label data-bind="ltext: 'auth-admin.link.fi'" for="link-text-fi" class="form-label"></label>
-            <input data-bind="textInput: nameFi" class="form-input text long" type="text" id="link-text-fi" autofocus="autofocus"/>
-            <label data-bind="ltext: 'auth-admin.link.sv'" for="link-text-sv" class="form-label"></label>
-            <input data-bind="textInput: nameSv" class="form-input text long" type="text" id="link-text-sv" />
+            <!-- ko foreach: $root.organization.editLinkModel.links -->
+            <label data-bind="ltext: 'auth-admin.link.' + $data.lang,
+                              attr:  {'for': 'link-text-' + $data.lang}"
+                   class="form-label"></label>
+            <input data-bind="textInput: $data.name,
+                              attr: {'id': 'link-text-' + $data.lang}"
+                   class="form-input text long" type="text" autofocus="autofocus"/>
             <label data-bind="ltext: 'auth-admin.link.url'" for="link-url"class="form-label"></label>
-            <input data-bind="textInput: url" class="form-input text long" type="text" id="link-url"/>
+            <input data-bind="textInput: $data.url" class="form-input text long" type="text" id="link-url"/>
+            <!-- /ko -->
             <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
           </div>
         </div>

@@ -618,7 +618,7 @@
                                       :use-attachment-links-integration false})
 
 (defn- names [names-map]
-  (i18n/with-default-localization names-map (:fi names)))
+  (i18n/with-default-localization names-map (:fi names-map)))
 
 (defn- link [link-names link-url]
   {:name (names link-names)

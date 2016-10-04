@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-optional-url] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -179,42 +179,66 @@
 (defn- localized-url [url]
   (i18n/localization-schema (ss/trim url)))
 
+(defn- validate-map-with-optional-url-values [param command]
+  (let [urls (map ss/trim (vals (get-in command [:data param])))]
+    (some #(when-not (ss/blank? %)
+             (validate-url %))
+          urls)))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
-   :parameters [url nameFi nameSv]
+   :parameters [url name]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
-                      (partial validate-optional-url :url)]}
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values [:url])]}
   [{user :user created :created}]
   (org/update-organization (usr/authority-admins-organization-id user)
-                           {$push {:links {:name (localized nameFi nameSv)
-                                           :url (localized-url url)
+                           {$push {:links {:name     name
+                                           :url      url
                                            :modified created}}})
   (ok))
 
 (defcommand update-organization-link
   {:description "Updates organization link."
-   :parameters [url nameFi nameSv index]
+   :parameters [url name index]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
-                      (partial validate-optional-url :url)
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values [:url])
                       (partial number-parameters [:index])]}
   [{user :user created :created}]
   (org/update-organization (usr/authority-admins-organization-id user)
-                           {$set {(str "links." index) {:name (localized nameFi nameSv)
-                                                        :url (localized-url url)
+                           {$set {(str "links." index) {:name     name
+                                                        :url      url
                                                         :modified created}}})
   (ok))
 
+(defn- combine-keys [prefix [k v]]
+  [(keyword (str (name prefix) "." (name k))) v])
+
+(defn- mongofy
+  "Transform eg. {:outer {:inner :value}} into {:outer.inner :value}"
+  [m]
+  (into {}
+        (mapcat (fn [[k v]]
+                  (if (and (keyword? k)
+                           (map? v))
+                    (map (partial combine-keys k) (mongofy v))
+                    [[k v]]))
+                m)))
+
 (defcommand remove-organization-link
   {:description "Removes organization link."
-   :parameters [url nameFi nameSv]
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]
+   :parameters [url name]
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values [:url])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user)
-                           {$pull {:links (localized nameFi nameSv)
-                                   :url (localized-url url)}})
+                           {$pull {:links (mongofy {:name name
+                                                    :url  url})}})
   (ok))
 
 (defquery organizations
