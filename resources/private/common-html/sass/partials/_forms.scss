@@ -1481,7 +1481,7 @@ textarea.grid-style-input {
   @extend .btn-base;
   display: block;
 }
- 
+
 div.review-done {
   margin: $marginL;
 }
@@ -1532,4 +1532,13 @@ div.review-done {
   padding-left: $marginS;
 }
 
- 
+.link-permit-selector {
+  padding-left: $marginS;
+  label.form-label {
+    width: 100%;
+  }
+  .errorPanel {
+    top: -50px;
+    left: 200px;
+  }
+}

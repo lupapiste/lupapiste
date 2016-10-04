@@ -80,6 +80,7 @@ jQuery(document).ready(function() {
     {name: "search-field"},
     {name: "maaraala-tunnus", synchronous: true},
     {name: "property-group", synchronous: true},
+    {name: "link-permit-selector"},
     {name: "password-field"},
     {name: "accordion-toolbar", synchronous: true},
     {name: "group-approval", synchronous: true},

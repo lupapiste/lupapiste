@@ -29,7 +29,10 @@
 (def hankkeen-kuvaus-kaivulupa
   (body
     hankkeen-kuvaus-kayttolupa
-    {:name "sijoitusLuvanTunniste" :type :string :size :l}))   ;; sijoituslupaviitetietoType
+    {:name "sijoitusLuvanTunniste" ; sijoituslupaviitetietoType
+     :size :l
+     :type :linkPermitSelector
+     :operationsPath ["yleisten-alueiden-luvat" "sijoituslupa"]}))
 
 (def tyomaasta-vastaava
   (-> ya-party
@@ -214,8 +217,3 @@
                           {:name "painorajoitus" :type :checkbox}
                           {:name "ulottumarajoituksia" :type :checkbox}
                           {:name "tyokoneitaLiikenteenSeassa" :type :checkbox}]}]}]})
-
-
-
-
-

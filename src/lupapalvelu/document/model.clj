@@ -130,6 +130,10 @@
   (when-not (or (string? v) (nil? v))
     [:err "unknown-type"]))
 
+(defmethod validate-field :linkPermitSelector [application elem v]
+  (when-not (or (string? v) (nil? v))
+    [:err "unknown-type"]))
+
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
