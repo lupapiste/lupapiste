@@ -4,8 +4,6 @@ LUPAPISTE.LinkPermitSelectorModel = function(params) {
 
   params.template = (params.template || params.schema.template) || "default-link-permit-selector-template";
 
-  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
-
   // inherit from DocgenInputModel
   ko.utils.extend(self, new LUPAPISTE.DocgenInputModel(params));
 
