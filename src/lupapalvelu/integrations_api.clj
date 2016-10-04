@@ -386,7 +386,7 @@
                        (when-let [org (and organization @organization)]
                          (when-not (or (org/krysp-integration? org (permit/permit-type app))
                                        (ah/asianhallinta-enabled?
-                                         (org/resolve-organization-scope (:municilapity app) (permit/permit-type app) org)))
+                                         (org/resolve-organization-scope (:municipality app) (permit/permit-type app) org)))
                            (fail :error.sftp.user-not-set))))]
    :states          #{:sent :complementNeeded}}
   [{{municipality :municipality permit-type :permitType} :application org :organization}]
