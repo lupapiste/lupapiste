@@ -58,14 +58,28 @@
                           :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")]
     (str prefix tunnus-location)))
 
+(defn- property-is-equal-to
+  [property value]
+  (str "<PropertyIsEqualTo>"
+       "<PropertyName>" (sxml/escape-xml property) "</PropertyName>"
+       "<Literal>" (sxml/escape-xml value) "</Literal>"
+       "</PropertyIsEqualTo>"))
+
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
   [property value]
-  (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>"
-                         (sxml/escape-xml property)
-                         "</PropertyName><Literal>"
-                         (sxml/escape-xml value)
-                         "</Literal></PropertyIsEqualTo>")))
+  (->> (property-is-equal-to property value)
+       (codec/url-encode)))
+
+(defn property-in
+  "Returns WFS 1.1.0 compatible URL-encoded search parameter suitable for 'filter'"
+  [property values]
+  (if (> 2 (count values))
+    (property-equals property (first values))
+    (->> (map (partial property-is-equal-to property) values)
+         (apply str)
+         (ss/wrap-with-tag "Or")
+         (codec/url-encode))))
 
 (defn wfs-krysp-url [server object-type filter]
   (let [server (if (ss/contains? server "?")

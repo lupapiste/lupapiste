@@ -93,6 +93,9 @@
     (replace "&gt;"   ">")
     (replace "&quot;" "\"")))
 
+(defn wrap-with-tag [tag content]
+  (str "<" tag ">" content "</" tag ">"))
+
 (defn base64-decode
   "Decode a base64 encoded string using UTF-8."
   ^String [^String s]
