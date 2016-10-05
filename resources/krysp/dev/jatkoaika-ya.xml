@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:FeatureCollection xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+  xmlns:yak="http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml"
+  xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd"
+  numberOfFeatures="1" timeStamp="2014-02-13T04:04:00Z">
+  <gml:description>String</gml:description>
+  <gml:csName>http://www.opengis.net/gml/srs/epsg.xml#3047</gml:csName>
+  <gml:boundedBy>
+    <gml:Envelope srsName="http://www.opengis.net/gml/srs/epsg.xml#3047">
+      <gml:lowerCorner>0 0</gml:lowerCorner>
+      <gml:upperCorner>0 0</gml:upperCorner>
+    </gml:Envelope>
+  </gml:boundedBy>
+  <gml:featureMember>
+    <yak:YleisetAlueet
+      xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset"
+      xmlns:yak="http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:gml="http://www.opengis.net/gml"
+      xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd">
+      <yak:toimituksenTiedot>
+        <yht:aineistonnimi>LP-753-2016-90001</yht:aineistonnimi>
+        <yht:aineistotoimittaja />
+        <yht:toimitusPvm>2014-02-13</yht:toimitusPvm>
+        <yht:kuntakoodi />
+        <yht:kielitieto>fi</yht:kielitieto>
+      </yak:toimituksenTiedot>
+      <yak:yleinenAlueAsiatieto>
+        <yak:Kayttolupa>
+          <yak:kasittelytietotieto>
+            <yak:Kasittelytieto>
+              <yht:muutosHetki>2014-01-29T13:57:15</yht:muutosHetki>
+              <yht:hakemuksenTila>Hyväksytty</yht:hakemuksenTila>
+              <yht:asiatunnus>LP-753-2016-90001</yht:asiatunnus>
+              <yht:paivaysPvm>2014-02-13</yht:paivaysPvm>
+              <yak:kasittelija>
+                <yak:henkilotieto>
+                  <yak:Henkilo>
+                    <yht:nimi>
+                      <yht:etunimi>Sonja</yht:etunimi>
+                      <yht:sukunimi>Vilpas</yht:sukunimi>
+                    </yht:nimi>
+                  </yak:Henkilo>
+                </yak:henkilotieto>
+              </yak:kasittelija>
+            </yak:Kasittelytieto>
+          </yak:kasittelytietotieto>
+          <yak:luvanTunnisteTiedot>
+            <yht:LupaTunnus>
+              <yht:kuntalupatunnus>523</yht:kuntalupatunnus>
+              <yht:muuTunnustieto>
+                <yht:MuuTunnus>
+                  <yht:tunnus>LP-753-2016-90001</yht:tunnus>
+                  <yht:sovellus>lupapiste</yht:sovellus>
+                </yht:MuuTunnus>
+              </yht:muuTunnustieto>
+            </yht:LupaTunnus>
+          </yak:luvanTunnisteTiedot>
+          <yak:alkuPvm>2014-02-13</yak:alkuPvm>
+          <yak:loppuPvm>2014-02-13</yak:loppuPvm>
+          <yak:sijaintitieto>
+            <yak:Sijainti>
+              <yht:osoite>
+                <yht:yksilointitieto>LP-753-2016-90001</yht:yksilointitieto>
+                <yht:alkuHetki>2014-02-13T16:04:00</yht:alkuHetki>
+                <yht:osoitenimi>
+                  <yht:teksti>Kuopionlahdenkatu 1</yht:teksti>
+                </yht:osoitenimi>
+              </yht:osoite>
+              <yht:piste>
+                <gml:Point>
+                  <gml:pos>534933.50461566 6973340.46732888</gml:pos>
+                </gml:Point>
+              </yht:piste>
+            </yak:Sijainti>
+          </yak:sijaintitieto>
+          <yak:osapuolitieto>
+            <yak:Osapuoli>
+              <yak:henkilotieto>
+                <yak:Henkilo>
+                  <yht:nimi>
+                    <yht:etunimi>Harri</yht:etunimi>
+                    <yht:sukunimi>Hakija</yht:sukunimi>
+                  </yht:nimi>
+                  <yak:sahkopostiosoite>hakija@example.com</yak:sahkopostiosoite>
+                  <yak:puhelin>040-1234567</yak:puhelin>
+                </yak:Henkilo>
+              </yak:henkilotieto>
+              <yak:yritystieto>
+                <yak:Yritys>
+                  <yak:nimi>Hakija Oy</yak:nimi>
+                  <yak:liikeJaYhteisotunnus>1234568-9</yak:liikeJaYhteisotunnus>
+                  <yak:postiosoitetieto>
+                    <yak:Postiosoite>
+                      <yht:osoitenimi>
+                        <yht:teksti>Katuosoite 1</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>38520</yht:postinumero>
+                      <yht:postitoimipaikannimi>Kuopio</yht:postitoimipaikannimi>
+                    </yak:Postiosoite>
+                  </yak:postiosoitetieto>
+                </yak:Yritys>
+              </yak:yritystieto>
+              <yak:rooliKoodi>hakija</yak:rooliKoodi>
+            </yak:Osapuoli>
+          </yak:osapuolitieto>
+          <yak:osapuolitieto>
+            <yak:Osapuoli>
+              <yak:yritystieto>
+                <yak:Yritys>
+                  <yak:nimi>Kaivin</yak:nimi>
+                  <yak:liikeJaYhteisotunnus>1234568-8</yak:liikeJaYhteisotunnus>
+                  <yak:postiosoitetieto>
+                    <yak:Postiosoite>
+                      <yht:osoitenimi>
+                        <yht:teksti>Suokatu 10</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>00200</yht:postinumero>
+                      <yht:postitoimipaikannimi>Kuopio</yht:postitoimipaikannimi>
+                    </yak:Postiosoite>
+                  </yak:postiosoitetieto>
+                </yak:Yritys>
+              </yak:yritystieto>
+              <yak:rooliKoodi>työnsuorittaja</yak:rooliKoodi>
+            </yak:Osapuoli>
+          </yak:osapuolitieto>
+          <yak:vastuuhenkilotieto>
+            <yak:Vastuuhenkilo>
+              <yak:sukunimi>Vastaava</yak:sukunimi>
+              <yak:etunimi>Harri</yak:etunimi>
+              <yak:osoitetieto>
+                <yak:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti />
+                  </yht:osoitenimi>
+                  <yht:postinumero />
+                  <yht:postitoimipaikannimi />
+                </yak:osoite>
+              </yak:osoitetieto>
+              <yak:puhelinnumero>040-8956123</yak:puhelinnumero>
+              <yak:sahkopostiosoite>vastaava@example.com</yak:sahkopostiosoite>
+              <yak:rooliKoodi>lupaehdoista/työmaasta vastaava henkilö</yak:rooliKoodi>
+            </yak:Vastuuhenkilo>
+          </yak:vastuuhenkilotieto>
+          <yak:vastuuhenkilotieto>
+            <yak:Vastuuhenkilo>
+              <yak:sukunimi>Maksaja</yak:sukunimi>
+              <yak:etunimi>Kalle</yak:etunimi>
+              <yak:osoitetieto>
+                <yak:osoite>
+                  <yht:osoitenimi>
+                    <yht:teksti />
+                  </yht:osoitenimi>
+                  <yht:postinumero />
+                  <yht:postitoimipaikannimi />
+                </yak:osoite>
+              </yak:osoitetieto>
+              <yak:puhelinnumero>040-2569743</yak:puhelinnumero>
+              <yak:sahkopostiosoite>maksaja@example.com</yak:sahkopostiosoite>
+              <yak:rooliKoodi>maksajan vastuuhenkilö</yak:rooliKoodi>
+            </yak:Vastuuhenkilo>
+          </yak:vastuuhenkilotieto>
+          <yak:maksajatieto>
+            <yak:Maksaja>
+              <yak:yritystieto>
+                <yak:Yritys>
+                  <yak:nimi>Maksaja Oy</yak:nimi>
+                  <yak:liikeJaYhteisotunnus>1236958-1</yak:liikeJaYhteisotunnus>
+                  <yak:postiosoitetieto>
+                    <yak:Postiosoite>
+                      <yht:osoitenimi>
+                        <yht:teksti>Suokatu 11</yht:teksti>
+                      </yht:osoitenimi>
+                      <yht:postinumero>00200</yht:postinumero>
+                      <yht:postitoimipaikannimi>Kuopio
+                      </yht:postitoimipaikannimi>
+                    </yak:Postiosoite>
+                  </yak:postiosoitetieto>
+                </yak:Yritys>
+              </yak:yritystieto>
+            </yak:Maksaja>
+          </yak:maksajatieto>
+          <yak:liitetieto>
+            <yak:Liite>
+              <yht:kuvaus>liite</yht:kuvaus>
+              <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+              <yht:muokkausHetki>2014-01-29T13:58:15</yht:muokkausHetki>
+              <yht:versionumero />
+              <yak:tyyppi>Muu liite</yak:tyyppi>
+            </yak:Liite>
+          </yak:liitetieto>
+          <yak:paatostieto>
+            <yak:Paatos>
+              <yak:takuuaikaPaivat>760</yak:takuuaikaPaivat>
+              <yak:lupaehdotJaMaaraykset>Kaivu: Alkukatselmus pidettävä.</yak:lupaehdotJaMaaraykset>
+              <yak:lupaehdotJaMaaraykset>Kaivu: Viheralueet rakennettava.</yak:lupaehdotJaMaaraykset>
+              <yak:paatosdokumentinPvm>2014-01-29</yak:paatosdokumentinPvm>
+              <yak:liitetieto>
+                <yak:Liite>
+                  <yht:kuvaus>liite</yht:kuvaus>
+                  <yht:linkkiliitteeseen>http://localhost:8000/dev/sample-attachment.txt</yht:linkkiliitteeseen>
+                  <yht:muokkausHetki>2014-01-29T13:58:15</yht:muokkausHetki>
+                  <yht:versionumero />
+                  <yak:tyyppi>Muu liite</yak:tyyppi>
+                </yak:Liite>
+              </yak:liitetieto>
+            </yak:Paatos>
+          </yak:paatostieto>
+          <yak:lupakohtainenLisatietotieto>
+            <yak:LupakohtainenLisatieto>
+              <yht:selitysteksti>Lisätietoja sijoituskohteesta</yht:selitysteksti>
+              <yht:arvo>Tyomaakaytto, Lisatietoja kayttotarkoituksesta: muu tyomaakaytto</yht:arvo>
+            </yak:LupakohtainenLisatieto>
+          </yak:lupakohtainenLisatietotieto>
+          <yak:lisaaikatieto>
+            <yak:Lisaaika>
+              <yht:alkuPvm>2016-10-04</yht:alkuPvm>
+              <yht:loppuPvm>2016-11-22</yht:loppuPvm>
+              <yak:perustelu>Jatkoajan perustelu</yak:perustelu>
+            </yak:Lisaaika>
+          </yak:lisaaikatieto>
+          <yak:sijoituslupaviitetieto>
+            <yak:Sijoituslupaviite>
+              <yak:vaadittuKytkin>false</yak:vaadittuKytkin>
+            </yak:Sijoituslupaviite>
+          </yak:sijoituslupaviitetieto>
+          <yak:kayttotarkoitus>muut yleiselle alueelle kohdistuvat tilan käytöt</yak:kayttotarkoitus>
+        </yak:Kayttolupa>
+      </yak:yleinenAlueAsiatieto>
+    </yak:YleisetAlueet>
+  </gml:featureMember>
+</wfs:FeatureCollection>
