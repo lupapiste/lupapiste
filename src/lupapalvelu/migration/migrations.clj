@@ -2414,6 +2414,18 @@
                               {$elemMatch {$and [{:notNeeded true} ,
                                                  {:versions {$exists true,
                                                              $not {$size 0}}}]}}}))
+
+(defmigration set-attachments-with-versions-to-needed-v2          ;; LPK-2275
+  {:apply-when (pos? (mongo/count :applications {:attachments
+                                                 {$elemMatch {$and [{:notNeeded true} ,
+                                                                    {:versions {$exists true,
+                                                                                $not {$size 0}}}]}}}))}
+  (update-applications-array :attachments
+                             not-needed-to-false
+                             {:attachments
+                              {$elemMatch {$and [{:notNeeded true} ,
+                                                 {:versions {$exists true,
+                                                             $not {$size 0}}}]}}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

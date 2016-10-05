@@ -371,6 +371,7 @@
      {$set {:modified created
             :attachments.$.modified created
             :attachments.$.state  state
+            :attachments.$.notNeeded false                  ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
 
