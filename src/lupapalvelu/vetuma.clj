@@ -18,7 +18,8 @@
             [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.vtj :as vtj]))
+            [lupapalvelu.vtj :as vtj]
+            [lupapalvelu.ident.session :as ident-session]))
 
 ;;
 ;; Configuration
@@ -283,16 +284,11 @@
 ;; public local api
 ;;
 
-(defn- get-data [stamp]
-  (mongo/select-one :vetuma {:user.stamp stamp}))
-
 (defn get-user [stamp]
-  (:user (get-data stamp)))
+  (lupapalvelu.ident.session/get-user stamp))
 
 (defn consume-user [stamp]
-  (when-let [user (get-data stamp)]
-    (mongo/remove-many :vetuma {:_id (:id user)})
-    (:user user)))
+  (lupapalvelu.ident.session/consume-user stamp))
 
 ;;
 ;; dev test api
