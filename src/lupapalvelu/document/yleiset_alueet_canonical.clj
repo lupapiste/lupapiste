@@ -2,7 +2,6 @@
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.operations :as op]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -235,12 +234,6 @@
      :maksajatieto maksajatieto
      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
      :johtoselvitysviitetieto johtoselvitysviitetieto}))
-
-(defn- get-linked-sijoituslupa-id [application]
-  (let [sijoituslupa-operations (op/operations-in ["yleisten-alueiden-luvat" "sijoituslupa"])]
-    (->> (:linkPermitData application)
-         (util/find-first (comp (set sijoituslupa-operations) keyword :operation))
-         :id)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
