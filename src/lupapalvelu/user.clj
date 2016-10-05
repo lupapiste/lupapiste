@@ -381,14 +381,19 @@
 ;; note: new user registration messages need to send a message even though
 ;; the user is not enabled, and some messages are intentionally sent directly 
 ;; to an email address without having an associated user id to check.
+;; Also when adding statement givers, user is disabled, but is sent a token link for password setting
 (defn email-recipient?
-  "If :id is present, check that the corresponding user is enabled or a dummy one. True otherwise."
+  "If :id is present, check that the corresponding user is enabled or a dummy one.
+   If not enabled, returns true if password is empty (reset password, statement giver creation).
+   True otherwise."
   [user]
   (let [id (:id user)]
-    (or (not id)
-      (if-let [user (get-user-by-id id)]
-         (or (= (:role user) "dummy")
-             (:enabled user))))))
+    (boolean
+      (or (not id)
+          (when-let [user (find-user {:id id})]
+            (or (= (:role user) "dummy")
+                (or (:enabled user)
+                    (ss/blank? (get-in user [:private :password])))))))))
 
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
