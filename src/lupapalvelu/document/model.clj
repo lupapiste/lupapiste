@@ -131,6 +131,7 @@
     [:err "unknown-type"]))
 
 (defmethod validate-field :linkPermitSelector [application elem v]
+  ;; This validation is for custom value in linkPermitSelector field, which should not be restricted into any format.
   (when-not (or (string? v) (nil? v))
     [:err "unknown-type"]))
 
