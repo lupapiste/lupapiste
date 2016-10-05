@@ -11,6 +11,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application-api :as app]
             [lupapalvelu.application :as a]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.document.tools :as tools]))
 
 (apply-remote-minimal)
@@ -618,3 +619,20 @@
                         (contains? applications luukas-canceled) => false)
                   (fact "Created draft is listed"
                         (contains? applications luukas-draft) => true)))))
+
+(facts "all operations in operation tree"
+  (fact "get everything"
+    (:operations (query pena :all-operations-in :path ""))
+    => (just (->> (flatten op/operation-tree)
+                  (filter keyword?)
+                  (map name)
+                  set)
+             :in-any-order :gaps-ok))
+
+  (fact "YA operations - sijoitusluvat - muu sijoituslupa"
+    (:operations (query pena :all-operations-in :path "yleisten-alueiden-luvat.sijoituslupa.muu-sijoituslupa"))
+    => ["ya-sijoituslupa-muu-sijoituslupa"])
+
+  (fact "R operation - rakennelman rakentaminen"
+    (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
+    => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))

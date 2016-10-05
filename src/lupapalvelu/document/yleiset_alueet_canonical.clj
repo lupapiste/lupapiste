@@ -2,6 +2,7 @@
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.operations :as op]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -148,7 +149,7 @@
 (def- configs-per-permit-name
   {:Kayttolupa                            default-config
    :Tyolupa                               (merge default-config
-                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true})
+                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true :sijoituslupa-link true})
    :Sijoituslupa                          (merge default-config
                                             {:tyoaika false :dummy-alku-and-loppu-pvm true})
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
@@ -235,30 +236,33 @@
      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
      :johtoselvitysviitetieto johtoselvitysviitetieto}))
 
+(defn- get-linked-sijoituslupa-id [application]
+  (let [sijoituslupa-operations (op/operations-in ["yleisten-alueiden-luvat" "sijoituslupa"])]
+    (->> (:linkPermitData application)
+         (util/find-first (comp (set sijoituslupa-operations) keyword :operation))
+         :id)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
+        hankkeen-kuvaus-key (util/find-first documents-by-type [:yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kayttolupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kaivulupa])
         operation-name-key (-> application :primaryOperation :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
         [main-viit-tapahtuma-name main-viit-tapahtuma] (-> documents-by-type get-main-viit-tapahtuma-info seq first)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (->
-                            (or
-                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
-                            first :data))
+                          (-> (hankkeen-kuvaus-key documents-by-type) first :data))
         pinta-ala (when (:hankkeen-kuvaus config)
                     (:varattava-pinta-ala hankkeen-kuvaus))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (:kayttotarkoitus hankkeen-kuvaus))
-        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
+        sijoituslupaviitetieto (when (:sijoituslupa-link config)
+                                 (when-let [tunniste (link-permit-selector-value hankkeen-kuvaus (:linkPermitData application) [hankkeen-kuvaus-key :sijoitusLuvanTunniste])]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1475239708367');
+@import url('main-blessed1.css?z=1475661763350');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -986,6 +986,20 @@ div.review-done {
 .building-select-container .building-select-box {
   position: relative;
   width: 30em;
+}
+
+/* line 1543, ../../../private/common-html/sass/partials/_forms.scss */
+.link-permit-selector {
+  padding-left: 6px;
+}
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
+.link-permit-selector label.form-label {
+  width: 100%;
+}
+/* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
+.link-permit-selector .errorPanel {
+  top: -80px;
+  left: 200px;
 }
 
 /* line 18, ../../../private/common-html/sass/partials/_tables.scss */

@@ -91,7 +91,8 @@
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [(long schema-version) (name schema-name)])))
 
-
+(defn get-in-schemas [schema-name path]
+  (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
 
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))

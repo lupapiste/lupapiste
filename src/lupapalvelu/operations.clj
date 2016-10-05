@@ -1142,6 +1142,9 @@
 (defn- is-add-operation-allowed-for-operation [operation]
   (get-operation-metadata operation :add-operation-allowed))
 
+(defn operations-in [operation-path]
+  (-> (util/get-in-tree operation-tree operation-path) util/get-leafs))
+
 (defn operations-filtered [filtering-fn only-addable?]
   (clojure.walk/postwalk
     (fn [node]

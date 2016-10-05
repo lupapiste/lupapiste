@@ -427,6 +427,7 @@
 "error.more-prev-app-info-needed" "en" "More information is needed to create an application for Lupapiste on the basis of the previous authorisation"
 "error.more-prev-app-info-needed" "fi" "Tarvitaan lisätietoja, jotta aiemmasta luvasta voidaan luoda hakemus Lupapisteeseen"
 "error.more-prev-app-info-needed" "sv" "Tilläggsuppgifter behövs för att skapa ansökan i Lupapiste från tidigare tillstånd."
+"error.multiple-linked-permits-of-type.yleisten-alueiden-luvat.sijoituslupa" "fi" "Hankkeelle on liitetty useita sijoituslupia viiteluvaksi. Vain yksi sijoituslupatunnus välittyy taustajärjestelmään."
 "error.new-applications-disabled" "en" "You cannot submit an application for this procedure through Lupapiste. In order to submit an application, please contact your Municipal official."
 "error.new-applications-disabled" "fi" "Et voi jättää tähän toimenpiteeseen liittyvää hakemusta Lupapisteen kautta. Jättääksesi hakemuksen ota yhteyttä kuntasi viranomaiseen."
 "error.new-applications-disabled" "sv" "Du kan inte lämna in en ansökan med anknytning till denna åtgärd via Lupapiste. För att lämna in en ansökan måste du kontakta myndigheten i din kommun."

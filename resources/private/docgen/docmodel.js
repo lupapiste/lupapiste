@@ -804,6 +804,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent(name, subSchema, model, path);
   }
 
+  function buildLinkPermitSelector (subSchema, model, path) {
+    return buildGroupComponent("link-permit-selector", subSchema, model, path);
+  }
+
   function buildPropertyGroup (subSchema, model, path) {
     return buildGroupComponent("property-group", subSchema, model, path);
   }
@@ -1187,6 +1191,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    linkPermitSelector: buildLinkPermitSelector,
     docgenHuoneistot: buildDocgenHuoneistotTable,
     constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
