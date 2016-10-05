@@ -66,26 +66,41 @@
 (ctc/validate-all-documents kaivulupa-application)
 
 (def- link-permit-data [{:id "LP-753-2013-00003"
-                          :type "kuntalupatunnus"
-                          :operation nil}
+                         :type "kuntalupatunnus"
+                         :operation nil}
                         {:id "LP-753-2013-00006"
                          :type "kuntalupatunnus"
                          :operation "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"}])
 
 
 (testable-privates lupapalvelu.document.yleiset-alueet-canonical
-  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija get-linked-sijoituslupa-id)
+  get-yritys-and-henkilo get-tyomaasta-vastaava get-hakija)
 
-
-(facts get-linked-sijoituslupa-id
-
-  (fact "without linked sijoituslupa"
-      (get-linked-sijoituslupa-id {:linkPermitData [{:id "LP-753-2013-00003"
-                                                     :type "kuntalupatunnus"
-                                                     :operation nil}]}) => nil)
+(facts link-permit-selector-value
 
   (fact "without linked sijoituslupa"
-    (get-linked-sijoituslupa-id {:linkPermitData link-permit-data}) => "LP-753-2013-00006"))
+    (link-permit-selector-value {}
+                                [{:id "LP-753-2013-00003"
+                                  :type "kuntalupatunnus"
+                                  :operation nil}]
+                                [:yleiset-alueet-hankkeen-kuvaus-kaivulupa :sijoitusLuvanTunniste]) => nil)
+
+  (fact "without linked sijoituslupa - with custom value"
+    (link-permit-selector-value  {:sijoitusLuvanTunniste "tunnus123"}
+                                 [{:id "LP-753-2013-00003"
+                                   :type "kuntalupatunnus"
+                                   :operation nil}]
+                                 [:yleiset-alueet-hankkeen-kuvaus-kaivulupa :sijoitusLuvanTunniste]) => "tunnus123")
+
+  (fact "with linked sijoituslupa"
+    (link-permit-selector-value {}
+                                link-permit-data
+                                [:yleiset-alueet-hankkeen-kuvaus-kaivulupa :sijoitusLuvanTunniste]) => "LP-753-2013-00006")
+
+  (fact "with linked sijoituslupa - link permit overrides custom value"
+    (link-permit-selector-value {:sijoitusLuvanTunniste "tunnus123"}
+                                link-permit-data
+                                [:yleiset-alueet-hankkeen-kuvaus-kaivulupa :sijoitusLuvanTunniste]) => "LP-753-2013-00006"))
 
 
 (facts* "Kaivulupa canonical model is correct"

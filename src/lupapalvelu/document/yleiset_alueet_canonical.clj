@@ -247,25 +247,22 @@
   [application lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
+        hankkeen-kuvaus-key (util/find-first documents-by-type [:yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kayttolupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kaivulupa])
         operation-name-key (-> application :primaryOperation :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
         [main-viit-tapahtuma-name main-viit-tapahtuma] (-> documents-by-type get-main-viit-tapahtuma-info seq first)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (->
-                            (or
-                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
-                            first :data))
+                          (-> (hankkeen-kuvaus-key documents-by-type) first :data))
         pinta-ala (when (:hankkeen-kuvaus config)
                     (:varattava-pinta-ala hankkeen-kuvaus))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (:kayttotarkoitus hankkeen-kuvaus))
         sijoituslupaviitetieto (when (:sijoituslupa-link config)
-                                 (when-let [tunniste (or (get-linked-sijoituslupa-id application)
-                                                         (:sijoitusLuvanTunniste hankkeen-kuvaus))]
+                                 (when-let [tunniste (link-permit-selector-value hankkeen-kuvaus (:linkPermitData application) [hankkeen-kuvaus-key :sijoitusLuvanTunniste])]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
