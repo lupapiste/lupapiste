@@ -355,3 +355,31 @@
         (-> (sc/check User (assoc user-skeleton :degree "arkkitehti")) :degree) => nil
         (-> (sc/check User (assoc user-skeleton :degree "Arkkitehti")) :degree) =not=> nil))
 
+(facts "email-recipient?"
+  (email-recipient? {}) => true
+  (email-recipient? {:id 1}) => false
+  (provided
+    (find-user {:id 1}) => nil)
+  (email-recipient? {:id 2}) => true
+  (provided
+    (find-user {:id 2}) => {:id 2 :dummy true})
+  (email-recipient? {:id 3}) => true                        ; no password set
+  (provided
+    (find-user {:id 3}) => {:id 3 :dummy false})
+  (email-recipient? {:id 4}) => true
+  (provided
+    (find-user {:id 4}) => {:id 4 :dummy false :enabled true})
+  (email-recipient? {:id 5}) => true
+  (provided
+    (find-user {:id 5}) => {:id 5 :dummy false :enabled true, :private {:password "foo"}})
+  (email-recipient? {:id 6}) => false                       ; has been enabled (has password), but now disabled
+  (provided
+    (find-user {:id 6}) => {:id 6 :dummy false :enabled false, :private {:password "foo"}})
+  (email-recipient? {:id 7}) => true
+  (provided
+    (find-user {:id 7}) => {:id 7 :dummy false :enabled true, :private {:password "foo"}})
+  (email-recipient? {:id 8}) => true
+  (provided
+    (find-user {:id 8}) => {:id 8 :dummy false :enabled true, :private {:password ""}}))
+
+
