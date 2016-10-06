@@ -306,7 +306,7 @@
             (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
             (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
       (let [application (meta-fields/enrich-with-link-permit-data application)
-            link-permit (application/get-link-permit-app application)
+            link-permit (first (application/get-link-permit-apps application))
             link-permit-xml (krysp-fetch/get-application-xml-by-application-id link-permit)
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"

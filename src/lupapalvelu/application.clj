@@ -264,11 +264,12 @@
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
 
-(defn get-link-permit-app
-  "Return associated (first lupapistetunnus) link-permit application."
+(defn get-link-permit-apps
+  "Return associated link-permit application."
   [{:keys [linkPermitData]}]
-  (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
-    (domain/get-application-no-access-checking (:id link))))
+  (when-let [links (filter (comp "lupapistetunnus" :type) linkPermitData)]
+    (->> (map :id links)
+         (domain/get-multiple-applications-no-access-checking))))
 
 ;;
 ;; Application query post process

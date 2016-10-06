@@ -83,7 +83,7 @@
         (krysp-fetch/get-application-xml-by-application-id link-app) => xml
         (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.8"}}}
         (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
-        (application/get-link-permit-app irrelevant) => link-app
+        (application/get-link-permit-apps irrelevant) => [link-app]
         (action/update-application irrelevant irrelevant) => nil
         (lupapalvelu.attachment/upload-and-attach! irrelevant irrelevant irrelevant) => nil))))
 
