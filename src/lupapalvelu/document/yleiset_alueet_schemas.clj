@@ -82,7 +82,6 @@
            :repeating false
            :approvable true
            :order 62
-           :section-help "schemas.maksaja.section.help"
            :accordion-fields hakija-accordion-paths
            :subtype :maksaja}
     :body yleiset-alueet-maksaja}
