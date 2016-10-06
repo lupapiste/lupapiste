@@ -27,7 +27,8 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
                                     endDate: parseDate( ext.endDate),
                                     url: pageutil.buildPageHash( "application",
                                                                  ext.id),
-                                    state: ext.state};
+                                    state: ext.state,
+                                    reason: _.trim(ext.reason)};
                           })
                           .sortBy( "startDate")
                           .value());
@@ -35,6 +36,11 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
         .call();
     }
   }
+
+  self.showReason = self.disposedPureComputed( function() {
+    return  _.some( self.extensions(),
+                    _.unary( _.partialRight( _.get , "reason")));
+  });
 
   self.addHubListener( "contextService::enter", fetchExtensions);
 
