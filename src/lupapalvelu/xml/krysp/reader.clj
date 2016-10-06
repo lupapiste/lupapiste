@@ -32,34 +32,34 @@
          </wfs:Query>
        </wfs:GetFeature>")})
 
-(defn- application-xml [type-name id-path server credentials id raw?]
-  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-equals id-path id))]
+(defn- application-xml [type-name id-path server credentials ids raw?]
+  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]
     (trace "Get application: " url)
     (cr/get-xml url {} credentials raw?)))
 
-(defn rakval-application-xml [server credentials id search-type raw?]
-  (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials id raw?))
+(defn rakval-application-xml [server credentials ids search-type raw?]
+  (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials ids raw?))
 
-(defn poik-application-xml   [server credentials id search-type raw?]
-  (application-xml common/poik-case-type   (common/get-tunnus-path permit/P search-type)    server credentials id raw?))
+(defn poik-application-xml   [server credentials ids search-type raw?]
+  (application-xml common/poik-case-type   (common/get-tunnus-path permit/P search-type)    server credentials ids raw?))
 
-(defn yl-application-xml     [server credentials id search-type raw?]
-  (application-xml common/yl-case-type     (common/get-tunnus-path permit/YL search-type)   server credentials id raw?))
+(defn yl-application-xml     [server credentials ids search-type raw?]
+  (application-xml common/yl-case-type     (common/get-tunnus-path permit/YL search-type)   server credentials ids raw?))
 
-(defn mal-application-xml    [server credentials id search-type raw?]
-  (application-xml common/mal-case-type    (common/get-tunnus-path permit/MAL search-type)  server credentials id raw?))
+(defn mal-application-xml    [server credentials ids search-type raw?]
+  (application-xml common/mal-case-type    (common/get-tunnus-path permit/MAL search-type)  server credentials ids raw?))
 
-(defn vvvl-application-xml   [server credentials id search-type raw?]
-  (application-xml common/vvvl-case-type   (common/get-tunnus-path permit/VVVL search-type) server credentials id raw?))
+(defn vvvl-application-xml   [server credentials ids search-type raw?]
+  (application-xml common/vvvl-case-type   (common/get-tunnus-path permit/VVVL search-type) server credentials ids raw?))
 
-(defn ya-application-xml     [server credentials id search-type raw?]
-  (let [options (post-body-for-ya-application id (common/get-tunnus-path permit/YA search-type))]
+(defn ya-application-xml     [server credentials ids search-type raw?]
+  (let [options (post-body-for-ya-application ids (common/get-tunnus-path permit/YA search-type))]
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(defn kt-application-xml   [server credentials id search-type raw?]
+(defn kt-application-xml   [server credentials ids search-type raw?]
   (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (application-xml common/kt-types path server credentials id raw?)))
+    (application-xml common/kt-types path server credentials ids raw?)))
 
 (defmethod permit/fetch-xml-from-krysp :R    [_ & args] (apply rakval-application-xml args))
 (defmethod permit/fetch-xml-from-krysp :P    [_ & args] (apply poik-application-xml args))

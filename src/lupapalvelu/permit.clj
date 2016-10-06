@@ -229,8 +229,8 @@
   nil)
 
 (defmulti fetch-xml-from-krysp
-  "[permit-type server-url credentials id search-type raw?] - Fetches KRYSP XML from municipality backend."
-  (fn [permit-type server-url credentials id search-type raw?]
+  "[permit-type server-url credentials ids search-type raw?] - Fetches KRYSP XML from municipality backend."
+  (fn [permit-type server-url credentials ids search-type raw?]
     (keyword permit-type)))
 
 (defmethod fetch-xml-from-krysp :default
