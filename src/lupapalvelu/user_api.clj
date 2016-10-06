@@ -524,36 +524,37 @@
 ;; ==============================================================================
 ;;
 
+(defn- register [user stamp rakentajafi]
+  (activation/send-activation-mail-for user)
+  (vetuma/consume-user stamp)
+  (when rakentajafi
+    (util/future* (idf/send-user-data user "rakentaja.fi")))
+  user)
+
+(defn- vetuma-data-to-user [vetuma-data {:keys [architect email] :as data}]
+  (merge
+    (set/rename-keys vetuma-data {:userid :personId})
+    (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
+    (when architect
+      (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
+    {:email (usr/canonize-email email) :role "applicant" :enabled false}))
+
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :optional-parameters [language]
    :user-roles       #{:anonymous}
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
-  (let [vetuma-data (vetuma/get-user stamp)
-        email (usr/canonize-email email)]
-    (if-not vetuma-data
-      (fail :error.create-user)
-      (try
-        (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-        (if-let [user (usr/create-new-user
-                        nil
-                        (merge
-                          (set/rename-keys vetuma-data {:userid :personId})
-                          (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
-                          (when (:architect data)
-                            (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
-                          {:email email :role "applicant" :enabled false}))]
-          (do
-            (activation/send-activation-mail-for user)
-            (vetuma/consume-user stamp)
-            (when rakentajafi
-              (util/future* (idf/send-user-data user "rakentaja.fi")))
-            (ok :id (:id user)))
-          (fail :error.create-user))
+  (if-let [vetuma-data (vetuma/get-user stamp)]
+    (try
+      (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
+      (if-let [user (usr/create-new-user nil (vetuma-data-to-user vetuma-data data))]
+        (ok :id (:id (register user stamp rakentajafi)))
+        (fail :error.create-user))
 
-        (catch IllegalArgumentException e
-          (fail (keyword (.getMessage e))))))))
+      (catch IllegalArgumentException e
+        (fail (keyword (.getMessage e)))))
+    (fail :error.create-user)))
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
