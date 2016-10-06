@@ -90,10 +90,12 @@ Select building
   [Arguments]  ${doctype}  ${building}  ${merge}
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
   Scroll to  ${selector}
+  Execute Javascript  $("${selector}").addClass( "test-reload")
   Wait until  Select from list  jquery=${selector}  ${building}
   Run keyword if  ${merge}  Confirm  dynamic-yes-no-confirm-dialog
   Run keyword unless  ${merge}  Deny  dynamic-yes-no-confirm-dialog
-  Sleep  2s  # Wait for reload to finish
+  # After reload, our manually added class is removed.
+  Wait until  Element should not be visible  jquery=select.test-reload
 
 No other input
   [Arguments]  ${doctype}
@@ -105,7 +107,9 @@ Other input is
 
 Set building number
   [Arguments]  ${doctype}  ${value}
-  Input text with jquery  section[data-doc-type=${doctype}] div.building-select-box input[data-test-id=manuaalinen_rakennusnro]  ${value}
+  ${selector}=  Set Variable  section[data-doc-type=${doctype}] div.building-select-box input[data-test-id=manuaalinen_rakennusnro]
+  Scroll to  ${selector}
+  Input text with jquery  ${selector}  ${value}
   Wait for jQuery
 
 Bad building number

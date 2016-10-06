@@ -338,7 +338,7 @@ Velho logs in
 Sonja logs in
   [Arguments]  ${showAll}=True
   Authority logs in  sonja  sonja  Sonja Sibbo  ${showAll}
-  
+
 Ronja logs in
   [Arguments]  ${showAll}=True
   Authority logs in  ronja  sonja  Ronja Sibbo  ${showAll}
@@ -937,7 +937,12 @@ Request should not be visible
 
 Active search tab is
   [Arguments]  ${tab}
-  Wait until  Element should be visible  jquery=li.active[data-test-id=search-tab-${tab}]  
+  Wait until  Element should be visible  jquery=li.active[data-test-id=search-tab-${tab}]
+
+Open search tab
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  xpath=//section[@id='applications']//li[@data-test-id='search-tab-${tab}']
+  Click by test id  search-tab-${tab}
 
 Show all applications
   ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
