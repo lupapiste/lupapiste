@@ -378,3 +378,64 @@
     (fact "foo :bar"  (not=as-kw "foo" :bar) => true)
     (fact "foo :bar foo"  (not=as-kw "foo" :bar "foo") => true)
     (fact "foo foo :bar"  (not=as-kw "foo" "foo" :bar) => true)))
+
+(facts get-in-tree
+  (fact "single level"
+    (get-in-tree [[:foo :bar] [:baz :quu]] [:foo]) => :bar)
+
+  (fact "not found"
+    (get-in-tree [[:foo :bar] [:baz :quu]] [:fuzz :foo]) => nil)
+
+  (fact "incomplete tree"
+    (get-in-tree [[:foo] [:bar] [:baz :quu]] [:foo]) => nil)
+
+  (fact "two level tree - one level path"
+    (get-in-tree [[:foo [[:bar :bux]]] [:baz :quu]] [:foo]) => [[:bar :bux]])
+
+  (fact "two level tree - two level path"
+    (get-in-tree [[:foo [[:bar :bux]]] [:baz :quu]] [:foo :bar]) => :bux)
+
+  (fact "multi level"
+    (get-in-tree [[:foo
+                   [[:bar
+                     [[:bux :biz] [:rip :rap]]]
+                    [:hii
+                     [[:hoo
+                       [[:hei :hou] [:hip :hup]]]]]]]
+                  [:baz :quu]]
+
+                 [:foo :hii :hoo :hei]) => :hou))
+
+(facts get-leafs
+  (fact "single level"
+    (get-leafs [[:foo :bar] [:baz :quu]]) => [:bar :quu])
+
+  (fact "only leaf"
+    (get-leafs :foo) => [:foo])
+
+  (fact "only map as leaf"
+    (get-leafs {:foo :bar}) => [{:foo :bar}])
+
+  (fact "map as leaf in single level tree"
+    (get-leafs [[:hii {:foo :bar}]]) => [{:foo :bar}])
+
+  (fact "only set as leaf"
+    (get-leafs #{:foo :bar}) => [#{:foo :bar}])
+
+  (fact "incomplete tree"
+    (get-leafs [[:foo] [:bar] [:baz :quu]]) => [nil nil :quu])
+
+  (fact "two level - contains right elements"
+    (get-leafs [[:foo [[:bar :bux] [:hii :hoo]]] [:baz :quu] [:hai :hei]]) => (just #{:bux :hoo :quu :hei} :in-any-order :gaps-ok))
+
+  (fact "two level - higher level leafs ordered before lower level leafs"
+    (get-leafs [[:foo [[:bar :bux] [:hii :hoo]]] [:baz :quu] [:hai :hei]]) => [:quu :hei :bux :hoo])
+
+  (fact "multi level"
+    (get-leafs [[:foo
+                 [[:bar
+                   [[:bux :biz] [:rip :rap]]]
+                  [:hii
+                   [[:hoo
+                     [[:hei :hou] [:hip :hup]]]]]]]
+                [:baz :quu]]) => [:quu :biz :rap :hou :hup]))

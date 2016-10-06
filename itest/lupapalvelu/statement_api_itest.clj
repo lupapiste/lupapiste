@@ -75,6 +75,23 @@
       (:to email) => (contains ronja-email)
       (:subject email) => "Lupapiste: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
+        (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))))
+
+  (facts "Add statement giver role for new user"
+    (command sipoo :create-user :email "foo@example.com" :lastName "foo@example.com" :role "authority") => ok?
+    (create-statement-giver sipoo "foo@example.com")
+
+    (fact "Statement giver is added and sorted"
+      (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+            givers (:data resp)]
+        (count givers) => 3
+        (-> givers first :email) => "foo@example.com"))
+
+    (fact "new statement giver receives email which contains the (html escaped) input text"
+      (let [email (last-email)]
+        (:to email) => (contains "foo@example.com")
+        (:subject email) => "Lupapiste: Lausunnot"
+        (get-in email [:body :plain]) => (contains "<b>bold</b>")
         (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;")))))
 
 (fact "request-for-statement"
@@ -120,106 +137,108 @@
         (auth-contains-statement-giver application ronja-id) => falsey))))
 
 (facts "Statement giver can be added from another organization"
-       (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
-             statement-giver-veikko (create-statement-giver sipoo veikko-email)]
+  (apply-remote-minimal)
+  (create-statement-giver sipoo ronja-email)
+  (let [application-id (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
+        statement-giver-veikko (create-statement-giver sipoo veikko-email)]
 
-         (last-email) => truthy
+    (last-email) => truthy
 
-         (fact "Initially Veikko does not have access to application"
-               (query veikko :application :id application-id) => not-accessible?)
+    (fact "Initially Veikko does not have access to application"
+      (query veikko :application :id application-id) => not-accessible?)
 
-         (let [application-before (query-application sonja application-id)
-               resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
-               application-after  (query-application sonja application-id)
-               emails (sent-emails)
-               email (first emails)]
-           (fact "Veikko receives email"
-                 (:to email) => (contains veikko-email)
-                 (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
-                 email => (partial contains-application-link? application-id "authority"))
-           (fact "...but no-one else"
-                 (count emails) => 1)
-           (fact "auth array has one entry more (veikko)"
-                 (count (:auth application-after)) => (inc (count (:auth application-before)))
-                 (count (filter #(= (:username %) "veikko") (:auth application-after))) => 1)
-           (fact "ronja did not get access"
-                 (count (filter #(= (:username %) "ronja") (:auth application-after))) => 0)
+    (let [application-before (query-application sonja application-id)
+          resp (command sonja :request-for-statement :functionCode nil :id application-id :selectedPersons [statement-giver-veikko] :saateText "saate" :dueDate 1450994400000) => ok?
+          application-after  (query-application sonja application-id)
+          emails (sent-emails)
+          email (first emails)]
+      (fact "Veikko receives email"
+        (:to email) => (contains veikko-email)
+        (:subject email) => "Lupapiste: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6"
+        email => (partial contains-application-link? application-id "authority"))
+      (fact "...but no-one else"
+        (count emails) => 1)
+      (fact "auth array has one entry more (veikko)"
+        (count (:auth application-after)) => (inc (count (:auth application-before)))
+        (count (filter #(= (:username %) "veikko") (:auth application-after))) => 1)
+      (fact "ronja did not get access"
+        (count (filter #(= (:username %) "ronja") (:auth application-after))) => 0)
 
-           (fact "Veikko really has access to application"
-                 (query veikko :application :id application-id) => ok?))
+      (fact "Veikko really has access to application"
+        (query veikko :application :id application-id) => ok?))
 
-         (facts "Veikko gives a statement"
+    (facts "Veikko gives a statement"
 
-                (last-email) ; Inbox zero
+      (last-email) ; Inbox zero
 
-                (let [application (query-application sonja application-id)
-                      statement (some #(when (= veikko-email (-> % :person :email)) %) (:statements application)) => truthy]
+      (let [application (query-application sonja application-id)
+            statement (some #(when (= veikko-email (-> % :person :email)) %) (:statements application)) => truthy]
 
-                  (fact* "Veikko is one of the possible statement givers"
-                         (let [resp (query sonja :get-statement-givers :id application-id) => ok?
-                               giver-emails (->> resp :data (map :email) set)]
-                           (count giver-emails) => 3
-                           (giver-emails sonja-email) => sonja-email
-                           (giver-emails ronja-email) => ronja-email
-                           (giver-emails veikko-email) => veikko-email))
+        (fact* "Veikko is one of the possible statement givers"
+               (let [resp (query sonja :get-statement-givers :id application-id) => ok?
+                     giver-emails (->> resp :data (map :email) set)]
+                 (count giver-emails) => 3
+                 (giver-emails sonja-email) => sonja-email
+                 (giver-emails ronja-email) => ronja-email
+                 (giver-emails veikko-email) => veikko-email))
 
-                  (fact "Statement cannot be given by applicant which is not statement owner"
-                        (command mikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => unauthorized?)
+        (fact "Statement cannot be given by applicant which is not statement owner"
+          (command mikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => unauthorized?)
 
-                  (fact "Statement cannot be given by authority which is not statement owner"
-                        (command sonja :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.not-statement-owner"))
+        (fact "Statement cannot be given by authority which is not statement owner"
+          (command sonja :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.not-statement-owner"))
 
-                  (fact "Statement cannot be given with invalid status"
-                        (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
+        (fact "Statement cannot be given with invalid status"
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
-                  (fact* "Statement is given"
-                         (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
+        (fact* "Statement is given"
+               (command veikko :give-statement :id application-id :statementId (:id statement) :status "puollettu" :text "I will approve" :lang "fi") => ok?)
 
-                  (fact "Applicant got email"
-                        (let [emails (sent-emails)
-                              email  (first emails)]
-                          (count emails) => 1
-                          (:to email) => (contains mikko-email)
-                          email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
+        (fact "Applicant got email"
+          (let [emails (sent-emails)
+                email  (first emails)]
+            (count emails) => 1
+            (:to email) => (contains mikko-email)
+            email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
 
-                  (fact "One Attachment is generated"
-                        (let [gen-attachments (->> (query-application sonja application-id)
-                                                   :attachments
-                                                   (filter (comp #{"lausunto"} :type-id :type)))
-                              gen-statement-attachement (first gen-attachments)]
+        (fact "One Attachment is generated"
+          (let [gen-attachments (->> (query-application sonja application-id)
+                                     :attachments
+                                     (filter (comp #{"lausunto"} :type-id :type)))
+                gen-statement-attachement (first gen-attachments)]
 
-                          (count gen-attachments) => 1
+            (count gen-attachments) => 1
 
-                          (fact "cannot delete it since it is read-only"
-                                (:readOnly gen-statement-attachement) => true
-                                (command sonja :delete-attachment :id application-id :attachmentId (:id gen-statement-attachement)) => (partial expected-failure? "error.unauthorized"))))
+            (fact "cannot delete it since it is read-only"
+              (:readOnly gen-statement-attachement) => true
+              (command sonja :delete-attachment :id application-id :attachmentId (:id gen-statement-attachement)) => (partial expected-failure? "error.unauthorized"))))
 
-                  (fact "Comment is added"
-                        (->> (query-application sonja application-id)
-                             :comments
-                             (filter (comp #{"statement"} :type :target))
-                             (count)) => 1)))))
+        (fact "Comment is added"
+          (->> (query-application sonja application-id)
+               :comments
+               (filter (comp #{"statement"} :type :target))
+               (count)) => 1)))))
 
 (facts "For non-environmental applications statements are disabled in sent state"
-       (fact "Request statement from Ronja"
-             (command sonja :request-for-statement :functionCode nil :id application-id
-                      :selectedPersons [(get-statement-giver-by-email sipoo ronja-email)]
-                      :saateText "saate" :dueDate 1450994400000) => ok?)
-       (let [{statement-id :id modify-id :modify-id} (designated-statement ronja application-id)]
-         (fact "Ronja saves draft"
-               (command ronja :save-statement-as-draft :id application-id :statementId statement-id
-                          :modify-id modify-id
-                          :status "puollettu" :text "I will approve" :lang "fi"))
-         (fact "Sonja approves application"
-               (command sonja :approve-application :id application-id :lang "fi") => ok?)
-        (fact "Application state is sent"
-              (->> application-id (query-application sonja) :state keyword) => :sent)
-        (fact "Ronja cannot give statement"
-              (command ronja :give-statement :id application-id :statementId statement-id
-                       :modify-id (:modify-id (designated-statement ronja application-id))
-                       :status "puollettu" :text "I will approve" :lang "fi") => {:ok false, :text "error.unsupported-permit-type"})
-        (fact "Ronja can delete statement draft"
-              (command ronja :delete-statement :id application-id :statementId statement-id) => ok?)))
+  (fact "Request statement from Ronja"
+    (command sonja :request-for-statement :functionCode nil :id application-id
+             :selectedPersons [(get-statement-giver-by-email sipoo ronja-email)]
+             :saateText "saate" :dueDate 1450994400000) => ok?)
+  (let [{statement-id :id modify-id :modify-id} (designated-statement ronja application-id)]
+    (fact "Ronja saves draft"
+      (command ronja :save-statement-as-draft :id application-id :statementId statement-id
+               :modify-id modify-id
+               :status "puollettu" :text "I will approve" :lang "fi"))
+    (fact "Sonja approves application"
+      (command sonja :approve-application :id application-id :lang "fi") => ok?)
+    (fact "Application state is sent"
+      (->> application-id (query-application sonja) :state keyword) => :sent)
+    (fact "Ronja cannot give statement"
+      (command ronja :give-statement :id application-id :statementId statement-id
+               :modify-id (:modify-id (designated-statement ronja application-id))
+               :status "puollettu" :text "I will approve" :lang "fi") => {:ok false, :text "error.unsupported-permit-type"})
+    (fact "Ronja can delete statement draft"
+      (command ronja :delete-statement :id application-id :statementId statement-id) => ok?)))
 
 (defn statement-attachment-id [apikey app-id]
   (let [{:keys [attachments]} (query-application apikey app-id)]
@@ -227,57 +246,57 @@
             (and (= (-> target :type keyword) :statement) id)) attachments)))
 
 (facts "For environmental applications statements can be requested and given in sent state"
-       (let [{ymp-id :id} (create-and-submit-application mikko
-                                                         :operation "vvvl-vesijohdosta"
-                                                         :propertyId oulu-property-id
-                                                         :address "Guang Hua Lu 88")
-             statement-giver-sonja (create-statement-giver oulu sonja-email) => ok?]
-         (fact "Olli approves application"
-               (command olli :approve-application :id ymp-id :lang "fi") => ok?)
-         (fact "Application state is sent"
-               (->> ymp-id  (query-application mikko) :state keyword) => :sent)
-         (fact "Olli requests statement from Sonja"
-               (command olli :request-for-statement :functionCode nil :id ymp-id
-                        :selectedPersons [statement-giver-sonja]
-                        :saateText "saate" :dueDate 1450994400000) => ok?)
-         (let [{statement-id :id modify-id :modify-id} (designated-statement sonja ymp-id)]
-           (fact "Sonja can save statement draft"
-                 (command sonja :save-statement-as-draft :id ymp-id :statementId statement-id
-                          :modify-id modify-id
-                          :status "puollettu" :text "I will approve" :lang "fi")=> ok?)
-           (fact "Sonja can add attachment"
-                 (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
-           (fact "Sonja can delete attachment"
-                 (let [{:keys [attachments]} (query-application sonja ymp-id)
-                       att-id (some (fn [{:keys [target id]}]
-                                      (and (= (-> target :type keyword) :statement) id)) attachments)]
-                   (command sonja :delete-attachment :id ymp-id
-                            :attachmentId (statement-attachment-id sonja ymp-id)) => ok?))
-           (fact "Sonja can add attachment again"
-                 (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
-           (fact "Sonja can give statement"
-                 (command sonja :give-statement :id ymp-id :statementId statement-id
-                          :modify-id (:modify-id (designated-statement sonja ymp-id))
-                          :status "puollettu" :text "Fine by me" :lang "fi") => ok?)
-           (fact "Given statement cannot be edited"
-                 (command sonja :save-statement-as-draft :id ymp-id :statementId statement-id
-                          :modify-id (:modify-id (designated-statement sonja ymp-id))
-                          :status "puollettu" :text "Will fail" :lang "fi")=> fail?)
-           (fact "Sonja cannot delete attachment"
-                 (command sonja :delete-attachment :id ymp-id
-                          :attachmentId (statement-attachment-id sonja ymp-id)))
-           (fact "Olli requests reply from Mikko to Sonja's statement"
-                 (command olli :request-for-statement-reply :id ymp-id :statementId statement-id
-                          :lang "fi") => ok?)
-           (fact "Mikko can save draft reply"
-                 (command mikko :save-statement-reply-as-draft :id ymp-id :statementId statement-id
-                          :modify-id (:modify-id (designated-statement sonja ymp-id))
-                          :text "I disagree!" :lang "fi") => ok?)
-           (fact "Mikko can send the reply"
-                 (command mikko :reply-statement :id ymp-id :statementId statement-id
-                          :modify-id (:modify-id (designated-statement sonja ymp-id))
-                          :text "I disagree strongly!"
-                          :lang "fi") => ok?))))
+  (let [{ymp-id :id} (create-and-submit-application mikko
+                                                    :operation "vvvl-vesijohdosta"
+                                                    :propertyId oulu-property-id
+                                                    :address "Guang Hua Lu 88")
+        statement-giver-sonja (create-statement-giver oulu sonja-email) => ok?]
+    (fact "Olli approves application"
+      (command olli :approve-application :id ymp-id :lang "fi") => ok?)
+    (fact "Application state is sent"
+      (->> ymp-id  (query-application mikko) :state keyword) => :sent)
+    (fact "Olli requests statement from Sonja"
+      (command olli :request-for-statement :functionCode nil :id ymp-id
+               :selectedPersons [statement-giver-sonja]
+               :saateText "saate" :dueDate 1450994400000) => ok?)
+    (let [{statement-id :id modify-id :modify-id} (designated-statement sonja ymp-id)]
+      (fact "Sonja can save statement draft"
+        (command sonja :save-statement-as-draft :id ymp-id :statementId statement-id
+                 :modify-id modify-id
+                 :status "puollettu" :text "I will approve" :lang "fi")=> ok?)
+      (fact "Sonja can add attachment"
+        (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
+      (fact "Sonja can delete attachment"
+        (let [{:keys [attachments]} (query-application sonja ymp-id)
+              att-id (some (fn [{:keys [target id]}]
+                             (and (= (-> target :type keyword) :statement) id)) attachments)]
+          (command sonja :delete-attachment :id ymp-id
+                   :attachmentId (statement-attachment-id sonja ymp-id)) => ok?))
+      (fact "Sonja can add attachment again"
+        (upload-attachment-for-statement sonja ymp-id nil true statement-id) => truthy)
+      (fact "Sonja can give statement"
+        (command sonja :give-statement :id ymp-id :statementId statement-id
+                 :modify-id (:modify-id (designated-statement sonja ymp-id))
+                 :status "puollettu" :text "Fine by me" :lang "fi") => ok?)
+      (fact "Given statement cannot be edited"
+        (command sonja :save-statement-as-draft :id ymp-id :statementId statement-id
+                 :modify-id (:modify-id (designated-statement sonja ymp-id))
+                 :status "puollettu" :text "Will fail" :lang "fi")=> fail?)
+      (fact "Sonja cannot delete attachment"
+        (command sonja :delete-attachment :id ymp-id
+                 :attachmentId (statement-attachment-id sonja ymp-id)))
+      (fact "Olli requests reply from Mikko to Sonja's statement"
+        (command olli :request-for-statement-reply :id ymp-id :statementId statement-id
+                 :lang "fi") => ok?)
+      (fact "Mikko can save draft reply"
+        (command mikko :save-statement-reply-as-draft :id ymp-id :statementId statement-id
+                 :modify-id (:modify-id (designated-statement sonja ymp-id))
+                 :text "I disagree!" :lang "fi") => ok?)
+      (fact "Mikko can send the reply"
+        (command mikko :reply-statement :id ymp-id :statementId statement-id
+                 :modify-id (:modify-id (designated-statement sonja ymp-id))
+                 :text "I disagree strongly!"
+                 :lang "fi") => ok?))))
 
 
 (facts "Applicant type person can be requested for statement"

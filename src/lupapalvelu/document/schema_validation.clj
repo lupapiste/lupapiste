@@ -186,6 +186,13 @@
                   #(not (contains? % :subtype))    PlainString
                   :else                            {:subtype (sc/eq nil)})) ; For better error messages
 
+(defschema Path [sc/Str])
+
+(defschema LinkPermitSelector
+  (merge GenInput
+         {:type                 (sc/eq :linkPermitSelector)
+          :operationsPath        Path}))
+
 (def special-types [:hetu
                     :foremanHistory
                     :fillMyInfoButton
@@ -208,6 +215,7 @@
                   (type-pred :select)     Select
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
+                  (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 

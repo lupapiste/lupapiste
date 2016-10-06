@@ -268,11 +268,12 @@ Applicant logs in
   Applications page should be open
 
 Authority logs in
-  [Arguments]  ${login}  ${password}  ${username}
+  [Arguments]  ${login}  ${password}  ${username}  ${showAll}=True
   User logs in  ${login}  ${password}  ${username}
   User nav menu is visible
   User role should be  authority
   Authority applications page should be open
+  Run Keyword If  ${showAll}  Show all applications
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -306,7 +307,8 @@ As ${name}
   Run Keyword  ${name} logs in
 
 Olli logs in
-  Authority logs in  olli  olli  Olli Ule\u00e5borg
+  [Arguments]  ${showAll}=True
+  Authority logs in  olli  olli  Olli Ule\u00e5borg  ${showAll}
 
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
@@ -318,25 +320,32 @@ Sven logs in
   Applicant logs in  sven@example.com  sven  Sven Svensson
 
 Arto logs in
-  Authority logs in  arto  arto  Arto Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  arto  arto  Arto Viranomainen  ${showAll}
 
 Veikko logs in
-  Authority logs in  veikko  veikko  Veikko Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  veikko  veikko  Veikko Viranomainen  ${showAll}
 
 Luukas logs in
-  Authority logs in  luukas  luukas  Luukas Lukija
+  [Arguments]  ${showAll}=True
+  Authority logs in  luukas  luukas  Luukas Lukija  ${showAll}
 
 Velho logs in
-  Authority logs in  velho  velho  Velho Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  velho  velho  Velho Viranomainen  ${showAll}
 
 Sonja logs in
-  Authority logs in  sonja  sonja  Sonja Sibbo
+  [Arguments]  ${showAll}=True
+  Authority logs in  sonja  sonja  Sonja Sibbo  ${showAll}
 
 Ronja logs in
-  Authority logs in  ronja  sonja  Ronja Sibbo
+  [Arguments]  ${showAll}=True
+  Authority logs in  ronja  sonja  Ronja Sibbo  ${showAll}
 
 Pekka logs in
-  Authority logs in  pekka  pekka  Pekka Borga
+  [Arguments]  ${showAll}=True
+  Authority logs in  pekka  pekka  Pekka Borga  ${showAll}
 
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
@@ -361,10 +370,12 @@ SolitaAdmin logs in
   Wait until  Element should be visible  admin
 
 Jarvenpaa authority logs in
-  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
+  [Arguments]  ${showAll}=True
+  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää  ${showAll}
 
 Jussi logs in
-  Authority logs in  jussi  jussi  Jussi Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  jussi  jussi  Jussi Viranomainen  ${showAll}
 
 
 #
@@ -923,6 +934,20 @@ Request should be visible
 Request should not be visible
   [Arguments]  ${address}
   Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
+
+Active search tab is
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  jquery=li.active[data-test-id=search-tab-${tab}]
+
+Open search tab
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  xpath=//section[@id='applications']//li[@data-test-id='search-tab-${tab}']
+  Click by test id  search-tab-${tab}
+
+Show all applications
+  ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
+  Run Keyword If  ${tab}  Scroll and click test id  search-tab-all
+
 
 #
 # Comments:

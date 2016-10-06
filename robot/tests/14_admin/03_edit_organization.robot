@@ -76,6 +76,7 @@ Admin impersonated Sipoo authority
   Click enabled by test id  submit-login-as
 
 Admin sees Mikko's inforequest
+  Open search tab  inforequest
   Request should be visible  ${appname}ir
 
 Admin sees comment on Mikko's application

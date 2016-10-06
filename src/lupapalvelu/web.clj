@@ -50,7 +50,8 @@
             [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.calendars-api :as calendars])
+            [lupapalvelu.calendars-api :as calendars]
+            [lupapalvelu.suomifi])
   (:import (java.io OutputStreamWriter BufferedWriter)))
 
 ;;

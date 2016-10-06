@@ -27,7 +27,7 @@
 "filter.parties" "sv" "Parter"
 "filter.postVerdict" "en" "During construction"
 "filter.postVerdict" "fi" "Rakentamisen aikaiset"
-"filter.postVerdict" "sv" "Under byggskede"
+"filter.postVerdict" "sv" "Under byggnadstiden"
 "filter.preVerdict" "en" "During application"
 "filter.preVerdict" "fi" "Hakemuksen aikaiset"
 "filter.preVerdict" "sv" "Under ansökningstiden"
