@@ -120,7 +120,7 @@
             </div>
 
             <!-- ko if: lupapisteApp.models.currentUser.isApplicant() || lupapisteApp.models.currentUser.isCompanyUser() -->
-            <div class="last-box app-type-box">
+            <div class="last-box app-type-box" data-test-id="applications-no-application">
                 <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.no-application.title'"></h2>
                 <p data-bind="lhtml: 'applications.missing.no-application.desc'"></p>
             </div>

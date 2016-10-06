@@ -58,6 +58,10 @@ Mikko logs in and wants us to remember him
   Applications page should be open
   Number of visible applications  0
 
+Mikko sees the help text if there are no applications
+  [Tags]  ie8
+  Wait until  Element should be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
+
 Mikko thinks he's Swedish
   [Tags]  ie8
   Language To  SV
@@ -103,3 +107,8 @@ Cleanup cookies
   [Tags]  ie8
   Delete Cookie  ring-session
   Delete Cookie  my-email
+
+Authority (Veikko) logs in and dont see the help text for no applications
+  Veikko logs in
+  Wait until  Element should not be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
+  [Teardown]  logout
