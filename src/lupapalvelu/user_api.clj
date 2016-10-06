@@ -532,7 +532,8 @@
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (usr/canonize-email email)]
-    (if vetuma-data
+    (if-not vetuma-data
+      (fail :error.create-user)
       (try
         (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
         (if-let [user (usr/create-new-user
@@ -552,8 +553,7 @@
           (fail :error.create-user))
 
         (catch IllegalArgumentException e
-          (fail (keyword (.getMessage e))))))
-    (fail :error.create-user)))
+          (fail (keyword (.getMessage e))))))))
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
