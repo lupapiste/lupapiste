@@ -634,10 +634,7 @@ input.form-input.inline {
 
 .accordion_content > .group-help-text {
   display: block;
-  margin: {
-    left: $marginS;
-    right: $marginS;
-  }
+  margin: $marginS;
 }
 
 .kiintun-and-maaraalatunnus {
