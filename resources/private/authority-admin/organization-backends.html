@@ -205,8 +205,12 @@
             <input data-bind="textInput: $data.name,
                               attr: {'id': 'link-text-' + $data.lang}"
                    class="form-input text long" type="text" autofocus="autofocus"/>
-            <label data-bind="ltext: 'auth-admin.link.url'" for="link-url"class="form-label"></label>
-            <input data-bind="textInput: $data.url" class="form-input text long" type="text" id="link-url"/>
+            <label data-bind="ltext: 'auth-admin.link.url',
+                              attr:  {'for': 'link-url-' + $data.lang}"
+                   class="form-label"></label>
+            <input data-bind="textInput: $data.url,
+                              attr: {'id': 'link-url-' + $data.lang}"
+                   class="form-input text long" type="text"/>
             <!-- /ko -->
             <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
           </div>
