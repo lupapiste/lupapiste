@@ -1,7 +1,7 @@
 *** Settings ***
 
-Documentation  Authority admin edits municipality links
-Suite Setup    Apply minimal fixture now  
+Documentation  Authority admin edits organization links
+Suite Setup    Apply minimal fixture now
 Test Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       authority_admin_resource.robot
@@ -11,7 +11,7 @@ Resource       authority_admin_resource.robot
 #Setting maps enabled for these tests
 #  Set integration proxy on
 
-Admin adds new municipality link
+Admin adds new organization link
   Sipoo logs in
   Go to page  backends
   Add link  fancy-link  http://reddit.com
@@ -37,4 +37,3 @@ Admin removes the link
 Mikko asks information and does not see link
   Mikko logs in
   User does not see link  fancy-link
-

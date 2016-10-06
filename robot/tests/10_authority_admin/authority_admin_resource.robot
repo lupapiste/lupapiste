@@ -11,11 +11,16 @@ Add link
   Wait and click  xpath=//a[@data-test-id='add-link']
   Wait until  Element should be visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-text-fi  ${name}
+  Input Text  jquery=#dialog-edit-link #link-url-fi  ${url}
   Input Text  jquery=#dialog-edit-link #link-text-sv  ${name} sv
-  Input Text  jquery=#dialog-edit-link #link-url  ${url}
+  Input Text  jquery=#dialog-edit-link #link-url-sv  ${url}
+  Input Text  jquery=#dialog-edit-link #link-text-en  ${name} en
+  Input Text  jquery=#dialog-edit-link #link-url-en  ${url}
+
   Click element  //div[@id='dialog-edit-link']//button[1]
   Wait until  Element should be visible  //td[text()='${name}']
   Wait until  Element should be visible  //td[text()='${name} sv']
+  Wait until  Element should be visible  //td[text()='${name} en']
   Wait until  Element should be visible  //a[@href='${url}']
 
 Update link
@@ -23,7 +28,7 @@ Update link
   Scroll to test id  organization-links-table
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name}']/..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
-  Input Text  jquery=#dialog-edit-link #link-url  ${url}
+  Input Text  jquery=#dialog-edit-link #link-url-fi  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
   Wait for jQuery
   Wait Until  Page Should Contain  ${url}
