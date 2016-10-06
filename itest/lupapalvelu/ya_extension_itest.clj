@@ -10,7 +10,8 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
-            [clj-time.format :as fmt]))
+            [clj-time.format :as fmt]
+            [net.cgrand.enlive-html :as enlive]))
 
 (apply-remote-minimal)
 
@@ -103,14 +104,25 @@
 (mongo/connect!)
 (mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
 
+(defn update-krysp [krysp new-reason new-start-date new-end-date]
+  (enlive/at krysp
+             [:lisaaikatieto :Lisaaika]
+             (enlive/content (filter identity
+                                     [{:tag :alkuPvm :content [new-start-date]}
+                                      (when new-end-date
+                                        {:tag :loppuPvm :content [new-end-date]})
+                                      {:tag :perustelu :content [new-reason]}]))))
+
 (facts "Application and link permit extensions"
        (mongo/with-db local-db-name
-         (let [{app-id :id} (create-and-submit-local-application pena
-                                                                 :propertyId sipoo-property-id
-                                                                 :operation "ya-katulupa-vesi-ja-viemarityot")
-               krysp (-> "resources/krysp/dev/jatkoaika-ya.xml"
-                         xml/parse
-                         strip-xml-namespaces)]
+         (let [{app-id :id}     (create-and-submit-local-application pena
+                                                                     :propertyId sipoo-property-id
+                                                                     :operation "ya-katulupa-vesi-ja-viemarityot")
+               krysp            (-> "resources/krysp/dev/jatkoaika-ya.xml"
+                                    xml/parse
+                                    strip-xml-namespaces)
+               krysp-start-date "04.10.2016"
+               krysp-end-date   "22.11.2016"]
 
            (fact "Fetch verdict"
                  (local-command sonja :check-for-verdict :id app-id) => ok?)
@@ -120,14 +132,14 @@
            (fact "Update application extension from KRYSP"
                  (yax/update-application-extensions krysp)
                  (-> (local-query pena :application :id app-id) :application :jatkoaika)
-                 => (contains {:alkuPvm "04.10.2016"
-                               :loppuPvm "22.11.2016"
+                 => (contains {:alkuPvm   krysp-start-date
+                               :loppuPvm  krysp-end-date
                                :perustelu "Jatkoajan perustelu"}))
            (fact "Extensions only include application extension"
                  (local-query pena :ya-extensions :id app-id)
-                 => (contains {:extensions  [{:startDate "04.10.2016"
-                                              :endDate "22.11.2016"
-                                              :reason "Jatkoajan perustelu"}]}))
+                 => (contains {:extensions [{:startDate krysp-start-date
+                                             :endDate   krysp-end-date
+                                             :reason    "Jatkoajan perustelu"}]}))
            (defn link-permit [start-date end-date]
              (let [ext-id (:id (local-command pena :create-continuation-period-permit :id app-id))
                    doc-id (-> (local-query pena :application :id ext-id)
@@ -135,19 +147,67 @@
                               (domain/get-document-by-name :tyo-aika-for-jatkoaika)
                               :id)]
                (mongo/update :applications
-                             {:_id ext-id
+                             {:_id       ext-id
                               :documents {$elemMatch {:id doc-id}}}
-                             {$set {:documents.$.data.tyoaika-alkaa-pvm.value start-date
+                             {$set {:documents.$.data.tyoaika-alkaa-pvm.value   start-date
                                     :documents.$.data.tyoaika-paattyy-pvm.value end-date
                                     }})
                ext-id))
-           (fact "Extension link permits"
-                 (let [ext-id1 (link-permit "7.7.2016" "8.8.2016")]
-                   (:extensions (local-query pena :ya-extensions :id app-id))
-                   => [{:startDate "7.7.2016"
-                        :endDate "8.8.2016"
-                        :id ext-id1
-                        :state "draft"}
-                       {:startDate "04.10.2016"
-                        :endDate "22.11.2016"
-                        :reason "Jatkoajan perustelu"}])))))
+
+           (facts "Extension link permits"
+                  (let [ext-id1 (link-permit "7.7.2016" "8.8.2016")]
+                    (fact "One link permit and app extension"
+                          (:extensions (local-query pena :ya-extensions :id app-id))
+                          => [{:startDate "7.7.2016"
+                               :endDate   "8.8.2016"
+                               :id        ext-id1
+                               :state     "draft"}
+                              {:startDate krysp-start-date
+                               :endDate   krysp-end-date
+                               :reason    "Jatkoajan perustelu"}])
+                    (let [ext-id2 (link-permit "4.10.2016" krysp-end-date)]
+                      (fact "Two link permits, latter matches app extension"
+                            (:extensions (local-query pena :ya-extensions :id app-id))
+                            => [{:startDate "7.7.2016"
+                                 :endDate   "8.8.2016"
+                                 :id        ext-id1
+                                 :state     "draft"}
+                                {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                 :endDate   krysp-end-date
+                                 :reason    "Jatkoajan perustelu"
+                                 :state     "draft"}])
+                      (fact "KRYSP does not contain end-date, does not match anymore"
+                            (yax/update-application-extensions (update-krysp krysp
+                                                                             "New reason"
+                                                                             "2016-10-04"
+                                                                             nil))
+                            (:extensions (local-query pena :ya-extensions :id app-id))
+                            => [{:startDate "7.7.2016"
+                                 :endDate   "8.8.2016"
+                                 :id        ext-id1
+                                 :state     "draft"}
+                                {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                 :endDate   krysp-end-date
+                                 :state     "draft"}
+                                {:startDate krysp-start-date
+                                 :endDate   nil
+                                 :reason    "New reason"}]
+                            )
+                      (fact "Link permit and matching app extension, both without end-date"
+                            (let [ext-id3 (link-permit krysp-start-date nil)]
+                              (:extensions (local-query pena :ya-extensions :id app-id))
+                              => [{:startDate "7.7.2016"
+                                   :endDate   "8.8.2016"
+                                   :id        ext-id1
+                                   :state     "draft"}
+                                  {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                   :endDate   krysp-end-date
+                                   :state     "draft"}
+                                  {:id ext-id3
+                                   :state "draft"
+                                   :startDate krysp-start-date
+                                   :endDate   nil
+                                   :reason    "New reason"}]))))))))
