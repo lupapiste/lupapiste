@@ -29,7 +29,7 @@ Pena now sees extensions table
   Check row  0  20.9.2016  10.10.2016  Luonnos  
 
 Pena creates second extension
-  Create extension  ${ext2}  01.08.2016  09.09.2016  
+  Create extension  ${ext2}  1.8.2016  9.9.2016  
 
 Pena creates third extension
   Create extension  ${ext3}  11.11.2016  12.12.2016

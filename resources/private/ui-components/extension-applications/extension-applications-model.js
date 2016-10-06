@@ -11,7 +11,7 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
   }
 
   function parseDate( date ) {
-    var m = moment( date, "DD.MM.YYYY", true);
+    var m = moment( date, "D.M.YYYY", true);
     return m.isValid() ? m : null;
   }
 
