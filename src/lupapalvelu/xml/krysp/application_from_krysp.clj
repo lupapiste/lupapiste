@@ -4,7 +4,7 @@
             [lupapalvelu.permit :as permit]
             [sade.common-reader :as scr]
             [sade.xml :as sxml]
-            [sade.util :refer [fn->>]]
+            [sade.util :refer [fn->>] :as util]
             [sade.core :refer [fail!]]))
 
 (defn- get-lp-tunnus [xml-without-ns]
@@ -18,24 +18,31 @@
        first))
 
 (defn- split-content-per-application [xml-without-ns]
-  (let [toimituksen-tiedot (sxml/select xml-without-ns [:toimituksenTiedot])]
+  (let [toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])]
     (->> (:content xml-without-ns)
          (remove (comp #{:toimituksenTiedot} :tag))
          (map (fn->> (vector toimituksen-tiedot)
                      (assoc xml-without-ns :content))))))
 
-(defn- get-application-xml [organization-id permit-type ids search-type raw?]
+(defn- not-empty-content [xml raw?]
+  (cond
+    raw? xml
+    (get-lp-tunnus xml) xml
+    (get-kuntalupatunnus xml) xml))
+
+(defn- fetch-application-xmls [organization-id permit-type ids search-type raw?]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs {:organization organization-id :permitType permit-type})]
-    (or (permit/fetch-xml-from-krysp permit-type url credentials ids search-type raw?)
-        (fail! :error.unknown))
+    (-> (permit/fetch-xml-from-krysp permit-type url credentials ids search-type raw?)
+        scr/strip-xml-namespaces
+        (not-empty-content raw?))
     (fail! :error.no-legacy-available)))
 
 (defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
-  (get-application-xml organization permitType [id] :application-id raw?))
+  (fetch-application-xmls organization permitType [id] :application-id raw?))
 
 (defn get-application-xml-by-backend-id [{:keys [id organization permitType] :as application} backend-id & [raw?]]
   (when backend-id
-    (get-application-xml organization permitType [backend-id] :kuntalupatunnus raw?)))
+    (fetch-application-xmls organization permitType [backend-id] :kuntalupatunnus raw?)))
 
 (defmulti get-application-xmls
   "Get application xmls from krysp"
@@ -45,14 +52,14 @@
 
 (defmethod get-application-xmls :application-id
   [organization-id permit-type search-type application-ids]
-  (->> (get-application-xml organization-id permit-type application-ids :application-id false)
-       (scr/strip-xml-namespaces)
+  (->> (fetch-application-xmls organization-id permit-type application-ids :application-id false)
        (split-content-per-application)
-       (group-by get-lp-tunnus)))
+       (group-by get-lp-tunnus)
+       (util/map-values first)))
 
 (defmethod get-application-xmls :kuntalupatunnus
   [organization-id permit-type search-type backend-ids]
-  (->> (get-application-xml organization-id permit-type backend-ids :kuntalupatunnus false)
-       (scr/strip-xml-namespaces)
+  (->> (fetch-application-xmls organization-id permit-type backend-ids :kuntalupatunnus false)
        (split-content-per-application)
-       (group-by get-kuntalupatunnus)))
+       (group-by get-kuntalupatunnus)
+       (util/map-values first)))
