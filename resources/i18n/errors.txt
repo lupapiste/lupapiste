@@ -770,3 +770,6 @@
 "error.vrk:CR343" "en" "In an electrically heated building, the fuel must be electricity"
 "error.vrk:CR343" "fi" "Jos lämmitystapa on sähkölämmitys, on polttoaineen oltava sähkö"
 "error.vrk:CR343" "sv" "Om uppvärmningssättet är elvärme, måste bränslet vara el."
+"file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
+"file_not_linked_to_the_document" "sv" ""
+"file_not_linked_to_the_document" "en" ""

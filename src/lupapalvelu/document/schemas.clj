@@ -1469,6 +1469,7 @@
            :removable-only-by-authority true
            :approvable true
            :subtype :maksaja
+           :section-help "schemas.maksaja.section.help"
            :accordion-fields hakija-accordion-paths
            :type :party}
     :body maksaja}
