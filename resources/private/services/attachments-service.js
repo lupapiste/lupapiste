@@ -38,9 +38,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.applicationId = lupapisteApp.models.application.id;
 
   hub.subscribe( "application-model-updated", function() {
-    clearData();  // Just in case
-    // to avoid retaining old filter states when going to different application
-    self.internedObservables = {};
     self.queryAll();
     self.authModel.refresh({id: self.applicationId()});
   });
@@ -52,7 +49,6 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
   function clearData() {
-    // to avoid showing stale data before ajax queries return.
     self.attachments([]);
     forceVisibleIds([]);
     self.filters([]);
