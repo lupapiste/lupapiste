@@ -1,11 +1,15 @@
 (ns lupapalvelu.autom-check-reviews-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.tasks :refer [task-is-review?]]
             [sade.core :refer [now fail]]
+            [sade.xml :as sxml]
             [sade.coordinate :as coordinate]
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
@@ -20,6 +24,8 @@
   (:import [java.io File]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
+
+(testable-privates lupapalvelu.verdict save-reviews-from-xml)
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -63,7 +69,7 @@
 
           (count (:tasks application-verdict-given)) => 0)
 
-        (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sade.xml/parse-string
+        (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sxml/parse-string
                                                                                                  (slurp "resources/krysp/dev/r-verdict-review.xml")
                                                                                                  ;;(slurp "dev-resources/krysp/verdict-r-buildings.xml")
                                                                                                  "utf-8")]
@@ -99,17 +105,15 @@
 
 (facts "Imported review PDF generation"
   (mongo/with-db db-name
-    (let [parsed-xml (sade.xml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+    (let [parsed-xml (sxml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
           application    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
           application-id (:id application)
-          command (assoc (lupapalvelu.action/application->command application)
-                       :user (lupapalvelu.batchrun/batchrun-user-for-review-fetch (lupapalvelu.batchrun/orgs-for-review-fetch))
-                       :created (sade.core/now))]
+          batchrun-user (batchrun/batchrun-user-for-review-fetch (batchrun/orgs-for-review-fetch))]
       (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-      (lupapalvelu.verdict/save-reviews-from-xml command parsed-xml) ;; => ok?
-      (let [updated-application (lupapalvelu.domain/get-application-no-access-checking application-id)
+      (save-reviews-from-xml batchrun-user (now) application parsed-xml) ;; => ok?
+      (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
-            last-attachment-file-id (lupapalvelu.attachment/attachment-latest-file-id updated-application last-attachment-id)
+            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)
             temp-pdf-path (File/createTempFile "review-test" ".tmp")]
         (try
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
