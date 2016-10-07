@@ -386,17 +386,21 @@
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
-      (let [url (get-in organization [(keyword permit-type) :url])]
-        (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
-        (when-not (s/blank? url)
-          ;; url means there's a defined location (eg sftp) for polling xml verdicts
-          (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type applications)))
+      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
+      (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type applications)
       (catch Throwable t
-        (errorf "Unable to get reviews for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+        (errorf "error.integration - Unable to get reviews for %s in chunks from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))
+        (doseq [app applications]
+          (try
+            (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (ss/join ", " (:id app)))
+            (verdict/check-for-reviews user created organization-id permit-type [app])
+            (catch Throwable t
+              (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t)))))))))
 
 (defn- fetch-reviews-for-organization [eraajo-user organization applications]
-  (->> (group-by :permitType applications)
-       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
+  (when-not (s/blank? (get-in organization [(keyword permit-type) :url])) ; url means there's a defined location (eg sftp) for polling xml verdicts
+    (->> (group-by :permitType applications)
+         (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization)))))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (orgs-for-review-fetch)
