@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1475832989917');
+@import url('main-blessed1.css?z=1475844379868');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -3538,16 +3538,18 @@ ul.tabs {
 
 /* line 93, ../../../private/common-html/sass/partials/_help.scss */
 .help-box {
-  padding-top: 12px;
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-bottom: 12px;
+  padding: 12px;
   background-color: #eeeeee;
   border-left: 10px solid #f39129;
 }
-/* line 102, ../../../private/common-html/sass/partials/_help.scss */
+/* line 97, ../../../private/common-html/sass/partials/_help.scss */
 .help-box p {
   padding-bottom: 0px;
+}
+
+/* line 102, ../../../private/common-html/sass/partials/_help.scss */
+.light {
+  background: white;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_autocomplete.scss */
