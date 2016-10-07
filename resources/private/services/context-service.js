@@ -13,11 +13,15 @@ LUPAPISTE.ContextService = function() {
   }
 
   function isAppView( appId ) {
+    // Inforequest only has inforequest and attachment views.
+    var infoRequestCheck = appModel.infoRequest()
+        ? _.includes( ["inforequest", "attachment"],
+                      pageutil.getPage() )
+        : true;
+
     return appId
       && pageutil.hashApplicationId() === appId
-      && pageutil.getPage() === (appModel.infoRequest()
-                                 ? "inforequest"
-                                 : "application");
+      && infoRequestCheck;
   }
 
   function checkContext() {

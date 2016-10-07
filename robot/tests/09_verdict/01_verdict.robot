@@ -33,6 +33,9 @@ Sonja fetches verdict from municipality KRYSP service
   Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
   Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
 
+Attachments are visible
+  Wait until  Element should be visible  jquery=tr.statement-row td a
+
 Application summary tab is visible
   Element should be visible  jquery=a[data-test-id=application-open-applicationSummary-tab]
 
