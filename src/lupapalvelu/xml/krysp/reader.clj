@@ -391,8 +391,9 @@
        (remove ss/blank?)))
 
 (defmulti ->verdicts
-  "[xml permit-type reader & reader-args] - Reads the verdicts."
-  (fn [xml permit-type reader & reader-args] (keyword permit-type)))
+  "Reads the verdicts."
+  {:arglists '([xml permit-type reader & reader-args])}
+  (fn [xml permit-type & _] (keyword permit-type)))
 
 (defmethod ->verdicts :default
   [xml permit-type reader & reader-args]

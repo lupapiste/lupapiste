@@ -168,28 +168,31 @@
   (get-metadata permit-type :sftp-directory))
 
 (defmulti application-krysp-mapper
-  "[application lang submitted-application krysp-version output-dir begin-of-link] - Maps application into KRYSP XML and saves the XML to disk."
-  (fn [{permit-type :permitType :as application} & args]
+  "Maps application into KRYSP XML and saves the XML to disk."
+  {:arglists '([application lang submitted-application krysp-version output-dir begin-of-link])}
+  (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
 (defmethod application-krysp-mapper :default
-  [{permit-type :permitType :as application} & _]
+  [{permit-type :permitType} & _]
   (error "KRYSP 'application mapper' method not defined for permit type: " permit-type)
   nil)
 
 (defmulti review-krysp-mapper
-  "[application review user lang krysp-version output-dir begin-of-link] - Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
-  (fn [{permit-type :permitType :as application} & args]
+  "Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
+  {:arglists '([application review user lang krysp-version output-dir begin-of-link])}
+  (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
 (defmethod review-krysp-mapper :default
-  [{permit-type :permitType :as application} & _]
+  [{permit-type :permitType} & _]
   (error "KRYSP 'review mapper' method not defined for permit type: " permit-type)
   nil)
 
 (defmulti read-verdict-xml
-  "[permit-type xml-without-ns] - Reads verdicts (sequence) from KRYSP xml."
-  (fn [permit-type xml-without-ns]
+  "Reads verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type xml-without-ns])}
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod read-verdict-xml :default
@@ -198,8 +201,9 @@
   nil)
 
 (defmulti validate-verdict-xml
-  "[permit-type xml-without-ns organization] - Reads verdicts (sequence) from KRYSP xml."
-  (fn [permit-type xml-without-ns organization]
+  "Reads verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type xml-without-ns organization])}
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod validate-verdict-xml :default
@@ -208,10 +212,11 @@
   nil)
 
 (defmulti read-verdict-extras-xml
-  "[application app-xml] - Reads some extras from verdict KRYSP xml.
+  "Reads some extras from verdict KRYSP xml.
   Returns application mongo updates.
   Method is called even if xml validation fails"
-  (fn [{permit-type :permitType :as application} app-xml]
+  {:arglists '([application app-xml])}
+  (fn [{permit-type :permitType} & _]
     (keyword permit-type)))
 
 (defmethod read-verdict-extras-xml :default
@@ -219,8 +224,9 @@
   nil)
 
 (defmulti read-tj-suunnittelija-verdict-xml
-  "[permit-type doc party-type target-kuntaRoolikoodi xml-without-ns] - Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
-  (fn [permit-type doc party-type target-kuntaRoolikoodi xml-without-ns]
+  "Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type doc party-type target-kuntaRoolikoodi xml-without-ns])}
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod read-tj-suunnittelija-verdict-xml :default
@@ -229,8 +235,9 @@
   nil)
 
 (defmulti fetch-xml-from-krysp
-  "[permit-type server-url credentials ids search-type raw?] - Fetches KRYSP XML from municipality backend."
-  (fn [permit-type server-url credentials ids search-type raw?]
+  "Fetches KRYSP XML from municipality backend."
+  {:arglists '([permit-type server-url credentials ids search-type raw?])}
+  (fn [permit-type & _]
     (keyword permit-type)))
 
 (defmethod fetch-xml-from-krysp :default
