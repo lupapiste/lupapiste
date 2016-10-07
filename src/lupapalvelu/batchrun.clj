@@ -19,7 +19,7 @@
             [lupapalvelu.xml.krysp.reader]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.attachment :as attachment]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
@@ -392,15 +392,15 @@
         (errorf "error.integration - Unable to get reviews for %s in chunks from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))
         (doseq [app applications]
           (try
-            (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (ss/join ", " (:id app)))
-            (verdict/check-for-reviews user created organization-id permit-type [app])
+            (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
+            (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type [app])
             (catch Throwable t
               (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t)))))))))
 
 (defn- fetch-reviews-for-organization [eraajo-user organization applications]
-  (when-not (s/blank? (get-in organization [(keyword permit-type) :url])) ; url means there's a defined location (eg sftp) for polling xml verdicts
-    (->> (group-by :permitType applications)
-         (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization)))))
+  (->> (group-by :permitType applications)
+       (remove (fn-> key keyword organization :url s/blank?))
+       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (orgs-for-review-fetch)
@@ -412,7 +412,7 @@
         eraajo-user (batchrun-user-for-review-fetch orgs-by-id)
         grouped-apps (group-by :organization apps)]
     (doall
-     (pmap #(fetch-reviews-for-organization (orgs-by-id (key %)) (val %)) grouped-apps))))
+     (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
