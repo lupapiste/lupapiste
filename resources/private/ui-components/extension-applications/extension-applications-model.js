@@ -11,7 +11,7 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
   }
 
   function parseDate( date ) {
-    var m = moment( date, "DD.MM.YYYY", true);
+    var m = moment( date, "D.M.YYYY", true);
     return m.isValid() ? m : null;
   }
 
@@ -27,7 +27,8 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
                                     endDate: parseDate( ext.endDate),
                                     url: pageutil.buildPageHash( "application",
                                                                  ext.id),
-                                    state: ext.state};
+                                    state: ext.state,
+                                    reason: _.trim(ext.reason)};
                           })
                           .sortBy( "startDate")
                           .value());
@@ -35,6 +36,11 @@ LUPAPISTE.ExtensionApplicationsModel = function() {
         .call();
     }
   }
+
+  self.showReason = self.disposedPureComputed( function() {
+    return  _.some( self.extensions(),
+                    _.unary( _.partialRight( _.get , "reason")));
+  });
 
   self.addHubListener( "contextService::enter", fetchExtensions);
 
