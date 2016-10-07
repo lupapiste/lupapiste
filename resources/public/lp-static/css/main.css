@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1475752742659');
+@import url('main-blessed1.css?z=1475832989917');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -5142,59 +5142,63 @@ button.rollup-button {
   margin-right: auto;
   vertical-align: top;
   position: relative;
-  padding-bottom: 48px;
 }
-/* line 35, ../../../private/common-html/sass/views/_applications.scss */
+/* line 36, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-button {
   margin-top: 0;
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
 }
-/* line 40, ../../../private/common-html/sass/views/_applications.scss */
+/* line 42, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .missing-wrapper {
   width: 100%;
 }
-/* line 43, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-inforequest-box {
+/* line 46, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .first-box {
   padding-left: 0;
   padding-right: 24px;
   min-height: 250px;
 }
-/* line 46, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-application-box {
+/* line 50, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .middle-box {
   padding-left: 24px;
   padding-right: 24px;
   min-height: 250px;
   border-left: 1px dotted #888a8c;
   border-right: 1px dotted #888a8c;
+  padding-bottom: 95px;
 }
-/* line 51, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-prev-permit-box {
+/* line 57, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .last-box {
   padding-left: 24px;
   padding-right: 0;
   min-height: 250px;
 }
-
-/* line 57, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
-  width: 45%;
+/* line 59, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .last-box p {
+  margin-bottom: 0px;
 }
-/* line 60, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .missing-application-box {
+
+/* line 66, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
+  width: 33%;
+}
+/* line 70, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state.wide .last-box {
   border-right: none;
 }
-/* line 63, ../../../private/common-html/sass/views/_applications.scss */
+/* line 74, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .missing-prev-permit-box {
   display: none;
 }
 
-/* line 68, ../../../private/common-html/sass/views/_applications.scss */
-.missing-inforequest-box.app-type-button,
-.missing-application-box.app-type-button,
-.missing-prev-permit-box.app-type-button {
+/* line 79, ../../../private/common-html/sass/views/_applications.scss */
+.first-box.app-type-button,
+.middle-box.app-type-button,
+.last-box.app-type-button {
   min-height: 0;
 }
 
-/* line 76, ../../../private/common-html/sass/views/_applications.scss */
+/* line 87, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
@@ -5213,31 +5217,31 @@ button.rollup-button {
   /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
   /* } */
 }
-/* line 93, ../../../private/common-html/sass/views/_applications.scss */
+/* line 104, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 98, ../../../private/common-html/sass/views/_applications.scss */
+/* line 109, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 103, ../../../private/common-html/sass/views/_applications.scss */
+/* line 114, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 109, ../../../private/common-html/sass/views/_applications.scss */
+/* line 120, ../../../private/common-html/sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 113, ../../../private/common-html/sass/views/_applications.scss */
+/* line 124, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_asc:after, .sorting.asc:after {
   content: "";
   display: block;
@@ -5251,7 +5255,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 124, ../../../private/common-html/sass/views/_applications.scss */
+/* line 135, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_desc:after, .sorting.desc:after {
   content: "";
   display: block;
@@ -5265,7 +5269,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 136, ../../../private/common-html/sass/views/_applications.scss */
+/* line 147, ../../../private/common-html/sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -5274,61 +5278,61 @@ button.rollup-button {
   bottom: 12px;
 }
 
-/* line 144, ../../../private/common-html/sass/views/_applications.scss */
+/* line 155, ../../../private/common-html/sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 146, ../../../private/common-html/sass/views/_applications.scss */
+/* line 157, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation {
   display: table-row;
 }
-/* line 148, ../../../private/common-html/sass/views/_applications.scss */
+/* line 159, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
-/* line 151, ../../../private/common-html/sass/views/_applications.scss */
+/* line 162, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div {
   padding-right: 24px;
   display: table-cell;
 }
-/* line 154, ../../../private/common-html/sass/views/_applications.scss */
+/* line 165, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
   margin: 0 6px 0 6px;
 }
-/* line 158, ../../../private/common-html/sass/views/_applications.scss */
+/* line 169, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation p {
   max-width: 35em;
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 164, ../../../private/common-html/sass/views/_applications.scss */
+/* line 175, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation h3 {
   max-width: 35em;
   margin-top: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 170, ../../../private/common-html/sass/views/_applications.scss */
+/* line 181, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation .invitation-actions {
   white-space: nowrap;
 }
 
-/* line 176, ../../../private/common-html/sass/views/_applications.scss */
+/* line 187, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 180, ../../../private/common-html/sass/views/_applications.scss */
+/* line 191, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 183, ../../../private/common-html/sass/views/_applications.scss */
+/* line 194, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+/* line 200, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -5338,31 +5342,31 @@ button.rollup-button {
   width: 22px;
   padding: 3px;
 }
-/* line 198, ../../../private/common-html/sass/views/_applications.scss */
+/* line 209, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 
-/* line 234, ../../../private/common-html/sass/views/_applications.scss */
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+/* line 250, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+/* line 253, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+/* line 256, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -5373,7 +5377,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+/* line 266, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
@@ -6644,6 +6648,11 @@ div.review-tasks {
 }
 
 /* line 130, ../../../private/common-html/sass/views/_create_application.scss */
+.bottom-marginL {
+  margin-bottom: 24px !important;
+}
+
+/* line 134, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -6652,19 +6661,19 @@ div.review-tasks {
   right: 4px !important;
 }
 
-/* line 136, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 140, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 142, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 146, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 145, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 149, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -6673,7 +6682,7 @@ div.review-tasks {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 155, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 159, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -6686,7 +6695,7 @@ div.review-tasks {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 167, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 171, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
@@ -6701,11 +6710,11 @@ div.review-tasks {
   z-index: 2;
 }
 
-/* line 182, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 186, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question {
   vertical-align: top;
 }
-/* line 183, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 187, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
