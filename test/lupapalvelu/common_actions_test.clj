@@ -69,7 +69,10 @@
                           :organization-links
                           :mark-seen-organization-links
                           :redirect-to-3d-map
-                          :ya-extensions}
+                          :ya-extensions
+                          :tasks-tab-visible
+                          :application-info-tab-visible
+                          :application-summary-tab-visible}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (foreach-action {} user application {})
@@ -110,7 +113,7 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                           :get-building-info-from-wfs :tasks-tab-visible
+                           :get-building-info-from-wfs :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
                            :mark-seen :info-links :organization-links :mark-seen-organization-links
                            :pdfa-casefile :suti-application-data :suti-application-products
                            :redirect-to-3d-map :ya-extensions
