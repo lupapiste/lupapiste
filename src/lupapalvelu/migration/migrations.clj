@@ -2398,7 +2398,7 @@
                             {$set {:name.en (-> organization :name :fi)}}))
       changed-organizations)))
 
-(defn- english-default-for-link [link]
+(defn- english-default-for-link-name [link]
   (if (not (-> link :name :en))
     (assoc-in link [:name :en] (-> link :name :fi))
     link))
@@ -2417,7 +2417,7 @@
                                              {:links 1})]
               (mongo/update-n :organizations
                               {:_id (:id organization)}
-                              {$set {:links (map english-default-for-link
+                              {$set {:links (map english-default-for-link-name
                                                  (:links organization))}})))))
 
 (defn- missing-url-map [lang]
@@ -2449,6 +2449,28 @@
                             {:_id (:id organization)}
                             {$set {:links (map default-urls-for-link
                                                (:links organization))}}))))
+
+(defn- english-default-for-link-url [link]
+  (if (not (-> link :url :en))
+    (assoc-in link [:url :en] (-> link :url :fi))
+    link))
+
+(when (env/feature? :english)
+  (defmigration set-english-defaults-for-organization-link-urls
+    {:apply-when (pos? (mongo/count :organizations
+                                    {$and
+                                     [{:links {$exists true}}
+                                      {:links {$elemMatch {:url.en nil}}}]}))}
+    (reduce + 0
+            (for [organization (mongo/select :organizations
+                                             {$and
+                                              [{:links {$exists true}}
+                                               {:links {$elemMatch {:url.en nil}}}]}
+                                             {:links 1})]
+              (mongo/update-n :organizations
+                              {:_id (:id organization)}
+                              {$set {:links (map english-default-for-link-url
+                                                 (:links organization))}})))))
 
 (defn not-needed-to-false                                   ;; LP-6232
   "If there are versions, it doesn't make sense to flag attachment as 'not needed'.
