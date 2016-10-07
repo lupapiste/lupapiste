@@ -23,6 +23,7 @@
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [clj-time.coerce :as c]))
 
 
@@ -382,19 +383,20 @@
         orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
     orgs-by-id))
 
-(defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
-  (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+(defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
+  (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
-      (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-        (debugf "fetch-reviews-for-application: processing application id %s" id)
-        (logging/with-logging-context {:applicationId id}
-        (if-not (s/blank? url)
+      (let [url (get-in organization [(keyword permit-type) :url])]
+        (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
+        (when-not (s/blank? url)
           ;; url means there's a defined location (eg sftp) for polling xml verdicts
-          (let [command (assoc (application->command app) :user eraajo-user :created (now))
-                result (verdict/do-check-for-reviews command)]
-            result))))
+          (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type applications)))
       (catch Throwable t
-        (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))))))
+        (errorf "Unable to get reviews for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+
+(defn- fetch-reviews-for-organization [eraajo-user organization applications]
+  (->> (group-by :permitType applications)
+       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (orgs-for-review-fetch)
@@ -403,9 +405,10 @@
                (mongo/select :applications {:_id (first args)})
                ;; else
                (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)
+        grouped-apps (group-by :organization apps)]
     (doall
-     (pmap (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
+     (pmap #(fetch-reviews-for-organization (orgs-by-id (key %)) (val %)) grouped-apps))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
@@ -453,4 +456,3 @@
                       (if (:archivabilityError result)
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
-

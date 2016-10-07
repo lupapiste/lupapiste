@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
+            [clojure.set :refer [rename-keys]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
@@ -11,10 +12,10 @@
             [sade.core :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]
+            [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
             [sade.env :as env]
-            [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
@@ -504,10 +505,10 @@
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
 
-(defn save-reviews-from-xml
+(defn- save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [{:keys [application] :as command} app-xml]
+  [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
         buildings-summary (building-reader/->buildings-summary app-xml)
@@ -544,24 +545,36 @@
         (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
       ;; else
-      (let [update-result (update-application command (util/deep-merge task-updates building-updates))
+      (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates))
             updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))]
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
            updated-application
-           added-task (:user command) (:lang command "fi")))
+           added-task user "fi"))
         (ok)))))
 
+(defn- get-application-xmls-in-chunks [organization-id permit-type search-type ids chunk-size]
+  (mapcat (partial krysp-fetch/get-application-xmls organization-id permit-type search-type)
+          (partition chunk-size ids)))
 
-(defn do-check-for-reviews [{:keys [application] :as command}]
-  {:pre [(every? command [:application :user :created])]}
-  (when-let [
-             app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
-             ]
-    ;; (doseq [t (:tasks (:application command))]
-    ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
-    ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
-    (if (not-empty app-xml)
-      (save-reviews-from-xml command app-xml)
-      (info "empty review xml for" (:id application)))))
+(defn- get-application-xmls-by-kuntalupatunnus [organization-id permit-type applications chunk-size]
+  (let [kl-tunnus->app-id (->> applications
+                               (map (fn [app] [(some :kuntalupatunnus (:verdicts app)) (:id app)]))
+                               (filter (comp nil? first))
+                               (into {}))]
+    (-> (get-application-xmls-in-chunks organization-id permit-type :kuntalupatunnus (keys kl-tunnus->app-id) chunk-size)
+        (rename-keys kl-tunnus->app-id))))
+
+(defn check-for-reviews [user created organization-id permit-type applications]
+  (let [chunk-size 10
+        xmls-by-app-id (get-application-xmls-in-chunks organization-id permit-type :application-id (map :id applications) chunk-size)
+        not-found-apps (remove (comp #{(keys xmls-by-app-id)} :id) applications)
+        all-xmls (merge (get-application-xmls-by-kuntalupatunnus organization-id permit-type applications chunk-size)
+                        xmls-by-app-id)
+        missing-ids (->> (map :id applications)
+                         (remove all-xmls))]
+    (when-not (empty? missing-ids)
+      (info "empty review xmls for " missing-ids))
+    (->> all-xmls
+         (util/map-keys #(util/find-by-id % applications))
+         (map (partial apply save-reviews-from-xml user created)))))
