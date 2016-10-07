@@ -8,15 +8,15 @@
             [sade.env :as env]))
 
 (def header-translations
-  {:suomifi_nationalidentificationnumber                      :hetu
-   :suomifi_cn                                                :fullName
-   :suomifi_firstname                                         :firstName
-   :suomifi_givenname                                         :givenName
-   :suomifi_sn                                                :lastName
-   :suomifi_mail                                              :email
-   :suomifi_vakinainenkotimainenlahiosoites                   :streetAddress
-   :suomifi_vakinainenkotimainenlahiosoitepostinumero         :postalCode
-   :suomifi_vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
+  {:suomifi-nationalidentificationnumber                      :hetu
+   :suomifi-cn                                                :fullName
+   :suomifi-firstname                                         :firstName
+   :suomifi-givenname                                         :givenName
+   :suomifi-sn                                                :lastName
+   :suomifi-mail                                              :email
+   :suomifi-vakinainenkotimainenlahiosoites                   :streetAddress
+   :suomifi-vakinainenkotimainenlahiosoitepostinumero         :postalCode
+   :suomifi-vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
 
 (env/in-dev
   (defpage "/from-shib/:command" {command :command}
