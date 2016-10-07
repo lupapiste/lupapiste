@@ -37,16 +37,18 @@ LUPAPISTE.AttachmentsService = function() {
   self.processing = lupapisteApp.models.application.processing;
   self.applicationId = lupapisteApp.models.application.id;
 
-  self.applicationId.subscribe(function(id) {
+  hub.subscribe( "application-model-updated", function() {
     clearData();  // Just in case
     // to avoid retaining old filter states when going to different application
     self.internedObservables = {};
-    if (id) {
-      self.queryAll();
-      self.authModel.refresh({id: id});
-    } else {
-      self.authModel.setData({});
-    }
+    self.queryAll();
+    self.authModel.refresh({id: self.applicationId()});
+  });
+
+  hub.subscribe( "contextService::leave", function() {
+    clearData();
+    self.internedObservables = {};
+    self.authModel.setData({});
   });
 
   function clearData() {
