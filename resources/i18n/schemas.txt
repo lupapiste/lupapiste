@@ -35,6 +35,7 @@
 "email" "sv" "E-post"
 "empty" "fi" ""
 "empty" "sv" ""
+"empty" "en" ""
 "energialuokka" "en" "Energy class"
 "energialuokka" "fi" "Energialuokka"
 "energialuokka" "sv" "Energiklass"
