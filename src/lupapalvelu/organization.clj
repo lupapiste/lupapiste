@@ -26,12 +26,12 @@
             [sade.xml :as sxml]
             [sade.schemas :as ssc]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.wfs :as wfs]
-            [lupapalvelu.geojson :as geo]
             [me.raynes.fs :as fs]
             [clojure.walk :refer [keywordize-keys]]))
 
@@ -608,3 +608,34 @@
     (when (not= (boolean already) (boolean flag))
       (update-organization (:id organization)
                            {(if flag $push $pull) {(util/kw-path group :operations) operation-id}}))))
+
+(defn add-organization-link [organization name url created]
+  (update-organization organization
+                       {$push {:links {:name     name
+                                       :url      url
+                                       :modified created}}}))
+
+(defn update-organization-link [organization index name url created]
+  (update-organization organization
+                       {$set {(str "links." index) {:name     name
+                                                    :url      url
+                                                    :modified created}}}))
+
+(defn- combine-keys [prefix [k v]]
+  [(keyword (str (name prefix) "." (name k))) v])
+
+(defn- mongofy
+  "Transform eg. {:outer {:inner :value}} into {:outer.inner :value}"
+  [m]
+  (into {}
+        (mapcat (fn [[k v]]
+                  (if (and (keyword? k)
+                           (map? v))
+                    (map (partial combine-keys k) (mongofy v))
+                    [[k v]]))
+                m)))
+
+(defn remove-organization-link [organization name url]
+  (update-organization organization
+                       {$pull {:links (mongofy {:name name
+                                                :url  url})}}))

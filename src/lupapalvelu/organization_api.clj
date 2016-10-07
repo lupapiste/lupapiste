@@ -172,13 +172,6 @@
         (ok))
       (fail :error.organization.duplicate-scope))))
 
-(defn- localized [nameFi nameSv]
-  (i18n/with-default-localization {:fi nameFi :sv nameSv}
-                                  nameFi))
-
-(defn- localized-url [url]
-  (i18n/localization-schema (ss/trim url)))
-
 (defn- validate-map-with-optional-url-values [param command]
   (let [urls (map ss/trim (vals (get-in command [:data param])))]
     (some #(when-not (ss/blank? %)
@@ -193,10 +186,8 @@
                                [:url :name] i18n/supported-langs)
                       (partial validate-map-with-optional-url-values [:url])]}
   [{user :user created :created}]
-  (org/update-organization (usr/authority-admins-organization-id user)
-                           {$push {:links {:name     name
-                                           :url      url
-                                           :modified created}}})
+  (org/add-organization-link (usr/authority-admins-organization-id user)
+                             name url created)
   (ok))
 
 (defcommand update-organization-link
@@ -208,25 +199,9 @@
                       (partial validate-map-with-optional-url-values [:url])
                       (partial number-parameters [:index])]}
   [{user :user created :created}]
-  (org/update-organization (usr/authority-admins-organization-id user)
-                           {$set {(str "links." index) {:name     name
-                                                        :url      url
-                                                        :modified created}}})
+  (org/update-organization-link (usr/authority-admins-organization-id user)
+                                index name url created)
   (ok))
-
-(defn- combine-keys [prefix [k v]]
-  [(keyword (str (name prefix) "." (name k))) v])
-
-(defn- mongofy
-  "Transform eg. {:outer {:inner :value}} into {:outer.inner :value}"
-  [m]
-  (into {}
-        (mapcat (fn [[k v]]
-                  (if (and (keyword? k)
-                           (map? v))
-                    (map (partial combine-keys k) (mongofy v))
-                    [[k v]]))
-                m)))
 
 (defcommand remove-organization-link
   {:description "Removes organization link."
@@ -236,9 +211,8 @@
                       (partial validate-map-with-optional-url-values [:url])]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user)
-                           {$pull {:links (mongofy {:name name
-                                                    :url  url})}})
+  (org/remove-organization-link (usr/authority-admins-organization-id user)
+                                name url)
   (ok))
 
 (defquery organizations
