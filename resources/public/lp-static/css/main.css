@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1475661763350');
+@import url('main-blessed1.css?z=1475840999085');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -7384,6 +7384,14 @@ table.selected-operations-table td.sot--center {
   text-align: center;
 }
 
+/* line 116, ../../../private/common-html/sass/views/_authority_admin.scss */
+div.organization-link-cell {
+  max-width: 24em;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* line 2, ../../../private/common-html/sass/views/_neighbor.scss */
 #neighbor-show .pending {
   width: 100%;
@@ -8304,14 +8312,14 @@ table.info-link-editor-view + .dragging {
   background-color: #333333;
 }
 
-/* line 364, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 359, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text {
   max-width: 20em;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
 
-/* line 368, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 363, ../../../private/common-html/sass/views/_side_panel.scss */
 span.info-link-text-wide {
   max-width: 28em;
   overflow-x: hidden;
@@ -8319,27 +8327,27 @@ span.info-link-text-wide {
 }
 
 @media all and (max-width: 991px) {
-  /* line 374, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 369, ../../../private/common-html/sass/views/_side_panel.scss */
   table.info-link-editor-view + .dragging {
     max-width: 24em;
   }
 
-  /* line 377, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 372, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text {
     max-width: 14em;
   }
 
-  /* line 381, ../../../private/common-html/sass/views/_side_panel.scss */
+  /* line 376, ../../../private/common-html/sass/views/_side_panel.scss */
   span.info-link-text-wide {
     max-width: 22em;
   }
 }
-/* line 386, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 381, ../../../private/common-html/sass/views/_side_panel.scss */
 .info-link-link {
   margin-bottom: .5em;
 }
 
-/* line 393, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 388, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit {
   border: none;
   margin-bottom: 0;
@@ -8359,16 +8367,16 @@ table.info-link-editor-edit tr:hover {
 table.info-link-editor-edit tr:hover:nth-child(even) {
   background: white;
 }
-/* line 396, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 391, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit tr:nth-child(odd) {
   border-bottom: 1px solid #dddddd;
 }
-/* line 399, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 394, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit td {
   padding-left: 5px;
   padding-right: 5px;
 }
-/* line 405, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 400, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit input {
   box-sizing: border-box;
   font-size: 16px;
@@ -8377,7 +8385,7 @@ table.info-link-editor-edit input {
   padding-bottom: 2px;
   padding-top: 2px;
 }
-/* line 415, ../../../private/common-html/sass/views/_side_panel.scss */
+/* line 410, ../../../private/common-html/sass/views/_side_panel.scss */
 table.info-link-editor-edit button.ghost {
   border: none;
   padding-left: 4px;

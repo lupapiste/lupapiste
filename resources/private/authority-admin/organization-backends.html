@@ -11,7 +11,6 @@
             <tr>
               <!-- ko foreach: loc.supported -->
               <th data-bind="ltext: 'auth-admin.link.' + $data"></th>
-              <th data-bind="ltext: 'auth-admin.link.url'"></th>
               <!-- /ko -->
               <th data-bind="ltext: 'auth-admin.actions'"></th>
             </tr>
@@ -19,8 +18,17 @@
           <tbody data-bind="foreach: organization.links">
             <tr>
               <!-- ko foreach: loc.supported -->
-              <td data-bind="text: $parent.name[$data]"></td>
-              <td><a href="#" data-bind="text: $parent.url[$data], attr: {href: $parent.url[$data]}" target="_blank"></a></td>
+              <td>
+                <div class="organization-link-cell"
+                     data-bind="text: $parent.name[$data]">
+                </div>
+                <div class="organization-link-cell">
+                  <a href="#" data-bind="attr: {href: $parent.url[$data]}" target="_blank">
+                    <span data-bind="text: $parent.url[$data]"
+                          class="organization-link-text"/>
+                  </a>
+                </div>
+              </td>
               <!-- /ko -->
               <td>
                 <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
