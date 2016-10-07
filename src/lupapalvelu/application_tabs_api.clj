@@ -13,6 +13,7 @@
   {:parameters [id]
    :states states/post-verdict-states
    :org-authz-roles auth/reader-org-authz-roles
+   :user-authz-roles auth/all-authz-roles
    :user-roles #{:authority :applicant}
    :pre-checks [(fn [{:keys [application]}]
                     (when (foreman/foreman-app? application)
@@ -30,6 +31,8 @@
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
                       states/pre-verdict-states
                       (when-not (fail :error.tabs.no-application-info)))]}
@@ -39,6 +42,8 @@
   {:parameters [id]
    :states states/all-application-states
    :user-roles #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
    :pre-checks [(fn-> state-before-last-canceled
                       states/post-verdict-states
                       (when-not (fail :error.tabs.no-application-summary)))]}

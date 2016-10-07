@@ -1,18 +1,18 @@
-@import url('main-blessed1.css?z=1475840999085');
+@import url('main-blessed1.css?z=1475843923629');
 
-/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
   display: block;
 }
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9:first-child {
   padding-left: 0;
 }
-/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1204, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
   width: 100%;
 }
-/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1198, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 {
   position: relative;
   float: left;
@@ -21,29 +21,29 @@
   max-width: 250%;
   padding-left: 20px;
 }
-/* line 1030, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1035, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 .col--vertical, .form-grid .col-10 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10 .col--vertical label {
   display: block;
 }
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10:first-child {
   padding-left: 0;
 }
-/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1204, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10.col--full > * {
   width: 100%;
 }
-/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1198, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 {
   position: relative;
   float: left;
@@ -52,29 +52,29 @@
   max-width: 275%;
   padding-left: 20px;
 }
-/* line 1030, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1035, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 .col--vertical, .form-grid .col-11 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11 .col--vertical label {
   display: block;
 }
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11:first-child {
   padding-left: 0;
 }
-/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1204, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11.col--full > * {
   width: 100%;
 }
-/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1198, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12 {
   position: relative;
   float: left;
@@ -83,29 +83,29 @@
   max-width: 300%;
   padding-left: 20px;
 }
-/* line 1030, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1035, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12 .col--vertical, .form-grid .col-12 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12 .col--vertical label {
   display: block;
 }
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12:first-child {
   padding-left: 0;
 }
-/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1204, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12.col--full > * {
   width: 100%;
 }
-/* line 1213, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1210, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .row {
   *zoom: 1;
   margin: 20px 0;
@@ -119,19 +119,19 @@
 .form-grid .row:after {
   clear: both;
 }
-/* line 1218, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1215, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .row--no-margin {
   margin: 0;
 }
-/* line 1222, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1219, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .row--no-bottom-margin {
   margin-bottom: 0;
 }
-/* line 1226, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1223, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .autocomplete-component {
   width: 100%;
 }
-/* line 1230, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1227, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -142,47 +142,47 @@
   display: block;
   height: 40px;
 }
-/* line 1242, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1239, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .poor.info-message {
   background-color: #df3215;
 }
-/* line 1246, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .low.info-message {
   background-color: #e7541d;
 }
-/* line 1250, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1247, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f7ac2e;
 }
-/* line 1254, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1251, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .good.info-message {
   background-color: #61b72f;
 }
-/* line 1258, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1262, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].poor {
   border-color: #df3215;
 }
-/* line 1266, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1263, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].low {
   border-color: #e7541d;
 }
-/* line 1270, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1267, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].average {
   border-color: #f7ac2e;
 }
-/* line 1274, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1271, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].good {
   border-color: #61b72f;
 }
-/* line 1278, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1275, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].excellent {
   border-color: #2ca92c;
 }
-/* line 1282, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1279, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -191,7 +191,7 @@
   font-style: normal;
   font-weight: bold;
 }
-/* line 1289, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1286, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .error-message:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -209,12 +209,12 @@
   margin-right: 6px;
 }
 
-/* line 1297, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1294, ../../../private/common-html/sass/partials/_forms.scss */
 .no-padding {
   padding: 0 !important;
 }
 
-/* line 1306, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1303, ../../../private/common-html/sass/partials/_forms.scss */
 .form-cell__message {
   background-color: #df3215;
   color: white;
@@ -222,559 +222,559 @@
   width: 100%;
 }
 
-/* line 1314, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1311, ../../../private/common-html/sass/partials/_forms.scss */
 .form-cell--warning input, .form-cell--warning select {
   border: 1px solid #df3215 !important;
   color: #df3215 !important;
   margin-bottom: 0 !important;
 }
-/* line 1319, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 .form-cell--warning .form-cell__message {
   display: inline-block;
 }
 
-/* line 1324, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1321, ../../../private/common-html/sass/partials/_forms.scss */
 .form-cell--required input, .form-cell--required select {
   border: 1px solid #f39129 !important;
   margin-bottom: 0 !important;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-1 > .row .col-1 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-2 > .row .col-1 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-2 > .row .col-2 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-3 > .row .col-1 {
   width: 33.33333%;
   min-width: 33.33333%;
   max-width: 33.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-3 > .row .col-2 {
   width: 66.66667%;
   min-width: 66.66667%;
   max-width: 66.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-3 > .row .col-3 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-4 > .row .col-1 {
   width: 25%;
   min-width: 25%;
   max-width: 25%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-4 > .row .col-2 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-4 > .row .col-3 {
   width: 75%;
   min-width: 75%;
   max-width: 75%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-4 > .row .col-4 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-5 > .row .col-1 {
   width: 20%;
   min-width: 20%;
   max-width: 20%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-5 > .row .col-2 {
   width: 40%;
   min-width: 40%;
   max-width: 40%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-5 > .row .col-3 {
   width: 60%;
   min-width: 60%;
   max-width: 60%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-5 > .row .col-4 {
   width: 80%;
   min-width: 80%;
   max-width: 80%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-5 > .row .col-5 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-1 {
   width: 16.66667%;
   min-width: 16.66667%;
   max-width: 16.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-2 {
   width: 33.33333%;
   min-width: 33.33333%;
   max-width: 33.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-3 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-4 {
   width: 66.66667%;
   min-width: 66.66667%;
   max-width: 66.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-5 {
   width: 83.33333%;
   min-width: 83.33333%;
   max-width: 83.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-6 > .row .col-6 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-1 {
   width: 14.28571%;
   min-width: 14.28571%;
   max-width: 14.28571%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-2 {
   width: 28.57143%;
   min-width: 28.57143%;
   max-width: 28.57143%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-3 {
   width: 42.85714%;
   min-width: 42.85714%;
   max-width: 42.85714%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-4 {
   width: 57.14286%;
   min-width: 57.14286%;
   max-width: 57.14286%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-5 {
   width: 71.42857%;
   min-width: 71.42857%;
   max-width: 71.42857%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-6 {
   width: 85.71429%;
   min-width: 85.71429%;
   max-width: 85.71429%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-7 > .row .col-7 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-1 {
   width: 12.5%;
   min-width: 12.5%;
   max-width: 12.5%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-2 {
   width: 25%;
   min-width: 25%;
   max-width: 25%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-3 {
   width: 37.5%;
   min-width: 37.5%;
   max-width: 37.5%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-4 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-5 {
   width: 62.5%;
   min-width: 62.5%;
   max-width: 62.5%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-6 {
   width: 75%;
   min-width: 75%;
   max-width: 75%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-7 {
   width: 87.5%;
   min-width: 87.5%;
   max-width: 87.5%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-8 > .row .col-8 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-1 {
   width: 11.11111%;
   min-width: 11.11111%;
   max-width: 11.11111%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-2 {
   width: 22.22222%;
   min-width: 22.22222%;
   max-width: 22.22222%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-3 {
   width: 33.33333%;
   min-width: 33.33333%;
   max-width: 33.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-4 {
   width: 44.44444%;
   min-width: 44.44444%;
   max-width: 44.44444%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-5 {
   width: 55.55556%;
   min-width: 55.55556%;
   max-width: 55.55556%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-6 {
   width: 66.66667%;
   min-width: 66.66667%;
   max-width: 66.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-7 {
   width: 77.77778%;
   min-width: 77.77778%;
   max-width: 77.77778%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-8 {
   width: 88.88889%;
   min-width: 88.88889%;
   max-width: 88.88889%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-9 > .row .col-9 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-1 {
   width: 10%;
   min-width: 10%;
   max-width: 10%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-2 {
   width: 20%;
   min-width: 20%;
   max-width: 20%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-3 {
   width: 30%;
   min-width: 30%;
   max-width: 30%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-4 {
   width: 40%;
   min-width: 40%;
   max-width: 40%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-5 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-6 {
   width: 60%;
   min-width: 60%;
   max-width: 60%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-7 {
   width: 70%;
   min-width: 70%;
   max-width: 70%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-8 {
   width: 80%;
   min-width: 80%;
   max-width: 80%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-9 {
   width: 90%;
   min-width: 90%;
   max-width: 90%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-10 > .row .col-10 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-1 {
   width: 9.09091%;
   min-width: 9.09091%;
   max-width: 9.09091%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-2 {
   width: 18.18182%;
   min-width: 18.18182%;
   max-width: 18.18182%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-3 {
   width: 27.27273%;
   min-width: 27.27273%;
   max-width: 27.27273%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-4 {
   width: 36.36364%;
   min-width: 36.36364%;
   max-width: 36.36364%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-5 {
   width: 45.45455%;
   min-width: 45.45455%;
   max-width: 45.45455%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-6 {
   width: 54.54545%;
   min-width: 54.54545%;
   max-width: 54.54545%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-7 {
   width: 63.63636%;
   min-width: 63.63636%;
   max-width: 63.63636%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-8 {
   width: 72.72727%;
   min-width: 72.72727%;
   max-width: 72.72727%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-9 {
   width: 81.81818%;
   min-width: 81.81818%;
   max-width: 81.81818%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-10 {
   width: 90.90909%;
   min-width: 90.90909%;
   max-width: 90.90909%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-11 > .row .col-11 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-1 {
   width: 8.33333%;
   min-width: 8.33333%;
   max-width: 8.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-2 {
   width: 16.66667%;
   min-width: 16.66667%;
   max-width: 16.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-3 {
   width: 25%;
   min-width: 25%;
   max-width: 25%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-4 {
   width: 33.33333%;
   min-width: 33.33333%;
   max-width: 33.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-5 {
   width: 41.66667%;
   min-width: 41.66667%;
   max-width: 41.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-6 {
   width: 50%;
   min-width: 50%;
   max-width: 50%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-7 {
   width: 58.33333%;
   min-width: 58.33333%;
   max-width: 58.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-8 {
   width: 66.66667%;
   min-width: 66.66667%;
   max-width: 66.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-9 {
   width: 75%;
   min-width: 75%;
   max-width: 75%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-10 {
   width: 83.33333%;
   min-width: 83.33333%;
   max-width: 83.33333%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-11 {
   width: 91.66667%;
   min-width: 91.66667%;
   max-width: 91.66667%;
 }
-/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid.form-grid--columns-12 > .row .col-12 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
-/* line 1341, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1338, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border {
   border: none;
   padding-left: 0;
   padding-right: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-1:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-2:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-3:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-4:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-5:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-6:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-7:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-8:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-9:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-10:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-11:first-child {
   padding-left: 0;
 }
-/* line 1347, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1344, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-12:first-child {
   padding-left: 0;
 }
 
-/* line 1355, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1352, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors input[type=text], .identifier-editors input[type=password], .identifier-editors select, .identifier-editors textarea {
   padding: 0 12px;
   min-height: 40px;
@@ -788,34 +788,34 @@
   -moz-appearance: none;
   margin: 0 6px;
 }
-/* line 1368, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1365, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors input[type=text].required, .identifier-editors input[type=password].required, .identifier-editors select.required, .identifier-editors textarea.required {
   border-color: #f6aa59;
 }
-/* line 1371, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1368, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors input[type=text]:focus, .identifier-editors input[type=password]:focus, .identifier-editors select:focus, .identifier-editors textarea:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1373, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors > div {
   margin: 12px 12px;
 }
-/* line 1379, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors button {
   margin: 0 12px;
 }
-/* line 1382, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1379, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors label.required {
   color: #f39129;
 }
-/* line 1384, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1381, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors label.required:after {
   content: "*";
   display: inline;
 }
 
-/* line 1392, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown {
   color: #333333;
   border: 1px solid #bbbbbb;
@@ -833,47 +833,47 @@ select.dropdown {
   appearance: none;
   overflow: hidden;
 }
-/* line 1421, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1418, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
 }
-/* line 1428, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1425, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown:focus {
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-light.png");
   border-color: #fbc732;
 }
 
-/* line 1435, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1432, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown::-ms-expand {
   display: none;
 }
 
-/* line 1439, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1436, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown.mandatory {
   border-color: #f39129;
 }
 
-/* line 1443, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1440, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown--full-width {
   min-width: 100%;
 }
 
-/* line 1447, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1444, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown--plain {
   border: none;
   background-image: white;
   padding-left: 0;
 }
-/* line 1451, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1448, ../../../private/common-html/sass/partials/_forms.scss */
 select.dropdown--plain:disabled {
   border: none;
   background-image: none;
   background-color: white;
 }
 
-/* line 1459, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1456, ../../../private/common-html/sass/partials/_forms.scss */
 .grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -886,117 +886,117 @@ select.dropdown--plain:disabled {
   -webkit-border-radius: 0px;
   -moz-appearance: none;
 }
-/* line 1060, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1057, ../../../private/common-html/sass/partials/_forms.scss */
 .grid-style-input:focus {
   color: #333333;
   border-color: #fbc732;
 }
-/* line 1064, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
 .grid-style-input:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
 
-/* line 1463, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1460, ../../../private/common-html/sass/partials/_forms.scss */
 textarea.grid-style-input {
   height: 160px;
   padding: 6px 12px;
 }
 
-/* line 1468, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1465, ../../../private/common-html/sass/partials/_forms.scss */
 .no-wrap-whitespace {
   white-space: nowrap;
 }
 
-/* line 1472, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1469, ../../../private/common-html/sass/partials/_forms.scss */
 .wrapped_text {
   white-space: pre-wrap;
 }
 
-/* line 1476, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1473, ../../../private/common-html/sass/partials/_forms.scss */
 .cell-span {
   line-height: 40px;
 }
 
-/* line 1480, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1477, ../../../private/common-html/sass/partials/_forms.scss */
 .check-string {
   display: block;
 }
 
-/* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1482, ../../../private/common-html/sass/partials/_forms.scss */
 div.review-done {
   margin: 24px;
 }
 
-/* line 1489, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1486, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table {
   padding-top: 6px;
 }
-/* line 1492, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1489, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .form-label {
   display: inline;
   width: initial;
   vertical-align: initial;
   font-weight: bold;
 }
-/* line 1499, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1496, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .checkbox-wrapper {
   border: none;
 }
-/* line 1502, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1499, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
-/* line 1508, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1505, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
-/* line 1514, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1511, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
-/* line 1520, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1517, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
-/* line 1525, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1522, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
 
-/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1528, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
 }
 
-/* line 1535, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1532, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container {
   margin-left: 6px;
 }
-/* line 1537, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1534, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container .building-select-box {
   position: relative;
   width: 30em;
 }
 
-/* line 1543, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1540, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector {
   padding-left: 6px;
 }
-/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1542, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector label.form-label {
   width: 100%;
 }
-/* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector .errorPanel {
   top: -80px;
   left: 200px;
@@ -5142,59 +5142,63 @@ button.rollup-button {
   margin-right: auto;
   vertical-align: top;
   position: relative;
-  padding-bottom: 48px;
 }
-/* line 35, ../../../private/common-html/sass/views/_applications.scss */
+/* line 36, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-button {
   margin-top: 0;
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
 }
-/* line 40, ../../../private/common-html/sass/views/_applications.scss */
+/* line 42, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .missing-wrapper {
   width: 100%;
 }
-/* line 43, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-inforequest-box {
+/* line 46, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .first-box {
   padding-left: 0;
   padding-right: 24px;
   min-height: 250px;
 }
-/* line 46, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-application-box {
+/* line 50, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .middle-box {
   padding-left: 24px;
   padding-right: 24px;
   min-height: 250px;
   border-left: 1px dotted #888a8c;
   border-right: 1px dotted #888a8c;
+  padding-bottom: 95px;
 }
-/* line 51, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state .missing-prev-permit-box {
+/* line 57, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .last-box {
   padding-left: 24px;
   padding-right: 0;
   min-height: 250px;
 }
-
-/* line 57, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
-  width: 45%;
+/* line 59, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state .last-box p {
+  margin-bottom: 0px;
 }
-/* line 60, ../../../private/common-html/sass/views/_applications.scss */
-.applications-empty-state.wide .missing-application-box {
+
+/* line 66, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
+  width: 33%;
+}
+/* line 70, ../../../private/common-html/sass/views/_applications.scss */
+.applications-empty-state.wide .last-box {
   border-right: none;
 }
-/* line 63, ../../../private/common-html/sass/views/_applications.scss */
+/* line 74, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .missing-prev-permit-box {
   display: none;
 }
 
-/* line 68, ../../../private/common-html/sass/views/_applications.scss */
-.missing-inforequest-box.app-type-button,
-.missing-application-box.app-type-button,
-.missing-prev-permit-box.app-type-button {
+/* line 79, ../../../private/common-html/sass/views/_applications.scss */
+.first-box.app-type-button,
+.middle-box.app-type-button,
+.last-box.app-type-button {
   min-height: 0;
 }
 
-/* line 76, ../../../private/common-html/sass/views/_applications.scss */
+/* line 87, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
@@ -5213,31 +5217,31 @@ button.rollup-button {
   /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
   /* } */
 }
-/* line 93, ../../../private/common-html/sass/views/_applications.scss */
+/* line 104, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 98, ../../../private/common-html/sass/views/_applications.scss */
+/* line 109, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 103, ../../../private/common-html/sass/views/_applications.scss */
+/* line 114, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 109, ../../../private/common-html/sass/views/_applications.scss */
+/* line 120, ../../../private/common-html/sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 113, ../../../private/common-html/sass/views/_applications.scss */
+/* line 124, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_asc:after, .sorting.asc:after {
   content: "";
   display: block;
@@ -5251,7 +5255,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 124, ../../../private/common-html/sass/views/_applications.scss */
+/* line 135, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_desc:after, .sorting.desc:after {
   content: "";
   display: block;
@@ -5265,7 +5269,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 136, ../../../private/common-html/sass/views/_applications.scss */
+/* line 147, ../../../private/common-html/sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -5274,61 +5278,61 @@ button.rollup-button {
   bottom: 12px;
 }
 
-/* line 144, ../../../private/common-html/sass/views/_applications.scss */
+/* line 155, ../../../private/common-html/sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 146, ../../../private/common-html/sass/views/_applications.scss */
+/* line 157, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation {
   display: table-row;
 }
-/* line 148, ../../../private/common-html/sass/views/_applications.scss */
+/* line 159, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
-/* line 151, ../../../private/common-html/sass/views/_applications.scss */
+/* line 162, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div {
   padding-right: 24px;
   display: table-cell;
 }
-/* line 154, ../../../private/common-html/sass/views/_applications.scss */
+/* line 165, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
   margin: 0 6px 0 6px;
 }
-/* line 158, ../../../private/common-html/sass/views/_applications.scss */
+/* line 169, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation p {
   max-width: 35em;
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 164, ../../../private/common-html/sass/views/_applications.scss */
+/* line 175, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation h3 {
   max-width: 35em;
   margin-top: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 170, ../../../private/common-html/sass/views/_applications.scss */
+/* line 181, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation .invitation-actions {
   white-space: nowrap;
 }
 
-/* line 176, ../../../private/common-html/sass/views/_applications.scss */
+/* line 187, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 180, ../../../private/common-html/sass/views/_applications.scss */
+/* line 191, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 183, ../../../private/common-html/sass/views/_applications.scss */
+/* line 194, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 189, ../../../private/common-html/sass/views/_applications.scss */
+/* line 200, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -5338,31 +5342,31 @@ button.rollup-button {
   width: 22px;
   padding: 3px;
 }
-/* line 198, ../../../private/common-html/sass/views/_applications.scss */
+/* line 209, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 
-/* line 234, ../../../private/common-html/sass/views/_applications.scss */
+/* line 245, ../../../private/common-html/sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 239, ../../../private/common-html/sass/views/_applications.scss */
+/* line 250, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 242, ../../../private/common-html/sass/views/_applications.scss */
+/* line 253, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+/* line 256, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -5373,7 +5377,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 255, ../../../private/common-html/sass/views/_applications.scss */
+/* line 266, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
@@ -6644,6 +6648,11 @@ div.review-tasks {
 }
 
 /* line 130, ../../../private/common-html/sass/views/_create_application.scss */
+.bottom-marginL {
+  margin-bottom: 24px !important;
+}
+
+/* line 134, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
@@ -6652,19 +6661,19 @@ div.review-tasks {
   right: 4px !important;
 }
 
-/* line 136, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 140, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 142, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 146, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 145, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 149, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -6673,7 +6682,7 @@ div.review-tasks {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 155, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 159, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -6686,7 +6695,7 @@ div.review-tasks {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 167, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 171, ../../../private/common-html/sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
@@ -6701,11 +6710,11 @@ div.review-tasks {
   z-index: 2;
 }
 
-/* line 182, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 186, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question {
   vertical-align: top;
 }
-/* line 183, ../../../private/common-html/sass/views/_create_application.scss */
+/* line 187, ../../../private/common-html/sass/views/_create_application.scss */
 .create-help.lupicon-circle-question:before {
   vertical-align: top;
   font-size: 44px;
