@@ -8,6 +8,10 @@
         <th data-bind="ltext: 'application.extension.start'"></th>
         <th data-bind="ltext: 'application.extension.end'"></th>
         <th data-bind="ltext: 'tila'"></th>
+        <!-- ko if: showReason -->
+        <th class="full-width-column"
+            data-bind="ltext: 'application.extension.reason'"></th>
+        <!-- /ko -->
       </tr>
     </thead>
     <tbody data-bind="foreach: extensions">
@@ -16,11 +20,16 @@
                        testId: 'start-date-' + $index()"></td>
         <td data-bind="dateString: endDate,
                        testId: 'end-date-' + $index()"></td>
-        <td>
-          <a data-bind="ltext: state,
+        <td data-bind="if: state">
+          <a class="no-wrap-whitespace"
+             data-bind="ltext: state,
                         attr: {href: url},
                         testId: 'state-link-' + $index()"></a>
         </td>
+        <!-- ko if: $parent.showReason -->
+        <td data-bind="text: reason,
+                       testId: 'reason-' + $index()"></td>
+        <!-- /ko -->
       </tr>
     </tbody>
   </table>
