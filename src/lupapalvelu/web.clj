@@ -23,6 +23,8 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
+            [sade.xml :as xml]
+            [sade.common-reader :refer [strip-xml-namespaces]]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -51,7 +53,8 @@
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.calendars-api :as calendars]
-            [lupapalvelu.ident.suomifi])
+            [lupapalvelu.ident.suomifi]
+            [lupapalvelu.ya-extension :as yax])
   (:import (java.io OutputStreamWriter BufferedWriter)))
 
 ;;
@@ -794,4 +797,14 @@
                           [:ul
                            [:li (format "Application ID: %s (%s)" applicationId address)]
                            [:li (format "User: %s %s" firstName lastName)]]]])))
-  )
+
+  ;; Reads and processes jatkoaika-ya.xml
+  ;; Since the the xml is static, this is useful only in robots.
+  (defpage "/dev/mock-ya-extension" []
+    (-> "krysp/dev/jatkoaika-ya.xml"
+        io/resource
+        slurp
+        xml/parse
+        strip-xml-namespaces
+        yax/update-application-extensions)
+    (resp/status 200 "YA extension KRYSP processed.")))
