@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [sade.core :refer [now fail]]
+            [sade.http :as http]
             [sade.strings :as ss]
             [sade.xml :as sxml]
             [sade.coordinate :as coordinate]
@@ -24,7 +25,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr])
-  (:import [java.io File]))
+  (:import [java.io File]
+           [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
 
@@ -50,52 +52,90 @@
   (mongo/with-db db-name
     (against-background [(coordinate/convert anything anything anything anything) => nil
                          ]
-      (let [application-submitted        (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 17")
-            application-id-submitted     (:id application-submitted)
-            application-verdict-given    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
-            application-id-verdict-given (:id application-verdict-given)
+      (let [application-submitted          (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 17")
+            application-id-submitted       (:id application-submitted)
+            application-verdict-given-1    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
+            application-id-verdict-given-1 (:id application-verdict-given-1)
+            application-verdict-given-2    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 19")
+            application-id-verdict-given-2 (:id application-verdict-given-2)
             ]
 
         (fact "Initial state of reviews before krysp reading is sane"
-          (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?
-          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) => 0
+          (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
+          (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
+          (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
           (count (batchrun/fetch-verdicts)) => pos?
-          (count  (:tasks (query-application local-query sonja application-id-verdict-given))) =not=> 0
+          (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) =not=> 0
 
-          (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+          (give-local-verdict sonja application-id-verdict-given-1 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
+          (give-local-verdict sonja application-id-verdict-given-2 :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           ;; (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
-                application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy]
+                application-verdict-given-1 (query-application local-query sonja application-id-verdict-given-1) => truthy
+                application-verdict-given-2 (query-application local-query sonja application-id-verdict-given-1) => truthy]
 
             (:state application-submitted) => "submitted"
-            (:state application-verdict-given) => "verdictGiven")
+            (:state application-verdict-given-1) => "verdictGiven"
+            (:state application-verdict-given-2) => "verdictGiven")
 
-          (count (:tasks application-verdict-given)) => 0)
+          (count (:tasks application-verdict-given-1)) => 0
+          (count (:tasks application-verdict-given-2)) => 0)
+
+        (fact "failure in fetching multiple applications causes fallback into fetching consecutively"
+
+          (let [app-1-before (query-application local-query sonja application-id-verdict-given-1)
+                app-2-before (query-application local-query sonja application-id-verdict-given-2)
+                review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
+                poll-result   (batchrun/poll-verdicts-for-reviews)
+                last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
+                last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
+                app-1-after   (query-application local-query sonja application-id-verdict-given-2)
+                app-1-after   (query-application local-query sonja application-id-verdict-given-2)]
+
+            (fact "reviews for submitted application"
+              (count-reviews sonja application-id-submitted) => 0)
+            (fact "last review state for application 1"
+              (:state last-review-1) => "requires_user_action")
+            (fact "last review state for application 2"
+              (:state last-review-2) => "sent")
+            (fact "reviews for verdict given application 1"
+              (count-reviews sonja application-id-verdict-given-1) => 3)
+            (fact "reviews for verdict given application 2"
+              (count-reviews sonja application-id-verdict-given-2) => 4)) => truthy
+
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] anything anything)
+                    => nil)
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-2] anything anything)
+                    => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                           (ss/replace #"LP-186-2014-90009" application-id-verdict-given-2)
+                           (sxml/parse-string "utf-8")))
+          (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
+                    =throws=> (SAXParseException. "msg" "id" "sid" 0 0)))
 
         (fact "checking for reviews in correct states"
 
-          (let [app-before (query-application local-query sonja application-id-verdict-given)
-                review-count-before (count-reviews sonja application-id-verdict-given) => 3
+          (let [app-before (query-application local-query sonja application-id-verdict-given-1)
+                review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
                 poll-result (batchrun/poll-verdicts-for-reviews)
-                last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))
-                app-after (query-application local-query sonja application-id-verdict-given)]
+                last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
+                app-after (query-application local-query sonja application-id-verdict-given-1)]
 
-            (count-reviews sonja application-id-submitted) => 0
-            (count poll-result) => pos?
-
-            (:state last-review) => "sent"
-            (count-reviews sonja application-id-submitted) => 0
-            (count-reviews sonja application-id-verdict-given) => 4) => truthy
+            (fact "reviews for submitted application"
+              (count-reviews sonja application-id-submitted) => 0)
+            (fact "last review state"
+              (:state last-review) => "sent")
+            (fact "reviews for verdict given application"
+              (count-reviews sonja application-id-verdict-given-1) => 4)) => truthy
 
           (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
-                           (ss/replace #"LP-186-2014-90009" application-id-verdict-given)
+                           (ss/replace #"LP-186-2014-90009" application-id-verdict-given-1)
                            (sxml/parse-string "utf-8"))))
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
-          (count-reviews sonja application-id-verdict-given) => 4
-          (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given))
+          (count-reviews sonja application-id-verdict-given-1) => 4
+          (let [tasks (map tools/unwrapped  (query-tasks sonja application-id-verdict-given-1))
                 reviews (filter task-is-review? tasks)
                 review-types (map #(-> % :data :katselmuksenLaji) reviews)
                 final-review? (fn [review]
