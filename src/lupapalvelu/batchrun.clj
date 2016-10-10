@@ -378,7 +378,8 @@
 
 (defn- save-reviews-for-application [user created application app-xml]
   (try
-    (verdict/save-reviews-from-xml user created application app-xml)
+    (when (and application app-xml)
+      (verdict/save-reviews-from-xml user created application app-xml))
     (catch Throwable t
       (errorf "error.integration - Could not save reviews for %s" (:id application)))))
 

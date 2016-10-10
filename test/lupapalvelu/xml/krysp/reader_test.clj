@@ -4,8 +4,9 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message]]
+            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals wfs-krysp-url]]
+            [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [sade.common-reader :as cr]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
@@ -507,3 +508,24 @@
         (party-with-paatos-data [osapuoli] nil) => truthy)
       (fact "Sijaistus can be empty"
         (party-with-paatos-data [osapuoli] {}) => truthy))))
+
+(facts application-state
+  (fact "state found"
+    (->> (build-multi-app-xml [[{:pvm "2016-09-09Z" :tila "rakennusty\u00f6t aloitettu"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => "rakennusty\u00f6t aloitettu")
+
+  (fact "nil xml"
+    (application-state nil) => nil)
+
+  (fact "not found"
+    (->> (build-multi-app-xml [[{:lp-tunnus "123"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => nil)
+
+  (fact "multiple state - pick the latest"
+    (->> (build-multi-app-xml [[{:pvm "2016-09-09Z" :tila "rakennusty\u00f6t aloitettu"}
+                                {:pvm "2016-09-11Z" :tila "lupa rauennut"}
+                                {:pvm "2016-09-10Z" :tila "rakennusty\u00f6t keskeytetty"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => "lupa rauennut"))

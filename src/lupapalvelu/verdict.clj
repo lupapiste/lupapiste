@@ -1,6 +1,5 @@
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
-            [clojure.set :refer [rename-keys]]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [pandect.core :as pandect]
@@ -504,6 +503,14 @@
     (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s" (count existing) (count existing-without-empties-matching-updates) (count from-update) (count from-update-with-new-id))
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
+(defn get-state-updates [user created {current-state :state :as application} app-xml]
+  (let [new-state (->> (krysp-reader/application-state app-xml)
+                       krysp-reader/krysp-state->application-state)]
+    (cond
+      (nil? new-state) nil
+      (sm/can-proceed? application new-state)  (application/state-transition-update new-state created application user)
+      (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
+                                                       (:id application) current-state (name new-state)))))
 
 (defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
@@ -524,7 +531,8 @@
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
-        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
+        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
+        state-updates (get-state-updates user created application app-xml)]
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
       (if-not (= (count buildings-summary)
@@ -544,9 +552,8 @@
       (do
         (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
         (fail :error.invalid-task-type))
-      ;; else
-      (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates))
-            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))]
+      (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates state-updates))
+            updated-application (domain/get-application-no-access-checking (:id application))]
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
            updated-application

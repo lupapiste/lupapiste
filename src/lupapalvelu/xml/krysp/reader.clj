@@ -4,7 +4,7 @@
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.xml :refer :all]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
@@ -289,7 +289,23 @@
               })))
   (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
-(defn- application-state [xml-without-ns]
+(def krysp-state->application-state
+  {"rakennusty\u00f6t aloitettu"                 :constructionStarted
+   "rakennusty\u00f6t keskeytetty"               :onHold
+   "p\u00e4\u00e4t\u00f6ksest\u00e4 valitettu, valitusprosessin tulosta ei ole" nil
+   "lupa rauennut"                               :extinct
+   "jatkoaika my\u00f6nnetty"                    nil
+   "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu" :inUse
+   "lupa vanhentunut"                            nil
+   "lopullinen loppukatselmus tehty"             :closed
+   "luvalla ei loppukatselmusehtoa, lupa valmis" :closed})
+
+(defmulti application-state
+  "Get application state from xml."
+  {:arglists '([xml-without-ns])}
+  :tag)
+
+(defn simple-application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
     (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
@@ -297,6 +313,19 @@
     last
     :hakemuksenTila
     ss/lower-case))
+
+(defmethod application-state :default [xml-without-ns] (simple-application-state xml-without-ns))
+
+(defn standard-application-state [xml-without-ns]
+  (->> (select xml-without-ns [:kasittelynTilatieto :Tilamuutos])
+       (map (fn-> cr/all-of (cr/convert-keys-to-timestamps [:pvm])))
+       (sort-by :pvm)
+       last
+       :tila
+       ss/lower-case))
+
+(defmethod application-state :Rakennusvalvonta [xml-without-ns] (standard-application-state xml-without-ns))
+(defmethod application-state :Popast [xml-without-ns] (standard-application-state xml-without-ns))
 
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})

@@ -54,7 +54,12 @@
               :attrs {:gml:id "rluvat.101939"},
               :content (mapv build-application-content-xml app-options)}]})
 
-(defn build-multi-app-xml [options-vec]
+(defn build-multi-app-xml
+  "Returns application xml map with ns. Currently supports only R applications.
+  [[{:pvm \"2016-06-06Z\" :tila \"rakennusty\u00f6t aloitettu\"}
+    {:lp-tunnus \"LP-123-2016-00001\" :kuntalupatunnus \"123-R-02\"}]
+   [{:lp-tunnus \"LP-123-2016-00002\"}]]"
+  [options-vec]
   {:tag :rakval:Rakennusvalvonta,
    :attrs {:xmlns:yht "http://www.paikkatietopalvelu.fi/gml/yhteiset", :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu", :xmlns:xsi "http://www.w3.org/2001/XMLSchema-instance", :xmlns:ogc "http://www.opengis.net/ogc", :xmlns:wfs "http://www.opengis.net/wfs", :xmlns:mkos "http://www.paikkatietopalvelu.fi/gml/opastavattiedot/osoitteet", :xsi:schemaLocation "http://www.paikkatietopalvelu.fi/gml/yhteiset http://www.paikkatietopalvelu.fi/gml/yhteiset/2.1.6/yhteiset.xsd http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta/2.2.0/rakennusvalvonta.xsd http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd", :xmlns:gml "http://www.opengis.net/gml", :xmlns:xlink "http://www.w3.org/1999/xlink", :xmlns:ows "http://www.opengis.net/ows", :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta", :xmlns:kiito "http://www.paikkatietopalvelu.fi/gml/kiinteistotoimitus"},
    :content (cons {:tag :rakval:toimituksenTiedot,

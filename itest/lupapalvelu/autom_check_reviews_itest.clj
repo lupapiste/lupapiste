@@ -83,14 +83,12 @@
 
         (fact "failure in fetching multiple applications causes fallback into fetching consecutively"
 
-          (let [app-1-before (query-application local-query sonja application-id-verdict-given-1)
-                app-2-before (query-application local-query sonja application-id-verdict-given-2)
-                review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
+          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
                 poll-result   (batchrun/poll-verdicts-for-reviews)
                 last-review-1 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
                 last-review-2 (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-2)))
-                app-1-after   (query-application local-query sonja application-id-verdict-given-2)
-                app-1-after   (query-application local-query sonja application-id-verdict-given-2)]
+                app-1         (query-application local-query sonja application-id-verdict-given-1)
+                app-2         (query-application local-query sonja application-id-verdict-given-2)]
 
             (fact "reviews for submitted application"
               (count-reviews sonja application-id-submitted) => 0)
@@ -101,7 +99,11 @@
             (fact "reviews for verdict given application 1"
               (count-reviews sonja application-id-verdict-given-1) => 3)
             (fact "reviews for verdict given application 2"
-              (count-reviews sonja application-id-verdict-given-2) => 4)) => truthy
+              (count-reviews sonja application-id-verdict-given-2) => 4)
+            (fact "application 1 state not updated"
+              (:state app-1) => "verdictGiven")
+            (fact "application 2 state is updated"
+              (:state app-2) => "constructionStarted")) => truthy
 
           (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] anything anything)
                     => nil)
@@ -114,18 +116,19 @@
 
         (fact "checking for reviews in correct states"
 
-          (let [app-before (query-application local-query sonja application-id-verdict-given-1)
-                review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
+          (let [review-count-before (count-reviews sonja application-id-verdict-given-1) => 3
                 poll-result (batchrun/poll-verdicts-for-reviews)
                 last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given-1)))
-                app-after (query-application local-query sonja application-id-verdict-given-1)]
+                app         (query-application local-query sonja application-id-verdict-given-1)]
 
             (fact "reviews for submitted application"
               (count-reviews sonja application-id-submitted) => 0)
             (fact "last review state"
               (:state last-review) => "sent")
             (fact "reviews for verdict given application"
-              (count-reviews sonja application-id-verdict-given-1) => 4)) => truthy
+              (count-reviews sonja application-id-verdict-given-1) => 4)
+            (fact "application state is updated"
+              (:state app) => "constructionStarted")) => truthy
 
           (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
