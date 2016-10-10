@@ -18,15 +18,15 @@ Add link
   Input Text  jquery=#dialog-edit-link #link-url-en  ${url}
 
   Click element  //div[@id='dialog-edit-link']//button[1]
-  Wait until  Element should be visible  //td[text()='${name}']
-  Wait until  Element should be visible  //td[text()='${name} sv']
-  Wait until  Element should be visible  //td[text()='${name} en']
+  Wait until  Element should be visible  //td/div[text()='${name}']
+  Wait until  Element should be visible  //td/div[text()='${name} sv']
+  Wait until  Element should be visible  //td/div[text()='${name} en']
   Wait until  Element should be visible  //a[@href='${url}']
 
 Update link
   [Arguments]  ${name}  ${url}
   Scroll to test id  organization-links-table
-  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name}']/..//a[@data-test-id='edit']
+  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-url-fi  ${url}
   Click element  //div[@id='dialog-edit-link']//button[1]
@@ -36,7 +36,7 @@ Update link
 Remove link
   [Arguments]  ${name}
   Scroll to test id  organization-links-table
-  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td[text()='${name}']/..//a[@data-test-id='remove']
+  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
 
 User sees link
   [Arguments]  ${name}  ${url}
