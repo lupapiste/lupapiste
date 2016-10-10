@@ -9,26 +9,29 @@ LUPAPISTE.OrganizationModel = function () {
   function EditLinkModel() {
     var self = this;
 
-    self.nameFi = ko.observable();
-    self.nameSv = ko.observable();
-    self.url = ko.observable();
+    self.links = ko.observableArray();
     self.commandName = ko.observable();
     self.command = null;
 
     self.init = function(params) {
       self.commandName(params.commandName);
       self.command = params.command;
-      self.nameFi(util.getIn(params, ["source", "name", "fi"], ""));
-      self.nameSv(util.getIn(params, ["source", "name", "sv"], ""));
-      self.url(util.getIn(params, ["source", "url"], ""));
+      self.links.removeAll();
+      self.links(_.map(loc.supported, function(lang) {
+        return {lang: lang,
+                name: ko.observable(util.getIn(params, ["source", "name", lang], "")),
+                url:  ko.observable(util.getIn(params, ["source", "url",  lang], ""))};
+      }));
     };
 
     self.execute = function() {
-      self.command(self.url(), self.nameFi(), self.nameSv());
+      self.command(self.links());
     };
 
     self.ok = ko.computed(function() {
-      return !_.isBlank(self.nameFi()) && !_.isBlank(self.nameSv()) && !_.isBlank(self.url());
+      return _.every(self.links(), function (l) {
+        return !_.isBlank(l.name()) && !_.isBlank(l.url());
+      });
     });
   }
   self.editLinkModel = new EditLinkModel();
@@ -293,14 +296,23 @@ LUPAPISTE.OrganizationModel = function () {
       .call();
   };
 
+  function linksForCommand(links) {
+    return _.reduce(links, function (acc, link) {
+      acc.url[link.lang] = link.url();
+      acc.name[link.lang] = link.name();
+      return acc;
+    }, {url: {}, name: {}});
+  }
+
   self.editLink = function(indexFn) {
     var index = indexFn();
     self.editLinkModel.init({
       source: this,
       commandName: "edit",
-      command: function(url, nameFi, nameSv) {
+      command: function(links) {
         ajax
-          .command("update-organization-link", {index: index, url: url, nameFi: nameFi, nameSv: nameSv})
+          .command("update-organization-link", _.merge({index: index},
+                                                       linksForCommand(links)))
           .success(function() {
             self.load();
             LUPAPISTE.ModalDialog.close();
@@ -314,9 +326,9 @@ LUPAPISTE.OrganizationModel = function () {
   self.addLink = function() {
     self.editLinkModel.init({
       commandName: "add",
-      command: function(url, nameFi, nameSv) {
+      command: function(links) {
         ajax
-          .command("add-organization-link", {url: url, nameFi: nameFi, nameSv: nameSv})
+          .command("add-organization-link", linksForCommand(links))
           .success(function() {
             self.load();
             LUPAPISTE.ModalDialog.close();
@@ -329,7 +341,7 @@ LUPAPISTE.OrganizationModel = function () {
 
   self.rmLink = function() {
     ajax
-      .command("remove-organization-link", {url: this.url, nameFi: this.name.fi, nameSv: this.name.sv})
+      .command("remove-organization-link", {url: this.url, name: this.name})
       .success(self.load)
       .call();
   };

@@ -9,17 +9,27 @@
         <table data-test-id="organization-links-table">
           <thead>
             <tr>
-              <th data-bind="ltext: 'auth-admin.link.fi'"></th>
-              <th data-bind="ltext: 'auth-admin.link.sv'"></th>
-              <th data-bind="ltext: 'auth-admin.link.url'"></th>
+              <!-- ko foreach: loc.supported -->
+              <th data-bind="ltext: 'auth-admin.link.' + $data"></th>
+              <!-- /ko -->
               <th data-bind="ltext: 'auth-admin.actions'"></th>
             </tr>
           </thead>
           <tbody data-bind="foreach: organization.links">
             <tr>
-              <td data-bind="text: name.fi"></td>
-              <td data-bind="text: name.sv"></td>
-              <td><a href="#" data-bind="text: url, attr: {href: url}" target="_blank"></a></td>
+              <!-- ko foreach: loc.supported -->
+              <td>
+                <div class="organization-link-cell"
+                     data-bind="text: $parent.name[$data]">
+                </div>
+                <div class="organization-link-cell">
+                  <a href="#" data-bind="attr: {href: $parent.url[$data]}" target="_blank">
+                    <span data-bind="text: $parent.url[$data]"
+                          class="organization-link-text"/>
+                  </a>
+                </div>
+              </td>
+              <!-- /ko -->
               <td>
                 <span data-bind="visible: lupapisteApp.models.globalAuthModel.ok('update-organization-link')">
                   [<a href="#" data-bind="click: $root.organization.editLink.bind($data, $index), ltext: 'edit'"
@@ -70,7 +80,7 @@
         <div style="margin-bottom: 0.7em;" data-bind="ltext: 'authorityAdmin.attachmentLinks.guide'"></div>
         <div class="checkbox-wrapper">
           <input type="checkbox" id="attachments-as-links-enabled"
-                 data-bind="checked: organization.useAttachmentLinksIntegration, 
+                 data-bind="checked: organization.useAttachmentLinksIntegration,
                             enable: lupapisteApp.models.globalAuthModel.ok('set-organization-use-attachment-links-integration')" />
           <label for="attachments-as-links-enabled" class="checkbox-label"
                  data-bind="ltext: 'authorityAdmin.attachmentLinks.label'"></label>
@@ -84,7 +94,7 @@
           <span data-bind="ltext: 'auth-admin.validate-verdict.rp.info'"></span>
           <div class="checkbox-wrapper">
             <input type="checkbox" id="validate-verdict-given-date-enabled"
-                   data-bind="checked: organization.validateVerdictGivenDate, 
+                   data-bind="checked: organization.validateVerdictGivenDate,
                               enable: lupapisteApp.models.globalAuthModel.ok('set-organization-app-required-fields-filling-obligatory')" />
             <label for="validate-verdict-given-date-enabled" class="checkbox-label"
                    data-bind="ltext: 'auth-admin.validate-verdict-given-date.enabled'"></label>
@@ -94,7 +104,7 @@
           <span data-bind="lhtml: 'auth-admin.validate-verdict.section.info'"></span>
           <div class="sectionbox-wrapper">
             <input type="checkbox" id="verdict-section-enabled"
-                   data-bind="checked: organization.verdictSectionEnabled, 
+                   data-bind="checked: organization.verdictSectionEnabled,
                               enable: lupapisteApp.models.globalAuthModel.ok('section-toggle-enabled')" />
             <label for="verdict-section-enabled" class="sectionbox-label"
                    data-bind="ltext: 'auth-admin.validate-verdict.section.enabled'"></label>
@@ -196,12 +206,20 @@
         </div>
         <div class="dialog-content">
           <div data-bind="with: $root.organization.editLinkModel">
-            <label data-bind="ltext: 'auth-admin.link.fi'" for="link-text-fi" class="form-label"></label>
-            <input data-bind="textInput: nameFi" class="form-input text long" type="text" id="link-text-fi" autofocus="autofocus"/>
-            <label data-bind="ltext: 'auth-admin.link.sv'" for="link-text-sv" class="form-label"></label>
-            <input data-bind="textInput: nameSv" class="form-input text long" type="text" id="link-text-sv" />
-            <label data-bind="ltext: 'auth-admin.link.url'" for="link-url"class="form-label"></label>
-            <input data-bind="textInput: url" class="form-input text long" type="text" id="link-url"/>
+            <!-- ko foreach: $root.organization.editLinkModel.links -->
+            <label data-bind="ltext: 'auth-admin.link.' + $data.lang,
+                              attr:  {'for': 'link-text-' + $data.lang}"
+                   class="form-label"></label>
+            <input data-bind="textInput: $data.name,
+                              attr: {'id': 'link-text-' + $data.lang}"
+                   class="form-input text long" type="text" autofocus="autofocus"/>
+            <label data-bind="ltext: 'auth-admin.link.url',
+                              attr:  {'for': 'link-url-' + $data.lang}"
+                   class="form-label"></label>
+            <input data-bind="textInput: $data.url,
+                              attr: {'id': 'link-url-' + $data.lang}"
+                   class="form-input text long" type="text"/>
+            <!-- /ko -->
             <button data-bind="click: execute, enable: ok(), ltext: 'save'" class="btn btn-primary btn-dialog close"></button>
           </div>
         </div>
