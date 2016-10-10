@@ -29,11 +29,6 @@
         <!-- /ko -->
       </div>
 
-      <div class="help-box light">
-        <span data-bind="ltext: 'applications.missing.no-application.title'"></span>
-        <span data-bind="component: {name: 'help-toggle', params: {lhtml: 'applications.missing.no-application.desc' }}"></span>
-      </div>
-
       <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
       <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
         <div class="form-grid form-grid--no-border">
@@ -73,6 +68,11 @@
         <div data-bind="component: {name: 'applications-search-filters-list', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
       </div>
       <!-- /ko -->
+
+      <div class="help-box light">
+        <span data-bind="ltext: 'applications.missing.no-application.title'"></span>
+        <span data-bind="component: {name: 'help-toggle', params: {lhtml: 'applications.missing.no-application.desc' }}"></span>
+      </div>
 
     </div>
     </script>
