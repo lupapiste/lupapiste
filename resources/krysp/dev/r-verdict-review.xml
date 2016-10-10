@@ -51,6 +51,12 @@
       <rakval:luvanTunnisteTiedot>
         <yht:LupaTunnus>
           <yht:kuntalupatunnus>14-0241-R 3</yht:kuntalupatunnus>
+          <yht:muuTunnustieto>
+            <yht:MuuTunnus>
+              <yht:tunnus>LP-186-2014-90009</yht:tunnus>
+              <yht:sovellus>Lupapiste</yht:sovellus>
+            </yht:MuuTunnus>
+          </yht:muuTunnustieto>
           <yht:VRKLupatunnus>18600014-0241</yht:VRKLupatunnus>
           <yht:saapumisPvm>2014-08-21Z</yht:saapumisPvm>
         </yht:LupaTunnus>

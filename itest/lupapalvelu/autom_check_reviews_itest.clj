@@ -1,6 +1,12 @@
 (ns lupapalvelu.autom-check-reviews-itest
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [clojure.java.io :as io]
+            [sade.core :refer [now fail]]
+            [sade.strings :as ss]
+            [sade.xml :as sxml]
+            [sade.coordinate :as coordinate]
+            [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.action :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.attachment :as att]
@@ -8,10 +14,6 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.tasks :refer [task-is-review?]]
-            [sade.core :refer [now fail]]
-            [sade.xml :as sxml]
-            [sade.coordinate :as coordinate]
-            [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api]
@@ -19,8 +21,9 @@
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]
             [lupapalvelu.pdftk :as pdftk]
-            [clojure.java.io :as io]
-            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp])
+            [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.user :as usr])
   (:import [java.io File]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
@@ -69,25 +72,25 @@
 
           (count (:tasks application-verdict-given)) => 0)
 
-        (against-background [(app-from-krysp/get-application-xml-by-application-id anything) => (sxml/parse-string
-                                                                                                 (slurp "resources/krysp/dev/r-verdict-review.xml")
-                                                                                                 ;;(slurp "dev-resources/krysp/verdict-r-buildings.xml")
-                                                                                                 "utf-8")]
-          (fact "checking for reviews in correct states"
+        (fact "checking for reviews in correct states"
 
-            (let [app-before (query-application local-query sonja application-id-verdict-given)
-                  review-count-before (count-reviews sonja application-id-verdict-given) => 3
-                  poll-result (batchrun/poll-verdicts-for-reviews)
-                  last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))
-                  app-after (query-application local-query sonja application-id-verdict-given)]
+          (let [app-before (query-application local-query sonja application-id-verdict-given)
+                review-count-before (count-reviews sonja application-id-verdict-given) => 3
+                poll-result (batchrun/poll-verdicts-for-reviews)
+                last-review (last (filter task-is-review? (query-tasks sonja application-id-verdict-given)))
+                app-after (query-application local-query sonja application-id-verdict-given)]
 
-              (count-reviews sonja application-id-submitted) => 0
-              (count poll-result) => pos?
+            (count-reviews sonja application-id-submitted) => 0
+            (count poll-result) => pos?
 
-              (:state last-review) => "sent"
-              (count-reviews sonja application-id-submitted) => 0
-              (count-reviews sonja application-id-verdict-given) => 4
-              )))
+            (:state last-review) => "sent"
+            (count-reviews sonja application-id-submitted) => 0
+            (count-reviews sonja application-id-verdict-given) => 4) => truthy
+
+          (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
+                    => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
+                           (ss/replace #"LP-186-2014-90009" application-id-verdict-given)
+                           (sxml/parse-string "utf-8"))))
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
@@ -108,7 +111,7 @@
     (let [parsed-xml (sxml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
           application    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
           application-id (:id application)
-          batchrun-user (batchrun/batchrun-user-for-review-fetch (batchrun/orgs-for-review-fetch))]
+          batchrun-user (usr/batchrun-user (map :id (batchrun/orgs-for-review-fetch)))]
       (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
       (save-reviews-from-xml batchrun-user (now) application parsed-xml) ;; => ok?
       (let [updated-application (domain/get-application-no-access-checking application-id)
