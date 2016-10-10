@@ -1,7 +1,8 @@
 (ns lupapalvelu.ident.session
   (:require [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [noir.response :as response]))
 
 ;;
 ;; public local api
@@ -10,7 +11,7 @@
 (defn collection-name []
   (cond
     (env/feature? :dummy-ident) :ident
-    (env/feature? :ident-suomifi) :ident
+    (env/feature? :suomifi-ident) :ident
     :else :vetuma))
 
 (defn get-session [session-id]
