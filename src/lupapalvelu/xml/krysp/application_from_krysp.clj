@@ -17,24 +17,24 @@
        :content
        first))
 
-(defn- split-content-per-application [xml-without-ns]
+(defn- group-content-by [content-fn xml-without-ns]
   (let [toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])]
     (->> (:content xml-without-ns)
          (remove (comp #{:toimituksenTiedot} :tag))
-         (map (fn->> (vector toimituksen-tiedot)
-                     (assoc xml-without-ns :content))))))
+         (group-by content-fn)
+         (util/map-values (fn->> (cons toimituksen-tiedot)
+                                 (assoc xml-without-ns :content))))))
 
-(defn- not-empty-content [xml raw?]
+(defn- not-empty-content [xml]
   (cond
-    raw? xml
     (get-lp-tunnus xml) xml
     (get-kuntalupatunnus xml) xml))
 
 (defn- fetch-application-xmls [organization-id permit-type ids search-type raw?]
   (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs {:organization organization-id :permitType permit-type})]
-    (-> (permit/fetch-xml-from-krysp permit-type url credentials ids search-type raw?)
-        scr/strip-xml-namespaces
-        (not-empty-content raw?))
+    (cond-> (permit/fetch-xml-from-krysp permit-type url credentials ids search-type raw?)
+      (not raw?) scr/strip-xml-namespaces
+      (not raw?) (not-empty-content))
     (fail! :error.no-legacy-available)))
 
 (defn get-application-xml-by-application-id [{:keys [id organization permitType] :as application} & [raw?]]
@@ -46,20 +46,16 @@
 
 (defmulti get-application-xmls
   "Get application xmls from krysp"
-  {:arglists '([organization-id permit-type search-type applications & [raw?]])}
+  {:arglists '([organization-id permit-type search-type ids])}
   (fn [org-id permit-type search-type & args]
     (keyword search-type)))
 
 (defmethod get-application-xmls :application-id
   [organization-id permit-type search-type application-ids]
   (->> (fetch-application-xmls organization-id permit-type application-ids :application-id false)
-       (split-content-per-application)
-       (group-by get-lp-tunnus)
-       (util/map-values first)))
+       (group-content-by get-lp-tunnus)))
 
 (defmethod get-application-xmls :kuntalupatunnus
   [organization-id permit-type search-type backend-ids]
   (->> (fetch-application-xmls organization-id permit-type backend-ids :kuntalupatunnus false)
-       (split-content-per-application)
-       (group-by get-kuntalupatunnus)
-       (util/map-values first)))
+       (group-content-by get-kuntalupatunnus)))
