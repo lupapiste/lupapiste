@@ -532,9 +532,9 @@
               (errorf "buildings count %s != task rakennus count %s for id %s"
                       (count buildings-summary)
                       (-> task :data :rakennus count) (:id application))))
-    (assert (map? application))
-    (assert (every? not-empty updated-tasks))
-    (assert (every? map? updated-tasks))
+    (assert (map? application) "application is map")
+    (assert (every? not-empty updated-tasks) "tasks not empty")
+    (assert (every? map? updated-tasks) "tasks are maps")
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
 
@@ -554,13 +554,15 @@
         (ok)))))
 
 (defn- get-application-xmls-in-chunks [organization-id permit-type search-type ids chunk-size]
-  (mapcat (partial krysp-fetch/get-application-xmls organization-id permit-type search-type)
-          (partition chunk-size ids)))
+  (when-not (empty? ids)
+    (->> (partition chunk-size ids)
+         (map (partial krysp-fetch/get-application-xmls organization-id permit-type search-type))
+         (apply merge))))
 
 (defn- get-application-xmls-by-kuntalupatunnus [organization-id permit-type applications chunk-size]
   (let [kl-tunnus->app-id (->> applications
                                (map (fn [app] [(some :kuntalupatunnus (:verdicts app)) (:id app)]))
-                               (filter (comp nil? first))
+                               (filter first)
                                (into {}))]
     (-> (get-application-xmls-in-chunks organization-id permit-type :kuntalupatunnus (keys kl-tunnus->app-id) chunk-size)
         (rename-keys kl-tunnus->app-id))))
@@ -569,12 +571,13 @@
   (let [chunk-size 10
         xmls-by-app-id (get-application-xmls-in-chunks organization-id permit-type :application-id (map :id applications) chunk-size)
         not-found-apps (remove (comp #{(keys xmls-by-app-id)} :id) applications)
-        all-xmls (merge (get-application-xmls-by-kuntalupatunnus organization-id permit-type applications chunk-size)
+        all-xmls (merge (get-application-xmls-by-kuntalupatunnus organization-id permit-type not-found-apps chunk-size)
                         xmls-by-app-id)
         missing-ids (->> (map :id applications)
                          (remove all-xmls))]
     (when-not (empty? missing-ids)
-      (info "empty review xmls for " missing-ids))
+      (info "empty review xmls for " (seq missing-ids)))
+    ;; FIXME: This runs in pmap - move all stuff out which writes in db
     (->> all-xmls
          (util/map-keys #(util/find-by-id % applications))
          (map (partial apply save-reviews-from-xml user created)))))
