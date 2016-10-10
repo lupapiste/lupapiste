@@ -207,19 +207,19 @@
         result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                        scr/strip-xml-namespaces))) => truthy     ; truthy for getting midje understand provided
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (fact "application not found"
     (get-application-xml-by-application-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"})  => nil
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [])))
 
   (fact "raw enabled"
     (get-application-xml-by-application-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"} true)  => ..some-content..
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id true) => ..some-content..))
 
   (fact "no endpoint defined"
@@ -228,7 +228,7 @@
      (catch [:sade.core/type :sade.core/fail :text "error.no-legacy-available"] e
        true))  => truthy     ; truthy for getting midje understand provided
 
-    (provided (organization/get-krysp-wfs anything) => nil)))
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => nil)))
 
 (facts get-application-xml-by-backend-id
   (fact "application found"
@@ -245,18 +245,18 @@
         result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                        scr/strip-xml-namespaces))) => truthy     ; truthy for getting midje understand provided
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (fact "application not found"
     (get-application-xml-by-backend-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"}  "XYZ-123-G")  => nil
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/get-krysp-wfs {:organization "123-R" :permitType "R"}) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml []))))
 
 (facts get-application-xmls
   (facts "single application - by application-id"
-    (let [result (get-application-xmls "123-R" "R" :application-id ["LP-123-2016-00001"])]
+    (let [result (get-application-xmls {:id "123-R"} "R" :application-id ["LP-123-2016-00001"])]
       (fact "result is map"
         result => map?)
 
@@ -274,11 +274,11 @@
                                              scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/resolve-krysp-wfs {:id "123-R"} "R") => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (facts "single application - by kuntalupatunnus"
-    (let [result (get-application-xmls "123-R" "R" :kuntalupatunnus ["XYZ-123-G"])]
+    (let [result (get-application-xmls {:id "123-R"} "R" :kuntalupatunnus ["XYZ-123-G"])]
       (fact "result is map"
         result => map?)
 
@@ -296,11 +296,11 @@
                                      scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/resolve-krysp-wfs {:id "123-R"} "R") => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (facts "multiple application - application-id"
-    (let [result (get-application-xmls "123-R" "R" :application-id ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"])]
+    (let [result (get-application-xmls {:id "123-R"} "R" :application-id ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"])]
       (fact "result is map"
         result => map?)
 
@@ -322,7 +322,7 @@
                                              scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
-    (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
+    (provided (organization/resolve-krysp-wfs {:id "123-R"} "R") => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00003"}]]))))
 
 

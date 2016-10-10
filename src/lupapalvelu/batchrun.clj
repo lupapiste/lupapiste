@@ -386,14 +386,14 @@
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
-      (krysp-fetch/fetch-xmls-for-applications (:id organization) permit-type applications)
+      (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
       (catch SAXParseException e
         (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
         ;; Fallcback into fetching xmls consecutively
         (->> (map (fn [app]
                     (try
                       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
-                      (krysp-fetch/fetch-xmls-for-applications (:id organization) permit-type [app])
+                      (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                       (catch Throwable t
                         (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t))
                         nil)))
