@@ -192,6 +192,8 @@
         trid      (vetuma-request "TRID")
         label     (i18n/localize lang "vetuma.continue")]
 
+    (when (env/feature? :dummy-ident)
+      (response/status 400 (response/content-type "text/plain" "VETUMA feature deprecated")))
     (if sessionid
       (if (every? util/relative-local-url? (vals paths))
         (do
@@ -266,7 +268,7 @@
         "FAILURE"  (handle-failure params data)))))
 
 (defn vetuma-session []
-  (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1})))
+  (lupapalvelu.ident.session/get-session (session-id)))
 
 (defpage "/api/vetuma/user" []
   (let [data (vetuma-session)

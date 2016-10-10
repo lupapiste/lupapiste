@@ -27,38 +27,40 @@
 (def url "https://localhost:8443")
 (def config-fixture {:rcvid (env/value :vetuma :rcvid)
                      :key (env/value :vetuma :key)})
-(if (env/value :vetuma :key)
-  (facts
-    (fact "digest calculation based on vetuma docs"
-      (mac test-parameters) => "72A72A046BD5561BD1C47F3B77FC9456AD58C9C428CACF44D502834C9F8C02A3")
+(if (and (not (env/feature? :dummy-ident)) (not (env/feature? :suomifi-ident)))
+  (if (env/value :vetuma :key)
+    (facts
+      (fact "digest calculation based on vetuma docs"
+        (mac test-parameters) => "72A72A046BD5561BD1C47F3B77FC9456AD58C9C428CACF44D502834C9F8C02A3")
 
-    (fact "request-data can be generated"
-      (request-data url "fi") => truthy)
+      (fact "request-data can be generated"
+        (request-data url "fi") => truthy)
 
-    (fact "request-data does not contain (secret) key"
-      (contains? (request-data url "fi") "KEY") => falsey)
+      (fact "request-data does not contain (secret) key"
+        (contains? (request-data url "fi") "KEY") => falsey)
 
-    (fact "response-data can be parsed"
-      (parsed valid-response) => (contains {:userid "210281-9988"})
-      (provided (config) => config-fixture))
+      (fact "response-data can be parsed"
+        (parsed valid-response) => (contains {:userid "210281-9988"})
+        (provided (config) => config-fixture))
 
-    (fact "extracting :subjectdata works"
-      (extract-subjectdata {:subjectdata "ETUNIMI=PORTAALIA, SUKUNIMI=TESTAA"}) => {:firstname "PORTAALIA" :lastname "TESTAA"})
+      (fact "extracting :subjectdata works"
+        (extract-subjectdata {:subjectdata "ETUNIMI=PORTAALIA, SUKUNIMI=TESTAA"}) => {:firstname "PORTAALIA" :lastname "TESTAA"})
 
-    (fact "extracting invalid :subjectdata does not fail"
-      ; This was seen in production
-      (extract-subjectdata {:subjectdata "CEN"}) => empty?)
+      (fact "extracting invalid :subjectdata does not fail"
+        ; This was seen in production
+        (extract-subjectdata {:subjectdata "CEN"}) => empty?)
 
-    (fact "parsing response just works"
-      (-> valid-response parsed user-extracted) => (contains {:userid "210281-9988" :firstname "PORTAALIA" :lastname "TESTAA"})
-      (provided (config) => config-fixture))
+      (fact "parsing response just works"
+        (-> valid-response parsed user-extracted) => (contains {:userid "210281-9988" :firstname "PORTAALIA" :lastname "TESTAA"})
+        (provided (config) => config-fixture))
 
-    (fact "with invalid data, empty map is returned"
-      (binding [*out* (NullWriter.)
-                *err* (NullWriter.)]
-        (parsed invalid-response) => (throws RuntimeException))))
+      (fact "with invalid data, empty map is returned"
+        (binding [*out* (NullWriter.)
+                  *err* (NullWriter.)]
+          (parsed invalid-response) => (throws RuntimeException))))
 
-  (println "Vetuma key not defined, skipped test"))
+    (println "Vetuma key not defined, skipped test"))
+  (println "Vetuma disabled in this build, skipped test"))
 
 (facts "template parsing"
   (fact "without placeholders input is returned"

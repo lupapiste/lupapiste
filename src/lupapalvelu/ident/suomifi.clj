@@ -16,15 +16,15 @@
 (defn- generate-trid [] (apply str (repeatedly 20 #(rand-int 10))))
 
 (def header-translations
-  {:suomifi_nationalidentificationnumber                      :personId
-   :suomifi_cn                                                :fullName
-   :suomifi_firstname                                         :firstName
-   :suomifi_givenname                                         :givenName
-   :suomifi_sn                                                :lastName
-   :suomifi_mail                                              :email
-   :suomifi_vakinainenkotimainenlahiosoites                   :streetAddress
-   :suomifi_vakinainenkotimainenlahiosoitepostinumero         :postalCode
-   :suomifi_vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
+  {:suomifi-nationalidentificationnumber                      :personId
+   :suomifi-cn                                                :fullName
+   :suomifi-firstname                                         :firstName
+   :suomifi-givenname                                         :givenName
+   :suomifi-sn                                                :lastName
+   :suomifi-mail                                              :email
+   :suomifi-vakinainenkotimainenlahiosoites                   :streetAddress
+   :suomifi-vakinainenkotimainenlahiosoitepostinumero         :postalCode
+   :suomifi-vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
 
 (defpage "/from-shib/login/:trid" {trid :trid}
   (let [headers          (get-in (request/ring-request) [:headers])
@@ -33,12 +33,20 @@
         relevant-headers (select-keys headers (keys header-translations))
         ident            (util/map-keys header-translations relevant-headers)]
     (info ident)
-    (mongo/update-one-and-return :ident {:sessionid (session-id) :trid trid} {$set {:ident ident}})
+    (mongo/update-one-and-return :ident {:sessionid (session-id) :trid trid} {$set {:user ident}})
     (response/json {:trid trid
                     :user (lupapalvelu.ident.session/get-user trid)
                     :ident ident})))
 
 (env/in-dev
+  (defpage [:get "/dev/saml/init-login"] {:keys [success error cancel]}
+    (let [sessionid (session-id)
+          trid      (generate-trid)
+          paths     {:success success
+                     :error   error
+                     :cancel  cancel}]
+     (mongo/update :ident {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
+     (response/json {:trid trid})))
   (defpage [:get "/dev/saml-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
           trid      (generate-trid)
@@ -64,6 +72,6 @@
           session     (:session request)
           trid        (:stamp form-params)
           ident       (select-keys form-params [:firstName :lastName :userid :stamp])
-          data        (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:ident ident}})
+          data        (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})
           uri         (get-in data [:paths :success])]
       (response/redirect uri))))

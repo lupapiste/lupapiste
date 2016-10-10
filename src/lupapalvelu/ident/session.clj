@@ -1,17 +1,28 @@
 (ns lupapalvelu.ident.session
-  (:require [lupapalvelu.mongo :as mongo]))
+  (:require [lupapalvelu.mongo :as mongo]
+            [sade.env :as env]
+            [monger.operators :refer :all]))
 
 ;;
 ;; public local api
 ;;
 
+(defn collection-name []
+  (cond
+    (env/feature? :dummy-ident) :ident
+    (env/feature? :ident-suomifi) :ident
+    :else :vetuma))
+
+(defn get-session [session-id]
+  (last (mongo/select (collection-name) {:sessionid session-id, :user.stamp {$exists true}} [:user] {:created-at 1})))
+
 (defn- get-data [stamp]
-  (mongo/select-one :vetuma {:user.stamp stamp}))
+  (mongo/select-one (collection-name) {:user.stamp stamp}))
 
 (defn get-user [stamp]
   (:user (get-data stamp)))
 
 (defn consume-user [stamp]
   (when-let [user (get-data stamp)]
-    (mongo/remove-many :vetuma {:_id (:id user)})
+    (mongo/remove-many (collection-name) {:_id (:id user)})
     (:user user)))
