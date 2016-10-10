@@ -505,7 +505,7 @@
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
 
-(defn- save-reviews-from-xml
+(defn save-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
@@ -567,7 +567,7 @@
     (-> (get-application-xmls-in-chunks organization-id permit-type :kuntalupatunnus (keys kl-tunnus->app-id) chunk-size)
         (rename-keys kl-tunnus->app-id))))
 
-(defn check-for-reviews [user created organization-id permit-type applications]
+(defn fetch-xmls-for-applications [user organization-id permit-type applications]
   (let [chunk-size 10
         xmls-by-app-id (get-application-xmls-in-chunks organization-id permit-type :application-id (map :id applications) chunk-size)
         not-found-apps (remove (comp #{(keys xmls-by-app-id)} :id) applications)
@@ -577,7 +577,4 @@
                          (remove all-xmls))]
     (when-not (empty? missing-ids)
       (info "empty review xmls for " (seq missing-ids)))
-    ;; FIXME: This runs in pmap - move all stuff out which writes in db
-    (->> all-xmls
-         (util/map-keys #(util/find-by-id % applications))
-         (map (partial apply save-reviews-from-xml user created)))))
+    all-xmls))

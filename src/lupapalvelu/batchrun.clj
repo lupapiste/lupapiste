@@ -24,7 +24,8 @@
             [sade.dummy-email-server]
             [sade.core :refer :all]
             [sade.strings :as ss]
-            [clj-time.coerce :as c]))
+            [clj-time.coerce :as c])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -374,24 +375,37 @@
                                    :krysp.R.version {$gte "2.1.5"}}
                                   {:krysp 1}))
 
+(defn- save-reviews-for-application [user created application app-xml]
+  (try
+    (verdict/save-reviews-from-xml user created application app-xml)
+    (catch Throwable t
+      (errorf "error.integration - Could not save reviews for %s" (:id application)))))
+
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
-      (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type applications)
+      (verdict/fetch-xmls-for-applications eraajo-user (:id organization) permit-type applications)
+      (catch SAXParseException e
+        (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
+        ;; Fallcback into fetching xmls consecutively
+        (->> (map (fn [app]
+                    (try
+                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
+                      (verdict/fetch-xmls-for-applications eraajo-user (:id organization) permit-type [app])
+                      (catch Throwable t
+                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                        nil)))
+                  applications)
+             (remove nil?)
+             (apply merge)))
       (catch Throwable t
-        (errorf "error.integration - Unable to get reviews for %s in chunks from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))
-        (doseq [app applications]
-          (try
-            (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
-            (verdict/check-for-reviews eraajo-user (now) (:id organization) permit-type [app])
-            (catch Throwable t
-              (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t)))))))))
+        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
 
 (defn- fetch-reviews-for-organization [eraajo-user {org-krysp :krysp :as organization} applications]
   (->> (group-by :permitType applications)
        (remove (fn-> key keyword org-krysp :url s/blank?))
-       (run! (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
+       (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
@@ -401,8 +415,10 @@
                (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
         eraajo-user (user/batchrun-user (keys orgs-by-id))
         grouped-apps (group-by :organization apps)]
-    (doall
-     (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps))))
+    (->> (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps)
+         (apply merge)
+         (util/map-keys #(util/find-by-id % apps))
+         (run! (partial apply save-reviews-for-application eraajo-user (now))))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
