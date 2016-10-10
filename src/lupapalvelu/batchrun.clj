@@ -432,8 +432,7 @@
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))
-  (let [orgs-by-id (orgs-for-review-fetch)
-        eraajo-user (user/batchrun-user (keys orgs-by-id))]
+  (let [eraajo-user (user/batchrun-user (map :id (orgs-for-review-fetch)))]
     (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
       (let [command (assoc (application->command application) :user eraajo-user :created (now))]
         (doseq [task (:tasks application)]
