@@ -552,29 +552,3 @@
            updated-application
            added-task user "fi"))
         (ok)))))
-
-(defn- get-application-xmls-in-chunks [organization-id permit-type search-type ids chunk-size]
-  (when-not (empty? ids)
-    (->> (partition chunk-size chunk-size nil ids)
-         (map (partial krysp-fetch/get-application-xmls organization-id permit-type search-type))
-         (apply merge))))
-
-(defn- get-application-xmls-by-kuntalupatunnus [organization-id permit-type applications chunk-size]
-  (let [kl-tunnus->app-id (->> applications
-                               (map (fn [app] [(some :kuntalupatunnus (:verdicts app)) (:id app)]))
-                               (filter first)
-                               (into {}))]
-    (-> (get-application-xmls-in-chunks organization-id permit-type :kuntalupatunnus (keys kl-tunnus->app-id) chunk-size)
-        (rename-keys kl-tunnus->app-id))))
-
-(defn fetch-xmls-for-applications [user organization-id permit-type applications]
-  (let [chunk-size 10
-        xmls-by-app-id (get-application-xmls-in-chunks organization-id permit-type :application-id (map :id applications) chunk-size)
-        not-found-apps (remove (comp #{(keys xmls-by-app-id)} :id) applications)
-        all-xmls (merge (get-application-xmls-by-kuntalupatunnus organization-id permit-type not-found-apps chunk-size)
-                        xmls-by-app-id)
-        missing-ids (->> (map :id applications)
-                         (remove all-xmls))]
-    (when-not (empty? missing-ids)
-      (info "empty review xmls for " (seq missing-ids)))
-    all-xmls))

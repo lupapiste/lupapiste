@@ -59,3 +59,25 @@
   [organization-id permit-type search-type backend-ids]
   (->> (fetch-application-xmls organization-id permit-type backend-ids :kuntalupatunnus false)
        (group-content-by get-kuntalupatunnus)))
+
+(defn- get-application-xmls-in-chunks [organization-id permit-type search-type ids chunk-size]
+  (when-not (empty? ids)
+    (->> (partition chunk-size chunk-size nil ids)
+         (map (partial get-application-xmls organization-id permit-type search-type))
+         (apply merge))))
+
+(defn- get-application-xmls-by-kuntalupatunnus [organization-id permit-type applications chunk-size]
+  (let [backend-id->app-id (->> applications
+                                (map (fn [app] [(some :kuntalupatunnus (:verdicts app)) (:id app)]))
+                                (filter first)
+                                (into {}))]
+    (-> (get-application-xmls-in-chunks organization-id permit-type :kuntalupatunnus (keys backend-id->app-id) chunk-size)
+        (rename-keys backend-id->app-id))))
+
+(defn fetch-xmls-for-applications [user organization-id permit-type applications]
+  (let [chunk-size 10
+        xmls-by-app-id (get-application-xmls-in-chunks organization-id permit-type :application-id (map :id applications) chunk-size)
+        not-found-apps (remove (comp #{(keys xmls-by-app-id)} :id) applications)
+        all-xmls (merge (get-application-xmls-by-kuntalupatunnus organization-id permit-type not-found-apps chunk-size)
+                        xmls-by-app-id)]
+    all-xmls))

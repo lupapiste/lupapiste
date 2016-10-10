@@ -17,6 +17,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.attachment :as attachment]
             [sade.util :refer [fn->] :as util]
@@ -385,14 +386,14 @@
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
-      (verdict/fetch-xmls-for-applications eraajo-user (:id organization) permit-type applications)
+      (krysp-fetch/fetch-xmls-for-applications eraajo-user (:id organization) permit-type applications)
       (catch SAXParseException e
         (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
         ;; Fallcback into fetching xmls consecutively
         (->> (map (fn [app]
                     (try
                       (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
-                      (verdict/fetch-xmls-for-applications eraajo-user (:id organization) permit-type [app])
+                      (krysp-fetch/fetch-xmls-for-applications eraajo-user (:id organization) permit-type [app])
                       (catch Throwable t
                         (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t))
                         nil)))
@@ -405,7 +406,8 @@
 (defn- fetch-reviews-for-organization [eraajo-user {org-krysp :krysp :as organization} applications]
   (->> (group-by :permitType applications)
        (remove (fn-> key keyword org-krysp :url s/blank?))
-       (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
+       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
+       (apply merge)))
 
 (defn poll-verdicts-for-reviews [& args]
   (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
