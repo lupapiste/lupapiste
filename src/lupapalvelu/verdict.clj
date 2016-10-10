@@ -555,7 +555,7 @@
 
 (defn- get-application-xmls-in-chunks [organization-id permit-type search-type ids chunk-size]
   (when-not (empty? ids)
-    (->> (partition chunk-size ids)
+    (->> (partition chunk-size chunk-size nil ids)
          (map (partial krysp-fetch/get-application-xmls organization-id permit-type search-type))
          (apply merge))))
 
