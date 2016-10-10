@@ -277,7 +277,7 @@
 
 (defpage [:delete "/api/vetuma/user"] []
   (if-let [session (vetuma-session)]
-    (if (mongo/remove :vetuma (:id session))
+    (if (lupapalvelu.ident.session/delete-user session)
       (response/json {:ok true})
       (response/status 500 "removing vetuma session failed"))
     (response/status 404 (str "no vetuma session for session id: " (session-id)))))

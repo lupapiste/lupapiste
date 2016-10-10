@@ -27,3 +27,6 @@
   (when-let [user (get-data stamp)]
     (mongo/remove-many (collection-name) {:_id (:id user)})
     (:user user)))
+
+(defn delete-user [session]
+  (mongo/remove (collection-name) (:id session)))
