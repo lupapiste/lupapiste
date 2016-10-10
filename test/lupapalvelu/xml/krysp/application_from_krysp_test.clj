@@ -12,7 +12,9 @@
                    get-lp-tunnus
                    get-kuntalupatunnus
                    not-empty-content
-                   group-content-by)
+                   group-content-by
+                   get-application-xmls-in-chunks
+                   get-application-xmls-by-backend-id)
 
 (defmulti build-application-content-xml (comp set keys))
 
@@ -322,3 +324,126 @@
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00003"}]]))))
+
+
+(facts get-application-xmls-in-chunks
+  (fact "one chunk"
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. ["id1" "id2"] 2)  => {"id1" ..xml-1.. "id2" ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..}))
+
+  (fact "multiple chunks"
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5" "id6"] 2)  => {"id1" ..xml-1.. "id2" ..xml-2..
+                                                                                                                          "id3" ..xml-3.. "id4" ..xml-4..
+                                                                                                                          "id5" ..xml-5.. "id6" ..xml-6..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..})
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id5" "id6"]) => {"id5" ..xml-5.. "id6" ..xml-6..}))
+
+  (fact "multiple unevenly separated chunks"
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5" "id6"] 5)  => {"id1" ..xml-1.. "id2" ..xml-2..
+                                                                                                                          "id3" ..xml-3.. "id4" ..xml-4..
+                                                                                                                          "id5" ..xml-5.. "id6" ..xml-6..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5"]) => {"id1" ..xml-1.. "id2" ..xml-2.. "id3" ..xml-3.. "id4" ..xml-4.. "id5" ..xml-5..})
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id6"]) => {"id6" ..xml-6..}))
+
+  (fact "empty result"
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5" "id6"] 3)  => nil
+
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3"]) => nil)
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id4" "id5" "id6"]) => nil))
+
+  (fact "partially empty result"
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5" "id6"] 2)  => {"id3" ..xml-3.. "id4" ..xml-4..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => nil)
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
+    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id5" "id6"]) => nil)))
+
+
+
+(facts get-application-xmls-by-backend-id
+  (fact "two applications with backend id"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => {"id1" ..xml-1.. "id2" ..xml-2..}
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus ["klid1" "klid2"] ..chunk-size..)
+              => {"klid1" ..xml-1.. "klid2" ..xml-2..}))
+
+  (fact "empty result"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => nil
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus ["klid1" "klid2"] ..chunk-size..)
+              => nil))
+
+  (fact "empty applications input"
+    (let [applications []]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => nil
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus nil ..chunk-size..)
+              => nil))
+
+  (fact "nil applications input"
+    (let [applications nil]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => nil
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus nil ..chunk-size..)
+              => nil))
+
+  (fact "two applications with one backend id"
+    (let [applications [{:id "id1"}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => {"id2" ..xml-2..}
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus ["klid2"] ..chunk-size..)
+              => {"klid2" ..xml-2..}))
+
+  (fact "multiple applications"
+    (let [applications [{:id "id1"}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}
+                        {:id "id3" :verdicts [{:kuntalupatunnus "klid3"}]}
+                        {:id "id4" :verdicts [{:kuntalupatunnus "klid4"}]}]]
+      (get-application-xmls-by-backend-id ..org.. ..permit-type.. applications ..chunk-size..))  => {"id2" ..xml-2.. "id3" ..xml-3..}
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus ["klid2" "klid3" "klid4"] ..chunk-size..)
+              => {"klid2" ..xml-2.. "klid3" ..xml-3..} )))
+
+(facts fetch-xmls-for-applications
+  (fact "two apps found by application id"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (fetch-xmls-for-applications ..org.. ..permit-type.. applications)) => {"id1" ..xml-1.. "id2" ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"])  => {"id1" ..xml-1.. "id2" ..xml-2..}))
+
+  (fact "two apps found by backend id"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (fetch-xmls-for-applications ..org.. ..permit-type.. applications)) => {"id1" ..xml-1.. "id2" ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"])  => {})
+    (provided (get-application-xmls ..org.. ..permit-type.. :kuntalupatunnus ["klid1" "klid2"])  => {"klid1" ..xml-1.. "klid2" ..xml-2..}))
+
+  (fact "two apps - another found by application id, another by backen id"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
+      (fetch-xmls-for-applications ..org.. ..permit-type.. applications)) => {"id1" ..xml-1.. "id2" ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"])  => {"id2" ..xml-2..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :kuntalupatunnus ["klid1"])  => {"klid1" ..xml-1..}))
+
+  (fact "multiple applications"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
+                        {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}
+                        {:id "id3"}
+                        {:id "id4" :verdicts [{:kuntalupatunnus "klid4"}]}
+                        {:id "id5" :verdicts [{:kuntalupatunnus "klid5"}]}]]
+      (fetch-xmls-for-applications ..org.. ..permit-type.. applications)) => {"id1" ..xml-1.. "id2" ..xml-2.. "id5" ..xml-5..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2" "id3" "id4" "id5"])  => {"id2" ..xml-2..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :kuntalupatunnus ["klid1" "klid4" "klid5"])  => {"klid1" ..xml-1.. "klid5" ..xml-5..})))
