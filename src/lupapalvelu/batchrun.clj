@@ -369,19 +369,10 @@
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
-(defn batchrun-user-for-review-fetch [orgs-by-id]
-  ;; modified from fetch-verdicts.
-  (let [org-ids (keys orgs-by-id)
-        eraajo-user (user/batchrun-user org-ids)]
-    eraajo-user))
-
 (defn orgs-for-review-fetch []
-  (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
-                                         {:krysp.R.url {$exists true},
-                                          :krysp.R.version {$gte "2.1.5"}}
-                                                   {:krysp 1})
-        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
-    orgs-by-id))
+  (organization/get-organizations {:krysp.R.url {$exists true},
+                                   :krysp.R.version {$gte "2.1.5"}}
+                                  {:krysp 1}))
 
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
@@ -397,19 +388,18 @@
             (catch Throwable t
               (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t)))))))))
 
-(defn- fetch-reviews-for-organization [eraajo-user organization applications]
+(defn- fetch-reviews-for-organization [eraajo-user {org-krysp :krysp :as organization} applications]
   (->> (group-by :permitType applications)
-       (remove (fn-> key keyword organization :url s/blank?))
-       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
+       (remove (fn-> key keyword org-krysp :url s/blank?))
+       (run! (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))))
 
 (defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (orgs-for-review-fetch)
+  (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
         apps (if (= 1 (count args))
                (mongo/select :applications {:_id (first args)})
-               ;; else
                (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)
+        eraajo-user (user/batchrun-user (keys orgs-by-id))
         grouped-apps (group-by :organization apps)]
     (doall
      (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps))))
@@ -427,7 +417,7 @@
   (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))
   (let [orgs-by-id (orgs-for-review-fetch)
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+        eraajo-user (user/batchrun-user (keys orgs-by-id))]
     (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
       (let [command (assoc (application->command application) :user eraajo-user :created (now))]
         (doseq [task (:tasks application)]
