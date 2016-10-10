@@ -57,9 +57,9 @@
                             (remove nil?)
                             vec)}]})
 
-(defmethod build-application-content-xml #{:lp-tunnus :kuntalupatunnus} [options] (build-luvan-tunniste-tiedot-xml))
-(defmethod build-application-content-xml #{:lp-tunnus}       [options] (build-luvan-tunniste-tiedot-xml))
-(defmethod build-application-content-xml #{:kuntalupatunnus} [options] (build-luvan-tunniste-tiedot-xml))
+(defmethod build-application-content-xml #{:lp-tunnus :kuntalupatunnus} [options] (build-luvan-tunniste-tiedot-xml options))
+(defmethod build-application-content-xml #{:lp-tunnus}       [options] (build-luvan-tunniste-tiedot-xml options))
+(defmethod build-application-content-xml #{:kuntalupatunnus} [options] (build-luvan-tunniste-tiedot-xml options))
 
 (defn build-rakennusvalvonta-asiatieto-xml [app-options]
   {:tag :rakval:rakennusvalvontaAsiatieto,
@@ -83,7 +83,7 @@
 
 (facts get-lp-tunnus
   (fact "get tunnus from xml"
-    (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001"}])
+    (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}]])
         scr/strip-xml-namespaces
         get-lp-tunnus) => "LP-123-2016-00001")
 
@@ -96,13 +96,13 @@
     (get-lp-tunnus nil) => nil)
 
   (fact "get tunnus from xml with multiple apps"
-    (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001"} {:lp-tunnus "LP-123-2016-00002"}])
+    (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00002"}]])
         scr/strip-xml-namespaces
         get-lp-tunnus) => "LP-123-2016-00001"))
 
-(facts get-lp-tunnus
+(facts get-kuntalupatunnus
   (fact "get tunnus from xml"
-    (-> (build-multi-app-xml [{:kuntalupatunnus "XYZ-123-G"}])
+    (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}]])
         scr/strip-xml-namespaces
         get-kuntalupatunnus) => "XYZ-123-G")
 
@@ -115,18 +115,18 @@
     (get-kuntalupatunnus nil) => nil)
 
   (fact "get tunnus from xml with multiple apps"
-    (-> (build-multi-app-xml [{:kuntalupatunnus "XYZ-123-G"} {:kuntalupatunnus "XYZ-123-F"}])
+    (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}] [{:kuntalupatunnus "XYZ-123-F"}]])
         scr/strip-xml-namespaces
         get-kuntalupatunnus) => "XYZ-123-G"))
 
 (facts not-empty-content
   (fact "content with lp-tunnus"
-    (let [xml (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00002"}])
+    (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00002"}]])
                   scr/strip-xml-namespaces)]
       (not-empty-content xml) => xml))
 
   (fact "content with kuntalupatunnus"
-    (let [xml (-> (build-multi-app-xml [{:kuntalupatunnus "XYZ-123-G"}])
+    (let [xml (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
       (not-empty-content xml) => xml))
 
@@ -141,24 +141,24 @@
 
 (facts group-content-by
   (fact "one application xml"
-    (let [xml (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+    (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
       (group-content-by get-lp-tunnus xml) => {"LP-123-2016-00001" xml}))
 
   (fact "one application xml - group by kuntalupatunnus"
-    (let [xml (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+    (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
       (group-content-by get-kuntalupatunnus xml) => { "XYZ-123-G" xml}))
 
   (fact "one application with many xmls contents"
-    (let [xml (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}
-                                        {:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-F"}])
+    (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]
+                                        [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-F"}]])
                   scr/strip-xml-namespaces)]
       (group-content-by get-lp-tunnus xml) => {"LP-123-2016-00001" xml}))
 
   (fact "many applications"
-    (let [xml (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}
-                                        {:lp-tunnus "LP-123-2016-00002" :kuntalupatunnus "XYZ-123-F"}])
+    (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]
+                                        [{:lp-tunnus "LP-123-2016-00002" :kuntalupatunnus "XYZ-123-F"}]])
                   scr/strip-xml-namespaces)
           toimituksen-tiedot (sxml/select1 xml [:toimituksenTiedot])
           result (group-content-by get-lp-tunnus xml)]
@@ -202,11 +202,11 @@
         (get-lp-tunnus result) => "LP-123-2016-00001")
 
       (fact "content"
-        result =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+        result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                        scr/strip-xml-namespaces))) => truthy     ; truthy for getting midje understand provided
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
-    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])))
+    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (fact "application not found"
     (get-application-xml-by-application-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"})  => nil
@@ -240,11 +240,11 @@
         (get-kuntalupatunnus result) => "XYZ-123-G")
 
       (fact "content"
-        result =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+        result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                        scr/strip-xml-namespaces))) => truthy     ; truthy for getting midje understand provided
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
-    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])))
+    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (fact "application not found"
     (get-application-xml-by-backend-id {:id "LP-123-2016-00001" :organization "123-R" :permitType "R"}  "XYZ-123-G")  => nil
@@ -268,12 +268,12 @@
         (get-kuntalupatunnus (result "LP-123-2016-00001")) => "XYZ-123-G")
 
       (fact "content"
-        (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+        (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                                              scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
-    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])))
+    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (facts "single application - by kuntalupatunnus"
     (let [result (get-application-xmls "123-R" "R" :kuntalupatunnus ["XYZ-123-G"])]
@@ -290,12 +290,12 @@
         (get-kuntalupatunnus (result "XYZ-123-G")) => "XYZ-123-G")
 
       (fact "content"
-        (result "XYZ-123-G") =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])
+        (result "XYZ-123-G") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                                      scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
-    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}])))
+    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["XYZ-123-G"] :kuntalupatunnus anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])))
 
   (facts "multiple application - application-id"
     (let [result (get-application-xmls "123-R" "R" :application-id ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"])]
@@ -312,13 +312,13 @@
         (get-lp-tunnus (result "LP-123-2016-00003")) => "LP-123-2016-00003")
 
       (fact "first xml content"
-        (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001"}])
+        (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}]])
                                              scr/strip-xml-namespaces))
 
       (fact "second xml content"
-        (result "LP-123-2016-00003") =>  (-> (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00003"}])
+        (result "LP-123-2016-00003") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00003"}]])
                                              scr/strip-xml-namespaces))) => truthy ; truthy for getting midje understand provided
 
 
     (provided (organization/get-krysp-wfs anything) => {:url ..some-url.. :credentials ..some-credentials..})
-    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"] :application-id anything) => (build-multi-app-xml [{:lp-tunnus "LP-123-2016-00001"} {:lp-tunnus "LP-123-2016-00003"}]))))
+    (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00003"}]]))))
