@@ -431,6 +431,7 @@
                       (fact "One of which is not a base layer"
                             (not= (:base k1) (:base k2)) => true)))
              (facts "Layer objects"
+                    (defn loc-data [s] (zipmap [:fi :sv :en] (repeat s)))
                     (fact "Every layer object has an unique id"
                           (->> objects (map :id) set count) => 5)
                     (fact "Ids are correctly formatted"
@@ -440,10 +441,10 @@
                                                       id))
                                          (and (not base) (not (number? id))))) objects))
                     (fact "Bar layer is correct "
-                          (let [subtitles (i18n/localization-schema "")
+                          (let [subtitles (loc-data "")
                                 bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
 
-                            (nth objects bar-index) => {:name        (i18n/localization-schema "bar")
+                            (nth objects bar-index) => {:name        (loc-data "bar")
                                                         :subtitle    subtitles
                                                         :id          (str "Lupapiste-" bar-index)
                                                         :baseLayerId (str "Lupapiste-" bar-index)
