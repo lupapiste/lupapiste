@@ -1,5 +1,5 @@
 (ns lupapalvelu.permit
-  (:require [taoensso.timbre :as timbre :refer [errorf warn]]
+  (:require [taoensso.timbre :as timbre :refer [error errorf warn]]
             [schema.core :as sc]
             [sade.core :refer [fail]]
             [sade.strings :as ss]
@@ -25,12 +25,6 @@
 
 (defn valid-permit-type? [permit-type]
   (contains? (permit-types) permit-type))
-
-(defn register-function [permit-type k f]
-  {:pre [(valid-permit-type? permit-type)
-         (keyword? k)
-         (fn? f)]}
-  (swap! permit-type-defs assoc-in [permit-type k] f))
 
 ;;
 ;; Enum
@@ -167,52 +161,83 @@
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
 
-(defn get-application-mapper
-  "Returns a function that maps application into KRYSP XML and saves the XML to disk."
-  [permit-type]
-  (get-metadata permit-type :app-krysp-mapper))
+(defmulti application-krysp-mapper
+  "Maps application into KRYSP XML and saves the XML to disk."
+  {:arglists '([application lang submitted-application krysp-version output-dir begin-of-link])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
 
-(defn get-review-mapper
-  "Returns a function that maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
-  [permit-type]
-  (get-metadata permit-type :review-krysp-mapper))
+(defmethod application-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'application mapper' method not defined for permit type: " permit-type)
+  nil)
 
-(defn get-verdict-reader
-  "Returns a function that reads verdicts (sequence) from KRYSP xml.
-   Function takes xml as parameter.
-   Use get-application-xml-getter to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :verdict-krysp-reader))
+(defmulti review-krysp-mapper
+  "Maps reviews (katselmus) into KRYSP XML and saves the XML to disk."
+  {:arglists '([application review user lang krysp-version output-dir begin-of-link])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
 
-(defn get-verdict-validator
-  "Returns a function that validates verdicts from KRYSP xml.
-   Function takes xml and organization map as parameters.
-   Use get-application-xml-getter to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :verdict-krysp-validator))
+(defmethod review-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'review mapper' method not defined for permit type: " permit-type)
+  nil)
 
-(defn get-verdict-extras-reader
-  "Returns a function that reads some extras from verdict KRYSP xml.
-   Function takes xml as parameter and returns a map that should be merged into the application."
-  [permit-type]
-  (get-metadata permit-type :verdict-extras-krysp-reader))
+(defmulti read-verdict-xml
+  "Reads verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type xml-without-ns])}
+  (fn [permit-type & _]
+    (keyword permit-type)))
 
-(defn get-tj-suunnittelija-verdict-reader
-  "Returns a function that reads tj/suunnittelija verdicts from KRYSP xml.
-   Function takes xml, party type and party's kuntaRoolikoodi as parameter.
-   Use get-application-xml-getter to fetch the XML."
-  [permit-type]
-  (get-metadata permit-type :tj-suunnittelija-verdict-krysp-reader))
+(defmethod read-verdict-xml :default
+  [permit-type & _]
+  (error "No verdict reader for permit type: " permit-type)
+  nil)
 
-(defn get-application-xml-getter
-  "Returns a function that fetches KRYSP XML from municipality backend.
-   Function parameters: 1) url,
-                        2) credentials [username password],
-                        3) id,
-                        4) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
-                        5) optional boolean parameter: raw form."
-  [permit-type]
-  (get-metadata permit-type :xml-from-krysp))
+(defmulti validate-verdict-xml
+  "Reads verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type xml-without-ns organization])}
+  (fn [permit-type & _]
+    (keyword permit-type)))
+
+(defmethod validate-verdict-xml :default
+  [permit-type & _]
+  (error "No verdict validator for permit type: " permit-type)
+  nil)
+
+(defmulti read-verdict-extras-xml
+  "Reads some extras from verdict KRYSP xml.
+  Returns application mongo updates.
+  Method is called even if xml validation fails"
+  {:arglists '([application app-xml])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
+
+(defmethod read-verdict-extras-xml :default
+  [& _]
+  nil)
+
+(defmulti read-tj-suunnittelija-verdict-xml
+  "Reads tj/suunnittelija verdicts (sequence) from KRYSP xml."
+  {:arglists '([permit-type doc party-type target-kuntaRoolikoodi xml-without-ns])}
+  (fn [permit-type & _]
+    (keyword permit-type)))
+
+(defmethod read-tj-suunnittelija-verdict-xml :default
+  [permit-type & _]
+  (error "No tj/suunnitelija verdict reader for permit type: " permit-type)
+  nil)
+
+(defmulti fetch-xml-from-krysp
+  "Fetches KRYSP XML from municipality backend."
+  {:arglists '([permit-type server-url credentials ids search-type raw?])}
+  (fn [permit-type & _]
+    (keyword permit-type)))
+
+(defmethod fetch-xml-from-krysp :default
+  [permit-type & _]
+  (error "No fetch method for permit type: " permit-type)
+  nil)
 
 (defn multiple-parties-allowed? [permit-type]
   (get-metadata permit-type :multiple-parties-allowed))

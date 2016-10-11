@@ -182,13 +182,10 @@
   [password crypto-iv]
   (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
-(defn get-krysp-wfs
+(defn resolve-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
-  ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs {:_id organization} permitType))
-  ([query permit-type]
-   (let [organization (mongo/select-one :organizations query [:krysp])
-         krysp-config (get-in organization [:krysp (keyword permit-type)])
+  ([organization permit-type]
+   (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
          crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (:crypto-iv krysp-config)
          password     (when-let [password (and crypto-iv (:password krysp-config))]
@@ -197,6 +194,14 @@
      (when-not (s/blank? (:url krysp-config))
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
+
+(defn get-krysp-wfs
+  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
+  ([{:keys [organization permitType] :as application}]
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (-> (mongo/select-one :organizations query [:krysp])
+       (resolve-krysp-wfs permit-type))))
 
 (defn municipality-address-endpoint [^String municipality]
   {:pre [(or (string? municipality) (nil? municipality))]}

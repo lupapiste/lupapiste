@@ -314,7 +314,8 @@
        submitted-application
        lang))))
 
-(permit/register-function permit/YA :app-krysp-mapper save-application-as-krysp)
+(defmethod permit/application-krysp-mapper :YA [application lang submitted-application krysp-version output-dir begin-of-link]
+  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
 
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -341,4 +342,5 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
-(permit/register-function permit/YA :review-krysp-mapper save-katselmus-as-krysp)
+(defmethod permit/review-krysp-mapper :YA [application review user lang krysp-version output-dir begin-of-link]
+  (save-katselmus-as-krysp application review user lang krysp-version output-dir begin-of-link))

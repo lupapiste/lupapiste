@@ -4,9 +4,11 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message]]
+            [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
             [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals wfs-krysp-url]]
+            [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [sade.common-reader :as cr]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -79,7 +81,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
 
     (fact "xml is parsed" cases => truthy)
 
@@ -163,7 +165,7 @@
 
 (facts "KRYSP verdict 2.1.8"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
@@ -185,7 +187,7 @@
 
 (facts "KRYSP verdict 2.1.8"
  (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.1.8-foremen.xml"))
-       cases (->verdicts xml ->standard-verdicts)]
+       cases (->verdicts xml :R permit/read-verdict-xml)]
 
    (fact "xml is parsed" cases => truthy)
    (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
@@ -204,7 +206,7 @@
 
 (facts "KRYSP verdict 2.2.0"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-2.2.0.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "validator finds verdicts" (standard-verdicts-validator xml {}) => nil)
@@ -227,7 +229,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -277,7 +279,7 @@
 
 (facts "Tekla sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-buildings.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
 
     (fact "xml is parsed" cases => truthy)
 
@@ -311,19 +313,19 @@
 
 (facts "case not found"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-not-found.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)
     (fact "validator does not find verdicts" (standard-verdicts-validator xml {}) => {:ok false, :text "info.no-verdicts-found-from-backend"})))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil ->standard-verdicts)]
+  (let [cases (->verdicts nil :R permit/read-verdict-xml)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml :R permit/read-verdict-xml)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -347,7 +349,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (xml/parse (slurp "resources/krysp/dev/verdict-ya.xml"))
-        cases (->verdicts xml ->simple-verdicts)]
+        cases (->verdicts xml :YA permit/read-verdict-xml)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -383,9 +385,9 @@
           (:tyyppi liite) => "Muu liite")))))
 
 (facts "Ymparisto verdicts"
-  (doseq [permit-type ["yl" "mal" "vvvl"]]
+  (doseq [permit-type ["YL" "MAL" "VVVL"]]
     (let [xml (xml/parse (slurp (str "resources/krysp/dev/verdict-" permit-type ".xml")))
-          cases (->verdicts xml ->simple-verdicts)]
+          cases (->verdicts xml permit-type permit/read-verdict-xml)]
 
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)
@@ -423,7 +425,7 @@
 
 (facts "Maaraykset from verdict message"
   (let [xml (xml/parse (slurp "dev-resources/krysp/verdict-r-empty-maarays-element.xml"))
-        verdicts (->verdicts xml ->standard-verdicts)
+        verdicts (->verdicts xml :R permit/read-verdict-xml)
         paatokset (:paatokset (first verdicts))
         lupamaaraykset (:lupamaaraykset (first paatokset))
         maaraykset (:maaraykset lupamaaraykset)]
@@ -506,3 +508,24 @@
         (party-with-paatos-data [osapuoli] nil) => truthy)
       (fact "Sijaistus can be empty"
         (party-with-paatos-data [osapuoli] {}) => truthy))))
+
+(facts application-state
+  (fact "state found"
+    (->> (build-multi-app-xml [[{:pvm "2016-09-09Z" :tila "rakennusty\u00f6t aloitettu"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => "rakennusty\u00f6t aloitettu")
+
+  (fact "nil xml"
+    (application-state nil) => nil)
+
+  (fact "not found"
+    (->> (build-multi-app-xml [[{:lp-tunnus "123"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => nil)
+
+  (fact "multiple state - pick the latest"
+    (->> (build-multi-app-xml [[{:pvm "2016-09-09Z" :tila "rakennusty\u00f6t aloitettu"}
+                                {:pvm "2016-09-11Z" :tila "lupa rauennut"}
+                                {:pvm "2016-09-10Z" :tila "rakennusty\u00f6t keskeytetty"}]])
+         (cr/strip-xml-namespaces)
+         (application-state)) => "lupa rauennut"))

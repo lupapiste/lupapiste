@@ -1,5 +1,6 @@
 (ns lupapalvelu.building-test
   (:require [midje.sweet :refer :all]
+            [monger.operators :refer :all]
             [lupapalvelu.building :refer :all]))
 
 (def buildings [{:description "Talo A",
@@ -38,7 +39,7 @@
 
   (facts "Building and document updates together"
     (fact "buildings array and document update OK"
-      (building-updates buildings {:documents test-docs}) => {:buildings buildings, "documents.1.data.valtakunnallinenNumero.value" "123456001M"})
+      (building-updates {:documents test-docs} buildings) => {$set {:buildings buildings, "documents.1.data.valtakunnallinenNumero.value" "123456001M"}})
     (let [first-tag-unknown (map #(assoc % :operationId "foobar") buildings)]
       (fact "no document updates if unknown operation in buildings"
-        (building-updates first-tag-unknown {:documents test-docs}) => {:buildings first-tag-unknown}))))
+        (building-updates {:documents test-docs} first-tag-unknown) => {$set {:buildings first-tag-unknown}}))))

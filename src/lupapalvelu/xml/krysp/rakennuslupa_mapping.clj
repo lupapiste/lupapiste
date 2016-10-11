@@ -478,7 +478,8 @@
       begin-of-link
       {:type "task" :id (:id katselmus)})))
 
-(permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
+(defmethod permit/review-krysp-mapper :R [application review user lang krysp-version output-dir begin-of-link]
+  (save-katselmus-as-krysp application review user lang krysp-version output-dir begin-of-link))
 
 (defn save-aloitusilmoitus-as-krysp [application lang output-dir started
                                      {:keys [index localShortId nationalId propertyId] :as building}
@@ -596,4 +597,5 @@
       submitted-application
       lang)))
 
-(permit/register-function permit/R :app-krysp-mapper save-application-as-krysp)
+(defmethod permit/application-krysp-mapper :R [application lang submitted-application krysp-version output-dir begin-of-link]
+  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
