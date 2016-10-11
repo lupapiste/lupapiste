@@ -328,7 +328,7 @@
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
   (fact "tags get ids when saved"
-    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just {:fi string? :sv string?})
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just (i18n/localization-schema string?))
                                                                          :tags (just [(just {:id string? :label "makeja"})
                                                                                       (just {:id string? :label "nigireja"})])})}))
 
@@ -431,6 +431,7 @@
                       (fact "One of which is not a base layer"
                             (not= (:base k1) (:base k2)) => true)))
              (facts "Layer objects"
+                    (defn loc-data [s] (zipmap [:fi :sv :en] (repeat s)))
                     (fact "Every layer object has an unique id"
                           (->> objects (map :id) set count) => 5)
                     (fact "Ids are correctly formatted"
@@ -440,10 +441,10 @@
                                                       id))
                                          (and (not base) (not (number? id))))) objects))
                     (fact "Bar layer is correct "
-                          (let [subtitles {:fi "" :sv "" :en ""}
+                          (let [subtitles (loc-data "")
                                 bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
 
-                            (nth objects bar-index) => {:name        {:fi "bar" :sv "bar" :en "bar"}
+                            (nth objects bar-index) => {:name        (loc-data "bar")
                                                         :subtitle    subtitles
                                                         :id          (str "Lupapiste-" bar-index)
                                                         :baseLayerId (str "Lupapiste-" bar-index)

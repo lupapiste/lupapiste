@@ -136,6 +136,9 @@
 (defmethod coerce-type :newBuildingSelector [elem-schema]
   (data-leaf elem-schema (sc/if ss/numeric? ssc/NatString (sc/eq "ei tiedossa"))))
 
+(defmethod coerce-type :linkPermitSelector [elem-schema]
+  (data-leaf elem-schema sc/Str))
+
 (defmethod coerce-type :radioGroup [elem-schema]
   (data-leaf elem-schema (apply sc/enum (map :name (:body elem-schema)))))
 

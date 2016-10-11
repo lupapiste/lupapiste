@@ -10,7 +10,6 @@
             [sade.validators :as v]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.document.vrk :refer :all]
-            [lupapalvelu.document.document-field-validators :refer :all]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
@@ -127,6 +126,11 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :companySelector [application elem v]
+  (when-not (or (string? v) (nil? v))
+    [:err "unknown-type"]))
+
+(defmethod validate-field :linkPermitSelector [application elem v]
+  ;; This validation is for custom value in linkPermitSelector field, which should not be restricted into any format.
   (when-not (or (string? v) (nil? v))
     [:err "unknown-type"]))
 

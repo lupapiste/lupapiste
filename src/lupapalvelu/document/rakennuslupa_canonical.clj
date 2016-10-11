@@ -42,7 +42,7 @@
   (:description (util/find-by-id op-id (cons primary secondaries)) ))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
-  (let [{:keys [tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+  (let [{:keys [buildingId tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when-pred {:jarjestysnumero nil
                                         :kiinttun (:propertyId application)
@@ -52,7 +52,7 @@
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
-    (if manuaalinen_rakennusnro
+    (if (and (ss/not-blank? manuaalinen_rakennusnro) (= buildingId "other"))
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)
       defaults)))
 

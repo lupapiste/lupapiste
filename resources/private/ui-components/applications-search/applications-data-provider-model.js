@@ -23,7 +23,9 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.applications = ko.observableArray([]);
 
-  self.applicationType = ko.observable("all");
+  self.applicationType = ko.observable(lupapisteApp.models.currentUser.isAuthority()
+                                       ? "application"
+                                       : "all");
 
   self.searchField = ko.observable("");
 
@@ -34,6 +36,19 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.skip = ko.observable(0);
 
   self.pending = ko.observable(false);
+
+  // Application <-> foremanApplication
+  // foremanNotice -> application
+  self.updateApplicationType = function( searchType ) {
+    var current = self.applicationType();
+    if( searchType === "foreman" && current === "application") {
+      self.applicationType( "foremanApplication");
+    } else {
+      if( searchType === "applications" && _.startsWith( current, "foreman")) {
+        self.applicationType( "application");
+      }
+    }
+  };
 
   // Computed
   var searchFields = ko.pureComputed(function() {

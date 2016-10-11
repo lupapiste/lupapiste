@@ -59,12 +59,15 @@
         </table>
       </section>
 
-      <!-- ko if: $root.authorization.ok("set-organization-permanent-archive-start-date") -->
+      <!-- ko if: organization.permanentArchiveEnabled -->
       <section>
         <h2 data-bind="ltext: 'authorityAdmin.archive.heading'"></h2>
         <div class="permanent-archive-date-input">
           <label for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></label>
-          <input data-bind="datepicker: organization.permanentArchiveInUseSince, valueUpdate: 'afterkeydown', attr: {placeholder: loc('choose')}"
+          <input data-bind="datepicker: organization.permanentArchiveInUseSince, 
+                            valueUpdate: 'afterkeydown',
+                            enable: $root.authorization.ok('set-organization-permanent-archive-start-date'),
+                            attr: {placeholder: loc('choose')}"
                  type="text"
                  id="archiving-start-date">
         </div>

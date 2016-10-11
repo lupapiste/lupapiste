@@ -127,6 +127,12 @@
   (let [ids (flatten (vals (select-keys reservation [:from :to])))]
     (assoc reservation :participants (map user/get-user-by-id (remove nil? ids)))))
 
+(defn- enrich-application [application]
+  (some-> application
+          (update :documents (partial map schemas/with-current-schema-info))
+          (update :tasks (partial map schemas/with-current-schema-info))
+          (update :reservations (partial map with-participants-info))))
+
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
@@ -135,9 +141,7 @@
                           (application-query-for user))]
 
     (some-> (mongo/select-one :applications {$and [query-id-part query-user-part]})
-            (update :documents (partial map schemas/with-current-schema-info))
-            (update :tasks (partial map schemas/with-current-schema-info))
-            (update :reservations (partial map with-participants-info))
+            (enrich-application)
             (filter-application-content-for user))))
 
 (defn get-application-no-access-checking
@@ -146,10 +150,19 @@
    (get-application-no-access-checking query-or-id {}))
   ([query-or-id projection]
    (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
-     (some-> (mongo/select-one :applications query projection)
-             (update :documents (partial map schemas/with-current-schema-info))
-             (update :tasks (partial map schemas/with-current-schema-info))
-             (update :reservations (partial map with-participants-info))))))
+     (->> (mongo/select-one :applications query projection)
+          enrich-application))))
+
+(defn get-multiple-applications-no-access-checking
+  ([query-or-ids]
+   {:pre [(coll? query-or-ids)]}
+   (get-multiple-applications-no-access-checking query-or-ids {}))
+  ([query-or-ids projection]
+   (let [query (if (map? query-or-ids) query-or-ids {:_id {$in query-or-ids}})]
+     (->> (if (seq projection)
+            (mongo/select :applications query projection)
+            (mongo/select :applications query))
+          (map enrich-application)))))
 
 ;;
 ;; authorization

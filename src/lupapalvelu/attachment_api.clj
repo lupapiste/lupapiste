@@ -179,8 +179,8 @@
    :org-authz-roles auth/reader-org-authz-roles
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states}
-  [{{attachments :attachments :as application} :application}]
-  (ok :attachments (map #(assoc % :tags (att-tags/attachment-tags %)) attachments)))
+  [{{attachments :attachments :as application} :application :as command}]
+  (ok :attachments (map attachment/enrich-attachment attachments)))
 
 (defquery attachment
   {:description "Get single attachment"
@@ -191,10 +191,10 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-states
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId])]}
-  [{{attachments :attachments :as application} :application}]
+  [{{attachments :attachments :as application} :application :as command}]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
     (if attachment
-      (ok :attachment (assoc attachment :tags (att-tags/attachment-tags attachment)))
+      (ok :attachment (attachment/enrich-attachment attachment))
       (fail :error.attachment-not-found))))
 
 (defquery attachment-groups
@@ -746,6 +746,23 @@
                                           (when (seq unSelectedAttachmentIds)
                                             (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
     (ok)))
+
+(defcommand set-attachment-as-construction-time
+  {:description "Sets attachment which is added on application time as construction time attachment"
+   :parameters [id attachmentId value]
+   :categories #{:attachments}
+   :user-roles #{:authority}
+   :states     states/pre-verdict-states
+   :pre-checks [attachment-id-is-present-in-application-or-not-set
+                app/validate-authority-in-drafts
+                (fn [{{value :value} :data :as command}]
+                  (when (false? value)
+                    (attachment/validate-attachment-manually-set-construction-time command)))]
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId])
+                      (partial action/boolean-parameters [:value])]}
+  [command]
+  (attachment/set-attachment-construction-time! command attachmentId value)
+  (ok))
 
 (defcommand set-attachment-visibility
   {:parameters       [id attachmentId value]

@@ -4,6 +4,7 @@ Documentation  Admin edits organization
 Suite Teardown  Apply minimal fixture now
 Resource       ../../common_resource.robot
 
+
 *** Test Cases ***
 
 Mikko creates an inforequest and an application in Sipoo
@@ -15,10 +16,20 @@ Mikko creates an inforequest and an application in Sipoo
   Open to authorities  Hello admin!
   [Teardown]  Logout
 
-Solita admin sees the list of organizations
+Solita admin goes to organizations page
   SolitaAdmin logs in
   Click link  Organisaatiot
-  Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
+  Wait test id visible  organization-search-term
+  Test id text is  organization-result-count  ${EMPTY}
+
+Admin shows all organizations
+  Scroll and click test id  organization-show-all
+  Test id text is  organization-result-count  18 organisaatiota.
+
+Admin searchs just 753-R
+  Fill test id  organization-search-term  753-R
+  Scroll and click test id  organization-search
+  Test id text is  organization-result-count  1 organisaatio.
 
 Admin edits organization with id 753-R
   Scroll and Click test id  edit-organization-753-R
@@ -42,6 +53,7 @@ Admin sets application disabled
   Scroll and click test id  edit-organization-753-R
   Wait until  Element should be visible  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
   Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
+  Scroll to test id  application-enabled-753-R
   Unselect Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="application-enabled-753-R"]/input
   Click enabled by test id  save-753-R
   Wait Until  Positive indicator should be visible
@@ -64,6 +76,7 @@ Admin impersonated Sipoo authority
   Click enabled by test id  submit-login-as
 
 Admin sees Mikko's inforequest
+  Open search tab  inforequest
   Request should be visible  ${appname}ir
 
 Admin sees comment on Mikko's application

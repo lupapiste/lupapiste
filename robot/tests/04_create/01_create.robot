@@ -108,6 +108,7 @@ Veikko can submit the application he created
 Veikko sees application in list
   [Tags]  ie8  firefox
   Go to page  applications
+  Open search tab  inforequest
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
 

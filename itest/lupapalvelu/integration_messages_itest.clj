@@ -39,7 +39,18 @@
             (fact "no files in errors" error => empty?)
             (fact "at least one file waits to be transferred" (count waiting) => pos?)
             (fact "all filenames start with application id" (map :name waiting) => (has every? #(.startsWith % app-id)))
-            (fact "file has modification time" (map :modified waiting) => (has every? pos?))))))))
+            (fact "file has modification time" (map :modified waiting) => (has every? pos?)))))))
+
+  (let [app (create-and-submit-application
+              pena
+              :operation "kerrostalo-rivitalo"
+              :propertyId oulu-property-id
+              :y 6965051.2333374 :x 535179.5
+              :address "Torikatu 45")]
+    (command olli :approve-application :id (:id app) :lang "fi") => ok?
+
+    (fact "Integration messages not available, if KRYSP is not set"
+      (query olli :integration-messages :id (:id app)) => (partial expected-failure? :error.sftp.user-not-set))))
 
 (facts "filename validation"
   (let [some-id "LP-123-1234-12345"

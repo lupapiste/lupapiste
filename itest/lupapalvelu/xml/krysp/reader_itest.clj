@@ -159,37 +159,34 @@
                                               :yhteystiedot {:email "", :puhelin ""}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
-  (let [xml (rakval-application-xml local-krysp nil id :application-id false)]
+  (let [xml (rakval-application-xml local-krysp nil [id] :application-id false)]
     xml => truthy
-    (count (->verdicts xml ->standard-verdicts)) => 2))
+    (count (->verdicts xml :R permit/read-verdict-xml)) => 2))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using kuntalupatunnus"
-  (let [xml (rakval-application-xml local-krysp nil kuntalupatunnus :kuntalupatunnus false)]
+  (let [xml (rakval-application-xml local-krysp nil [kuntalupatunnus] :kuntalupatunnus false)]
     xml => truthy
-    (count (->verdicts xml ->standard-verdicts)) => 1))
+    (count (->verdicts xml :R permit/read-verdict-xml)) => 1))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (poik-application-xml local-krysp nil id :application-id false)]
+  (let [xml (poik-application-xml local-krysp nil [id] :application-id false)]
     xml => truthy
-    (count (->verdicts xml ->standard-verdicts)) => 1))
+    (count (->verdicts xml :R permit/read-verdict-xml)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-krysp nil id :application-id false)]
+  (let [xml (ya-application-xml local-krysp nil [id] :application-id false)]
     xml => truthy
-    (count (->verdicts xml ->simple-verdicts)) => 1))
+    (count (->verdicts xml :YA permit/read-verdict-xml)) => 1))
 
 (facts "converting ymparisto verdicts  krysp to lupapiste domain model"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
-    (let [getter (permit/get-application-xml-getter permit-type)
-          reader (permit/get-verdict-reader permit-type)]
 
-      (fact "Application XML getter is set up" getter => fn?)
-      (fact "Verdict reader is set ip" reader => fn?)
+    (let [xml (permit/fetch-xml-from-krysp permit-type local-krysp nil [id] :application-id false)
+          cases (->verdicts xml permit-type permit/read-verdict-xml)]
 
-      (let [xml (getter local-krysp nil id :application-id false)
-            cases (->verdicts xml reader)]
-        (fact "xml is parsed" cases => truthy)
-        (fact "xml has 1 cases" (count cases) => 1)
-        (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
-        (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))))))
+      (fact "xml is read" xml => truthy)
+      (fact "xml is parsed" cases => not-empty)
+      (fact "xml has 1 cases" (count cases) => 1)
+      (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+      (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-")))))

@@ -634,10 +634,7 @@ input.form-input.inline {
 
 .accordion_content > .group-help-text {
   display: block;
-  margin: {
-    left: $marginS;
-    right: $marginS;
-  }
+  margin: $marginS;
 }
 
 .kiintun-and-maaraalatunnus {
@@ -1481,7 +1478,7 @@ textarea.grid-style-input {
   @extend .btn-base;
   display: block;
 }
- 
+
 div.review-done {
   margin: $marginL;
 }
@@ -1532,4 +1529,21 @@ div.review-done {
   padding-left: $marginS;
 }
 
- 
+.building-select-container {
+  margin-left: $marginS;
+  .building-select-box {
+    position: relative;
+    width: 30em;
+  }
+}
+
+.link-permit-selector {
+  padding-left: $marginS;
+  label.form-label {
+    width: 100%;
+  }
+  .errorPanel {
+    top: -80px;
+    left: 200px;
+  }
+}

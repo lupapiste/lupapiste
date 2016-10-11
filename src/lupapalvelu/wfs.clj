@@ -648,7 +648,7 @@
     (let [resp (query-get-capabilities url "WFS" username password false)]
       (or
         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-        (warn "Response not OK or did not contain XML. Response was: " (:status resp) (:body resp))))))
+        (warn "GetCapabilities Response not OK or did not contain XML. Response was: " (:status resp) (:body resp) ", url: " url)))))
 
 (defn get-our-capabilities []
   (let [host (env/value :geoserver :host) ; local IP from Chef environment

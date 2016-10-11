@@ -111,3 +111,9 @@ table.selected-operations-table {
     text-align: center;
   }
 }
+
+// Organization links
+div.organization-link-cell {
+  @include link-text( 24em );
+  white-space: nowrap;
+}

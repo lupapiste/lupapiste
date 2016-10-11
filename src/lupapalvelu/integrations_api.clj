@@ -19,7 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
@@ -67,13 +67,13 @@
       transfer
       (assoc transfer :attachments (map :id attachments)))))
 
-(defn- do-approve [application organization created id lang do-rest-fn]
-  (if (organization/krysp-integration? organization (permit/permit-type application))
+(defn- do-approve [application organization created id current-state lang do-rest-fn]
+  (if (org/krysp-integration? organization (permit/permit-type application))
     (or
       (application/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
             sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
+                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization :current-state current-state))
             attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
         (do-rest-fn attachments-updates)))
     ;; Integration details not defined for the organization -> let the approve command pass
@@ -89,6 +89,7 @@
    :org-authz-roles  #{:approver}}
   [{:keys [application created user organization] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
+        current-state  (:state application)
         next-state   (if jatkoaika-app?
                        :closed ; FIXME create a state machine for :ya-jatkoaika
                        (sm/next-state application))
@@ -120,7 +121,7 @@
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application @organization created id lang do-update)))
+    (do-approve application @organization created id current-state lang do-update)))
 
 (defn- application-already-exported [type]
   (fn [{application :application}]
@@ -197,7 +198,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (org/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -249,10 +250,8 @@
    :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
-    (let [kryspxml    (building-reader/building-xml url credentials propertyId)
-          buildings   (building-reader/->buildings-summary kryspxml)]
-      (ok :data buildings))
+  (if-let [{url :url credentials :credentials} (org/get-krysp-wfs application)]
+    (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
 
 ;;
@@ -262,12 +261,20 @@
 (defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
   [application]
-  (when-let [link-permit-app (application/get-link-permit-app application)]
+  (when-let [link-permit-app (first (application/get-link-permit-apps application))]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
+
+(defn- update-kuntalupatunnus [application]
+  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+    (update-in application
+               [:linkPermitData]
+               conj {:id kuntalupatunnus
+                     :type "kuntalupatunnus"})
+    application))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
@@ -278,13 +285,8 @@
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
   [{orig-app :application created :created user :user org :organization :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data orig-app)
-        application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-                      (update-in application
-                                 [:linkPermitData]
-                                 conj {:id kuntalupatunnus
-                                       :type "kuntalupatunnus"})
-                      application)
+  (let [application (-> (meta-fields/enrich-with-link-permit-data orig-app)
+                        update-kuntalupatunnus)
         submitted-application (mongo/by-id :submitted-applications id)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
 
@@ -299,14 +301,6 @@
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
-
-(defn- update-kuntalupatunnus [application]
-  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-    (update-in application
-               [:linkPermitData]
-               conj {:id kuntalupatunnus
-                     :type "kuntalupatunnus"})
-    application))
 
 (defn- application-already-in-asianhallinta [_ application]
   (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]
@@ -380,14 +374,20 @@
      :error []}))
 
 (defquery integration-messages
-  {:parameters [id]
-   :user-roles #{:authority}
-   :org-authz-roles  #{:approver}
-   :states #{:sent :complementNeeded}}
+  {:parameters      [id]
+   :user-roles      #{:authority}
+   :org-authz-roles #{:approver}
+   :pre-checks      [(fn [{app :application organization :organization}]
+                       (when-let [org (and organization @organization)]
+                         (when-not (or (org/krysp-integration? org (permit/permit-type app))
+                                       (ah/asianhallinta-enabled?
+                                         (org/resolve-organization-scope (:municipality app) (permit/permit-type app) org)))
+                           (fail :error.sftp.user-not-set))))]
+   :states          #{:sent :complementNeeded}}
   [{{municipality :municipality permit-type :permitType} :application org :organization}]
   (let [organization     @org
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
-        ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
+        ah-scope         (org/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
@@ -414,7 +414,7 @@
         dir (case transfer-type
               "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
               "ah" (ah/resolve-output-directory
-                     (organization/resolve-organization-scope municipality permit-type organization)))
+                     (org/resolve-organization-scope municipality permit-type organization)))
         subdir (case file-type
                  "ok" (str env/file-separator "archive" env/file-separator)
                  "error" (str env/file-separator "error" env/file-separator))

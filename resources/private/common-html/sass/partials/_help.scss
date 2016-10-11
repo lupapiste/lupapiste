@@ -91,15 +91,14 @@
 }
 
 .help-box {
-  padding: {
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-  }
+  padding: 12px;
   background-color: $gray238;
   border-left: 10px solid $orange-dark;
   p {
     padding-bottom: 0px;
   }
+}
+
+.light {
+  background: $gray255;
 }

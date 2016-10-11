@@ -272,7 +272,6 @@ LUPAPISTE.AttachmentsService = function() {
       .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
       .error(function(response) {
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
-        error("Unable to update attachment: ", response.text);
         notify.ajaxError(response);
       })
       .call();
@@ -299,6 +298,10 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.setVisibility = function(attachmentId, visibility, hubParams) {
     self.updateAttachment(attachmentId, "set-attachment-visibility", {"value": visibility}, hubParams);
+  };
+
+  self.setConstructionTime = function(attachmentId, value, hubParams) {
+    self.updateAttachment(attachmentId, "set-attachment-as-construction-time", {"value": value}, hubParams);
   };
 
   self.setMeta = function(attachmentId, metadata, hubParams) {

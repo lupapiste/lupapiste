@@ -30,44 +30,55 @@
     }
     vertical-align: top;
     position: relative;
-    padding-bottom: 48px;
+
   }
+
   .app-type-button {
     @extend .app-type-box;
     margin-top: 0;
-    padding-bottom: 0;
+    padding-bottom: 0 !important;
   }
+
   .missing-wrapper {
     width: 100%;
   }
-  .missing-inforequest-box {
+
+  .first-box {
     @include missing-type( 0, $marginL );
   }
-  .missing-application-box {
+
+  .middle-box {
     @include missing-type( $marginL, $marginL );
     border-left: 1px dotted $color-dark-bg;
     border-right: 1px dotted $color-dark-bg;
+    padding-bottom: 95px;
   }
-  .missing-prev-permit-box {
+
+  .last-box {
     @include missing-type( $marginL, 0 );
+    p {
+      margin-bottom: 0px;
+    }
   }
 }
 
 .applications-empty-state.wide {
   .app-type-box {
-    width: 45%;
+    width: 33%;
   }
-  .missing-application-box {
+
+  .last-box {
     border-right: none;
   }
+
   .missing-prev-permit-box {
     display: none;
   }
 }
 
-.missing-inforequest-box.app-type-button,
-.missing-application-box.app-type-button,
-.missing-prev-permit-box.app-type-button {
+.first-box.app-type-button,
+.middle-box.app-type-button,
+.last-box.app-type-button {
   min-height: 0;
 }
 

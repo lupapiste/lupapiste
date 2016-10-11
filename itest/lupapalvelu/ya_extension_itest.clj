@@ -1,9 +1,17 @@
 (ns lupapalvelu.ya-extension-itest
   (:require [midje.sweet :refer :all]
+            [sade.core :as sade]
+            [sade.xml :as xml]
+            [sade.common-reader :refer [strip-xml-namespaces]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [monger.operators :refer :all]
+            [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
-            [clj-time.format :as fmt]))
+            [clj-time.format :as fmt]
+            [net.cgrand.enlive-html :as enlive]))
 
 (apply-remote-minimal)
 
@@ -42,17 +50,17 @@
                                            :text "Authority statement giver"
                                            :name "Ronja"}]) => ok?)
          (fact "Fetch verdicts"
-               (command sonja :check-for-verdict :id r-id) => ok?
+               (command ronja :check-for-verdict :id r-id) => ok?
                (command sonja :check-for-verdict :id ya-id) => ok?)
          (fact "No extensions for R application"
                (query pena :ya-extensions :id r-id) => fail?)
          (fact "No extensions yet established"
                (query pena :ya-extensions :id ya-id)
-               => (err :error.no-extension-applications))
+               => (err :error.no-extensions))
          (fact "Add non-extension link permit. Still no extensions."
                (command pena :add-link-permit :id ya-id :linkPermitId link-id) => ok?
                (query pena :ya-extensions :id ya-id)
-               => (err :error.no-extension-applications))
+               => (err :error.no-extensions))
          (fact "Create continuation period permit"
                (let [ext-id (:id (command pena :create-continuation-period-permit :id ya-id))]
                  (query pena :ya-extensions :id ya-id)
@@ -66,7 +74,7 @@
                                         :id)]
                          (command pena :update-doc :id ext-id :collection "documents"
                                   :doc doc-id :updates [[:tyoaika-alkaa-pvm "20.09.2016"]
-                                                        [:tyoaika-paattyy-pvm "10.10.2016"]]) => ok?
+                                                        [:tyoaika-paattyy-pvm "10.10.2016"]])=> ok?
                          (command pena :add-comment :id ext-id :text "Zao!"
                                   :roles ["applicant" "authority"]
                                   :target {:type "application"}
@@ -90,3 +98,133 @@
                        (command pena :submit-application :id ext-id) => ok?)
                  (fact "Approve extension pseudo query"
                        (query sonja :approve-ya-extension :id ext-id) => ok?)))))
+
+(def local-db-name (str "test_ya_extension_itest_" (sade/now)))
+
+(mongo/connect!)
+(mongo/with-db local-db-name (fixture/apply-fixture "minimal"))
+
+(defn update-krysp [krysp new-reason new-start-date new-end-date]
+  (enlive/at krysp
+             [:lisaaikatieto :Lisaaika]
+             (enlive/content (filter identity
+                                     [{:tag :alkuPvm :content [new-start-date]}
+                                      (when new-end-date
+                                        {:tag :loppuPvm :content [new-end-date]})
+                                      {:tag :perustelu :content [new-reason]}]))))
+
+(facts "Application and link permit extensions"
+       (mongo/with-db local-db-name
+         (let [{app-id :id}     (create-and-submit-local-application pena
+                                                                     :propertyId sipoo-property-id
+                                                                     :operation "ya-katulupa-vesi-ja-viemarityot")
+               krysp            (-> "resources/krysp/dev/jatkoaika-ya.xml"
+                                    xml/parse
+                                    strip-xml-namespaces)
+               krysp-start-date "04.10.2016"
+               krysp-end-date   "22.11.2016"
+               {verdict-id :verdictId} (local-command sonja :new-verdict-draft :id app-id)]
+           ;; Local command does not work with :check-for-verdict on CI
+           (fact "Save verdict draft"
+                 (local-command sonja
+                                :save-verdict-draft
+                                :id app-id
+                                :agreement false
+                                :backendId "12345"
+                                :verdictId verdict-id
+                                :given (sade/now)
+                                :name "Sonja Sibbo"
+                                :official 0
+                                :section nil
+                                :text "This is my verdict.") => ok?)
+           (fact "Publish verdict"
+                 (local-command sonja
+                                :publish-verdict
+                                :id app-id
+                                :lang "fi"
+                                :verdictId verdict-id) => ok?)
+           (fact "No extensions"
+                 (local-query pena :ya-extensions :id app-id)
+                 => (err :error.no-extensions))
+           (fact "Update application extension from KRYSP"
+                 (yax/update-application-extensions krysp)
+                 (-> (local-query pena :application :id app-id) :application :jatkoaika)
+                 => (contains {:alkuPvm   krysp-start-date
+                               :loppuPvm  krysp-end-date
+                               :perustelu "Jatkoajan perustelu"}))
+           (fact "Extensions only include application extension"
+                 (local-query pena :ya-extensions :id app-id)
+                 => (contains {:extensions [{:startDate krysp-start-date
+                                             :endDate   krysp-end-date
+                                             :reason    "Jatkoajan perustelu"}]}))
+           (defn link-permit [start-date end-date]
+             (let [ext-id (:id (local-command pena :create-continuation-period-permit :id app-id))
+                   doc-id (-> (local-query pena :application :id ext-id)
+                              :application
+                              (domain/get-document-by-name :tyo-aika-for-jatkoaika)
+                              :id)]
+               (mongo/update :applications
+                             {:_id       ext-id
+                              :documents {$elemMatch {:id doc-id}}}
+                             {$set {:documents.$.data.tyoaika-alkaa-pvm.value   start-date
+                                    :documents.$.data.tyoaika-paattyy-pvm.value end-date
+                                    }})
+               ext-id))
+
+           (facts "Extension link permits"
+                  (let [ext-id1 (link-permit "7.7.2016" "8.8.2016")]
+                    (fact "One link permit and app extension"
+                          (:extensions (local-query pena :ya-extensions :id app-id))
+                          => [{:startDate "7.7.2016"
+                               :endDate   "8.8.2016"
+                               :id        ext-id1
+                               :state     "draft"}
+                              {:startDate krysp-start-date
+                               :endDate   krysp-end-date
+                               :reason    "Jatkoajan perustelu"}])
+                    (let [ext-id2 (link-permit "4.10.2016" krysp-end-date)]
+                      (fact "Two link permits, latter matches app extension"
+                            (:extensions (local-query pena :ya-extensions :id app-id))
+                            => [{:startDate "7.7.2016"
+                                 :endDate   "8.8.2016"
+                                 :id        ext-id1
+                                 :state     "draft"}
+                                {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                 :endDate   krysp-end-date
+                                 :reason    "Jatkoajan perustelu"
+                                 :state     "draft"}])
+                      (fact "KRYSP does not contain end-date, does not match anymore"
+                            (yax/update-application-extensions (update-krysp krysp
+                                                                             "New reason"
+                                                                             "2016-10-04"
+                                                                             nil))
+                            (:extensions (local-query pena :ya-extensions :id app-id))
+                            => [{:startDate "7.7.2016"
+                                 :endDate   "8.8.2016"
+                                 :id        ext-id1
+                                 :state     "draft"}
+                                {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                 :endDate   krysp-end-date
+                                 :state     "draft"}
+                                {:startDate krysp-start-date
+                                 :endDate   nil
+                                 :reason    "New reason"}]
+                            )
+                      (fact "Link permit and matching app extension, both without end-date"
+                            (let [ext-id3 (link-permit krysp-start-date nil)]
+                              (:extensions (local-query pena :ya-extensions :id app-id))
+                              => [{:startDate "7.7.2016"
+                                   :endDate   "8.8.2016"
+                                   :id        ext-id1
+                                   :state     "draft"}
+                                  {:id        ext-id2
+                                 :startDate "4.10.2016"
+                                   :endDate   krysp-end-date
+                                   :state     "draft"}
+                                  {:id ext-id3
+                                   :state "draft"
+                                   :startDate krysp-start-date
+                                   :endDate   nil
+                                   :reason    "New reason"}]))))))))

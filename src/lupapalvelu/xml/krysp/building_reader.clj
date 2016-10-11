@@ -9,7 +9,8 @@
             [sade.util :as util]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.building :as building]))
+            [lupapalvelu.building :as building]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -56,6 +57,21 @@
         (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
         (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma]))))))
 
+
+(defn building-info-list
+  "Gets buildings info either from cache selection or fetches via WFS."
+  [url credentials propertyId]
+  (if-let [{buildings :buildings} (mongo/select-one :buildingCache {:propertyId propertyId})]
+    buildings
+    (let [kryspxml  (building-xml url credentials propertyId)
+          buildings (->buildings-summary kryspxml)]
+      (when (not-empty buildings)
+        (try
+          (mongo/insert :buildingCache
+                        (mongo/with-mongo-meta {:propertyId propertyId :buildings buildings})
+                        com.mongodb.WriteConcern/UNACKNOWLEDGED)
+          (catch com.mongodb.DuplicateKeyException _)))
+      buildings)))
 
 (def ...notfound... nil)
 (def ...notimplemented... nil)
@@ -205,14 +221,7 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn- buildings-summary-for-application
-  "Returns application building updates from xml (if buildings exist)."
-  [xml application]
-  (let [summary (->buildings-summary xml)]
-    (when (seq summary)
-      (building/building-updates summary application))))
-
-(permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
+(defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 
 (defn- parse-buildings
   "Convenience function for debugging KRYSP messages.
