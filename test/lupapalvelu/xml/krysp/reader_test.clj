@@ -344,7 +344,8 @@
     (fact "xml has 11 reviews" (count reviews) => 11)
     (fact "huomautukset" (get-in aloitus-review-task [:data :katselmus :huomautukset :kuvaus :value]) => non-empty)
     (fact "katselmuksenLaji" (get-in aloitus-review-task [:data :katselmuksenLaji :value]) => "aloituskokous")
-    (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)))
+    (fact "tunnustieto" (get-in aloitus-review-task [:data :muuTunnus]) => truthy)
+    (fact "lasnaolijat" (get-in (last katselmus-tasks) [:data :katselmus :lasnaolijat :value]) => (contains "Teppo"))))
 
 ;; YA verdict
 
