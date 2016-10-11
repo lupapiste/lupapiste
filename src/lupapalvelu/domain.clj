@@ -156,10 +156,12 @@
 (defn get-multiple-applications-no-access-checking
   ([query-or-ids]
    {:pre [(coll? query-or-ids)]}
-   (get-application-no-access-checking query-or-ids {}))
+   (get-multiple-applications-no-access-checking query-or-ids {}))
   ([query-or-ids projection]
    (let [query (if (map? query-or-ids) query-or-ids {:_id {$in query-or-ids}})]
-     (->> (mongo/select :applications query projection)
+     (->> (if (seq projection)
+            (mongo/select :applications query projection)
+            (mongo/select :applications query))
           (map enrich-application)))))
 
 ;;
