@@ -240,3 +240,12 @@ div.search {
   }
 }
 
+.search-results-waiting {
+  i.spin {
+    font-size: 2 * $lupicon-size;
+    padding: 0;
+  }
+  span {
+    padding-left: 2em;
+  }
+}
