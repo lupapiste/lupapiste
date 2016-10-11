@@ -41,7 +41,7 @@ Switch to authority
 
 Authority sees base application on foreman search
   ${appId} =  Get From List  ${applicationIds}  0
-  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
+  Wait until  Element should be visible  xpath=//table[@id='applications-list']//tr[@data-id='${appId}']
 
 Authority does not see foreman applications on default search
   ${foremanAppId0} =  Get From List  ${foremanApps}  0

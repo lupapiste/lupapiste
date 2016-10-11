@@ -81,10 +81,6 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     self.skip(0); // when above filters change, set table view to first page
   });
 
-  ko.computed(function() {
-    return self.pending() ? pageutil.showAjaxWait(loc("applications.loading")) : pageutil.hideAjaxWait();
-  });
-
   // Subscribtions
   lupapisteApp.services.applicationFiltersService.selected.subscribe(function(selected) {
     if (selected) {
