@@ -11,7 +11,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]))
+            [lupapalvelu.document.tools :as tools]
+            [sade.strings :as ss]))
 
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
@@ -386,7 +387,7 @@
 
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
-    (let [xml (xml/parse (slurp (str "resources/krysp/dev/verdict-" permit-type ".xml")))
+    (let [xml (xml/parse (slurp (str "resources/krysp/dev/verdict-" (ss/lower-case permit-type) ".xml")))
           cases (->verdicts xml permit-type permit/read-verdict-xml)]
 
       (fact "xml is parsed" cases => truthy)
