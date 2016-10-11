@@ -38,6 +38,14 @@
                     :user (lupapalvelu.ident.session/get-user trid)
                     :ident ident})))
 
+(defpage "/api/saml/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
+  (if (str/contains? status2 "AuthnFailed")
+    (warn "SAML endpoint rejected authentication")
+    (error "SAML endpoint encountered an error:" status status2 message))
+  (if-let [trid (re-find #"\d+$" relay-state)]
+    (let [url (or (some-> (lupapalvelu.ident.session/get-user trid) (get-in [:paths :error])) "/")]
+      (response/redirect url))))
+
 (env/in-dev
   (defpage [:get "/dev/saml/init-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
