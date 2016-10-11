@@ -64,6 +64,16 @@
 
 (def supported-language-schema (apply sc/enum (map name languages)))
 
+(defn localization-schema
+  "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
+  [value-type]
+  (into {} (map (juxt identity (constantly value-type))
+                supported-langs)))
+
+(defn with-default-localization [loc-map default]
+  (merge (localization-schema default)
+         loc-map))
+
 (defn valid-language
   "Input validator for lang parameter. Accepts also empty lang."
   [{{:keys [lang]} :data}]

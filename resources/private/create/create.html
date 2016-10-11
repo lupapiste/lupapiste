@@ -90,7 +90,7 @@
         <div data-bind="ltext: 'organization.links'"></div>
         <ul data-bind="foreach: organizationLinks">
           <li>
-            <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
+            <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url[loc.getCurrentLanguage()]}" href="#" target="_blank"></a>
           </li>
         </ul>
       </div>

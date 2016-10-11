@@ -261,12 +261,20 @@
 (defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
   [application]
-  (when-let [link-permit-app (application/get-link-permit-app application)]
+  (when-let [link-permit-app (first (application/get-link-permit-apps application))]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
+
+(defn- update-kuntalupatunnus [application]
+  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+    (update-in application
+               [:linkPermitData]
+               conj {:id kuntalupatunnus
+                     :type "kuntalupatunnus"})
+    application))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
@@ -277,13 +285,8 @@
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
   [{orig-app :application created :created user :user org :organization :as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data orig-app)
-        application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-                      (update-in application
-                                 [:linkPermitData]
-                                 conj {:id kuntalupatunnus
-                                       :type "kuntalupatunnus"})
-                      application)
+  (let [application (-> (meta-fields/enrich-with-link-permit-data orig-app)
+                        update-kuntalupatunnus)
         submitted-application (mongo/by-id :submitted-applications id)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
 
@@ -298,14 +301,6 @@
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
-
-(defn- update-kuntalupatunnus [application]
-  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-    (update-in application
-               [:linkPermitData]
-               conj {:id kuntalupatunnus
-                     :type "kuntalupatunnus"})
-    application))
 
 (defn- application-already-in-asianhallinta [_ application]
   (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]

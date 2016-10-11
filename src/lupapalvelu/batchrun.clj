@@ -17,13 +17,16 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.attachment :as attachment]
-            [sade.util :as util]
+            [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
             [sade.core :refer :all]
-            [clj-time.coerce :as c]))
+            [sade.strings :as ss]
+            [clj-time.coerce :as c])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -368,44 +371,59 @@
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
-(defn batchrun-user-for-review-fetch [orgs-by-id]
-  ;; modified from fetch-verdicts.
-  (let [org-ids (keys orgs-by-id)
-        eraajo-user (user/batchrun-user org-ids)]
-    eraajo-user))
-
 (defn orgs-for-review-fetch []
-  (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
-                                         {:krysp.R.url {$exists true},
-                                          :krysp.R.version {$gte "2.1.5"}}
-                                                   {:krysp 1})
-        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
-    orgs-by-id))
+  (organization/get-organizations {:krysp.R.url {$exists true},
+                                   :krysp.R.version {$gte "2.1.5"}}
+                                  {:krysp 1}))
 
-(defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
-  (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+(defn- save-reviews-for-application [user created application app-xml]
+  (try
+    (when (and application app-xml)
+      (verdict/save-reviews-from-xml user created application app-xml))
+    (catch Throwable t
+      (errorf "error.integration - Could not save reviews for %s" (:id application)))))
+
+(defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
+  (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
-      (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-        (debugf "fetch-reviews-for-application: processing application id %s" id)
-        (logging/with-logging-context {:applicationId id}
-        (if-not (s/blank? url)
-          ;; url means there's a defined location (eg sftp) for polling xml verdicts
-          (let [command (assoc (application->command app) :user eraajo-user :created (now))
-                result (verdict/do-check-for-reviews command)]
-            result))))
+      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
+      (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+      (catch SAXParseException e
+        (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
+        ;; Fallcback into fetching xmls consecutively
+        (->> (map (fn [app]
+                    (try
+                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
+                      (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
+                      (catch Throwable t
+                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                        nil)))
+                  applications)
+             (remove nil?)
+             (apply merge)))
       (catch Throwable t
-        (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))))))
+        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+
+(defn- fetch-reviews-for-organization [eraajo-user {org-krysp :krysp :as organization} applications]
+  (->> (group-by :permitType applications)
+       (remove (fn-> key keyword org-krysp :url s/blank?))
+       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
+       (apply merge)))
 
 (defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (orgs-for-review-fetch)
+  (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
         apps (if (= 1 (count args))
                (mongo/select :applications {:_id (first args)})
-               ;; else
-               (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
-    (doall
-     (pmap (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
+               (mongo/select :applications {:state {$in eligible-application-states}
+                                            :organization {$in (keys orgs-by-id)}
+                                            :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}))
+        eraajo-user (user/batchrun-user (keys orgs-by-id))
+        grouped-apps (group-by :organization apps)]
+    (->> (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps)
+         (apply merge)
+         (util/map-keys #(util/find-by-id % apps))
+         (run! (partial apply save-reviews-for-application eraajo-user (now))))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
@@ -419,8 +437,7 @@
   (mongo/connect!)
   (debug "# of applications with background generated tasks:"
            (mongo/count :applications {:tasks.source.type "background"}))
-  (let [orgs-by-id (orgs-for-review-fetch)
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
+  (let [eraajo-user (user/batchrun-user (map :id (orgs-for-review-fetch)))]
     (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
       (let [command (assoc (application->command application) :user eraajo-user :created (now))]
         (doseq [task (:tasks application)]
@@ -453,4 +470,3 @@
                       (if (:archivabilityError result)
                         (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
                         (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))
-

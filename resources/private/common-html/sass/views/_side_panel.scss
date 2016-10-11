@@ -39,7 +39,7 @@
       display: block;
       font-weight: bold;
       margin: 0 0 $marginM 0;
-      
+
       .unseen-comments {
         color: $green-dark;
         font-size: 14px;
@@ -57,7 +57,7 @@
   .content-wrapper {
     float: left;
     height: 100%;
-    background-color: $gray69; 
+    background-color: $gray69;
     padding: $marginS;
     width: 500px;
   }
@@ -301,7 +301,7 @@
   .info-links-content {
     overflow-y: scroll;
     height: 100%;
-    padding-bottom: 2 * $btn-height;    
+    padding-bottom: 2 * $btn-height;
   }
 }
 
@@ -317,7 +317,7 @@
     }
     &:hover:nth-child(even) {
       background: $bg;
-    }    
+    }
   }
 }
 
@@ -340,7 +340,7 @@ table.info-link-editor-view.info-link-divider {
   border: 1px dashed $orange-light;
   min-height: $btn-height;
   width: 100%;
-  
+
 }
 
 // Dragged link within list
@@ -351,15 +351,10 @@ table.info-link-editor-view.dragging {
 // Drag element
 table.info-link-editor-view + .dragging {
   display: block !important;
-  max-width: 30em;  
+  max-width: 30em;
   background-color: $gray51;
 }
 
-@mixin link-text( $max-width) {
-  max-width: $max-width;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-}
 
 span.info-link-text {
   @include link-text( 20em );
@@ -377,7 +372,7 @@ span.info-link-text-wide {
   span.info-link-text {
     max-width: 14em;
   }
-  
+
   span.info-link-text-wide {
     max-width: 22em;
   }
@@ -395,7 +390,7 @@ table.info-link-editor-edit {
   margin-bottom: 2px;
   tr:nth-child(odd) {
     border-bottom: 1px solid $grid-border-color;
-  }  
+  }
   td {
     padding: {
     left: 5px;
@@ -409,7 +404,7 @@ table.info-link-editor-edit {
     width: 100%;
     padding: {
       bottom: 2px;
-      top: 2px;      
+      top: 2px;
     }
   }
   button.ghost {

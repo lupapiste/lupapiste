@@ -50,7 +50,7 @@
                                            :text "Authority statement giver"
                                            :name "Ronja"}]) => ok?)
          (fact "Fetch verdicts"
-               (command sonja :check-for-verdict :id r-id) => ok?
+               (command ronja :check-for-verdict :id r-id) => ok?
                (command sonja :check-for-verdict :id ya-id) => ok?)
          (fact "No extensions for R application"
                (query pena :ya-extensions :id r-id) => fail?)
@@ -122,10 +122,27 @@
                                     xml/parse
                                     strip-xml-namespaces)
                krysp-start-date "04.10.2016"
-               krysp-end-date   "22.11.2016"]
-
-           (fact "Fetch verdict"
-                 (local-command sonja :check-for-verdict :id app-id) => ok?)
+               krysp-end-date   "22.11.2016"
+               {verdict-id :verdictId} (local-command sonja :new-verdict-draft :id app-id)]
+           ;; Local command does not work with :check-for-verdict on CI
+           (fact "Save verdict draft"
+                 (local-command sonja
+                                :save-verdict-draft
+                                :id app-id
+                                :agreement false
+                                :backendId "12345"
+                                :verdictId verdict-id
+                                :given (sade/now)
+                                :name "Sonja Sibbo"
+                                :official 0
+                                :section nil
+                                :text "This is my verdict.") => ok?)
+           (fact "Publish verdict"
+                 (local-command sonja
+                                :publish-verdict
+                                :id app-id
+                                :lang "fi"
+                                :verdictId verdict-id) => ok?)
            (fact "No extensions"
                  (local-query pena :ya-extensions :id app-id)
                  => (err :error.no-extensions))

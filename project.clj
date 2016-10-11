@@ -150,15 +150,11 @@
   :java-source-paths ["java-src"]
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
-  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
-                                    :checksum :ignore}]
-                 ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
+  :repositories [["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
                  ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
-  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
-                                           :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]
