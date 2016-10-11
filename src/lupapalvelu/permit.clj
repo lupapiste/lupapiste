@@ -26,12 +26,6 @@
 (defn valid-permit-type? [permit-type]
   (contains? (permit-types) permit-type))
 
-(defn register-function [permit-type k f]
-  {:pre [(valid-permit-type? permit-type)
-         (keyword? k)
-         (fn? f)]}
-  (swap! permit-type-defs assoc-in [permit-type k] f))
-
 ;;
 ;; Enum
 ;;
