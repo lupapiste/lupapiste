@@ -804,6 +804,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return buildGroupComponent(name, subSchema, model, path);
   }
 
+  function buildLinkPermitSelector (subSchema, model, path) {
+    return buildGroupComponent("link-permit-selector", subSchema, model, path);
+  }
+
   function buildPropertyGroup (subSchema, model, path) {
     return buildGroupComponent("property-group", subSchema, model, path);
   }
@@ -818,6 +822,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function buildConstructionWasteReport (subSchema, model, path) {
     return buildGroupComponent("construction-waste-report", subSchema, model, path);
+  }
+
+  function buildDocgenBuildingSelect( subSchema, model, path ) {
+    return buildGroupComponent( "docgen-building-select", subSchema, model, path );
   }
 
   function buildRadioGroup(subSchema, model, path) {
@@ -851,123 +859,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     partsDiv.appendChild(span);
     return partsDiv;
-  }
-
-  function buildBuildingSelector(subSchema, model, path) {
-    var myPath = path.join(".");
-    var validationResult = getValidationResult(model, subSchema.name);
-    var select = document.createElement("select");
-    var selectedOption = getModelValue(model, subSchema.name);
-    var option = document.createElement("option");
-    var span = makeEntrySpan(subSchema, myPath, validationResult);
-
-    select.id = pathStrToID(myPath);
-
-    select.name = myPath;
-    select.className = "form-input combobox long";
-    if (validationResult && validationResult[0]) {
-      var level = validationResult[0];
-      select.className += " " + level;
-    }
-
-    var otherKey = subSchema["other-key"];
-    if (otherKey) {
-      var pathToOther = path.slice(0, -1);
-      pathToOther.push(otherKey);
-      select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
-    }
-
-    if (isInputReadOnly(doc, subSchema, model)) {
-      select.disabled = true;
-    } else {
-      select.onchange = function (e) {
-        var event = getEvent(e);
-        var target = event.target;
-
-        var buildingId = target.value;
-
-        function mergeFromWfs(overwriteWithBackendData) {
-          ajax
-          .command("merge-details-from-krysp", {
-            id: self.appId, documentId: self.docId,
-            path: myPath,
-            buildingId: buildingId,
-            overwrite: overwriteWithBackendData,
-            collection: self.getCollection()
-          })
-          .success(_.partial(repository.load, self.appId, _.noop))
-          .onError("error.no-legacy-available", notify.ajaxError)
-          .call();
-        }
-
-        if (buildingId !== "" && buildingId !== "other") {
-          LUPAPISTE.ModalDialog.showDynamicYesNo(
-              loc("overwrite.confirm"),
-              loc("application.building.merge"),
-              {title: loc("yes"), fn: _.partial(mergeFromWfs, true)},
-              {title: loc("no"), fn: _.partial(mergeFromWfs, false)}
-          );
-        } else {
-          mergeFromWfs(true);
-        }
-        return false;
-      };
-    }
-
-    option.value = "";
-    option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") {
-      option.selected = "selected";
-    }
-    select.appendChild(option);
-
-    var otherOption = null;
-    if (otherKey) {
-      otherOption = document.createElement("option");
-      otherOption.value = "other";
-      otherOption.appendChild(document.createTextNode(loc("select-other")));
-      if (selectedOption === "other") {
-        otherOption.selected = "selected";
-      }
-      select.appendChild(otherOption);
-    }
-
-    ajax
-      .query("get-building-info-from-wfs", { id: self.appId })
-      .success(function (data) {
-        _.each(data.data, function (building) {
-          var name = building.buildingId;
-          var usage = building.usage;
-          var created = building.created;
-          var option = document.createElement("option");
-          option.value = name;
-          option.appendChild(document.createTextNode(name + " (" + usage + ") - " + created));
-          if (selectedOption === name) {
-            option.selected = "selected";
-          }
-          if (otherOption) {
-            select.insertBefore(option, otherOption);
-          } else {
-            select.appendChild(option);
-          }
-        });
-      })
-      .error(function (e) {
-        var error = e.text ? e.text : "error.unknown";
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(loc(error)));
-        option.selected = "selected";
-        select.appendChild(option);
-        select.setAttribute("disabled", true);
-      })
-      .call();
-
-    if (subSchema.label) {
-      span.appendChild(makeLabel(subSchema, "select", myPath, validationResult));
-    }
-    span.appendChild(select);
-    return span;
   }
 
   function buildNewBuildingSelector(subSchema, model, path) {
@@ -1300,6 +1191,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     docgenGroup: buildDocgenGroup,
     docgenTable: buildDocgenTable,
     propertyGroup: buildPropertyGroup,
+    linkPermitSelector: buildLinkPermitSelector,
     docgenHuoneistot: buildDocgenHuoneistotTable,
     constructionWasteReport: buildConstructionWasteReport,
     string: buildString,
@@ -1311,7 +1203,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     date: buildDate,
     time: buildTime,
     // element: buildElement,
-    buildingSelector: buildBuildingSelector,
+    buildingSelector: buildDocgenBuildingSelect,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,

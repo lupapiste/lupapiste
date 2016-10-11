@@ -48,6 +48,7 @@ Sonja disables verdict attachment using multiselect view
   Click by test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'selected')]  1
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
   Click by test id  multiselect-action-button
 

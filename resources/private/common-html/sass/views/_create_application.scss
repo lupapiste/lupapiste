@@ -127,6 +127,10 @@
   margin-bottom: $marginM !important;
 }
 
+.bottom-marginL {
+  margin-bottom: $marginL !important;
+}
+
 #popup-id_close {
   @include spite-bg;
   background-position: 0px -4100px;

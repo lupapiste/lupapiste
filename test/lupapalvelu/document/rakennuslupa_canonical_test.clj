@@ -24,11 +24,20 @@
         base-result {:jarjestysnumero nil
                      :kiinttun nil
                      :muuTunnustieto [{:MuuTunnus {:sovellus "toimenpideId", :tunnus "1"}}
-                                      {:MuuTunnus {:sovellus "Lupapiste", :tunnus "1"}}]}]
+                                      {:MuuTunnus {:sovellus "Lupapiste", :tunnus "1"}}]}
+        building-info {:buildingId "not-other"
+                       :rakennusnro "001"
+                       :valtakunnallinenNumero "122334455R"
+                       :manuaalinen_rakennusnro "123"}]
     (get-rakennustunnus {} {} document) => base-result
     (get-rakennustunnus {:tunnus "B"} application document) => (assoc base-result :rakennuksenSelite "B: desc")
     (get-rakennustunnus {:tunnus ""} application document) => (assoc base-result :rakennuksenSelite "desc")
-    (get-rakennustunnus {:tunnus "B"} {} document) => (assoc base-result :rakennuksenSelite "B")))
+    (get-rakennustunnus {:tunnus "B"} {} document) => (assoc base-result :rakennuksenSelite "B")
+    (get-rakennustunnus building-info {} document) => (contains {:rakennusnro "001"
+                                                                 :valtakunnallinenNumero "122334455R"})
+    (get-rakennustunnus (assoc building-info :buildingId "other") {} document)
+    => (contains {:rakennusnro "123"
+                  :valtakunnallinenNumero "122334455R"})))
 
 (def- municipality 753)
 

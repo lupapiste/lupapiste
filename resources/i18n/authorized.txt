@@ -1,2 +1,3 @@
+"authorized.invite" "en" "User invitation"
 "authorized.invite" "fi" "Käyttäjäkutsu"
 "authorized.invite" "sv" "Inbjudan"

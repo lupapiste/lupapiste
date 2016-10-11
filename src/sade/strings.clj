@@ -164,3 +164,8 @@
 (defn to-camel-case
   [string]
   (s/replace string #"-(\w)" #(upper-case (second %1))))
+
+(defn =trim-i
+  "Compares trimmed lower-cased versions of strings."
+  [& xs]
+  (apply = (map (comp trim lower-case) xs)))

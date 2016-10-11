@@ -115,7 +115,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.50"]
+                 [lupapiste/commons "0.7.52"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.1"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -150,15 +150,11 @@
   :java-source-paths ["java-src"]
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
-  :repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
-                                    :checksum :ignore}]
-                 ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
+  :repositories [["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
                                        :snapshots false}]
                  ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
                  ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
                                       :snapshots false}]]
-  :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/repository/solita"
-                                           :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" ["midje" ":filter" "-ajanvaraus"]]
             "ajanvaraus"  ["with-profile" "dev,itest" ["midje" ":filter" "ajanvaraus"]]
             "stest"       ["with-profile" "dev,stest" "midje"]

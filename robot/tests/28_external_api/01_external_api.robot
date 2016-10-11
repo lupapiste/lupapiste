@@ -24,6 +24,7 @@ JS API is not available for organizations which don't have IPs allowed
   As Sonja
   Create application the fast way  sipoo  753-416-25-32  kerrostalo-rivitalo
   Go to page  applications
+  Open search tab  all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
   Element should not be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
   Logout
@@ -32,6 +33,7 @@ Porvoo has allowed IP in use and can see Show permits on map button
   As Pekka
   Create application the fast way  Tinatuopintie 3  638-417-1-738  kerrostalo-rivitalo
   Go to page  applications
+  Open search tab  all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
   Element should be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
 
@@ -70,7 +72,7 @@ Add post verdict attachment
   Open tab  attachments
   Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
   Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application  
+  Return to application
 
 Transfering attachments emits LupapisteApi.integrationSent function call
   Scroll to top

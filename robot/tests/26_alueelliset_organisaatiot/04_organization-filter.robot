@@ -17,6 +17,7 @@ Sonja logs in and creates another application
 
 Sonja sees all her organizations in the dropdown of the organization filter autocomplete component
   Go to page  applications
+  Open search tab  all
   Element should not be visible  xpath=//div[@data-test-id="organization-filter-item"]
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]

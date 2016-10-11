@@ -447,7 +447,7 @@
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
-(when (or pdfa/pdf2pdf-enabled? dev-env?)
+(when pdfa/pdf2pdf-enabled?
   (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
           (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
                 application-id (:id application)
@@ -527,7 +527,7 @@
            (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
   (println "Skipped attachment-itest libreoffice tests!"))
 
-(when (or pdfa/pdf2pdf-enabled? dev-env?)
+(when pdfa/pdf2pdf-enabled?
   (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
     (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
           application-id (:id application)
@@ -769,7 +769,7 @@
     (fact "is PDF"
       (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
 
-    (when (or pdfa/pdf2pdf-enabled? dev-env?) ; test PDF/A when pdf2pdf converter is enabled
+    (when pdfa/pdf2pdf-enabled? ; test PDF/A when pdf2pdf converter is enabled
       (facts "Is archivable after PDF/A conversion"
         (count (:versions pdf-attachment)) => 1             ; only one version
         (get-in pdf-attachment [:latestVersion :fileId]) =not=> (get-in pdf-attachment [:latestVersion :originalFileId]) ; original file is known
@@ -978,3 +978,37 @@
 
           (fact "set-attachment-as-construction-time"
             (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
+
+(facts "Not needed..."
+  (let [application (create-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        att1 (first attachments)]
+    (fact "Initially not needed can be toggled"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?)
+    (fact "If set notNeeded, upload not possible"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 false))
+    (fact "Upload possible when attachment is needed"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 true))
+    (fact "Can't be set notNeeded when file is uploaded"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => fail?)
+    (let [{attachments :attachments} (query-application pena application-id)
+          updated-attachment (first attachments)]
+      (command pena
+               :delete-attachment-version
+               :id application-id
+               :attachmentId (:id updated-attachment)
+               :fileId (get-in updated-attachment [:latestVersion :fileId])
+               :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
+      (fact "Not needed can be set after version deletion"
+        (command pena :set-attachment-not-needed :id application-id :notNeeded true
+                 :attachmentId (:id updated-attachment)) => ok?))
+    ))

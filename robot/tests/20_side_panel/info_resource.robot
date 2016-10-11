@@ -6,10 +6,10 @@ Resource       ../../common_resource.robot
 *** Keywords ***
 
 Star is shown
-  Wait Until  Element should be visible  jquery=button#open-info-side-panel.positive i.lupicon-circle-star 
+  Wait Until  Element should be visible  jquery=button#open-info-side-panel.positive i.lupicon-circle-star
 
 Star is not shown
-  Wait Until  Element should be visible  jquery=button#open-info-side-panel.primary i.lupicon-circle-info 
+  Wait Until  Element should be visible  jquery=button#open-info-side-panel.primary i.lupicon-circle-info
 
 No info panel stars
   Wait Until  Javascript?  $("div.info-links-content i.lupicon-circle-star:visible").length === 0
@@ -53,7 +53,7 @@ Check just link
   Javascript?  $("${a} span").text() === "${text}"
   Javascript?  $("${a}").attr("href") === "${url}"
   Javascript?  Boolean($("${a} i.lupicon-circle-star:visible").length) === ${new}
-  
+
 Edit info link
   [Arguments]  ${index}  ${text}  ${url}
   Scroll and click test id  view-link-edit-${index}

@@ -9,7 +9,11 @@ ${appname}     Roadcrew
 ${propertyid}  753-416-88-88
 ${ext1}        Extension yi
 ${ext2}        Extension er
-${ext3}        Extension san
+${ext3}        Extension san    
+${kryspstart}  4.10.2016
+${kryspend}    22.11.2016
+${reason}      Jatkoajan perustelu
+${ext4}        Extension si      
 
 *** Test Cases ***
 
@@ -29,7 +33,7 @@ Pena now sees extensions table
   Check row  0  20.9.2016  10.10.2016  Luonnos  
 
 Pena creates second extension
-  Create extension  ${ext2}  01.08.2016  09.09.2016  
+  Create extension  ${ext2}  1.8.2016  9.9.2016  
 
 Pena creates third extension
   Create extension  ${ext3}  11.11.2016  12.12.2016
@@ -62,6 +66,33 @@ The same is true in the required field summary tab
   Deny  dynamic-yes-no-confirm-dialog
   [Teardown]  Logout
 
+Simulate reading application extension from backend
+  Go to  ${SERVER}/dev/mock-ya-extension
+  Wait until  Page should contain  YA extension KRYSP processed.
+  Go back
+
+Pena logs in again
+  Pena logs in
+  Open application  ${appname}  ${propertyid}
+  Open tab  tasks
+
+The third row contains reason but not state
+  Check row  0  1.8.2016  9.9.2016  Luonnos
+  Check row  1  20.9.2016  10.10.2016  Hakemus jätetty
+  Check row  2  ${kryspstart}  ${kryspend}  ${EMPTY}  ${reason}
+  Check row  3  11.11.2016  12.12.2016  Luonnos
+
+Pena creates extension with dates matching KRYSP
+  Create extension  ${ext4}  ${kryspstart}  ${kryspend}
+
+Now the third row has the draft state
+  Open tab  tasks
+  Check row  0  1.8.2016  9.9.2016  Luonnos
+  Check row  1  20.9.2016  10.10.2016  Hakemus jätetty
+  Check row  2  ${kryspstart}  ${kryspend}  Luonnos  ${reason}
+  Check row  3  11.11.2016  12.12.2016  Luonnos
+    
+
 *** Keywords ***
 
 Create extension
@@ -84,11 +115,13 @@ Change address
   Wait Until  Page should contain  ${address}
 
 Check row
-  [Arguments]  ${index}  ${start}  ${end}  ${state}
+  [Arguments]  ${index}  ${start}  ${end}  ${state}  ${reason}=${EMPTY}
   Wait until  Test id text is  start-date-${index}  ${start}
   Test id text is  end-date-${index}  ${end}
-  Test id text is  state-link-${index}  ${state}
-  
+  Run keyword unless  '${state}' == ''  Test id text is  state-link-${index}  ${state}
+  Run keyword if  '${state}' == ''  No such test id  state-link-${index}
+  Run keyword unless  '${reason}' == ''  Test id text is  reason-${index}  ${reason}
+
 Set dates
   [Arguments]  ${start}  ${end}
   Open tab  info

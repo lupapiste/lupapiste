@@ -31,6 +31,7 @@ Teppo logs in and creates some applications
 
 Teppo navigates to application page
   Go to page  applications
+  Active search tab is  all
   Wait until  Click by test id  search-tab-all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  9
 
@@ -63,8 +64,9 @@ Teppo Logs out
   Log out
 
 Sonja logs in and navigates to application page
-  Sonja logs in
+  Sonja logs in  False
   Go to page  applications
+  Active search tab is  application
 
 Sonja selects all applications tab
   Wait until  Click by test id  search-tab-all

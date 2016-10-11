@@ -13,7 +13,7 @@
              target="_blank"
              data-bind="attr: {href: url},
                         testId: 'organization-link-' + $index()">
-            <span data-bind="text: text"></span>
+            <span class="info-link-text" data-bind="text: text"></span>
             <i class="lupicon-circle-star"
                data-bind="visible: isNew"></i>
           </a>
@@ -23,7 +23,7 @@
       <h2 data-bind="visible:showInfoTitle,
                      ltext: 'info.info.links'"></h2>
       <!-- ko if: _.size( infoLinks() ) -->
-      <div id="side-panel-info-links" 
+      <div id="side-panel-info-links"
            data-bind="foreach: infoLinks">
         <info-link params="id: $data.id, index: $index"></info-link>
       </div>

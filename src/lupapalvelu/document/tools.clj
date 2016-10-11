@@ -56,6 +56,7 @@
       :companySelector  nil
       :buildingSelector "001"
       :newBuildingSelector "1"
+      :linkPermitSelector "tunnus123"
       :hetu             "210281-9988"
       :fillMyInfoButton nil
       :foremanHistory   nil

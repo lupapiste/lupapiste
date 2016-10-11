@@ -1,4 +1,6 @@
+"extra.1" "en" "The application can be edited until it is transferred to be processed. If the application requires further editing, it must be returned for editing."
 "extra.1" "fi" "Hakemusta voi muokata, kunnes se siirretään käsittelyyn. Jos sen jälkeen hakemusta tulee vielä korjata, hakemus pitää palauttaa täydennettäväksi."
 "extra.1" "sv" "Ansökan kan ändras ända tills den överförs till behandling. Om ansökan bör ändras ännu efter det, måste ansökan returneras för komplettering."
+"extra.2" "en" "This means that the earlier cancelled  application has been returned to active status, to its pre-cancellation status."
 "extra.2" "fi" "Tämä tarkoittaa, että aikaisemmin peruutettu hakemus on palautettu aktiiviseksi peruutusta edeltävään tilaan."
 "extra.2" "sv" "Detta betyder att en tidigare återtagen ansökan är återaktiverad till läget den var före återtagandet."

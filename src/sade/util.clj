@@ -526,3 +526,22 @@
        (map name)
        (ss/join ".")
        keyword))
+
+(defn get-in-tree
+  "Gets a branch in (operation)tree by path. Tree should be represented as vectors of pairs.
+  (get-in-tree [[:n1 [[:n11 :l11] [:n12 [[:n121 :l121]]]]] [:n2 [[:n21 :l21]]] [:n3 :l3]] [:n1 :n12])
+  ; => [[:n121 :l121]]"
+  [tree path]
+  (reduce #(second (find-first (comp #{%2} first) %1)) tree path))
+
+(defn get-leafs
+  "Gets all leafs in (operation)tree. Tree should be represented as vectors of pairs.
+  (get-leafs [[:n1 [[:n11 :l11] [:n12 [[:n121 :l121]]]]] [:n2 [[:n21 :l21]]] [:n3 :l3]])
+  ; => (:l3 :l11 :l21 :l121)"
+  [tree]
+  (if (sequential? tree)
+    (loop [leafs [] t tree]
+      (if-let [children (not-empty (map second t))]
+        (recur (concat leafs (remove sequential? children)) (apply concat (filter sequential? children)))
+        leafs))
+    [tree]))

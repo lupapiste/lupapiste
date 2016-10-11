@@ -19,6 +19,7 @@ Sonja logs in and creates another application
 
 Sonja sees all her operations in the dropdown of the operations filter autocomplete component
   Go to page  applications
+  Show all applications
   Element should not be visible  xpath=//div[@data-test-id="operation-filter-item"]
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]

@@ -629,6 +629,13 @@
     (ok)
     (fail :error.unknown)))
 
+(defquery all-operations-in
+  {:description "Return all operation names in operation tree for given paths."
+   :optional-parameters [path]
+   :user-roles          #{:authority :oirAuthority :applicant}
+   :input-validators    [(partial action/string-parameters [:path])]}
+  [command]
+  (ok :operations (op/operations-in (ss/split (not-empty path) #"\."))))
 
 ;;
 ;; Change permit
