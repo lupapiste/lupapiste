@@ -293,7 +293,7 @@
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
                         :pitoPvm (util/to-local-date (get katselmus :pitoPvm))
-                        :lasnaolijat (get katselmus :lasnaOlijat "")
+                        :lasnaolijat (get katselmus :lasnaolijat "")
                         :huomautukset {:kuvaus (or (-> first-huomautus :huomautus :kuvaus)
                                                    "")}
                         :poikkeamat (get katselmus :poikkeamat "")
