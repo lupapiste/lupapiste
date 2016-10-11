@@ -50,13 +50,38 @@
                                 :Rasitetoimitus])]
                 (str "typeName=" (ss/join "," elems))))
 
-(defn get-tunnus-path
+(defmulti get-tunnus-xml-path
+  "Get path for reading xml without ns."
+  {:arglists '([permit-type search-type])}
+  (fn [permit-type & args]
+    (keyword permit-type)))
+
+(defmethod get-tunnus-xml-path :default
   [permit-type search-type]
-  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
-        tunnus-location (case search-type
-                          :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
-                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")]
-    (str prefix tunnus-location)))
+  (case search-type
+    :application-id  [:LupaTunnus :muuTunnustieto :MuuTunnus :tunnus]
+    :kuntalupatunnus [:LupaTunnus :kuntalupatunnus]))
+
+(defmethod get-tunnus-xml-path :KT
+  [permit-type search-type]
+  [:hakemustunnustieto :Hakemustunnus :tunnus])
+
+(defmulti get-tunnus-path
+  "Get url path for fetching xmls from krysp."
+  {:arglists '([permit-type search-type])}
+  (fn [permit-type & args]
+    (keyword permit-type)))
+
+(defmethod get-tunnus-path :default
+  [permit-type search-type]
+  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)]
+    (->> (map (partial str "yht") (get-tunnus-xml-path permit-type search-type))
+         (ss/join "/")
+         (str prefix))))
+
+(defmethod get-tunnus-path :KT
+  [permit-type search-type]
+  "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus")
 
 (defn- property-is-equal-to
   [property value]

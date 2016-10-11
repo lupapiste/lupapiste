@@ -19,85 +19,85 @@
 
 (facts get-lp-tunnus
   (fact "get tunnus from xml"
-    (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}]])
-        scr/strip-xml-namespaces
-        get-lp-tunnus) => "LP-123-2016-00001")
+    (->> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}]])
+         scr/strip-xml-namespaces
+         (get-lp-tunnus "R")) => "LP-123-2016-00001")
 
   (fact "get tunnus from empty xml"
-    (-> (build-multi-app-xml [])
-        scr/strip-xml-namespaces
-        get-lp-tunnus) => nil)
+    (->> (build-multi-app-xml [])
+         scr/strip-xml-namespaces
+         (get-lp-tunnus "R")) => nil)
 
   (fact "get tunnus from nil"
-    (get-lp-tunnus nil) => nil)
+    (get-lp-tunnus "R" nil) => nil)
 
   (fact "get tunnus from xml with multiple apps"
-    (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00002"}]])
-        scr/strip-xml-namespaces
-        get-lp-tunnus) => "LP-123-2016-00001"))
+    (->> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00002"}]])
+         scr/strip-xml-namespaces
+         (get-lp-tunnus "R")) => "LP-123-2016-00001"))
 
 (facts get-kuntalupatunnus
   (fact "get tunnus from xml"
-    (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}]])
-        scr/strip-xml-namespaces
-        get-kuntalupatunnus) => "XYZ-123-G")
+    (->> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}]])
+         scr/strip-xml-namespaces
+         (get-kuntalupatunnus "R")) => "XYZ-123-G")
 
   (fact "get tunnus from empty xml"
-    (-> (build-multi-app-xml [])
-        scr/strip-xml-namespaces
-        get-kuntalupatunnus) => nil)
+    (->> (build-multi-app-xml [])
+         scr/strip-xml-namespaces
+         (get-kuntalupatunnus "R")) => nil)
 
   (fact "get tunnus from nil"
-    (get-kuntalupatunnus nil) => nil)
+    (get-kuntalupatunnus "R" nil) => nil)
 
   (fact "get tunnus from xml with multiple apps"
-    (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}] [{:kuntalupatunnus "XYZ-123-F"}]])
-        scr/strip-xml-namespaces
-        get-kuntalupatunnus) => "XYZ-123-G"))
+    (->> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}] [{:kuntalupatunnus "XYZ-123-F"}]])
+         scr/strip-xml-namespaces
+         (get-kuntalupatunnus "R")) => "XYZ-123-G"))
 
 (facts not-empty-content
   (fact "content with lp-tunnus"
     (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00002"}]])
                   scr/strip-xml-namespaces)]
-      (not-empty-content xml) => xml))
+      (not-empty-content "R" xml) => xml))
 
   (fact "content with kuntalupatunnus"
     (let [xml (-> (build-multi-app-xml [[{:kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
-      (not-empty-content xml) => xml))
+      (not-empty-content "R" xml) => xml))
 
   (fact "content is empty"
     (let [xml (-> (build-multi-app-xml [])
                   scr/strip-xml-namespaces)]
-      (not-empty-content xml) => nil))
+      (not-empty-content "R" xml) => nil))
 
   (fact "content is nil"
-    (not-empty-content nil) => nil))
+    (not-empty-content "R" nil) => nil))
 
 
 (facts group-content-by
   (fact "one application xml"
     (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
-      (group-content-by get-lp-tunnus xml) => {"LP-123-2016-00001" xml}))
+      (group-content-by get-lp-tunnus "R" xml) => {"LP-123-2016-00001" xml}))
 
   (fact "one application xml - group by kuntalupatunnus"
     (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
                   scr/strip-xml-namespaces)]
-      (group-content-by get-kuntalupatunnus xml) => { "XYZ-123-G" xml}))
+      (group-content-by get-kuntalupatunnus "R" xml) => { "XYZ-123-G" xml}))
 
   (fact "one application with many xmls contents"
     (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]
                                         [{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-F"}]])
                   scr/strip-xml-namespaces)]
-      (group-content-by get-lp-tunnus xml) => {"LP-123-2016-00001" xml}))
+      (group-content-by get-lp-tunnus "R" xml) => {"LP-123-2016-00001" xml}))
 
   (fact "many applications"
     (let [xml (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]
                                         [{:lp-tunnus "LP-123-2016-00002" :kuntalupatunnus "XYZ-123-F"}]])
                   scr/strip-xml-namespaces)
           toimituksen-tiedot (sxml/select1 xml [:toimituksenTiedot])
-          result (group-content-by get-lp-tunnus xml)]
+          result (group-content-by get-lp-tunnus "R" xml)]
 
       result => map?
 
@@ -107,24 +107,29 @@
 
       (sxml/select1 (result "LP-123-2016-00002") [:toimituksenTiedot]) = toimituksen-tiedot
 
-      (get-lp-tunnus (result "LP-123-2016-00001")) => "LP-123-2016-00001"
+      (get-lp-tunnus "R" (result "LP-123-2016-00001")) => "LP-123-2016-00001"
 
-      (get-lp-tunnus (result "LP-123-2016-00002")) => "LP-123-2016-00002"
+      (get-lp-tunnus "R" (result "LP-123-2016-00002")) => "LP-123-2016-00002"
 
-      (get-kuntalupatunnus (result "LP-123-2016-00001")) => "XYZ-123-G"
+      (get-kuntalupatunnus "R" (result "LP-123-2016-00001")) => "XYZ-123-G"
 
-      (get-kuntalupatunnus (result "LP-123-2016-00002")) => "XYZ-123-F"))
+      (get-kuntalupatunnus "R" (result "LP-123-2016-00002")) => "XYZ-123-F"
+
+      result => {"LP-123-2016-00001" (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
+                                         scr/strip-xml-namespaces)
+                 "LP-123-2016-00002" (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00002" :kuntalupatunnus "XYZ-123-F"}]])
+                                         scr/strip-xml-namespaces)}))
 
   (fact "nil content"
-    (group-content-by get-lp-tunnus nil) => {})
+    (group-content-by get-lp-tunnus "R" nil) => {})
 
   (fact "empty content"
-    (group-content-by get-lp-tunnus {}) => {})
+    (group-content-by get-lp-tunnus "R" {}) => {})
 
   (fact "empty xml content"
     (->> (build-multi-app-xml [])
          scr/strip-xml-namespaces
-         (group-content-by get-lp-tunnus)) => {}))
+         (group-content-by get-lp-tunnus "R")) => {}))
 
 (facts get-application-xml-by-application-id
   (fact "application found"
@@ -135,7 +140,7 @@
         (keys result) => (just #{:tag :attrs :content}))
 
       (fact "contains lp-tunnus"
-        (get-lp-tunnus result) => "LP-123-2016-00001")
+        (get-lp-tunnus "R" result) => "LP-123-2016-00001")
 
       (fact "content"
         result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
@@ -173,7 +178,7 @@
         (keys result) => (just #{:tag :attrs :content}))
 
       (fact "contains kuntalupatunnus"
-        (get-kuntalupatunnus result) => "XYZ-123-G")
+        (get-kuntalupatunnus "R" result) => "XYZ-123-G")
 
       (fact "content"
         result =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
@@ -198,10 +203,10 @@
         (keys result) => ["LP-123-2016-00001"])
 
       (fact "contains lp-tunnus"
-        (get-lp-tunnus (result "LP-123-2016-00001")) => "LP-123-2016-00001")
+        (get-lp-tunnus "R" (result "LP-123-2016-00001")) => "LP-123-2016-00001")
 
       (fact "contains kuntalupatunnus"
-        (get-kuntalupatunnus (result "LP-123-2016-00001")) => "XYZ-123-G")
+        (get-kuntalupatunnus "R" (result "LP-123-2016-00001")) => "XYZ-123-G")
 
       (fact "content"
         (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
@@ -220,10 +225,10 @@
         (keys result) => ["XYZ-123-G"])
 
       (fact "contains lp-tunnus"
-        (get-lp-tunnus (result "XYZ-123-G")) => "LP-123-2016-00001")
+        (get-lp-tunnus "R" (result "XYZ-123-G")) => "LP-123-2016-00001")
 
       (fact "contains kuntalupatunnus"
-        (get-kuntalupatunnus (result "XYZ-123-G")) => "XYZ-123-G")
+        (get-kuntalupatunnus "R" (result "XYZ-123-G")) => "XYZ-123-G")
 
       (fact "content"
         (result "XYZ-123-G") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001" :kuntalupatunnus "XYZ-123-G"}]])
@@ -242,10 +247,10 @@
         (keys result) => (just #{"LP-123-2016-00001" "LP-123-2016-00003"} :in-any-order :gaps-ok))
 
       (fact "first xml contains lp-tunnus"
-        (get-lp-tunnus (result "LP-123-2016-00001")) => "LP-123-2016-00001")
+        (get-lp-tunnus "R" (result "LP-123-2016-00001")) => "LP-123-2016-00001")
 
       (fact "second xml contains lp-tunnus"
-        (get-lp-tunnus (result "LP-123-2016-00003")) => "LP-123-2016-00003")
+        (get-lp-tunnus "R" (result "LP-123-2016-00003")) => "LP-123-2016-00003")
 
       (fact "first xml content"
         (result "LP-123-2016-00001") =>  (-> (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}]])

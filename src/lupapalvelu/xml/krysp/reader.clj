@@ -58,8 +58,7 @@
     (cr/get-xml-with-post server options credentials raw?)))
 
 (defn kt-application-xml   [server credentials ids search-type raw?]
-  (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (application-xml common/kt-types path server credentials ids raw?)))
+  (application-xml common/kt-types (common/get-tunnus-path permit/KT search-type) server credentials ids raw?))
 
 (defmethod permit/fetch-xml-from-krysp :R    [_ & args] (apply rakval-application-xml args))
 (defmethod permit/fetch-xml-from-krysp :P    [_ & args] (apply poik-application-xml args))
