@@ -16,7 +16,8 @@ Cancelling vetuma return back to register page
   [Tags]  integration  ie8
   Go to register page
   Register button is visible
-  Cancel via vetuma
+  Click by test id  vetuma-init
+  Click by test id  cancel-button
   Wait until page contains element  register-cancel
 
 VTJ-data should be populated from Osuuspankki

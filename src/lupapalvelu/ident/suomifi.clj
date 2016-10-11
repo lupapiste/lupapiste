@@ -43,7 +43,7 @@
     (warn "SAML endpoint rejected authentication")
     (error "SAML endpoint encountered an error:" status status2 message))
   (if-let [trid (re-find #"\d+$" relay-state)]
-    (let [url (or (some-> (lupapalvelu.ident.session/get-user trid) (get-in [:paths :error])) "/")]
+    (let [url (or (some-> (lupapalvelu.ident.session/get-user trid) (get-in [:paths :cancel])) "/")]
       (response/redirect url))))
 
 (env/in-dev
@@ -63,7 +63,8 @@
                      :cancel  cancel}]
       (mongo/update :ident {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
       (core/html [:html
-                  [:head [:title "SAML Dev Login"]]
+                  [:head [:title "SAML Dev Login"]
+                         [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]]
                   [:body {:style "background-color: #ab0000; color: white; padding: 4em"}
                    [:h3 "SAML Dev Login"]
                    [:div
@@ -72,7 +73,8 @@
                       [:p "Sukunimi: " (form/text-field :lastName)]
                       [:p "Hetu: " (form/text-field :userid)]
                       [:p "TRID: " (form/text-field :stamp trid)]
-                      [:p (form/submit-button {:id "btn"} "Lähetä")])]]])))
+                      [:p (form/submit-button {:id "btn" :data-test-id "submit-button"} "Lähetä")]
+                      [:p (form/submit-button {:id "btn" :data-test-id "cancel-button" :name "cancel"} "Peru tapahtuma")])]]])))
 
   (defpage [:post "/dev/saml-login"] []
     (let [request     (request/ring-request)
@@ -81,5 +83,7 @@
           trid        (:stamp form-params)
           ident       (select-keys form-params [:firstName :lastName :userid :stamp])
           data        (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})
-          uri         (get-in data [:paths :success])]
+          uri         (if (:cancel form-params)
+                        (get-in data [:paths :cancel])
+                        (get-in data [:paths :success]))]
       (response/redirect uri))))
