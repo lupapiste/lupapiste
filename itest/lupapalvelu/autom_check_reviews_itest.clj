@@ -8,6 +8,7 @@
             [sade.xml :as sxml]
             [sade.coordinate :as coordinate]
             [sade.dummy-email-server :as dummy-email-server]
+            [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [lupapalvelu.action :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.attachment :as att]
@@ -61,7 +62,7 @@
             application-id-verdict-given-2 (:id application-verdict-given-2)
             ]
 
-        (fact "Initial state of reviews before krysp reading is sane"
+        (facts "Initial state of reviews before krysp reading is sane"
           (local-command sonja :approve-application :id application-id-verdict-given-1 :lang "fi") => ok?
           (local-command sonja :approve-application :id application-id-verdict-given-2 :lang "fi") => ok?
           (count  (:tasks (query-application local-query sonja application-id-verdict-given-1))) => 0
@@ -73,14 +74,19 @@
           ;; (give-local-verdict sonja application-id-verdict-given :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
           (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy
                 application-verdict-given-1 (query-application local-query sonja application-id-verdict-given-1) => truthy
-                application-verdict-given-2 (query-application local-query sonja application-id-verdict-given-1) => truthy]
+                application-verdict-given-2 (query-application local-query sonja application-id-verdict-given-2) => truthy]
 
-            (:state application-submitted) => "submitted"
-            (:state application-verdict-given-1) => "verdictGiven"
-            (:state application-verdict-given-2) => "verdictGiven")
+            (fact "application state - submitted"
+              (:state application-submitted) => "submitted")
+            (fact "application state - verdictGiven 1"
+              (:state application-verdict-given-1) => "verdictGiven")
+            (fact "application state - verdictGiven 2"
+              (:state application-verdict-given-2) => "verdictGiven")) => truthy
 
-          (count (:tasks application-verdict-given-1)) => 0
-          (count (:tasks application-verdict-given-2)) => 0)
+          (fact "tasks for verdictGiven 1"
+            (count (:tasks application-verdict-given-1)) => 0)
+          (fact "tasks for verdictGiven 2"
+            (count (:tasks application-verdict-given-2)) => 0))
 
         (fact "failure in fetching multiple applications causes fallback into fetching consecutively"
 
@@ -154,6 +160,111 @@
             (count (filter  (partial = "aloituskokous") review-types)) => 2
             (count (filter final-review? reviews)) => 1
             (get-in (first (filter final-review? reviews)) [:data :rakennus :0 :tila :tila]) => "lopullinen"))))))
+
+(facts "Automatic checking for reviews - application state and operation"
+  (mongo/with-db db-name
+    (mongo/remove-many :applications {})
+    (against-background [(coordinate/convert anything anything anything anything) => nil]
+      (let [application-id-submitted     (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "submitted 16"))
+            application-id-canceled      (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "canceled 17"))
+            application-id-verdict-given (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "verdict-given 18"))
+            application-id-construction  (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "construction-started 19"))
+            application-id-tj            (:id (create-and-submit-local-application pena :propertyId sipoo-property-id :address "foreman 20" :operation "tyonjohtajan-nimeaminen-v2"))
+            application-id-suunnittelija (:id (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "suunnittelija 21" :operation "suunnittelijan-nimeaminen"))]
+
+
+        (facts "Initial state of applications before krysp reading is sane"
+          (fact "cancel application"
+            (local-command pena :cancel-application :id application-id-canceled :lang "fi" :text "cancelation") => ok?)
+
+          (fact "approve verdictGiven app"   (local-command sonja :approve-application :id application-id-verdict-given :lang "fi") => ok?)
+          (fact "approve construction app"   (local-command sonja :approve-application :id application-id-construction  :lang "fi") => ok?)
+
+          (fact "add link permit for tj app" (local-command pena :add-link-permit :id application-id-tj :linkPermitId application-id-verdict-given) => ok?)
+          (fact "tj app as tj-ilmoitus"      (local-command pena  :change-permit-sub-type :id application-id-tj :permitSubtype "tyonjohtaja-hakemus") => ok?)
+          (fact "submit tj app"              (local-command pena  :submit-application :id application-id-tj) => ok?)
+          (fact "approve tj app"             (local-command sonja :approve-application :id application-id-tj :lang "fi") => ok?)
+
+          (fact "add link permit for suunnittelija app" (local-command sonja :add-link-permit :id application-id-suunnittelija :linkPermitId application-id-verdict-given) => ok?)
+          (fact "submit suunnittelija app"   (local-command sonja :submit-application :id application-id-suunnittelija) => ok?)
+
+          (fact "give verdict for verdictGiven app" (give-local-verdict sonja application-id-verdict-given :verdictId "verdict-vg" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+          (fact "give verdict for construction app" (give-local-verdict sonja application-id-construction :verdictId "verdict-cs" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+          (fact "give verdict for tj app"    (give-local-verdict sonja application-id-tj :verdictId "verdict-tj" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+
+          (fact "approve suunnittelija app"  (local-command sonja :approve-application :id application-id-suunnittelija :lang "fi") => ok?)
+          (fact "give verdict for suunnittelija app"   (give-local-verdict sonja application-id-suunnittelija :verdictId "verdict-suun" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+
+
+          (fact "give verdict for suunnittelja app"
+            (give-local-verdict sonja application-id-suunnittelija :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+
+          (fact "change construction application state to constructionStarted"
+            (local-command sonja :change-application-state :id application-id-construction :state "constructionStarted")  => ok?)
+
+          (let [application-submitted     (query-application local-query sonja application-id-submitted)     => truthy
+                application-canceled      (query-application local-query sonja application-id-canceled)      => truthy
+                application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
+                application-construction  (query-application local-query sonja application-id-construction)  => truthy
+                application-tj            (query-application local-query sonja application-id-tj)            => truthy
+                application-suunnittelija (query-application local-query sonja application-id-suunnittelija) => truthy]
+
+            (fact "submitted"
+              (:state application-submitted)     => "submitted")
+            (fact "canceled"
+              (:state application-canceled)      => "canceled")
+            (fact "verdictGiven"
+              (:state application-verdict-given) => "verdictGiven")
+            (fact "constructionStarted"
+              (:state application-construction)  => "constructionStarted")
+            (fact "tyonjohtaja"
+              (:state application-tj)            => "foremanVerdictGiven")
+            (fact "suunnittelija"
+              (:state application-suunnittelija) => "verdictGiven")) => truthy)
+
+        (fact "checking review updates states"
+
+          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+                application-submitted     (query-application local-query sonja application-id-submitted)     => truthy
+                application-canceled      (query-application local-query sonja application-id-canceled)      => truthy
+                application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
+                application-construction  (query-application local-query sonja application-id-construction)  => truthy
+                application-tj            (query-application local-query sonja application-id-tj)            => truthy
+                application-suunnittelija (query-application local-query sonja application-id-suunnittelija) => truthy]
+
+            (fact "submitted"
+              (:state application-submitted)     => "submitted")
+            (fact "canceled"
+              (:state application-canceled)      => "canceled")
+            (fact "application state is updated from verdictGive to constructionStarted"
+              (:state application-verdict-given) => "constructionStarted")
+            (fact "constructionStarted state is updated"
+              (:state application-construction)  => "inUse")
+            (fact "tj application state is not updated"
+              (:state application-tj) => "foremanVerdictGiven")
+            (fact "suunnittelija application state is not updated"
+              (:state application-suunnittelija) => "verdictGiven")) => truthy
+
+          ;; Review query is made only for applications in eligible state -> xml found for verdict given application
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+                    => (build-multi-app-xml [[{:lp-tunnus application-id-verdict-given} {:pvm "2016-06-05Z" :tila "rakennusty\u00f6t aloitettu"}]
+                                             [{:lp-tunnus application-id-construction}  {:pvm "2016-06-06Z" :tila "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu"}]])))
+
+        (fact "checking review updates states again"
+          (let [poll-result (batchrun/poll-verdicts-for-reviews)
+                application-verdict-given (query-application local-query sonja application-id-verdict-given) => truthy
+                application-construction  (query-application local-query sonja application-id-construction)  => truthy]
+
+            (fact "verdict given application state is not updated"
+              (:state application-verdict-given) => "constructionStarted")
+            (fact "constructionStarted state is not updated, since fetched state is before current state"
+              (:state application-construction)  => "inUse")) => truthy
+
+          ;; Review query is made only for applications in eligible state -> xml found for verdict given application
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given application-id-construction] :application-id anything)
+                    => (build-multi-app-xml [[{:lp-tunnus application-id-construction}  {:pvm "2016-06-07Z" :tila "rakennusty\u00f6t aloitettu"}]]))
+          ;; No result for verdict given appwhen retried with kuntalupatunnus
+          (provided (krysp-reader/rakval-application-xml anything anything ["verdict-vg"] :kuntalupatunnus anything) => nil))))))
 
 (facts "Imported review PDF generation"
   (mongo/with-db db-name

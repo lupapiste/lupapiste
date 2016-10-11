@@ -415,7 +415,9 @@
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
         apps (if (= 1 (count args))
                (mongo/select :applications {:_id (first args)})
-               (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
+               (mongo/select :applications {:state {$in eligible-application-states}
+                                            :organization {$in (keys orgs-by-id)}
+                                            :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}))
         eraajo-user (user/batchrun-user (keys orgs-by-id))
         grouped-apps (group-by :organization apps)]
     (->> (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps)
