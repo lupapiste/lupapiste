@@ -267,7 +267,7 @@
 (defn get-link-permit-apps
   "Return associated link-permit application."
   [{:keys [linkPermitData]}]
-  (when-let [links (filter (comp "lupapistetunnus" :type) linkPermitData)]
+  (when-let [links (not-empty (filter (comp #{"lupapistetunnus"} :type) linkPermitData))]
     (->> (map :id links)
          (domain/get-multiple-applications-no-access-checking))))
 
