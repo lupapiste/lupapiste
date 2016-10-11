@@ -50,6 +50,7 @@
 
 (facts "Automatic checking for reviews"
   (mongo/with-db db-name
+    (mongo/remove-many :applications {})
     (against-background [(coordinate/convert anything anything anything anything) => nil
                          ]
       (let [application-submitted          (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 17")
@@ -105,14 +106,16 @@
             (fact "application 2 state is updated"
               (:state app-2) => "constructionStarted")) => truthy
 
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] anything anything)
-                    => nil)
-          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-2] anything anything)
+          ;; Trying to fetch with multiple ids throws xml parser exception -> causes fallback into consecutive fetching
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything) =throws=> (SAXParseException. "msg" "id" "sid" 0 0))
+          ;; Fallback - no xml found for application 1 by application id or backend-id
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1] :application-id anything) => nil)
+          (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil)
+          ;; Xml found for application 2
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-2] :application-id anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                            (ss/replace #"LP-186-2014-90009" application-id-verdict-given-2)
-                           (sxml/parse-string "utf-8")))
-          (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
-                    =throws=> (SAXParseException. "msg" "id" "sid" 0 0)))
+                           (sxml/parse-string "utf-8"))))
 
         (fact "checking for reviews in correct states"
 
@@ -130,10 +133,13 @@
             (fact "application state is updated"
               (:state app) => "constructionStarted")) => truthy
 
-          (provided (krysp-reader/rakval-application-xml anything anything anything anything anything)
+          ;; Application xml found for application 1 when fetching multiple applications
+          (provided (krysp-reader/rakval-application-xml anything anything [application-id-verdict-given-1 application-id-verdict-given-2] :application-id anything)
                     => (-> (slurp "resources/krysp/dev/r-verdict-review.xml")
                            (ss/replace #"LP-186-2014-90009" application-id-verdict-given-1)
-                           (sxml/parse-string "utf-8"))))
+                           (sxml/parse-string "utf-8")))
+          ;; Fetching xml for application 2 by kuntalupatunnus returns nil
+          (provided (krysp-reader/rakval-application-xml anything anything ["2013-01"] :kuntalupatunnus anything) => nil))
 
         (fact "existing tasks are preserved"
           ;; should be seeing 1 added "aloituskokous" here compared to default verdict.xml
