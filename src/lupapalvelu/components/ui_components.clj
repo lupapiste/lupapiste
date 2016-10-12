@@ -79,7 +79,7 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages
+                 :supportedLangs        i18n/supported-langs
                  :urgencyStates         ["normal" "urgent" "pending"]
                  :calendars             (cal/ui-params)
                  :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
