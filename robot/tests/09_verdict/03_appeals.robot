@@ -24,8 +24,8 @@ Sonja fetches verdict from municipality KRYSP service
   Fetch verdict
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
-  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  No such test id  verdict-requirements-0
+  Wait test id visible  verdict-requirements-1
 
 There are no appeals yet
   Element should not be visible  jquery=table.appeals-table
