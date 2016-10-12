@@ -78,7 +78,7 @@
         (rename-keys backend-id->app-id))))
 
 (defn fetch-xmls-for-applications [organization permit-type applications]
-  (let [chunk-size 10
+  (let [chunk-size (get-in organization [:krysp (keyword permit-type) :chunk-size] 10)
         xmls-by-app-id (get-application-xmls-in-chunks organization permit-type :application-id (map :id applications) chunk-size)
         not-found-apps (remove (comp (set (keys xmls-by-app-id)) :id) applications)
         all-xmls (merge (get-application-xmls-by-backend-id organization permit-type not-found-apps chunk-size)
