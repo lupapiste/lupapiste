@@ -800,8 +800,10 @@
                                                   <!-- /ko -->
                                               </div>
                                               <!-- Muutoksenhaku -->
+                                              <!-- ko ifnot: $parentContext.$data.draft -->
                                               <div data-bind="component: {name: 'verdict-appeal',
                                                               params: {id: verdict.id, test: $parentContext.$index() + '-' +$index()}}"></div>
+                                              <!-- /ko -->
                                           </div>
                                       </div>
                                   </div>
