@@ -94,7 +94,17 @@ var attachment = (function() {
     uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(options);
+    function tryInit( counter ) {
+      if( _.get( iframe, "contentWindow.LUPAPISTE.Upload")) {
+        iframe.contentWindow.LUPAPISTE.Upload.init(options);
+      } else {
+        if( counter ) {
+          _.delay( tryInit, 100, counter-- );
+        }
+      }
+    }
+    // Keep trying for 10 seconds max (100 * 100 ms)
+    tryInit( 100 );
   }
 
   function regroupAttachmentTypeList(types) {

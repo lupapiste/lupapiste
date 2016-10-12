@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1476098781337');
+@import url('main-blessed1.css?z=1476189969644');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -4911,6 +4911,16 @@ div.search i {
 /* line 237, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.eight {
   width: 15%;
+}
+
+/* line 244, ../../../private/common-html/sass/partials/_applications_search.scss */
+.search-results-waiting i.spin {
+  font-size: 44px;
+  padding: 0;
+}
+/* line 248, ../../../private/common-html/sass/partials/_applications_search.scss */
+.search-results-waiting span {
+  padding-left: 2em;
 }
 
 /* line 2, ../../../private/common-html/sass/partials/_indicator.scss */
