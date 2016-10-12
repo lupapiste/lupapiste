@@ -360,6 +360,21 @@
 
     (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"])  => {"id1" ..xml-1.. "id2" ..xml-2..}))
 
+  (fact "get chunk size is from organization krysp config"
+    (let [organization {:krysp {:R {:fetch-chunk-size ..chunk-size..}}}
+          applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}]]
+      (fetch-xmls-for-applications organization "R" applications)) => {"id1" ..xml-1..}
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks anything "R" :application-id ["id1"] ..chunk-size..)  => {"id1" ..xml-1..})
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks anything "R" :kuntalupatunnus nil ..chunk-size..)  => nil))
+
+  (fact "default chunk size is 10"
+    (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}]]
+      (fetch-xmls-for-applications ..org.. ..permit-type.. applications)) => {"id1" ..xml-1..}
+
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id ["id1"] 10)  => {"id1" ..xml-1..})
+    (provided (#'lupapalvelu.xml.krysp.application-from-krysp/get-application-xmls-in-chunks ..org.. ..permit-type.. :kuntalupatunnus nil 10)  => nil))
+
   (fact "two apps found by backend id"
     (let [applications [{:id "id1" :verdicts [{:kuntalupatunnus "klid1"}]}
                         {:id "id2" :verdicts [{:kuntalupatunnus "klid2"}]}]]
