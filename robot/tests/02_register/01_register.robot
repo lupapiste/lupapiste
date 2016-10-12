@@ -12,7 +12,7 @@ Setup random email
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${email}  ${secs}@example.com
 
-Cancelling vetuma return back to register page
+Cancelling identification causes return back to register page
   [Tags]  integration  ie8
   Go to register page
   Register button is visible
@@ -20,16 +20,16 @@ Cancelling vetuma return back to register page
   Click by test id  cancel-button
   Wait until page contains element  register-cancel
 
-VTJ-data should be populated from Osuuspankki
+VTJ-data should be populated from identification
   [Tags]  integration  ie8
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via Osuuspankki via Vetuma  vetuma-init
+  Authenticate via dummy page
   Wait until  Submit is disabled
-  Textfield should contain  xpath=//input[@data-test-id='register-street']  Sepänkatu 11 A 5
-  Textfield should contain  xpath=//input[@data-test-id='register-zip']  70100
-  Textfield should contain  xpath=//input[@data-test-id='register-city']  KUOPIO
+  Textfield should contain  xpath=//input[@data-test-id='register-street']  Testikatu 23
+  Textfield should contain  xpath=//input[@data-test-id='register-zip']  90909
+  Textfield should contain  xpath=//input[@data-test-id='register-city']  Testikylä
 
 Filling register form2
   [Tags]  integration  ie8
@@ -68,12 +68,17 @@ Submit is disabled
   ${path} =   Set Variable  xpath=//button[@data-test-id='register-submit']
   Wait Until  Element Should Be Disabled  ${path}
 
+Authenticate via dummy page
+  Click by test id  vetuma-init
+  Wait test id visible  submit-button
+  Click by test id  submit-button
+
 Fill registration
   [Arguments]  ${street}  ${zip}  ${city}  ${phone}  ${mail}  ${password}  ${lang}=fi
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via Nordea via Vetuma
+  Authenticate via dummy page
   Wait until page contains element  xpath=//input[@data-test-id='register-personid']
   Submit is disabled
 
@@ -124,7 +129,7 @@ Activate account
   Wait Until  Page Should Contain  ${mail}
   Page Should Contain  /app/security/activate
   Click link  xpath=//a
-  User should be logged in  Nordea Demo
+  User should be logged in  Teemu Testaaja
   Confirm notification dialog
   Applications page should be open
   Number of visible applications  0

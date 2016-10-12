@@ -22,8 +22,8 @@
    :suomifi-givenname                                         :givenName
    :suomifi-sn                                                :lastName
    :suomifi-mail                                              :email
-   :suomifi-vakinainenkotimainenlahiosoites                   :streetAddress
-   :suomifi-vakinainenkotimainenlahiosoitepostinumero         :postalCode
+   :suomifi-vakinainenkotimainenlahiosoites                   :street
+   :suomifi-vakinainenkotimainenlahiosoitepostinumero         :zip
    :suomifi-vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
 
 (defpage "/from-shib/login/:trid" {trid :trid}
@@ -65,23 +65,36 @@
       (core/html [:html
                   [:head [:title "SAML Dev Login"]
                          [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]]
-                  [:body {:style "background-color: #ab0000; color: white; padding: 4em"}
+                  [:body {:style "background-color: #fbc742; padding: 4em; font-size: 14px; font-family: Courier"}
                    [:h3 "SAML Dev Login"]
                    [:div
                     (form/form-to {} [:post "/dev/saml-login"]
-                      [:p "Etunimi: " (form/text-field :firstName)]
-                      [:p "Sukunimi: " (form/text-field :lastName)]
-                      [:p "Hetu: " (form/text-field :userid)]
-                      [:p "TRID: " (form/text-field :stamp trid)]
-                      [:p (form/submit-button {:id "btn" :data-test-id "submit-button"} "Lähetä")]
-                      [:p (form/submit-button {:id "btn" :data-test-id "cancel-button" :name "cancel"} "Peru tapahtuma")])]]])))
+                      [:table
+                       [:tr [:td "Etunimi: "]
+                            [:td (form/text-field :firstName "Teemu")]]
+                       [:tr [:td "Kutsumanimi: "]
+                            [:td (form/text-field :givenName "Teemu")]]
+                       [:tr [:td "Sukunimi: "]
+                            [:td (form/text-field :lastName "Testaaja")]]
+                       [:tr [:td "Hetu: "]
+                            [:td (form/text-field :userid "010101-123N")]]
+                       [:tr [:td "Katuosoite: "
+                            [:td (form/text-field :street "Testikatu 23")]]]
+                       [:tr [:td "Postinumero: "]
+                            [:td (form/text-field :zip "90909")]]
+                       [:tr [:td "Kaupunki: "]
+                            [:td (form/text-field :city "Testikylä")]]
+                       [:tr [:td "TRID: "]
+                            [:td (form/text-field :stamp trid)]]
+                       [:tr [:td {:colspan 2} (form/submit-button {:id "btn" :data-test-id "submit-button"} "Lähetä")]]
+                       [:tr [:td {:colspan 2} (form/submit-button {:id "btn" :data-test-id "cancel-button" :name "cancel"} "Peru tapahtuma")]]])]]])))
 
   (defpage [:post "/dev/saml-login"] []
     (let [request     (request/ring-request)
           form-params (util/map-keys keyword (:form-params request))
           session     (:session request)
           trid        (:stamp form-params)
-          ident       (select-keys form-params [:firstName :lastName :userid :stamp])
+          ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])
           data        (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})
           uri         (if (:cancel form-params)
                         (get-in data [:paths :cancel])
