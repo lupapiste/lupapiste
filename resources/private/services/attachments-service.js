@@ -49,6 +49,7 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
   function clearData() {
+    disposeItems( self.attachments );
     self.attachments([]);
     forceVisibleIds([]);
     self.filters([]);
@@ -118,7 +119,14 @@ LUPAPISTE.AttachmentsService = function() {
     return attachmentObs;
   }
 
+  function disposeItems( models ) {
+    _.each( ko.unwrap(models), function( m ) {
+      ko.unwrap( m ).dispose();
+    });
+  }
+
   self.setAttachments = function(attachments) {
+    disposeItems( self.attachments );
     initAuthModels(attachments);
     refreshAllAuthModels();
     self.attachments(_.map(attachments, buildAttachmentModel));
@@ -227,9 +235,9 @@ LUPAPISTE.AttachmentsService = function() {
     var params = {id: self.applicationId(), attachmentId: attachmentId};
     ajax.command("delete-attachment", params)
       .success(function(res) {
-        self.attachments.remove(function(attachment) {
+        disposeItems( self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
-        });
+        }));
         self.authModel.refresh({id: self.applicationId()});
         queryTagGroupsAndFilters();
         sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
