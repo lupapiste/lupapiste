@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Setting pre verdict attachment as contruction time attachment
+Suite Setup    Apply minimal fixture now
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
