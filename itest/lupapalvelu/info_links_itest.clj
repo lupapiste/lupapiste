@@ -181,7 +181,7 @@
         (fact "Authorities can see the application info links in draft state"
               (query sonja :info-links :id app-id) => ok?
               (query luukas :info-links :id app-id) => ok?)
-                (facts "Statement giver"
+        (facts "Statement giver"
                (fact "Submit application"
                      (command pena :submit-application :id app-id) => ok?)
                (fact "Invite statement giver"
@@ -197,7 +197,27 @@
                (fact "Mark seen"
                      (command teppo :mark-seen-organization-links :id app-id) => ok?
                      (->> (query teppo :organization-links :id app-id :lang "fi")
-                          :links (map :isNew))=> '(false false false))))
+                          :links (map :isNew))=> '(false false false)))
+        (facts "Organization link urls must be valid"
+               (fact "Add link"
+                     (command sipoo :add-organization-link
+                              :url (assoc lupapiste-url
+                                          :fi "not-a-valid-url")
+                              :name lupapiste-name)
+                     => {:ok false, :text "error.invalid.url"})
+               (fact "Update link"
+                     (command sipoo :update-organization-link
+                              :url (assoc lupapiste-url
+                                          :sv "not-a-valid-url")
+                              :name lupapiste-name
+                              :index 0)
+                     => {:ok false, :text "error.invalid.url"})
+               (fact "Remove link"
+                     (command sipoo :remove-organization-link
+                              :url (assoc lupapiste-url
+                                          :fi "not-a-valid-url")
+                              :name lupapiste-name)
+                     => {:ok false, :text "error.invalid.url"})))
       (fact "Organization without links"
             (let [app-id (create-app-id veikko
                                         :propertyId tampere-property-id
