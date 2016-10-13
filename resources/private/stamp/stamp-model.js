@@ -24,14 +24,15 @@ LUPAPISTE.StampModel = function(params) {
       return version.stamped;
     })).last();
 
+    var stamped = _.get( a, "latestVersion.stamped");
     a.contentType = selected.contentType;
     a.filename = selected.filename;
     a.version = {major: selected.version.major, minor: selected.version.minor};
     a.size = selected.size;
-    a.selected = ko.observable(a.forPrinting && !a.stamped);
+    a.selected = ko.observable(a.forPrinting && !stamped);
     a.status = ko.observable("");
-    a.restamp = _(a.versions).last().stamped;
-    a.stamped = ko.observable(a.stamped);
+    a.restamp = stamped;
+    a.stamped = ko.observable(stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
     return a;
   }
