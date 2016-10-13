@@ -292,7 +292,7 @@
                                                          {:krysp.YI.url {$exists true}}
                                                          {:krysp.YL.url {$exists true}}]}
                                                    {:krysp 1})
-        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
+        orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
         eraajo-user (user/batchrun-user org-ids)]
@@ -300,7 +300,7 @@
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
           (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
-            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+            (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
                 (if-not (s/blank? url)
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
@@ -411,7 +411,7 @@
        (apply merge)))
 
 (defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
+  (let [orgs-by-id (util/key-by :id (orgs-for-review-fetch))
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
         apps (if (= 1 (count args))
                (mongo/select :applications {:_id (first args)})
