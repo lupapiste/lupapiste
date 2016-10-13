@@ -366,7 +366,8 @@ LUPAPISTE.AttachmentsService = function() {
     return util.getIn(attachment, ["state"]) === self.APPROVED;
   };
   self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED;
+    return util.getIn(attachment, ["state"]) === self.REJECTED
+      && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
@@ -377,16 +378,21 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // returns a function for use in computed
-  // If all of the attachments are approved -> approved
+  // If some of the attachments are approved and the rest not needed -> approved
   // If some of the attachments are rejected -> rejected
   // Else null
   self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      if (_.every(_.map(attachmentIds, getUnwrappedAttachmentById),
-                  self.isApproved)) {
+      var unwrappedAttachments = _.map(attachmentIds,
+                                       getUnwrappedAttachmentById);
+      if (_.some( unwrappedAttachments, self.isApproved)
+          && _.every(unwrappedAttachments,
+                     function( a ) {
+                       return self.isApproved( a ) || self.isNotNeeded( a );
+                     })) {
         return self.APPROVED;
       } else {
-        return _.some(_.map(attachmentIds, getUnwrappedAttachmentById),
+        return _.some(unwrappedAttachments,
                       self.isRejected) ? self.REJECTED : null;
       }
     };
