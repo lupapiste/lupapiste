@@ -17,7 +17,7 @@
                  [bultitude "0.2.8"] ; noir requires 0.2.0
 
                  ; MongoDB driver
-                 [com.novemberain/monger "3.0.2"]
+                 [com.novemberain/monger "3.1.0"]
 
                  ; Logging
                  [com.taoensso/timbre "4.6.0"]
