@@ -464,7 +464,10 @@
       (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey"))
+
+    ;; TODO validate against schema!
+    )
 
   true)
 
