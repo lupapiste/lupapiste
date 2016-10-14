@@ -36,6 +36,9 @@ Pena chooses building 2, no merge
   No other input  ${doctype1}
   Company name is  ${doctype1}  New company name
 
+Pena chooses empty selection, no dialog
+  Clear building selection  ${doctype1}
+
 Pena chooses Other building
   Select other building  ${doctype1}
   Other input is  ${doctype1}  ${EMPTY}
@@ -78,8 +81,15 @@ No building selected
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
   Scroll to  ${selector}
   Wait until  List selection should be  jquery=${selector}  - Valitse -
-  
 
+Clear building selection
+  [Arguments]  ${doctype}
+  ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
+  Scroll to  ${selector}
+  Wait until  Select from list  jquery=${selector}  ${EMPTY}
+  No building selected  ${doctype}
+  Element should not be visible  dynamic-yes-no-confirm-dialog
+  
 Select other building
   [Arguments]  ${doctype}
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
