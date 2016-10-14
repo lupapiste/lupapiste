@@ -464,7 +464,12 @@
       (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey"))
+
+    (when-not (:language user-data)
+      (fail! :error.missing.user.language))
+    ;; TODO validate against schema!
+    )
 
   true)
 

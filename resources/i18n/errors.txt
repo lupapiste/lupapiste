@@ -773,3 +773,6 @@
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" ""
 "file_not_linked_to_the_document" "en" ""
+"error.missing.language" "fi" "Käyttäjän kielivalinta puuttuu"
+"error.missing.language" "sv" ""
+"error.missing.language" "en" "User language is missing"
