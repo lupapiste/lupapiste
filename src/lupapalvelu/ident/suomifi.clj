@@ -77,7 +77,9 @@
                        [:tr [:td "Sukunimi: "]
                             [:td (form/text-field :lastName "Testaaja")]]
                        [:tr [:td "Hetu: "]
-                            [:td (form/text-field :userid "010101-123N")]]
+                            [:td [:input {:name "userid"
+                                          :data-test-id "dummy-login-userid"
+                                          :value "010101-123N"}]]]
                        [:tr [:td "Katuosoite: "
                             [:td (form/text-field :street "Testikatu 23")]]]
                        [:tr [:td "Postinumero: "]

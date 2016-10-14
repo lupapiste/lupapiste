@@ -3,7 +3,6 @@
 Documentation   Mikko registers
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Test Cases ***
 
@@ -20,7 +19,7 @@ Cancelling identification causes return back to register page
   Click by test id  cancel-button
   Wait until page contains element  register-cancel
 
-VTJ-data should be populated from identification
+VTJ-data for Teemu should be populated from identification
   [Tags]  integration  ie8
   Go to login page
   Go to register page
@@ -40,7 +39,7 @@ Can not login before activation
   Go to login page
   Login fails  ${email}  vetuma69
 
-Vetuma-guy activates his account
+Teemu activates his account
   [Tags]  integration  ie8
   Activate account  ${email}
   [Teardown]  Logout

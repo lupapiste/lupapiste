@@ -3,24 +3,23 @@
 Documentation   Identity federation
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
 
 *** Test Cases ***
 
 Setup random email
-  [Tags]  integration  ie8
+  [Tags]  ie8
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${email}  ${secs}@example.com
 
 Send mock identity to server
-  [Tags]  integration  ie8
+  [Tags]  ie8
   Go to  ${SERVER}/dev-pages/idf.html
   Execute Javascript  $("input[name='email']").val("${email}").change();
   Wait until  Page should contain  READY
   Click element  submit
 
 Got email
-  [Tags]  integration  ie8
+  [Tags]  ie8
   Open last email
   Wait Until  Page Should Contain  ${email}
   Page Should Contain  /app/fi/welcome#!/link-account
@@ -28,8 +27,8 @@ Got email
   Click link  xpath=//a
   Register button is visible
 
-Federated user activates account via VETUMA
-  [Tags]  integration  ie8
+Federated user activates account
+  [Tags]  ie8
   Authenticate via dummy page
   Wait until  Submit is disabled
   Wait until  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Testikatu 23
