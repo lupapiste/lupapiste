@@ -326,17 +326,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.addHubListener( "add-attachment-file", addAttachmentFile );
 
-  function onUploadDone( params) {
-    var id = _.get( params, "attachmentId");
-    if( id ) {
-      self.service.queryOne( id, {attachmentUploaded: id} );
-    } else {
-      self.service.queryAll();
-    }
-  }
-
-  self.addHubListener("upload-done", onUploadDone);
-
   // After attachment query
   function afterQuery( params ) {
     var id = _.get( params, "attachmentUploaded");

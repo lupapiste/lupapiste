@@ -158,22 +158,21 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
 
-  function queryTagGroupsAndFilters() {
+  self.queryTagGroupsAndFilters = function() {
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
-  }
+  };
 
   self.queryAll = function() {
     forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);
-    queryTagGroupsAndFilters();
+    self.queryTagGroupsAndFilters();
   };
 
   // hubParams are attached to the hub send event for attachment query.
   self.queryOne = function(attachmentId, hubParams) {
     (_.get(ko.unwrap(self.getAttachment(attachmentId)), "processing", _.noop))(true);
     queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
-    queryTagGroupsAndFilters();
   };
 
   self.getAttachment = function(attachmentId) {
@@ -239,7 +238,7 @@ LUPAPISTE.AttachmentsService = function() {
           return attachment().id === attachmentId;
         }));
         self.authModel.refresh({id: self.applicationId()});
-        queryTagGroupsAndFilters();
+        self.queryTagGroupsAndFilters();
         sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
       })
       .error(_.partial(sendHubNotification, "remove", "delete-attachment", _.merge(params, hubParams)))
@@ -249,8 +248,12 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   hub.subscribe("upload-done", function(data) {
-    self.queryOne(data.attachmentId);
-    self.authModel.refresh({id: self.applicationId()});
+    if (data.attachmentId) {
+      self.queryOne(data.attachmentId);
+      self.queryTagGroupsAndFilters();
+    } else {
+      self.queryAll();
+    }
   });
 
   self.copyUserAttachments = function(hubParams) {

@@ -59,7 +59,10 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   function addSelfUpdateListener(fieldName) {
     var event = {eventType: "update", ok: true, field: fieldName, attachmentId: self.id};
-    self.addEventListener(service.serviceName, event, _.ary(_.partial(service.queryOne, self.id), 0));
+    self.addEventListener(service.serviceName, event, function() {
+      service.queryOne(self.id);
+      service.queryTagGroupsAndFilters();
+    });
   }
 
   self.disposedSubscribe(self.notNeeded, function(val) {
