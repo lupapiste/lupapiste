@@ -184,7 +184,7 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
-                      (partial validate-map-with-optional-url-values [:url])]}
+                      (partial validate-map-with-optional-url-values :url)]}
   [{user :user created :created}]
   (org/add-organization-link (usr/authority-admins-organization-id user)
                              name url created)
@@ -196,7 +196,7 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
-                      (partial validate-map-with-optional-url-values [:url])
+                      (partial validate-map-with-optional-url-values :url)
                       (partial number-parameters [:index])]}
   [{user :user created :created}]
   (org/update-organization-link (usr/authority-admins-organization-id user)
@@ -208,7 +208,7 @@
    :parameters [url name]
    :input-validators [(partial map-parameters-with-required-keys
                                [:url :name] i18n/supported-langs)
-                      (partial validate-map-with-optional-url-values [:url])]
+                      (partial validate-map-with-optional-url-values :url)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (org/remove-organization-link (usr/authority-admins-organization-id user)

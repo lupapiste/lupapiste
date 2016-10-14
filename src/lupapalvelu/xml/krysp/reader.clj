@@ -14,8 +14,19 @@
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]))
 
-(defn- post-body-for-ya-application [id id-path]
-  {:body (str "<wfs:GetFeature service=\"WFS\"
+(defn- post-body-for-ya-application [ids id-path]
+  (let [equal-tos (map (partial format
+                                (str "\n  <ogc:PropertyIsEqualTo>\n"
+                                     "    <ogc:PropertyName>%s</ogc:PropertyName>\n"
+                                     "    <ogc:Literal>%s</ogc:Literal>\n"
+                                     "  </ogc:PropertyIsEqualTo>\n")
+                                id-path)
+                       ids)
+        filter-content (if (> (count equal-tos) 1)
+                         (ss/wrap-with-tag "ogc:Or" (apply str equal-tos))
+                         (first equal-tos))]
+
+    {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
         outputFormat=\"GML2\"
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
@@ -23,14 +34,11 @@
         xmlns:ogc=\"http://www.opengis.net/ogc\"
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
-          <ogc:Filter>
-            <ogc:PropertyIsEqualTo>
-                       <ogc:PropertyName>" id-path "</ogc:PropertyName>
-                       <ogc:Literal>" id "</ogc:Literal>
-            </ogc:PropertyIsEqualTo>
-          </ogc:Filter>
+          <ogc:Filter>"
+                filter-content
+                "</ogc:Filter>
          </wfs:Query>
-       </wfs:GetFeature>")})
+       </wfs:GetFeature>")}))
 
 (defn- application-xml [type-name id-path server credentials ids raw?]
   (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]

@@ -49,6 +49,7 @@ LUPAPISTE.AttachmentsService = function() {
   });
 
   function clearData() {
+    disposeItems( self.attachments );
     self.attachments([]);
     forceVisibleIds([]);
     self.filters([]);
@@ -118,7 +119,14 @@ LUPAPISTE.AttachmentsService = function() {
     return attachmentObs;
   }
 
+  function disposeItems( models ) {
+    _.each( ko.unwrap(models), function( m ) {
+      ko.unwrap( m ).dispose();
+    });
+  }
+
   self.setAttachments = function(attachments) {
+    disposeItems( self.attachments );
     initAuthModels(attachments);
     refreshAllAuthModels();
     self.attachments(_.map(attachments, buildAttachmentModel));
@@ -150,22 +158,21 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
 
-  function queryTagGroupsAndFilters() {
+  self.queryTagGroupsAndFilters = function() {
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
-  }
+  };
 
   self.queryAll = function() {
     forceVisibleIds([]);
     queryData("attachments", "attachments", self.setAttachments);
-    queryTagGroupsAndFilters();
+    self.queryTagGroupsAndFilters();
   };
 
   // hubParams are attached to the hub send event for attachment query.
   self.queryOne = function(attachmentId, hubParams) {
     (_.get(ko.unwrap(self.getAttachment(attachmentId)), "processing", _.noop))(true);
     queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
-    queryTagGroupsAndFilters();
   };
 
   self.getAttachment = function(attachmentId) {
@@ -227,11 +234,11 @@ LUPAPISTE.AttachmentsService = function() {
     var params = {id: self.applicationId(), attachmentId: attachmentId};
     ajax.command("delete-attachment", params)
       .success(function(res) {
-        self.attachments.remove(function(attachment) {
+        disposeItems( self.attachments.remove(function(attachment) {
           return attachment().id === attachmentId;
-        });
+        }));
         self.authModel.refresh({id: self.applicationId()});
-        queryTagGroupsAndFilters();
+        self.queryTagGroupsAndFilters();
         sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
       })
       .error(_.partial(sendHubNotification, "remove", "delete-attachment", _.merge(params, hubParams)))
@@ -241,8 +248,12 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   hub.subscribe("upload-done", function(data) {
-    self.queryOne(data.attachmentId);
-    self.authModel.refresh({id: self.applicationId()});
+    if (data.attachmentId) {
+      self.queryOne(data.attachmentId);
+      self.queryTagGroupsAndFilters();
+    } else {
+      self.queryAll();
+    }
   });
 
   self.copyUserAttachments = function(hubParams) {
@@ -272,6 +283,7 @@ LUPAPISTE.AttachmentsService = function() {
       .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
       .error(function(response) {
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
+        error("Unable to update attachment: " , _.assign({commandName: commandName, commandParams: commandParams}, response));
         notify.ajaxError(response);
       })
       .call();
@@ -358,7 +370,8 @@ LUPAPISTE.AttachmentsService = function() {
     return util.getIn(attachment, ["state"]) === self.APPROVED;
   };
   self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED;
+    return util.getIn(attachment, ["state"]) === self.REJECTED
+      && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
@@ -369,16 +382,21 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   // returns a function for use in computed
-  // If all of the attachments are approved -> approved
+  // If some of the attachments are approved and the rest not needed -> approved
   // If some of the attachments are rejected -> rejected
   // Else null
   self.attachmentsStatus = function(attachmentIds) {
     return function() {
-      if (_.every(_.map(attachmentIds, getUnwrappedAttachmentById),
-                  self.isApproved)) {
+      var unwrappedAttachments = _.map(attachmentIds,
+                                       getUnwrappedAttachmentById);
+      if (_.some( unwrappedAttachments, self.isApproved)
+          && _.every(unwrappedAttachments,
+                     function( a ) {
+                       return self.isApproved( a ) || self.isNotNeeded( a );
+                     })) {
         return self.APPROVED;
       } else {
-        return _.some(_.map(attachmentIds, getUnwrappedAttachmentById),
+        return _.some(unwrappedAttachments,
                       self.isRejected) ? self.REJECTED : null;
       }
     };

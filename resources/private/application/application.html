@@ -411,12 +411,10 @@
                     </div>
 
                     <!-- Attachments tab -->
-                    <!-- ko if: selectedTabName() === 'attachments' -->
-                    <div id="application-attachments-tab" class="tab-content">
+                    <div id="application-attachments-tab" class="tab-content"
+                         data-bind="visible: selectedTabName() === 'attachments'">
                       <attachments-listing/>
                     </div>
-                    <!-- /ko -->
-
 
                     <!-- Required field summary tab -->
 

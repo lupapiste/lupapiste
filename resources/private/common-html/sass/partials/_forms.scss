@@ -335,7 +335,7 @@ input.form-input.inline {
   }
   .form-label-checkbox{
     vertical-align: middle;
-    width: 262px;
+    width: auto !important;
     margin-right: 4px;
   }
   .form-label-group, .form-label-table {

@@ -33,15 +33,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
-  // Todo: for some reason this computed is needed in order to open
-  // the rollups initially?
-  self.disposedComputed(function() {
-    var id = self.service.applicationId(); // create dependency
-    if (id) {
-      self.service.queryAll();
-    }
-  });
-
   //
   // Attachment hierarchy
   //
@@ -335,21 +326,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.addHubListener( "add-attachment-file", addAttachmentFile );
 
-  function onUploadDone( params) {
-    var id = _.get( params, "attachmentId");
-    if( id ) {
-      self.service.queryOne( id, {attachmentUploaded: id} );
-    } else {
-      self.service.queryAll();
-    }
-  }
-
-  self.addHubListener("upload-done", onUploadDone);
-
   // After attachment query
   function afterQuery( params ) {
     var id = _.get( params, "attachmentUploaded");
-    if( id ) {
+    if( id && pageutil.lastSubPage() === "attachments" ) {
       pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
     }
   }
