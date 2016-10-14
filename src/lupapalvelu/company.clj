@@ -277,17 +277,18 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (usr/create-new-user nil {:email       (:email user)
-                            :username    (:email user)
-                            :firstName   (:firstName user)
-                            :lastName    (:lastName user)
-                            :language    (or (:language user) "fi")
-                            :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
-                            :personId    (:personId user)
-                            :password    password
-                            :role        :applicant
-                            :architect   true
-                            :enabled     true}
+  (usr/create-new-user nil (util/assoc-when
+                             {:email       (:email user)
+                              :username    (:email user)
+                              :firstName   (:firstName user)
+                              :lastName    (:lastName user)
+                              :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
+                              :personId    (:personId user)
+                              :password    password
+                              :role        :applicant
+                              :architect   true
+                              :enabled     true}
+                             :language    (:language user))
     :send-email false)
   (ok))
 
