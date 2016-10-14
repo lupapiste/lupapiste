@@ -379,7 +379,16 @@
 (defn- save-reviews-for-application [user created application app-xml]
   (try
     (when (and application app-xml)
-      (verdict/save-reviews-from-xml user created application app-xml))
+      (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+        (let [{:keys [review-count updated-tasks validation-errors] :as result} (verdict/save-reviews-from-xml user created application app-xml)]
+          (cond
+            (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "Reviews found"
+                                                                             :updated-tasks updated-tasks})
+            (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
+                                                                              :event "Failed to read reviews"
+                                                                              :validation-errors validation-errors}))
+          result)))
     (catch Throwable t
       (errorf "error.integration - Could not save reviews for %s" (:id application)))))
 

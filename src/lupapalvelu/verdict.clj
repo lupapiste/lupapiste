@@ -549,13 +549,11 @@
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
-      (do
-        (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
-        (fail :error.invalid-task-type))
+      (fail :error.invalid-task-type :validation-errors validation-errors)
       (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates state-updates))
             updated-application (domain/get-application-no-access-checking (:id application))]
         (doseq [added-task added-tasks-with-updated-buildings]
           (tasks/generate-task-pdfa
            updated-application
            added-task user "fi"))
-        (ok)))))
+        (ok :review-count (count reviews) :updated-tasks (map :id updated-tasks))))))
