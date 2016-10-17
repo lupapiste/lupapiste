@@ -557,6 +557,6 @@
 
 (defn save-review-updates [user application updates added-tasks-with-updated-buildings]
   (let [update-result (update-application (application->command application) updates)
-        updated-application (domain/get-application-no-access-checking (:id application))]
+        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (doseq [added-task added-tasks-with-updated-buildings]
       (tasks/generate-task-pdfa updated-application added-task user "fi"))))

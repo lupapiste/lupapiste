@@ -6,6 +6,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -429,7 +430,16 @@
   (let [eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})]
     (mongo/select :applications {:state {$in eligible-application-states}
                                  :organization organization-id
-                                 :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}})))
+                                 :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
+                  (merge app/timestamp-key
+                         {:state true
+                          :permitType true
+                          :permitSubtype true
+                          :organization true
+                          :primaryOperation true
+                          :tasks true
+                          :verdicts true
+                          :history true}))))
 
 (defn- fetch-review-updates-for-organization
   [eraajo-user created applications {org-krysp :krysp :as organization}]
