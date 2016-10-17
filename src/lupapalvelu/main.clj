@@ -11,7 +11,8 @@
                "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
                "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
                "check-reviews"              'lupapalvelu.batchrun/check-for-reviews
-               "check-review-for-id"        'lupapalvelu.batchrun/check-review-for-id
+               "check-reviews-for-orgs"     'lupapalvelu.batchrun/check-reviews-for-orgs
+               "check-reviews-for-ids"      'lupapalvelu.batchrun/check-reviews-for-ids
                "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
                "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants
                "pdfa-convert-review-pdfs"   'lupapalvelu.batchrun/pdfa-convert-review-pdfs
