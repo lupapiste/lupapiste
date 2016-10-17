@@ -18,6 +18,7 @@
             [lupapalvelu.tasks :refer [task-is-review?]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.integrations-api]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.fixture.core :as fixture]
@@ -30,8 +31,6 @@
            [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
-
-(testable-privates lupapalvelu.verdict save-reviews-from-xml)
 
 (mongo/connect!)
 (mongo/with-db db-name
@@ -268,12 +267,16 @@
 
 (facts "Imported review PDF generation"
   (mongo/with-db db-name
-    (let [parsed-xml (sxml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
+    (let [parsed-xml     (sxml/parse-string (slurp "resources/krysp/dev/r-verdict-review.xml") "utf-8")
           application    (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Katselmuskuja 18")
           application-id (:id application)
-          batchrun-user (usr/batchrun-user (map :id (batchrun/orgs-for-review-fetch)))]
-      (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?
-      (save-reviews-from-xml batchrun-user (now) application parsed-xml) ;; => ok?
+          batchrun-user  (usr/batchrun-user (map :id (batchrun/orgs-for-review-fetch)))
+          read-result    (verdict/read-reviews-from-xml batchrun-user (now) application parsed-xml)]
+      (fact "give verdict"
+        (give-local-verdict sonja (:id application) :verdictId "aaa" :status 42 :name "Paatoksen antaja" :given 123 :official 124) => ok?)
+      (fact "read verdict"
+        read-result => ok?)
+      (verdict/save-review-updates batchrun-user application (:updates read-result) (:added-tasks-with-updated-buildings read-result))
       (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
             last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)

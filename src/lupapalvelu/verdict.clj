@@ -512,7 +512,7 @@
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
 
-(defn save-reviews-from-xml
+(defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
@@ -550,10 +550,13 @@
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
       (fail :error.invalid-task-type :validation-errors validation-errors)
-      (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates state-updates))
-            updated-application (domain/get-application-no-access-checking (:id application))]
-        (doseq [added-task added-tasks-with-updated-buildings]
-          (tasks/generate-task-pdfa
-           updated-application
-           added-task user "fi"))
-        (ok :review-count (count reviews) :updated-tasks (map :id updated-tasks))))))
+      (ok :review-count (count reviews)
+          :updated-tasks (map :id updated-tasks)
+          :updates (util/deep-merge task-updates building-updates state-updates)
+          :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
+
+(defn save-review-updates [user application updates added-tasks-with-updated-buildings]
+  (let [update-result (update-application (application->command application) updates)
+        updated-application (domain/get-application-no-access-checking (:id application))]
+    (doseq [added-task added-tasks-with-updated-buildings]
+      (tasks/generate-task-pdfa updated-application added-task user "fi"))))
