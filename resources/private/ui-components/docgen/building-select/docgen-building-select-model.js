@@ -46,7 +46,7 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
   }
 
   self.disposedSubscribe( self.value, function( value) {
-    if( value !== OTHER) {
+    if( value && value !== OTHER) {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("overwrite.confirm"),
         loc("application.building.merge"),

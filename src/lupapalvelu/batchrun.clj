@@ -6,6 +6,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -371,17 +372,37 @@
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
-(defn orgs-for-review-fetch []
-  (organization/get-organizations {:krysp.R.url {$exists true},
-                                   :krysp.R.version {$gte "2.1.5"}}
+(defn orgs-for-review-fetch [& organization-ids]
+  (organization/get-organizations (merge {:krysp.R.url {$exists true},
+                                          :krysp.R.version {$gte "2.1.5"}}
+                                         (when (seq organization-ids) {:_id {$in organization-ids}}))
                                   {:krysp 1}))
 
-(defn- save-reviews-for-application [user created application app-xml]
+(defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings] :as result}]
+  (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+    (when (ok? result)
+      (try
+        (verdict/save-review-updates user application updates added-tasks-with-updated-buildings)
+        (catch Throwable t
+          (logging/log-event :error {:run-by "Automatic review checking"
+                                     :event "Failed to save"
+                                     :exception-message (.getMessage t)}))))))
+
+(defn- read-reviews-for-application [user created application app-xml]
   (try
     (when (and application app-xml)
-      (verdict/save-reviews-from-xml user created application app-xml))
+      (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+        (let [{:keys [review-count updated-tasks validation-errors] :as result} (verdict/read-reviews-from-xml user created application app-xml)]
+          (cond
+            (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "Reviews found"
+                                                                             :updated-tasks updated-tasks})
+            (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
+                                                                              :event "Failed to read reviews"
+                                                                              :validation-errors validation-errors}))
+          result)))
     (catch Throwable t
-      (errorf "error.integration - Could not save reviews for %s" (:id application)))))
+      (errorf "error.integration - Could not read reviews for %s" (:id application)))))
 
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
@@ -404,34 +425,52 @@
       (catch Throwable t
         (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
 
-(defn- fetch-reviews-for-organization [eraajo-user {org-krysp :krysp :as organization} applications]
-  (->> (group-by :permitType applications)
-       (remove (fn-> key keyword org-krysp :url s/blank?))
-       (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
-       (apply merge)))
+(defn- organization-applications-for-review-fetching
+  [organization-id]
+  (let [eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})]
+    (mongo/select :applications {:state {$in eligible-application-states}
+                                 :organization organization-id
+                                 :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
+                  (merge app/timestamp-key
+                         {:state true
+                          :permitType true
+                          :permitSubtype true
+                          :organization true
+                          :primaryOperation true
+                          :tasks true
+                          :verdicts true
+                          :history true}))))
 
-(defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (util/key-by :id (orgs-for-review-fetch))
-        eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
-        apps (if (= 1 (count args))
-               (mongo/select :applications {:_id (first args)})
-               (mongo/select :applications {:state {$in eligible-application-states}
-                                            :organization {$in (keys orgs-by-id)}
-                                            :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}))
-        eraajo-user (user/batchrun-user (keys orgs-by-id))
-        grouped-apps (group-by :organization apps)]
-    (->> (pmap #(fetch-reviews-for-organization eraajo-user (orgs-by-id (key %)) (val %)) grouped-apps)
+(defn- fetch-review-updates-for-organization
+  [eraajo-user created applications {org-krysp :krysp :as organization}]
+  (let [applications (or applications (organization-applications-for-review-fetching (:id organization)))]
+    (->> (group-by :permitType applications)
+         (remove (fn-> key keyword org-krysp :url s/blank?))
+         (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
+         (util/map-keys #(util/find-by-id % applications))
+         (map (fn [[app app-xml]] [app (verdict/read-reviews-from-xml eraajo-user created app app-xml)]))
+         (into {}))))
+
+(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
+  (let [applications (when (seq application-ids)
+                       (mongo/select :applications {:_id {$in application-ids}}))
+        organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
+        eraajo-user (user/batchrun-user (map :id organizations))]
+    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications) organizations)
          (apply merge)
-         (util/map-keys #(util/find-by-id % apps))
-         (run! (partial apply save-reviews-for-application eraajo-user (now))))))
+         (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
   (mongo/connect!)
   (poll-verdicts-for-reviews))
 
-(defn check-review-for-id [& args]
+(defn check-reviews-for-orgs [& args]
   (mongo/connect!)
-  (poll-verdicts-for-reviews (first args)))
+  (poll-verdicts-for-reviews :organization-ids args))
+
+(defn check-reviews-for-ids [& args]
+  (mongo/connect!)
+  (poll-verdicts-for-reviews :application-ids args))
 
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)

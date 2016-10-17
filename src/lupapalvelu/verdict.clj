@@ -512,7 +512,7 @@
       (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
                                                        (:id application) current-state (name new-state)))))
 
-(defn save-reviews-from-xml
+(defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
   [user created application app-xml]
@@ -549,13 +549,14 @@
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
-      (do
-        (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
-        (fail :error.invalid-task-type))
-      (let [update-result (update-application (application->command application) (util/deep-merge task-updates building-updates state-updates))
-            updated-application (domain/get-application-no-access-checking (:id application))]
-        (doseq [added-task added-tasks-with-updated-buildings]
-          (tasks/generate-task-pdfa
-           updated-application
-           added-task user "fi"))
-        (ok)))))
+      (fail :error.invalid-task-type :validation-errors validation-errors)
+      (ok :review-count (count reviews)
+          :updated-tasks (map :id updated-tasks)
+          :updates (util/deep-merge task-updates building-updates state-updates)
+          :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
+
+(defn save-review-updates [user application updates added-tasks-with-updated-buildings]
+  (let [update-result (update-application (application->command application) updates)
+        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
+    (doseq [added-task added-tasks-with-updated-buildings]
+      (tasks/generate-task-pdfa updated-application added-task user "fi"))))
