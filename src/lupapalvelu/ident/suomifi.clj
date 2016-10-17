@@ -96,9 +96,9 @@
           form-params (util/map-keys keyword (:form-params request))
           session     (:session request)
           trid        (:stamp form-params)
-          ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])
-          data        (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})
-          uri         (if (:cancel form-params)
-                        (get-in data [:paths :cancel])
-                        (get-in data [:paths :success]))]
-      (response/redirect uri))))
+          ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])]
+      (if (:cancel form-params)
+        (let [data (mongo/select-one :ident {:sessionid (:id session) :trid trid})]
+          (response/redirect (get-in data [:paths :cancel])))
+        (let [data (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})]
+          (response/redirect (get-in data [:paths :success])))))))

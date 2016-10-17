@@ -30,15 +30,15 @@ User can logout after authentication
   Click by test id  vetuma-logout
   Wait Until  Element should not be visible  //div[@data-test-id='user-nav-menu']
 
-#User is shown error when authentication via Vetuma canceled
-#  [Tags]  integration
-#  Go to bulletins page
-#  Open bulletin by index  1
-#
-#  Open bulletin tab  info
-#  Start Vetuma authentication but cancel via Nordea
-#  Wait Until  Element should be visible by test id  indicator-negative
-#  Page should contain  Vetuma-tunnistautuminen peruutettiin
+User is shown error when authentication via Vetuma canceled
+  [Tags]  integration
+  Go to bulletins page
+  Open bulletin by index  1
+
+  Open bulletin tab  info
+  Start authentication but cancel it
+  Wait Until  Element should be visible by test id  indicator-negative
+  Page should contain  Vetuma-tunnistautuminen peruutettiin
 
 
 *** Keywords ***
@@ -48,3 +48,9 @@ Authenticate via dummy page
   Fill test id  dummy-login-userid  210281-9988
   Wait test id visible  submit-button
   Click by test id  submit-button
+
+Start authentication but cancel it
+  Click by test id  vetuma-init
+  Wait test id visible  cancel-button
+  Click by test id  cancel-button
+
