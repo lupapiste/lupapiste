@@ -371,9 +371,10 @@
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
-(defn orgs-for-review-fetch []
-  (organization/get-organizations {:krysp.R.url {$exists true},
-                                   :krysp.R.version {$gte "2.1.5"}}
+(defn orgs-for-review-fetch [& organization-ids]
+  (organization/get-organizations (merge {:krysp.R.url {$exists true},
+                                          :krysp.R.version {$gte "2.1.5"}}
+                                         (when (seq organization-ids) {:_id {$in organization-ids}}))
                                   {:krysp 1}))
 
 (defn- save-reviews-for-application [user created application app-xml]
@@ -419,11 +420,11 @@
        (map (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
        (apply merge)))
 
-(defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (orgs-for-review-fetch))
+(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
+  (let [orgs-by-id (reduce #(assoc %1 (:id %2) %2) {} (apply orgs-for-review-fetch organization-ids))
         eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
-        apps (if (= 1 (count args))
-               (mongo/select :applications {:_id (first args)})
+        apps (if (seq application-ids)
+               (mongo/select :applications {:_id {$in application-ids}})
                (mongo/select :applications {:state {$in eligible-application-states}
                                             :organization {$in (keys orgs-by-id)}
                                             :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}))
@@ -438,9 +439,13 @@
   (mongo/connect!)
   (poll-verdicts-for-reviews))
 
-(defn check-review-for-id [& args]
+(defn check-reviews-for-orgs [& args]
   (mongo/connect!)
-  (poll-verdicts-for-reviews (first args)))
+  (poll-verdicts-for-reviews :organization-ids args))
+
+(defn check-reviews-for-ids [& args]
+  (mongo/connect!)
+  (poll-verdicts-for-reviews :application-ids args))
 
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
