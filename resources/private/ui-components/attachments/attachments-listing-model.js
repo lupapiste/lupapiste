@@ -328,12 +328,12 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   // After attachment query
   function afterQuery( params ) {
-    var id = _.get( params, "attachmentUploaded");
+    var id = _.get( params, "attachmentId");
     if( id && pageutil.lastSubPage() === "attachments" ) {
       pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
     }
   }
-  self.addEventListener( self.service.serviceName, "query", afterQuery );
+  self.addEventListener( self.service.serviceName, {eventType: "query", triggerCommand: "upload-attachment"}, afterQuery );
 
   self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
     self.service.queryOne(params.attachmentId);
