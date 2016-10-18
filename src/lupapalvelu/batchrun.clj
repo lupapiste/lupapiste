@@ -448,7 +448,7 @@
          (remove (fn-> key keyword org-krysp :url s/blank?))
          (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
          (util/map-keys #(util/find-by-id % applications))
-         (map (fn [[app app-xml]] [app (verdict/read-reviews-from-xml eraajo-user created app app-xml)]))
+         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)]))
          (into {}))))
 
 (defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
