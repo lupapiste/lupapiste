@@ -63,24 +63,30 @@
   (->> (fetch-application-xmls organization permit-type backend-ids :kuntalupatunnus false)
        (group-content-by get-kuntalupatunnus permit-type)))
 
-(defn- get-application-xmls-in-chunks [organization permit-type search-type ids chunk-size]
-  (when-not (empty? ids)
-    (->> (partition chunk-size chunk-size nil ids)
-         (map (partial get-application-xmls organization permit-type search-type))
-         (apply merge))))
+(defn- get-application-xmls-for-chunk
+  "Fetches application xmls and returns map of applications as keys and xmls as values."
+  [organization permit-type search-type application-chunk]
+  (let [id-key (case search-type :kuntalupatunnus :kuntalupatunnus :id)]
+    (->> (map id-key application-chunk)
+         (get-application-xmls organization permit-type search-type)
+         (util/map-keys #(util/find-by-key id-key % application-chunk)))))
+
+(defn- get-application-xmls-in-chunks [organization permit-type search-type applications chunk-size]
+  (when-not (empty? applications)
+    (->> (partition chunk-size chunk-size nil applications)
+         (mapcat (partial get-application-xmls-for-chunk organization permit-type search-type))
+         (remove (comp nil? first)))))
 
 (defn- get-application-xmls-by-backend-id [organization permit-type applications chunk-size]
-  (let [backend-id->app-id (->> applications
-                                (map (fn [app] [(some :kuntalupatunnus (:verdicts app)) (:id app)]))
-                                (filter first)
-                                (into {}))]
-    (-> (get-application-xmls-in-chunks organization permit-type :kuntalupatunnus (keys backend-id->app-id) chunk-size)
-        (rename-keys backend-id->app-id))))
+  (let [apps-with-kuntalupatunnus (->> applications
+                                       (map (fn [app] (assoc app :kuntalupatunnus (some :kuntalupatunnus (:verdicts app)))))
+                                       (filter :kuntalupatunnus))]
+    (get-application-xmls-in-chunks organization permit-type :kuntalupatunnus apps-with-kuntalupatunnus chunk-size)))
 
 (defn fetch-xmls-for-applications [organization permit-type applications]
   (let [chunk-size (get-in organization [:krysp (keyword permit-type) :fetch-chunk-size] 10)
-        xmls-by-app-id (get-application-xmls-in-chunks organization permit-type :application-id (map :id applications) chunk-size)
-        not-found-apps (remove (comp (set (keys xmls-by-app-id)) :id) applications)
-        all-xmls (merge (get-application-xmls-by-backend-id organization permit-type not-found-apps chunk-size)
-                        xmls-by-app-id)]
-    all-xmls))
+        xmls-by-app-id (get-application-xmls-in-chunks organization permit-type :application-id applications chunk-size)
+        found-app-ids  (map (comp :id first) xmls-by-app-id)
+        not-found-apps (lazy-seq (remove (comp (set found-app-ids) :id) applications))]
+    (lazy-cat xmls-by-app-id
+              (get-application-xmls-by-backend-id organization permit-type not-found-apps chunk-size))))
