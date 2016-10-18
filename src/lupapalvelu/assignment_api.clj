@@ -10,7 +10,7 @@
   [_]
   (ok :assignments (assignment/get-assignments)))
 
-(defcommand add-assignment
+(defcommand create-assignment
   {:description "Add an assignment"
    :user-roles #{:authority}
    :parameters [recipient target description]

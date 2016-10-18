@@ -13,12 +13,12 @@
 (facts "Creating assignments"
   (let [{id :id} (create-app sonja :propertyId sipoo-property-id)]
     (fact "only authorities can create assignments"
-      (command sonja :add-assignment
+      (command sonja :create-assignment
                :id          id
                :recipient   "pena"
                :target      ["target"]
                :description "desc") => ok?
-      (command pena :add-assignment
+      (command pena :create-assignment
                :id          id
                :recipient   "pena"
                :target      ["target"]
