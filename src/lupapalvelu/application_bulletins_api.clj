@@ -221,11 +221,15 @@
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
                                  (assoc doc :schema (schemas/get-schema schema-info)))
+          remove-meta-fn       (fn [doc] (dissoc doc :meta))
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
                                    ; unset keys (with empty values) set by filter-application-content-for
                                    (dissoc :comments :neighbors :statements)
                                    (update-in [:documents] (partial map append-schema-fn))
+                                   ; hide document meta i.e. approval info etc
+                                   (update-in [:documents] (partial map remove-meta-fn))
+                                   (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))
