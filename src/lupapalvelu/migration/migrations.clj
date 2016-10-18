@@ -2504,6 +2504,22 @@
                                                  {:versions {$exists true,
                                                              $not {$size 0}}}]}}}))
 
+
+(defmigration remove-unnecessary-data-from-bulletin-attachments
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.attachments {$exists true}}))}
+  (update-bulletin-versions :attachments
+                            (fn [attachment]
+                              (-> attachment
+                                  (select-keys [:id :type :latestVersion :auth :metadata :contents])
+                                  (update :latestVersion #(select-keys % [:filename :contentType :fileId :size]))))
+                            {:versions.attachments {$elemMatch {:originalFileId {$exists true}}}}))
+
+(defmigration remove-unnecessary-data-from-bulletin-documents
+  {:apply-when (pos? (mongo/count :application-bulletins {:versions.documents {$elemMatch {:meta {$exists true}}}}))}
+  (update-bulletin-versions :documents
+                            #(dissoc % :meta)
+                            {:versions.documents {$elemMatch {:meta {$exists true}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
