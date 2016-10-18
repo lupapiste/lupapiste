@@ -3,6 +3,7 @@
 Documentation   Mikko registers
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../common_keywords/ident_helpers.robot
 
 *** Test Cases ***
 
@@ -24,7 +25,7 @@ VTJ-data for Teemu should be populated from identification
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via dummy page
+  Authenticate via dummy page  vetuma-init
   Wait until  Submit is disabled
   Textfield should contain  xpath=//input[@data-test-id='register-street']  Testikatu 23
   Textfield should contain  xpath=//input[@data-test-id='register-zip']  90909
@@ -67,17 +68,12 @@ Submit is disabled
   ${path} =   Set Variable  xpath=//button[@data-test-id='register-submit']
   Wait Until  Element Should Be Disabled  ${path}
 
-Authenticate via dummy page
-  Click by test id  vetuma-init
-  Wait test id visible  submit-button
-  Click by test id  submit-button
-
 Fill registration
   [Arguments]  ${street}  ${zip}  ${city}  ${phone}  ${mail}  ${password}  ${lang}=fi
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via dummy page
+  Authenticate via dummy page  vetuma-init
   Wait until page contains element  xpath=//input[@data-test-id='register-personid']
   Submit is disabled
 

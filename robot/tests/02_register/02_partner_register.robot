@@ -7,19 +7,19 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Setup random email
-  [Tags]  ie8
+  [Tags]  integration  ie8
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${email}  ${secs}@example.com
 
 Send mock identity to server
-  [Tags]  ie8
+  [Tags]  integration  ie8
   Go to  ${SERVER}/dev-pages/idf.html
   Execute Javascript  $("input[name='email']").val("${email}").change();
   Wait until  Page should contain  READY
   Click element  submit
 
 Got email
-  [Tags]  ie8
+  [Tags]  integration  ie8
   Open last email
   Wait Until  Page Should Contain  ${email}
   Page Should Contain  /app/fi/welcome#!/link-account
@@ -28,8 +28,8 @@ Got email
   Register button is visible
 
 Federated user activates account
-  [Tags]  ie8
-  Authenticate via dummy page
+  [Tags]  integration  ie8
+  Authenticate via dummy page  vetuma-linking-init
   Wait until  Submit is disabled
   Wait until  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Testikatu 23
   Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Testikatu 23
