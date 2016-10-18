@@ -69,8 +69,13 @@
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (let [valid? (tiff-validation/valid-tiff? content)]
-    {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
+  (let [tmp-file (File/createTempFile "lupapiste-attach-tif-file" ".tif")]
+    (try
+      (io/copy content tmp-file)
+      (let [valid? (tiff-validation/valid-tiff? tmp-file)]
+        {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})
+      (finally
+        (io/delete-file tmp-file :silently)))))
 
 (defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
   (if (and (env/feature? :convert-all-attachments)
