@@ -68,6 +68,10 @@
                        app-snapshot
                        [:documents]
                        remove-party-docs-fn)
+        app-snapshot (update-in
+                       app-snapshot
+                       [:documents]
+                       (partial map #(dissoc % :meta)))
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
                          (map #(select-keys % attachment-snapshot-fields))
