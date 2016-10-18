@@ -199,7 +199,8 @@
                    "suti-service.js"
                    "info-service.js"
                    "context-service.js"
-                   "building-service.js"]}
+                   "building-service.js"
+                   "assignment-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

@@ -1,0 +1,21 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-template">
+  <button class="primary"
+          data-bind="toggleClick: editorVisible,
+                     testId:'create-assignment-editor'">
+    <i class="lupicon-add"></i>
+    <span data-bind="ltext: 'application.assignment.create'"></span>
+  </button>
+  <bubble-dialog params="visible: editorVisible, okFun: createAssignment, buttonIcon: 'lupicon-save'">
+    <!-- ko with: $parent -->
+    <select data-bind="options: types,
+                       optionsText: mainTypeLoc,
+                       optionsValue, 'type',
+                       value: selectedType,
+                       valueAllowUnset: true"></select>
+    <select data-bind="options: subTypes,
+                       value: selectedSubtype,
+                       valueAllowUnset: true,
+                       visible: subTypes() && subTypes().length > 0"></select>
+   <!-- /ko -->
+  </bubble-dialog>
+</script>

@@ -3,7 +3,9 @@
     <h1 data-bind="ltext: 'application.tabParties'"></h1>
     <help-toggle params="lhtml: ['help.' + permitType() + '.PartiesDesc', 'company-invite.help']"></help-toggle>
 
-   <create-assignment></create-assignment>
+    <!-- ko if: features.enabled("assignments")
+    <create-assignment></create-assignment>
+    <!-- /ko -->
 
     <div class="application_section">
         <div class="application_section_content content_expanded">
