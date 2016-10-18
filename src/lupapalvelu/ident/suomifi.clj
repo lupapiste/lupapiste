@@ -33,7 +33,7 @@
         relevant-headers (select-keys headers (keys header-translations))
         ident            (util/map-keys header-translations relevant-headers)]
     (info ident)
-    (mongo/update-one-and-return :ident {:sessionid (session-id) :trid trid} {$set {:user ident}})
+    (mongo/update-one-and-return :vetuma {:sessionid (session-id) :trid trid} {$set {:user ident}})
     (response/json {:trid trid
                     :user (lupapalvelu.ident.session/get-user trid)
                     :ident ident})))
@@ -53,7 +53,7 @@
           paths     {:success success
                      :error   error
                      :cancel  cancel}]
-     (mongo/update :ident {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
+     (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
      (response/json {:trid trid})))
   (defpage [:get "/dev/saml-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
@@ -61,7 +61,7 @@
           paths     {:success success
                      :error   error
                      :cancel  cancel}]
-      (mongo/update :ident {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
+      (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
       (core/html [:html
                   [:head [:title "SAML Dev Login"]
                          [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]]
@@ -98,7 +98,7 @@
           trid        (:stamp form-params)
           ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])]
       (if (:cancel form-params)
-        (let [data (mongo/select-one :ident {:sessionid (:id session) :trid trid})]
+        (let [data (mongo/select-one :vetuma {:sessionid (:id session) :trid trid})]
           (response/redirect (get-in data [:paths :cancel])))
-        (let [data (mongo/update-one-and-return :ident {:sessionid (:id session) :trid trid} {$set {:user ident}})]
+        (let [data (mongo/update-one-and-return :vetuma {:sessionid (:id session) :trid trid} {$set {:user ident}})]
           (response/redirect (get-in data [:paths :success])))))))
