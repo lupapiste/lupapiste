@@ -349,66 +349,7 @@
 
                     <!-- Parties tab -->
 
-                    <div id="application-parties-tab" class="tab-content" data-bind="with: application">
-                        <h1 data-bind="ltext: 'application.tabParties'"></h1>
-                        <span data-bind="component: {
-                                         name: 'help-toggle',
-                                         params: { lhtml: ['help.' + permitType() + '.PartiesDesc',
-                                         'company-invite.help']}
-                                         }"></span>
-                        <div class="application_section">
-                            <div class="application_section_content content_expanded">
-                                <div data-bind="component: {name: 'authorized-parties'}"></div>
-                            </div>
-                        </div>
-
-                        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" -->
-                        <div data-bind="component: 'application-guests'"></div>
-                        <!-- /ko -->
-
-                        <p data-bind="lhtml: 'required.field.desc'"></p>
-
-                        <!-- docgen generated content: -->
-                        <div class="application_section">
-                            <div id="partiesDocgen" class="docgen-content">
-                                <!-- This is where generated document will be placed. -->
-                            </div>
-                            <!-- ko if: $root.foreman.isVisible -->
-                            <section class="accordion" id="accordion-application-foreman">
-                                <button onclick="accordion.click(this)"
-                                        data-test-id="accordion-application-foreman-header"
-                                        class="accordion-toggle secondary">
-                                    <i class="lupicon-chevron-down"></i>
-                                    <i class="lupicon-chevron-up toggle"></i>
-                                    <span class="bar-text" data-bind="ltext: 'application.parties.foreman'"></span>
-                                </button>
-                                <div class="accordion_content" data-accordion-state="closed">
-                                    <div class="accordion-fields">
-                                        <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
-                                    </div>
-                                </div>
-                            </section>
-                            <!-- /ko -->
-                        </div>
-
-                        <button data-bind="click: $parent.addPartyModel.init, visible: $parent.authorization.ok('create-doc')"
-                                class="secondary modal"
-                                data-test-id="add-party">
-                            <i class="lupicon-circle-plus"></i>
-                            <span data-bind="ltext: 'application.addParty'"></span>
-                        </button>
-
-                        <div class="process-nav">
-                            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-                                <span data-bind="ltext: 'application.next-tab'"></span>
-                                <i class="lupicon-chevron-right"></i>
-                            </a>
-                            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info">
-                                <i class="lupicon-chevron-left"></i>
-                                <span data-bind="ltext: 'application.previous-tab'"></span>
-                            </a>
-                        </div>
-                    </div>
+                    <div data-bind="template: 'parties-tab-template'"></div>
 
                     <!-- Attachments tab -->
                     <div id="application-attachments-tab" class="tab-content"
@@ -673,7 +614,7 @@
                                             <!--  ko if:  $data.lupamaaraykset -->
                                             <h2 data-bind="ltext: 'verdict.lupamaaraukset',
                                                            testId: 'verdict-requirements-' + $parentContext.$index()"></h2>
-                                              <div class="accordion-content-part">                                            
+                                              <div class="accordion-content-part">
                                                   <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                                                       <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                                                   <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -749,7 +690,7 @@
                                               </div>
                                               <!-- /ko -->
                                               <!-- /lupamaaraykset -->
-                                              
+
                                               <h2 data-bind="ltext: 'verdict.poytakirjat'"></h2>
                                               <div class="accordion-content-part">
 
@@ -883,7 +824,7 @@
                                          }"></span>
 
                         <extension-applications></extension-applications>
-                        
+
                         <div data-bind="if: _.some( _js.buildings ) && $root.authorization.ok('inform-building-construction-started')">
                           <h2 data-bind="ltext:'application.aloitusilmoitukset'"></h2>
                             <table>
