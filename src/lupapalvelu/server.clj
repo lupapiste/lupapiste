@@ -66,7 +66,8 @@
             [lupapalvelu.calendars-api]
             [lupapalvelu.suti-api]
             [lupapalvelu.ddd-map-api]
-            [lupapalvelu.ya-extension-api])
+            [lupapalvelu.ya-extension-api]
+            [lupapalvelu.assignment-api])
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]))
 
