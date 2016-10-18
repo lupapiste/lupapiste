@@ -194,7 +194,7 @@
                                         :verdicts :tasks
                                         :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
               (fact "attachments only contain specified keys and nothing else"
-                (map keys (:attachments bulletin)) => (has every? (just [:id :type :latestVersion]))
+                (map keys (:attachments bulletin)) => (has every? (just [:id :type :latestVersion :contents]))
                 (map (comp keys :latestVersion) (:attachments bulletin)) => (has every? (just [:filename :contentType :fileId :size])))
               (fact "bulletin state is 'proclaimed'"
                 (:bulletinState bulletin) => "proclaimed")
