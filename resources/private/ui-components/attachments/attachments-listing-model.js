@@ -3,6 +3,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  self.pageName = "attachments-listing";
+
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
 
@@ -74,6 +76,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   function isFiltered( attachmentId ) {
     return Boolean( filtered()[attachmentId]);
   }
+  var filterSet = self.service.getFilters( self.pageName );
 
   function filterAttachmentIds( attachmentIds) {
     return _.filter( attachmentIds, isFiltered );
@@ -440,6 +443,10 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   self.hasFilteredAttachments = ko.pureComputed(function() {
     return !_.isEmpty(self.service.filteredAttachments());
+  });
+
+  self.hasFilters = ko.pureComputed(function() {
+    return !_.isEmpty(filterSet.filters());
   });
 
 };

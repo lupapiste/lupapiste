@@ -12,8 +12,8 @@
 
   <suti-display></suti-display>
 
-  <!-- ko if: $data.hasUnfilteredAttachments() -->
-  <filters></filters>
+  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
+  <filters params="pageName: $data.pageName"></filters>
   <!-- /ko -->
 
   <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilteredAttachments() -->

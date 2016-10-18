@@ -1,11 +1,15 @@
-LUPAPISTE.FiltersModel = function() {
+LUPAPISTE.FiltersModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var prefix = _.uniqueId( "filters");
 
-  self.filters = lupapisteApp.services.attachmentsService.filtersArray;
+  var filterSet = lupapisteApp.services.attachmentsService.getFilters( params.pageName );
+
+  self.filters = self.disposedPureComputed(function() {
+    return _.flatten(filterSet.filters());
+  });
 
   self.id = function( index ) {
     return prefix + "-" + index;
