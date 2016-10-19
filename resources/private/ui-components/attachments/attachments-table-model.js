@@ -7,7 +7,6 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
   }
 
-
   function buildHash(attachment) {
     var applicationId = lupapisteApp.models.application._js.id;
     return pageutil.buildPageHash("attachment", applicationId, attachment.id);

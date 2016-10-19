@@ -16,12 +16,12 @@
   <filters params="pageName: $data.pageName"></filters>
   <!-- /ko -->
 
-  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilteredAttachments() -->
+  <!-- ko if: $data.hasFilteredAttachments() -->
   <help-toggle params="html: legendHtml,
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
-  <div data-bind="template: {name: 'attachments-accordions-template',
-                             data: $data}"></div>
+  <div data-bind="component: { name: 'attachments-accordions',
+                               params: { pageName: 'attachment-listing' } }"></div>
   <!-- /ko -->
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">
@@ -32,7 +32,7 @@
       <div class="attachment-templates"></div>
     </div>
   </div>
-  
+
   <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
   <div data-test-id="no-filtered-attachments-info">
     <i class="lupicon-circle-attention negative"></i>

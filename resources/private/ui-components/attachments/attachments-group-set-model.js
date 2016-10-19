@@ -44,7 +44,7 @@ LUPAPISTE.AttachmentsGroupSetModel = function(tagGroups) {
 
   function initTagGroups(path, tagGroups, defaultOpen) {
     return _.map(tagGroups, function(tagGroup) {
-      var groupPath = path.push(_.head(tagGroup));
+      var groupPath = path.concat(_.head(tagGroup));
       var subGroups = initTagGroups(groupPath, _.tail(subGroups), defaultOpen);
       return getGroup(groupPath, subGroups, defaultOpen);
     });
@@ -58,7 +58,7 @@ LUPAPISTE.AttachmentsGroupSetModel = function(tagGroups) {
     if (_.isEmpty(path)) {
       return groups;
     } else {
-      return getGroup[_.isArray(path) ? path.join(".") : path];
+      return getGroup(_.isArray(path) ? path.join(".") : path);
     }
   };
 

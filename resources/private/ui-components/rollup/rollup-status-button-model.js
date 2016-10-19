@@ -9,7 +9,7 @@ LUPAPISTE.RollupStatusButtonModel = function( params ) {
   self.params = params;
   self.status = params.status;
   var notNeeded = ko.unwrap( params.notNeeded );
-  self.text = params.ltext ? loc( params.ltext ) : params.text;
+  self.text = params.ltext ? loc( params.ltext ) : ko.unwrap(params.text);
 
   self.isApproved = self.disposedPureComputed( function() {
     return self.status() === APPROVED;

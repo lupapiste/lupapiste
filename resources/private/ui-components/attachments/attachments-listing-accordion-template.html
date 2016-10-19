@@ -1,39 +1,41 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-listing-accordion-template">
-  <!-- ko if: $data.data && $data.data() && $data.data().hasContent -->
+  <!-- ko if: $data.hasContent -->
     <rollup params="open: $data.open"
-            data-bind="attr: {'data-test-level': 'accordion-level-' + $parent.level}">
+            data-bind="attr: {'data-test-level': 'accordion-level-' + $data.level}">
       <rollup-status-button
         data-bind="attr: {'data-test-name': $parent.name}"
         params="open: $parent.open,
                 style: {'secondary': $parent.level === 0,
-                'tertiary': $parent.level > 0,
-                'attachments-accordion': true},
-                status: $parent.data().status,
-                notNeeded: $parent.data().notNeeded,
-                text: $parent.name">
-      </rollup-status-button>
+                        'tertiary': $parent.level > 0,
+                        'attachments-accordion': true},
+                status: $parent.status,
+                notNeeded: $parent.notNeeded,
+                text: $parent.accordionName">
+    </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
-        <!-- ko if: $parent.data().type === "main" -->
-        <div data-bind="foreach: $parent.accordions">
+        <!-- ko if: !_.isEmpty( $parent.groups() ) -->
+        <div data-bind="foreach: $parent.groups() ">
           <div class="attachments-accordion-content-part"
-               data-bind="template: {name: 'attachments-listing-accordion-template',
-                                     data: _.merge($data, {level: $parents[1].level + 1})}">
+               data-bind="component: { name: 'attachments-listing-accordion',
+                                       params: { pageName: $parent[1].pageName,
+                                                 path: $data.path,
+                                                 level: $parent[1].level + 1 } }">
           </div>
         </div>
         <!-- /ko -->
-        <!-- ko if: $parent.data().type === "sub" -->
+        <!-- ko if: _.isEmpty( $parent.groups() ) -->
         <div class="rollup-accordion-content-part">
-          <div data-bind="template: { name: 'attachments-table-template',
-                                      data: LUPAPISTE.AttachmentsTableModel($parent.data().attachmentInfos)}"></div>
+          <div data-bind="component: { name: 'attachments-table',
+                                       params: $parent.filteredAttachments }"></div>
         </div>
         <!-- /ko -->
-        <button data-bind="click: $parent.data().downloadAll,
-                           enable: $parent.data && $parent.data() && $parent.data().hasFile,
-                           attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($parent.path)}"
+        <button data-bind="click: $parent.downloadAll,
+                           enable: $parent.hasFile,
+                           attr: {'data-test-id': 'download-accordion-attachments-button-' + _.last($data.name)}"
                 class="secondary">
           <i class="lupicon-download"></i>
-          <span data-bind="text: $parent.data().downloadAllText"></span>
+          <span data-bind="text: $parent.downloadAllText"></span>
         </button>
       </div>
     </rollup>
