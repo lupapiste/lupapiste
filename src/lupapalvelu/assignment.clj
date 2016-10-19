@@ -49,11 +49,6 @@
 ;; Querying assignments
 ;;
 
-(sc/defn ^:always-validate get-assignment :- (sc/maybe Assignment)
-  [user           :- usr/SessionSummaryUser
-   application-id :- ssc/ObjectIdStr]
-  (first (get-assignments user {:_id application-id})))
-
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
    (get-assignments user {}))
@@ -61,6 +56,11 @@
    (mongo/select :assignments (organization-query-for-user user query)))
   ([user query projection]
    (mongo/select :assignments (organization-query-for-user user query) projection)))
+
+(sc/defn ^:always-validate get-assignment :- (sc/maybe Assignment)
+  [user           :- usr/SessionSummaryUser
+   application-id :- ssc/ObjectIdStr]
+  (first (get-assignments user {:_id application-id})))
 
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
