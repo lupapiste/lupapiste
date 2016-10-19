@@ -461,16 +461,22 @@
          (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started"})
   (mongo/connect!)
-  (poll-verdicts-for-reviews))
+  (poll-verdicts-for-reviews)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished"}))
 
 (defn check-reviews-for-orgs [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :organizations args})
   (mongo/connect!)
-  (poll-verdicts-for-reviews :organization-ids args))
+  (poll-verdicts-for-reviews :organization-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
 
 (defn check-reviews-for-ids [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :applications args})
   (mongo/connect!)
-  (poll-verdicts-for-reviews :application-ids args))
+  (poll-verdicts-for-reviews :application-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :applications args}))
 
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)
