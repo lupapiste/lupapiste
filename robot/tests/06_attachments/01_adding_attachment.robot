@@ -167,7 +167,7 @@ Set attachment back to needed
   [Tags]  attachments
   Click not needed  muut.muu
   Wait until  Not needed should not be selected  muut.muu
-  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments

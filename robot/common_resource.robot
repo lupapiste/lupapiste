@@ -724,7 +724,7 @@ Assert file latest version
 
 Attachment file upload
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
+  Wait Until     Element should be visible  uploadFrame
   Select Frame   uploadFrame
   Wait until     Element should be visible  test-save-new-attachment
   Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']

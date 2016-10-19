@@ -249,7 +249,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe("upload-done", function(data) {
     if (data.attachmentId) {
-      self.queryOne(data.attachmentId);
+      self.queryOne(data.attachmentId, {triggerCommand: "upload-attachment"});
       self.queryTagGroupsAndFilters();
     } else {
       self.queryAll();
