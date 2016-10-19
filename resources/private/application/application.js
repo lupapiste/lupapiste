@@ -123,13 +123,18 @@
   });
 
   function refreshAuthoritiesSelectList(appId) {
-    ajax.query("application-authorities", {id: appId})
+    if (authorizationModel.ok("assign-application")) {
+      ajax.query("application-authorities", {id: appId})
         .success(function(res) {
           var auths = res.authorities || [];
           authorities(auths);
         })
         .pending(applicationModel.pending)
         .call();
+    } else {
+      authorities([]);
+    }
+
   }
 
 
