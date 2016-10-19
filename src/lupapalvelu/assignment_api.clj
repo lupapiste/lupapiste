@@ -5,10 +5,17 @@
             [sade.core :refer :all]))
 
 (defquery assignments
-  {:description "Return the entire collection"
+  {:description "Return all the assignments the user is allowed to see"
    :user-roles #{:authority}}
-  [_]
-  (ok :assignments (assignment/get-assignments)))
+  [{user :user}]
+  (ok :assignments (assignment/get-assignments user)))
+
+(defquery assignments-for-application
+  {:description "Return the assignments for the current application"
+   :user-roles #{:authority}}
+  [{user     :user
+    {id :id} :application}]
+  (ok :assignments (assignment/get-assignments-for-application user id)))
 
 (defcommand create-assignment
   {:description "Add an assignment"

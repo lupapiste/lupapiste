@@ -45,16 +45,24 @@
 ;; Querying assignments
 ;;
 
-(sc/defn ^:always-validate get-assignments :- [Assignment]
-  ([]
-   (get-assignments {}))
-  ([query]
-   (mongo/select :assignments query))
-  ([query projection]
-   (mongo/select :assignments query projection)))
+(defn- assignment-in-user-organization-query [user]
+  {:organizationId {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
 
-(defn get-assignments-for-application [application-id]
-  (get-assignments {:applicationId application-id}))
+(defn- with-organization-check [user query]
+  (merge query (assignment-in-user-organization-query user)))
+
+(sc/defn ^:always-validate get-assignments :- [Assignment]
+  ([user :- usr/SessionSummaryUser]
+   (get-assignments user {}))
+  ([user query]
+   (mongo/select :assignments (with-organization-check user query)))
+  ([user query projection]
+   (mongo/select :assignments (with-organization-check user query) projection)))
+
+(sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
+  [user           :- usr/SessionSummaryUser
+   application-id :- sc/Str]
+  (get-assignments user {:applicationId application-id}))
 
 ;;
 ;; Inserting and modifying assignments
@@ -73,13 +81,12 @@
 (sc/defn ^:always-validate complete-assignment [assignment-id :- ssc/ObjectIdStr
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
-  (let [auth-organizations (into [] (usr/organization-ids-by-roles completer #{:authority}))]
-    (update-assignment {:_id            assignment-id
-                        :organizationId {$in auth-organizations}
-                        :completed      nil}
-                       {$set {:completed timestamp
-                              :status    "completed"
-                              :completer (usr/summary completer)}})))
+  (update-assignment (with-organization-check completer
+                       {:_id       assignment-id
+                        :completed nil})
+                     {$set {:completed timestamp
+                            :status    "completed"
+                            :completer (usr/summary completer)}}))
 
 ; A temporary test function, to be removed before merge to develop
 (defn test-assignment [application-id target description]
