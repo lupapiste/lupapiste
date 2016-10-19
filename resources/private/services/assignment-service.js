@@ -31,14 +31,12 @@ LUPAPISTE.AssignmentService = function() {
 
 
   hub.subscribe("assignmentService::createAssignment", function(event) {
-    console.log("assignmentService::createAssignment", event);
     // ajax.command("create-assignment", _.pick(event, ["target", "creator", "description", ]))
     // .success(util.showSavedIndicator)
     // .call();
   });
 
   hub.subscribe("assignmentService::markComplete", function(event) {
-    console.log("assignmentService::markComplete", event);
     // ajax.command("complete-assignment", _.get(event, "assignmentId"))
     // .success(util.showSavedIndicator)
     // .call();
