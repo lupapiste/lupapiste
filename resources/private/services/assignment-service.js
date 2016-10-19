@@ -30,13 +30,13 @@ LUPAPISTE.AssignmentService = function() {
   });
 
 
-  hub.subscribe("assignmentService::createAssignment", function(event) {
+  hub.subscribe("assignmentService::createAssignment", function() {
     // ajax.command("create-assignment", _.pick(event, ["target", "creator", "description", ]))
     // .success(util.showSavedIndicator)
     // .call();
   });
 
-  hub.subscribe("assignmentService::markComplete", function(event) {
+  hub.subscribe("assignmentService::markComplete", function() {
     // ajax.command("complete-assignment", _.get(event, "assignmentId"))
     // .success(util.showSavedIndicator)
     // .call();
