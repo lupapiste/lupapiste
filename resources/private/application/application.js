@@ -175,7 +175,7 @@
       inviteModel.setApplicationId(app.id);
 
       // Verdict details
-      verdictModel.refresh(app, applicationDetails.authorities);
+      verdictModel.refresh(app);
 
       // Map
       mapModel.refresh(app);
