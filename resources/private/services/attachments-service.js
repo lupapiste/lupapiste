@@ -13,8 +13,11 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
-  self.tagGroups = ko.observableArray([]);
+
   self.groupTypes = ko.observableArray([]);
+
+  self.tagGroups = ko.observableArray([]);
+  var tagGroupSets = {};
 
   // Filters are represented as nested arrays and are interpreted into logical rules as follows:
   // [[A B] [C D]] = (and (or A B) (or C D))
@@ -38,10 +41,12 @@ LUPAPISTE.AttachmentsService = function() {
 
   function clearData() {
     disposeItems( self.attachments );
+    disposeItems(tagGroupSets);
     disposeItems(filterSets);
     self.attachments([]);
     filterSets = {};
     self.tagGroups([]);
+    tagGroupSets = {};
     self.groupTypes([]);
   }
 
@@ -132,6 +137,9 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.setTagGroups = function(data) {
     self.tagGroups(data);
+    _.forEach(tagGroupSets, function(tagGroupSet) {
+      tagGroupSet.setTagGroups(data);
+    });
   };
 
   self.setFilters = function(data) {
@@ -177,6 +185,13 @@ LUPAPISTE.AttachmentsService = function() {
       filterSets[filterSetId] = new LUPAPISTE.AttachmentsFilterSetModel(self.filters());
     }
     return filterSets[filterSetId];
+  };
+
+  self.getTagGroups = function(groupSetId) {
+    if (!tagGroupSets[groupSetId]) {
+      tagGroupSets[groupSetId] = new LUPAPISTE.AttachmentsGroupSetModel(self.tagGroups());
+    }
+    return tagGroupSets[groupSetId];
   };
 
   self.hasAttachments = ko.computed(function() {
