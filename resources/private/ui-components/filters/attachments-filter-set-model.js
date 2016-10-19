@@ -57,7 +57,7 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
     if (_.includes(forceVisibleIds, att.id)) {
       return true;
     }
-    return service.isFiltered(attachment, activeFilters());
+    return service.isFiltered(activeFilters(), attachment);
   };
 
   self.forceVisibility = function(attachmentId) {
