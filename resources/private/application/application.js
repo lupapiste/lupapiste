@@ -60,12 +60,6 @@
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-  var AuthorityInfo = function(id, firstName, lastName) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-  };
-
   function updateWindowTitle(newTitle) {
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
@@ -128,13 +122,23 @@
     }
   });
 
-  function initAuthoritiesSelectList(data) {
-    var authorityInfos = [];
-    _.each(data || [], function(authority) {
-      authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
-    });
-    authorities(authorityInfos);
+  function refreshAuthoritiesSelectList(appId) {
+    ajax.query("application-authorities", {id: appId})
+        .success(function(res) {
+          var auths = res.authorities || [];
+          authorities(auths);
+        })
+        .pending(applicationModel.pending)
+        .call();
   }
+
+
+  hub.onPageUnload("application", function() {
+    authorities([]);
+  });
+  hub.subscribe("application-model-updated", function(event) {
+    refreshAuthoritiesSelectList(event.applicationId);
+  });
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
@@ -187,9 +191,6 @@
 
       verdictAttachmentPrintsOrderModel.refresh();
       verdictAttachmentPrintsOrderHistoryModel.refresh();
-
-      // authorities
-      initAuthoritiesSelectList(applicationDetails.authorities);
 
       // permit subtypes
       applicationModel.permitSubtypes(applicationDetails.permitSubtypes);
