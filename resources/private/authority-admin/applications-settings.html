@@ -74,6 +74,14 @@
       </section>
       <!-- /ko -->
 
+      <section>
+        <h2>Lataa lista organisaation avoimista hakemuksista</h2>
+        <form action="/api/raw/open-applications-xlsx" method="get">
+          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+          <input type="submit" value="Lataa"/>
+        </form>
+      </section>
+
     </div> <!-- container -->
   </section>
 </body>
