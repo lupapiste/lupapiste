@@ -24,7 +24,7 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
 
   // Grouped tags of filters which are currently active.
   var activeFilters = self.disposedPureComputed(function() {
-    return _.map(self.filters, function(filterGroup) {
+    return _.map(self.filters(), function(filterGroup) {
       return _(filterGroup)
         .filter(function(f) { return f.active(); })
         .map("tag")
@@ -33,7 +33,7 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
   });
 
   self.clearData = function() {
-    self.forceVisibleIds([]);
+    forceVisibleIds([]);
     filtersByTag = {};
     _.invokeMap(subscriptions, "dispose");
     subscriptions = [];
@@ -42,9 +42,9 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
   function initFilter(filter) {
     if (!filtersByTag[filter.tag]) {
       var filterValue = ko.observable(filter["default"]);
-      filtersByTag[filter.tag] = _.assing({}, filter, {active: filterValue});
+      filtersByTag[filter.tag] = _.assign({}, filter, {active: filterValue});
       subscriptions.push(filterValue.subscribe(function() {
-        self.forceVisibleIds([]);
+        forceVisibleIds([]);
       }));
     } else {
       filtersByTag[filter.tag].active(filter["default"]);
@@ -61,11 +61,11 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
   };
 
   self.forceVisibility = function(attachmentId) {
-    self.forceVisibleIds.push(attachmentId);
+    forceVisibleIds.push(attachmentId);
   };
 
   self.resetForcedVisibility = function() {
-    self.forceVisibleIds([]);
+    forceVisibleIds([]);
   };
 
   self.setFilters = function(filters) {

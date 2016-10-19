@@ -17,8 +17,8 @@ LUPAPISTE.FiltersModel = function(params) {
 
   self.groupState = self.disposedComputed( function() {
     var activeCount = _.size( _.filter( self.filters(),
-                                        function( m ) {
-                                          return m.filter();
+                                        function( filter ) {
+                                          return filter.active();
                                         }));
     var state = "some";
     if( activeCount === _.size( self.filters()) ) {
