@@ -71,7 +71,7 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities().length > 0 -->
+                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities -->
                               <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
                               <!-- /ko -->
 
