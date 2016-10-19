@@ -21,11 +21,21 @@
     {:keys [organization id]} :application}]
   (let [recipient-summary (-> {:username recipient} (usr/get-user) (usr/summary))
         creator-summary (-> user (usr/summary))]
-    (assignment/insert-assignment {:organizationId organization
-                                   :applicationId  id
-                                   :creator        creator-summary
-                                   :recipient      recipient-summary
-                                   :target         target
-                                   :description    description}
-                                  created))
-  (ok))
+    (ok :id (assignment/insert-assignment {:organizationId organization
+                                           :applicationId  id
+                                           :creator        creator-summary
+                                           :recipient      recipient-summary
+                                           :target         target
+                                           :description    description}
+                                          created))))
+
+(defcommand complete-assignment
+  {:description "Complete an assignment"
+   :user-roles #{:authority}
+   :parameters [assignmentId]
+   :input-validators [(partial non-blank-parameters [:assignmentId])]}
+  [{user    :user
+    created :created}]
+  (if (> (assignment/complete-assignment assignmentId user created) 0)
+    (ok)
+    (fail :error.assignment-not-completed)))

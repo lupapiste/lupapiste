@@ -1,5 +1,5 @@
 (ns lupapalvelu.assignment
-  (:require [monger.operators :refer [$set]]
+  (:require [monger.operators :refer [$set $in]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
@@ -60,23 +60,26 @@
 ;; Inserting and modifying assignments
 ;;
 
-(sc/defn ^:always-validate insert-assignment [assignment :- NewAssignment
-                                              timestamp  :- ssc/Timestamp]
-  (mongo/insert :assignments (new-assignment assignment timestamp)))
+(sc/defn ^:always-validate insert-assignment :- ssc/ObjectIdStr
+  [assignment :- NewAssignment
+   timestamp  :- ssc/Timestamp]
+  (let [created-assignment (new-assignment assignment timestamp)]
+    (mongo/insert :assignments created-assignment)
+    (:id created-assignment)))
 
-(sc/defn ^:always-validate update-assignment [assignment-id      :- ssc/ObjectIdStr
-                                              assignment-changes]
-  (mongo/update-by-id :assignments
-                      assignment-id
-                      assignment-changes))
+(defn- update-assignment [query assignment-changes]
+  (mongo/update-n :assignments query assignment-changes))
 
 (sc/defn ^:always-validate complete-assignment [assignment-id :- ssc/ObjectIdStr
-                                                completer     :- usr/SummaryUser
+                                                completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
-  (update-assignment assignment-id
-                     {$set {:completed timestamp
-                            :status    "completed"
-                            :completer completer}}))
+  (let [auth-organizations (into [] (usr/organization-ids-by-roles completer #{:authority}))]
+    (update-assignment {:_id            assignment-id
+                        :organizationId {$in auth-organizations}
+                        :completed      nil}
+                       {$set {:completed timestamp
+                              :status    "completed"
+                              :completer (usr/summary completer)}})))
 
 ; A temporary test function, to be removed before merge to develop
 (defn test-assignment [application-id target description]

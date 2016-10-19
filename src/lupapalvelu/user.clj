@@ -142,11 +142,18 @@
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
 
+(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+
+(defschema SessionSummaryUser
+  (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
+      (assoc (sc/optional-key :orgAuthz) {sc/Keyword #{sc/Keyword}}
+             :expires ssc/Timestamp)))
+
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
   (some-> user
-    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+    (select-keys session-summary-keys)
     with-org-auth
     (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
@@ -379,7 +386,7 @@
     (and $ (not (dummy? $)))))
 
 ;; note: new user registration messages need to send a message even though
-;; the user is not enabled, and some messages are intentionally sent directly 
+;; the user is not enabled, and some messages are intentionally sent directly
 ;; to an email address without having an associated user id to check.
 ;; Also when adding statement givers, user is disabled, but is sent a token link for password setting
 (defn email-recipient?
