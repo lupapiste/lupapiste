@@ -24,7 +24,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
   });
 
   self.filteredAttachments = self.disposedPureComputed(function() {
-    return _.filter(attachments(), filterSet.isFiltered);
+    return filterSet.apply(attachments());
   });
 
   var fileCount = self.disposedPureComputed(function() {
@@ -97,7 +97,7 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
 
   // auto-open accordion when new filtered results are available
   self.disposedComputed(function() {
-    if (_.filter(attachments(), filterSet.isFiltered).length) {
+    if ( self.filteredAttachments().length ) {
       tagGroup.toggle(true);
     }
   });

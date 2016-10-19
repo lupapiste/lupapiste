@@ -18,7 +18,7 @@ LUPAPISTE.AttachmentsAccordionsModel = function(params) {
   var attachments = service.attachments;
 
   var filteredAttachments = self.disposedPureComputed(function() {
-    return _.filter(attachments(), filterSet.isFiltered);
+    return filterSet.apply(attachments());
   });
 
   var fileCount = self.disposedPureComputed(function() {

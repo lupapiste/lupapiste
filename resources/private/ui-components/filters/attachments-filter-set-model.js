@@ -60,6 +60,10 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
     return service.isFiltered(activeFilters(), attachment);
   };
 
+  self.apply = function(attachments) {
+    return _.filter(attachments, self.isFiltered);
+  };
+
   self.forceVisibility = function(attachmentId) {
     forceVisibleIds.push(attachmentId);
   };
