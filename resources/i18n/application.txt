@@ -951,5 +951,5 @@
 "applications.welcome" "sv" "<div style='padding: 50px'>Välkommen! Du kan börja genom att utreda projektets tillståndsbehov genom att klicka på knappen <i>Nytt projekt</i> . Efter att du utrett tillståndsbehovet kan du kontakta myndigheterna. </div>"
 "application.assignment.create" "fi" "Luo tehtävä"
 "application.assignment.type.parties" "fi" "Osapuolet"
-"application.assignment.type.documents" "fi" "Hankkeen tiedot"
+"application.assignment.type.operations" "fi" "Hankkeen tiedot"
 "application.assignment.type.attachments" "fi" "Liitteet"

@@ -18,11 +18,13 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   self.subTypes = ko.pureComputed(function() {
     var selected = self.selectedType();
     if ( selected ) {
-      return _.find(self.types, {type: selected.type}).values;
+      return _.find(self.types, {type: selected}).values;
     } else {
       return;
     }
   });
+
+  self.users = ko.observableArray([]);
 
   self.mainTypeLoc = function(optionValue) {
     return loc("application.assignment.type." + optionValue.type);

@@ -7,15 +7,32 @@
   </button>
   <bubble-dialog params="visible: editorVisible, okFun: createAssignment, buttonIcon: 'lupicon-save'">
     <!-- ko with: $parent -->
-    <select data-bind="options: types,
-                       optionsText: mainTypeLoc,
-                       optionsValue, 'type',
-                       value: selectedType,
-                       valueAllowUnset: true"></select>
-    <select data-bind="options: subTypes,
-                       value: selectedSubtype,
-                       valueAllowUnset: true,
-                       visible: subTypes() && subTypes().length > 0"></select>
+    <div class="form-grid">
+      <div class="row">
+        <div class="col-1"
+             data-bind="component: {name: 'select-field',
+                          params: {value: selectedType,
+                                  options: types,
+                                  optionsValue: 'type',
+                                  optionsText: mainTypeLoc,
+                                  valueAllowUnset: true,
+                                  id: 'assignment-target-group',
+                                  label: 'Aihe',
+                                  required: false}}">
+        </div>
+        <!-- ko if: subTypes() && subTypes().length > 0 -->
+        <div class="col-1"
+             data-bind="component: {name: 'select-field',
+                         params: {value: selectedSubtype,
+                                  options: subTypes,
+                                  valueAllowUnset: true,
+                                  id: 'assignment-target-id',
+                                  label: 'Kohde',
+                                  required: false}}">
+         </div>
+         <!-- /ko -->
+      </div>
+    </div>
    <!-- /ko -->
   </bubble-dialog>
 </script>
