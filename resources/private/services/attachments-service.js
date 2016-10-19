@@ -215,18 +215,14 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  var orderedFilteredAttachments = ko.pureComputed(function() {
-    return orderByTags(self.filteredAttachments(), self.tagGroups());
-  });
-
-  self.nextFilteredAttachmentId = function(attachmentId) {
-    var attachments = orderedFilteredAttachments();
+  self.nextFilteredAttachmentId = function(attachmentId, filterSet) {
+    var attachments = orderByTags(filterSet.apply(self.attachments()), self.tagGroups());
     var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
     return util.getIn(attachments[index+1], ["id"]);
   };
 
-  self.previousFilteredAttachmentId = function(attachmentId) {
-    var attachments = orderedFilteredAttachments();
+  self.previousFilteredAttachmentId = function(attachmentId, filterSet) {
+    var attachments = orderByTags(filterSet.apply(self.attachments()), self.tagGroups());
     var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
     return util.getIn(attachments, [index-1, "id"]);
   };
