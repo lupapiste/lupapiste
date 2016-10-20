@@ -4,28 +4,22 @@
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.xml :refer :all]
-            [sade.util :refer [fn->] :as util]
+            [sade.util :refer [fn-> fn->>] :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]))
 
 (defn- post-body-for-ya-application [ids id-path]
-  (let [equal-tos (map (partial format
-                                (str "\n  <ogc:PropertyIsEqualTo>\n"
-                                     "    <ogc:PropertyName>%s</ogc:PropertyName>\n"
-                                     "    <ogc:Literal>%s</ogc:Literal>\n"
-                                     "  </ogc:PropertyIsEqualTo>\n")
-                                id-path)
-                       ids)
-        filter-content (if (> (count equal-tos) 1)
-                         (ss/wrap-with-tag "ogc:Or" (apply str equal-tos))
-                         (first equal-tos))]
-
+  (let [filter-content (->> (if (> (count ids) 1)
+                              (wfs/property-in id-path ids)
+                              (wfs/property-is-equal id-path (first ids)))
+                            (element-to-string))]
     {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
         outputFormat=\"GML2\"
@@ -36,7 +30,7 @@
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>"
                 filter-content
-                "</ogc:Filter>
+         "</ogc:Filter>
          </wfs:Query>
        </wfs:GetFeature>")}))
 

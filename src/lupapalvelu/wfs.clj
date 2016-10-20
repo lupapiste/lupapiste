@@ -174,7 +174,7 @@
   (let [attributes (if (map? (first attrs) )
                      (first attrs)
                      (apply hash-map (partition 2 attrs)))]
-    {:tag (str "ogc:" filter-name)
+    {:tag (keyword (str "ogc:" (name filter-name)))
      :attrs attributes
      :content [(property-name prop-name)
                {:tag :ogc:Literal :content [value]}]}))
@@ -185,6 +185,10 @@
 
 (defn property-is-equal [prop-name value]
   (property-filter "PropertyIsEqualTo" prop-name value))
+
+(defn property-in [prop-name values]
+  (->> (map (partial property-is-equal prop-name) values)
+       (hash-map :tag :ogc:Or :content)))
 
 (defn property-is-less [prop-name value]
   (property-filter "PropertyIsLessThan" prop-name value))

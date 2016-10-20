@@ -1,6 +1,8 @@
 (ns lupapalvelu.xml.krysp.common-reader
   (:require [ring.util.codec :as codec]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.wfs :as wfs]
+            [sade.common-reader :as scr]
             [sade.strings :as ss]
             [sade.xml :as sxml]))
 
@@ -83,17 +85,12 @@
   [permit-type search-type]
   "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus")
 
-(defn- property-is-equal-to
-  [property value]
-  (str "<PropertyIsEqualTo>"
-       "<PropertyName>" (sxml/escape-xml property) "</PropertyName>"
-       "<Literal>" (sxml/escape-xml value) "</Literal>"
-       "</PropertyIsEqualTo>"))
-
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
   [property value]
-  (->> (property-is-equal-to property value)
+  (->> (wfs/property-is-equal property value)
+       (scr/strip-xml-namespaces)
+       (sxml/element-to-string)
        (codec/url-encode)))
 
 (defn property-in
@@ -101,9 +98,9 @@
   [property values]
   (if (> 2 (count values))
     (property-equals property (first values))
-    (->> (map (partial property-is-equal-to property) values)
-         (apply str)
-         (ss/wrap-with-tag "Or")
+    (->> (wfs/property-in property values)
+         (scr/strip-xml-namespaces)
+         (sxml/element-to-string)
          (codec/url-encode))))
 
 (defn wfs-krysp-url [server object-type filter]
