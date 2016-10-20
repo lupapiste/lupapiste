@@ -49,7 +49,7 @@
             <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
             <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             <br>
-            <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+            <span data-bind="html: loc(['attachmentType', type()['type-group'], type()['type-id'], 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
