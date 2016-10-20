@@ -75,10 +75,11 @@
       <!-- /ko -->
 
       <section>
-        <h2>Lataa lista organisaation avoimista hakemuksista</h2>
+        <h2 data-bind="ltext: 'authorityAdmin.applicationsReport.title'"></h2>
+        <span data-bind="ltext: 'authorityAdmin.applicationsReport.caption'"></span>
         <form action="/api/raw/open-applications-xlsx" method="get">
           <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-          <input type="submit" value="Lataa"/>
+          <input type="submit" data-bind="attr: { value: loc('authorityAdmin.applicationsReport.buttonText')}"/>
         </form>
       </section>
 

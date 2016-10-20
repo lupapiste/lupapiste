@@ -2,14 +2,20 @@
   (:require [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.user :as usr]
             [lupapalvelu.reports.applications :as app-reports]
-            [sade.files :as files]))
+            [taoensso.timbre :refer [error]]
+            [lupapalvelu.i18n :as i18n]))
 
 (defraw open-applications-xlsx
   {:user-roles #{:authorityAdmin}}
-  [{adminUser :user}]
-  (let [orgId (usr/authority-admins-organization-id adminUser)]
+  [{user :user}]
+  (let [orgId               (usr/authority-admins-organization-id user)
+        excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
+        resulting-file-name (i18n/localize "fi" "applications.report.file-name")]
     (try
       {:status  200
        :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                 "Content-Disposition" "attachment;filename=\"avoimet-hakemukset.xlsx\""}
-       :body    (files/temp-file-input-stream (app-reports/open-applications-for-organization-in-excel! orgId))})))
+                 "Content-Disposition" (str "attachment;filename=\"" resulting-file-name "\"")}
+       :body    (app-reports/open-applications-for-organization-in-excel! orgId "fi" excluded-operations)}
+      (catch Exception e#
+        (error "Exception while compiling open applications excel:" e#)
+        {:status 500}))))

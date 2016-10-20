@@ -7,50 +7,56 @@
             [lupapalvelu.i18n :as i18n]
             [sade.core :refer [now]]
             [lupapalvelu.action :refer [defraw]])
-  (:import (java.io File FileOutputStream)))
+  (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)))
 
-(defn- open-applications-for-organization [organizationId]
-  (mongo/select :applications {:organization organizationId
-                               :state {$in ["submitted" "open" "draft"]}
-                               :infoRequest false
-                               :primaryOperation.name {$nin [:tyonjohtajan-nimeaminen-v2]}}
-                {:_id 1 :state 1 :created 1 :opened 1 :submitted 1 :modified 1 :authority.firstName 1 :authority.lastName 1}
-                {:authority.lastName 1}))
+(defn open-applications-for-organization [organizationId excluded-operations]
+  (let [query (cond-> {:organization organizationId
+                       :state {$in ["submitted" "open" "draft"]}
+                       :infoRequest false}
+                excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
+    (mongo/select :applications
+                  query
+                  [:_id :state :created :opened :submitted :modified :authority.firstName :authority.lastName]
+                  {:authority.lastName 1})))
 
 (defn- authority [app]
   (->> app :authority ((juxt :firstName :lastName)) (ss/join " ")))
 
-(defn- localized-state [app]
-  (i18n/localize "fi" (get app :state)))
+(defn- localized-state [lang app]
+  (i18n/localize lang (get app :state)))
 
 (defn- date-value [key app]
   (util/to-local-datetime (get app key)))
 
-(defn open-applications-for-organization-in-excel! [organizationId]
+(defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it
-  (let [file (File/createTempFile "open-applications" "xlsx")
-        data   (open-applications-for-organization organizationId)
-        _ (println data organizationId)
-        sheet-name (str "Avoimet " (util/to-local-date (now)))
+  (let [data               (open-applications-for-organization organizationId excluded-operations)
+        sheet-name         (str (i18n/localize lang "applications.report.sheet-name-prefix") " " (util/to-local-date (now)))
+        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
+                                                               "applications.authority"
+                                                               "applications.status"
+                                                               "applications.opened"
+                                                               "applications.sent"
+                                                               "applications.lastModified"])
+        column-count       (count header-row-content)
         row-fn (juxt :id
                      authority
-                     localized-state
+                     (partial localized-state lang)
                      (partial date-value :opened)
                      (partial date-value :submitted)
                      (partial date-value :modified))
         wb     (spreadsheet/create-workbook
                  sheet-name
-                 (concat [["LP-tunnus" "Käsittelijä" "Tila" "Avattu" "Jätetty" "Muokattu viimeksi"]] (map row-fn data)))
+                 (concat [header-row-content] (map row-fn data)))
         sheet  (first (spreadsheet/sheet-seq wb))
         header-row (-> sheet spreadsheet/row-seq first)]
     (spreadsheet/set-row-style! header-row (spreadsheet/create-cell-style! wb {:font {:bold true}}))
-    (.autoSizeColumn sheet 0)
-    (.autoSizeColumn sheet 1)
-    (.autoSizeColumn sheet 2)
-    (.autoSizeColumn sheet 3)
-    (.autoSizeColumn sheet 4)
-    (.autoSizeColumn sheet 5)
-    (with-open [out (FileOutputStream. file)]
-      (spreadsheet/save-workbook-into-stream! out wb))
-    file))
+
+    ; Expand columns to fit all their contents
+    (doseq [i (range column-count)]
+      (.autoSizeColumn sheet i))
+
+    (with-open [out (ByteArrayOutputStream.)]
+      (spreadsheet/save-workbook-into-stream! out wb)
+      (ByteArrayInputStream. (.toByteArray out)))))
 
