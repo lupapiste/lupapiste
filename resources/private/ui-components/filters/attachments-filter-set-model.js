@@ -46,15 +46,13 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
       subscriptions.push(filterValue.subscribe(function() {
         forceVisibleIds([]);
       }));
-    } else {
-      filtersByTag[filter.tag].active(filter["default"]);
     }
     return filter.tag;
   }
 
   self.isFiltered = function(attachment) {
     var att = ko.unwrap(attachment);
-    if (_.includes(forceVisibleIds, att.id)) {
+    if (_.includes(forceVisibleIds(), att.id)) {
       return true;
     }
     return service.isFiltered(activeFilters(), attachment);
