@@ -66,7 +66,7 @@
 (defn- get-application-xmls-for-chunk
   "Fetches application xmls and returns map of applications as keys and xmls as values."
   [organization permit-type search-type application-chunk]
-  (let [id-key (case search-type :kuntalupatunnus :kuntalupatunnus :id)]
+  (let [id-key (if (= search-type :kuntalupatunnus) :kuntalupatunnus :id)]
     (->> (map id-key application-chunk)
          (get-application-xmls organization permit-type search-type)
          (util/map-keys #(util/find-by-key id-key % application-chunk)))))
