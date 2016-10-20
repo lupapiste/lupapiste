@@ -25,7 +25,7 @@
         municipality-query (when-not (ss/blank? municipality)
                              {:versions.municipality municipality})
         state-query        (when-not (ss/blank? state)
-                             {:versions.bulletinState state})
+                             {:bulletinState state})
         queries            (filter seq [text-query municipality-query state-query])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
@@ -221,11 +221,13 @@
                                                      :id (:id bulletin))
           append-schema-fn     (fn [{schema-info :schema-info :as doc}]
                                  (assoc doc :schema (schemas/get-schema schema-info)))
+          remove-meta-fn       (fn [doc] (dissoc doc :meta))
           bulletin             (-> bulletin-version
                                    (domain/filter-application-content-for {})
                                    ; unset keys (with empty values) set by filter-application-content-for
                                    (dissoc :comments :neighbors :statements)
                                    (update-in [:documents] (partial map append-schema-fn))
+                                   (update-in [:attachments] (partial map #(dissoc % :metadata :auth)))
                                    (assoc :stateSeq bulletins/bulletin-state-seq))
           bulletin-commentable (= (bulletin-can-be-commented command) nil)]
       (ok :bulletin (merge bulletin {:canComment bulletin-commentable})))

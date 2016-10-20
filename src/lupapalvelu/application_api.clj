@@ -55,9 +55,6 @@
   [{:keys [application user] :as command}]
   (if application
     (ok :application (app/post-process-app command)
-        :authorities (if (usr/authority? user)
-                       (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users application "authority"))
-                       [])
         :permitSubtypes (app/resolve-valid-subtypes application))
     (fail :error.application-not-found)))
 

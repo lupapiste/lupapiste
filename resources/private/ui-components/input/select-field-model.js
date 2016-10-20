@@ -11,4 +11,5 @@ LUPAPISTE.SelectFieldModel = function(params) {
   self.optionsValue = params.optionsValue || function(item) {return item;};
   self.optionsText  = params.optionsText || function(item) {return item;};
   self.optionsCaption = params.lOptionsCaption ? loc(params.lOptionsCaption) : params.optionsCaption;
+  self.valueAllowUnset = params.valueAllowUnset || false;
 };

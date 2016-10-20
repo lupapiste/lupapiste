@@ -166,9 +166,8 @@ LUPAPISTE.verdictPageController = (function($) {
                   type: ko.observable(),
                   typeSelector: null};
   var createTaskController = LUPAPISTE.createTaskController;
-  var authorities = ko.observableArray([]);
 
-  function refresh(application, authorityUsers, verdictId) {
+  function refresh(application, verdictId) {
     var target = {type: "verdict", id: verdictId};
     currentApplication = application;
     currentApplicationId = currentApplication.id;
@@ -188,12 +187,11 @@ LUPAPISTE.verdictPageController = (function($) {
       .call();
 
     createTaskController.reset(currentApplicationId, target);
-    authorities(authorityUsers);
   }
 
-  repository.loaded(["verdict"], function(application, applicationDetails) {
+  repository.loaded(["verdict"], function(application) {
     if (currentApplicationId === application.id) {
-      refresh(application, applicationDetails.authorities, currentVerdictId);
+      refresh(application, currentVerdictId);
     }
   });
 
@@ -206,7 +204,7 @@ LUPAPISTE.verdictPageController = (function($) {
     } else {
       lupapisteApp.setTitle(currentApplication.title);
       if (currentVerdictId !== verdictId){
-        refresh(currentApplication, authorities(), currentVerdictId);
+        refresh(currentApplication, currentVerdictId);
       }
     }
     currentApplicationId = applicationId;
@@ -218,9 +216,7 @@ LUPAPISTE.verdictPageController = (function($) {
       verdictModel: verdictModel,
       authorization: authorizationModel,
       createTask: createTaskController,
-      targeted: targeted,
-      authorities: authorities, // Authorities for comment template
-      application: {} // Dummy application for comment template
+      targeted: targeted
     });
   });
 

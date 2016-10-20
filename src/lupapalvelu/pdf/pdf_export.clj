@@ -167,6 +167,7 @@
 
 (defn- doc-order-comparator [x y]
   (cond
+    (identical? x y)  0
     (nil? x) 1
     (nil? y) -1
     :else (compare x y)))

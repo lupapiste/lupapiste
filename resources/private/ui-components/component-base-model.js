@@ -4,6 +4,8 @@ LUPAPISTE.ComponentBaseModel = function() {
 
   var hubSubscriptions = [];
   var koSubscriptions = [];
+  // Subscriptions that can be turned on by applySubscriptions and turned off by disposeAppliedSubscriptions
+  var applyableSubscriptions = [];
 
   self.sendEvent = function(service, event, data) {
     hub.send(service + "::" + event, data);
@@ -22,7 +24,14 @@ LUPAPISTE.ComponentBaseModel = function() {
   };
 
   self.disposedSubscribe = function(observable, fn) {
-    koSubscriptions.push(observable.subscribe(fn));
+    var subscription = observable.subscribe(fn);
+    koSubscriptions.push(subscription);
+    return subscription;
+  };
+
+  self.unsubscribe = function(subscription) {
+    subscription.dispose();
+    koSubscriptions = _.pull(koSubscriptions, subscription);
   };
 
   self.disposedComputed = function(fn) {
@@ -36,6 +45,26 @@ LUPAPISTE.ComponentBaseModel = function() {
     koSubscriptions.push(computed);
     return computed;
   };
+
+  // Register updating subscription so that they can be turned off when needed.
+  self.registerApplyableSubscription = function(obs, f) {
+    applyableSubscriptions.push({observable: obs, callback: f});
+  };
+
+  // Turns on registered applyable subscriptions.
+  self.applySubscriptions = function() {
+    _.forEach(applyableSubscriptions, function(subscription) {
+      _.set(subscription, "id", self.disposedSubscribe(subscription.observable, subscription.callback));
+    });
+  };
+
+  // Turns off registered applyable subscriptions.
+  self.disposeAppliedSubscriptions = function() {
+    _.forEach(applyableSubscriptions, function(subscription) {
+      self.unsubscribe(subscription.id);
+    });
+  };
+
 
   self.dispose = function() {
     while(hubSubscriptions.length !== 0) {
