@@ -37,9 +37,18 @@
                                   optionsText: function(u) { return u.firstName + ' ' + u.lastName;},
                                   valueAllowUnset: true,
                                   id: 'assignment-recipient',
-                                  label: 'Vastaanottaja',
+                                  label: loc('application.assignment.recipient.label'),
                                   required: true}}">
          </div>
+      </div>
+      <div class="row">
+        <div class="col-3"
+             data-bind="component: {name: 'textarea-field',
+                                    params: {value: description,
+                                             lPlaceholder: 'application.assignment.description.placeholder',
+                                             id: 'assignment-description'}}">
+
+        </div>
       </div>
     </div>
    <!-- /ko -->

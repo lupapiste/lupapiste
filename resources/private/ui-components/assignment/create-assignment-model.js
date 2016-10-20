@@ -28,6 +28,8 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
 
   self.recipient = ko.observable(params.authorities()[0]);
 
+  self.description = ko.observable();
+
   self.mainTypeLoc = function(optionValue) {
     return loc("application.assignment.type." + optionValue.type);
   };
