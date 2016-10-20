@@ -257,6 +257,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   hub.subscribe("upload-done", function(data) {
+    self.authModel.refresh({id: self.applicationId()});
     if (data.attachmentId) {
       self.queryOne(data.attachmentId, {triggerCommand: "upload-attachment"});
       self.queryTagGroupsAndFilters();
@@ -269,6 +270,7 @@ LUPAPISTE.AttachmentsService = function() {
     var params = {id: self.applicationId()};
     ajax.command("copy-user-attachments-to-application", params)
       .success(function(res) {
+        self.authModel.refresh({id: self.applicationId()});
         self.queryAll();
         sendHubNotification("copy-user-attachments", "copy-user-attachments-to-application", _.merge(params, hubParams), res);
       })
@@ -289,7 +291,10 @@ LUPAPISTE.AttachmentsService = function() {
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
+      .success(function(response) {
+        self.authModel.refresh({id: self.applicationId()});
+        sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
+      })
       .error(function(response) {
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
         error("Unable to update attachment: " , _.assign({commandName: commandName, commandParams: commandParams}, response));
