@@ -131,7 +131,7 @@
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
-                                  [pdfboxing "0.1.9"]]
+                                  [pdfboxing "0.1.10"]]
                    :plugins [[lein-midje "3.2"]
                              [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]

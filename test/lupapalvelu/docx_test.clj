@@ -7,12 +7,6 @@
             [clojure.java.io :as io])
   (:import (java.io File)))
 
-(extend-protocol pdfboxing.common/PDFDocument
-  java.io.File
-  (obtain-document [source]
-    (if (pdfboxing.common/is-pdf? source)
-      (pdfboxing.common/load-pdf source))))
-
 (facts "Yritystilisopimus"
   (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :zip "99999", :po "Stockholm"}
         contact {:firstName "Etu", :lastName "Suku"}
