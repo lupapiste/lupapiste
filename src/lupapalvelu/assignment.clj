@@ -1,9 +1,10 @@
 (ns lupapalvelu.assignment
-  (:require [monger.operators :refer [$set $in]]
+  (:require [monger.operators :refer [$in $options $or $regex $set]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 ;; Helpers and schemas
 
@@ -35,6 +36,14 @@
                 :target
                 :description]))
 
+(sc/defschema AssignmentsSearchQuery
+  {:searchText (sc/maybe sc/Str)})
+
+(sc/defschema AssignmentsSearchResponse
+  {:userTotalCount sc/Int
+   :totalCount     sc/Int
+   :assignments    [Assignment]})
+
 (sc/defn ^:private new-assignment :- Assignment
   [assignment :- NewAssignment
    timestamp  :- ssc/Timestamp]
@@ -48,6 +57,30 @@
 ;;
 ;; Querying assignments
 ;;
+
+(defn- make-free-text-query [filter-search]
+  (let [search-keys [:description] ; and what else?
+        fuzzy (ss/fuzzy-re filter-search)]
+    {$or (map #(hash-map % {$regex   fuzzy
+                            $options "i"})
+              search-keys)}))
+
+(defn- make-text-query [filter-search]
+  {:pre [filter-search]}
+  (cond
+    (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search)
+    {:applicationId (ss/upper-case filter-search)}
+
+    :else
+    (make-free-text-query filter-search)))
+
+(defn search-query [data]
+  (merge (into {} (map (juxt identity (constantly nil))
+                       (keys AssignmentsSearchQuery)))
+         (select-keys data (keys AssignmentsSearchQuery))))
+
+(defn- make-query [query]
+  (make-text-query (:searchText query)))
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
@@ -66,6 +99,13 @@
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
   (get-assignments user {:applicationId application-id}))
+
+(sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
+  [user  :- usr/SessionSummaryUser
+   query :- AssignmentsSearchQuery]
+  {:userTotalCount 0
+   :totalCount     0
+   :assignments    (get-assignments user (make-query query))})
 
 ;;
 ;; Inserting and modifying assignments

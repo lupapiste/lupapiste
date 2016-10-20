@@ -49,6 +49,13 @@
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
 
+(defquery assignments-search
+  {:description "Service point for attachment search component"
+   :parameters []
+   :user-roles #{:authority}
+   :feature :assignments}
+  [{user :user data :data}]
+  (ok :data (assignment/assignments-search user (assignment/search-query data))))
 ;;
 ;; Commands
 ;;
