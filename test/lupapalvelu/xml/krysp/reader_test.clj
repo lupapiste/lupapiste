@@ -5,7 +5,7 @@
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
             [lupapalvelu.xml.krysp.reader :refer [->verdicts get-app-info-from-message application-state]]
-            [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals wfs-krysp-url]]
+            [lupapalvelu.xml.krysp.common-reader :refer [rakval-case-type property-equals property-in wfs-krysp-url]]
             [lupapalvelu.krysp-test-util :refer [build-multi-app-xml]]
             [sade.common-reader :as cr]
             [lupapalvelu.permit :as permit]
@@ -30,8 +30,14 @@
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
+(fact "property-in returns url-encoded data"
+  (property-in "_a_" ["_b_" "_c_"]) => "%3COr%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_c_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E%3C%2FOr%3E")
+
 (fact "property-equals returns url-encoded xml-encoded data"
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+
+(fact "property-in returns url-encoded xml-encoded data"
+  (property-in "<a>" ["<b>" "<c>"]) => "%3COr%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bc%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E%3C%2FOr%3E")
 
 (defn verdict-skeleton [poytakirja-xml]
   {:tag :paatostieto
