@@ -4,12 +4,13 @@
                  [org.clojure/data.zip "0.1.1"] ; Note: 0.1.2 breaks lupapalvelu.wfs
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.12"]
+                 [org.clojure/tools.reader "0.10.0"]
                  [org.clojure/tools.trace "0.7.9"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/core.memoize "0.5.9"]
 
                  ; Web frameworks
-                 [ring "1.5.0" :exclusions [commons-fileupload]] ; we will depend on the latest version manually until ring 1.6.0 is released
+                 [ring "1.5.0" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
 
@@ -20,12 +21,12 @@
                  [com.novemberain/monger "3.1.0"]
 
                  ; Logging
-                 [com.taoensso/timbre "4.6.0"]
+                 [com.taoensso/timbre "4.7.4"]
                  [org.slf4j/slf4j-log4j12 "1.7.21"]
 
                  ;;Hystrix
-                 [com.netflix.hystrix/hystrix-clj "1.5.5"]
-                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.5"]
+                 [com.netflix.hystrix/hystrix-clj "1.5.6"]
+                 [com.netflix.hystrix/hystrix-metrics-event-stream "1.5.6"]
 
                  ; markup processing
                  [enlive "1.1.6"]
@@ -39,23 +40,23 @@
                  [org.mindrot/jbcrypt "0.3m"]
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [org.bouncycastle/bcprov-jdk15on "1.55"]
-                 [pandect "0.5.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
+                 [pandect "0.6.0"]
 
                  ; JSON
-                 [cheshire "5.5.0"]
+                 [cheshire "5.6.3"]
 
                  ; HTTP client
-                 [clj-http "3.1.0" :exclusions [commons-codec]]
+                 [clj-http "3.3.0" :exclusions [commons-codec]]
 
                  ; Email client
                  [com.draines/postal "1.11.4" :exclusions [commons-codec/commons-codec]]
 
                  ; iCalendar
-                 [org.mnode.ical4j/ical4j "1.0.7"]
+                 [org.mnode.ical4j/ical4j "1.0.7" :exclusions [commons-logging]]
 
                  ; Apache Commons
-                 [commons-fileupload "1.3.2"]
-                 [org.apache.commons/commons-lang3 "3.4"]
+                 [commons-fileupload "1.3.2"] ; explicit requirement to catch version upgrades
+                 [org.apache.commons/commons-lang3 "3.5"]
                  [commons-io "2.5"]
                  [commons-codec "1.10"]
 
@@ -92,7 +93,7 @@
 
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
-                 [org.apache.poi/poi-ooxml "3.14"]
+                 [org.apache.poi/poi-ooxml "3.15"]
                  [dk.ative/docjure "1.11.0"] ; this also depends on Apache POI v3.14
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.6" :exclusions [com.lowagie/itext]]
@@ -116,23 +117,23 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.52"]
+                 [lupapiste/commons "0.7.54"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
-                 [lupapiste/mongocheck "0.1.1"]
+                 [lupapiste/mongocheck "0.1.2"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
                  [lupapiste/openpdf "1.0.5"]
                  ; Wrapper for clj-pdf for PDF/A document generation
-                 [lupapiste/pdfa-generator "1.0.1"]
+                 [lupapiste/pdfa-generator "1.0.1" :exclusions [org.clojure/tools.reader]]
                  ; Apache pdfbox for PDF/A wrapper
-                 [org.apache.pdfbox/pdfbox "2.0.2"]
-                 [org.apache.pdfbox/xmpbox "2.0.2"]]
+                 [org.apache.pdfbox/pdfbox "2.0.3"]
+                 [org.apache.pdfbox/xmpbox "2.0.3"]]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
-                                  [ring/ring-mock "0.3.0"]
+                                  [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
                                   [rhizome "0.2.7"]
                                   [pdfboxing "0.1.9"]]
                    :plugins [[lein-midje "3.2"]
-                             [jonase/eastwood "0.2.3" :exclusions [[org.clojure/tools.namespace] org.clojure/clojure]]
+                             [jonase/eastwood "0.2.3" :exclusions [org.clojure/tools.namespace org.clojure/clojure]]
                              [lupapiste/lein-buildid "0.4.2"]
                              [lupapiste/lein-nitpicker "0.5.1"]]
                    :resource-paths ["dev-resources"]
