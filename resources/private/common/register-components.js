@@ -130,6 +130,7 @@ jQuery(document).ready(function() {
     {name: "attachments-accordions"},
     {name: "attachments-listing-accordion"},
     {name: "attachments-table"},
+    {name: "attachments-operation-buttons"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},

@@ -41,7 +41,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
-  function addAttachmentFile( params ) {              // Operation buttons
+  function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");
     var attachmentGroup = _.get( params, "attachmentGroup" );
@@ -58,8 +58,6 @@ LUPAPISTE.AttachmentsListingModel = function() {
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   }
 
-  self.newAttachment = _.ary( addAttachmentFile, 0 ); // Operation buttons
-
   self.addHubListener( "add-attachment-file", addAttachmentFile );
 
   // After attachment query
@@ -69,6 +67,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
       pageutil.openPage( "attachment", appModel.id() + "/" + id);
     }
   }
+
   self.addEventListener( service.serviceName, {eventType: "query", triggerCommand: "upload-attachment"}, afterQuery );
 
   self.addEventListener(service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
@@ -79,92 +78,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
     service.queryOne(params.attachmentId);
   });
 
-  function AttachmentTemplatesModel() {
-    var templateModel = this;
-    templateModel.init = function() {
-      templateModel.initDone = true;
-      templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
-      templateModel.selectm
-        .allowDuplicates(true)
-        .ok(_.ary(service.createAttachmentTemplates, 1))
-        .cancel(LUPAPISTE.ModalDialog.close);
-      return templateModel;
-    };
-
-    templateModel.show = function() {
-      if (!templateModel.initDone) {
-        templateModel.init();
-      }
-
-      var data = _.map(appModel.allowedAttachmentTypes(), function(g) {
-        var groupId = g[0];
-        var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var typeIds = g[1];
-        var attachments = _.map(typeIds, function(typeId) {
-          var id = {"type-group": groupId, "type-id": typeId};
-          var text = loc(["attachmentType", groupId, typeId]);
-          return {id: id, text: text};
-        });
-        return [groupText, attachments];
-      });
-      templateModel.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates-v2");
-      return templateModel;
-    };
-  }
-  self.attachmentTemplatesModel = new AttachmentTemplatesModel(); //
-  self.attachmentTemplatesAdd = function() {                      // Operation buttons
-    self.attachmentTemplatesModel.show();                         //
-  };
   self.addEventListener(service.serviceName, "create", LUPAPISTE.ModalDialog.close);
 
   self.addEventListener(service.serviceName, "remove", util.showSavedIndicator);
 
   self.addEventListener(service.serviceName, "copy-user-attachments", util.showSavedIndicator);
-
-  self.copyUserAttachments = function() {                    // Operation buttons
-    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
-                             size: "medium",
-                             component: "yes-no-dialog",
-                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
-                                               yesFn: service.copyUserAttachments}});
-  };
-
-  self.canCopyUserAttachments = function() {                // Operation buttons
-    return self.authModel.ok("copy-user-attachments-to-application");
-  };
-
-  self.startStamping = function() {                         // Operation buttons
-    hub.send("start-stamping", {application: appModel});
-  };
-
-  self.canStamp = function() {                              // Operation buttons
-    return self.authModel.ok("stamp-attachments");
-  };
-
-  self.signAttachments = function() {                       // Operation buttons
-    hub.send("sign-attachments", {application: appModel, attachments: attachments});
-  };
-
-  self.canSign = function() {                               // Operation buttons
-    return self.authModel.ok("sign-attachments");
-  };
-
-  self.markVerdictAttachments = function() {                // Operation buttons
-    hub.send("start-marking-verdict-attachments", {application: appModel});
-  };
-
-  self.canMarkVerdictAttachments = function() {             // Operation buttons
-    return self.authModel.ok("set-attachments-as-verdict-attachment");
-  };
-
-  self.orderAttachmentPrints = function() {                 // Operation buttons
-    hub.send("order-attachment-prints", {application: appModel});
-  };
-
-  self.canOrderAttachmentPrints = function() {              // Operation buttons
-    return self.authModel.ok("order-verdict-attachment-prints");
-  };
 
   self.hasUnfilteredAttachments = self.disposedPureComputed(function() {
     return !_.isEmpty(attachments());

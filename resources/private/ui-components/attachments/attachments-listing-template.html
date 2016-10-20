@@ -7,8 +7,7 @@
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
   <div class="clear"></div>
-  <div data-bind="template: {name: 'attachments-operation-buttons-template',
-                             data: $data}"></div>
+  <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
 
   <suti-display></suti-display>
 
