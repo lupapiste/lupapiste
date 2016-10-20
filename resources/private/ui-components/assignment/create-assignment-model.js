@@ -20,15 +20,18 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
     if ( selected ) {
       return _.find(self.types, {type: selected}).values;
     } else {
-      return;
+      return [];
     }
   });
 
   self.users = ko.observableArray([]);
 
+  self.recipient = ko.observable(params.authorities()[0]);
+
   self.mainTypeLoc = function(optionValue) {
     return loc("application.assignment.type." + optionValue.type);
   };
+
 
 
   self.createAssignment = function(v) {

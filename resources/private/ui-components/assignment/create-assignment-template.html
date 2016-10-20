@@ -2,7 +2,7 @@
   <button class="primary"
           data-bind="toggleClick: editorVisible,
                      testId:'create-assignment-editor'">
-    <i class="lupicon-add"></i>
+    <i class="lupicon-circle-plus"></i>
     <span data-bind="ltext: 'application.assignment.create'"></span>
   </button>
   <bubble-dialog params="visible: editorVisible, okFun: createAssignment, buttonIcon: 'lupicon-save'">
@@ -20,7 +20,6 @@
                                   label: 'Aihe',
                                   required: false}}">
         </div>
-        <!-- ko if: subTypes() && subTypes().length > 0 -->
         <div class="col-1"
              data-bind="component: {name: 'select-field',
                          params: {value: selectedSubtype,
@@ -28,9 +27,19 @@
                                   valueAllowUnset: true,
                                   id: 'assignment-target-id',
                                   label: 'Kohde',
+                                  disable: subTypes().length == 0,
                                   required: false}}">
          </div>
-         <!-- /ko -->
+         <div class="col-1"
+             data-bind="component: {name: 'select-field',
+                         params: {value: recipient,
+                                  options: params.authorities,
+                                  optionsText: function(u) { return u.firstName + ' ' + u.lastName;},
+                                  valueAllowUnset: true,
+                                  id: 'assignment-recipient',
+                                  label: 'Vastaanottaja',
+                                  required: true}}">
+         </div>
       </div>
     </div>
    <!-- /ko -->
