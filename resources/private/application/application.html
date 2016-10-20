@@ -352,10 +352,12 @@
                     <div data-bind="template: 'parties-tab-template'"></div>
 
                     <!-- Attachments tab -->
-                    <div id="application-attachments-tab" class="tab-content"
-                         data-bind="visible: selectedTabName() === 'attachments'">
+
+                    <!-- ko if: selectedTabName() === 'attachments' -->
+                    <div id="application-attachments-tab" class="tab-content">
                       <attachments-listing/>
                     </div>
+                    <!-- /ko -->
 
                     <!-- Required field summary tab -->
 
