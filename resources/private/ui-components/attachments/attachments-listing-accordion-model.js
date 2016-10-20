@@ -35,11 +35,19 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
 
   self.name = _.last(groupPath);
 
+  // If some of the attachments are approved and the rest not needed -> approved
+  // If some of the attachments are rejected -> rejected
+  // Else null
   self.status = self.disposedPureComputed(function() {
-    return resolveStatus(attachments());
+    var atts = attachments();
+    if ( _.some( atts, service.isApproved ) &&
+         _.every( atts, _.overSome([service.isApproved, service.isNotNeeded]) ) ) {
+      return service.APPROVED;
+    } else if ( _.some( atts, service.isRejected ) ) {
+      return  service.REJECTED;
+    }
+    return null;
   });
-
-  self.notNeeded = ko.observable(false); // FIXME: find out how should be infered
 
   self.hasContent = self.disposedPureComputed(function() {
     return !_.isEmpty(self.filteredAttachments());
@@ -61,14 +69,6 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
     return _.every(groupPath, function(groupName) {
       return _.includes(ko.unwrap(attachment).tags, groupName);
     });
-  }
-
-  function resolveStatus(attachments) {
-    if (_.every(attachments, function(att) { return att.status === service.APPROVED; })) {
-      return service.APPROVED;
-    } else if (_.some(attachments, function(att) { return att.status === service.REJECTED; })) {
-      return service.REJECTED;
-    }
   }
 
   function getOperationLocalization(operationId) {

@@ -386,32 +386,6 @@ LUPAPISTE.AttachmentsService = function() {
     return util.getIn(attachment, ["notNeeded"]) === true;
   };
 
-  function getUnwrappedAttachmentById(attachmentId) {
-    return ko.utils.unwrapObservable(self.getAttachment(attachmentId));
-  }
-
-  // returns a function for use in computed
-  // If some of the attachments are approved and the rest not needed -> approved
-  // If some of the attachments are rejected -> rejected
-  // Else null
-  self.attachmentsStatus = function(attachmentIds) {
-    return function() {
-      var unwrappedAttachments = _.map(attachmentIds,
-                                       getUnwrappedAttachmentById);
-      if (_.some( unwrappedAttachments, self.isApproved)
-          && _.every(unwrappedAttachments,
-                     function( a ) {
-                       return self.isApproved( a ) || self.isNotNeeded( a );
-                     })) {
-        return self.APPROVED;
-      } else {
-        return _.some(unwrappedAttachments,
-                      self.isRejected) ? self.REJECTED : null;
-      }
-    };
-  };
-
-
   //
   // Filtering attachments
   //
