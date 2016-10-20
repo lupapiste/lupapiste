@@ -93,6 +93,7 @@
                  ; MS Office document processing
                  [ontodev/excel "0.2.4" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
                  [org.apache.poi/poi-ooxml "3.14"]
+                 [dk.ative/docjure "1.11.0"] ; this also depends on Apache POI v3.14
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.6" :exclusions [com.lowagie/itext]]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.6"]

@@ -54,7 +54,8 @@
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.calendars-api :as calendars]
             [lupapalvelu.suomifi]
-            [lupapalvelu.ya-extension :as yax])
+            [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.reports.reports-api])
   (:import (java.io OutputStreamWriter BufferedWriter)))
 
 ;;
