@@ -407,28 +407,33 @@
 (defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
   (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
-      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]" (:id organization) permit-type (ss/join ", " (map :id applications)))
+      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]"
+              (:id organization) permit-type (ss/join ", " (map :id applications)))
       (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
       (catch SAXParseException e
         (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
         ;; Fallcback into fetching xmls consecutively
         (->> (map (fn [app]
                     (try
-                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s" (:id organization) permit-type (:id app))
+                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
+                              (:id organization) permit-type (:id app))
                       (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
                       (catch Throwable t
-                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s" (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
+                                (:id app) (:id organization) (.getName (class t)) (.getMessage t))
                         nil)))
                   applications)
-             (remove nil?)
-             (apply merge)))
+             (apply concat)
+             (remove nil?)))
       (catch Throwable t
-        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s" permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
+        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
+                permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
 
 (defn- organization-applications-for-review-fetching
-  [organization-id]
+  [organization-id permit-type]
   (let [eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})]
     (mongo/select :applications {:state {$in eligible-application-states}
+                                 :permitType permit-type
                                  :organization organization-id
                                  :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
                   (merge app/timestamp-key
@@ -442,35 +447,40 @@
                           :history true}))))
 
 (defn- fetch-review-updates-for-organization
-  [eraajo-user created applications {org-krysp :krysp :as organization}]
-  (let [applications (or applications (organization-applications-for-review-fetching (:id organization)))]
-    (->> (group-by :permitType applications)
-         (remove (fn-> key keyword org-krysp :url s/blank?))
-         (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization))
-         (util/map-keys #(util/find-by-id % applications))
-         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)]))
-         (into {}))))
+  [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
+  (let [grouped-apps (if (seq applications)
+                       (group-by :permitType applications)
+                       (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
+                            (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
+    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
+         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
 
 (defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
   (let [applications (when (seq application-ids)
                        (mongo/select :applications {:_id {$in application-ids}}))
         organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
         eraajo-user (user/batchrun-user (map :id organizations))]
-    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications) organizations)
-         (apply merge)
+    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications [:R]) organizations)
+         (apply concat)
          (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started"})
   (mongo/connect!)
-  (poll-verdicts-for-reviews))
+  (poll-verdicts-for-reviews)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished"}))
 
 (defn check-reviews-for-orgs [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :organizations args})
   (mongo/connect!)
-  (poll-verdicts-for-reviews :organization-ids args))
+  (poll-verdicts-for-reviews :organization-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
 
 (defn check-reviews-for-ids [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :applications args})
   (mongo/connect!)
-  (poll-verdicts-for-reviews :application-ids args))
+  (poll-verdicts-for-reviews :application-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :applications args}))
 
 (defn pdfa-convert-review-pdfs [& args]
   (mongo/connect!)

@@ -1,4 +1,4 @@
-Uusi s&auml;hk&ouml;inen allekirjoitus Onnistuu.fi:ss&auml;:
+Uusi s&auml;hk&ouml;inen allekirjoitus Visma Sign -palvelussa:
 
 Yritys: {{company.name}} ({{company.y}})
 

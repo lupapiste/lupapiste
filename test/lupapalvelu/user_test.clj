@@ -32,6 +32,22 @@
               :private "SECRET"}]
     (fact (summary user) => (just (dissoc user :private)))))
 
+(facts session-summary
+  (fact (session-summary nil) => nil)
+  (let [user {:id "1"
+              :firstName "Simo"
+              :username  "simo@salminen.com"
+              :lastName "Salminen"
+              :role "comedian"
+              :private "SECRET"
+              :orgAuthz {:753-R ["authority" "approver"]}
+              :company {:id "Firma Oy"
+                        :role "admin"
+                        :submit true}}]
+    (fact (:expires (session-summary user)) => number?)
+    (fact (-> (session-summary user) :orgAuthz :753-R) => set?)
+    (fact (= (summary user) (summary (session-summary user))) => truthy)))
+
 (fact "virtual-user?"
   (virtual-user? {:role "authority"})  => false
   (virtual-user? {:role :authorityAdmin})   => false
@@ -381,5 +397,3 @@
   (email-recipient? {:id 8}) => true
   (provided
     (find-user {:id 8}) => {:id 8 :dummy false :enabled true, :private {:password ""}}))
-
-
