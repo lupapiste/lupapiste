@@ -14,6 +14,7 @@
                    get-kuntalupatunnus
                    not-empty-content
                    group-content-by
+                   get-application-xmls-for-chunk
                    get-application-xmls-in-chunks
                    get-application-xmls-by-backend-id)
 
@@ -263,6 +264,29 @@
 
     (provided (organization/resolve-krysp-wfs {:id "123-R"} "R") => {:url ..some-url.. :credentials ..some-credentials..})
     (provided (permit/fetch-xml-from-krysp "R" ..some-url.. ..some-credentials.. ["LP-123-2016-00001" "LP-123-2016-00002" "LP-123-2016-00003"] :application-id anything) => (build-multi-app-xml [[{:lp-tunnus "LP-123-2016-00001"}] [{:lp-tunnus "LP-123-2016-00003"}]]))))
+
+
+(facts get-application-xmls-for-chunk
+  (fact "two applications"
+    (get-application-xmls-for-chunk ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"}])  => {{:id "id1"} ..xml-1.. {:id "id2"} ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..}))
+
+  (fact "no applications"
+    (get-application-xmls-for-chunk ..org.. ..permit-type.. :application-id [])  => {}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id []) => nil))
+
+  (fact "by backend-id"
+    (get-application-xmls-for-chunk ..org.. ..permit-type.. :kuntalupatunnus [{:id "id1" :kuntalupatunnus "klid1"} {:id "id2" :kuntalupatunnus "klid2"}])
+    => {{:id "id1" :kuntalupatunnus "klid1"} ..xml-1.. {:id "id2" :kuntalupatunnus "klid2"} ..xml-2..}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :kuntalupatunnus ["klid1" "klid2"]) => {"klid1" ..xml-1.. "klid2" ..xml-2..}))
+
+  (fact "empty result"
+    (get-application-xmls-for-chunk ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"} {:id "id3"}]) => {}
+
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2" "id3"]) => nil)))
 
 
 (facts get-application-xmls-in-chunks
