@@ -162,6 +162,11 @@
       :error.map-parameters-with-required-keys
       {:required-keys required-keys})))
 
+(defn parameters-matching-schema [params schema command]
+  (filter-params-of-command params command
+                            (partial sc/check schema)
+                            "error.illegal-value:schema-validation"))
+
 (defn update-application
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."
@@ -597,4 +602,3 @@
          (map (partial filter-actions-by-category collection-key))
          (map validate-actions)
          (zipmap (map :id coll)))))
-

@@ -949,3 +949,7 @@
 "applications.welcome" "en" "<div style='padding: 50px \">Welcome! You can start by finding out your project's permit need by pressing the <i>New Project</i> button. After obtaining the necessary permission, you can contact the authorities. </div>"
 "applications.welcome" "fi" "<div style='padding: 50px'>Tervetuloa! Voit aloittaa selvittämällä hankkeesi luvan tarpeen painamalla <i>Uusi hanke</i> painiketta. Selvitettyäsi luvan tarpeen voit ottaa yhteyttä viranomaisiin . </div>"
 "applications.welcome" "sv" "<div style='padding: 50px'>Välkommen! Du kan börja genom att utreda projektets tillståndsbehov genom att klicka på knappen <i>Nytt projekt</i> . Efter att du utrett tillståndsbehovet kan du kontakta myndigheterna. </div>"
+"application.assignment.create" "fi" "Luo tehtävä"
+"application.assignment.type.parties" "fi" "Osapuolet"
+"application.assignment.type.operations" "fi" "Hankkeen tiedot"
+"application.assignment.type.attachments" "fi" "Liitteet"

@@ -253,10 +253,12 @@
                 attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
 
-  (let [attachment-type (att-type/parse-attachment-type attachmentType)]
+  (let [attachment (attachment/get-attachment-info application attachmentId)
+        attachment-type (att-type/parse-attachment-type attachmentType)]
     (if (att-type/allowed-attachment-type-for-application? attachment-type application)
-      (let [metadata (-> (tos/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
-                         (tos/update-end-dates (:verdicts application)))]
+      (let [metadata (merge (:metadata attachment)
+                            (-> (tos/metadata-for-document (:organization application) (:tosFunction application) attachment-type)
+                                (tos/update-end-dates (:verdicts application))))]
         (attachment/update-attachment-data! command attachmentId {:type attachment-type :metadata metadata} created))
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)

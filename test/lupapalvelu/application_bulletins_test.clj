@@ -8,7 +8,7 @@
                               {:schema-info {:type "party"} :data {:name "party 2"}}
                               {:schema-info {:type :location} :data {:name "location" :x 1 :y 2}}
                               {:schema-info {} :data {:name "untyped"}}]
-                  :attachments [{:type "test1" :versions [{:id 1} {:id 2}] :latestVersion {:id 2}}
+                  :attachments [{:type "test1" :versions [{:id 1} {:id 2}] :latestVersion {:fileId 223 :filename "2.txt"}}
                                 {:type "testi2"}
                                 nil]
                   :state :submitted})
@@ -23,7 +23,7 @@
   (let [snapshot (create-bulletin-snapshot example-app)
         updates (snapshot-updates snapshot {} 123)]
     (fact "attachments with latest versions"
-      (:attachments snapshot) => [{:type "test1" :latestVersion {:id 2}}])
+      (:attachments snapshot) => [{:type "test1" :latestVersion {:fileId 223 :filename "2.txt"}}])
 
     (fact "state"
       (:state snapshot) => :submitted
