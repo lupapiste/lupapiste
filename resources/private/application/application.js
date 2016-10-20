@@ -137,10 +137,6 @@
 
   }
 
-
-  hub.onPageUnload("application", function() {
-    authorities([]);
-  });
   hub.subscribe("application-model-updated", function(event) {
     refreshAuthoritiesSelectList(event.applicationId);
   });
