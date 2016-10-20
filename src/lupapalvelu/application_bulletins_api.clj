@@ -25,7 +25,7 @@
         municipality-query (when-not (ss/blank? municipality)
                              {:versions.municipality municipality})
         state-query        (when-not (ss/blank? state)
-                             {:versions.bulletinState state})
+                             {:bulletinState state})
         queries            (filter seq [text-query municipality-query state-query])]
     (when-let [and-query (seq queries)]
       {$and and-query})))
