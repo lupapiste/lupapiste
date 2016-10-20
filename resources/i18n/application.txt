@@ -989,4 +989,7 @@
 "application.assignment.target.attachments" "fi" "Liiteryhmä"
 "application.assignment.target.attachments" "sv" ""
 "application.assignment.target.attachments" "en" ""
+"application.assignment.type" "fi" "Tyyppi"
+"application.assignment.type" "sv" "Typ"
+"application.assignment.type" "en" "Type"
 

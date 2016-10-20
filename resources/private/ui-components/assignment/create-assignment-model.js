@@ -15,7 +15,7 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
                 {type: "operations", values: ["op1"]},
                 {type: "attachments", values: ["att1, att2"]}]; // TODO data structre
 
-  self.subTypes = ko.pureComputed(function() {
+  self.subTypes = self.disposedPureComputed(function() {
     var selected = self.selectedType();
     if ( selected ) {
       return _.find(self.types, {type: selected}).values;
@@ -34,7 +34,9 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
     return loc("application.assignment.type." + optionValue.type);
   };
 
-
+  self.subTypeLabel = self.disposedPureComputed(function() {
+    return self.selectedType() ? loc("application.assignment.target." + self.selectedType()) : loc("application.assignment.type");
+  });
 
   self.createAssignment = function(v) {
     self.sendEvent(myService, "createAssignment", v);
