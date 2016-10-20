@@ -267,42 +267,42 @@
 
 (facts get-application-xmls-in-chunks
   (fact "one chunk"
-    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. [{:id "id1"} {:id "id2"}] 2)  => [[{:id "id1"} ..xml-1..] [{:id "id2"} ..xml-2..]]
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"}] 2)  => [[{:id "id1"} ..xml-1..] [{:id "id2"} ..xml-2..]]
 
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..}))
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..}))
 
   (fact "multiple chunks"
-    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 2)
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 2)
     => [[{:id "id1"} ..xml-1..] [{:id "id2"} ..xml-2..]
         [{:id "id3"} ..xml-3..] [{:id "id4"} ..xml-4..]
         [{:id "id5"} ..xml-5..] [{:id "id6"} ..xml-6..]]
 
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..})
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id5" "id6"]) => {"id5" ..xml-5.. "id6" ..xml-6..}))
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"]) => {"id1" ..xml-1.. "id2" ..xml-2..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id5" "id6"]) => {"id5" ..xml-5.. "id6" ..xml-6..}))
 
   (fact "multiple unevenly separated chunks"
-    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 5)
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 5)
     => [[{:id "id1"} ..xml-1..] [{:id "id2"} ..xml-2..]
         [{:id "id3"} ..xml-3..] [{:id "id4"} ..xml-4..]
         [{:id "id5"} ..xml-5..] [{:id "id6"} ..xml-6..]]
 
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3" "id4" "id5"]) => {"id1" ..xml-1.. "id2" ..xml-2.. "id3" ..xml-3.. "id4" ..xml-4.. "id5" ..xml-5..})
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id6"]) => {"id6" ..xml-6..}))
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2" "id3" "id4" "id5"]) => {"id1" ..xml-1.. "id2" ..xml-2.. "id3" ..xml-3.. "id4" ..xml-4.. "id5" ..xml-5..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id6"]) => {"id6" ..xml-6..}))
 
   (fact "empty result"
-    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 3) => []
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 3) => []
 
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2" "id3"]) => nil)
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id4" "id5" "id6"]) => nil))
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2" "id3"]) => nil)
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id4" "id5" "id6"]) => nil))
 
   (fact "partially empty result"
-    (get-application-xmls-in-chunks ..org.. ..permit-type.. ..search-type.. [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 2)
+    (get-application-xmls-in-chunks ..org.. ..permit-type.. :application-id [{:id "id1"} {:id "id2"} {:id "id3"} {:id "id4"} {:id "id5"} {:id "id6"}] 2)
     => [[{:id "id3"} ..xml-3..] [{:id "id4"} ..xml-4..]]
 
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id1" "id2"]) => nil)
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
-    (provided (get-application-xmls ..org.. ..permit-type.. ..search-type.. ["id5" "id6"]) => nil)))
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id1" "id2"]) => nil)
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id3" "id4"]) => {"id3" ..xml-3.. "id4" ..xml-4..})
+    (provided (get-application-xmls ..org.. ..permit-type.. :application-id ["id5" "id6"]) => nil)))
 
 
 
