@@ -1,6 +1,7 @@
 (ns lupapalvelu.assignment-api
   (:require [lupapalvelu.action :refer [defcommand defquery non-blank-parameters vector-parameters parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.schemas :as ssc]))
@@ -54,13 +55,14 @@
 ;;
 
 (defcommand create-assignment
-  {:description "Create an assignment"
-   :user-roles #{:authority}
-   :parameters [recipient target description]
+  {:description      "Create an assignment"
+   :user-roles       #{:authority}
+   :parameters       [recipient target description]
    :input-validators [(partial non-blank-parameters [:recipient :description])
                       (partial vector-parameters [:target])]
-   :pre-checks [validate-receiver]
-   :feature :assignments}
+   :pre-checks       [validate-receiver]
+   :states           states/all-application-states-but-draft-or-terminal
+   :feature          :assignments}
   [{user                      :user
     created                   :created
     {:keys [organization id]} :application}]
