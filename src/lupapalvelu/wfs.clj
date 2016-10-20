@@ -187,8 +187,9 @@
   (property-filter "PropertyIsEqualTo" prop-name value))
 
 (defn property-in [prop-name values]
-  (->> (map (partial property-is-equal prop-name) values)
-       (hash-map :tag :ogc:Or :content)))
+  (if (> (count values) 1)
+    (apply ogc-or (map (partial property-is-equal prop-name) values))
+    (property-is-equal prop-name (first values))))
 
 (defn property-is-less [prop-name value]
   (property-filter "PropertyIsLessThan" prop-name value))

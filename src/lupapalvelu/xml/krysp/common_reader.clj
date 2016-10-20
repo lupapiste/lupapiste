@@ -96,12 +96,10 @@
 (defn property-in
   "Returns WFS 1.1.0 compatible URL-encoded search parameter suitable for 'filter'"
   [property values]
-  (if (> 2 (count values))
-    (property-equals property (first values))
-    (->> (wfs/property-in property values)
-         (scr/strip-xml-namespaces)
-         (sxml/element-to-string)
-         (codec/url-encode))))
+  (->> (wfs/property-in property values)
+       (scr/strip-xml-namespaces)
+       (sxml/element-to-string)
+       (codec/url-encode)))
 
 (defn wfs-krysp-url [server object-type filter]
   (let [server (if (ss/contains? server "?")

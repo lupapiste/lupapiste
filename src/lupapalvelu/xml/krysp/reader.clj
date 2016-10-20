@@ -16,9 +16,7 @@
             [lupapalvelu.xml.krysp.common-reader :as common]))
 
 (defn- post-body-for-ya-application [ids id-path]
-  (let [filter-content (->> (if (> (count ids) 1)
-                              (wfs/property-in id-path ids)
-                              (wfs/property-is-equal id-path (first ids)))
+  (let [filter-content (->> (wfs/property-in id-path ids)
                             (element-to-string))]
     {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
