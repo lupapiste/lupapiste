@@ -1,9 +1,12 @@
 (ns lupapalvelu.assignment
   (:require [monger.operators :refer [$set $in]]
             [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 ;; Helpers and schemas
 
@@ -101,3 +104,11 @@
    :recipient (usr/summary (usr/get-user {:username "pena"}))
    :target target
    :description description})
+
+(defn display-text-for-document [doc lang]
+  (let [schema-loc-key (str (get-in doc [:schema-info :name]) "._group_label")
+        schema-localized (i18n/localize lang schema-loc-key)
+        accordion-datas (schemas/resolve-accordion-field-values doc)]
+    (if (seq accordion-datas)
+      (str schema-localized " - " (ss/join " " accordion-datas))
+      schema-localized)))
