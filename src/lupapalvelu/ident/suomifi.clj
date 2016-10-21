@@ -8,12 +8,12 @@
             [hiccup.form :as form]
             [hiccup.core :as core]
             [sade.env :as env]
+            [lupapalvelu.ident.session :as ident-session]
             [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer [$set]]))
+            [monger.operators :refer [$set]]
+            [lupapalvelu.security :as security]))
 
 (defn session-id [] (get-in (request/ring-request) [:session :id]))
-
-(defn- generate-trid [] (apply str (repeatedly 20 #(rand-int 10))))
 
 (def header-translations
   {:suomifi-nationalidentificationnumber                      :personId
@@ -27,29 +27,38 @@
    :suomifi-vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
 
 (defpage "/from-shib/login/:trid" {trid :trid}
-  (let [headers          (get-in (request/ring-request) [:headers])
-        ; because HTTP headers are case insensitive
-        headers          (zipmap (map (comp keyword str/lower-case) (keys headers)) (vals headers))
-        relevant-headers (select-keys headers (keys header-translations))
-        ident            (util/map-keys header-translations relevant-headers)]
+  (let [headers  (->> (request/ring-request)
+                      :headers
+                      (comp keyword str/lower-case))
+        ident    (-> (select-keys headers (keys header-translations))
+                     (clojure.set/rename-keys header-translations))]
     (info ident)
-    (mongo/update-one-and-return :vetuma {:sessionid (session-id) :trid trid} {$set {:user ident}})
+    (mongo/update :vetuma {:sessionid (session-id) :trid trid} {$set {:user ident}})
     (response/json {:trid trid
-                    :user (lupapalvelu.ident.session/get-user trid)
+                    :user (ident-session/get-user trid)
                     :ident ident})))
+
+(defpage [:get "/api/saml/login"] {:keys [success error cancel]}
+  (let [sessionid (session-id)
+        trid      (security/random-password)
+        paths     {:success success
+                   :error   error
+                   :cancel  cancel}]
+    (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
+    (response/redirect (str "/saml/login/" trid))))
 
 (defpage "/api/saml/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
   (if (str/contains? status2 "AuthnFailed")
     (warn "SAML endpoint rejected authentication")
     (error "SAML endpoint encountered an error:" status status2 message))
   (if-let [trid (re-find #"\d+$" relay-state)]
-    (let [url (or (some-> (lupapalvelu.ident.session/get-user trid) (get-in [:paths :cancel])) "/")]
+    (let [url (or (some-> (ident-session/get-user trid) (get-in [:paths :cancel])) "/")]
       (response/redirect url))))
 
 (env/in-dev
   (defpage [:get "/dev/saml/init-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
-          trid      (generate-trid)
+          trid      (security/random-password)
           paths     {:success success
                      :error   error
                      :cancel  cancel}]
@@ -57,7 +66,7 @@
      (response/json {:trid trid})))
   (defpage [:get "/dev/saml-login"] {:keys [success error cancel]}
     (let [sessionid (session-id)
-          trid      (generate-trid)
+          trid      (security/random-password)
           paths     {:success success
                      :error   error
                      :cancel  cancel}]
