@@ -9,6 +9,13 @@
             [monger.operators :refer [$set]]
             [lupapalvelu.security :as security]))
 
+(def session-initiator-by-lang
+  {"fi" "/Shibboleth.sso/Login"
+   "sv" "/Shibboleth.sso/LoginSV"
+   "en" "/Shibboleth.sso/LoginEN"})
+
+(def default-session-initiator "/Shibboleth.sso/Login")
+
 (defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (def header-translations
@@ -33,14 +40,15 @@
     (let [data (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {$set {:user ident}})]
       (response/redirect (get-in data [:paths :success])))))
 
-(defpage [:get "/api/saml/login"] {:keys [success error cancel]}
+(defpage [:get "/api/saml/login"] {:keys [success error cancel language]}
   (let [sessionid (session-id)
         trid      (security/random-password)
         paths     {:success success
                    :error   error
-                   :cancel  cancel}]
+                   :cancel  cancel}
+        login-path (get session-initiator-by-lang language default-session-initiator)]
     (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
-    (response/redirect (str "/saml/login/" trid))))
+    (response/redirect (str login-path "?target=/saml/login/" trid))))
 
 (defpage "/api/saml/error" {relay-state :RelayState status :statusCode status2 :statusCode2 message :statusMessage}
   (if (str/contains? status2 "AuthnFailed")
