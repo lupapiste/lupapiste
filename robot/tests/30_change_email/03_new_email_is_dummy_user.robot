@@ -47,7 +47,7 @@ Mikko changes his email to mikko@example.net
   [Tags]  integration
   Change email to  mikko@example.net
   Open last email and click the email change link
-  Identify for email change via Vetuma
+  Identify for email change via dummy page
   Log in with new email address  mikko@example.net  mikko123  Mikko Intonen
 
 The invitation for mikko@example.net has been removed from the second application
