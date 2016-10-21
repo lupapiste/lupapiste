@@ -4,7 +4,7 @@
     <rollup params="open: $data.open"
             data-bind="attr: {'data-test-level': 'accordion-level-' + $data.level}">
       <rollup-status-button
-        data-bind="attr: {'data-test-name': $parent.name}"
+        data-bind="attr: {'data-test-name': $parent.accordionName}"
         params="open: $parent.open,
                 style: {'secondary': $parent.level === 0,
                         'tertiary': $parent.level > 0,
