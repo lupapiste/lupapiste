@@ -54,10 +54,10 @@
                                   [:tr [:td "Postinumero: "]
                                    [:td (form/text-field :zip "90909")]]
                                   [:tr [:td "Kaupunki: "]
-                                   [:td (form/text-field :city "Testikylä")]]
+                                   [:td (form/text-field :city "Testikyl\u00e4")]]
                                   [:tr [:td "TRID: "]
                                    [:td (form/text-field :stamp trid)]]
-                                  [:tr [:td {:colspan 2} (form/submit-button {:id "btn" :data-test-id "submit-button"} "Lähetä")]]
+                                  [:tr [:td {:colspan 2} (form/submit-button {:id "btn" :data-test-id "submit-button"} "OK")]]
                                   [:tr [:td {:colspan 2} (form/submit-button {:id "btn" :data-test-id "cancel-button" :name "cancel"} "Peru tapahtuma")]]])]]])))
 
   (defpage [:post "/dev/saml-login"] []
