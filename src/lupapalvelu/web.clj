@@ -53,7 +53,7 @@
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
             [lupapalvelu.calendars-api :as calendars]
-            [lupapalvelu.suomifi]
+            [lupapalvelu.ident.suomifi]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.reports.reports-api])
   (:import (java.io OutputStreamWriter BufferedWriter)))

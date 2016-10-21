@@ -3,7 +3,6 @@
 Documentation   Mikko changes email address
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
 Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
@@ -50,8 +49,8 @@ Got email
 
 Go through vetuma
   [Tags]  integration
-  Vetuma button is visible
-  Authenticate via Nordea via Vetuma  vetuma-init-email
+  Ident button is visible
+  Authenticate via dummy page
 
 Got info that email is changed
   [Tags]  integration
@@ -92,14 +91,11 @@ Mikko changes his email back to mikko@example.com
   [Tags]  integration
   Change email to  mikko@example.com
   Open last email and click the email change link
-  Identify for email change via Vetuma
+  Identify for email change via dummy page
   Log in with new email address  mikko@example.com  mikko123  Mikko Intonen
   Logout
 
 *** Keywords ***
-
-Vetuma button is visible
-  Wait until page contains element  vetuma-init-email
 
 Navigate to email change
   Click Element  user-name
