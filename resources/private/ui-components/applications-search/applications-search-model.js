@@ -3,6 +3,8 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.globalAuthModel;
+
   self.searchType = ko.observable("applications");
 
   self.defaultOperations = function() {
@@ -11,20 +13,63 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({defaultOperations: self.defaultOperations});
 
-  self.noApplications = ko.pureComputed(function(){
-    return self.dataProvider.data().userTotalCount <= 0;
+  self.externalApi = {
+    enabled: ko.pureComputed(function() {
+      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
+             lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
+    }),
+    showPermitsOnMap: function() {
+      var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
+      hub.send("external-api::filtered-permits", data);
+    }
+  };
+
+  self.limits = ko.observableArray([10, 25, 50, 100]);
+
+  self.searchTypes =
+    ko.observableArray([new LUPAPISTE.SearchSectionModel({
+      type: "applications",
+      lLabel: "navigation",
+      dataProvider: self.dataProvider,
+      externalApi: self.externalApi,
+      filterComponent:  "applications-search-filter",
+      resultsComponent: "applications-search-results",
+      pagingComponent:  "applications-search-paging",
+      tabsComponent:    "applications-search-tabs"
+    })]);
+  if (self.authorizationModel.ok("enable-foreman-search")) {
+    self.searchTypes.push(new LUPAPISTE.SearchSectionModel({
+      type: "foreman",
+      lLabel: "applications.search.foremen",
+      dataProvider: self.dataProvider,
+      externalApi: self.externalApi,
+      filterComponent:  "applications-foreman-search-filter",
+      resultsComponent: "applications-foreman-search-results",
+      pagingComponent:  "applications-search-paging",
+      tabsComponent:    "applications-foreman-search-tabs"
+    }));
+  }
+
+  self.search = ko.pureComputed(function () {
+    return _.find(self.searchTypes(), function (searchType) {
+      return searchType.type === self.searchType();
+    });
   });
 
   self.totalCount = ko.pureComputed(function() {
-    return self.dataProvider.data().totalCount;
+    return self.search().totalCount();
   });
 
   self.noResults = ko.pureComputed(function(){
-    return self.totalCount() === 0;
+    return self.search().totalCount() === 0;
   });
 
   self.gotResults = ko.pureComputed(function(){
-    return self.totalCount() > 0;
+    return self.search().gotResults();
+  });
+
+  self.noApplications = ko.pureComputed(function(){
+    return self.search().userTotalCount() <= 0;
   });
 
   self.missingTitle = ko.pureComputed(function() {
@@ -34,10 +79,6 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   self.missingDesc = ko.pureComputed(function() {
     return self.noApplications() ? "applications.empty.desc" : "applications.no-match.desc";
   });
-
-  self.authorizationModel = lupapisteApp.models.globalAuthModel;
-
-  self.limits = ko.observableArray([10, 25, 50, 100]);
 
   // clear filters when search type is changed
   self.searchType.subscribe(function(val) {
@@ -52,14 +93,6 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     self.dataProvider.updateApplicationType( val );
   });
 
-  self.showForemanSearch = ko.pureComputed(function() {
-    return self.searchType() === "foreman";
-  });
-
-  self.showApplicationsSearch = ko.pureComputed(function() {
-    return self.searchType() === "applications";
-  });
-
   self.create = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"create"});
     pageutil.openPage("create-part-1");
@@ -69,16 +102,4 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
     pageutil.openPage("create-page-prev-permit");
   };
-
-  self.externalApi = {
-    enabled: ko.pureComputed(function() {
-      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
-    }),
-    showPermitsOnMap: function() {
-      var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
-      hub.send("external-api::filtered-permits", data);
-    }
-  };
-
 };

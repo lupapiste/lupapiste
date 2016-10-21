@@ -5,7 +5,9 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
 
   self.dataProvider = params.dataProvider;
   self.limits = params.limits;
-  self.count = params.count;
+  self.count = ko.pureComputed(function() {
+    return self.dataProvider.data().totalCount;
+  });
 
   self.limit = params.dataProvider.limit;
 

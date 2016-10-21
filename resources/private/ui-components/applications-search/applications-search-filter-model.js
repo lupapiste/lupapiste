@@ -3,6 +3,8 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
   var self = this;
 
   self.dataProvider = params.dataProvider;
+  self.externalApi = params.externalApi;
+  self.gotResults = params.gotResults;
 
   self.savedFilters = lupapisteApp.services.applicationFiltersService.savedFilters;
 
