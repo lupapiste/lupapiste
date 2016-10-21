@@ -121,7 +121,7 @@
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.2"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
-                 [lupapiste/openpdf "1.0.5"]
+                 [lupapiste/openpdf "1.0.6"]
                  ; Wrapper for clj-pdf for PDF/A document generation
                  [lupapiste/pdfa-generator "1.0.1" :exclusions [org.clojure/tools.reader]]
                  ; Apache pdfbox for PDF/A wrapper
