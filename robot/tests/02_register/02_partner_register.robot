@@ -29,7 +29,7 @@ Got email
 
 Federated user activates account
   [Tags]  integration  ie8
-  Authenticate via dummy page  vetuma-linking-init
+  Authenticate via dummy page
   Wait until  Submit is disabled
   Wait until  Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Testikatu 23
   Textfield should contain  xpath=//input[@data-test-id='link-account-street']  Testikatu 23

@@ -4,10 +4,6 @@
             [noir.response :as response]
             [noir.request :as request]
             [sade.strings :as str]
-            [sade.util :as util]
-            [hiccup.form :as form]
-            [hiccup.core :as core]
-            [sade.env :as env]
             [lupapalvelu.ident.session :as ident-session]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$set]]
@@ -27,13 +23,14 @@
    :suomifi-vakinainenkotimainenlahiosoitepostitoimipaikkas   :city})
 
 (defpage "/from-shib/login/:trid" {trid :trid}
-  (let [headers  (->> (request/ring-request)
+  (let [sessionid (session-id)
+        headers  (->> (request/ring-request)
                       :headers
                       (comp keyword str/lower-case))
         ident    (-> (select-keys headers (keys header-translations))
                      (clojure.set/rename-keys header-translations))]
     (info ident)
-    (let [data (mongo/update-one-and-return :vetuma {:sessionid (:id session) :trid trid} {$set {:user ident}})]
+    (let [data (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {$set {:user ident}})]
       (response/redirect (get-in data [:paths :success])))))
 
 (defpage [:get "/api/saml/login"] {:keys [success error cancel]}

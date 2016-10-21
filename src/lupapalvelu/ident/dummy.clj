@@ -1,5 +1,11 @@
 (ns lupapalvelu.ident.dummy
   (:require [noir.response :as response]
+            [noir.core :refer [defpage]]
+            [sade.util :as util]
+            [hiccup.form :as form]
+            [hiccup.core :as core]
+            [sade.env :as env]
+            [monger.operators :refer [$set]]
             [lupapalvelu.mongo :as mongo]
             [sade.util :as util]
             [noir.request :as request]
