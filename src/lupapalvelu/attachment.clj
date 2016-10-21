@@ -673,7 +673,7 @@
   {:pre [(map? application) (:id application) (:attachments application)]}
   (let [{:keys [archivable contentType]} (last (:versions attachment))]
     (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
-      (fail :error.attachment.id)
+      (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
             temp-pdf (File/createTempFile fileId ".tmp")
