@@ -7,7 +7,8 @@
             [lupapalvelu.ident.session :as ident-session]
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$set]]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [sade.util :as util]))
 
 (def session-initiator-by-lang
   {"fi" "/Shibboleth.sso/Login"
@@ -33,7 +34,7 @@
   (let [sessionid (session-id)
         headers  (->> (request/ring-request)
                       :headers
-                      (comp keyword str/lower-case))
+                      (util/map-keys (comp keyword str/lower-case)))
         ident    (-> (select-keys headers (keys header-translations))
                      (clojure.set/rename-keys header-translations))]
     (info ident)
