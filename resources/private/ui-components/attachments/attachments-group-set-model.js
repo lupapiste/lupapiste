@@ -45,7 +45,7 @@ LUPAPISTE.AttachmentsGroupSetModel = function(tagGroups) {
   function initTagGroups(path, tagGroups, defaultOpen) {
     return _.map(tagGroups, function(tagGroup) {
       var groupPath = path.concat(_.head(tagGroup));
-      var subGroups = initTagGroups(groupPath, _.tail(subGroups), defaultOpen);
+      var subGroups = initTagGroups(groupPath, _.tail(tagGroup), defaultOpen);
       return getGroup(groupPath, subGroups, defaultOpen);
     });
   }

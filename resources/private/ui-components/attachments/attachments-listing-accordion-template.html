@@ -17,9 +17,9 @@
         <div data-bind="foreach: $parent.groups() ">
           <div class="attachments-accordion-content-part"
                data-bind="component: { name: 'attachments-listing-accordion',
-                                       params: { pageName: $parent[1].pageName,
+                                       params: { pageName: $parents[1].pageName,
                                                  path: $data.path,
-                                                 level: $parent[1].level + 1 } }">
+                                                 level: $parents[1].level + 1 } }">
           </div>
         </div>
         <!-- /ko -->
