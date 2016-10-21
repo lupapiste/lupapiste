@@ -24,7 +24,7 @@
    :suomifi-mail                                              :email
    :suomifi-vakinainenkotimainenlahiosoites                   :street
    :suomifi-vakinainenkotimainenlahiosoitepostinumero         :zip
-   :suomifi-vakinainenkotimainenLahiosoitepostitoimipaikkas   :city})
+   :suomifi-vakinainenkotimainenlahiosoitepostitoimipaikkas   :city})
 
 (defpage "/from-shib/login/:trid" {trid :trid}
   (let [headers  (->> (request/ring-request)
@@ -33,10 +33,8 @@
         ident    (-> (select-keys headers (keys header-translations))
                      (clojure.set/rename-keys header-translations))]
     (info ident)
-    (mongo/update :vetuma {:sessionid (session-id) :trid trid} {$set {:user ident}})
-    (response/json {:trid trid
-                    :user (ident-session/get-user trid)
-                    :ident ident})))
+    (let [data (mongo/update-one-and-return :vetuma {:sessionid (:id session) :trid trid} {$set {:user ident}})]
+      (response/redirect (get-in data [:paths :success])))))
 
 (defpage [:get "/api/saml/login"] {:keys [success error cancel]}
   (let [sessionid (session-id)
