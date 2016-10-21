@@ -1,7 +1,6 @@
 (ns lupapalvelu.action
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
-            [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull]]
             [schema.core :as sc]
@@ -91,7 +90,7 @@
       extra-error-data)))
 
 (defn non-blank-parameters [params command]
-  (filter-params-of-command params command #(or (not (string? %)) (s/blank? %)) :error.missing-parameters))
+  (filter-params-of-command params command #(or (not (string? %)) (ss/blank? %)) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
@@ -100,7 +99,7 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (not (string? %)) (s/blank? %)))
+      (partial some #(or (not (string? %)) (ss/blank? %)))
       :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
@@ -148,7 +147,7 @@
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
-    (trace "invalid property id parameters:" (s/join ", " invalid))
+    (trace "invalid property id parameters:" (ss/join ", " invalid))
     (fail :error.invalid-property-id)))
 
 (defn map-parameters [params command]
@@ -271,7 +270,7 @@
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
-    (info "missing parameters:" (s/join ", " missing))
+    (info "missing parameters:" (ss/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
 
 (defn input-validators-fail [command]
