@@ -101,6 +101,9 @@
   (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
     (update document :schema-info merge current-info)))
 
+
+(def select-one-of-key "_selected")
+
 ;;
 ;; helpers
 ;;
@@ -115,6 +118,19 @@
 
 (defn approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
+(defn resolve-accordion-field-values
+  "Returns collection of document values from paths defined by schema's :accordion-fields"
+  [document]
+  (when-let [fields (get-in document [:schema-info :accordion-fields])]
+    (let [doc-data (:data document)
+          selected-value (when (= (ffirst fields) select-one-of-key)
+                          (get-in doc-data [(keyword select-one-of-key) :value]))
+          get-field-value (fn [path] (get-in doc-data (conj (mapv keyword path) :value)))]
+      (if selected-value
+        (->> (filter #(= (first %) selected-value) fields)
+             (map get-field-value))
+        (map get-field-value fields)))))
 
 ;;
 ;; schema sniplets
@@ -151,8 +167,6 @@
               :i18nkey "country.country"
               :sortBy :displayname
               :body (map (fn [n]{:name n :i18nkey (str "country." n)}) country-list)})
-
-(def select-one-of-key "_selected")
 
 (def turvakielto "turvakieltoKytkin")
 
