@@ -17,6 +17,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]
@@ -38,26 +39,6 @@
 ;;
 ;; Application approval
 ;;
-
-; TODO needs refactoring
-(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
-  (let [link-permit-app-id (-> application :linkPermitData first :id)
-        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
-    ; TODO why we check only link permit data on index 0?
-    (if kuntalupatunnus
-      (-> application
-         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
-         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} states/post-submitted-states))
-        application
-        (do
-          (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
-                 " Associated Link-permit data: " (:linkPermitData application))
-          (if (foreman/foreman-app? application)
-            (fail! :error.link-permit-app-not-in-post-sent-state)
-            (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
 
 (defn get-transfer-item [type {:keys [created user]} & [attachments]]
   (let [transfer {:type type
@@ -107,7 +88,7 @@
         application (-> application
                       meta-fields/enrich-with-link-permit-data
                       (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                         (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
+                         (link-permit/update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
