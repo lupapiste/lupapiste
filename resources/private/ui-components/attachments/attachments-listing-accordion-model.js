@@ -96,8 +96,9 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
   };
 
   // auto-open accordion when new filtered results are available
-  self.disposedComputed(function() {
-    if ( self.filteredAttachments().length ) {
+  var attachmentCount = self.disposedComputed(function() { return self.filteredAttachments().length; });
+  self.subscribeChanged(attachmentCount, function(count, previousCount) {
+    if (count > previousCount) {
       tagGroup.toggle(true);
     }
   });
