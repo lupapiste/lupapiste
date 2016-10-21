@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: attachments">
-        <tr data-bind="attr: {'data-test-type': $data.type()['type-group'] + '.' + $data.type()['type-id'],
+        <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
                               'data-test-state': $data.state}">
           <td data-bind="foreach: $parent.stateIcons( $data )"
               class="attachment-state-icons">
@@ -30,7 +30,7 @@
           <td>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
-              <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
+              <span data-bind="text: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id'])])"></span>
               <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             </a>
             <br>
@@ -46,10 +46,10 @@
           <!-- /ko -->
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: loc(['attachmentType', type()['type-group'], type()['type-id']])"></span>
+            <span data-bind="text: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id'])])"></span>
             <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
             <br>
-            <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+            <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
