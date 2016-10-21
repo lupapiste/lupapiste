@@ -2,6 +2,8 @@
   (:require [monger.operators :refer [$set $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
@@ -45,7 +47,12 @@
                       :closed timestamp
                       :closedBy (select-keys user [:id :firstName :lastName])
                       :state :closed}
-        application  (merge orig-app app-updates)
+        application  (-> orig-app
+                         meta-fields/enrich-with-link-permit-data
+                         (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
+                             (link-permit/update-link-permit-data-with-kuntalupatunnus-from-verdict %)
+                             %))
+                         (merge app-updates))
         organization @org
         krysp?       (organization/krysp-integration? organization (permit/permit-type application))]
     (when krysp?
