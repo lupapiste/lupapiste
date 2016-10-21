@@ -32,9 +32,10 @@
          </div>
          <div class="col-1"
              data-bind="component: {name: 'select-field',
-                         params: {value: recipient,
+                         params: {value: recipientId,
                                   options: params.authorities,
-                                  optionsText: function(u) { return u.firstName + ' ' + u.lastName;},
+                                  optionsValue: 'id',
+                                  optionsText: util.partyFullName,
                                   valueAllowUnset: true,
                                   id: 'assignment-recipient',
                                   label: loc('application.assignment.recipient.label'),

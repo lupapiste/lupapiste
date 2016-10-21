@@ -26,7 +26,7 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
 
   self.users = ko.observableArray([]);
 
-  self.recipient = ko.observable(params.authorities()[0]);
+  self.recipientId = ko.observable();
 
   self.description = ko.observable();
 
@@ -38,8 +38,11 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
     return self.selectedType() ? loc("application.assignment.target." + self.selectedType()) : loc("application.assignment.type");
   });
 
-  self.createAssignment = function(v) {
-    self.sendEvent(myService, "createAssignment", v);
+  self.createAssignment = function() {
+    self.sendEvent(myService, "createAssignment", {id: params.applicationId(),
+                                                   recipientId: self.recipientId(),
+                                                   target: [self.selectedType(), self.selectedSubtype()],
+                                                   description: self.description()});
     self.editorVisible(false);
   };
 
