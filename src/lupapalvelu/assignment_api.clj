@@ -1,5 +1,5 @@
 (ns lupapalvelu.assignment-api
-  (:require [lupapalvelu.action :refer [defcommand defquery non-blank-parameters vector-parameters parameters-matching-schema]]
+  (:require [lupapalvelu.action :as action :refer [defcommand defquery parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
@@ -8,16 +8,16 @@
 
 ;; Helpers and validators
 
-(defn- username->summary [username]
-  (-> {:username username} (usr/get-user) (usr/summary)))
+(defn- userid->summary [id]
+  (usr/summary (usr/get-user-by-id id)))
 
-(defn- username->session-summary [username]
-  (-> {:username username} (usr/get-user) (usr/session-summary)))
+(defn- userid->session-summary [id]
+  (usr/session-summary (usr/get-user-by-id id)))
 
 (defn- validate-receiver [{{:keys [organization]} :application
-                           {:keys [recipient]}    :data}]
-  (when (and recipient
-             (not (usr/user-is-authority-in-organization? (username->session-summary recipient)
+                           {:keys [recipientId]}    :data}]
+  (when (and recipientId
+             (not (usr/user-is-authority-in-organization? (userid->session-summary recipientId)
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
 
@@ -45,7 +45,7 @@
   {:description "Return a single assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :input-validators [(partial parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
+   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :feature :assignments}
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
@@ -57,9 +57,9 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
-   :parameters       [recipient target description]
-   :input-validators [(partial non-blank-parameters [:recipient :description])
-                      (partial vector-parameters [:target])]
+   :parameters       [recipientId target description]
+   :input-validators [(partial action/non-blank-parameters [:recipientId :description])
+                      (partial action/vector-parameters [:target])]
    :pre-checks       [validate-receiver]
    :states           states/all-application-states-but-draft-or-terminal
    :feature          :assignments}
@@ -69,7 +69,7 @@
   (ok :id (assignment/insert-assignment {:organizationId organization
                                          :applicationId  id
                                          :creator        (usr/summary user)
-                                         :recipient      (username->summary recipient)
+                                         :recipient      (userid->summary recipientId)
                                          :target         target
                                          :description    description}
                                         created)))
@@ -78,7 +78,7 @@
   {:description "Complete an assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :input-validators [(partial non-blank-parameters [:assignmentId])]
+   :input-validators [(partial action/non-blank-parameters [:assignmentId])]
    :feature :assignments}
   [{user    :user
     created :created}]
