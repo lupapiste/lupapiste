@@ -36,7 +36,8 @@
                       :headers
                       (util/map-keys (comp keyword str/lower-case)))
         ident    (-> (select-keys headers (keys header-translations))
-                     (clojure.set/rename-keys header-translations))]
+                     (clojure.set/rename-keys header-translations)
+                     (assoc :stamp trid))]
     (info ident)
     (let [data (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {$set {:user ident}})]
       (response/redirect (get-in data [:paths :success])))))
