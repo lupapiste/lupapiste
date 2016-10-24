@@ -15,6 +15,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
+  var filterSet = service.getFilters( "attachments-listing" );
+
   self.groupTypes   = service.groupTypes;
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
@@ -50,8 +52,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   // Navigation
   self.backToApplication = trackClickWrap("backToApplication", lupapisteApp.models.application.open, "attachments");
 
-  self.nextAttachmentId = service.nextFilteredAttachmentId(self.id);
-  self.previousAttachmentId = service.previousFilteredAttachmentId(self.id);
+  self.nextAttachmentId = service.nextFilteredAttachmentId(self.id, filterSet);
+  self.previousAttachmentId = service.previousFilteredAttachmentId(self.id, filterSet);
 
   self.openNextAttachment = trackClickWrap("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
   self.openPreviousAttachment = trackClickWrap("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );

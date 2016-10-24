@@ -34,6 +34,17 @@ LUPAPISTE.ComponentBaseModel = function() {
     koSubscriptions = _.pull(koSubscriptions, subscription);
   };
 
+  self.subscribeChanged = function(observable, fn) {
+    var prevValue;
+    var multiSubscription = { // Wraps both (before and after) subscriptions in one disposable object
+      subscriptions: [ observable.subscribe(function(value) { prevValue = value; }, null, "beforeChange"),
+                       observable.subscribe(function(value) { fn(value, prevValue); }) ],
+      dispose: function() { _.invokeMap(multiSubscription.subscriptions, "dispose"); }
+    };
+    koSubscriptions.push(multiSubscription);
+    return multiSubscription;
+  };
+
   self.disposedComputed = function(fn) {
     var computed = ko.computed(fn);
     koSubscriptions.push(computed);
