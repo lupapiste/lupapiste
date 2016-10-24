@@ -35,7 +35,16 @@
                              (domain/get-multiple-applications-no-access-checking {:verdicts true :state true}))]
     (map #(assoc % :app-data (util/find-by-id (:id %) link-permit-apps)) link-permit-data)))
 
+(defn- check-link-permit-count [{{primary-op :name} :primaryOperation app-id :id link-permit-data :linkPermitData}]
+  (when (some-> (op/get-operation-metadata primary-op :max-outgoing-link-permits)
+                (< (count link-permit-data)))
+    (warn "Application " app-id " has more link permits than allowed for operation '" primary-op "'!"))
+  (when (some-> (op/get-operation-metadata primary-op :min-outgoing-link-permits)
+                (> (count link-permit-data)))
+    (warn "Application " app-id " has fewer link permits than required for operation '" primary-op "'!")))
+
 (defn update-backend-ids-in-link-permit-data [application]
+  (check-link-permit-count application)
   (let [link-permit-data (link-permits-with-app-data application)]
     (some->> (first link-permit-data)  ; TODO: Find out if should fail when some or every link permit check fails
              (check-link-permit-backend-id application)
