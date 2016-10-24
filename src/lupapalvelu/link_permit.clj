@@ -1,26 +1,40 @@
 (ns lupapalvelu.link-permit
-  (:require [taoensso.timbre :as timbre :refer [infof info error errorf]]
+  (:require [taoensso.timbre :as timbre :refer [infof info error errorf warn]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.states :as states]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.util :as util]))
 
-;; TODO needs refactoring
-(defn update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
-  (let [link-permit-app-id (-> application :linkPermitData first :id) ; TODO: search trough all link permits
-        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)] ; TODO: search trough all verdicts
-    ;; TODO why we check only link permit data on index 0?
-    (if kuntalupatunnus
-      (-> application
-         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
-         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} states/post-submitted-states))
-        application
-        (do
-          (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
-                 " Associated Link-permit data: " (:linkPermitData application))
-          (if (foreman/foreman-app? application)
-            (fail! :error.link-permit-app-not-in-post-sent-state)
-            (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
+(defn- get-backend-id [application]
+  (some :kuntalupatunnus (:verdicts application)))
+
+(defn- update-backend-id-in-link-permit [link-permit-applications {link-permit-app-id :id :as link-permit}]
+  (if-let [backend-id  (-> (util/find-by-id link-permit-app-id link-permit-applications)
+                           get-backend-id)]
+    (assoc link-permit :lupapisteId link-permit-app-id :type "kuntalupatunnus" :id backend-id)
+    link-permit))
+
+(defn- link-permit-not-found! [application link-permit-app]
+  (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" (:id link-permit-app) ") verdict."
+        " Associated Link-permit data: " (:linkPermitData application))
+  (if (foreman/foreman-app? application)
+    (fail! :error.link-permit-app-not-in-post-sent-state)
+    (fail! :error.kuntalupatunnus-not-available-from-verdict)))
+
+(defn- check-link-permit-backend-id [application {link-state :state link-type :type :as link-permit-app}]
+  (cond
+    (= link-type "kuntalupatunnus")                            nil ; backend-id already exists
+    (get-backend-id link-permit-app)                           nil ; backend-id found from verdicts
+    (and (foreman/foreman-app? application)
+         (states/post-submitted-states (keyword link-state)))  nil ; main application for foreman app is submitted
+    :else                                                      :not-found))
+
+(defn update-backend-ids-in-link-permit-data [application]
+  (let [link-permit-apps (-> (map :id (:linkPermitData application))
+                             (domain/get-multiple-applications-no-access-checking {:verdicts true :state true}))]
+    (some->> (first link-permit-apps) ; TODO: Find out if should fail when some or every link permit check fails
+             (check-link-permit-backend-id application)
+             (link-permit-not-found! application))
+    (update application :linkPermitData (partial map (partial update-backend-id-in-link-permit link-permit-apps)))))
