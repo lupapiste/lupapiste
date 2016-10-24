@@ -10,10 +10,9 @@
 (defn- get-backend-id [application]
   (some :kuntalupatunnus (:verdicts application)))
 
-(defn- update-backend-id-in-link-permit [link-permit-applications {link-permit-app-id :id :as link-permit}]
-  (if-let [backend-id  (-> (util/find-by-id link-permit-app-id link-permit-applications)
-                           get-backend-id)]
-    (assoc link-permit :lupapisteId link-permit-app-id :type "kuntalupatunnus" :id backend-id)
+(defn- update-backend-id-in-link-permit [{app-id :id :as link-permit}]
+  (if-let [backend-id  (get-backend-id (:app-data link-permit))]
+    (assoc link-permit :lupapisteId app-id :type "kuntalupatunnus" :id backend-id)
     link-permit))
 
 (defn- link-permit-not-found! [application link-permit-app]
@@ -23,18 +22,23 @@
     (fail! :error.link-permit-app-not-in-post-sent-state)
     (fail! :error.kuntalupatunnus-not-available-from-verdict)))
 
-(defn- check-link-permit-backend-id [application {link-state :state link-type :type :as link-permit-app}]
+(defn- check-link-permit-backend-id [application {{link-state :state} :app-data link-type :type :as link-permit-app}]
   (cond
     (= link-type "kuntalupatunnus")                       nil ; backend-id already exists
-    (get-backend-id link-permit-app)                      nil ; backend-id found from verdicts
+    (get-backend-id (:app-data link-permit-app))          nil ; backend-id found from verdicts
     (and (foreman/foreman-app? application)
          (states/post-sent-states (keyword link-state)))  nil ; main application for foreman app is submitted
     :else                                                 :not-found))
 
-(defn update-backend-ids-in-link-permit-data [application]
-  (let [link-permit-apps (-> (map :id (:linkPermitData application))
+(defn- link-permits-with-app-data [{link-permit-data :linkPermitData}]
+  (let [link-permit-apps (-> (map :id link-permit-data)
                              (domain/get-multiple-applications-no-access-checking {:verdicts true :state true}))]
-    (some->> (first link-permit-apps) ; TODO: Find out if should fail when some or every link permit check fails
+    (map #(assoc % :app-data (util/find-by-id (:id %) link-permit-apps)) link-permit-data)))
+
+(defn update-backend-ids-in-link-permit-data [application]
+  (let [link-permit-data (link-permits-with-app-data application)]
+    (some->> (first link-permit-data)  ; TODO: Find out if should fail when some or every link permit check fails
              (check-link-permit-backend-id application)
              (link-permit-not-found! application))
-    (update application :linkPermitData (partial map (partial update-backend-id-in-link-permit link-permit-apps)))))
+    (assoc application :linkPermitData (->> (map update-backend-id-in-link-permit link-permit-data)
+                                            (map #(dissoc % :app-data))))))
