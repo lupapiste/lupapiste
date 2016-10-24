@@ -26,23 +26,23 @@ LUPAPISTE.ApplicationsSearchModel = function() {
 
   self.limits = ko.observableArray([10, 25, 50, 100]);
 
-  self.searchTypes =
+  self.searchModels =
     ko.observableArray([new LUPAPISTE.SearchSectionModel({
-      type: "applications",
-      lLabel: "navigation",
-      dataProvider: self.dataProvider,
-      externalApi: self.externalApi,
+      type:             "applications",
+      lLabel:           "navigation",
+      dataProvider:     self.dataProvider,
+      externalApi:      self.externalApi,
       filterComponent:  "applications-search-filter",
       resultsComponent: "applications-search-results",
       pagingComponent:  "applications-search-paging",
       tabsComponent:    "applications-search-tabs"
     })]);
   if (self.authorizationModel.ok("enable-foreman-search")) {
-    self.searchTypes.push(new LUPAPISTE.SearchSectionModel({
-      type: "foreman",
-      lLabel: "applications.search.foremen",
-      dataProvider: self.dataProvider,
-      externalApi: self.externalApi,
+    self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+      type:             "foreman",
+      lLabel:           "applications.search.foremen",
+      dataProvider:     self.dataProvider,
+      externalApi:      null,
       filterComponent:  "applications-foreman-search-filter",
       resultsComponent: "applications-foreman-search-results",
       pagingComponent:  "applications-search-paging",
@@ -50,26 +50,26 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     }));
   }
 
-  self.search = ko.pureComputed(function () {
-    return _.find(self.searchTypes(), function (searchType) {
-      return searchType.type === self.searchType();
+  self.searchModel = ko.pureComputed(function () {
+    return _.find(self.searchModels(), function (searchModel) {
+      return searchModel.type === self.searchType();
     });
   });
 
   self.totalCount = ko.pureComputed(function() {
-    return self.search().totalCount();
+    return self.searchModel().totalCount();
   });
 
   self.noResults = ko.pureComputed(function(){
-    return self.search().totalCount() === 0;
+    return self.searchModel().totalCount() === 0;
   });
 
   self.gotResults = ko.pureComputed(function(){
-    return self.search().gotResults();
+    return self.searchModel().gotResults();
   });
 
   self.noApplications = ko.pureComputed(function(){
-    return self.search().userTotalCount() <= 0;
+    return self.searchModel().userTotalCount() <= 0;
   });
 
   self.missingTitle = ko.pureComputed(function() {

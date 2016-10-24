@@ -43,9 +43,9 @@
             <!-- /ko -->
           </div>
 
-          <!-- ko if: searchTypes().length > 1 -->
+          <!-- ko if: searchModels().length > 1 -->
           <div class="form-grid form-grid--no-border"
-               data-bind="foreach: searchTypes">
+               data-bind="foreach: searchModels">
             <span
                  data-bind="component: {name: 'radio-field',
                                         params: {value: $data.type,
@@ -58,13 +58,11 @@
           <!-- /ko -->
 
           <!-- Filters -->
-          <div data-bind="component: {name:   search().filter.name,
-                                      params: search().filter.params}"
+          <div data-bind="component: searchModel().filter"
                class="application-search-component"></div>
 
           <!-- Tabs -->
-          <div data-bind="component: {name:   search().tabs.name,
-                                      params: search().tabs.params}"
+          <div data-bind="component: searchModel().tabs"
                class="application-search-component"></div>
         </div>
       </div>
@@ -74,13 +72,11 @@
       <div class="container">
 
         <!-- ko ifnot: noApplications() -->
-        <div data-bind="component: {name: search().searchResults.name,
-                        params: search().searchResults.params}"
+        <div data-bind="component: searchModel().searchResults"
              class="applications-search-component"></div>
 
           <!-- ko if: gotResults() -->
-          <div data-bind="component: {name: search().paging.name,
-                          params: search().paging.params}"
+          <div data-bind="component: searchModel().paging"
                class="applications-search-component"></div>
           <!-- /ko -->
 
