@@ -21,8 +21,8 @@
   (fact "two verdicts, second has backend-id"
     (get-backend-id {:verdicts [{} {:kuntalupatunnus ..backend-id..}]}) => ..backend-id..)
 
-  (fact "two verdicts, two backend-ids, matches first"
-    (get-backend-id {:verdicts [{:kuntalupatunnus ..backend-id1..} {:kuntalupatunnus ..backend-id2..}]}) = ..backend-id2..)
+  (fact "two verdicts, two backend-ids, return first"
+    (get-backend-id {:verdicts [{:kuntalupatunnus ..backend-id1..} {:kuntalupatunnus ..backend-id2..}]}) => ..backend-id1..)
 
   (fact "no verdicts"
     (get-backend-id {}) => nil))
@@ -45,7 +45,7 @@
     (check-link-permit-backend-id {} {:type "kuntalupatunnus"}) => nil)
 
   (fact "kuntalupatunnus found from verdict"
-    (check-link-permit-backend-id {} {:verdicts [{:kuntalupatunnus ..backend-id..}]}) => nil)
+    (check-link-permit-backend-id {} {:app-data {:verdicts [{:kuntalupatunnus ..backend-id..}]}}) => nil)
 
   (fact "kuntalupatunnus not found"
     (check-link-permit-backend-id {} {}) => :not-found)
