@@ -126,11 +126,12 @@
     (let [doc-data (:data document)
           selected-value (when (= (ffirst fields) select-one-of-key)
                           (get-in doc-data [(keyword select-one-of-key) :value]))
-          get-field-value (fn [path] (get-in doc-data (conj (mapv keyword path) :value)))]
-      (if selected-value
-        (->> (filter #(= (first %) selected-value) fields)
-             (map get-field-value))
-        (map get-field-value fields)))))
+          interesting-fields (if selected-value
+                               (filter #(= (first %) selected-value) fields)
+                               fields)]
+      (->> interesting-fields
+           (map (fn [path] (get-in doc-data (conj (mapv keyword path) :value))))
+           (remove util/empty-or-nil?)))))
 
 ;;
 ;; schema sniplets
