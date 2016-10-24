@@ -62,7 +62,7 @@
    :input-validators    [(partial action/non-blank-parameters [:email])
                          action/email-validator
                          guest/valid-guest-role]
-   :states              states/all-application-states
+   :states              (states/all-application-states-but [:canceled])
    :notified            true}
   [command]
   (guest/invite-guest command))

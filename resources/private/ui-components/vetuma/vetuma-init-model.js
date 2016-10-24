@@ -3,7 +3,8 @@ LUPAPISTE.VetumaInitModel = function(params) {
 
   var self = this;
   var VETUMA_PARAMS = ["success", "error", "cancel", "y", "vtj", "language"];
-  var VETUMA_BASE = "/api/vetuma?";
+  var VETUMA_BASE = features.enabled("dummy-ident") ? "/dev/saml-login?" :
+                    (features.enabled("suomifi-ident") ? "/api/saml/login?" : "/api/vetuma?");
 
   if (_.isUndefined(params.language)) {
     params.language = loc.currentLanguage;

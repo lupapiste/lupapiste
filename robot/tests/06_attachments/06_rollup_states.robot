@@ -36,17 +36,29 @@ Sonja adds another Pääpiirustus
 Sonja approves Julkisivupiirustus
   Approve row  tr[data-test-type='paapiirustus.julkisivupiirustus']
 
-Making Pohjapiirustus not needed approves Pääpiirustukset
+Pääpiirrustukset accordion still rejected since Pohjapiirustus not uploaded
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
   Rollup rejected  Pääpiirustukset
-  Click not needed  paapiirustus.pohjapiirustus
-  Rollup approved  Pääpiirustukset
-  Rollup neutral  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup neutral  Muut suunnitelmat
 
 Hiding not needed does not affect states
   Scroll and click test id  needed-filter-label
   Scroll and click test id  needed-filter-label
-  Rollup neutral  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+  Rollup rejected  Pääpiirustukset
   Wait until  Element should not be visible  jquery=rollup-status-button[data-test-name='Muut suunnitelmat'] button.rollup-button
+
+Making Pohjapiirustus not needed approves Pääpiirustukset
+  Rollup rejected  Pääpiirustukset
+  Click not needed  paapiirustus.pohjapiirustus
+  Rollup approved  Pääpiirustukset
+  Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
+
+Hiding not needed again does not affect states
+  Scroll and click test id  needed-filter-label
+  Scroll and click test id  needed-filter-label
+  Rollup approved  Pääpiirustukset
+  Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja adds and approves Väestonsuojasuunnitelma
   Scroll and click test id  notNeeded-filter-label

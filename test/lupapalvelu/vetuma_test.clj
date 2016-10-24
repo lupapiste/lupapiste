@@ -27,7 +27,7 @@
 (def url "https://localhost:8443")
 (def config-fixture {:rcvid (env/value :vetuma :rcvid)
                      :key (env/value :vetuma :key)})
-(if (env/value :vetuma :key)
+(if (and (env/value :vetuma :key) (not (env/feature? :dummy-ident)) (not (env/feature? :suomifi-ident)))
   (facts
     (fact "digest calculation based on vetuma docs"
       (mac test-parameters) => "72A72A046BD5561BD1C47F3B77FC9456AD58C9C428CACF44D502834C9F8C02A3")
@@ -58,7 +58,7 @@
                 *err* (NullWriter.)]
         (parsed invalid-response) => (throws RuntimeException))))
 
-  (println "Vetuma key not defined, skipped test"))
+  (println "Vetuma disabled or key not defined, skipped test"))
 
 (facts "template parsing"
   (fact "without placeholders input is returned"

@@ -796,7 +796,7 @@
     decode-response
     :body))
 
-(defn vetuma-stamp! []
+(defn vetuma-stamp! [] ; Used by neighbor_itest
   (-> {:userid "123"
        :firstname "Pekka"
        :lastname "Banaani"}

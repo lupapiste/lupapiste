@@ -5,7 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
-Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/ident_helpers.robot
 
 *** Test Cases ***
 
@@ -13,7 +13,7 @@ Init, go to bulletin and authenticate via Vetuma
   [Tags]  integration
   Create a bulletin and go to bulletin page
   Open bulletin tab  info
-  Authenticate via Osuuspankki via Vetuma  vetuma-init
+  Authenticate via dummy page  vetuma-init
   Open bulletin tab  info
 
 Comment bulletin without any additional form fields
