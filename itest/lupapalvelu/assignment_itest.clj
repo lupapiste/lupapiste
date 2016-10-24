@@ -4,7 +4,9 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [lupapalvelu.domain :as domain]
+            [sade.util :as util]))
 
 (when (env/feature? :assignments)
   (apply-remote-minimal)
@@ -79,4 +81,22 @@
       (fact "Authorities CAN complete other authorities' assignments within their organizations"
         (complete-assignment sonja assignment-id2) => ok?)
       (fact "After calling complete-assignment, the assignment is completed"
-        (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :status) => "completed"))))
+        (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :status) => "completed")))
+
+  (facts "Assignment targets"
+    (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
+          _ (generate-documents app-id sonja)
+          hakija-doc-id (:id (domain/get-applicant-document (:documents (query-application sonja app-id))))
+          update-resp (command sonja :update-doc :id app-id :doc hakija-doc-id :updates [["henkilo.henkilotiedot.etunimi" "SONJA"]])
+          targets-resp (query sonja :assignment-targets :id app-id :lang "fi")
+          party-target-values (second (first (filter (fn [[k _]] (= k "parties")) (:targets targets-resp))))]
+      update-resp => ok?
+      targets-resp => ok?
+
+      (:targets targets-resp) => vector?
+      (fact "targets are returned as key-val vectors"
+        (:targets targets-resp) => (has every? (fn [[k v]] (and (string? k) (vector? v)))))
+      (fact "keys for values look right"
+        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:displayText :id]))))
+      (fact "data from accordion-field is in display text"
+        (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA")))))

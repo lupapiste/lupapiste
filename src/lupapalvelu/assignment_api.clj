@@ -1,6 +1,7 @@
 (ns lupapalvelu.assignment-api
   (:require [lupapalvelu.action :as action :refer [defcommand defquery parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -49,6 +50,20 @@
    :feature :assignments}
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
+
+(defquery assignment-targets
+  {:description "Possible assigment targets per application for frontend"
+   :parameters [id lang]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :states   states/all-application-states-but-draft-or-terminal
+   :feature :assignments}
+  [{:keys [application]}]
+  (let [party-docs (domain/get-documents-by-type application :party)
+        parties    (for [doc party-docs]
+                     {:id (:id doc)
+                      :displayText (assignment/display-text-for-document doc lang)})]
+    (ok :targets [["parties" parties]])))
 
 ;;
 ;; Commands

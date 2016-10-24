@@ -105,7 +105,9 @@
    :target target
    :description description})
 
-(defn display-text-for-document [doc lang]
+(defn display-text-for-document
+  "Return localized text for frontend. Text is schema name + accordion-fields if defined."
+  [doc lang]
   (let [schema-loc-key (str (get-in doc [:schema-info :name]) "._group_label")
         schema-localized (i18n/localize lang schema-loc-key)
         accordion-datas (schemas/resolve-accordion-field-values doc)]
