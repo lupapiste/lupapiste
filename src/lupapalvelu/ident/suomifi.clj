@@ -20,7 +20,7 @@
 (defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (def header-translations
-  {:suomifi-nationalidentificationnumber                      :personId
+  {:suomifi-nationalidentificationnumber                      :userid
    :suomifi-cn                                                :fullName
    :suomifi-firstname                                         :firstName
    :suomifi-givenname                                         :givenName
