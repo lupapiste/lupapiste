@@ -133,7 +133,7 @@
     (let [jetty-opts (merge
                        {:max-threads 250}
                        (when (env/value :ssl :enabled) (assoc (env/value :ssl) :ssl? true)))
-          noir-opts {:mode env/mode
+          noir-opts {:mode (keyword (or (env/value :noir :mode) env/mode))
                      :ns 'lupapalvelu.web
                      :jetty-options jetty-opts
                      :session-store (session/cookie-store {:key (read-session-key)})
