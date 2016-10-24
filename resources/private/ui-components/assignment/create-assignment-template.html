@@ -1,33 +1,35 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-template">
+  <!-- ko if: targetGroups().length > 0 -->
   <button class="primary"
           data-bind="toggleClick: editorVisible,
                      testId:'create-assignment-editor'">
     <i class="lupicon-circle-plus"></i>
     <span data-bind="ltext: 'application.assignment.create'"></span>
   </button>
-  <bubble-dialog params="visible: editorVisible, okFun: createAssignment, buttonIcon: 'lupicon-save'">
+  <bubble-dialog params="visible: editorVisible, okFun: createAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
     <!-- ko with: $parent -->
     <div class="form-grid">
       <div class="row">
         <div class="col-1"
              data-bind="component: {name: 'select-field',
-                          params: {value: selectedType,
-                                  options: types,
-                                  optionsValue: 'type',
-                                  optionsText: mainTypeLoc,
-                                  valueAllowUnset: true,
-                                  id: 'assignment-target-group',
-                                  label: 'Aihe',
-                                  required: false}}">
+                          params: {value: selectedTargetGroup,
+                                   options: targetGroups,
+                                   optionsText: mainTypeLoc,
+                                   valueAllowUnset: true,
+                                   id: 'assignment-target-group',
+                                   label: 'Aihe',
+                                   required: false}}">
         </div>
         <div class="col-1"
              data-bind="component: {name: 'select-field',
-                         params: {value: selectedSubtype,
-                                  options: subTypes,
+                         params: {value: selectedTargetId,
+                                  options: targetIds,
+                                  optionsText: 'displayText',
+                                  optionsValue: 'id',
                                   valueAllowUnset: true,
                                   id: 'assignment-target-id',
                                   label: subTypeLabel,
-                                  disable: subTypes().length == 0,
+                                  disable: targetIds().length == 0,
                                   required: false}}">
          </div>
          <div class="col-1"
@@ -54,4 +56,5 @@
     </div>
    <!-- /ko -->
   </bubble-dialog>
+  <!-- /ko -->
 </script>

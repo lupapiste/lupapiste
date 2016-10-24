@@ -6,7 +6,7 @@ LUPAPISTE.AssignmentService = function() {
   "use strict";
   var self = this;
 
- // {:id              ssc/ObjectIdStr
+   // {:id              ssc/ObjectIdStr
    // :organization-id sc/Str
    // :application-id  sc/Str
    // :target          sc/Any
@@ -17,18 +17,29 @@ LUPAPISTE.AssignmentService = function() {
    // :completer-id    (sc/maybe sc/Str)
    // :active          sc/Bool
    // :description     sc/Str})
-   var test = {id: "123", organizationId: "753-R", applicationId:"LP-753-2016-00001",
-               target: ["documents", "parties", "1234"], created: 1476772272398,
-               creator: {id: "321", username: "pena@example.com"},
-               recipient: {id: "4123", username: "sonja"},
-               status: "active", description: "FOOFAA"};
 
-  var _data = ko.observableArray([test]);
+  var _data = ko.observableArray([]);
 
   self.assignments = ko.pureComputed(function() {
     return _data();
   });
 
+  /*
+   * Targets are two levels deep and represented as objects.
+   * Keys are the "target groups", and value for each key is array of corresponding items in application.
+   * Example with only parties group:
+   * {"parties": [{id: "5808c517f16562feee6856fb", displayText: "Pääsuunnittelija"},
+                  {id: "5808c517f16562feee6856fc", displayText: "Suunnittelija"}]}
+   */
+  self.targets = ko.observableArray([]);
+
+  function assignmentTargetsQuery(id) {
+    ajax.query("assignment-targets", {id: id, lang: loc.getCurrentLanguage()})
+      .success(function(resp) {
+        self.targets(_.fromPairs(resp.targets));
+      })
+      .call();
+  }
 
   hub.subscribe("assignmentService::createAssignment", function(event) {
     ajax.command("create-assignment", _.omit(event, "eventType"))
@@ -41,5 +52,10 @@ LUPAPISTE.AssignmentService = function() {
     // .success(util.showSavedIndicator)
     // .call();
   });
+
+  hub.subscribe("assignmentService::targetsQuery", function(event) {
+    assignmentTargetsQuery(_.get(event, "applicationId"));
+  });
+
 
 };

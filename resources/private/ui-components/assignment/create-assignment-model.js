@@ -9,16 +9,21 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   self.editorVisible = ko.observable(false);
 
 
-  self.selectedType = ko.observable();
-  self.selectedSubtype = ko.observable();
+  self.selectedTargetGroup = ko.observable();
+  self.selectedTargetId = ko.observable();
   self.types = [{type: "parties", values: ["foo1", "foo2"]},
                 {type: "operations", values: ["op1"]},
                 {type: "attachments", values: ["att1, att2"]}]; // TODO data structre
 
-  self.subTypes = self.disposedPureComputed(function() {
-    var selected = self.selectedType();
+  self.rawTargets = params.targets;
+  self.targetGroups = self.disposedPureComputed(function() { return _.keys(self.rawTargets());});
+  // query targets
+  self.sendEvent(myService, "targetsQuery", {applicationId: params.applicationId()});
+
+  self.targetIds = self.disposedPureComputed(function() {
+    var selected = self.selectedTargetGroup();
     if ( selected ) {
-      return _.find(self.types, {type: selected}).values;
+      return _.get(self.rawTargets(), selected);
     } else {
       return [];
     }
@@ -31,17 +36,22 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   self.description = ko.observable();
 
   self.mainTypeLoc = function(optionValue) {
-    return loc("application.assignment.type." + optionValue.type);
+    return loc("application.assignment.type." + optionValue);
   };
 
   self.subTypeLabel = self.disposedPureComputed(function() {
-    return self.selectedType() ? loc("application.assignment.target." + self.selectedType()) : loc("application.assignment.type");
+    return self.selectedTargetGroup() ? loc("application.assignment.target." + self.selectedTargetGroup()) : loc("application.assignment.type");
+  });
+
+  self.assignmentOk = self.disposedPureComputed(function() {
+    var observables = [self.selectedTargetGroup(), self.selectedTargetId(), self.recipientId(), self.description()];
+    return !_.some(observables, _.isEmpty);
   });
 
   self.createAssignment = function() {
     self.sendEvent(myService, "createAssignment", {id: params.applicationId(),
                                                    recipientId: self.recipientId(),
-                                                   target: [self.selectedType(), self.selectedSubtype()],
+                                                   target: [self.selectedTargetGroup(), self.selectedTargetId()],
                                                    description: self.description()});
     self.editorVisible(false);
   };
