@@ -25,11 +25,11 @@
 
 (defn- check-link-permit-backend-id [application {link-state :state link-type :type :as link-permit-app}]
   (cond
-    (= link-type "kuntalupatunnus")                            nil ; backend-id already exists
-    (get-backend-id link-permit-app)                           nil ; backend-id found from verdicts
+    (= link-type "kuntalupatunnus")                       nil ; backend-id already exists
+    (get-backend-id link-permit-app)                      nil ; backend-id found from verdicts
     (and (foreman/foreman-app? application)
-         (states/post-submitted-states (keyword link-state)))  nil ; main application for foreman app is submitted
-    :else                                                      :not-found))
+         (states/post-sent-states (keyword link-state)))  nil ; main application for foreman app is submitted
+    :else                                                 :not-found))
 
 (defn update-backend-ids-in-link-permit-data [application]
   (let [link-permit-apps (-> (map :id (:linkPermitData application))
