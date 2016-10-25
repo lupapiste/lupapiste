@@ -166,8 +166,7 @@ var repository = (function() {
     }
     hub.subscribe("application-loaded", function(e) {
       if (_.includes(pages, pageutil.getPage())) {
-        //TODO: passing details as 2nd param due to application.js hack (details contains the municipality persons)
-        f(e.applicationDetails.application, e.applicationDetails);
+        f(e.applicationDetails.application);
       }
     });
   }

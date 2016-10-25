@@ -1,5 +1,5 @@
 // Assign an authority to the application.
-LUPAPISTE.AuthoritySelectModel = function() {
+LUPAPISTE.AuthoritySelectModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
@@ -17,7 +17,7 @@ LUPAPISTE.AuthoritySelectModel = function() {
   // case where user has not made a new selection.
   var latest = NaN;
 
-  self.oldAssignee = self.disposedComputed( function() {
+  self.oldAssignee = self.disposedPureComputed( function() {
     var old = appId()
           ? ko.mapping.toJS( lupapisteApp.models.application.authority())
           : {};
@@ -28,38 +28,22 @@ LUPAPISTE.AuthoritySelectModel = function() {
 
   self.pending = ko.observable(false);
 
-  self.authorities = ko.observableArray();
-
-  self.fullName = function( obj ) {
-    obj = _.defaults( ko.mapping.toJS( obj ), {firstName: "", lastName: ""});
-
-    return obj.lastName + " " + obj.firstName;
-  };
-
-  function fetchAuthorities() {
-    if( appId() && self.canEdit() ) {
-      ajax.query("application-authorities", {id: appId()})
-        .success(function(res) {
-          var auths = res.authorities;
-          var old = self.oldAssignee();
-
-          // If the oldAssignee is no longer part of the organization,
-          // she is still shown in the select but disabled. See also
-          // disableAuthorities below.
-          if( old.id && !_.find( res.authorities, {id: old.id}) ) {
-            auths = _.flatten( [_.assign( old, {disabled: true} ),
-                                auths]);
-          }
-          self.authorities( auths );
-        })
-        .pending(self.pending)
-        .call();
+  function resolveOldAssignee(authorities) {
+    var old = self.oldAssignee();
+    // If the oldAssignee is no longer part of the organization,
+    // she is still shown in the select but disabled. See also
+    // disableAuthorities below.
+    if (old.id && !_.find( authorities, {id: old.id})) {
+      authorities = _.flatten( [_.assign( old, {disabled: true} ),
+                          authorities]);
     }
+    return authorities;
   }
 
-  self.addHubListener( "application-model-updated", fetchAuthorities);
-  // Initialization
-  fetchAuthorities();
+  self.authorities = self.disposedPureComputed(function() {
+    return resolveOldAssignee(params.authorities());
+  });
+
 
   self.disableAuthorities = function( option, item ) {
     if( item ) {
@@ -67,6 +51,12 @@ LUPAPISTE.AuthoritySelectModel = function() {
       // from the organization
       ko.applyBindingsToNode( option, {disable: item.disabled }, item );
     }
+  };
+
+
+  self.fullName = function( obj ) {
+    obj = _.defaults( ko.mapping.toJS( obj ), {firstName: "", lastName: ""});
+    return obj.lastName + " " + obj.firstName;
   };
 
   // The reader function is outside the assigneeId computed,

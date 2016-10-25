@@ -79,7 +79,7 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages
+                 :supportedLangs        i18n/supported-langs
                  :urgencyStates         ["normal" "urgent" "pending"]
                  :calendars             (cal/ui-params)
                  :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
@@ -199,7 +199,8 @@
                    "suti-service.js"
                    "info-service.js"
                    "context-service.js"
-                   "building-service.js"]}
+                   "building-service.js"
+                   "assignment-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -304,7 +305,7 @@
                   :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
                          "foreman-template.html" "archival-summary-template.html" "organization-links.html"
-                         "required-fields-summary-tab-template.html"
+                         "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "application-actions-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]

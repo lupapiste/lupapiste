@@ -53,7 +53,7 @@
 
             <!-- Authority -->
             <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
-            <div data-bind="component: 'authority-select'"></div>
+            <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
             <!-- /ko -->
 
           </div>

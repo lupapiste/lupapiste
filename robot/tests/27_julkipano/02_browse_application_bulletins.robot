@@ -44,6 +44,14 @@ Bulletins should be filterable by municipality
   Select From Autocomplete By Test Id  municipalities-filter-component  Sipoo
   Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
+Velho gives a verdict and publishes it as bulletin
+  As Olli
+  Create application and publish bulletin  Raitotie 2  564-403-4-17
+  Submit empty verdict
+  Bulletin shows as proclaimed and can be moved to verdict given
+  Move bulletin to verdict given with appeal period starting today
+  Go to bulletins page
+
 Bulletins should be filterable by state
   Reload Page
   Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettavana
@@ -51,3 +59,22 @@ Bulletins should be filterable by state
   Select From Autocomplete By Test Id  states-filter-component  Kuulutettavana
   Wait Until  Bulletin list should have rows  10
   Bulletin button should have bulletins left to fetch  3
+
+  Reload Page
+  Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Päätös annettu
+
+  Select From Autocomplete By Test Id  states-filter-component  Päätös annettu
+  Wait Until  Bulletin list should have rows  1
+
+*** Keywords ***
+
+Move bulletin to verdict given with appeal period starting today
+  ${TODAY_DD_MM_YYYY} =  Convert Date  ${CURRENT_DATETIME}  %d.%m.%Y
+  ${WEEK_FROM_NOW} =     Add time to date  ${CURRENT_DATETIME}  7 days  %d.%m.%Y
+  ${MONTH_FROM_NOW} =     Add time to date  ${CURRENT_DATETIME}  30 days  %d.%m.%Y
+  Input text with jQuery  input[name="verdictGivenAt"]  ${TODAY_DD_MM_YYYY}
+  Input text with jQuery  input[name="appealPeriodStartsAt"]  ${TODAY_DD_MM_YYYY}
+  Input text with jQuery  input[name="appealPeriodEndsAt"]  ${MONTH_FROM_NOW}
+  Input text with jQuery  textarea[name="verdictGivenText"]  foobar
+  Wait until  Element should be enabled  //button[@data-test-id='publish-bulletin']
+  Click by test id  publish-bulletin

@@ -3,8 +3,7 @@ LUPAPISTE.AttachmentsListingModel = function() {
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  self.APPROVED = "ok";
-  self.REJECTED = "requires_user_action";
+  self.pageName = "attachments-listing";
 
   var legendTemplate = _.template( "<div class='like-btn'>"
                                    + "<i class='<%- icon %>'></i>"
@@ -27,299 +26,27 @@ LUPAPISTE.AttachmentsListingModel = function() {
     .value()
     .join("<br>");
 
-  self.service = lupapisteApp.services.attachmentsService;
-  self.appModel = lupapisteApp.models.application;
+  var service = lupapisteApp.services.attachmentsService;
+  var appModel = lupapisteApp.models.application;
+
+  var filterSet = service.getFilters( self.pageName );
+
+  var attachments = service.attachments;
+
+  var filteredAttachments = self.disposedPureComputed(function() {
+    return filterSet.apply(attachments());
+  });
+
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
-
-  // Todo: for some reason this computed is needed in order to open
-  // the rollups initially?
-  self.disposedComputed(function() {
-    var id = self.service.applicationId(); // create dependency
-    if (id) {
-      self.service.queryAll();
-    }
-  });
-
-  //
-  // Attachment hierarchy
-  //
-
-  function findMatchingTag(tags, attachment) {
-    return _.find(tags, function(tag) {
-      return _.includes(attachment.tags, tag);
-    });
-  }
-
-  function resolveTagGrouping(attachments, tagGroups) {
-    if (!tagGroups || !tagGroups.length) {
-      return _.map(attachments, "id");
-    }
-    return _(attachments)
-      .groupBy(_.partial(findMatchingTag, _.map(tagGroups, _.head)))
-      .mapValues(function (attachmentsInGroup, tagGroupName) {
-        var tagGroup = _.find(tagGroups, function(tagGroup) {
-          return _.head(tagGroup) === tagGroupName;
-        });
-        return resolveTagGrouping(attachmentsInGroup, _.tail(tagGroup));
-      })
-      .value();
-  }
-
-  //
-  // Attachments hierarchy
-  //
-
-  var filtered =  self.disposedPureComputed( function() {
-    return _(self.service.filteredAttachments())
-      .map ( function( obs ) {
-        return [obs().id, true];
-      })
-      .fromPairs()
-      .value();
-  });
-
-  function isFiltered( attachmentId ) {
-    return Boolean( filtered()[attachmentId]);
-  }
-
-  function filterAttachmentIds( attachmentIds) {
-    return _.filter( attachmentIds, isFiltered );
-  }
-
-  // Return attachment ids grouped first by type-groups and then by type ids.
-
-  self.getAttachmentsHierarchy = function() {
-    var attachments = _.map(self.service.attachments(), ko.utils.unwrapObservable);
-    return groupAttachmentsByTags(attachments);
-  };
-
-  function groupAttachmentsByTags(attachments) {
-    return resolveTagGrouping(attachments, self.service.tagGroups());
-  }
-
-  self.attachmentsHierarchy = ko.pureComputed(self.getAttachmentsHierarchy);
-
-
-  function getAttachmentInfos(attachmentIds) {
-    return _(attachmentIds)
-          .map(self.service.getAttachment)
-          .filter()
-          .value();
-  }
-
-  function modelForSubAccordion(subGroup) {
-    var visibleIds = filterAttachmentIds(subGroup.attachmentIds);
-    var attachmentInfos = getAttachmentInfos(visibleIds);
-    return {
-      type: "sub",
-      attachmentInfos: attachmentInfos,
-      // all approved or some rejected
-      status: ko.pureComputed(self.service.attachmentsStatus(subGroup.attachmentIds)),
-      hasContent: ko.pureComputed(function() {
-        return attachmentInfos &&
-          attachmentInfos.length > 0;
-      }),
-      hasFile: ko.pureComputed(function() {
-        return _.some(attachmentInfos, function(attachment) {
-          return !!util.getIn(attachment, ["latestVersion", "fileId"]);
-        });
-      }),
-      attachmentIds: subGroup.attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, visibleIds),
-      downloadAllText: ko.pureComputed(function() {
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
-         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
-    };
-  }
-
-  // If all of the subgroups in the main group are approved -> approved
-  // If some of the subgroups in the main group are rejected -> rejected
-  // Else null
-  function subGroupsStatus(subGroups) {
-    return ko.pureComputed(function() {
-      if (_.every(_.values(subGroups),
-                  function(sg) {
-                    return sg.status() === self.APPROVED;
-                 }))
-      {
-        return self.APPROVED;
-      } else {
-        return _.some(_.values(subGroups),
-                      function(sg) {
-                        return sg.status() === self.REJECTED;
-                     }) ? self.REJECTED : null;
-      }
-    });
-  }
-
-  function someSubGroupsField(subGroups, fieldName) {
-    return ko.pureComputed(function() {
-      return _.some(_.values(subGroups),
-                    function(sg) { return util.getIn(sg, [fieldName]); });
-    });
-  }
-
-  function modelForMainAccordion(mainGroup) {
-    var subGroups = _.mapValues(mainGroup.subGroups, groupToModel);
-    var attachmentIds = _(subGroups).map("attachmentIds").flatten().value();
-    var attachmentInfos = getAttachmentInfos(attachmentIds);
-    return _.merge({
-      type: "main",
-      status: subGroupsStatus(subGroups),
-      hasContent: someSubGroupsField(subGroups, "hasContent"),
-      hasFile: someSubGroupsField(subGroups, "hasFile"),
-      attachmentIds: attachmentIds,
-      downloadAll: _.partial(self.service.downloadAttachments, attachmentIds),
-      downloadAllText: ko.pureComputed(function() {
-         var n = _.filter(_.map(attachmentInfos, ko.unwrap), function(a) { return a.latestVersion; }).length;
-         return loc("download") + " " + n + " " + loc((n === 1) ? "file" : "file-plural-partitive"); })
-    }, subGroups);
-  }
-
-  function hierarchyToGroups(hierarchy) {
-    return _.mapValues(hierarchy, function(group, name) {
-      if (_.isPlainObject(group)) {
-        return {
-          type: "main",
-          name: name,
-          subGroups: hierarchyToGroups(group)
-        };
-      } else {
-        return {
-          type: "sub",
-          name: name,
-          attachmentIds: group
-        };
-      }
-    });
-  }
-
-  function groupToModel(group) {
-    if (group.type === "main") {
-      return modelForMainAccordion(group);
-    } else {
-      return modelForSubAccordion(group);
-    }
-  }
-
-  self.attachmentGroups = ko.pureComputed(function() {
-    return _.mapValues(hierarchyToGroups(self.attachmentsHierarchy()),
-                       groupToModel);
-  });
-
-   function getAttachmentsForGroup(groupPath) {
-    function getAttachments(group) {
-      if (_.isPlainObject(group)) {
-        return _.flatten(_.map(_.values(group), getAttachments));
-      } else {
-        return group;
-      }
-    }
-    var group = util.getIn(self.attachmentsHierarchy(), groupPath);
-    return getAttachments(group);
-  }
-
-   function getDataForGroup(groupPath) {
-    return ko.pureComputed(function() {
-      return util.getIn(self.attachmentGroups(), groupPath);
-    });
-  }
-
-  function getOperationLocalization(operationId, allOperations) {
-    var operation = ko.toJS(_.find(allOperations, function(op) {
-      return util.getIn(op, ["id"]) === operationId;
-    }));
-    return operation
-      ? _.filter([loc([operation.name, "_group_label"]), operation.description]).join(" - ")
-      : "";
-  }
-
-  function groupToAccordionName(groupPath, allOperations) {
-    var opIdRegExp = /^op-id-([1234567890abcdef]{24})$/i,
-        key = _.last(groupPath);
-    if (opIdRegExp.test(key)) {
-      return getOperationLocalization(opIdRegExp.exec(key)[1], allOperations);
-    } else {
-      return loc(["application", "attachments", key]);
-    }
-  }
-
-  function getDataForAccordion(groupPath, allOperations) {
-    return {
-      name: groupToAccordionName(groupPath, allOperations),
-      path: groupPath,
-      open: ko.observable(),
-      data: ko.pureComputed(function() {
-        return modelForSubAccordion({
-          name: groupToAccordionName(groupPath, allOperations),
-          attachmentIds: getAttachmentsForGroup(groupPath)
-        });
-      })
-    };
-  }
-
-  function attachmentTypeLayout(groupPath, tagGroups, allOperations) {
-    if (tagGroups.length) {
-      return {
-        name: groupToAccordionName(groupPath, allOperations),
-        path: groupPath,
-        open: ko.observable(),
-        data: getDataForGroup(groupPath),
-        accordions: _.map(tagGroups, function(tagGroup) {
-          return attachmentTypeLayout(groupPath.concat(_.head(tagGroup)), _.tail(tagGroup), allOperations);
-        })
-      };
-    } else {
-      return getDataForAccordion(groupPath, allOperations);
-    }
-  }
-
-  function toggleOpen(groups, bool) {
-    groups.open(bool);
-    if (groups.accordions) {
-      _.map(groups.accordions,
-        function(group) {toggleOpen(group, bool);});
-    }
-  }
-
-  self.openAll = function() {
-    if (self.groups && self.groups().open) {
-      toggleOpen(self.groups(), true);
-    }
-  };
-
-  self.toggleAll = function() {
-    if (self.groups && self.groups().open) {
-      toggleOpen(self.groups(), !(self.groups().open()));
-    }
-  };
-
-  // auto-open all accordions when new filtered results are available
-  self.autoOpener = ko.computed(function() {
-    if(self.service.filteredAttachments()) {
-      self.openAll();
-    }
-  });
-
-  // entry point for templates to access model data
-  self.groups = ko.computed(function() {
-    var tagGroups = self.service.tagGroups();
-    var allOperations = lupapisteApp.models.application.allOperations();
-    if (!_.isEmpty(tagGroups)) {
-      return attachmentTypeLayout([], tagGroups, allOperations);
-    } else {
-      return {};
-    }
-  });
 
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");
     var attachmentGroup = _.get( params, "attachmentGroup" );
     attachment.initFileUpload({
-      applicationId: self.appModel.id(),
+      applicationId: appModel.id(),
       attachmentId: attachmentId,
       attachmentType: attachmentType,
       typeSelector: !attachmentType,
@@ -331,135 +58,42 @@ LUPAPISTE.AttachmentsListingModel = function() {
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   }
 
-  self.newAttachment = _.ary( addAttachmentFile, 0 );
-
   self.addHubListener( "add-attachment-file", addAttachmentFile );
-
-  function onUploadDone( params) {
-    var id = _.get( params, "attachmentId");
-    if( id ) {
-      self.service.queryOne( id, {attachmentUploaded: id} );
-    } else {
-      self.service.queryAll();
-    }
-  }
-
-  self.addHubListener("upload-done", onUploadDone);
 
   // After attachment query
   function afterQuery( params ) {
-    var id = _.get( params, "attachmentUploaded");
-    if( id ) {
-      pageutil.openPage( "attachment", self.appModel.id() + "/" + id);
+    var id = _.get( params, "attachmentId");
+    if( id && pageutil.lastSubPage() === "attachments" ) {
+      pageutil.openPage( "attachment", appModel.id() + "/" + id);
     }
   }
-  self.addEventListener( self.service.serviceName, "query", afterQuery );
 
-  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
-    self.service.queryOne(params.attachmentId);
+  self.addEventListener( service.serviceName, {eventType: "query", triggerCommand: "upload-attachment"}, afterQuery );
+
+  self.addEventListener(service.serviceName, {eventType: "update", commandName: "approve-attachment"}, function(params) {
+    service.queryOne(params.attachmentId);
   });
 
-  self.addEventListener(self.service.serviceName, {eventType: "update", commandName: "reject-attachment"}, function(params) {
-    self.service.queryOne(params.attachmentId);
+  self.addEventListener(service.serviceName, {eventType: "update", commandName: "reject-attachment"}, function(params) {
+    service.queryOne(params.attachmentId);
   });
 
-  function AttachmentTemplatesModel() {
-    var templateModel = this;
-    templateModel.init = function() {
-      templateModel.initDone = true;
-      templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
-      templateModel.selectm
-        .allowDuplicates(true)
-        .ok(_.ary(self.service.createAttachmentTemplates, 1))
-        .cancel(LUPAPISTE.ModalDialog.close);
-      return templateModel;
-    };
+  self.addEventListener(service.serviceName, "create", LUPAPISTE.ModalDialog.close);
 
-    templateModel.show = function() {
-      if (!templateModel.initDone) {
-        templateModel.init();
-      }
+  self.addEventListener(service.serviceName, "remove", util.showSavedIndicator);
 
-      var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
-        var groupId = g[0];
-        var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var attachmentIds = g[1];
-        var attachments = _.map(attachmentIds, function(a) {
-          var id = {"type-group": groupId, "type-id": a};
-          var text = loc(["attachmentType", groupId, a]);
-          return {id: id, text: text};
-        });
-        return [groupText, attachments];
-      });
-      templateModel.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates-v2");
-      return templateModel;
-    };
-  }
-  self.attachmentTemplatesModel = new AttachmentTemplatesModel();
-  self.attachmentTemplatesAdd = function() {
-    self.attachmentTemplatesModel.show();
-  };
-  self.addEventListener(self.service.serviceName, "create", LUPAPISTE.ModalDialog.close);
+  self.addEventListener(service.serviceName, "copy-user-attachments", util.showSavedIndicator);
 
-  self.addEventListener(self.service.serviceName, "remove", util.showSavedIndicator);
-
-  self.addEventListener(self.service.serviceName, "copy-user-attachments", util.showSavedIndicator);
-
-  self.copyUserAttachments = function() {
-    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
-                             size: "medium",
-                             component: "yes-no-dialog",
-                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
-                                               yesFn: self.service.copyUserAttachments}});
-  };
-
-  self.canCopyUserAttachments = function() {
-    return self.authModel.ok("copy-user-attachments-to-application");
-  };
-
-  self.startStamping = function() {
-    hub.send("start-stamping", {application: self.appModel});
-  };
-
-  self.canStamp = function() {
-    return self.authModel.ok("stamp-attachments");
-  };
-
-  self.signAttachments = function() {
-    hub.send("sign-attachments", {application: self.appModel, attachments: lupapisteApp.services.attachmentsService.attachments});
-  };
-
-  self.canSign = function() {
-    return self.authModel.ok("sign-attachments");
-  };
-
-  self.markVerdictAttachments = function() {
-    hub.send("start-marking-verdict-attachments", {application: self.appModel});
-  };
-
-  self.canMarkVerdictAttachments = function() {
-    return self.authModel.ok("set-attachments-as-verdict-attachment");
-  };
-
-  self.orderAttachmentPrints = function() {
-    hub.send("order-attachment-prints", {application: self.appModel});
-  };
-
-  self.canOrderAttachmentPrints = function() {
-    return self.authModel.ok("order-verdict-attachment-prints");
-  };
-
-  self.hasFile = ko.pureComputed(function() {
-    return _(self.attachmentGroups()).invokeMap("hasFile").some();
+  self.hasUnfilteredAttachments = self.disposedPureComputed(function() {
+    return !_.isEmpty(attachments());
   });
 
-  self.hasUnfilteredAttachments = ko.pureComputed(function() {
-    return !_.isEmpty(self.service.attachments());
+  self.hasFilteredAttachments = self.disposedPureComputed(function() {
+    return !_.isEmpty(filteredAttachments());
   });
 
-  self.hasFilteredAttachments = ko.pureComputed(function() {
-    return !_.isEmpty(self.service.filteredAttachments());
+  self.hasFilters = self.disposedPureComputed(function() {
+    return !_.isEmpty(filterSet.filters());
   });
 
 };

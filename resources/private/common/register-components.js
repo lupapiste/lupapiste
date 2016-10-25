@@ -127,6 +127,10 @@ jQuery(document).ready(function() {
     {name: "task"},
     {name: "ram-links"},
     {name: "attachments-listing"},
+    {name: "attachments-accordions"},
+    {name: "attachments-listing-accordion"},
+    {name: "attachments-table"},
+    {name: "attachments-operation-buttons"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
@@ -137,7 +141,8 @@ jQuery(document).ready(function() {
     {name: "info-link"},
     {name: "targeted-attachments"},
     {name: "open-3d-map"},
-    {name: "extension-applications"}
+    {name: "extension-applications"},
+    {name: "create-assignment"}
 ];
 
   ko.registerLupapisteComponents(components);

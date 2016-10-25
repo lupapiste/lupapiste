@@ -73,7 +73,12 @@
                         :lupapisteId         (:id app)
                         :address             (:title app)
                         :contentsTable       (get-kopiolaitos-html-table "fi" attachments-with-amount)}]
-
+        (fact "without kuntalupatunnus succeeds"
+          (command sonja :order-verdict-attachment-prints
+            :id app-id
+            :lang "fi"
+            :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
+            :orderInfo (dissoc order-info :kuntalupatunnus)) => ok?)
         (fact "with invalid orderInfo order fails"
           (command sonja :order-verdict-attachment-prints
             :id app-id
@@ -108,8 +113,8 @@
 
         (facts "sent emails were correct"
           (let [sent-emails (sent-emails)]  ;; resets sent emails list
-            (count sent-emails) => 2
-            (map :to sent-emails) => (just #{"sipoo@example.com" "sipoo2@example.com"})
+            (count sent-emails) => 4
+            (map :to sent-emails) => (just ["sipoo@example.com" "sipoo2@example.com" "sipoo@example.com" "sipoo2@example.com"] :in-any-order)
 
             (fact "check attachment contents of both sent emails"
               (doseq [email sent-emails

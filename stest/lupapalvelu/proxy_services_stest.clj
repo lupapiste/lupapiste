@@ -360,7 +360,6 @@
   (fact "Jalasjarvi, as of 2016 part of Kurikka and shoud return Kurikka's code"
     (municipality-by-point 281160 6936532.8125001) => "301"))
 
-
 (facts "Get address from Salo"
   (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx"})
 

@@ -1,20 +1,14 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="select-field-template">
-      <div class="col--vertical">
-        <label data-bind="text: label, attr: {'for': id}"></label>
-        <span class="select-arrow lupicon-chevron-small-down" data-bind="css: {disabled: disable}"></span>
-        <select data-bind="options: options,
-                           optionsText: optionsText,
-                           optionsValue: optionsValue,
-                           optionsCaption: optionsCaption,
-                           value: value,
-                           disable: disable,
-                           attr: {id: id, name: id}"></select>
-      </div>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl" id="select-field-template">
+  <div class="col--vertical">
+    <label data-bind="text: label, attr: {'for': id}"></label>
+    <span class="select-arrow lupicon-chevron-small-down" data-bind="css: {disabled: disable}"></span>
+    <select data-bind="options: options,
+                       optionsText: optionsText,
+                       optionsValue: optionsValue,
+                       optionsCaption: optionsCaption,
+                       value: value,
+                       disable: disable,
+                       valueAllowUnset: valueAllowUnset,
+                       attr: {id: id, name: id}"></select>
+  </div>
+</script>

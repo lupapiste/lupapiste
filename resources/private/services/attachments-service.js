@@ -13,25 +13,16 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
-  self.tagGroups = ko.observableArray([]);
+
   self.groupTypes = ko.observableArray([]);
 
-  // array of arrays of filters received from backend along with default values.
+  self.tagGroups = ko.observableArray([]);
+  var tagGroupSets = {};
+
+  // Filters are represented as nested arrays and are interpreted into logical rules as follows:
   // [[A B] [C D]] = (and (or A B) (or C D))
   self.filters = ko.observableArray([]);
-
-  self.activeFilters = ko.pureComputed(function() {
-    return _.filter(self.filtersArray(), function(f) {
-      return f.filter() === true;
-    });
-  });
-
-  self.filteredAttachments = ko.pureComputed(
-    function() {
-      return applyFilters(self.attachments(), self.activeFilters());});
-
-  // Ids for attachments that are visible despite of active filters
-  var forceVisibleIds = ko.observableArray();
+  var filterSets = {};
 
   self.authModel = lupapisteApp.models.applicationAuthModel;
   self.processing = lupapisteApp.models.application.processing;
@@ -50,10 +41,12 @@ LUPAPISTE.AttachmentsService = function() {
 
   function clearData() {
     disposeItems( self.attachments );
+    disposeItems(tagGroupSets);
+    disposeItems(filterSets);
     self.attachments([]);
-    forceVisibleIds([]);
-    self.filters([]);
+    filterSets = {};
     self.tagGroups([]);
+    tagGroupSets = {};
     self.groupTypes([]);
   }
 
@@ -120,7 +113,7 @@ LUPAPISTE.AttachmentsService = function() {
   }
 
   function disposeItems( models ) {
-    _.each( ko.unwrap(models), function( m ) {
+    _.forEach( ko.unwrap(models), function( m ) {
       ko.unwrap( m ).dispose();
     });
   }
@@ -144,10 +137,16 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.setTagGroups = function(data) {
     self.tagGroups(data);
+    _.forEach(tagGroupSets, function(tagGroupSet) {
+      tagGroupSet.setTagGroups(data);
+    });
   };
 
   self.setFilters = function(data) {
     self.filters(data);
+    _.forEach(filterSets, function(filterSet) {
+      filterSet.setFilters(data);
+    });
   };
 
   self.setGroupTypes = function(data) {
@@ -158,28 +157,41 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
 
-  function queryTagGroupsAndFilters() {
+  self.queryTagGroupsAndFilters = function() {
     queryData("attachments-tag-groups", "tagGroups", self.setTagGroups);
     queryData("attachments-filters", "attachmentsFilters", self.setFilters);
-  }
+  };
 
   self.queryAll = function() {
-    forceVisibleIds([]);
+    _.forEach(filterSets, function(filterSet) { filterSet.resetForcedVisibility(); });
     queryData("attachments", "attachments", self.setAttachments);
-    queryTagGroupsAndFilters();
+    self.queryTagGroupsAndFilters();
   };
 
   // hubParams are attached to the hub send event for attachment query.
   self.queryOne = function(attachmentId, hubParams) {
     (_.get(ko.unwrap(self.getAttachment(attachmentId)), "processing", _.noop))(true);
     queryData("attachment", "attachment", self.setAttachmentData, {"attachmentId": attachmentId}, hubParams);
-    queryTagGroupsAndFilters();
   };
 
   self.getAttachment = function(attachmentId) {
     return _.find(self.attachments(), function(attachment) {
       return attachment.peek().id === attachmentId;
     });
+  };
+
+  self.getFilters = function(filterSetId) {
+    if (!filterSets[filterSetId]) {
+      filterSets[filterSetId] = new LUPAPISTE.AttachmentsFilterSetModel(self.filters());
+    }
+    return filterSets[filterSetId];
+  };
+
+  self.getTagGroups = function(groupSetId) {
+    if (!tagGroupSets[groupSetId]) {
+      tagGroupSets[groupSetId] = new LUPAPISTE.AttachmentsGroupSetModel(self.tagGroups());
+    }
+    return tagGroupSets[groupSetId];
   };
 
   self.hasAttachments = ko.computed(function() {
@@ -203,18 +215,14 @@ LUPAPISTE.AttachmentsService = function() {
     }
   }
 
-  var orderedFilteredAttachments = ko.pureComputed(function() {
-    return orderByTags(self.filteredAttachments(), self.tagGroups());
-  });
-
-  self.nextFilteredAttachmentId = function(attachmentId) {
-    var attachments = orderedFilteredAttachments();
+  self.nextFilteredAttachmentId = function(attachmentId, filterSet) {
+    var attachments = orderByTags(filterSet.apply(self.attachments()), self.tagGroups());
     var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
     return util.getIn(attachments[index+1], ["id"]);
   };
 
-  self.previousFilteredAttachmentId = function(attachmentId) {
-    var attachments = orderedFilteredAttachments();
+  self.previousFilteredAttachmentId = function(attachmentId, filterSet) {
+    var attachments = orderByTags(filterSet.apply(self.attachments()), self.tagGroups());
     var index = _(attachments).map(ko.unwrap).findIndex(["id", attachmentId]);
     return util.getIn(attachments, [index-1, "id"]);
   };
@@ -239,7 +247,7 @@ LUPAPISTE.AttachmentsService = function() {
           return attachment().id === attachmentId;
         }));
         self.authModel.refresh({id: self.applicationId()});
-        queryTagGroupsAndFilters();
+        self.queryTagGroupsAndFilters();
         sendHubNotification("remove", "delete-attachment", _.merge(params, hubParams), res);
       })
       .error(_.partial(sendHubNotification, "remove", "delete-attachment", _.merge(params, hubParams)))
@@ -249,14 +257,20 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   hub.subscribe("upload-done", function(data) {
-    self.queryOne(data.attachmentId);
     self.authModel.refresh({id: self.applicationId()});
+    if (data.attachmentId) {
+      self.queryOne(data.attachmentId, {triggerCommand: "upload-attachment"});
+      self.queryTagGroupsAndFilters();
+    } else {
+      self.queryAll();
+    }
   });
 
   self.copyUserAttachments = function(hubParams) {
     var params = {id: self.applicationId()};
     ajax.command("copy-user-attachments-to-application", params)
       .success(function(res) {
+        self.authModel.refresh({id: self.applicationId()});
         self.queryAll();
         sendHubNotification("copy-user-attachments", "copy-user-attachments-to-application", _.merge(params, hubParams), res);
       })
@@ -277,7 +291,10 @@ LUPAPISTE.AttachmentsService = function() {
                                   "attachmentId": attachmentId},
                                  params);
     ajax.command(commandName, commandParams)
-      .success(_.partial(sendHubNotification, "update", commandName, _.merge(commandParams, hubParams)))
+      .success(function(response) {
+        self.authModel.refresh({id: self.applicationId()});
+        sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
+      })
       .error(function(response) {
         sendHubNotification("update", commandName, _.merge(commandParams, hubParams), response);
         error("Unable to update attachment: " , _.assign({commandName: commandName, commandParams: commandParams}, response));
@@ -301,7 +318,7 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
-    forceVisibleIds.push(attachmentId);
+    _.forEach(filterSets, function(filterSet) { filterSet.forceVisibility(attachmentId); });
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": Boolean(flag)}, hubParams);
   };
 
@@ -374,79 +391,25 @@ LUPAPISTE.AttachmentsService = function() {
     return util.getIn(attachment, ["notNeeded"]) === true;
   };
 
-  function getUnwrappedAttachmentById(attachmentId) {
-    return ko.utils.unwrapObservable(self.getAttachment(attachmentId));
-  }
-
-  // returns a function for use in computed
-  // If some of the attachments are approved and the rest not needed -> approved
-  // If some of the attachments are rejected -> rejected
-  // Else null
-  self.attachmentsStatus = function(attachmentIds) {
-    return function() {
-      var unwrappedAttachments = _.map(attachmentIds,
-                                       getUnwrappedAttachmentById);
-      if (_.some( unwrappedAttachments, self.isApproved)
-          && _.every(unwrappedAttachments,
-                     function( a ) {
-                       return self.isApproved( a ) || self.isNotNeeded( a );
-                     })) {
-        return self.APPROVED;
-      } else {
-        return _.some(unwrappedAttachments,
-                      self.isRejected) ? self.REJECTED : null;
-      }
-    };
-  };
-
-
   //
-  // Filter manipulation
+  // Filtering attachments
   //
 
-  self.internedObservables = {};
-
-  // keep track of filter toggles, since they are passed over to the UI, and
-  // we need to keep using the same ones after tag updates
-
-  function internFilterBoolean(key, def) {
-    if (!self.internedObservables[key]) {
-      var filterValue = ko.observable(def);
-      self.internedObservables[key] = filterValue;
-      filterValue.subscribe(function() {
-        forceVisibleIds([]);
-      });
-    }
-    return self.internedObservables[key];
-  }
-
-  // filter tag -> observable toggles, shared between service and UI, updated in UI
-  self.filtersArray = ko.pureComputed( function() {
-    return _.map(_.flatten(self.filters()),
-                      function(filter /*, idx // unused */) {
-                        return {ltext: "filter." + filter.tag,
-                                tag: filter.tag,
-                                filter: internFilterBoolean(filter.tag, filter["default"])};});
-  });
-
-  self.isAttachmentFiltered = function (att) {
-    if (_.includes(forceVisibleIds(), att().id)) {
-      return true;
-    }
-    return _.reduce(self.filters(), function (ok, group) {
-          var group_tags = _.map(group, function(x) {return x.tag;});
-          var active_tags = _.map(self.activeFilters(), function(x) {return x.tag;});
-          var enabled = _.intersection(group_tags, active_tags);
-          var tags = att().tags;
-          return (ok && (!(_.first(enabled)) || _.first(_.intersection(enabled, tags)))); },  true);
+  self.isFiltered = function(activeFilters, attachment) {
+    var att = ko.unwrap(attachment);
+    return _.every(activeFilters, function(active_tags) {
+      return _.isEmpty(active_tags) || !_.isEmpty(_.intersection(active_tags, att.tags));
+    });
   };
 
-  function applyFilters(attachments /* , active // unused */) {
-    return _.filter(attachments, self.isAttachmentFiltered);
-  }
+  // Active filters are represented as nested arrays.
+  // Attachment tags should match into filter by a logical rule interpreted from the filter:
+  // [[A B] [C D]] = (and (or A B) (or C D))
+  self.applyFilters = function(attachments, activeFilters) {
+    return _.filter(attachments, _.partial(self.isFiltered, activeFilters));
+  };
 
   ko.options.deferUpdates = false;
-
 
   // Attachments table icon column. Used both by the regular attachments table and stamping template.
   self.stateIcons = function(attachment) {

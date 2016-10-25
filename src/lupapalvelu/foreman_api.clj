@@ -27,7 +27,7 @@
   {:parameters [id taskId foremanRole foremanEmail]
    :user-roles #{:applicant :authority}
    :input-validators [(partial action/email-validator :foremanEmail)]
-   :states states/all-application-states
+   :states (states/all-application-states-but states/terminal-states)
    :pre-checks [application/validate-authority-in-drafts
                 application/validate-only-authority-before-verdict-given]}
   [{:keys [created user application] :as command}]

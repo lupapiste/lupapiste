@@ -15,6 +15,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
+  var filterSet = service.getFilters( "attachments-listing" );
+
   self.groupTypes   = service.groupTypes;
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
@@ -50,8 +52,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   // Navigation
   self.backToApplication = trackClickWrap("backToApplication", lupapisteApp.models.application.open, "attachments");
 
-  self.nextAttachmentId = service.nextFilteredAttachmentId(self.id);
-  self.previousAttachmentId = service.previousFilteredAttachmentId(self.id);
+  self.nextAttachmentId = service.nextFilteredAttachmentId(self.id, filterSet);
+  self.previousAttachmentId = service.previousFilteredAttachmentId(self.id, filterSet);
 
   self.openNextAttachment = trackClickWrap("nextAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.nextAttachmentId );
   self.openPreviousAttachment = trackClickWrap("previousAttachment", pageutil.openPage, "attachment", self.applicationId + "/" + self.previousAttachmentId );
@@ -123,7 +125,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     // dynamic content rendered by Knockout is not possible
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
-  self.addHubListener({eventType: "upload-done", attachmentId: self.id}, querySelf );
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
 
   // Versions - delete

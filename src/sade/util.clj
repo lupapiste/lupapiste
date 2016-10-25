@@ -75,6 +75,11 @@
   (->> (map (fn [[k v]] [k (f v)]) m)
        (into {})))
 
+(defn key-by
+  "Like group-by but returns values unwrapped. Multiple values for same key are omitted, last value is used."
+  [f coll]
+  (reduce #(assoc %1 (f %2) %2) {} coll))
+
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
   nested structure. keys is a sequence of keys. Any empty maps that result

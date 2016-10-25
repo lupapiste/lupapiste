@@ -66,7 +66,8 @@
             [lupapalvelu.calendars-api]
             [lupapalvelu.suti-api]
             [lupapalvelu.ddd-map-api]
-            [lupapalvelu.ya-extension-api])
+            [lupapalvelu.ya-extension-api]
+            [lupapalvelu.assignment-api])
   (:import [javax.imageio ImageIO]
            [javax.activation MailcapCommandMap]))
 
@@ -132,7 +133,7 @@
     (let [jetty-opts (merge
                        {:max-threads 250}
                        (when (env/value :ssl :enabled) (assoc (env/value :ssl) :ssl? true)))
-          noir-opts {:mode env/mode
+          noir-opts {:mode (keyword (or (env/value :noir :mode) env/mode))
                      :ns 'lupapalvelu.web
                      :jetty-options jetty-opts
                      :session-store (session/cookie-store {:key (read-session-key)})

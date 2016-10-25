@@ -1125,14 +1125,13 @@ $max-columns: 12;
 
   .select-arrow {
     position: absolute;
-    right: 1px;
+    right: 2px;
     bottom: 1px;
     color: $orange-dark;
     pointer-events:none;
 
     // show white box behind selector arrow to hide default select arrows on IE9
     background-color: #fff;
-    height: $grid-input-height - 2px;
     width: 30px;
     line-height: $grid-input-height - 2px;
     vertical-align: middle;

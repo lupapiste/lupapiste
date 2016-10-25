@@ -163,6 +163,8 @@
                                                        :propertyId sipoo-property-id
                                                        :x 406898.625 :y 6684125.375
                                                        :address "Hitantine 108")
+              _ (upload-attachment pena (:id oulu-app) {:type {:type-id "muu" :type-group "muut"}
+                                                        :op-id (-> oulu-app :primaryOperation :id)} true)
               _ (command olli :approve-application :id (:id oulu-app) :lang "fi") => ok?
               _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
               _ (command olli :move-to-proclaimed
@@ -191,12 +193,17 @@
                                         :primaryOperation :propertyId :state :stateSeq :canComment
                                         :verdicts :tasks
                                         :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
+              (fact "attachments only contain specified keys and nothing else"
+                (map keys (:attachments bulletin)) => (has every? (just [:id :type :latestVersion :contents]))
+                (map (comp keys :latestVersion) (:attachments bulletin)) => (has every? (just [:filename :contentType :fileId :size])))
               (fact "bulletin state is 'proclaimed'"
                 (:bulletinState bulletin) => "proclaimed")
               (fact "each documents has schema definition"
                 (:documents bulletin) => (partial every? :schema))
               (fact "no party documents"
                 (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))
+              (fact "no document metadata in bulletins"
+                (:documents bulletin) => (partial not-any? :meta))
               (fact "_applicantIndex"
                 (:_applicantIndex bulletin) => (just ["Panaani Pena"]))))
 
