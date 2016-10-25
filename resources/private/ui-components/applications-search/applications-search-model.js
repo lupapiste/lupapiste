@@ -11,7 +11,11 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     return self.searchType() === "foreman" ? [{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}] : [];
   };
 
-  self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({defaultOperations: self.defaultOperations});
+  self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({
+    defaultOperations: self.defaultOperations,
+    sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
+    searchResultType: lupapisteApp.models.currentUser.isAuthority() ? "application" : "all"
+  });
 
   self.externalApi = {
     enabled: ko.pureComputed(function() {
@@ -92,7 +96,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       self.dataProvider.setDefaultSort();
       lupapisteApp.services.applicationFiltersService.reloadDefaultFilter();
     }
-    self.dataProvider.updateApplicationType( val );
+    self.dataProvider.updateSearchResultType( val );
   });
 
   self.create = function() {

@@ -14,11 +14,11 @@ LUPAPISTE.ApplicationsSearchTabsModel = function(params) {
     self.tabs.push("readyForArchival");
   }
 
-  self.selectedTab = self.dataProvider.applicationType;
+  self.selectedTab = self.dataProvider.searchResultType;
 
   self.selectTab = function(item) {
     hub.send("track-click", {category:"Applications", label: item, event:"radioTab"});
-    self.dataProvider.applicationType(item);
+    self.dataProvider.searchResultType(item);
     self.dataProvider.skip(0);
   };
 };

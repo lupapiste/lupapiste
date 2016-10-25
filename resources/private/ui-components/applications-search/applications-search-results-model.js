@@ -17,7 +17,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   });
   self.gotResults = params.gotResults;
 
-  self.selectedTab = self.dataProvider.applicationType;
+  self.selectedTab = self.dataProvider.searchResultType;
 
   self.offset = 0;
   self.onPageLoad = hub.onPageLoad(pageutil.getPage(), function() {
