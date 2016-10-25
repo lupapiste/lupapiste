@@ -18,6 +18,7 @@
 (def default-authz-reader-roles (conj default-authz-writer-roles :foreman :reader :guest :guestAuthority))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (union all-authz-writer-roles default-authz-reader-roles))
+(def comment-user-authz-roles (conj all-authz-writer-roles :foreman))
 
 (def default-org-authz-roles #{:authority :approver})
 (def commenter-org-authz-roles (conj default-org-authz-roles :commenter))

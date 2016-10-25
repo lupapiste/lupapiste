@@ -99,6 +99,12 @@
                                      emails (if (sequential? email) email [email])]
                                  (map (fn [addr] {:email addr}) emails)))
 
+(defn comment-recipients-fn
+  "Recipients roles for comments are same user roles that can view and add comments."
+  [{:keys [application]}]
+  (get-email-recipients-for-application application auth/comment-user-authz-roles []))
+
+
 ;;
 ;; Configuration for generic notifications
 ;;
