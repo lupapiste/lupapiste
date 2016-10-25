@@ -104,6 +104,18 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
+  (fact "Default search returns minimal query since there is no saved default filter"
+        (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                                 :skip 0
+                                                                 :limit 100
+                                                                 :sort {:asc false
+                                                                        :field "modified"}}
+        (:search (query pena :applications-search-default)) => {:applicationType "all"
+                                                                :skip 0
+                                                                :limit 100
+                                                                :sort {:asc false
+                                                                       :field "modified"}})
+
   (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
