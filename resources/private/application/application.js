@@ -161,6 +161,16 @@
     }
   }
 
+  function resetApplication() {
+    var app = _.merge(LUPAPISTE.EmptyApplicationModel(), {});
+
+    // Plain data
+    applicationModel._js = app;
+    // Update observables
+    var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
+    ko.mapping.fromJS(app, mappingOptions, applicationModel);
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -398,6 +408,7 @@
     if( currentId && !_.includes( _.get( window, "location.hash"),
                                   currentId)) {
       currentId = null;
+      resetApplication();
     }
   });
 
