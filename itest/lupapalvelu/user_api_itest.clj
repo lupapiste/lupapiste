@@ -108,6 +108,18 @@
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
 
+  (fact "Default search returns query"
+        (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                                 :skip 0
+                                                                 :limit 100
+                                                                 :sort {:asc false
+                                                                        :field "modified"}
+                                                                 :handlers []
+                                                                 :tags []
+                                                                 :operations []
+                                                                 :organizations []
+                                                                 :areas []})
+
   (fact "Overwrite default filter"
     (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
 
