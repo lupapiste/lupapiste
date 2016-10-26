@@ -141,7 +141,10 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
                       _.omitBy( fieldsCache, _.isEmpty ));
   }
 
-  function fetchSearchResults() {
+  function fetchSearchResults( clearCache ) {
+    if( clearCache ) {
+      fieldsCache = {};
+    }
     // Create dependency to the observable
     var fields = searchFields();
     if( initialized && cacheMiss()) {
@@ -156,7 +159,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     }
   }
 
-  hub.onPageLoad("applications", fetchSearchResults );
+  hub.onPageLoad("applications", _.wrap( true, fetchSearchResults ) );
 
   ko.computed( fetchSearchResults ).extend({deferred: true});
 
