@@ -261,6 +261,15 @@ div.search {
       width: 15%;
     }
   }
+
+  tr {
+    td.active {
+      color: $red-dark;
+    }
+    td.completed {
+      color: $green;
+    }
+  }
 }
 
 .search-results-waiting {

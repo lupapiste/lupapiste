@@ -23,12 +23,14 @@
           </thead>
           <tbody data-bind="foreach: data">
             <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
-              <td data-bind="text: $data.status"        data-test-col-name="status"></td>
+              <td data-bind="css: $data.status" data-test-col-name="status">
+                <i data-bind="css: $data.statusClass"></i>
+              </td>
               <td data-bind="text: $data.applicationId" data-test-col-name="id"></td>
-              <td data-bind="text: $data.address"        data-test-col-name="target"></td>
-              <td data-bind="text: $data.target"       data-test-col-name="location"></td>
+              <td data-bind="text: $data.address"       data-test-col-name="target"></td>
+              <td data-bind="text: $data.target"        data-test-col-name="location"></td>
               <td data-bind="text: $data.description"   data-test-col-name="description"></td>
-              <td data-bind="text: $data.creator.firstName"   data-test-col-name="description"></td>
+              <td data-bind="text: $data.creatorName"   data-test-col-name="description"></td>
             </tr>
           </tbody>
         </table>

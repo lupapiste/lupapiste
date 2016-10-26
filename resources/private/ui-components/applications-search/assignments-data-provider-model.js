@@ -19,8 +19,21 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.skip    = ko.observable(0);
 
   self.pending = ko.observable(false);
+
+  var statusClasses = {
+    active: "lupicon-circle-attention",
+    completed: "lupicon-circle-check"
+  };
+
+  function enrichAssignmentData(assignment) {
+    return _.merge(assignment, {
+      creatorName: assignment.creator.firstName + " " + assignment.creator.lastName,
+      statusClass: statusClasses[assignment.status]
+    });
+  }
+
   self.onSuccess = function(res) {
-    var assignments = res.assignments;
+    var assignments = _.map(res.assignments, enrichAssignmentData);
     self.data({searchResults: assignments,
                totalCount: assignments.length,
                userTotalCount: assignments.length});
