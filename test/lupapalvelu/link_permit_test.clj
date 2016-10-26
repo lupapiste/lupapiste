@@ -8,7 +8,6 @@
 (testable-privates lupapalvelu.link-permit
                    get-backend-id
                    update-backend-id-in-link-permit
-                   check-link-permit-backend-id
                    link-permits-with-app-data)
 
 (facts get-backend-id
@@ -40,22 +39,6 @@
     (update-backend-id-in-link-permit {:id "id1"})
     => {:id "id1"}))
 
-(facts check-link-permit-backend-id
-  (fact "kuntalupatunnus set manually"
-    (check-link-permit-backend-id {} {:type "kuntalupatunnus"}) => nil)
-
-  (fact "kuntalupatunnus found from verdict"
-    (check-link-permit-backend-id {} {:app-data {:verdicts [{:kuntalupatunnus ..backend-id..}]}}) => nil)
-
-  (fact "kuntalupatunnus not found"
-    (check-link-permit-backend-id {} {}) => :not-found)
-
-  (fact "not interested if main application of foreman app is sent"
-    (check-link-permit-backend-id {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}} {:app-data {:state "sent"}}) => nil)
-
-  (fact "main application of foreman app is not sent and backend-is is not found"
-    (check-link-permit-backend-id {:primaryOperation {:name "tyonjohtajan-nimeaminen-v2"}} {:app-data {:state "submitted"}}) => :not-found))
-
 (facts link-permits-with-app-data
   (fact "one application"
     (link-permits-with-app-data {:linkPermitData [{:id ..app-id..}]}) => [{:id ..app-id.. :app-data {:id ..app-id.. :state ..state..}}]
@@ -81,19 +64,6 @@
 
     (provided (domain/get-multiple-applications-no-access-checking [..app-id..] anything)
               => [{:id ..app-id.. :state ..state.. :verdicts [{:kuntalupatunnus ..backend-id..}]}]))
-
-  (fact "link permit not found"
-    (update-backend-ids-in-link-permit-data {:linkPermitData [{:id ..app-id..}]})
-    => (throws #"error.kuntalupatunnus-not-available-from-verdict")
-
-    (provided (domain/get-multiple-applications-no-access-checking [..app-id..] anything) => []))
-
-  (fact "kuntalupatunnus not found"
-    (update-backend-ids-in-link-permit-data {:linkPermitData [{:id ..app-id..}]})
-    => (throws #"error.kuntalupatunnus-not-available-from-verdict")
-
-    (provided (domain/get-multiple-applications-no-access-checking [..app-id..] anything)
-              => [{:id ..app-id.. :state ..state.. :verdicts [{}]}]))
 
   (fact "multiple applications"
     (update-backend-ids-in-link-permit-data {:linkPermitData [{:id ..app-id1..} {:id ..app-id2..} {:id ..app-id3..} {:id ..app-id4..}]})

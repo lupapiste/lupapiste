@@ -15,21 +15,6 @@
     (assoc link-permit :lupapisteId app-id :type "kuntalupatunnus" :id backend-id)
     link-permit))
 
-(defn- link-permit-not-found! [application link-permit-app]
-  (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" (:id link-permit-app) ") verdict."
-        " Associated Link-permit data: " (:linkPermitData application))
-  (if (foreman/foreman-app? application)
-    (fail! :error.link-permit-app-not-in-post-sent-state)
-    (fail! :error.kuntalupatunnus-not-available-from-verdict)))
-
-(defn- check-link-permit-backend-id [application {{link-state :state} :app-data link-type :type :as link-permit-app}]
-  (cond
-    (= link-type "kuntalupatunnus")                       nil ; backend-id already exists
-    (get-backend-id (:app-data link-permit-app))          nil ; backend-id found from verdicts
-    (and (foreman/foreman-app? application)
-         (states/post-sent-states (keyword link-state)))  nil ; main application for foreman app is submitted
-    :else                                                 :not-found))
-
 (defn- link-permits-with-app-data [{link-permit-data :linkPermitData}]
   (let [link-permit-apps (-> (map :id link-permit-data)
                              (domain/get-multiple-applications-no-access-checking {:verdicts true :state true}))]
@@ -45,9 +30,6 @@
 
 (defn update-backend-ids-in-link-permit-data [application]
   (check-link-permit-count application)
-  (let [link-permit-data (link-permits-with-app-data application)]
-    (some->> (first link-permit-data)  ; TODO: Find out if should fail when some or every link permit check fails
-             (check-link-permit-backend-id application)
-             (link-permit-not-found! application))
-    (assoc application :linkPermitData (->> (map update-backend-id-in-link-permit link-permit-data)
-                                            (map #(dissoc % :app-data))))))
+  (assoc application :linkPermitData (->> (link-permits-with-app-data application)
+                                          (map update-backend-id-in-link-permit)
+                                          (map #(dissoc % :app-data)))))
