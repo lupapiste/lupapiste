@@ -52,6 +52,7 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :gtm                   (env/value :gtm)
                  :frontpage             (env/value :frontpage)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
@@ -449,7 +450,7 @@
 
    :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
              :js ["company-user.js"]
-             :html ["index.html" "login.html" "company-user.html"]}
+             :html ["index.html" "login.html" "company-user.html" "gtm.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
