@@ -168,6 +168,17 @@
              (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
+(defn- is-verdict-attachment? [{target :target}] (= (:type target) "verdict"))
+(defn- is-statement-attachment? [{target :target}] (= (:type target) "statement"))
+
+(defn- verdict-or-statement-attachment-edit-by-authority-only
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (when-not (usr/authority? user)
+    (let [attachment-info (attachment/get-attachment-info application attachmentId)]
+      (when (or (is-verdict-attachment? attachment-info)
+                (is-statement-attachment? attachment-info))
+        (fail :error.illegal-attachment-operation)))))
+
 ;;
 ;; Attachments
 ;;
@@ -249,6 +260,7 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
+                verdict-or-statement-attachment-edit-by-authority-only
                 attachment-editable-by-application-state
                 attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
@@ -378,6 +390,7 @@
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
+                 verdict-or-statement-attachment-edit-by-authority-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
@@ -396,6 +409,7 @@
                  foreman-must-be-uploader
                  attachment-not-readOnly
                  attachment-editable-by-application-state
+                 verdict-or-statement-attachment-edit-by-authority-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
@@ -692,6 +706,7 @@
                 foreman-must-be-uploader
                 attachment-editable-by-application-state
                 attachment-not-readOnly
+                verdict-or-statement-attachment-edit-by-authority-only
                 validate-operation-in-application]}
   [{:keys [created] :as command}]
   (let [data (attachment/meta->attachment-data meta)]

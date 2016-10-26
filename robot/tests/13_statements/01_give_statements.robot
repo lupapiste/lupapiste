@@ -190,10 +190,11 @@ Veikko can delete his own statement but no others
   Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
-Veikko from Tampere can give statement
+Veikko from Tampere can give statement (and attach something to it as well)
   Open statement  veikko.viranomainen@tampere.fi
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
+  Add attachment  statement  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}  ennakkoluvat_ja_lausunnot.lausunto
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
