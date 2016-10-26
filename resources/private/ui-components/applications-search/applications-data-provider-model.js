@@ -21,7 +21,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.data = ko.observable(defaultData);
 
-  self.applications = ko.observableArray([]);
+  self.results = ko.observableArray([]);
 
   self.searchResultType = ko.observable(params.searchResultType);
 
@@ -109,7 +109,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.onSuccess = function(res) {
     var data = wrapData(res.data);
     self.data(data);
-    self.applications(data.applications);
+    self.results(data.applications);
   };
 
   self.clearFilters = function() {

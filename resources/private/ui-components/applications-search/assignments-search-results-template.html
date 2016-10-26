@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="assignments-search-results-template">
+      <div class="tabs-content">
+        <!-- ko if: dataProvider.pending -->
+        <div class="btn search-results-waiting">
+          <i class="lupicon-refresh spin primary"></i>
+          <span data-bind="ltext: 'applications.loading'"></span>
+        </div>
+        <!-- /ko -->
+        <!-- ko ifnot: dataProvider.pending -->
+        <table id="applications-list" class="assignments-search-result__table" data-bind="if: gotResults()">
+          <thead>
+            <tr data-bind="foreach: columns">
+              <th data-bind="click: $data.click, css: $data.css, attr: $data.attr">
+                <span data-bind="ltext: $data.ltext"></span>
+                <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
+                <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: data">
+            <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
+              <td data-bind="text: $data.status"        data-test-col-name="status"></td>
+              <td data-bind="text: $data.applicationId" data-test-col-name="id"></td>
+              <td data-bind="text: $data.address"        data-test-col-name="target"></td>
+              <td data-bind="text: $data.target"       data-test-col-name="location"></td>
+              <td data-bind="text: $data.description"   data-test-col-name="description"></td>
+              <td data-bind="text: $data.creator.firstName"   data-test-col-name="description"></td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- ko ifnot: gotResults -->
+        <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
+        <!-- /ko -->
+      </div>
+    </script>
+  </section>
+</body>
+</html>

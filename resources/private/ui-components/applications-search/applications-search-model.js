@@ -23,7 +23,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
              lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
     }),
     showPermitsOnMap: function() {
-      var data = _.map(self.dataProvider.applications(), externalApiTools.toExternalPermit);
+      var data = _.map(self.dataProvider.results(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);
     }
   };
@@ -53,6 +53,21 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       resultsComponent: "applications-foreman-search-results",
       pagingComponent:  "applications-search-paging",
       tabsComponent:    "applications-foreman-search-tabs"
+    }));
+  }
+  if (self.authorizationModel.ok("assignments-search")) {
+    self.searchModels.push(new LUPAPISTE.SearchSectionModel({
+      type:             "assignments",
+      lLabel:           "application.assignment.searchLabel",
+      dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
+        sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"])
+      }),
+      externalApi:      null,
+      limits:           self.limits,
+      filterComponent:  "applications-search-filter",
+      resultsComponent: "assignments-search-results",
+      pagingComponent:  "applications-search-paging",
+      tabsComponent:    "assignments-search-tabs"
     }));
   }
 

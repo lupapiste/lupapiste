@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1476874996021');
+@import url('main-blessed1.css?z=1477472568098');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -4913,12 +4913,37 @@ div.search i {
   width: 15%;
 }
 
-/* line 244, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 245, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.first {
+  width: 5%;
+}
+/* line 248, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.second {
+  width: 15%;
+}
+/* line 251, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.third {
+  width: 10%;
+}
+/* line 254, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.fourth {
+  width: 10%;
+}
+/* line 257, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.fifth {
+  width: 40%;
+}
+/* line 260, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.sixth {
+  width: 15%;
+}
+
+/* line 267, ../../../private/common-html/sass/partials/_applications_search.scss */
 .search-results-waiting i.spin {
   font-size: 44px;
   padding: 0;
 }
-/* line 248, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 271, ../../../private/common-html/sass/partials/_applications_search.scss */
 .search-results-waiting span {
   padding-left: 2em;
 }

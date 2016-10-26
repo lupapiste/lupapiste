@@ -7,7 +7,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.dataProvider = params.dataProvider;
   self.data = ko.pureComputed(function() {
-    return _.map(self.dataProvider.applications(), function(item) {
+    return _.map(self.dataProvider.results(), function(item) {
       item.kuntalupatunnus = util.getIn(item, ["verdicts", 0, "kuntalupatunnus"]);
       if (item.foremanRole) {
         item.foremanRoleI18nkey = "osapuoli.tyonjohtaja.kuntaRoolikoodi." + item.foremanRole;
