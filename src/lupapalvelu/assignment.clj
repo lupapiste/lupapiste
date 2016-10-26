@@ -9,32 +9,36 @@
 ;; Helpers and schemas
 
 (defn- assignment-in-user-organization-query [user]
-  {:organizationId {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
+  {:application.organization {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
 
 (defn- organization-query-for-user [user query]
   (merge query (assignment-in-user-organization-query user)))
 
+(def assignment-statuses
+  ["active" "inactive" "completed"])
+
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :organizationId sc/Str
-   :applicationId  sc/Str
+   :application    {:id           sc/Str
+                    :organization sc/Str
+                    :address      sc/Str
+                    :municipality sc/Str}
    :target         sc/Any
    :created        ssc/Timestamp
    :creator        usr/SummaryUser
    :recipient      usr/SummaryUser
    :completed      (sc/maybe ssc/Timestamp)
    :completer      (sc/maybe usr/SummaryUser)
-   :status         (sc/enum "active" "inactive" "completed")
+   :status         (apply sc/enum assignment-statuses)
    :description    sc/Str})
 
 (sc/defschema NewAssignment
   (select-keys Assignment
-               [:organizationId
-                :applicationId
+               [:application
                 :creator
+                :description
                 :recipient
-                :target
-                :description]))
+                :target]))
 
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)})
@@ -69,7 +73,7 @@
   {:pre [filter-search]}
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search)
-    {:applicationId (ss/upper-case filter-search)}
+    {:application.id (ss/upper-case filter-search)}
 
     :else
     (make-free-text-query filter-search)))
@@ -98,7 +102,7 @@
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
-  (get-assignments user {:applicationId application-id}))
+  (get-assignments user {:application.id application-id}))
 
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
@@ -132,12 +136,3 @@
    {$set {:completed timestamp
           :status    "completed"
           :completer (usr/summary completer)}}))
-
-; A temporary test function, to be removed before merge to develop
-(defn test-assignment [application-id target description]
-  {:organizationId "753-R"
-   :applicationId application-id
-   :creator (usr/summary (usr/get-user {:username "sonja"}))
-   :recipient (usr/summary (usr/get-user {:username "pena"}))
-   :target target
-   :description description})

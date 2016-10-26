@@ -26,11 +26,12 @@
               <td data-bind="css: $data.status" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>
               </td>
-              <td data-bind="text: $data.applicationId" data-test-col-name="id"></td>
-              <td data-bind="text: $data.address"       data-test-col-name="target"></td>
-              <td data-bind="text: $data.target"        data-test-col-name="location"></td>
-              <td data-bind="text: $data.description"   data-test-col-name="description"></td>
-              <td data-bind="text: $data.creatorName"   data-test-col-name="description"></td>
+              <td data-bind="text: $data.application.id" data-test-col-name="id"></td>
+              <td data-bind="text: $data.addressAndMunicipality"
+                  data-test-col-name="target"></td>
+              <td data-bind="text: $data.target"         data-test-col-name="location"></td>
+              <td data-bind="text: $data.description"    data-test-col-name="description"></td>
+              <td data-bind="text: $data.creatorName"    data-test-col-name="description"></td>
             </tr>
           </tbody>
         </table>

@@ -58,7 +58,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   if (self.authorizationModel.ok("assignments-search")) {
     self.searchModels.push(new LUPAPISTE.SearchSectionModel({
       type:             "assignments",
-      lLabel:           "application.assignment.searchLabel",
+      lLabel:           "application.assignment.search.label",
       dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
         sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"])
       }),

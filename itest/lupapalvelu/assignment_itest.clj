@@ -1,7 +1,6 @@
 (ns lupapalvelu.assignment-itest
   (:require [midje.sweet :refer :all]
             [schema.core :as sc]
-            [lupapalvelu.itest-util :refer [expected-failure?]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]

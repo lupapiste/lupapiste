@@ -8,7 +8,7 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
 
   self.openApplication = function(model, event, target) {
     console.log(model);
-    ajax.query("application", {id: model.applicationId, lang: loc.getCurrentLanguage()})
+    ajax.query("application", {id: model.application.id, lang: loc.getCurrentLanguage()})
       .success(function(res) {
         self.offset = window.pageYOffset;
         pageutil.openApplicationPage(res.application, target);

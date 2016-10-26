@@ -28,7 +28,8 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   function enrichAssignmentData(assignment) {
     return _.merge(assignment, {
       creatorName: assignment.creator.firstName + " " + assignment.creator.lastName,
-      statusClass: statusClasses[assignment.status]
+      statusClass: statusClasses[assignment.status],
+      addressAndMunicipality: assignment.application.address + ", " + loc(['municipality', assignment.application.municipality])
     });
   }
 
