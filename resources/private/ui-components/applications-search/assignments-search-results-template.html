@@ -21,7 +21,7 @@
               </th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: data">
+          <tbody data-bind="foreach: results">
             <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
               <td data-bind="css: $data.status" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>
@@ -31,7 +31,15 @@
                   data-test-col-name="target"></td>
               <td data-bind="text: $data.target"         data-test-col-name="location"></td>
               <td data-bind="text: $data.description"    data-test-col-name="description"></td>
-              <td data-bind="text: $data.creatorName"    data-test-col-name="description"></td>
+              <td data-bind="text: $data.creatorName"    data-test-col-name="creator"></td>
+              <td data-test-col-name="complete">
+                <!-- ko ifnot: $data.completed -->
+                <button class="positive right">
+                  <i class="lupicon-check"></i>
+                  <span data-bind="ltext: 'application.assignment.complete'"></span>
+                </button>
+                <!-- /ko -->
+              </td>
             </tr>
           </tbody>
         </table>

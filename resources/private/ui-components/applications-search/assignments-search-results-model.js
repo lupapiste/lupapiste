@@ -4,7 +4,7 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ApplicationsSearchResultsModel(params));
 
-  self.data = ko.pureComputed(self.dataProvider.results);
+  self.results = self.dataProvider.results;
 
   self.openApplication = function(model, event, target) {
     console.log(model);
@@ -25,9 +25,12 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
                               {sortable: false}),
     util.createSortableColumn("fourth",   "application.assignment.subject",
                               {sortable: false}),
-    util.createSortableColumn("fifth",   "",
+    util.createSortableColumn("fifth",   "empty",
                               {sortable: false}),
     util.createSortableColumn("sixth",   "application.assignment.creator",
+                              {sortable: false}),
+    util.createSortableColumn("seventh", "empty",
                               {sortable: false})
+
   ];
 };
