@@ -58,7 +58,8 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
   });
 
   self.downloadAll = function() {
-    service.downloadAttachments(_.map(self.filteredAttachments(), "id"));
+    service.downloadAttachments(_.map(self.filteredAttachments(),
+                                      _.ary( _.partialRight( util.getIn, ["id"]), 1 )));
   };
 
   self.downloadAllText = self.disposedPureComputed(function() {
