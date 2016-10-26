@@ -596,7 +596,7 @@
                       (partial action/non-blank-parameters [:page])]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
-   :states     (conj states/post-submitted-states :submitted)
+   :states     states/post-submitted-states
    :description "Stamps all attachments of given application"}
   [{application :application org :organization {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond

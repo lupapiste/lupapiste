@@ -103,7 +103,7 @@
       (fail :error.permit-has-no-such-subtype))))
 
 (defn submitted? [{:keys [state]}]
-  (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
+  (boolean (states/post-submitted-states (keyword state))))
 
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
