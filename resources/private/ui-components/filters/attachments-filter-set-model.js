@@ -26,7 +26,7 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
   var activeFilters = self.disposedPureComputed(function() {
     return _.map(self.filters(), function(filterGroup) {
       return _(filterGroup)
-        .filter(function(f) { return f.active(); })
+        .filter(function(filter) { return filter.active(); })
         .map("tag")
         .value();
     });
@@ -79,6 +79,13 @@ LUPAPISTE.AttachmentsFilterSetModel = function(filters) {
 
   self.getFilterValue = function(tag) {
     return _.get(filtersByTag, tag, "active");
+  };
+
+  self.toggleAll = function(value) {
+    var active = _.isBoolean(value) ? value : util.getIn(self.filters, [0, "active"]);
+    _.map(_.flatten(self.filters()), function(filter) {
+      filter.active(active);
+    });
   };
 
   var baseModelDispose = self.dispose;
