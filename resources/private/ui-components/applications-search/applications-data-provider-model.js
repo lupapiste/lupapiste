@@ -14,6 +14,8 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   var defaultForemanSort = {field: "submitted", asc: false};
 
   var defaultOperations = params.defaultOperations;
+  var initialized = false;
+  var fieldsCache = {};
 
   // Observables
   self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
@@ -134,19 +136,43 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     self.sort.asc(defaultForemanSort.asc);
   };
 
-  hub.onPageLoad("applications", function() {
-    ajax.datatables("applications-search", searchFields())
-      .success(self.onSuccess)
-      .onError("error.unauthorized", notify.ajaxError)
-      .pending(self.pending)
-      .call();
-  });
+  function cacheMiss() {
+    return !_.isEqual(_.omitBy( searchFields(), _.isEmpty ),
+                      _.omitBy( fieldsCache, _.isEmpty ));
+  }
 
-  ko.computed(function() {
-    ajax.datatables("applications-search", searchFields())
-      .success(self.onSuccess)
-      .onError("error.unauthorized", notify.ajaxError)
-      .pending(self.pending)
-      .call();
-  }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
+  function fetchSearchResults( clearCache ) {
+    if( clearCache ) {
+      fieldsCache = {};
+    }
+    // Create dependency to the observable
+    var fields = searchFields();
+    if( initialized && cacheMiss()) {
+      ajax.datatables("applications-search", fields)
+        .success(function( res ) {
+          fieldsCache = _.cloneDeep(fields);
+          self.onSuccess( res );
+        })
+        .onError("error.unauthorized", notify.ajaxError)
+        .pending(self.pending)
+        .call();
+    }
+  }
+
+  hub.onPageLoad("applications", _.wrap( true, fetchSearchResults ) );
+
+  ko.computed( fetchSearchResults ).extend({deferred: true});
+
+  // Initialization
+  ajax.datatables("applications-search-default", {})
+    .success(function( res ) {
+      fieldsCache = res.search;
+      self.onSuccess( res );
+    })
+    .onError("error.unauthorized", notify.ajaxError)
+    .pending(self.pending)
+    .complete( function() {
+      initialized = true;
+    })
+    .call();
 };
