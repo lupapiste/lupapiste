@@ -40,6 +40,7 @@
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
                 (user/authority? user)))
+   :recipients-fn notifications/comment-recipients-fn
    :model-fn create-model})
 
 (notifications/defemail :application-targeted-comment
@@ -79,7 +80,7 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles auth/comment-user-authz-roles
    :org-authz-roles auth/commenter-org-authz-roles
    :states states/all-states}
   [{{app-id :id :as application} :application}]
@@ -90,7 +91,7 @@
    :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
-   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :user-authz-roles auth/comment-user-authz-roles
    :org-authz-roles auth/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
                 foreman/allow-foreman-only-in-foreman-app

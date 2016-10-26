@@ -17,6 +17,10 @@
     (fact "Pena is not architect"
       (command pena :copy-user-attachments-to-application :id application-id) => unauthorized?)
     (command pena :update-user :firstName "Pena" :lastName "Panaani" :architect true) => ok?
+
+    (fact "Pena is has no attachments"
+      (command pena :copy-user-attachments-to-application :id application-id) => (partial expected-failure? :error.no-user-attachments))
+
     (upload-user-attachment pena "osapuolet.cv" true)
 
     (fact "Pena can copy-user-attachments to application"

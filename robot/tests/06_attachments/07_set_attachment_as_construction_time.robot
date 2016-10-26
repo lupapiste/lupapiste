@@ -94,12 +94,50 @@ Mikko logs in and goes to attachments table
   Open tab  attachments
   Click by test id  postVerdict-filter-label
 
+Pre and post verdict filters are set
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  general-filter-checkbox
+  Checkbox wrapper not selected by test id  parties-filter-checkbox
+  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
+  Checkbox wrapper not selected by test id  other-filter-checkbox
+
 Mikko sees construction time checkbox is checked and disabled
   [Tags]  attachments
   Open attachment details  muut.muu
   Wait until  Page should contain element  ${construction-time-checkbox}
   Element should be disabled  ${construction-time-checkbox}
   Checkbox should be selected  ${construction-time-checkbox}
+
+Mikko goes back to attachments listing and sees filters are set as they were
+  Click by test id  back-to-application-from-attachment
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  general-filter-checkbox
+  Checkbox wrapper not selected by test id  parties-filter-checkbox
+  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
+  Checkbox wrapper not selected by test id  other-filter-checkbox
+
+Mikko toggles all filters on
+  Click by test id  toggle-all-filters-label
+  Wait until  Toggle all filters is selected
+  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  preVerdict-filter-checkbox
+  Checkbox wrapper selected by test id  general-filter-checkbox
+  Checkbox wrapper selected by test id  parties-filter-checkbox
+  Checkbox wrapper selected by test id  paapiirustus-filter-checkbox
+  Checkbox wrapper selected by test id  other-filter-checkbox
+
+Mikko toggles all filters off
+  Click by test id  toggle-all-filters-label
+  Wait until  Toggle all filters is not selected
+  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  preVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  general-filter-checkbox
+  Checkbox wrapper not selected by test id  parties-filter-checkbox
+  Checkbox wrapper not selected by test id  paapiirustus-filter-checkbox
+  Checkbox wrapper not selected by test id  other-filter-checkbox
+
 
 Mikko logs out
   [Tags]  attachments
@@ -114,3 +152,9 @@ Select construction time checkbox
 Unselect construction time checkbox
   Unselect checkbox  ${construction-time-checkbox}
   Positive indicator icon should be visible
+
+Toggle all filters is selected
+  Element should be visible  jquery=i.lupicon-checkbox-on[data-test-id=toggle-all-filters-checkbox]
+
+Toggle all filters is not selected
+  Element should be visible  jquery=i.lupicon-checkbox-off[data-test-id=toggle-all-filters-checkbox]
