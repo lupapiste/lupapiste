@@ -32,8 +32,6 @@ LUPAPISTE.FiltersModel = function(params) {
 
   self.clickGroupState = function() {
     var state = self.groupState();
-    _.each( self.filters(), function( m ) {
-      m.filter( state !== "all");
-    });
+    filterSet.toggleAll( state !== "all" );
   };
 };
