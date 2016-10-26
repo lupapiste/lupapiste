@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Calendar utils
+Library         DateTime
 Resource        ../../common_resource.robot
 
 *** Keywords ***
@@ -44,10 +45,12 @@ Add reservation type
 
 Goto following week in calendar view
   Wait for jQuery
-  ${monday}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
+  ${timestampStr}=  Get Element Attribute  xpath=//td[@data-test-id='calendar-weekday-0']@data-test-timestamp
+  ${monday}=  Convert To Integer  ${timestampStr}
   Click by test id  calendar-view-following-week
-  ${monday}=  Evaluate  ${monday}+604800000
-  Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${monday}']
+  ${nextMonday}=  Add Time To Date  ${monday}  7 days  epoch
+  ${nextMondayEpoch}=  Convert To Integer  ${nextMonday}
+  Wait Until Page Contains Element  xpath=//td[@data-test-timestamp='${nextMondayEpoch}']
   Wait for jQuery
 
 Assign application to

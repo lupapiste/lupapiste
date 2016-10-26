@@ -3,7 +3,6 @@
 Documentation   Mikko can accept invitations created for the old email after email change
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
 Resource        ../common_keywords/email_helpers.robot
 
 *** Test Cases ***
@@ -26,7 +25,7 @@ Mikko changes his email
   Mikko logs in
   Mikko changes email to mikko@example.net
   Mikko receives email and clicks the email change link
-  Mikko identifies himself via Vetuma
+  Authenticate via dummy page
   Mikko logs in with the new email address
 
 Mikko can open the old application
@@ -45,7 +44,7 @@ Mikko changes his email back to mikko@example.com
   [Tags]  integration
   Change email to  mikko@example.com
   Open last email and click the email change link
-  Identify for email change via Vetuma
+  Identify for email change via dummy page
   Log in with new email address  mikko@example.com  mikko123  Mikko Intonen
   Logout
 
@@ -79,8 +78,10 @@ Mikko receives email and clicks the email change link
 
 Mikko identifies himself via Vetuma
   Vetuma button is visible
-  Authenticate via Nordea via Vetuma  vetuma-init-email
-  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
+  Click by test id  vetuma-init-email
+  Fill test id  dummy-login-userid  210281-9988
+  Wait test id visible  submit-button
+  Click by test id  submit-button  Wait Until  Page should contain  Voit nyt kirjautua sisään uudella sähköpostiosoitteellasi.
 
 Mikko logs in with the new email address
   Element should be visible by test id  login-new-email

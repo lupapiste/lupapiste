@@ -592,6 +592,9 @@
 
        (fact "foreman CAN copy own attachments to foreman application"
          (command foreman :update-user :firstName "Teppo" :lastName "Nieminen" :architect true) => ok?
+
+         (upload-user-attachment foreman "osapuolet.cv" true)
+
          (command foreman :copy-user-attachments-to-application :id foreman-app-id) => ok?)
 
        (fact "foreman can NOT upload a new version to pre-verdict attachment template on main application"

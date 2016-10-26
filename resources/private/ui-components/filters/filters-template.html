@@ -13,11 +13,11 @@
         <input type="checkbox"
                data-bind="attr: {'id': $parent.id( $index() ),
                                  'data-test-id': tag + '-filter-checkbox'},
-                          checked: filter">
+                          checked: active">
         <label class="filter-label"
                data-bind="attr: {'for': $parent.id( $index() ),
                                  'data-test-id': tag + '-filter-label'},
-                          ltext: ltext"></label>
+                          ltext: 'filter.' + $data.tag"></label>
     </div></div>
   </div>
 </script

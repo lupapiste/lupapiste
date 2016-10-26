@@ -5,7 +5,8 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
-Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/ident_helpers.robot
+
 
 *** Test Cases ***
 
@@ -19,7 +20,7 @@ User can authenticate via Vetuma
   Element should be visible by test id  vetuma-init
   Element should not be visible by test id  bulletin-comment-box-form
 
-  Authenticate via Nordea via Vetuma
+  Authenticate via dummy page  vetuma-init
 
   Open bulletin tab  info
   Element should not be visible by test id  vetuma-init
@@ -37,6 +38,7 @@ User is shown error when authentication via Vetuma canceled
   Open bulletin by index  1
 
   Open bulletin tab  info
-  Start Vetuma authentication but cancel via Nordea
+  Start authentication but cancel it  vetuma-init
   Wait Until  Element should be visible by test id  indicator-negative
   Page should contain  Vetuma-tunnistautuminen peruutettiin
+

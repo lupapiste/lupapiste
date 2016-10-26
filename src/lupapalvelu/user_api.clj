@@ -689,6 +689,9 @@
        (filter (partial allowed-state? (:state application)))
        (remove #(or (att/attachment-is-readOnly? %) (att/attachment-is-locked? %)))))
 
+(defn user-attachments-exists [{user :user}]
+  (when (empty? (:attachments (mongo/by-id :users (:id user) {:attachments true})))
+    (fail :error.no-user-attachments)))
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
@@ -697,9 +700,10 @@
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
-                    unauthorized))]}
+                    unauthorized))
+                user-attachments-exists]}
   [{application :application user :user :as command}]
-  (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
+  (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id id
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment

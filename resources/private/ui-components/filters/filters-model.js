@@ -1,11 +1,15 @@
-LUPAPISTE.FiltersModel = function() {
+LUPAPISTE.FiltersModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var prefix = _.uniqueId( "filters");
 
-  self.filters = lupapisteApp.services.attachmentsService.filtersArray;
+  var filterSet = lupapisteApp.services.attachmentsService.getFilters( params.pageName );
+
+  self.filters = self.disposedPureComputed(function() {
+    return _.flatten(filterSet.filters());
+  });
 
   self.id = function( index ) {
     return prefix + "-" + index;
@@ -13,8 +17,8 @@ LUPAPISTE.FiltersModel = function() {
 
   self.groupState = self.disposedComputed( function() {
     var activeCount = _.size( _.filter( self.filters(),
-                                        function( m ) {
-                                          return m.filter();
+                                        function( filter ) {
+                                          return filter.active();
                                         }));
     var state = "some";
     if( activeCount === _.size( self.filters()) ) {
@@ -28,8 +32,6 @@ LUPAPISTE.FiltersModel = function() {
 
   self.clickGroupState = function() {
     var state = self.groupState();
-    _.each( self.filters(), function( m ) {
-      m.filter( state !== "all");
-    });
+    filterSet.toggleAll( state !== "all" );
   };
 };

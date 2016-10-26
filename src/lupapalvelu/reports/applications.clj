@@ -26,7 +26,7 @@
   (i18n/localize lang (get app :state)))
 
 (defn- date-value [key app]
-  (util/to-local-datetime (get app key)))
+  (util/to-local-date (get app key)))
 
 (defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
   ;; Create a spreadsheet and save it

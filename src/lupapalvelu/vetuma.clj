@@ -18,7 +18,8 @@
             [sade.validators :as v]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.vtj :as vtj]))
+            [lupapalvelu.vtj :as vtj]
+            [lupapalvelu.ident.session :as ident-session]))
 
 ;;
 ;; Configuration
@@ -191,6 +192,8 @@
         trid      (vetuma-request "TRID")
         label     (i18n/localize lang "vetuma.continue")]
 
+    (when (env/feature? :dummy-ident)
+      (response/status 400 (response/content-type "text/plain" "VETUMA feature deprecated")))
     (if sessionid
       (if (every? util/relative-local-url? (vals paths))
         (do
@@ -265,7 +268,7 @@
         "FAILURE"  (handle-failure params data)))))
 
 (defn vetuma-session []
-  (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1})))
+  (lupapalvelu.ident.session/get-session (session-id)))
 
 (defpage "/api/vetuma/user" []
   (let [data (vetuma-session)
@@ -274,7 +277,7 @@
 
 (defpage [:delete "/api/vetuma/user"] []
   (if-let [session (vetuma-session)]
-    (if (mongo/remove :vetuma (:id session))
+    (if (lupapalvelu.ident.session/delete-user session)
       (response/json {:ok true})
       (response/status 500 "removing vetuma session failed"))
     (response/status 404 (str "no vetuma session for session id: " (session-id)))))
@@ -283,16 +286,11 @@
 ;; public local api
 ;;
 
-(defn- get-data [stamp]
-  (mongo/select-one :vetuma {:user.stamp stamp}))
-
 (defn get-user [stamp]
-  (:user (get-data stamp)))
+  (lupapalvelu.ident.session/get-user stamp))
 
 (defn consume-user [stamp]
-  (when-let [user (get-data stamp)]
-    (mongo/remove-many :vetuma {:_id (:id user)})
-    (:user user)))
+  (lupapalvelu.ident.session/consume-user stamp))
 
 ;;
 ;; dev test api
