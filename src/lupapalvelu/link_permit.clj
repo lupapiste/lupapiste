@@ -30,6 +30,8 @@
 
 (defn update-backend-ids-in-link-permit-data [application]
   (check-link-permit-count application)
-  (assoc application :linkPermitData (->> (link-permits-with-app-data application)
-                                          (map update-backend-id-in-link-permit)
-                                          (map #(dissoc % :app-data)))))
+  (let [link-permit-data (link-permits-with-app-data application)]
+    (when (and (foreman/foreman-app? application) (-> link-permit-data first :app-data :state keyword states/post-sent-states not))
+      (fail! :error.link-permit-app-not-in-post-sent-state))
+    (assoc application :linkPermitData (->> (map update-backend-id-in-link-permit link-permit-data)
+                                            (map #(dissoc % :app-data))))))
