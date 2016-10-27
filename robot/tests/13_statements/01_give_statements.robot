@@ -195,6 +195,7 @@ Veikko from Tampere can give statement (and attach something to it as well)
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
   Add attachment  statement  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}  ennakkoluvat_ja_lausunnot.lausunto
+  Wait test id visible  statement-attachments-table
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit
