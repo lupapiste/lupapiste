@@ -97,4 +97,14 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
     return self.authModel.ok("order-verdict-attachment-prints");
   };
 
+  self.downloadAll = _.partial( self.sendEvent,
+                                service.serviceName,
+                                "downloadAllAttachments" );
+
+  self.hasFiles = function() {
+    return _.some( service.attachments(),
+                   _.ary( _.partialRight( util.getIn,
+                                          ["latestVersion", "fileId"] ),
+                          1));
+  };
 };
