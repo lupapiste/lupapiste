@@ -832,7 +832,7 @@
 "applications.filter.verdict" "en" "Decisions"
 "applications.filter.verdict" "fi" "Päätökset"
 "applications.filter.verdict" "sv" "Beslut"
-"applications.foreman-name" "en" "Foreman"
+"applications.foreman-name" "en" "Supervisor"
 "applications.foreman-name" "fi" "Työnjohtaja"
 "applications.foreman-name" "sv" "Arbetsledare"
 "applications.foreman-role" "en" "Role"
