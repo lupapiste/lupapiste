@@ -30,12 +30,27 @@ LUPAPISTE.CurrentUser = function() {
     foremanFilters: []
   };
 
+  var fbPixel = null;
+  if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics.isTrackingEnabled()) {
+    fbPixel = function () {
+      var fbUrl = LUPAPISTE.config.facebook.url;
+      return "<img height='1' width='1' style='display:none' src='" + fbUrl + "'/>";
+    };
+  }
+
   function constructor(user) {
     if( user.indicatorNote ) {
       hub.send( "indicator", {style: "primary",
                               message: user.indicatorNote,
                               sticky: true, html: true});
       delete user.indicatorNote;
+    }
+    if (user.firstLogin && _.isFunction(fbPixel)) {
+      // send a bit to Facebook about firstLogin
+      info("Triggering first login Facebook pixel");
+      hub.send( "indicator", {style: "hidden",
+                              rawMessage: fbPixel(),
+                              html: true});
     }
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
   }

@@ -49,6 +49,7 @@
     "gis": true,
     "hub": true,
     "invites": true,
+    "info": true,
     "JSON": false,
     "ko": false,
     "loc": true,
