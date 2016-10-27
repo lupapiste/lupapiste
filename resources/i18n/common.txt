@@ -2379,7 +2379,7 @@
 "phone.short" "en" "Page"
 "phone.short" "fi" "p."
 "phone.short" "sv" "tfn"
-"poikkeuslupa._group_label" "en" "Exception case add-on"
+"poikkeuslupa._group_label" "en" "Deviation case add-on"
 "poikkeuslupa._group_label" "fi" "Poikkeamishakemuksen lisäosa"
 "poikkeuslupa._group_label" "sv" "Tilläggsdel till undantagsansökan"
 "prev-permit-label-address" "en" "Street address:"
