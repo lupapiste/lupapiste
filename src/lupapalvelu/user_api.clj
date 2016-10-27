@@ -49,11 +49,14 @@
 (defquery user
   {:optional-parameters [lang]
    :input-validators [i18n/valid-language]
+   :on-success (fn [_ {user :user}]
+                 (when (:firstLogin user)
+                   (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
     (ok :user (usr/update-user-language! full-user (ss/lower-case lang)))
-    (fail)))
+    (fail :error.user.not.found)))
 
 (defquery users
   {:user-roles #{:admin}}
