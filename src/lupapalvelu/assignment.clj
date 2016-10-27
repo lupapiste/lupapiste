@@ -48,6 +48,7 @@
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
    :status (apply sc/enum "all" assignment-statuses)
+   :recipient (sc/maybe sc/Str)
    :skip   sc/Int
    :limit  sc/Int})
 
@@ -89,15 +90,18 @@
 (defn search-query [data]
   (merge {:searchText nil
           :status "all"
+          :recipient nil
           :skip   0
           :limit  100}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText status]}]
+(defn- make-query [query {:keys [searchText status recipient]}]
   {$and
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+            (when-not (ss/blank? recipient)
+              {:recipient.username recipient})
             (if (= status "all")
               {:status {$ne "inactive"}}
               {:status status})])})

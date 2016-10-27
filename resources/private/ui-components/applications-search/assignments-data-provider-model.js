@@ -50,6 +50,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     return {
       searchText: self.searchFieldDelayed(),
       status: self.searchResultType(),
+      recipient: lupapisteApp.models.currentUser.username(),
       limit: self.limit(),
       skip: self.skip()
     };
