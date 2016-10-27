@@ -11,7 +11,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     return self.searchType() === "foreman" ? [{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}] : [];
   };
 
-  self.limits = ko.observableArray([5, 10, 25, 50, 100]);
+  self.limits = ko.observableArray([10, 25, 50, 100]);
   self.currentLimit = ko.observable(100);
 
   self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({
