@@ -22,19 +22,19 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
   };
 
   self.columns = [
-    util.createSortableColumn("first", "application.assignment.status",
+    util.createSortableColumn("first",   "application.assignment.status",
                               {sortable: false}),
     util.createSortableColumn("second",  "applications.id",
                               {sortable: false}),
     util.createSortableColumn("third",  "applications.location",
                               {sortable: false}),
-    util.createSortableColumn("fourth",   "application.assignment.subject",
+    util.createSortableColumn("fourth",  "application.assignment.subject",
                               {sortable: false}),
-    util.createSortableColumn("fifth",   "empty",
+    util.createSortableColumn("fifth",   null,    // Description
                               {sortable: false}),
     util.createSortableColumn("sixth",   "application.assignment.creator",
                               {sortable: false}),
-    util.createSortableColumn("seventh", "empty",
+    util.createSortableColumn("seventh", null,    // Mark complete
                               {sortable: false})
 
   ];
