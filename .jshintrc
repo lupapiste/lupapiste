@@ -29,6 +29,7 @@
     "accordion": true,
     "AccordionState" : true,
     "ajax": true,
+    "analytics": true,
     "attachment": true,
     "attachmentTypeSelect": true,
     "attachmentUtils" : true,
