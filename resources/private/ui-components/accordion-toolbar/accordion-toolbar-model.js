@@ -45,14 +45,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                "id"] );
   });
 
-  self.showIdentifierEditors = ko.observable(false);
+  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
+  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
+
+  self.showIdentifierEditors = ko.observable(self.identifierField ? (self.identifierField.value() ? false : true) : false).extend({deferred:true});
   var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
     // refresh accordion sitcky state
     _.delay(window.Stickyfill.rebuild, 0);
   });
-
-  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
-  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
@@ -138,14 +138,12 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
+  // Dispose
+
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
     hub.unsubscribe(toggleEditorSubscription);
   };
-
-  _.defer(function() {
-    self.showIdentifierEditors(self.identifierField ? (self.identifierField.value() ? false : true) : false);
-  });
 
 };
