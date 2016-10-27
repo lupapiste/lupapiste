@@ -36,7 +36,8 @@ LUPAPISTE.SearchSectionModel = function(params) {
     name: params.pagingComponent,
     params: {
       dataProvider: self.dataProvider,
-      limits: params.limits
+      limits: params.limits,
+      resultsTextKey: params.resultsTextKey
     }
   };
   self.tabs = {

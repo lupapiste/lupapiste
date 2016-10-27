@@ -68,6 +68,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
         currentLimit:     self.currentLimit
       }),
       externalApi:      null,
+      resultsTextKey:   "application.assignment.search.results",
       limits:           self.limits,
       currentLimit:     self.currentLimit,
       filterComponent:  "applications-search-filter",

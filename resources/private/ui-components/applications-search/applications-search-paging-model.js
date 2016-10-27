@@ -20,6 +20,8 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
     }
   };
 
+  self.resultsTextKey = params.resultsTextKey || "applications.results";
+
   self.next = _.partial(self.paging, 1);
   self.prev = _.partial(self.paging, -1);
 
