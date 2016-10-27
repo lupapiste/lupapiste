@@ -1359,7 +1359,7 @@
 "kopiolaitos-order-email.titles.kuntalupatunnus" "en" "Permit ID"
 "kopiolaitos-order-email.titles.kuntalupatunnus" "fi" "Lupatunnus"
 "kopiolaitos-order-email.titles.kuntalupatunnus" "sv" "Tillståndsbeteckning"
-"kopiolaitos-order-email.titles.lupapisteId" "en" "Transmeasure ID"
+"kopiolaitos-order-email.titles.lupapisteId" "en" "Application ID"
 "kopiolaitos-order-email.titles.lupapisteId" "fi" "Asiointitunnus"
 "kopiolaitos-order-email.titles.lupapisteId" "sv" "Kommunikationskod"
 "kopiolaitos-order-email.titles.orderDetails" "en" "Details of the order"

@@ -22,7 +22,7 @@
 "verdict-attachment-prints-order.order-dialog.legend.orderer" "en" "Subscriber information"
 "verdict-attachment-prints-order.order-dialog.legend.orderer" "fi" "Tilaajatiedot"
 "verdict-attachment-prints-order.order-dialog.legend.orderer" "sv" "Beställaruppgifter"
-"verdict-attachment-prints-order.order-dialog.lupapisteId" "en" "Transaction ID"
+"verdict-attachment-prints-order.order-dialog.lupapisteId" "en" "Application ID"
 "verdict-attachment-prints-order.order-dialog.lupapisteId" "fi" "Asiointitunnus"
 "verdict-attachment-prints-order.order-dialog.lupapisteId" "sv" "Kommunikationskod"
 "verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set" "en" "The order cannot be sent because the photocopying service's email address is missing from the system. Ask your municipal administrator to set the address."
