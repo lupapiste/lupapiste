@@ -449,7 +449,8 @@
    :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
+   :welcome {:depends [:welcome-app  :analytics :global-models :ui-components :login :register :register-company
+                       :link-account :debug :header :screenmessages :password-reset :change-email :footer]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html" "gtm.html"]}
 
