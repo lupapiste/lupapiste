@@ -51,7 +51,7 @@ LUPAPISTE.IndicatorModel = function() {
   hub.subscribe("indicator", function(e) {
     var defaultMessages = {negative: "form.err",
                            positive: "form.saved"};
-    var msg = loc( e.message  || defaultMessages[e.style] );
+    var msg = e.rawMessage ? e.rawMessage : loc(e.message  || defaultMessages[e.style]);
     self.indicatorMessage( e.html ? msg : _.escape( msg ));
     self.indicatorStyle(e.style);
     self.sticky(!!e.sticky);
