@@ -29,7 +29,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
-  self.limit = ko.observable(100); // Default limit applications per page
+  self.limit = params.currentLimit;
 
   self.skip = ko.observable(0);
 

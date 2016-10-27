@@ -1,10 +1,15 @@
 (ns lupapalvelu.assignment
-  (:require [monger.operators :refer [$and $in $ne $options $or $regex $set]]
+  (:require [clojure.set :refer [rename-keys]]
+            [monger.operators :refer [$and $in $ne $options $or $regex $set]]
+            [monger.query :as query]
+            [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
+            [sade.core :refer :all]
             [sade.schemas :as ssc]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 ;; Helpers and schemas
 
@@ -42,7 +47,9 @@
 
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
-   :status (apply sc/enum "all" assignment-statuses)})
+   :status (apply sc/enum "all" assignment-statuses)
+   :skip   sc/Int
+   :limit  sc/Int})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
@@ -64,7 +71,7 @@
 ;;
 
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:description] ; and what else?
+  (let [search-keys [:description]
         fuzzy (ss/fuzzy-re filter-search)]
     {$or (map #(hash-map % {$regex   fuzzy
                             $options "i"})
@@ -80,8 +87,10 @@
     (make-free-text-query filter-search)))
 
 (defn search-query [data]
-  (merge (into {} (map (juxt identity (constantly nil))
-                       (keys AssignmentsSearchQuery)))
+  (merge {:searchText nil
+          :status "all"
+          :skip   0
+          :limit  100}
          (select-keys data (keys AssignmentsSearchQuery))))
 
 (defn- make-query [query {:keys [searchText status]}]
@@ -92,6 +101,17 @@
             (if (= status "all")
               {:status {$ne "inactive"}}
               {:status status})])})
+
+(defn search [query skip limit]
+  (try
+    (->> (mongo/with-collection "assignments"
+           (query/find query)
+           (query/skip skip)
+           (query/limit limit))
+         (map #(rename-keys % {:_id :id})))
+    (catch com.mongodb.MongoException e
+      (errorf "Assignment search query=%s failed: %s" query e)
+      (fail! :error.unknown))))
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
@@ -118,7 +138,9 @@
         mongo-query (make-query user-query query)]
     {:userTotalCount (mongo/count :assignments )
      :totalCount     (mongo/count :assignments mongo-query)
-     :assignments    (get-assignments user mongo-query)}))
+     :assignments    (search mongo-query
+                             (util/->long (:skip query))
+                             (util/->long (:limit query)))}))
 
 ;;
 ;; Inserting and modifying assignments

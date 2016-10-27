@@ -15,7 +15,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     {field: ko.observable("description"), asc: ko.observable(true)};
   self.data             = ko.observable(params.data || defaultData);
   self.results          = ko.observable(self.data().searchResults);
-  self.limit            = ko.observable(params.limit);
+  self.limit            = params.currentLimit;
   self.skip             = ko.observable(0);
   self.searchResultType = ko.observable(params.searchResultType);
 
@@ -49,7 +49,9 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   var searchFields = ko.pureComputed(function() {
     return {
       searchText: self.searchFieldDelayed(),
-      status: self.searchResultType()
+      status: self.searchResultType(),
+      limit: self.limit(),
+      skip: self.skip()
     };
   });
 

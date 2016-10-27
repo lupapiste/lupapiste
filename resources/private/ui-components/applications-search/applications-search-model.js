@@ -11,10 +11,14 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     return self.searchType() === "foreman" ? [{id: "tyonjohtajan-nimeaminen-v2", label: ""}, {id: "tyonjohtajan-nimeaminen", label: ""}] : [];
   };
 
+  self.limits = ko.observableArray([5, 10, 25, 50, 100]);
+  self.currentLimit = ko.observable(100);
+
   self.dataProvider = new LUPAPISTE.ApplicationsDataProvider({
     defaultOperations: self.defaultOperations,
     sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-    searchResultType: lupapisteApp.models.currentUser.isAuthority() ? "application" : "all"
+    searchResultType: lupapisteApp.models.currentUser.isAuthority() ? "application" : "all",
+    currentLimit:     self.currentLimit
   });
 
   self.externalApi = {
@@ -28,7 +32,6 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     }
   };
 
-  self.limits = ko.observableArray([10, 25, 50, 100]);
 
   self.searchModels =
     ko.observableArray([new LUPAPISTE.SearchSectionModel({
@@ -62,10 +65,11 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
         sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
         searchResultType: "active",
-        limit: 100
+        currentLimit:     self.currentLimit
       }),
       externalApi:      null,
       limits:           self.limits,
+      currentLimit:     self.currentLimit,
       filterComponent:  "applications-search-filter",
       resultsComponent: "assignments-search-results",
       pagingComponent:  "applications-search-paging",
