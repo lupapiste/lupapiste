@@ -20,6 +20,7 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   // query targets
   self.sendEvent(myService, "targetsQuery", {applicationId: params.applicationId()});
 
+  // Possible targets when target group has been selected
   self.targetIds = self.disposedPureComputed(function() {
     var selected = self.selectedTargetGroup();
     if ( selected ) {

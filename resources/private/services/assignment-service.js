@@ -41,6 +41,14 @@ LUPAPISTE.AssignmentService = function() {
       .call();
   }
 
+  function assignmentsForApplication(id) {
+    ajax.query("assignments-for-application", {id: id})
+      .success(function(resp) {
+        _data(resp.assignments);
+      })
+      .call();
+  }
+
   hub.subscribe("assignmentService::createAssignment", function(event) {
     ajax.command("create-assignment", _.omit(event, "eventType"))
      .success(util.showSavedIndicator)
@@ -55,6 +63,14 @@ LUPAPISTE.AssignmentService = function() {
 
   hub.subscribe("assignmentService::targetsQuery", function(event) {
     assignmentTargetsQuery(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("assignmentService::applicationAssignments", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("application-model-updated", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
   });
 
 

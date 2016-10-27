@@ -11,6 +11,7 @@
 LUPAPISTE.AccordionToolbarModel = function( params ) {
   "use strict";
   var self = this;
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   var APPROVE  = "approve";
   var REJECT   = "reject";
@@ -18,6 +19,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.docModel = params.docModel;
   self.docModelOptions = params.docModelOptions;
   self.accordionService = lupapisteApp.services.accordionService;
+  self.assignmentService = lupapisteApp.services.assignmentService;
   self.approvalModel = params.approvalModel;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
@@ -137,6 +139,18 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
       self.showIdentifierEditors(visibility);
     }
   });
+
+
+
+  /*************
+   * Assignments
+   ************/
+
+   self.documentAssignments = self.disposedPureComputed(function() {
+    if (self.assignmentService) {
+      return _.filter(self.assignmentService.assignments(), function(assignment) { return assignment.target[1] === self.docModel.docId;});
+    }
+   });
 
   // Dispose
 
