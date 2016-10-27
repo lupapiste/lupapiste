@@ -7,7 +7,6 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
   self.results = self.dataProvider.results;
 
   self.openApplication = function(model, event, target) {
-    console.log(model);
     ajax.query("application", {id: model.application.id, lang: loc.getCurrentLanguage()})
       .success(function(res) {
         self.offset = window.pageYOffset;
@@ -17,8 +16,8 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
   };
 
   self.markComplete = function(id) {
-    return function(event) {
-      hub.send('assignmentService::markComplete', {assignmentId: id});
+    return function() {
+      hub.send("assignmentService::markComplete", {assignmentId: id});
     };
   };
 

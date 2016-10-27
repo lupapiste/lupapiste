@@ -11,12 +11,13 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     userTotalCount: -1
   };
 
-  self.sort    = params.sort ||
+  self.sort = params.sort ||
     {field: ko.observable("description"), asc: ko.observable(true)};
-  self.data    = ko.observable(params.data || defaultData);
-  self.results = ko.observable(self.data().searchResults);
-  self.limit   = ko.observable(params.limit);
-  self.skip    = ko.observable(0);
+  self.data             = ko.observable(params.data || defaultData);
+  self.results          = ko.observable(self.data().searchResults);
+  self.limit            = ko.observable(params.limit);
+  self.skip             = ko.observable(0);
+  self.searchResultType = ko.observable(params.searchResultType);
 
   self.pending = ko.observable(false);
 
@@ -29,7 +30,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     return _.merge(assignment, {
       creatorName: assignment.creator.firstName + " " + assignment.creator.lastName,
       statusClass: statusClasses[assignment.status],
-      addressAndMunicipality: assignment.application.address + ", " + loc(['municipality', assignment.application.municipality])
+      addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])
     });
   }
 
@@ -42,8 +43,14 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   self.searchField = ko.observable("");
+  self.searchFieldDelayed = ko.pureComputed(self.searchField)
+    .extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
+
   var searchFields = ko.pureComputed(function() {
-    searchText: self.searchField()
+    return {
+      searchText: self.searchFieldDelayed(),
+      status: self.searchResultType()
+    };
   });
 
   function loadAssignments() {
