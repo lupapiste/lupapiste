@@ -1,6 +1,8 @@
 (function() {
   "use strict";
 
+  var attachmentsService = lupapisteApp.services.attachmentsService;
+
   var constructEditableMetadata = function(actualMetadata, schema) {
     var newMap = {};
     _.forEach(schema, function (v) {
@@ -193,9 +195,7 @@
           if (util.getIn(data, ["metadata", "sailytysaika", "arkistointi"]) && ko.unwrap(data.metadata.sailytysaika.arkistointi) === "ikuisesti") {
             self.disabledFields.push("sailytysaika");
           }
-          if (_.isFunction(params.saveCallback)) {
-            params.saveCallback();
-          }
+          attachmentsService.queryOne(self.attachmentId);
         })
         .call();
     };

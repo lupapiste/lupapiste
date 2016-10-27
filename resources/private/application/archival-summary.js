@@ -1,6 +1,8 @@
 (function() {
   "use strict";
 
+  var attachmentsService = lupapisteApp.services.attachmentsService;
+
   function GroupModel(groupName, groupDesc, attachments, building) {
     var self = this;
     self.attachments = ko.observableArray(attachments);
@@ -22,212 +24,189 @@
     });
   }
 
-  var getPreAttachments = function(attachments) {
-    return _.filter(attachments, function(attachment) {
-      return !_.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
-        attachment.latestVersion;
-    });
-  };
-
-  var getPostAttachments = function(attachments) {
-    return _.filter(attachments, function(attachment) {
-      return _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
-          attachment.latestVersion;
-    });
-  };
-
-  var filterByArchiveStatus = function(attachments, keepArchived) {
-    return _.filter(attachments, function(attachment) {
-      var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
-      if (!arkistointi || arkistointi === "ei") {
-        return !keepArchived;
-      } else {
-        return keepArchived;
-      }
-    });
-  };
+  function isArchived(attachment) {
+    var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
+    return arkistointi && arkistointi !== "ei";
+  }
 
   var generalAttachmentsStr = "attachments.general";
 
-  var getGroupList = function(attachments, buildings) {
+  function getGroupList(attachments, buildings) {
     if (_.isEmpty(attachments)) {
       return [];
     }
+
     var grouped = _.groupBy(attachments, function(attachment) {
-      return _.isObject(attachment.op) && attachment.op.id ? attachment.op.id() : generalAttachmentsStr;
+      return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
     });
+
     var mapped = _.map(grouped, function(attachments, group) {
       if (group === generalAttachmentsStr) {
         return new GroupModel(group, null, attachments);
       } else {
-        var att = _.head(attachments);
-        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments, buildings[att.op.id()]);
+        var attachment = _.head(attachments);
+        var operation  = ko.unwrap(attachment.op);
+        return new GroupModel(operation.name, operation.description, attachments, buildings[operation.id]);
       }
     });
+
     return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
       if ( group.groupName === generalAttachmentsStr ) {
         return -1;
       } else {
-        return (_.head(group.attachments())).op.created();
+        return util.getIn(group.attachments, [0, "op", "created"]);
       }
     });
-  };
 
-  var openAttachmentIds = [];
+  }
 
-  var isConvertableType = function (contentType) {
+  function isConvertableType(contentType) {
     return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
-  };
+  }
 
-  var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
-    return _.map(attachments, function(attachment) {
-      if (!_.isFunction(attachment.metadata)) {
-        attachment.metadata = ko.observable(attachment.metadata);
-      }
-      if (attachment.id) {
-        var idIndex = openAttachmentIds.indexOf(ko.unwrap(attachment.id));
-        attachment.showAdditionalControls = ko.observable(idIndex !== -1);
-        if (idIndex > -1) {
-          openAttachmentIds.splice(idIndex, 1);
-        }
-      } else {
-        attachment.showAdditionalControls = ko.observable(false);
-      }
-      attachment.retentionDescription = ko.pureComputed(function() {
-        var retention = attachment.metadata() ? attachment.metadata().sailytysaika : null;
-        if (retention && retention.arkistointi()) {
-          var retentionMode = retention.arkistointi();
-          var additionalDetail = "";
-          switch(retentionMode) {
-            case "toistaiseksi":
-              var laskentaperuste = util.getIn(retention, ["laskentaperuste"]);
-              if (laskentaperuste) {
-                additionalDetail = ", " + loc("laskentaperuste") + " " + loc(laskentaperuste);
-              }
-              break;
-            case "m\u00E4\u00E4r\u00E4ajan":
-              additionalDetail = ", " + retention.pituus() + " " + loc("vuotta");
-              break;
-          }
-          return loc(retentionMode) + additionalDetail.toLowerCase();
-        } else {
-          return loc("<Arvo puuttuu>");
-        }
-      });
-      attachment.personalDataDescription = ko.pureComputed(function() {
-        var personalData = attachment.metadata() ? attachment.metadata().henkilotiedot : null;
-        if (_.isFunction(personalData)) {
-          return loc(personalData());
-        } else {
-          return loc("<Arvo puuttuu>");
-        }
-      });
-      if (attachment.type) {
-        attachment.attachmentType = ko.observable([attachment.type["type-group"](), attachment.type["type-id"]()].join("."));
-        attachment.attachmentType.subscribe(function (value) {
-          ajax
-            .command("set-attachment-type",
-            {id: applicationId, attachmentId: attachment.id(), attachmentType: value})
-            .success(function() {
-              repository.load(applicationId);
-            })
-            .error(function(e) {
-              repository.load(applicationId);
-              error(e.text);
-            })
-            .call();
-        });
-      }
-      if (attachment.contents) {
-        attachment.contents.subscribe(function (value) {
-          ajax
-            .command("set-attachment-contents",
-            {id: applicationId, attachmentId: attachment.id(), contents: value})
-            .success(function() {
-              hub.send("indicator-icon", {style: "positive"});
-              repository.load(applicationId);
-            })
-            .error(function(e) {
-              repository.load(applicationId);
-              error(e.text);
-            })
-            .call();
-        });
-      }
-      var lv = attachment.latestVersion;
-      attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
-      attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
-      attachment.sendToArchive = ko.observable(false);
-      if (lv && _.isUndefined(lv.archivable) && isConvertableType(lv.contentType())) {
-        attachment.convertableToPdfA = true;
-      } else {
-        attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() : false;
-      }
-      return attachment;
+  function ArchivalSummaryDocumentModel(application, doc) {
+    var self = _.assign(this, doc);
+
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+    self.authModel = attachmentsService.authModels()[doc.id] || lupapisteApp.models.applicationAuthModel;
+
+    self.metadata = ko.observable(ko.unwrap(doc.metadata));
+
+    self.typeChange = util.getIn(doc, ["type", "type-group"]) && util.getIn(doc, ["type", "type-id"]) &&
+      new LUPAPISTE.AttachmentsChangeTypeModel({ authModel: self.authModel,
+                                                 allowedAttachmentTypes: lupapisteApp.models.application.allowedAttachmentTypes(),
+                                                 attachmentType: self.type,
+                                                 attachmentId: self.id });
+
+    self.addEventListener("attachments", {eventType: "attachment-type-selected", attachmentId: doc.id}, function(data) {
+      self.type(data.attachmentType);
     });
-  };
 
-  var selectIfArchivable = function(attachment) {
+    self.showAdditionalControls = ko.observable(false);
+    self.toggleAdditionalControls = function() {
+      self.showAdditionalControls(!self.showAdditionalControls());
+    };
+
+    self.archivable = ko.observable();
+    self.archivabilityError = ko.observable();
+
+    self.sendToArchive = ko.observable(false);
+
+    self.convertableToPdfA = ko.observable();
+
+    self.retentionDescription = self.disposedPureComputed(function() {
+      var retention = util.getIn(self.metadata, ["sailytysaika"], {});
+      if (ko.unwrap(retention.arkistointi)) {
+        var retentionMode = ko.unwrap(retention.arkistointi);
+        var additionalDetail = "";
+        switch(retentionMode) {
+        case "toistaiseksi":
+          var laskentaperuste = ko.unwrap(retention.laskentaperuste);
+          if (laskentaperuste) {
+            additionalDetail = ", " + loc("laskentaperuste") + " " + loc(laskentaperuste);
+          }
+          break;
+        case "m\u00E4\u00E4r\u00E4ajan":
+          additionalDetail = ", " + ko.unwrap(retention.pituus) + " " + loc("vuotta");
+          break;
+        }
+        return loc(retentionMode) + additionalDetail.toLowerCase();
+      } else {
+        return loc("<Arvo puuttuu>");
+      }
+    });
+
+    self.personalDataDescription = self.disposedPureComputed(function() {
+      return loc(util.getIn(self.metadata, ["henkilotiedot"]) || "<Arvo puuttuu>");
+    });
+
+    function getState(doc, metakey) {
+      return util.getIn(doc, [metakey || "metadata", "tila"]) || "valmis";
+    }
+
+    if (doc.documentType === "application") {
+      self.state = self.disposedPureComputed(_.partial( getState, application ));
+    } else if (doc.documentType === "case-file") {
+      self.state = self.disposedPureComputed(_.partial( getState, application, "processMetadata" ));
+    } else {
+      self.state = self.disposedPureComputed(_.partial( getState, doc ));
+    }
+
+    self.reset = function(doc) {
+      self.metadata(ko.unwrap(doc.metadata));
+      self.attachmentType = ko.observable(ko.unwrap(doc.typeString));
+      //self.showAdditionalControls(false);
+
+      var latestVersion = doc.latestVersion;
+      self.archivable(Boolean( util.getIn(latestVersion, ["archivable"]) ));
+      self.archivabilityError(util.getIn(latestVersion, ["archivabilityError"]));
+
+      if (latestVersion && _.isUndefined(latestVersion.archivable) && isConvertableType(ko.unwrap(latestVersion.contentType))) {
+        self.convertableToPdfA(true);
+      } else {
+        self.convertableToPdfA(_.has(latestVersion, "archivable") ? !ko.unwrap(latestVersion.archivable) : false);
+      }
+    };
+  }
+
+  var initializedDocuments = {};
+
+  function resetDocument(application, document) {
+    var id = util.getIn(document, ["id"]);
+    var archivalDocumentModel = initializedDocuments[id] || new ArchivalSummaryDocumentModel(application, ko.unwrap(document));
+    archivalDocumentModel.reset(ko.unwrap(document));
+    initializedDocuments[id] = archivalDocumentModel;
+    return archivalDocumentModel;
+  }
+
+  function selectIfArchivable(attachment) {
     var tila = util.getIn(attachment, ["metadata", "tila"]);
     if (attachment.archivable && tila !== "arkistoitu") {
       attachment.sendToArchive(true);
     }
-  };
+  }
 
-  var filteredDocs = function(params) {
+  function filteredDocs(params) {
     var applicationState = params.application.state();
     var appDocId = params.application.id() + "-application";
     var caseFileDocId = params.application.id() + "-case-file";
     var docs = [
-      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export"}
+      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export", documentType: "application"}
     ];
 
     if (applicationState === "extinct" || applicationState === "closed") {
-      docs.push({documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile"});
+      docs.push({documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile", documentType: "case-file"});
     }
     return docs;
-  };
+  }
 
   var model = function(params) {
     var self = this;
-    self.attachments = params.application.attachments;
-    var appDocId = params.application.id() + "-application";
-    var caseFileDocId = params.application.id() + "-case-file";
+    self.attachments = ko.pureComputed(function() {
+      return _.map(attachmentsService.attachments(), _.partial(resetDocument, params.application));
+    });
 
     var docs = filteredDocs(params);
 
     var mainDocuments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(filteredDocs(params));
-    });
-    self.stateMap = ko.pureComputed(function() {
-      var getState = function(doc) {
-        var tila = util.getIn(doc, ["metadata", "tila"]);
-        if (tila) {
-          return tila;
-        } else {
-          return "valmis";
-        }
-      };
-      var stateMap = _.mapValues(_.keyBy(self.attachments(), function(att) {
-        return ko.unwrap(att.id);
-      }), getState);
-      stateMap[appDocId] = getState(params.application);
-      stateMap[caseFileDocId] = util.getIn(params.application, ["processMetadata", "tila"]) ? params.application.processMetadata().tila() : "valmis";
-      return stateMap;
+      return _.map(filteredDocs(params), _.partial(resetDocument, params.application));
     });
 
     var preAttachments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
+      return attachmentsService.applyFilters(self.attachments(), [["preVerdict"], ["hasFile"]]);
     });
     var postAttachments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(getPostAttachments(self.attachments()), params.application.id());
+      return attachmentsService.applyFilters(self.attachments(), [["postVerdict"], ["hasFile"]]);
     });
+
     var archivedPreAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(preAttachments(), true);
+      return _.filter(preAttachments(), isArchived);
     });
     var archivedPostAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(postAttachments(), true);
+      return _.filter(postAttachments(), isArchived);
     });
+
     var buildings = _
       .chain(params.application._js.buildings)
       .filter(function(val) {
@@ -246,17 +225,17 @@
       return getGroupList(archivedPostAttachments(), buildings);
     });
     self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(preAttachments(), false), buildings);
+      return getGroupList(_.reject(preAttachments(), isArchived), buildings);
     });
     self.notArchivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(postAttachments(), false), buildings);
+      return getGroupList(_.reject(postAttachments(), isArchived), buildings);
     });
 
     self.archivedDocuments = ko.pureComputed(function() {
-      return filterByArchiveStatus(mainDocuments(), true);
+      return _.filter(mainDocuments(), isArchived);
     });
     self.notArchivedDocuments = ko.pureComputed(function() {
-      return filterByArchiveStatus(mainDocuments(), false);
+      return _.reject(mainDocuments(), isArchived);
     });
     self.showArchived = ko.pureComputed(function() {
       return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups()) || !_.isEmpty(self.archivedPostGroups());
@@ -266,11 +245,11 @@
     });
 
     var attachmentGroupLabel = function(groupName) {
-      return loc(["attachmentType", groupName, "_group_label"].join("."));
+      return loc(["attachmentType", groupName, "_group_label"]);
     };
 
     var attachmentTypeLabel = function(groupName, typeName) {
-      return loc(["attachmentType", [groupName, typeName].join(".")].join("."));
+      return loc(["attachmentType", groupName, typeName]);
     };
 
     self.selectableAttachmentTypes = ko.pureComputed(function () {
@@ -420,11 +399,11 @@
           LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
           self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
-            // FIXME added ifs to fix LPK-2110, but why are only docs 0 and 1 updated,
-            // and the values differ???
+            // Update application document. See filteredDocs for additionanl details.
             if (util.getIn(docs, [0, "metadata"])) {
               docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
             }
+            // Update case-file document. See filteredDocs for additionanl details.
             if (util.getIn(docs, [1, "metadata"])) {
               docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
             }
@@ -434,14 +413,9 @@
     };
 
     self.convertToPdfA = function(attachment) {
-      var id = ko.unwrap(attachment.id);
-      openAttachmentIds.push(id);
-      ajax
-        .command("convert-to-pdfa", {id: ko.unwrap(params.application.id), attachmentId: id})
-        .success(function() {
-          repository.load(ko.unwrap(params.application.id));
-        })
-        .call();
+      var attachmentId = ko.unwrap(attachment.id);
+      attachment.showAdditionalControls(true);
+      attachmentsService.convertToPdfA(attachmentId);
     };
 
     self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application);
