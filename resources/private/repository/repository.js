@@ -120,11 +120,6 @@ var repository = (function() {
 
           _.each(application.tasks || [], setSchema);
 
-          _.each(application.attachments ||[], function(att) {
-            calculateAttachmentStateIndicators(att, application);
-            setAttachmentOperation(application.allOperations, att);
-          });
-
           application.verdicts = util.verdictsWithTasks(application);
 
           application.tags = _(application.tags || []).map(function(tagId) {
