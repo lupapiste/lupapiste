@@ -34,7 +34,9 @@
               <td data-bind="text: $data.creatorName"    data-test-col-name="creator"></td>
               <td data-test-col-name="complete">
                 <!-- ko ifnot: $data.completed -->
-                <button class="positive right">
+                <button data-bind="click: $parent.markComplete($data.id),
+                                   clickBubble: false"
+                        class="positive right">
                   <i class="lupicon-check"></i>
                   <span data-bind="ltext: 'application.assignment.complete'"></span>
                 </button>

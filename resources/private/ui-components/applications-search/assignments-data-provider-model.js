@@ -45,19 +45,18 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   var searchFields = ko.pureComputed(function() {
     searchText: self.searchField()
   });
-  hub.onPageLoad("applications", function() {
-    ajax.datatables("assignments", searchFields())
-      .success(self.onSuccess)
-      .onError("error.unauthorized", notify.ajaxError)
-      .pending(self.pending)
-      .call();
-  });
 
-  ko.computed(function() {
+  function loadAssignments() {
     ajax.datatables("assignments", searchFields())
       .success(self.onSuccess)
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
       .call();
-  }).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
+  }
+
+  hub.onPageLoad("applications", loadAssignments);
+
+  hub.subscribe("assignmentService::assignmentCompleted", loadAssignments);
+
+  ko.computed(loadAssignments).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
 };

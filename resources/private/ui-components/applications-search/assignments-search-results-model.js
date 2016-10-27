@@ -16,6 +16,12 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
       .call();
   };
 
+  self.markComplete = function(id) {
+    return function(event) {
+      hub.send('assignmentService::markComplete', {assignmentId: id});
+    };
+  };
+
   self.columns = [
     util.createSortableColumn("first", "application.assignment.status",
                               {sortable: false}),

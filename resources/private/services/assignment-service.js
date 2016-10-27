@@ -36,10 +36,15 @@ LUPAPISTE.AssignmentService = function() {
     // .call();
   });
 
-  hub.subscribe("assignmentService::markComplete", function() {
-    // ajax.command("complete-assignment", _.get(event, "assignmentId"))
-    // .success(util.showSavedIndicator)
-    // .call();
+  function onAssignmentCompleted(response) {
+    util.showSavedIndicator(response);
+    hub.send("assignmentService::assignmentCompleted", null);
+  }
+
+  hub.subscribe("assignmentService::markComplete", function(event) {
+    ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
+      .success(onAssignmentCompleted)
+      .call();
   });
 
 };
