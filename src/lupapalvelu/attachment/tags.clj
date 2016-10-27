@@ -25,11 +25,14 @@
     (states/post-verdict-states (keyword app-state)) :postVerdict
     :else :preVerdict))
 
-
 (defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
   (if not-needed
     :notNeeded
     :needed))
+
+(defn- tag-by-file-status [{{file-id :fileId} :latestVersion :as attachment}]
+  (when file-id
+    :hasFile))
 
 (defn- op-id->tag [op-id]
   (when op-id
@@ -54,7 +57,8 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              tag-by-type)
+              tag-by-type
+              tag-by-file-status)
         attachment)
        (remove nil?)))
 
