@@ -35,10 +35,10 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   }
 
   self.onSuccess = function(res) {
-    var assignments = _.map(res.assignments, enrichAssignmentData);
+    var assignments = _.map(res.data.assignments, enrichAssignmentData);
     self.data({searchResults: assignments,
-               totalCount: assignments.length,
-               userTotalCount: assignments.length});
+               totalCount: res.data.totalCount,
+               userTotalCount: res.data.userTotalCount});
     self.results(assignments);
   };
 
@@ -54,7 +54,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   });
 
   function loadAssignments() {
-    ajax.datatables("assignments", searchFields())
+    ajax.datatables("assignments-search", searchFields())
       .success(self.onSuccess)
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)

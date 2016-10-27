@@ -97,7 +97,11 @@
 
       (fact "text search finds approximate matches in description"
         (let [{assignment-id1 :id} (create-assignment sonja "ronja" id1 ["target"] "Kuvaava teksti")]
-          (->> (query sonja :assignments-search :searchText "uva eks")
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti")
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "active")
+               :data :assignments (map :description)) => (contains "Kuvaava teksti")
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "completed")
+               :data :assignments) => empty?
           (->> (query sonja :assignments-search :searchText "not even close")
                :data :assignments (map :description)) => empty?)))))

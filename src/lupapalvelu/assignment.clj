@@ -1,5 +1,5 @@
 (ns lupapalvelu.assignment
-  (:require [monger.operators :refer [$in $options $or $regex $set]]
+  (:require [monger.operators :refer [$and $in $ne $options $or $regex $set]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
@@ -41,7 +41,8 @@
                 :target]))
 
 (sc/defschema AssignmentsSearchQuery
-  {:searchText (sc/maybe sc/Str)})
+  {:searchText (sc/maybe sc/Str)
+   :status (apply sc/enum "all" assignment-statuses)})
 
 (sc/defschema AssignmentsSearchResponse
   {:userTotalCount sc/Int
@@ -83,8 +84,14 @@
                        (keys AssignmentsSearchQuery)))
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query]
-  (make-text-query (:searchText query)))
+(defn- make-query [query {:keys [searchText status]}]
+  {$and
+   (filter seq
+           [query
+            (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+            (if (= status "all")
+              {:status {$ne "inactive"}}
+              {:status status})])})
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
@@ -107,9 +114,11 @@
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
-  {:userTotalCount 0
-   :totalCount     0
-   :assignments    (get-assignments user (make-query query))})
+  (let [user-query  (organization-query-for-user user {})
+        mongo-query (make-query user-query query)]
+    {:userTotalCount (mongo/count :assignments )
+     :totalCount     (mongo/count :assignments mongo-query)
+     :assignments    (get-assignments user mongo-query)}))
 
 ;;
 ;; Inserting and modifying assignments
