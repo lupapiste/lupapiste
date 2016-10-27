@@ -53,6 +53,7 @@
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
                  :gtm                   (env/value :gtm)
+                 :facebook              (env/value :facebook)
                  :frontpage             (env/value :frontpage)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
