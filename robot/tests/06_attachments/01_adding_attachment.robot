@@ -25,6 +25,9 @@ Mikko sees all "not needed" checkboxes as enabled and not selected
   Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Not needed should not be selected  paapiirustus.pohjapiirustus
 
+Download all button is not visible
+  No such test id  download-all
+
 Mikko sets asemapiirros not needed
   [Tags]  attachments
   Click not needed  paapiirustus.asemapiirros
@@ -39,11 +42,6 @@ As an applicant Mikko does not see approve or reject columns
   [Tags]  attachments
   No such test id  approve-column
   No such test id  reject-column
-
-"Download all attachments" should be disabled
-  [Tags]  attachments
-  Element should be disabled  jquery=button[data-test-id='download-all-attachments-button']
-  # TODO: Check all dowload buttons in accordions
 
 Dropdown options for attachment actions should look correct for Mikko
   [Tags]  attachments
@@ -62,10 +60,16 @@ Mikko returns to application
   [Tags]  attachments
   Return to application
 
+Download all button is now visible
+  Wait test id visible  download-all
+
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
+
+Download all is gone again
+  No such test id  download-all
 
 Mikko adds png attachment without comment again
   [Tags]  attachments
@@ -91,10 +95,8 @@ Mikko adds again png attachment with comment
   Return to application
   Wait Until  Comment count is  1
 
-"Download all attachments" should be enabled
-  [Tags]  attachments
-  Element should be enabled  jquery=button[data-test-id='download-all-attachments-button']
-  # TODO: Check all dowload buttons in accordions
+Download all button is again visible
+  Wait test id visible  download-all
 
 Mikko opens attachment details
   [Tags]  attachments
