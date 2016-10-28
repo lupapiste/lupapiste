@@ -5,7 +5,7 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  var myService = self.params.myService || "assignmentService";
+  //var myService = self.params.myService || "assignmentService";
 
   self.assignments = params.documentAssignments;
 
