@@ -34,37 +34,42 @@
 
   var generalAttachmentsStr = "attachments.general";
 
-  var initializedGroupLists = {};
+  var groupLists = {};
 
-  function getGroupList(attachments, buildings) {
+  function getGroupList(groupListId, attachments, buildings) {
+    // Group list for attachments grouped by archived/not-archived and pre-/postverdict
     if (_.isEmpty(attachments)) {
       return [];
     }
 
-    var grouped = _.groupBy(attachments, function(attachment) {
-      return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
-    });
-
-    var mapped = _.map(grouped, function(attachments, group) {
-      if (!initializedGroupLists[group]) {
+    function getGroup(groupList, attachments, group) {
+      if (!groupList.initializedGroups[group]) {
         var op  = util.getIn(attachments, [0, "op"]);
-        var groupModel = group === generalAttachmentsStr ?
-            new GroupModel(group, null, attachments) :
-            new GroupModel(op.name, op.description, attachments, buildings[op.id]);
-        initializedGroupLists[group] = groupModel;
+        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, op.description, attachments, buildings[op.id]);
+        groupList.initializedGroups[group] = groupModel;
       } else {
-        initializedGroupLists[group].attachments(attachments);
+        groupList.initializedGroups[group].attachments(attachments);
       }
-      return initializedGroupLists[group];
-    });
+      return groupList.initializedGroups[group];
+    }
 
-    return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
-      if ( group.groupName === generalAttachmentsStr ) {
-        return -1;
-      } else {
-        return util.getIn(group.attachments, [0, "op", "created"]);
-      }
-    });
+    var groupList = groupLists[groupListId] || { initializedGroups: {} };
+    groupLists[groupListId] = groupList;
+
+    return  _(attachments)
+      .groupBy(function(attachment) {
+        return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
+      })
+      .map(_.partial(getGroup, groupList))
+      .sortBy(function(group) { // attachments.general on top, else sort by op.created
+        if ( group.groupName === generalAttachmentsStr ) {
+          return -1;
+        } else {
+          return util.getIn(group.attachments, [0, "op", "created"]);
+        }
+      })
+
+      .value();
 
   }
 
@@ -171,7 +176,7 @@
 
   function selectIfArchivable(attachment) {
     var tila = util.getIn(attachment, ["metadata", "tila"]);
-    if (attachment.archivable && tila !== "arkistoitu") {
+    if (attachment.archivable() && tila !== "arkistoitu") {
       attachment.sendToArchive(true);
     }
   }
@@ -238,16 +243,16 @@
       .value();
 
     self.archivedGroups = self.disposedPureComputed(function() {
-      return getGroupList(archivedPreAttachments(), buildings);
+      return getGroupList("archived-pre", archivedPreAttachments(), buildings);
     });
     self.archivedPostGroups = self.disposedPureComputed(function() {
-      return getGroupList(archivedPostAttachments(), buildings);
+      return getGroupList("archived-post", archivedPostAttachments(), buildings);
     });
     self.notArchivedGroups = self.disposedPureComputed(function() {
-      return getGroupList(_.reject(preAttachments(), isArchived), buildings);
+      return getGroupList("not-archived-pre", _.reject(preAttachments(), isArchived), buildings);
     });
     self.notArchivedPostGroups = self.disposedPureComputed(function() {
-      return getGroupList(_.reject(postAttachments(), isArchived), buildings);
+      return getGroupList("not-archived-post", _.reject(postAttachments(), isArchived), buildings);
     });
 
     self.archivedDocuments = self.disposedPureComputed(function() {
@@ -430,9 +435,9 @@
     var baseModelDispose = self.dispose;
     self.dispose = function() {
       _.invokeMap(initializedDocuments, "dispose");
-      _.invokeMap(initializedGroupLists, "dispose");
+      _.forEach(groupLists, function(gl) { _.invokeMap(gl.initializedGroups, "dispose"); });
       initializedDocuments = {};
-      initializedGroupLists = {};
+      groupLists = {};
       baseModelDispose();
     };
   }
