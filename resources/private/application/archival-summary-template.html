@@ -13,9 +13,9 @@
       </div>
 
       <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
       <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true, attachmentTypes: selectableAttachmentTypes}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
 
       <div class="buttons">
         <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected">
@@ -39,9 +39,9 @@
       </div>
 
       <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
       <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false, attachmentTypes: selectableAttachmentTypes}}"></div>
+      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
     </div>
 
     <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->

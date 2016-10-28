@@ -264,28 +264,6 @@
       return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups()) || !_.isEmpty(self.notArchivedPostGroups());
     });
 
-    var attachmentGroupLabel = function(groupName) {
-      return loc(["attachmentType", groupName, "_group_label"]);
-    };
-
-    var attachmentTypeLabel = function(groupName, typeName) {
-      return loc(["attachmentType", groupName, typeName]);
-    };
-
-    self.selectableAttachmentTypes = self.disposedPureComputed(function () {
-      return _.map(lupapisteApp.models.application.allowedAttachmentTypes(), function (typeGroup) {
-        return {
-          groupLabel: attachmentGroupLabel(typeGroup[0]),
-          types: _.map(typeGroup[1], function (type) {
-            return {
-              typeLabel: attachmentTypeLabel(typeGroup[0], type),
-              typeValue: [typeGroup[0], type].join(".")
-            };
-          })
-        };
-      });
-    });
-
     var isSelectedForArchive = function(attachment) {
       return ko.unwrap(attachment.sendToArchive);
     };
