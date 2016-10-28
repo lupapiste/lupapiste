@@ -5,7 +5,6 @@
             [sade.util :as util])
   (:import java.util.UUID))
 
-; Allow Google fonts and scripts fom ajax.aspnetcdn.com to be loaded
 (def content-security-policy
   (str "default-src 'self' https://*.lupapiste.fi; "
        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com https://www.googletagmanager.com https://tagmanager.google.com;"
