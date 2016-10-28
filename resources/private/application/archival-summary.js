@@ -161,9 +161,10 @@
   var initializedDocuments = {};
 
   function resetDocument(application, document) {
+    // Document can be application doc, case-file doc or attachment.
     var id = util.getIn(document, ["id"]);
-    var archivalDocumentModel = initializedDocuments[id] || new ArchivalSummaryDocumentModel(application, ko.unwrap(document));
-    archivalDocumentModel.reset(ko.unwrap(document));
+    var archivalDocumentModel = initializedDocuments[id] || new ArchivalSummaryDocumentModel(application, document());
+    archivalDocumentModel.reset(document());
     initializedDocuments[id] = archivalDocumentModel;
     return archivalDocumentModel;
   }
@@ -175,16 +176,23 @@
     }
   }
 
-  function filteredDocs(params) {
-    var applicationState = params.application.state();
-    var appDocId = params.application.id() + "-application";
-    var caseFileDocId = params.application.id() + "-case-file";
-    var docs = [
-      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export", documentType: "application"}
-    ];
+  function initApplicationDocs(application) {
+    // Initialize archived non-attachment documents for application.
+    var applicationState = application.state();
+    var appDocId = application.id() + "-application";
+    var caseFileDocId = application.id() + "-case-file";
+    var docs = [ ko.observable({ documentNameKey: "applications.application",
+                                 metadata: application.metadata,
+                                 id: appDocId,
+                                 previewAction: "pdf-export",
+                                 documentType: "application" }) ];
 
     if (applicationState === "extinct" || applicationState === "closed") {
-      docs.push({documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile", documentType: "case-file"});
+      docs.push( ko.observable({ documentNameKey: "caseFile.heading",
+                                 metadata: application.processMetadata,
+                                 id: caseFileDocId,
+                                 previewAction: "pdfa-casefile",
+                                 documentType: "case-file" }) );
     }
     return docs;
   }
@@ -198,10 +206,10 @@
       return _.map(attachmentsService.attachments(), _.partial(resetDocument, params.application));
     });
 
-    var docs = filteredDocs(params);
+    var applicationDocs = initApplicationDocs(params.application);
 
     var mainDocuments = self.disposedPureComputed(function() {
-      return _.map(filteredDocs(params), _.partial(resetDocument, params.application));
+      return _.map(applicationDocs, _.partial(resetDocument, params.application));
     });
 
     var preAttachments = self.disposedPureComputed(function() {
@@ -362,7 +370,7 @@
       return ko.unwrap(doc.id);
     };
 
-    var allIds = _.map(self.attachments().concat(docs), getId);
+    var allIds = _.map(self.attachments().concat(mainDocuments()), getId);
 
     if (ko.unwrap(params.application.id)) {
       pollChangedState(allIds);
@@ -411,13 +419,13 @@
           LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
           self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
-            // Update application document. See filteredDocs for additionanl details.
-            if (util.getIn(docs, [0, "metadata"])) {
-              docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
+            // Update application document. See initApplicationDocs for additional details.
+            if (util.getIn(applicationDocs, [0, "metadata"])) {
+              applicationDocs[0]().metadata(newApplication.metadata);
             }
-            // Update case-file document. See filteredDocs for additionanl details.
-            if (util.getIn(docs, [1, "metadata"])) {
-              docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            // Update case-file document. See initApplicationDocs for additional details.
+            if (util.getIn(applicationDocs, [1, "metadata"])) {
+              applicationDocs[1]().metadata(newApplication.processMetadata);
             }
           });
         })
