@@ -149,7 +149,6 @@
     self.reset = function(doc) {
       self.metadata(ko.unwrap(doc.metadata));
       self.attachmentType = ko.observable(ko.unwrap(doc.typeString));
-      //self.showAdditionalControls(false);
 
       var latestVersion = doc.latestVersion;
       self.archivable(Boolean( util.getIn(latestVersion, ["archivable"]) ));
