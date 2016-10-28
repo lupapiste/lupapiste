@@ -28,7 +28,7 @@ LUPAPISTE.AssignmentService = function() {
    * Targets are two levels deep and represented as objects.
    * Keys are the "target groups", and value for each key is array of corresponding items in application.
    * Example with only parties group:
-   * {"parties": [{id: "5808c517f16562feee6856fb", displayText: "Pääsuunnittelija"},
+   * {"parties": [{id: "5808c517f16562feee6856fb", displayText: "Paasuunnittelija"},
                   {id: "5808c517f16562feee6856fc", displayText: "Suunnittelija"}]}
    */
   self.targets = ko.observableArray([]);
