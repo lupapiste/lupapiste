@@ -125,8 +125,11 @@
     return uneditableFields;
   };
 
-  var model = function(params) {
+  function MetadataEditorModel(params) {
     var self = this;
+
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
     self.attachmentId = ko.unwrap(params.attachmentId);
     self.applicationId = ko.unwrap(params.application.id);
     self.metadata = ko.isObservable(params.metadata) ? params.metadata : ko.observable(params.metadata);
@@ -141,11 +144,11 @@
     var organization = ko.unwrap(params.application.organization);
     var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];
 
-    self.invalidFields = ko.pureComputed(function () {
+    self.invalidFields = self.disposedPureComputed(function () {
       return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
     });
 
-    self.metadata.subscribe(function(newValue) {
+    self.disposedSubscribe(self.metadata, function(newValue) {
       // If metadata changes outside this component, we update the new values to the local copy
       if (!_.isEmpty(self.schema()) && !_.isEmpty(newValue)) {
         var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema(), roles);
@@ -172,13 +175,14 @@
       self.editable(false);
     };
 
-    self.modificationAllowed = ko.pureComputed(function() {
+    self.modificationAllowed = self.disposedPureComputed(function() {
       return !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
     });
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);
       var command;
+
       if (params.caseFile) {
         command = "store-tos-metadata-for-process";
       } else if (self.attachmentId) {
@@ -186,6 +190,7 @@
       } else {
         command = "store-tos-metadata-for-application";
       }
+
       ajax.command(command)
         .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
         .success(function(data) {
@@ -199,10 +204,10 @@
         })
         .call();
     };
-  };
+  }
 
   ko.components.register("metadata-editor", {
-    viewModel: model,
+    viewModel: MetadataEditorModel,
     template: {element: "metadata-editor-template"}
   });
 
