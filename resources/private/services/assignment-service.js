@@ -51,7 +51,11 @@ LUPAPISTE.AssignmentService = function() {
 
   hub.subscribe("assignmentService::createAssignment", function(event) {
     ajax.command("create-assignment", _.omit(event, "eventType"))
-     .success(util.showSavedIndicator)
+     .success(function(resp) {
+      util.showSavedIndicator(resp);
+      // Refresh application assignments
+      assignmentsForApplication(event.id);
+     })
      .call();
   });
 
