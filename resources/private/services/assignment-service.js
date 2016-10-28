@@ -6,7 +6,7 @@ LUPAPISTE.AssignmentService = function() {
   "use strict";
   var self = this;
 
- // {:id              ssc/ObjectIdStr
+   // {:id              ssc/ObjectIdStr
    // :organization-id sc/Str
    // :application-id  sc/Str
    // :target          sc/Any
@@ -17,23 +17,46 @@ LUPAPISTE.AssignmentService = function() {
    // :completer-id    (sc/maybe sc/Str)
    // :active          sc/Bool
    // :description     sc/Str})
-   var test = {id: "123", organizationId: "753-R", applicationId:"LP-753-2016-00001",
-               target: ["documents", "parties", "1234"], created: 1476772272398,
-               creator: {id: "321", username: "pena@example.com"},
-               recipient: {id: "4123", username: "sonja"},
-               status: "active", description: "FOOFAA"};
 
-  var _data = ko.observableArray([test]);
+  var _data = ko.observableArray([]);
 
   self.assignments = ko.pureComputed(function() {
     return _data();
   });
 
+  /*
+   * Targets are two levels deep and represented as objects.
+   * Keys are the "target groups", and value for each key is array of corresponding items in application.
+   * Example with only parties group:
+   * {"parties": [{id: "5808c517f16562feee6856fb", displayText: "Pääsuunnittelija"},
+                  {id: "5808c517f16562feee6856fc", displayText: "Suunnittelija"}]}
+   */
+  self.targets = ko.observableArray([]);
 
-  hub.subscribe("assignmentService::createAssignment", function() {
-    // ajax.command("create-assignment", _.pick(event, ["target", "creator", "description", ]))
-    // .success(util.showSavedIndicator)
-    // .call();
+  function assignmentTargetsQuery(id) {
+    ajax.query("assignment-targets", {id: id, lang: loc.getCurrentLanguage()})
+      .success(function(resp) {
+        self.targets(_.fromPairs(resp.targets));
+      })
+      .call();
+  }
+
+  function assignmentsForApplication(id) {
+    ajax.query("assignments-for-application", {id: id})
+      .success(function(resp) {
+        _data(resp.assignments);
+      })
+      .call();
+  }
+
+  hub.subscribe("assignmentService::createAssignment", function(event) {
+    ajax.command("create-assignment", _.omit(event, "eventType"))
+     .success(function(resp) {
+      util.showSavedIndicator(resp);
+      // Refresh application assignments
+      assignmentsForApplication(event.id);
+     })
+     .call();
   });
 
   function onAssignmentCompleted(response) {
@@ -46,5 +69,18 @@ LUPAPISTE.AssignmentService = function() {
       .success(onAssignmentCompleted)
       .call();
   });
+
+  hub.subscribe("assignmentService::targetsQuery", function(event) {
+    assignmentTargetsQuery(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("assignmentService::applicationAssignments", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("application-model-updated", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
+  });
+
 
 };

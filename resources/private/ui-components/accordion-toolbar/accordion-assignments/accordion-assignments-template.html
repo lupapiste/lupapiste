@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="accordion-assignments-template">
+  <div class="accordion-assignments" data-bind="foreach: assignments">
+    <div class="assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
+  </div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="accordion-single-assignment-template">
+  <i class="lupicon-circle-attention"></i>
+  <span class="assignment-header" data-bind="text: loc('application.assignment') + ' ' + ($index()+1) + ': '"></span>
+  <div class="assignment-text">
+  <span data-bind="text: $parent.descriptionText($data)"></span>
+  <span> - </span>
+  <span data-bind="fullName: creator"></span>
+  </div>
+</script>
+

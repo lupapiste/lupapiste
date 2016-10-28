@@ -778,3 +778,6 @@
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
+"error.invalid-assignment-receiver" "fi" ""error.invalid-assignment-receiver" "fi" "Tuntematon käyttäjä"
+"error.invalid-assignment-receiver" "sv" "Okänd användare"
+"error.invalid-assignment-receiver" "en" "Unknown user"

@@ -11,6 +11,7 @@
 LUPAPISTE.AccordionToolbarModel = function( params ) {
   "use strict";
   var self = this;
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   var APPROVE  = "approve";
   var REJECT   = "reject";
@@ -18,6 +19,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.docModel = params.docModel;
   self.docModelOptions = params.docModelOptions;
   self.accordionService = lupapisteApp.services.accordionService;
+  self.assignmentService = lupapisteApp.services.assignmentService;
   self.approvalModel = params.approvalModel;
   self.auth = self.docModel.authorizationModel;
   self.isOpen = ko.observable();
@@ -45,14 +47,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
                                                "id"] );
   });
 
-  self.showIdentifierEditors = ko.observable(false);
+  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
+  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
+
+  self.showIdentifierEditors = ko.observable(self.identifierField ? (self.identifierField.value() ? false : true) : false).extend({deferred:true});
   var stickyRefresh = self.showIdentifierEditors.subscribe(function() {
     // refresh accordion sitcky state
     _.delay(window.Stickyfill.rebuild, 0);
   });
-
-  // identifier field is object with keys docId, schema, key, value. Value is observable (can be edited).
-  self.identifierField = self.accordionService && self.accordionService.getIdentifier(self.docModel.docId);
 
   var docData = self.accordionService && self.accordionService.getDocumentData(self.docModel.docId);
 
@@ -138,14 +140,26 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
+
+
+  /*************
+   * Assignments
+   ************/
+
+   self.documentAssignments = self.disposedPureComputed(function() {
+    if (self.assignmentService) {
+      return _.filter(self.assignmentService.assignments(), function(assignment) { return assignment.target[1] === self.docModel.docId;});
+    } else {
+      return [];
+    }
+   });
+
+  // Dispose
+
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
     hub.unsubscribe(toggleEditorSubscription);
   };
-
-  _.defer(function() {
-    self.showIdentifierEditors(self.identifierField ? (self.identifierField.value() ? false : true) : false);
-  });
 
 };

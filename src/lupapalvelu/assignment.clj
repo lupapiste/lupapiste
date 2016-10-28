@@ -4,6 +4,8 @@
             [monger.query :as query]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -171,3 +173,13 @@
    {$set {:completed timestamp
           :status    "completed"
           :completer (usr/summary completer)}}))
+
+(defn display-text-for-document
+  "Return localized text for frontend. Text is schema name + accordion-fields if defined."
+  [doc lang]
+  (let [schema-loc-key (str (get-in doc [:schema-info :name]) "._group_label")
+        schema-localized (i18n/localize lang schema-loc-key)
+        accordion-datas (schemas/resolve-accordion-field-values doc)]
+    (if (seq accordion-datas)
+      (str schema-localized " - " (ss/join " " accordion-datas))
+      schema-localized)))
