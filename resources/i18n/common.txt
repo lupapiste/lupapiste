@@ -2358,7 +2358,7 @@
 "permitApplications" "en" "Applications for permits"
 "permitApplications" "fi" "Lupahakemukset"
 "permitApplications" "sv" "Tillståndsansökningar"
-"permitSubtype.muutoslupa" "en" "Change authorisation"
+"permitSubtype.muutoslupa" "en" "Change permit"
 "permitSubtype.muutoslupa" "fi" "Muutoslupa"
 "permitSubtype.muutoslupa" "sv" "Ändringstillstånd"
 "permitSubtype.poikkeamislupa" "en" "Deviation"
