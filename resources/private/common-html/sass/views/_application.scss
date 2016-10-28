@@ -600,6 +600,10 @@ $app-gray-darkest: $gray187;
   }
 }
 
+.content--neighbors-owners {
+  min-height: 20em;
+}
+
 #dialog-verdict-attachment-prints-order, #dialog-verdict-attachment-prints-order-history {
   .dialog-content {
     padding-left: 15px;

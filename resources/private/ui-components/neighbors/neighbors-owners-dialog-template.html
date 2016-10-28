@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="neighbors-owners-dialog-template">
-      <div class="content">
+      <div class="content content--neighbors-owners">
         <div data-bind="ifnot: readonly && status() === statusSelectOwners">
           <h2 data-bind="text: loc(['neighbors.owners.status', status()])"></h2>
           <img data-bind="visible: isSearching" src="/lp-static/img/ajax-loader-16.gif" alt="" width="16" height="16"/>
@@ -54,6 +54,12 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div data-bind="ifnot: _.isEmpty(emptyPropertyIds())">
+          <span data-bind="ltext: 'neighbors.property-ids.no-owners-found'"></span>
+          <ul data-bind="foreach: emptyPropertyIds">
+            <li data-bind="propertyId: $data"></li>
+          </ul>
         </div>
       </div>
       <!-- ko ifnot: $component.readonly -->
