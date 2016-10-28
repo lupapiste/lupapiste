@@ -105,7 +105,7 @@
       (fact "keys for values look right"
         (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:displayText :id]))))
       (fact "data from accordion-field is in display text"
-        (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA")))))
+        (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
     (let [{id1 :id} (create-app sonja :propertyId sipoo-property-id)
