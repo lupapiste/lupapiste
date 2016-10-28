@@ -112,7 +112,7 @@
           {id2 :id} (create-app ronja :propertyId sipoo-property-id)]
 
       (fact "text search finds approximate matches in description"
-        (let [{assignment-id1 :id} (create-assignment sonja "ronja" id1 ["target"] "Kuvaava teksti")]
+        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
           (->> (query sonja :assignments-search :searchText "uva eks" :status "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti")
           (->> (query sonja :assignments-search :searchText "uva eks" :status "active")
