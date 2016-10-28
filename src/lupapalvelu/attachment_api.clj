@@ -4,7 +4,7 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
-            [sade.core :refer [ok fail fail! now def- unauthorized!]]
+            [sade.core :refer [ok fail fail! now def-]]
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
@@ -176,7 +176,7 @@
   (let [attachment-info (attachment/get-attachment-info application attachmentId)]
     (when (and (is-verdict-attachment? attachment-info)
                (not (auth/application-authority? application user)))
-      (unauthorized!))))
+      (fail :error.unauthorized))))
 
 (defn- statement-attachment-edit-by-authority-or-statement-giver-only
   [{{attachmentId :attachmentId} :data user :user application :application}]
@@ -184,7 +184,7 @@
     (when (is-statement-attachment? attachment-info)
       (when-not (or (auth/application-authority? application user)
                     (auth/has-auth-role? application (:id user) :statementGiver))
-        (unauthorized!)))))
+        (fail :error.unauthorized)))))
 
 ;;
 ;; Attachments
