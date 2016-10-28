@@ -50,6 +50,13 @@
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
 
+(defquery assignments-search
+  {:description "Service point for attachment search component"
+   :parameters []
+   :user-roles #{:authority}
+   :feature :assignments}
+  [{user :user data :data}]
+  (ok :data (assignment/assignments-search user (assignment/search-query data))))
 ;;
 ;; Commands
 ;;
@@ -63,11 +70,11 @@
    :pre-checks       [validate-receiver]
    :states           states/all-application-states-but-draft-or-terminal
    :feature          :assignments}
-  [{user                      :user
-    created                   :created
-    {:keys [organization id]} :application}]
-  (ok :id (assignment/insert-assignment {:organizationId organization
-                                         :applicationId  id
+  [{user         :user
+    created      :created
+    application  :application}]
+  (ok :id (assignment/insert-assignment {:application    (select-keys application
+                                                                      [:id :organization :address :municipality])
                                          :creator        (usr/summary user)
                                          :recipient      (username->summary recipient)
                                          :target         target

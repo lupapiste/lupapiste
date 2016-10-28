@@ -1,39 +1,61 @@
 (ns lupapalvelu.assignment
-  (:require [monger.operators :refer [$set $in]]
+  (:require [clojure.set :refer [rename-keys]]
+            [monger.operators :refer [$and $in $ne $options $or $regex $set]]
+            [monger.query :as query]
+            [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
-            [sade.schemas :as ssc]))
+            [sade.core :refer :all]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 ;; Helpers and schemas
 
 (defn- assignment-in-user-organization-query [user]
-  {:organizationId {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
+  {:application.organization {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
 
 (defn- organization-query-for-user [user query]
   (merge query (assignment-in-user-organization-query user)))
 
+(def assignment-statuses
+  ["active" "inactive" "completed"])
+
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :organizationId sc/Str
-   :applicationId  sc/Str
+   :application    {:id           sc/Str
+                    :organization sc/Str
+                    :address      sc/Str
+                    :municipality sc/Str}
    :target         sc/Any
    :created        ssc/Timestamp
    :creator        usr/SummaryUser
    :recipient      usr/SummaryUser
    :completed      (sc/maybe ssc/Timestamp)
    :completer      (sc/maybe usr/SummaryUser)
-   :status         (sc/enum "active" "inactive" "completed")
+   :status         (apply sc/enum assignment-statuses)
    :description    sc/Str})
 
 (sc/defschema NewAssignment
   (select-keys Assignment
-               [:organizationId
-                :applicationId
+               [:application
                 :creator
+                :description
                 :recipient
-                :target
-                :description]))
+                :target]))
+
+(sc/defschema AssignmentsSearchQuery
+  {:searchText (sc/maybe sc/Str)
+   :status (apply sc/enum "all" assignment-statuses)
+   :recipient (sc/maybe sc/Str)
+   :skip   sc/Int
+   :limit  sc/Int})
+
+(sc/defschema AssignmentsSearchResponse
+  {:userTotalCount sc/Int
+   :totalCount     sc/Int
+   :assignments    [Assignment]})
 
 (sc/defn ^:private new-assignment :- Assignment
   [assignment :- NewAssignment
@@ -48,6 +70,52 @@
 ;;
 ;; Querying assignments
 ;;
+
+(defn- make-free-text-query [filter-search]
+  (let [search-keys [:description]
+        fuzzy (ss/fuzzy-re filter-search)]
+    {$or (map #(hash-map % {$regex   fuzzy
+                            $options "i"})
+              search-keys)}))
+
+(defn- make-text-query [filter-search]
+  {:pre [filter-search]}
+  (cond
+    (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search)
+    {:application.id (ss/upper-case filter-search)}
+
+    :else
+    (make-free-text-query filter-search)))
+
+(defn search-query [data]
+  (merge {:searchText nil
+          :status "all"
+          :recipient nil
+          :skip   0
+          :limit  100}
+         (select-keys data (keys AssignmentsSearchQuery))))
+
+(defn- make-query [query {:keys [searchText status recipient]}]
+  {$and
+   (filter seq
+           [query
+            (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+            (when-not (ss/blank? recipient)
+              {:recipient.username recipient})
+            (if (= status "all")
+              {:status {$ne "inactive"}}
+              {:status status})])})
+
+(defn search [query skip limit]
+  (try
+    (->> (mongo/with-collection "assignments"
+           (query/find query)
+           (query/skip skip)
+           (query/limit limit))
+         (map #(rename-keys % {:_id :id})))
+    (catch com.mongodb.MongoException e
+      (errorf "Assignment search query=%s failed: %s" query e)
+      (fail! :error.unknown))))
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
@@ -65,7 +133,18 @@
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
-  (get-assignments user {:applicationId application-id}))
+  (get-assignments user {:application.id application-id}))
+
+(sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
+  [user  :- usr/SessionSummaryUser
+   query :- AssignmentsSearchQuery]
+  (let [user-query  (organization-query-for-user user {})
+        mongo-query (make-query user-query query)]
+    {:userTotalCount (mongo/count :assignments )
+     :totalCount     (mongo/count :assignments mongo-query)
+     :assignments    (search mongo-query
+                             (util/->long (:skip query))
+                             (util/->long (:limit query)))}))
 
 ;;
 ;; Inserting and modifying assignments
@@ -92,12 +171,3 @@
    {$set {:completed timestamp
           :status    "completed"
           :completer (usr/summary completer)}}))
-
-; A temporary test function, to be removed before merge to develop
-(defn test-assignment [application-id target description]
-  {:organizationId "753-R"
-   :applicationId application-id
-   :creator (usr/summary (usr/get-user {:username "sonja"}))
-   :recipient (usr/summary (usr/get-user {:username "pena"}))
-   :target target
-   :description description})

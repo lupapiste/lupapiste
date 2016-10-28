@@ -43,75 +43,45 @@
             <!-- /ko -->
           </div>
 
-          <!-- ko if: lupapisteApp.models.globalAuthModel.ok('enable-foreman-search') -->
-          <div class="form-grid form-grid--no-border">
+          <!-- ko if: searchModels().length > 1 -->
+          <div class="form-grid form-grid--no-border"
+               data-bind="foreach: searchModels">
             <span
                  data-bind="component: {name: 'radio-field',
-                                        params: {value: 'applications',
-                                                 selectedValue: searchType,
-                                                 id: 'searchTypeApplications',
+                                        params: {value: $data.type,
+                                                 selectedValue: $parent.searchType,
+                                                 id: 'searchType' + _.capitalize($data.type),
                                                  name: 'searchType',
-                                                 lLabel: 'navigation'}}"></span>
-            <span
-                 data-bind="component: {name: 'radio-field',
-                                        params: {value: 'foreman',
-                                                 selectedValue: searchType,
-                                                 id: 'searchTypeForeman',
-                                                 name: 'searchType',
-                                                 lLabel: 'applications.search.foremen'}}"></span>
+                                                 lLabel: $data.lLabel}}"></span>
+
           </div>
           <!-- /ko -->
-          <!-- ko if: showApplicationsSearch -->
-          <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
 
-            <!-- ko if: externalApi.enabled -->
-            <button data-bind="click: externalApi.showPermitsOnMap, visible: gotResults"
-                    data-test-id="external-show-permits-on-map">
-              <i class="lupicon-location"></i>
-              <span data-bind="text: 'N\u00E4yt\u00E4 hankkeet kartalla'"></span>
-            </button>
-            <!-- /ko -->
+          <!-- Filters -->
+          <div data-bind="component: searchModel().filter"
+               class="application-search-component"></div>
 
-            <div data-bind="component: {name: 'applications-search-tabs', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
-          <!-- /ko -->
-
-          <!-- ko if: showForemanSearch -->
-          <div data-bind="component: {name: 'applications-foreman-search-filter', params: {dataProvider: dataProvider}}" class="applications-search-component"></div>
-          <div data-bind="component: {name: 'applications-foreman-search-tabs', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
-          <!-- /ko -->
-
+          <!-- Tabs -->
+          <div data-bind="component: searchModel().tabs"
+               class="application-search-component"></div>
         </div>
       </div>
       <!-- /ko -->
 
+      <!-- Search results and paging-->
       <div class="container">
 
-      <!-- ko if: showApplicationsSearch -->
-
         <!-- ko ifnot: noApplications() -->
-        <div data-bind="component: {name: 'applications-search-results', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
+        <div data-bind="component: searchModel().searchResults"
+             class="applications-search-component"></div>
 
           <!-- ko if: gotResults() -->
-          <div data-bind="component: {name: 'applications-search-paging', params: {dataProvider: dataProvider, limits: limits, count: totalCount}}" class="applications-search-component"></div>
+          <div data-bind="component: searchModel().paging"
+               class="applications-search-component"></div>
           <!-- /ko -->
 
         <!-- /ko -->
-
-      <!-- /ko -->
-
-      <!-- ko if: showForemanSearch -->
-
-        <!-- ko ifnot: noApplications() -->
-        <div data-bind="component: {name: 'applications-foreman-search-results', params: {dataProvider: dataProvider, gotResults: gotResults}}" class="applications-search-component"></div>
-
-          <!-- ko if: gotResults() -->
-          <div data-bind="component: {name: 'applications-search-paging', params: {dataProvider: dataProvider, limits: limits, count: totalCount}}" class="applications-search-component"></div>
-          <!-- /ko -->
-
-        <!-- /ko -->
-
-      <!-- /ko -->
-
+
         <!-- ko if: noApplications() -->
         <div class="applications-empty-state"
              data-bind="css: {wide: !authorizationModel.ok('create-application-from-previous-permit')}">
@@ -127,7 +97,7 @@
               <h2 class="bottom-marginM" data-bind="ltext: 'applications.missing.application.title'"></h2>
               <p data-bind="lhtml: 'applications.missing.application.desc'"></p>
             </div>
-            
+
             <div class="last-box missing-prev-permit-box app-type-box">
               <h2 class="bottom-marginM" data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
               <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>

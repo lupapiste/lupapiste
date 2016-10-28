@@ -18,22 +18,20 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   var fieldsCache = {};
 
   // Observables
-  self.sort = util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]) ||
+  self.sort = params.sort ||
               {field: ko.observable(defaultSort.field), asc: ko.observable(defaultSort.asc)};
 
   self.data = ko.observable(defaultData);
 
-  self.applications = ko.observableArray([]);
+  self.results = ko.observableArray([]);
 
-  self.applicationType = ko.observable(lupapisteApp.models.currentUser.isAuthority()
-                                       ? "application"
-                                       : "all");
+  self.searchResultType = ko.observable(params.searchResultType);
 
   self.searchField = ko.observable("");
 
   self.searchFieldDelayed = ko.pureComputed(self.searchField).extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
-  self.limit = ko.observable(100); // Default limit applications per page
+  self.limit = params.currentLimit;
 
   self.skip = ko.observable(0);
 
@@ -41,13 +39,13 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   // Application <-> foremanApplication
   // foremanNotice -> application
-  self.updateApplicationType = function( searchType ) {
-    var current = self.applicationType();
+  self.updateSearchResultType = function( searchType ) {
+    var current = self.searchResultType();
     if( searchType === "foreman" && current === "application") {
-      self.applicationType( "foremanApplication");
+      self.searchResultType( "foremanApplication");
     } else {
       if( searchType === "applications" && _.startsWith( current, "foreman")) {
-        self.applicationType( "application");
+        self.searchResultType( "application");
       }
     }
   };
@@ -64,7 +62,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
              organizations: _.map(lupapisteApp.services.organizationFilterService.selected(), "id"),
              operations: _.map(operations, "id"),
              handlers: _.map(lupapisteApp.services.handlerFilterService.selected(), "id"),
-             applicationType: self.applicationType(),
+             applicationType: self.searchResultType(),
              areas: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
@@ -77,7 +75,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     lupapisteApp.services.organizationFilterService.selected();
     lupapisteApp.services.operationFilterService.selected();
     lupapisteApp.services.handlerFilterService.selected();
-    self.applicationType();
+    self.searchResultType();
     lupapisteApp.services.areaFilterService.selected();
     self.limit();
     self.skip(0); // when above filters change, set table view to first page
@@ -113,7 +111,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   self.onSuccess = function(res) {
     var data = wrapData(res.data);
     self.data(data);
-    self.applications(data.applications);
+    self.results(data.applications);
   };
 
   self.clearFilters = function() {

@@ -15,7 +15,9 @@
           <thead>
             <tr data-bind="foreach: columns">
               <th data-bind="click: $data.click, css: $data.css, attr: $data.attr">
-                <span data-bind="ltext: $data.ltext"></span>
+                <!-- ko if: $data.ltext -->
+                  <span data-bind="ltext: $data.ltext"></span>
+                <!-- /ko -->
                 <i class="lupicon-chevron-small-up" data-bind="visible: $data.isAscending"></i>
                 <i class="lupicon-chevron-small-down" data-bind="visible: $data.isDescending"></i>
               </th>
