@@ -49,9 +49,7 @@
                       :state :closed}
         application  (-> orig-app
                          meta-fields/enrich-with-link-permit-data
-                         (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                             (link-permit/update-link-permit-data-with-kuntalupatunnus-from-verdict %)
-                             %))
+                         link-permit/update-backend-ids-in-link-permit-data
                          (merge app-updates))
         organization @org
         krysp?       (organization/krysp-integration? organization (permit/permit-type application))]

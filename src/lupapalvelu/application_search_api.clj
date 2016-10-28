@@ -11,7 +11,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.application-utils :as app-utils]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]))
 
 (defquery applications-search
   {:description "Service point for application search component"
@@ -24,6 +25,28 @@
                 data
                 [:tags :organizations :applicationType :handlers
                  :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
+
+(defquery applications-search-default
+  {:description "The initial applications search. Returns data and used search."
+   :parameters  []
+   :user-roles  #{:applicant :authority}}
+  [{user :user}]
+  (let [{:keys [defaultFilter applicationFilters]} (usr/get-user-by-id (:id user))
+        {:keys [sort filter]} (or (some-> defaultFilter
+                                          :id
+                                          (util/find-by-id applicationFilters))
+                                  {:sort   {:field "modified"
+                                            :asc   false}
+                                   :filter {}})
+        search (assoc filter
+                      :sort sort
+                      :applicationType (if (usr/authority? user)
+                                         "application"
+                                         "all")
+                      :limit 100
+                      :skip 0)]
+    (ok :data (search/applications-for-user user search)
+        :search search)))
 
 (defquery applications-for-new-appointment-page
   {:description "Service point for application list in new-appointment page"

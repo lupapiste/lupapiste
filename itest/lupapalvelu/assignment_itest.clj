@@ -31,14 +31,17 @@
     (command user :complete-assignment :assignmentId assignment-id))
 
   (facts "Querying assignments"
+
     (fact "only authorities can see assignments"
       (query sonja :assignments) => ok?
       (query pena :assignments)  => unauthorized?)
+
     (fact "authorities can only see assignments belonging to their organizations"
       (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
             {assignment-id :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")]
         (-> (query sonja :assignments) :assignments count)  => pos?
         (-> (query veikko :assignments) :assignments count) => zero?))
+
     (fact "assignments can be fetched by application id"
       (let [{id1 :id} (create-app sonja :propertyId sipoo-property-id)
             {id2 :id} (create-app ronja :propertyId sipoo-property-id)
@@ -53,6 +56,7 @@
 
   (facts "Creating assignments"
     (let [{id :id} (create-app sonja :propertyId sipoo-property-id)]
+
       (fact "only authorities can create assignments"
         (create-assignment sonja ronja-id id ["target"] "Kuvaus") => ok?
         (create-assignment pena sonja-id id ["target"] "Hommaa") => unauthorized?)
@@ -78,8 +82,10 @@
         (complete-assignment veikko assignment-id1) => not-completed?
         (complete-assignment ronja assignment-id1)  => ok?
         (complete-assignment ronja assignment-id1)  => not-completed?)
+
       (fact "Authorities CAN complete other authorities' assignments within their organizations"
         (complete-assignment sonja assignment-id2) => ok?)
+
       (fact "After calling complete-assignment, the assignment is completed"
         (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :status) => "completed")))
 
@@ -100,3 +106,18 @@
         (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:displayText :id]))))
       (fact "data from accordion-field is in display text"
         (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA")))))
+
+  (facts "Assignments search"
+    (let [{id1 :id} (create-app sonja :propertyId sipoo-property-id)
+          {id2 :id} (create-app ronja :propertyId sipoo-property-id)]
+
+      (fact "text search finds approximate matches in description"
+        (let [{assignment-id1 :id} (create-assignment sonja "ronja" id1 ["target"] "Kuvaava teksti")]
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "all")
+               :data :assignments (map :description)) => (contains "Kuvaava teksti")
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "active")
+               :data :assignments (map :description)) => (contains "Kuvaava teksti")
+          (->> (query sonja :assignments-search :searchText "uva eks" :status "completed")
+               :data :assignments) => empty?
+          (->> (query sonja :assignments-search :searchText "not even close")
+               :data :assignments (map :description)) => empty?)))))

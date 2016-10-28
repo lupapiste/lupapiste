@@ -5,13 +5,22 @@ LUPAPISTE.BuildingService = function() {
 
   var buildings = ko.observableArray();
 
-  var latestAppId = null;
+  var latestPropertyId = null;
+
+  function appId() {
+    return lupapisteApp.services.contextService.applicationId();
+  }
 
   function updateNeeded() {
-    var appId = lupapisteApp.services.contextService.applicationId();
-    if( appId && appId !== latestAppId ) {
-      latestAppId = appId;
-      return true;
+    if( appId() ) {
+      var propertyId = lupapisteApp.models.application.propertyId();
+      if( propertyId !== latestPropertyId ) {
+        latestPropertyId = propertyId;
+        return true;
+      }
+    } else {
+      // We are not on an application page.
+      latestPropertyId = null;
     }
   }
 
@@ -24,7 +33,7 @@ LUPAPISTE.BuildingService = function() {
   self.buildingsInfo = function() {
     if( updateNeeded()) {
       ajax.query( "get-building-info-from-wfs",
-                  {id: latestAppId})
+                  {id: appId()})
         .success( function( res ) {
           buildings( res.data );
         })
@@ -36,21 +45,21 @@ LUPAPISTE.BuildingService = function() {
 
   // Options [optional]
   // documentId: Document id
-  // buildingId: Building id
+  // buildingId: Building id[[/Users/vespesa/projects/lupapiste/.gitignore][]]
   // overwrite: Whether overwrite during merge
   // [path]: Schema path (default "buildingId")
   // [collection]: Mongo collection ("documents")
  hub.subscribe( "buildingService::merge", function( options ) {
     ajax.command("merge-details-from-krysp",
                  _.defaults( _.pick( options, ["documentId",
-                                            "buildingId",
-                                            "overwrite",
-                                            "path",
-                                            "collection"]),
-                           {id: latestAppId,
-                            path: "buildingId",
-                            collection: "documents"}))
-      .success( _.partial( repository.load, latestAppId, _.noop))
+                                               "buildingId",
+                                               "overwrite",
+                                               "path",
+                                               "collection"]),
+                             {id: appId(),
+                              path: "buildingId",
+                              collection: "documents"}))
+     .success( _.partial( repository.load, appId(), _.noop))
       .onError("error.no-legacy-available", notify.ajaxError)
       .call();
   });

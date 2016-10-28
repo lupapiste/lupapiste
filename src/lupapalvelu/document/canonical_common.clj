@@ -263,7 +263,7 @@
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
      util/not-empty-or-nil?
      :saapumisPvm (util/to-xml-date submitted)
-     :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
+     :kuntalupatunnus (->> application :verdicts (some :kuntalupatunnus)))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"

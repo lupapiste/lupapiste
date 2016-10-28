@@ -20,7 +20,8 @@
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
   <div data-bind="component: { name: 'attachments-accordions',
-                               params: { pageName: $data.pageName } }"></div>
+                               params: { pageName: $data.pageName,
+                               noDownloadButton: true} }"></div>
   <!-- /ko -->
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">
