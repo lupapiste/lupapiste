@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="assignments-search-filter-template">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-2">
+          <label data-bind="ltext: 'application.filter.search'"></label>
+          <div class="search" data-bind="css: {toggled: dataProvider.searchField(), active: searchFieldSelected}">
+            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField, hasFocus: searchFieldSelected"/>
+            <i class="search-icon lupicon-search"></i>
+            <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="help-box light">
+        <span data-bind="ltext: 'applications.missing.no-application.title'"></span>
+        <span data-bind="component: {name: 'help-toggle', params: {lhtml: 'applications.missing.no-application.desc' }}"></span>
+      </div>
+    </div>
+    </script>
+  </section>
+</body>
+</html>

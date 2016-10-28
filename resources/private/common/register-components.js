@@ -62,6 +62,7 @@ jQuery(document).ready(function() {
     {name: "applications-foreman-search-results"},
     {name: "assignments-search-tabs", template: "applications-search-tabs-template"},
     {name: "assignments-search-results"},
+    {name: "assignments-search-filter"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
