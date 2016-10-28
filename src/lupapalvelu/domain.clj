@@ -355,6 +355,7 @@
    :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}
+   :location-wgs84           {}
    :modified                 nil ; timestamp
    :municipality             ""
    :neighbors                []

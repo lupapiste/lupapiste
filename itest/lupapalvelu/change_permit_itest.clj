@@ -5,6 +5,8 @@
             [lupapalvelu.domain :as domain]
             [clojure.set :refer [intersection]]))
 
+(apply-remote-minimal)
+
 (facts "Change permit"
   (let [apikey              sonja
         application         (create-and-submit-application

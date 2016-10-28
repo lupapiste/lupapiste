@@ -2523,6 +2523,15 @@
                             #(dissoc % :meta)
                             {:versions.documents {$elemMatch {:meta {$exists true}}}}))
 
+;; Create-change-permit command has not been copying location-wgs84 property.
+;; The copying has been fixed, but we need to run the old migration again.
+(defmigration add-wgs84-location-for-applications-again
+  {:apply-when (pos? (mongo/count :applications {:location-wgs84 {$exists false}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
+        (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
