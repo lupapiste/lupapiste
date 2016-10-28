@@ -32,7 +32,8 @@ LUPAPISTE.AttachmentsAccordionsModel = function(params) {
   });
 
   self.downloadAll = function() {
-    service.downloadAttachments(filteredAttachments());
+    service.downloadAttachments(_.map(filteredAttachments(),
+                                      _.ary( _.partialRight(util.getIn, ["id"]), 1)));
   };
 
   self.downloadAllText = self.disposedPureComputed(function() {

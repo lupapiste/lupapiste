@@ -20,7 +20,7 @@ ${company2}   Testiyritys 9242
 Pena logs in and creates application
   Pena logs in
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  approve-app${secs}
+  Set Suite Variable  ${appname}  BUILDINGS${secs}
   Create application the fast way  ${appname}  753-416-25-30  sisatila-muutos
 
 Pena chooses building 1
@@ -56,10 +56,12 @@ Pena adds operation
   Select operation branch  "Rakennuksen korjaaminen ja/tai muuttaminen (käyttötarkoitus, julkisivut, remontit yms.)"
   Select operation branch  "Rakennuksen julkisivujen tai katon muutos"
   Scroll and click test id  add-operation-to-application
-
+  Wait until  Element should be visible  jquery=section[data-doc-type=${doctype2}]
+  
 Initially new building selector and company name are empty
   No building selected  ${doctype2}
   No other input  ${doctype2}
+  Scroll and click  section[data-doc-type=${doctype2}] input[value=yritys]
   Company name is  ${doctype2}  ${EMPTY}
 
 Pena chooses building 2 for the secondary operation
@@ -79,8 +81,7 @@ Primary operation details are unchanged
 No building selected
   [Arguments]  ${doctype}
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
-  Scroll to  ${selector}
-  Wait until  List selection should be  jquery=${selector}  - Valitse -
+  Wait until  Javascript?  $("${selector}").val() === ""
 
 Clear building selection
   [Arguments]  ${doctype}
@@ -101,7 +102,7 @@ Select building
   ${selector}=  Set Variable  section[data-doc-type=${doctype}] select[name=buildingId]
   Scroll to  ${selector}
   Execute Javascript  $("${selector}").addClass( "test-reload")
-  Wait until  Select from list  jquery=${selector}  ${building}
+  Wait until  Select from list by value  jquery=${selector}  ${building}
   Run keyword if  ${merge}  Confirm  dynamic-yes-no-confirm-dialog
   Run keyword unless  ${merge}  Deny  dynamic-yes-no-confirm-dialog
   # After reload, our manually added class is removed.
@@ -132,7 +133,9 @@ Good building number
 
 Company name is
   [Arguments]  ${doctype}  ${name}  
-  Wait until  Textfield value should be  jquery=section[data-doc-type=${doctype}] input[data-docgen-path="rakennuksenOmistajat.0.yritys.yritysnimi"]  ${name}
+  ${selector}=  Set Variable  jquery=section[data-doc-type=${doctype}] input[data-docgen-path="rakennuksenOmistajat.0.yritys.yritysnimi"]
+  Wait until  Element should be visible  ${selector}
+  Textfield value should be  ${selector}  ${name}  
 
 Set company name
   [Arguments]  ${doctype}  ${name}

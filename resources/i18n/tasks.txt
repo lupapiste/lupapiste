@@ -244,7 +244,7 @@
 "task-lupamaarays.maarays" "en" "Regulation"
 "task-lupamaarays.maarays" "fi" "Määräys"
 "task-lupamaarays.maarays" "sv" "Åläggande"
-"task-vaadittu-tyonjohtaja.asiointitunnus" "en" "Separate notification e-ID"
+"task-vaadittu-tyonjohtaja.asiointitunnus" "en" "Separate notification application ID"
 "task-vaadittu-tyonjohtaja.asiointitunnus" "fi" "Erillisen ilmoituksen asiointitunnus"
 "task-vaadittu-tyonjohtaja.asiointitunnus" "sv" "Kommunikationskod för enskilt meddelande"
 "task-vaadittu-tyonjohtaja.osapuolena" "en" "Announced in connection with the application"

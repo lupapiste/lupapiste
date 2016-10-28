@@ -87,9 +87,7 @@
                       timestamps)
         application (-> application
                       meta-fields/enrich-with-link-permit-data
-                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                         (link-permit/update-link-permit-data-with-kuntalupatunnus-from-verdict %)
-                         %))
+                      link-permit/update-backend-ids-in-link-permit-data
                       (merge app-updates))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)

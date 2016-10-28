@@ -1,6 +1,6 @@
-# Moi {{name}},
+# Moi,
 
-hakemukselle on lis&auml;tty uusi kommentti. P&auml;&auml;set lukemaan kommentin hakemuksen keskusteluketjusta.
+neuvontapyynn&ouml;lle on lis&auml;tty uusi kommentti. P&auml;&auml;set lukemaan kommentin neuvontapyynn&ouml;n keskusteluketjusta.
 
 {{link-fi}}
 
@@ -11,7 +11,7 @@ Terveisin,
 
 ---
 
-# Hej {{name}},
+# Hej,
 
 En ny kommentar har inkommit till diskussionet:
 

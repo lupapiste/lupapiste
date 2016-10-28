@@ -807,7 +807,7 @@
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
-   :states     states/post-submitted-states
+   :states     states/post-sent-states
    :pre-checks [validate-organization-backend-urls
                 correct-urls-configured]}
   [{{:keys [verdicts]} :application organization :organization}]

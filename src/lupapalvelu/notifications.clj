@@ -9,7 +9,8 @@
             [sade.email :as email]
             [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.user :as u]))
+            [lupapalvelu.user :as u]
+            [lupapalvelu.authorization :as auth]))
 
 ;;
 ;; Helpers
@@ -58,21 +59,16 @@
          (when subject-key title-postfix))))
 
 (defn- get-email-recipients-for-application
-  "Emails are sent to everyone in auth array except statement persons,
-   those who haven't accepted invite or have unsubscribed emails."
+  "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
+   More specific set recipients can be defined by user roles."
   [{:keys [auth statements]} included-roles excluded-roles]
   {:post [every? map? %]}
-  (let [users            (->> auth (remove :invite) (remove :unsubscribed))
-        included-users   (if (seq included-roles)
-                           (filter (fn [user] (some #(= (:role user) %) included-roles)) users)
-                           users)
-        auth-recipients (->> included-users
-                           (filter (fn [user] (not-any? #(= (:role user) %) excluded-roles)))
-                           (map #(u/non-private (u/get-user-by-id (:id %)))))
-        statement-giver-emails (set (map #(-> % :person :email) statements))]
-    (if (some #(= "statementGiver" %) excluded-roles)
-      (remove #(statement-giver-emails (:email %)) auth-recipients)
-      auth-recipients)))
+  (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
+                                        (set excluded-roles))]
+    (->> (filter (comp recipient-roles keyword :role) auth)
+         (remove :invite)
+         (remove :unsubscribed)
+         (map (comp u/non-private u/get-user-by-id :id)))))
 
 ;;
 ;; Model creation functions
@@ -88,17 +84,26 @@
    :name (:firstName recipient)
    :lang (:language recipient)})
 
-
 ;;
 ;; Recipient functions
 ;;
 
-(defn- default-recipients-fn [{application :application}]
-  (get-email-recipients-for-application application nil ["statementGiver"]))
+(defn- default-recipients-fn
+  "Default recipient roles for notifications are all user roles but 'statementGiver'."
+  [{application :application}]
+  (get-email-recipients-for-application application nil [:statementGiver]))
+
 (defn from-user [command] [(:user command)])
+
 (defn from-data [{data :data}] (let [email (:email data)
                                      emails (if (sequential? email) email [email])]
                                  (map (fn [addr] {:email addr}) emails)))
+
+(defn comment-recipients-fn
+  "Recipients roles for comments are same user roles that can view and add comments."
+  [{:keys [application]}]
+  (get-email-recipients-for-application application auth/comment-user-authz-roles [:statementGiver]))
+
 
 ;;
 ;; Configuration for generic notifications

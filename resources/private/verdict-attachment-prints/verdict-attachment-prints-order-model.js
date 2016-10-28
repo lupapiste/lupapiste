@@ -45,15 +45,14 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
       return util.isNonNegative(a.orderAmount());
     });
-    var dialogFieldValues = [self.ordererOrganization(),
+    var mandatoryDialogFieldValues = [self.ordererOrganization(),
                              self.ordererEmail(),
                              self.ordererPhone(),
                              self.applicantName(),
-                             self.kuntalupatunnus(),
                              self.propertyId(),
                              self.lupapisteId(),
                              self.address()];
-    var nonEmptyFields = _.every(dialogFieldValues, function(v){ return !_.isEmpty(v); });
+    var nonEmptyFields = _.every(mandatoryDialogFieldValues, function(v){ return !_.isEmpty(v); });
     return self.authorizationModel.ok("order-verdict-attachment-prints") &&
            !self.processing() &&
            !_.isEmpty(self.kopiolaitosEmail()) &&

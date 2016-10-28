@@ -22,7 +22,7 @@
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/map-parameters-with-required-keys [:orderInfo]
-                        [:address :ordererPhone :kuntalupatunnus :ordererEmail :ordererAddress :ordererOrganization :applicantName :propertyId :lupapisteId])
+                        [:address :ordererPhone :ordererEmail :ordererAddress :ordererOrganization :applicantName :propertyId :lupapisteId])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:id :amount])
                       attachment-amounts-validator]
    :pre-checks [any-attachment-is-printable]}

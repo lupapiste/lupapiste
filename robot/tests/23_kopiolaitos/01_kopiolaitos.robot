@@ -42,7 +42,7 @@ Sonja sets contents description for the attachment
   Input text by test id  attachment-contents-input  Muu muu muu liite
   Click by test id  back-to-application-from-attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
-  Wait until  Element should not be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
 Sonja disables verdict attachment using multiselect view
   Click by test id  mark-verdict-attachments
