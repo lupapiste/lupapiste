@@ -31,7 +31,7 @@
 "attachmentType.ennakkoluvat_ja_lausunnot.selvitys_naapurien_kuulemisesta.info" "en" "Consultation letters must be attached, if the applicant has consulted with the neighbours. Not required = The authority will consider if they are needed"
 "attachmentType.ennakkoluvat_ja_lausunnot.selvitys_naapurien_kuulemisesta.info" "fi" "Kuulemiskirjeet liitettävä, jos hakija on kuullut naapurit. Ei tarpeen = Viranomainen harkitsee tarpeellisuuden"
 "attachmentType.ennakkoluvat_ja_lausunnot.selvitys_naapurien_kuulemisesta.info" "sv" "Hörandebrev måste tilläggas, om ansökaren har hört grannarna. Inte nödvändigt=Myndigheten avväger nödvändigheten"
-"attachmentType.ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu.info" "en" "If the project has applied for a planning solution other than through Lupapiste"
+"attachmentType.ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu.info" "en" "If the project has applied for a planning requirement solution other than through Lupapiste"
 "attachmentType.ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu.info" "fi" "Jos hankkeessa on haettu suunnittelutarveratkaisu muuten kuin Lupapisteen kautta"
 "attachmentType.ennakkoluvat_ja_lausunnot.suunnittelutarveratkaisu.info" "sv" "Om man har ansökt om planeringsbehovsavgörande på annat sätt än via Lupapiste"
 "attachmentType.ennakkoluvat_ja_lausunnot.vesi_ja_viemariliitoslausunto_tai_kartta.info" "en" "If the project will connect with an existing network or one that is under construction"

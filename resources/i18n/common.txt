@@ -2364,7 +2364,7 @@
 "permitSubtype.poikkeamislupa" "en" "Deviation"
 "permitSubtype.poikkeamislupa" "fi" "Poikkeaminen"
 "permitSubtype.poikkeamislupa" "sv" "Avvikelse"
-"permitSubtype.suunnittelutarveratkaisu" "en" "The need to design solution"
+"permitSubtype.suunnittelutarveratkaisu" "en" "Planning requirement solution"
 "permitSubtype.suunnittelutarveratkaisu" "fi" "Suunnittelutarveratkaisu"
 "permitSubtype.suunnittelutarveratkaisu" "sv" "Planeringsbehovsavgörande"
 "permitSubtype.tyonjohtaja-hakemus" "en" "Application"
