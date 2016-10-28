@@ -37,6 +37,7 @@
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
    :user-roles #{:authority}
+   :categories #{:documents}
    :feature :assignments}
   [{user     :user
     {id :id} :application}]
@@ -94,6 +95,7 @@
    :user-roles #{:authority}
    :parameters [assignmentId]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
+   :categories #{:documents}
    :feature :assignments}
   [{user    :user
     created :created}]
