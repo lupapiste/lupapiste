@@ -45,17 +45,25 @@ LUPAPISTE.CurrentUser = function() {
                               sticky: true, html: true});
       delete user.indicatorNote;
     }
-    if (user.firstLogin && _.isFunction(fbPixel)) {
+    if (user.firstLogin) {
+      hub.send("first-login", {user: user});
+    }
+    ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
+  }
+
+  constructor({});
+
+  hub.subscribe("first-login", function() {
+    if (_.isFunction(fbPixel)) {
       // send a bit to Facebook about firstLogin
       info("Triggering first login Facebook pixel");
       hub.send( "indicator", {style: "hidden",
                               rawMessage: fbPixel(),
                               html: true});
     }
-    ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
-  }
-
-  constructor({});
+    // unset first login flag
+    ajax.command("first-login").success(_.noop).call();
+  });
 
   self.loaded = ko.pureComputed(function() {
     return self.id();
