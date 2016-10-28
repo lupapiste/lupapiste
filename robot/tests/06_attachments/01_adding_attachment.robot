@@ -25,8 +25,9 @@ Mikko sees all "not needed" checkboxes as enabled and not selected
   Not needed should not be selected  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Not needed should not be selected  paapiirustus.pohjapiirustus
 
-Download all button is not visible
+Download all buttons are not visible
   No such test id  download-all
+  No such test id  download-all-attachments-button
 
 Mikko sets asemapiirros not needed
   [Tags]  attachments
@@ -60,16 +61,18 @@ Mikko returns to application
   [Tags]  attachments
   Return to application
 
-Download all button is now visible
+Download all buttons are now visible
   Wait test id visible  download-all
+  Wait test id visible  download-all-attachments-button
 
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
-Download all is gone again
+Download all buttons are gone again
   No such test id  download-all
+  No such test id  download-all-attachments-button
 
 Mikko adds png attachment without comment again
   [Tags]  attachments
@@ -95,8 +98,9 @@ Mikko adds again png attachment with comment
   Return to application
   Wait Until  Comment count is  1
 
-Download all button is again visible
+Download all buttons are again visible
   Wait test id visible  download-all
+  Wait test id visible  download-all-attachments-button
 
 Mikko opens attachment details
   [Tags]  attachments

@@ -15,5 +15,15 @@
                                              path: $data.path,
                                              level: 0 } }"></div>
     </div>
+    <!-- ko if: hasFile -->
+    <button data-bind="click: $data.downloadAll"
+            class="secondary"
+            data-test-id="download-all-attachments-button">
+      <i class="lupicon-download"></i>
+      <span data-bind="text: $data.downloadAllText"></span>
+    </button>
+    <!-- /ko -->
   </div>
 </script>
+
+                       
