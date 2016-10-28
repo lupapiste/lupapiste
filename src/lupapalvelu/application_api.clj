@@ -655,6 +655,7 @@
                               (select-keys application
                                 [:auth
                                  :propertyId, :location
+                                 :location-wgs84
                                  :schema-version
                                  :address, :title
                                  :foreman, :foremanRole
