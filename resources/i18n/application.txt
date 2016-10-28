@@ -994,4 +994,7 @@
 "application.assignment.type" "fi" "Tyyppi"
 "application.assignment.type" "sv" "Typ"
 "application.assignment.type" "en" "Type"
+"application.assignment" "fi" "Tehtävä"
+"application.assignment" "sv" "Uppdrag"
+"application.assignment" "en" "Assignment"
 
