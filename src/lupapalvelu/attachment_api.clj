@@ -4,7 +4,7 @@
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
-            [sade.core :refer [ok fail fail! now def-]]
+            [sade.core :refer [ok fail fail! now def- unauthorized!]]
             [sade.files :as files]
             [sade.strings :as ss]
             [sade.util :refer [fn->] :as util]
@@ -168,6 +168,24 @@
              (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
+(defn- is-verdict-attachment? [{target :target}] (= (:type target) "verdict"))
+(defn- is-statement-attachment? [{target :target}] (= (:type target) "statement"))
+
+(defn- verdict-attachment-edit-by-authority-only
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (let [attachment-info (attachment/get-attachment-info application attachmentId)]
+    (when (and (is-verdict-attachment? attachment-info)
+               (not (auth/application-authority? application user)))
+      (unauthorized!))))
+
+(defn- statement-attachment-edit-by-authority-or-statement-giver-only
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (let [attachment-info (attachment/get-attachment-info application attachmentId)]
+    (when (is-statement-attachment? attachment-info)
+      (when-not (or (auth/application-authority? application user)
+                    (auth/has-auth-role? application (:id user) :statementGiver))
+        (unauthorized!)))))
+
 ;;
 ;; Attachments
 ;;
@@ -249,6 +267,8 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
+                verdict-attachment-edit-by-authority-only
+                statement-attachment-edit-by-authority-or-statement-giver-only
                 attachment-editable-by-application-state
                 attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
@@ -378,6 +398,8 @@
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
+                 verdict-attachment-edit-by-authority-only
+                 statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
@@ -396,6 +418,8 @@
                  foreman-must-be-uploader
                  attachment-not-readOnly
                  attachment-editable-by-application-state
+                 verdict-attachment-edit-by-authority-only
+                 statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
@@ -692,6 +716,8 @@
                 foreman-must-be-uploader
                 attachment-editable-by-application-state
                 attachment-not-readOnly
+                verdict-attachment-edit-by-authority-only
+                statement-attachment-edit-by-authority-or-statement-giver-only
                 validate-operation-in-application]}
   [{:keys [created] :as command}]
   (let [data (attachment/meta->attachment-data meta)]

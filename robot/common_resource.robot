@@ -657,6 +657,7 @@ Add attachment
   Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
+  Run Keyword If  '${kind}' == 'statement'  Click enabled by test id  add-statement-attachment
 
   Wait until  Element should be visible  upload-dialog
 
