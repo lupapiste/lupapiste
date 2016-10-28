@@ -1,10 +1,11 @@
 (ns lupapalvelu.application-search-itest
-  (:require [clojure.string :as s]
-            [midje.sweet :refer :all]
-            [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet  :refer :all]
-            [sade.property :as p]
-            [sade.util :as util]))
+    (:require [clojure.string :as s]
+      [midje.sweet :refer :all]
+      [lupapalvelu.itest-util :refer :all]
+      [lupapalvelu.factlet :refer :all]
+      [sade.property :as p]
+      [sade.util :as util]
+      [sade.strings :as ss]))
 
 
 (defn- num-of-results? [n response]
@@ -71,6 +72,9 @@
     (facts "by operation name"
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
       (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?))
+
+    (fact "by a very very long search term"
+          (search (ss/join (repeat 22 "1234567890"))) => fail?)
 
     (fact "Submitted application is returned by latest-applications"
       (let [resp (query pena :latest-applications)
