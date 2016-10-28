@@ -190,7 +190,7 @@
 "auth-admin.operations-attachments" "en" "Attachments for measures"
 "auth-admin.operations-attachments" "fi" "Liitteet toimenpiteisiin"
 "auth-admin.operations-attachments" "sv" "Åtgärdernas bilagor"
-"auth-admin.operations-attachments.add" "en" "Add appendix type"
+"auth-admin.operations-attachments.add" "en" "Add attachment type"
 "auth-admin.operations-attachments.add" "fi" "Lisää liitetyyppi"
 "auth-admin.operations-attachments.add" "sv" "Lägg till bilagtyp"
 "auth-admin.operations-attachments.attachments" "en" "Attachments"

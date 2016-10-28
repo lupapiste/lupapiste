@@ -49,7 +49,7 @@
 "verdict-attachment-prints-order.order-dialog.propertyId" "en" "Property ID"
 "verdict-attachment-prints-order.order-dialog.propertyId" "fi" "Kiinteistötunnus"
 "verdict-attachment-prints-order.order-dialog.propertyId" "sv" "Fastighetsbeteckning"
-"verdict-attachment-prints-order.order-dialog.ready" "en" "Copies of permit images of appendix {0} were ordered from the photocopying service."
+"verdict-attachment-prints-order.order-dialog.ready" "en" "{0} copies of permit images attachments were ordered from the photocopying service."
 "verdict-attachment-prints-order.order-dialog.ready" "fi" "Kopiolaitokselta tilattiin {0} liitteen lupakuvien kopiot."
 "verdict-attachment-prints-order.order-dialog.ready" "sv" "Kopior av {0} bilagor beställdes från kopieringstjänst"
 "verdict-attachment-prints-order.order-dialog.submit" "en" "Order"

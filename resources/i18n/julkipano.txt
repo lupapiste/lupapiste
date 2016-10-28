@@ -40,7 +40,7 @@
 "bulletin.comment" "en" "Opinion/Reminder"
 "bulletin.comment" "fi" "Mielipide/Muistutus"
 "bulletin.comment" "sv" "Åsikt/Anmärkning"
-"bulletin.comment.addAttachment" "en" "Add an appendix to the comment (max. 15 MB)"
+"bulletin.comment.addAttachment" "en" "Add an attachment to the comment (max. 15 MB)"
 "bulletin.comment.addAttachment" "fi" "Lisää kommenttiin liitetiedosto (maks. 15 Mt)"
 "bulletin.comment.addAttachment" "sv" "Lägg till bilaga i kommentar (max. 15 Mb)"
 "bulletin.comment.delivery" "en" "The decision will be sent to:"
