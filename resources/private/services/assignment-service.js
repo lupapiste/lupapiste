@@ -49,38 +49,40 @@ LUPAPISTE.AssignmentService = function() {
       .call();
   }
 
-  hub.subscribe("assignmentService::createAssignment", function(event) {
-    ajax.command("create-assignment", _.omit(event, "eventType"))
-     .success(function(resp) {
-      util.showSavedIndicator(resp);
-      // Refresh application assignments
-      assignmentsForApplication(event.id);
-     })
-     .call();
-  });
-
   function onAssignmentCompleted(response) {
     util.showSavedIndicator(response);
     hub.send("assignmentService::assignmentCompleted", null);
   }
 
-  hub.subscribe("assignmentService::markComplete", function(event) {
-    ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
-      .success(onAssignmentCompleted)
-      .call();
-  });
+  if( features.enabled( "assignments")) {
 
-  hub.subscribe("assignmentService::targetsQuery", function(event) {
-    assignmentTargetsQuery(_.get(event, "applicationId"));
-  });
+    hub.subscribe("assignmentService::createAssignment", function(event) {
+      ajax.command("create-assignment", _.omit(event, "eventType"))
+        .success(function(resp) {
+          util.showSavedIndicator(resp);
+          // Refresh application assignments
+          assignmentsForApplication(event.id);
+        })
+        .call();
+    });
 
-  hub.subscribe("assignmentService::applicationAssignments", function(event) {
-    assignmentsForApplication(_.get(event, "applicationId"));
-  });
+    hub.subscribe("assignmentService::markComplete", function(event) {
+      ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
+        .success(onAssignmentCompleted)
+        .call();
+    });
 
-  hub.subscribe("application-model-updated", function(event) {
-    assignmentsForApplication(_.get(event, "applicationId"));
-  });
+    hub.subscribe("assignmentService::targetsQuery", function(event) {
+      assignmentTargetsQuery(_.get(event, "applicationId"));
+    });
 
+    hub.subscribe("assignmentService::applicationAssignments", function(event) {
+      assignmentsForApplication(_.get(event, "applicationId"));
+    });
+
+    hub.subscribe("application-model-updated", function(event) {
+      assignmentsForApplication(_.get(event, "applicationId"));
+    });
+  }
 
 };
