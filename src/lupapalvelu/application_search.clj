@@ -20,6 +20,8 @@
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]))
 
+(def search-text-max-length 150)
+
 ;; Operations
 
 (defn- normalize-operation-name [i18n-text]
@@ -48,24 +50,9 @@
 ;; Query construction
 ;;
 
-(defn- fuzzy-re
-  "Takes search term and turns it into 'fuzzy' regular expression
-  string (not pattern!) that matches any string that contains the
-  substrings in the correct order. The search term is split both for
-  regular whitespace and Unicode no-break space. The original string
-  parts are escaped for (inadvertent) regex syntax.
-  Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
-  [term]
-  (let [whitespace "[\\s\u00a0]+"
-        fuzzy      (->> (ss/split term (re-pattern whitespace))
-                        (map #(java.util.regex.Pattern/quote %))
-                        (ss/join (str ".*" whitespace ".*")))]
-    (str "^.*" fuzzy ".*$")))
-
-
 (defn- make-free-text-query [filter-search]
   (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id]
-        fuzzy       (fuzzy-re filter-search)
+        fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
         ops         (operation-names filter-search)]
     (if (seq ops)
@@ -229,7 +216,10 @@
       (errorf "Application search query=%s, sort=%s failed: %s" query sort e)
       (fail! :error.unknown))))
 
-(defn applications-for-user [user params]
+
+(defn applications-for-user [user {:keys [searchText] :as params}]
+  (when (> (count searchText) search-text-max-length)
+    (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
@@ -260,6 +250,3 @@
      :operation (i18n/localize :fi "operations" op-name)
      :operationName {:fi (i18n/localize :fi "operations" op-name)
                      :sv (i18n/localize :sv "operations" op-name)}}))
-
-
-

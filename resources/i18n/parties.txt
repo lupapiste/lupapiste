@@ -76,7 +76,7 @@
 "osapuoli.patevyys-tyonjohtaja.valmistumisvuosi" "en" "Year of graduation"
 "osapuoli.patevyys-tyonjohtaja.valmistumisvuosi" "fi" "Valmistumisvuosi"
 "osapuoli.patevyys-tyonjohtaja.valmistumisvuosi" "sv" "Utexamineringsår"
-"osapuoli.patevyys.Liiteet" "en" "Appendices"
+"osapuoli.patevyys.Liiteet" "en" "Attachments"
 "osapuoli.patevyys.Liiteet" "fi" "Liitteet"
 "osapuoli.patevyys.Liiteet" "sv" "Bilagor"
 "osapuoli.patevyys._group_label" "en" "Eligibility of designer"

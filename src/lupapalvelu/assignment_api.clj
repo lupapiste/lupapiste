@@ -1,6 +1,7 @@
 (ns lupapalvelu.assignment-api
-  (:require [lupapalvelu.action :refer [defcommand defquery non-blank-parameters vector-parameters parameters-matching-schema]]
+  (:require [lupapalvelu.action :as action :refer [defcommand defquery parameters-matching-schema]]
             [lupapalvelu.assignment :as assignment]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
@@ -8,16 +9,16 @@
 
 ;; Helpers and validators
 
-(defn- username->summary [username]
-  (-> {:username username} (usr/get-user) (usr/summary)))
+(defn- userid->summary [id]
+  (usr/summary (usr/get-user-by-id id)))
 
-(defn- username->session-summary [username]
-  (-> {:username username} (usr/get-user) (usr/session-summary)))
+(defn- userid->session-summary [id]
+  (usr/session-summary (usr/get-user-by-id id)))
 
 (defn- validate-receiver [{{:keys [organization]} :application
-                           {:keys [recipient]}    :data}]
-  (when (and recipient
-             (not (usr/user-is-authority-in-organization? (username->session-summary recipient)
+                           {:keys [recipientId]}    :data}]
+  (when (and recipientId
+             (not (usr/user-is-authority-in-organization? (userid->session-summary recipientId)
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
 
@@ -35,20 +36,44 @@
 
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
+   :parameters [id]
+   :states states/all-application-states-but-draft-or-terminal
    :user-roles #{:authority}
+   :categories #{:documents}
    :feature :assignments}
-  [{user     :user
-    {id :id} :application}]
+  [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
 
 (defquery assignment
   {:description "Return a single assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :input-validators [(partial parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
+   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :feature :assignments}
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
+
+(defquery assignment-targets
+  {:description "Possible assigment targets per application for frontend"
+   :parameters [id lang]
+   :user-roles #{:authority}
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :states   states/all-application-states-but-draft-or-terminal
+   :feature :assignments}
+  [{:keys [application]}]
+  (let [party-docs (domain/get-documents-by-type application :party)
+        parties    (for [doc party-docs]
+                     {:id (:id doc)
+                      :displayText (assignment/display-text-for-document doc lang)})]
+    (ok :targets [["parties" parties]])))
+
+(defquery assignments-search
+  {:description "Service point for attachment search component"
+   :parameters []
+   :user-roles #{:authority}
+   :feature :assignments}
+  [{user :user data :data}]
+  (ok :data (assignment/assignments-search user (assignment/search-query data))))
 
 ;;
 ;; Commands
@@ -57,19 +82,19 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
-   :parameters       [recipient target description]
-   :input-validators [(partial non-blank-parameters [:recipient :description])
-                      (partial vector-parameters [:target])]
+   :parameters       [recipientId target description]
+   :input-validators [(partial action/non-blank-parameters [:recipientId :description])
+                      (partial action/vector-parameters [:target])]
    :pre-checks       [validate-receiver]
    :states           states/all-application-states-but-draft-or-terminal
    :feature          :assignments}
-  [{user                      :user
-    created                   :created
-    {:keys [organization id]} :application}]
-  (ok :id (assignment/insert-assignment {:organizationId organization
-                                         :applicationId  id
+  [{user         :user
+    created      :created
+    application  :application}]
+  (ok :id (assignment/insert-assignment {:application    (select-keys application
+                                                                      [:id :organization :address :municipality])
                                          :creator        (usr/summary user)
-                                         :recipient      (username->summary recipient)
+                                         :recipient      (userid->summary recipientId)
                                          :target         target
                                          :description    description}
                                         created)))
@@ -78,7 +103,8 @@
   {:description "Complete an assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
-   :input-validators [(partial non-blank-parameters [:assignmentId])]
+   :input-validators [(partial action/non-blank-parameters [:assignmentId])]
+   :categories #{:documents}
    :feature :assignments}
   [{user    :user
     created :created}]

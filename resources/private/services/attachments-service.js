@@ -279,13 +279,6 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
-  self.downloadAttachments = function(attachmentIds) {
-    var ids = attachmentIds || _(self.attachments()).map(ko.unwrap).map("id");
-    var applicationId = self.applicationId();
-    var uri = "/api/raw/download-attachments?id=" + applicationId + "&ids=" + ids.join(",") + "&lang=" + loc.getCurrentLanguage();
-    window.open(uri);
-  };
-
   self.updateAttachment = function(attachmentId, commandName, params, hubParams) {
     var commandParams = _.assign({"id": self.applicationId(),
                                   "attachmentId": attachmentId},

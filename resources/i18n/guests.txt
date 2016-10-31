@@ -1,7 +1,7 @@
 "application-guests.caption" "en" "Select a person for read-only access"
 "application-guests.caption" "fi" "Valitse henkilö, jolle lukuoikeudet annetaan"
 "application-guests.caption" "sv" "Välj person som ska tilldelas läsrätt"
-"application-guests.info" "en" "You can grant another person read-only access to the project. In this case, he or she can access the application and upload appendices."
+"application-guests.info" "en" "You can grant another person read-only access to the project. In this case, he or she can access the application and upload attachments."
 "application-guests.info" "fi" "Voit antaa toiselle henkilölle lukuoikeudet hankkeelle. Tällöin hän voi tutustua hakemukseen ja ladata liitetiedostoja."
 "application-guests.info" "sv" "Du kan ge läsrätt för projektet åt en annan person. Då kan han/hon bekanta sig med ansökan och ladda upp bifogade filer."
 "application-guests.inviter" "en" "Inviter"

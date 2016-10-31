@@ -240,6 +240,38 @@ div.search {
   }
 }
 
+.assignments-search-result__table {
+  th {
+    &.first {
+      width: 5%;
+    }
+    &.second {
+      width: 15%;
+    }
+    &.third {
+      width: 10%;
+    }
+    &.fourth {
+      width: 10%;
+    }
+    &.fifth {
+      width: 40%;
+    }
+    &.sixth {
+      width: 15%;
+    }
+  }
+
+  tr {
+    td.active {
+      color: $red-dark;
+    }
+    td.completed {
+      color: $green;
+    }
+  }
+}
+
 .search-results-waiting {
   i.spin {
     font-size: 2 * $lupicon-size;

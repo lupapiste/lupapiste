@@ -91,7 +91,15 @@
 
         (fact "Authority is still able to add an attachment"
           (upload-attachment sonja (:id application) first-attachment true)
-          (upload-attachment pena (:id application) first-attachment false))))))
+          (upload-attachment pena (:id application) first-attachment false))
+
+        (fact "Applicant can not alter the attachment"
+          (command pena :set-attachment-type :id (:id application)
+                                             :attachmentId (:id first-attachment)
+                                             :attachmentType "muut.aitapiirustus") => fail?
+          (command pena :delete-attachment :id (:id application)
+                                           :attachmentId (:id first-attachment)
+                                           :attachmentType "muut.aitapiirustus") => fail?)))))
 
 (fact "Fetch verdict when all antoPvms are in the future"
   (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
