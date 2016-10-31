@@ -76,7 +76,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext,
                                                                 propertyIds,
                                                                 _.partialRight(self.ownersFound, propertyIds),
-                                                                self.ownersNotFound));
+                                                                _.partial(self.ownersNotFound, propertyIds )));
     return self;
   };
 
@@ -114,8 +114,18 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self.status(self.statusPropertyIdSearchFailed);
   };
 
-  self.ownersNotFound = function() {
+  self.ownersNotFound = function( allPropertyIds ) {
+    self.emptyPropertyIds( allPropertyIds );
     return self.status(self.statusOwnersSearchFailed);
+  };
+
+  self.showManualAdd = function() {
+    // The same dialog is shown also in non-neighbour
+    // scenarios. Readonly flag denotes non-neighbor use case.
+    return (_.isEmpty( self.ownersGroups() )
+            || _.some(self.emptyPropertyIds()))
+      && !self.isSearching()
+      && !self.readonly;
   };
 
   self.addSelectedOwners = function() {

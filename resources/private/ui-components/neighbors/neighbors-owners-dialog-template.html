@@ -58,8 +58,13 @@
         <div data-bind="ifnot: _.isEmpty(emptyPropertyIds())">
           <span data-bind="ltext: 'neighbors.property-ids.no-owners-found'"></span>
           <ul data-bind="foreach: emptyPropertyIds">
-            <li data-bind="propertyId: $data"></li>
+            <li data-bind="propertyId: $data,
+                           testId: 'no-owner-for-' + $data"></li>
           </ul>
+        </div>
+        <div data-bind="if: showManualAdd()">
+          <p data-bind="ltext: 'neighbors.manual-add'"
+             data-test-id="neighbor-manual-add-hint"></p>
         </div>
       </div>
       <!-- ko ifnot: $component.readonly -->

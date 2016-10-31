@@ -52,15 +52,18 @@ Sonja corrects the email address of neighbor c
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
 
 Sonja adds owners - luonnollinen henkilo
-  Scroll to  div#neighbors-map
-  Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}]
-  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'
+  Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}, {"kiinttunnus": "75341600380014"}]
+  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'  
+  Scroll to top  
+  Sleep  0.5s
   Start drawing a point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Lönnroth, Tage
   Wait until  Element Should Contain  xpath=//span[@class='owner-street']  Präståkersvägen 1
   Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  04130
   Wait until  Element Should Contain  xpath=//span[@class='owner-city']  SIBBO
+  Test id visible  no-owner-for-75341600380014
+  Test id visible  neighbor-manual-add-hint
   Click by test id  modal-dialog-submit-button
   [Teardown]  Clear mocks
 
@@ -79,6 +82,7 @@ Sonja adds owners - kuolinpesä
   Wait until  Element Should Contain  xpath=//span[@class='owner-zip']  70620
   Wait until  Element Should Contain  xpath=//span[@class='owner-city']  KUOPIO
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='modal-dialog-submit-button']
+  No such test id  neighbor-manual-add-hint
   Click by test id  modal-dialog-submit-button
   [Teardown]  Clear mocks
 
@@ -87,6 +91,7 @@ property-info-by-wkt error
   Start drawing a point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Kiinteistötunnuksen haku ei onnistunut.
+  Test id visible  neighbor-manual-add-hint
   Click by test id  modal-dialog-cancel-button
   [Teardown]  Clear mocks
 
@@ -97,6 +102,8 @@ Find owners error
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Page Should Contain  Omistajien haku ei onnistunut.
   Page Should Contain  753-416-38-13
+  Wait test id visible  no-owner-for-75341600380013
+  Test id visible  neighbor-manual-add-hint
   Click by test id  modal-dialog-cancel-button
   [Teardown]  Clear mocks
 
@@ -161,7 +168,7 @@ Mail is sent
   Open last email
   Wait until  Element should contain  xpath=//dd[@data-test-id='to']  b@example.com
 
-Neighbor clicks on email link and sees epplication
+Neighbor clicks on email link and sees application
   Click element  xpath=//a
   Neighbor application address should be  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
