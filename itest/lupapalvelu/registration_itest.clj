@@ -1,6 +1,7 @@
 (ns lupapalvelu.registration-itest
   (:require [midje.sweet :refer :all]
             [cheshire.core :as json]
+            [ring.util.codec :as codec]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
@@ -187,12 +188,33 @@
                               (let [resp (http-get first-href {:follow-redirects false})]
                                 resp => (partial redirects-to "/app/fi/applicant")))
 
+                        (fact "Logged in flag is set"
+                          (-> (http-get (str (server-address) "/dev/by-id/users/" user-id) (merge cmd-opts params))
+                              decode-body
+                              :data) => (contains {:firstLogin true}))
+
                         (fact "Second activation attempt leads to login page"
                               (let [resp (http-get first-href {:follow-redirects false})]
                                 resp => (partial redirects-to "/app/fi/welcome")))
 
                         (fact "Log in"
-                              (login new-user-email new-user-pw) => ok?)))))))
+                              (login new-user-email new-user-pw params) => ok?)
+
+                        (let [csrf (-> (get @store "anti-csrf-token") .getValue codec/url-decode)
+                              params (assoc params :headers {"x-anti-forgery-token" csrf})]
+                          (fact "1st user query has firstLogin"
+                            (-> (http-get
+                                  (str (server-address) "/api/query/user")
+                                  params)
+                                decode-body
+                                :user) => (contains {:firstLogin true}))
+                          (fact "2nd user query does not have firstLogin flag"
+                            (-> (http-get
+                                  (str (server-address) "/api/query/user")
+                                  params)
+                                decode-body
+                                :user
+                                keys) =not=> (contains :firstLogin)))))))))
 
   (facts* "Registration using dummy ident"
     (env/set-feature! true [:dummy-ident])
@@ -281,10 +303,31 @@
                   (let [resp (http-get first-href {:follow-redirects false})]
                     resp => (partial redirects-to "/app/fi/applicant")))
 
+                (fact "Logged in flag is set"
+                  (-> (http-get (str (server-address) "/dev/by-id/users/" user-id) (merge cmd-opts params))
+                      decode-body
+                      :data) => (contains {:firstLogin true}))
+
                 (fact "Second activation attempt leads to login page"
                   (let [resp (http-get first-href {:follow-redirects false})]
                     resp => (partial redirects-to "/app/fi/welcome")))
 
                 (fact "Log in"
-                  (login new-user-email new-user-pw) => ok?)))))))
+                  (login new-user-email new-user-pw params) => ok?)
+
+                (let [csrf (-> (get @store "anti-csrf-token") .getValue codec/url-decode)
+                      params (assoc params :headers {"x-anti-forgery-token" csrf})]
+                  (fact "1st user query has firstLogin"
+                    (-> (http-get
+                          (str (server-address) "/api/query/user")
+                          params)
+                        decode-body
+                        :user) => (contains {:firstLogin true}))
+                  (fact "2nd user query does not have firstLogin flag"
+                    (-> (http-get
+                          (str (server-address) "/api/query/user")
+                          params)
+                        decode-body
+                        :user
+                        keys) =not=> (contains :firstLogin)))))))))
   (env/set-feature! orig-feature-dummy-ident [:dummy-ident]))
