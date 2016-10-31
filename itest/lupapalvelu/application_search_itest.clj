@@ -1,12 +1,11 @@
 (ns lupapalvelu.application-search-itest
-    (:require [clojure.string :as s]
-      [midje.sweet :refer :all]
-      [lupapalvelu.itest-util :refer :all]
-      [lupapalvelu.factlet :refer :all]
-      [sade.property :as p]
-      [sade.util :as util]
-      [sade.strings :as ss]))
-
+  (:require [clojure.string :as s]
+            [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.factlet :refer :all]
+            [sade.property :as p]
+            [sade.util :as util]
+            [sade.strings :as ss]))
 
 (defn- num-of-results? [n response]
   (and
