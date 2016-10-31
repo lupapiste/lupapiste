@@ -49,18 +49,14 @@
 (defquery user
   {:optional-parameters [lang]
    :input-validators [i18n/valid-language]
+   :on-success (fn [_ {user :user}]
+                 (when (:firstLogin user)
+                   (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
     (ok :user (usr/update-user-language! full-user (ss/lower-case lang)))
     (fail :error.user.not.found)))
-
-(defcommand first-login
-  {:description "Removes firstLogin flag from user"
-   :user-roles auth/all-authenticated-user-roles}
-  [{user :user}]
-  (mongo/update :users {:_id (:id user) :firstLogin true} {$unset {:firstLogin true}})
-  (ok))
 
 (defquery users
   {:user-roles #{:admin}}

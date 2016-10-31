@@ -208,10 +208,7 @@
                                   params)
                                 decode-body
                                 :user) => (contains {:firstLogin true}))
-                          (fact "first-login command clears first login flag"
-                            (-> (http-post
-                                  (str (server-address) "/api/command/first-login")
-                                  params)) => http200?
+                          (fact "2nd user query does not have firstLogin flag"
                             (-> (http-get
                                   (str (server-address) "/api/query/user")
                                   params)
@@ -326,10 +323,7 @@
                           params)
                         decode-body
                         :user) => (contains {:firstLogin true}))
-                  (fact "first-login command clears first login flag"
-                    (-> (http-post
-                          (str (server-address) "/api/command/first-login")
-                          params)) => http200?
+                  (fact "2nd user query does not have firstLogin flag"
                     (-> (http-get
                           (str (server-address) "/api/query/user")
                           params)
