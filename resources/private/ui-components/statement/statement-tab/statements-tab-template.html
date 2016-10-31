@@ -44,29 +44,42 @@
                 <tbody data-bind="foreach: combinedData">
                     <tr class="statement-giver-row" data-bind="{attr: {'data-test-email': email()}}">
                         <td>
-                            <input class="form-input" type="checkbox"
-                                   data-bind="checkedValue: $data,
-                                              checked: $component.selectedPersons,
-                                              attr: {'id': 'statement-giver-checkbox-' + $index(),
-                                                     'data-test-id': 'statement-giver-checkbox-' + $index(),
-                                                     'name': 'statementGiverSelectedPerson-' + $index(),
-                                                     'disabled': errors().length != 0}" />
+                          <input class="form-input full-width" type="checkbox"
+                                 data-bind="checkedValue: $data,
+                                            checked: $component.selectedPersons,
+                                            attr: {'id': 'statement-giver-checkbox-' + $index(),
+                                                   'data-test-id': 'statement-giver-checkbox-' + $index(),
+                                                   'name': 'statementGiverSelectedPerson-' + $index(),
+                                                   'disabled': errors().length != 0}" />
+                        </td>
+                        <!-- ko if: readonly -->
+                        <td>
+                          <span data-bind="text: text, attr: {'data-test-id': 'statement-giver-role-text-' + $index()}"></span>
                         </td>
                         <td>
-                          <input class="form-input" type="text" data-bind="textInput: text,
+                          <span data-bind="text: name, attr: {'data-test-id': 'statement-giver-name-' + $index()}"></span>
+                        </td>
+                        <td>
+                          <span data-bind="text: email, attr: {'data-test-id': 'statement-giver-email-' + $index()}"></span>
+                        </td>
+                        <!-- /ko -->
+                        <!-- ko ifnot: readonly -->
+                        <td>
+                          <input class="form-input full-width" type="text" data-bind="textInput: text,
                                                                            attr: {'data-test-id': 'statement-giver-role-text-' + $index(),
                                                                                   'readonly': readonly}"></input>
                         </td>
                         <td>
-                          <input class="form-input" type="text" data-bind="textInput: name,
+                          <input class="form-input full-width" type="text" data-bind="textInput: name,
                                                                            attr: {'data-test-id': 'statement-giver-name-' + $index(),
                                                                                   'readonly': readonly}"></input>
                         </td>
                         <td>
-                        <input class="form-input" type="text" data-bind="textInput: email,
-                                                                         attr: {'data-test-id': 'statement-giver-email-' + $index(),
-                                                                                'readonly': readonly}"></input>
+                          <input class="form-input full-width" type="text" data-bind="textInput: email,
+                                                                           attr: {'data-test-id': 'statement-giver-email-' + $index(),
+                                                                                  'readonly': readonly}"></input>
                         </td>
+                        <!-- /ko -->
                     </tr>
                 </tbody>
             </table>
