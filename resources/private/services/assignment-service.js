@@ -2,7 +2,7 @@
  * Assignments for application
  *
  */
-LUPAPISTE.AssignmentService = function() {
+LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   "use strict";
   var self = this;
 
@@ -42,11 +42,13 @@ LUPAPISTE.AssignmentService = function() {
   }
 
   function assignmentsForApplication(id) {
-    ajax.query("assignments-for-application", {id: id})
-      .success(function(resp) {
-        _data(resp.assignments);
-      })
-      .call();
+    if (applicationAuthModel.ok("assingments-for-application")) {
+      ajax.query("assignments-for-application", {id: id})
+        .success(function(resp) {
+          _data(resp.assignments);
+        })
+        .call();
+    }
   }
 
   function onAssignmentCompleted(response) {
@@ -81,7 +83,9 @@ LUPAPISTE.AssignmentService = function() {
     });
 
     hub.subscribe("application-model-updated", function(event) {
-      assignmentsForApplication(_.get(event, "applicationId"));
+      if (!_.isEmpty(event.applicationId)) {
+        assignmentsForApplication(_.get(event, "applicationId"));
+      }
     });
   }
 
