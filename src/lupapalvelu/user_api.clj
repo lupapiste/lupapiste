@@ -1,5 +1,5 @@
 (ns lupapalvelu.user-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -31,7 +31,6 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.calendar :as cal]))
 
 ;;
