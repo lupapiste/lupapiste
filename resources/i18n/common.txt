@@ -2050,6 +2050,8 @@
 "neighbors.status-dialog.user.userid" "en" "Code"
 "neighbors.status-dialog.user.userid" "fi" "Tunnus"
 "neighbors.status-dialog.user.userid" "sv" "Nummer"
+"neighbors.property-ids.no-owners-found" "fi" "Seuraville kiinteistötunnuksile ei löytynyt omistajatietoja:"
+"neighbors.manual-add" "fi" "Voit lisätä omistajatiedot myös käsin Lisää naapuri -napin kautta."
 "new-applications-or-inforequests-disabled.both-disabled" "en" "You cannot submit information requests or applications relating to this action through Lupapiste. To do so, please contact your Municipal official."
 "new-applications-or-inforequests-disabled.both-disabled" "fi" "Et voi jättää tähän toimenpiteeseen liittyvää neuvontapyyntöä tai hakemusta Lupapisteen kautta. Näin tehdäksesi ota yhteyttä kuntasi viranomaiseen."
 "new-applications-or-inforequests-disabled.both-disabled" "sv" "Du kan inte lämna in en ansökan eller begäran om rådgivning med anknytning till denna åtgärd via Lupapiste. För att göra det måste du kontakta myndigheten i din kommun."
