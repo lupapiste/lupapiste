@@ -74,11 +74,35 @@
 
 (defonce jetty (atom nil))
 (defonce jmx-server (atom nil))
+(defonce nrepl-server (atom nil))
 
 (defn- calendar-mime-type-setup []
   (let [mc (MailcapCommandMap/getDefaultCommandMap)]
       (.addMailcap mc "text/calendar;; x-java-content-handler=com.sun.mail.handlers.text_plain")
       (MailcapCommandMap/setDefaultCommandMap mc)))
+
+(defn start-nrepl! []
+  (when (env/feature? :nrepl)
+    (require 'clojure.tools.nrepl.server)
+    (let [start-server (resolve 'clojure.tools.nrepl.server/start-server)]
+      (swap! nrepl-server
+             (fn [old-server]
+               (if (nil? old-server)
+                 (let [port 9090
+                       server (start-server :port port :bind "localhost")]
+                   (warn "*** Started nrepl in port" port)
+                   server)
+                 (do
+                   (warn "nrepl already started!")
+                   old-server)))))))
+
+(defn stop-nrepl! []
+  (swap! nrepl-server
+         (fn [server]
+           (when-not (nil? server)
+             (let [stop-server (resolve 'clojure.tools.nrepl.server/stop-server)]
+               (stop-server server)
+               (info "nrepl stopped"))))))
 
 (defn- init! []
   (calendar-mime-type-setup)
@@ -114,12 +138,7 @@
   (perf-mon/init)
 
   (server/add-middleware headers/sanitize-header-values)
-  (server/add-middleware control/lockdown-middleware)
-
-  (when (env/feature? :nrepl)
-    (warn "*** Starting nrepl in port 9090")
-    (require 'clojure.tools.nrepl.server)
-    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090 :bind "localhost")))
+  (server/add-middleware control/lockdown-middleware))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}
@@ -184,6 +203,7 @@
 (defn stop-all! []
   (stop-jetty!)
   (stop-jmx-server!)
+  (stop-nrepl!)
   (mongo/disconnect!))
 
 (defn -main [& _]
@@ -200,6 +220,7 @@
   (init!)
   (start-jetty!)
   (start-jmx-server!)
+  (start-nrepl!)
   (-> (Runtime/getRuntime) (.addShutdownHook (Thread. stop-all!))))
 
 "server ready to start"
