@@ -100,6 +100,10 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.6"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.6" :exclusions [org.freemarker/freemarker]]
 
+                 ; Apache pdfbox for PDF/A wrapper
+                 [org.apache.pdfbox/pdfbox "2.0.3"]
+                 [org.apache.pdfbox/xmpbox "2.0.3"]
+
                  ; JavaScript and CSS compression
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js org.mozilla/rhino]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
 
@@ -124,9 +128,8 @@
                  [lupapiste/openpdf "1.0.6"]
                  ; Wrapper for clj-pdf for PDF/A document generation
                  [lupapiste/pdfa-generator "1.0.1" :exclusions [org.clojure/tools.reader]]
-                 ; Apache pdfbox for PDF/A wrapper
-                 [org.apache.pdfbox/pdfbox "2.0.3"]
-                 [org.apache.pdfbox/xmpbox "2.0.3"]]
+                 ; JMX-server with socket reuse
+                 [lupapiste/jmx-server "0.1.0"]]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
                                   [ring/ring-mock "0.3.0" :exclusions [ring/ring-codec]]
                                   [com.raspasov/clj-ssh "0.5.12"]
