@@ -153,6 +153,7 @@
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :java-source-paths ["java-src"]
+  :jvm-opts ["-Dfile.encoding=UTF-8"]
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"terms\.html" #"\/email-templates\/" #"proj4" #".debug"]}
   :repositories [["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
