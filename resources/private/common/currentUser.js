@@ -40,7 +40,8 @@ LUPAPISTE.CurrentUser = function() {
 
   function constructor(user) {
     if( !_.isEmpty(user) && !user.language && !user.impersonating ) {
-      ajax.command("update-user", _.merge(_.pick(user, ["firstName", "lastName"]), {language: loc.getCurrentLanguage()}))
+      user.language = loc.getCurrentLanguage();
+      ajax.command("update-user", _.pick(user, ["firstName", "lastName", "language"]))
         .success(function() {
           hub.send("indicator", {style: "primary",
                                  message: "user.language.note",
