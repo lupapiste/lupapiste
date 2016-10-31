@@ -1,14 +1,15 @@
 (ns lupapalvelu.application-bulletins-itest
-    (:require [midje.sweet :refer :all]
-              [lupapalvelu.itest-util :refer :all]
-              [lupapalvelu.application-bulletins-itest-util :refer :all]
-              [lupapalvelu.vetuma-itest-util :as vetuma-util]
-              [lupapalvelu.factlet :refer :all]
-              [lupapalvelu.mongo :as mongo]
-              [sade.util :as util]
-              [sade.core :refer [now]]
-              [clojure.java.io :as io]
-              [cheshire.core :as json] [sade.util :as util]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins-itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma-util]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [sade.util :as util]
+            [sade.strings :as ss]
+            [sade.core :refer [now]]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]))
 
 (apply-remote-minimal)
 
@@ -219,6 +220,8 @@
               (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
                 (count data) => 2))
 
+            (fact "Free text search - search term too long"
+              (datatables pena :application-bulletins :page 1 :searchText (ss/join (repeat 200 "hitan")) :municipality nil :state nil :sort nil) => fail?)
             (fact "Free text"
               (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "hitan" :municipality nil :state nil :sort nil)]
                 (count data) => 1

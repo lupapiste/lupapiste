@@ -9,8 +9,8 @@
                data-bind="textInput: value, attr: {placeholder: placeholder, id: id, name: id, 'data-test-id': id},
                           hasFocus: isSelected,
                           css: {required: required && !value()},
-                          disable: disable"
-               maxlength="255"/>
+                          attr: { maxlength: maxlength },
+                          disable: disable"/>
       </div>
     </script>
   </section>

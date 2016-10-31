@@ -8,7 +8,7 @@
         <div class="col-2">
           <label data-bind="ltext: 'application.filter.search'"></label>
           <div class="search" data-bind="css: {toggled: dataProvider.searchField(), active: searchFieldSelected}">
-            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField, hasFocus: searchFieldSelected"/>
+            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')}, textInput: dataProvider.searchField, hasFocus: searchFieldSelected" maxlength="150"/>
             <i class="search-icon lupicon-search"></i>
             <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
           </div>
