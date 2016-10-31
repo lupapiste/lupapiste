@@ -161,7 +161,7 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   hub.subscribe("reload-current-user", function() {
-    ajax.query("user", {lang: loc.getCurrentLanguage()})
+    ajax.query("user")
       .success(function (res) {
         if (res.user) {
           constructor(res.user);
