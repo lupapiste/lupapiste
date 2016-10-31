@@ -31,7 +31,7 @@ LUPAPISTE.CurrentUser = function() {
   };
 
   var fbPixel = null;
-  if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics.isTrackingEnabled()) {
+  if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics && analytics.isTrackingEnabled()) {
     fbPixel = function () {
       var fbUrl = LUPAPISTE.config.facebook.url;
       return "<img height='1' width='1' style='display:none' src='" + fbUrl + "'/>";
