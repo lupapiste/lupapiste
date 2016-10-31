@@ -85,6 +85,7 @@
     self.authModel = attachmentsService.authModels()[doc.id] || lupapisteApp.models.applicationAuthModel;
 
     self.metadata = ko.observable(ko.unwrap(doc.metadata));
+    self.attachmentType = ko.observable(ko.unwrap(doc.typeString));
 
     self.typeChange = util.getIn(doc, ["type", "type-group"]) && util.getIn(doc, ["type", "type-id"]) &&
       new LUPAPISTE.AttachmentsChangeTypeModel({ authModel: self.authModel,
@@ -148,7 +149,7 @@
 
     self.reset = function(doc) {
       self.metadata(ko.unwrap(doc.metadata));
-      self.attachmentType = ko.observable(ko.unwrap(doc.typeString));
+      self.attachmentType(ko.unwrap(doc.typeString));
 
       var latestVersion = doc.latestVersion;
       self.archivable(Boolean( util.getIn(latestVersion, ["archivable"]) ));
