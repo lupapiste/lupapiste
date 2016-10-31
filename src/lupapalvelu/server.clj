@@ -69,9 +69,11 @@
             [lupapalvelu.ya-extension-api]
             [lupapalvelu.assignment-api])
   (:import [javax.imageio ImageIO]
-           [javax.activation MailcapCommandMap]))
+           [javax.activation MailcapCommandMap]
+           [fi.lupapiste.jmx ServerFactory]))
 
 (defonce jetty (atom nil))
+(defonce jmx-server (atom nil))
 
 (defn- calendar-mime-type-setup []
   (let [mc (MailcapCommandMap/getDefaultCommandMap)]
@@ -144,10 +146,12 @@
       (reset! jetty jetty-instance)
       (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
       "server running")
-    (warn "Server already started!")))
+    (warn "Jetty already started!")))
 
 (defn- stop-jetty! []
-  (when-not (nil? @jetty) (swap! jetty server/stop)))
+  (when-not (nil? @jetty)
+    (swap! jetty server/stop)
+    (info "Jetty stopped")))
 
 (defcontrol "/internal/hot-restart" []
   (util/future*
@@ -159,6 +163,28 @@
     (mongo/disconnect!)
     (mongo/connect!)
     (start-jetty!)))
+
+(defn start-jmx-server! []
+  (swap! jmx-server
+         (fn [old-server]
+           (if (nil? old-server)
+             (let [port (env/value :lupapiste :jmx :port)
+                   new-server (ServerFactory/start port)]
+               (info "Started JMX server on port" port)
+               new-server)
+             (do
+               (warn "JMX server already started!")
+               old-server)))))
+
+(defn- stop-jmx-server! []
+  (when-not (nil? @jmx-server)
+    (swap! jmx-server #(ServerFactory/stop %))
+    (info "JXM Server stopped")))
+
+(defn stop-all! []
+  (stop-jetty!)
+  (stop-jmx-server!)
+  (mongo/disconnect!))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
@@ -172,6 +198,8 @@
   (info "ImageIO: Registered image MIME types:" (s/join " " (ImageIO/getReaderMIMETypes)))
 
   (init!)
-  (start-jetty!))
+  (start-jetty!)
+  (start-jmx-server!)
+  (-> (Runtime/getRuntime) (.addShutdownHook (Thread. stop-all!))))
 
 "server ready to start"
