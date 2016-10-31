@@ -335,6 +335,10 @@ Velho logs in
   [Arguments]  ${showAll}=True
   Authority logs in  velho  velho  Velho Viranomainen  ${showAll}
 
+Hannu logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  rakennustarkastaja@hel.fi  helsinki  Hannu Helsinki  ${showAll}
+
 Sonja logs in
   [Arguments]  ${showAll}=True
   Authority logs in  sonja  sonja  Sonja Sibbo  ${showAll}
