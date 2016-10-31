@@ -43,8 +43,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isStatementOverDue = function(statement) {
-    var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && !self.isGiven(statement) ) ? moment().isAfter(statement.dueDate(), 'day') : false;
   };
 
   self.repliesEnabled = ko.pureComputed(function() {
