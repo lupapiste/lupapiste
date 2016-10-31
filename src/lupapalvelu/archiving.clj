@@ -133,9 +133,7 @@
                       (info "Response indicates that" id "is already in archive. Updating state.")
                       (state-update-fn :arkistoitu application now id)
                       (mark-application-archived-if-done application now))
-                    (state-update-fn :valmis application now id)))))
-            (when (instance? File is-or-file)
-              (io/delete-file is-or-file :silently)))))
+                    (state-update-fn :valmis application now id))))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -258,19 +256,24 @@
           case-file-archive-id (str id "-case-file")
           case-file-xml-id     (str case-file-archive-id "-xml")]
       (when (document-ids application-archive-id)
-        (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
+        (let [application-file-stream (pdf-export/generate-application-pdfa application :fi)
               metadata (generate-archive-metadata application user)]
-          (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
+          (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
-        (let [case-file-file (libre/generate-casefile-pdfa application :fi)
-              case-file-xml (tiedonohjaus/xml-case-file application :fi)
-              xml-tmp-file (files/temp-file "case-file" "xml")
-              metadata (-> (generate-archive-metadata application user)
-                           (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
-              xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
-          (spit xml-tmp-file case-file-xml)
-          (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
-          (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))
+        (let [libre-file (files/temp-file "casefile-to-archive" ".fodt") ; deleted in finally
+              xml-tmp-file (files/temp-file "case-file" "xml")] ; deleted in finally
+          (try
+            (let [case-file-file (libre/generate-casefile-pdfa application :fi libre-file)
+                  case-file-xml (tiedonohjaus/xml-case-file application :fi)
+                  metadata (-> (generate-archive-metadata application user)
+                               (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
+                  xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
+              (spit xml-tmp-file case-file-xml)
+              (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
+              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state))
+            (finally
+              (io/delete-file libre-file :silently)
+              (io/delete-file xml-tmp-file :silently)))))
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]

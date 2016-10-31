@@ -514,7 +514,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (files/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+       :body (attachment/get-attachments-for-user! user atts)}))
 
 ;;
 ;; Upload
@@ -588,7 +588,7 @@
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
-          temp-pdf (files/temp-file fileId ".tmp")
+          temp-pdf (files/temp-file fileId ".tmp") ; deleted in finally
           attachment-options (util/assoc-when {:comment-text nil
                                                :required false
                                                :original-file-id originalFileId
@@ -829,7 +829,7 @@
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
     (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-          temp-pdf (files/temp-file fileId ".tmp")]
+          temp-pdf (files/temp-file fileId ".tmp")] ; deleted in finally
       (try
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)

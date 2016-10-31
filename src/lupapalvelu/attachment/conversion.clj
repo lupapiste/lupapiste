@@ -52,10 +52,10 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [temp (files/temp-file "lupapiste-attach-file" ".pdf")]
+    (let [temp (files/temp-file "lupapiste-attach-file" ".pdf")] ; deleted in finally
       (try
         (io/copy content temp)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a (files/temp-file-input-stream temp) {:application application :filename filename})]
+        (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
           (cond
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content (:output-file processing-result)}
             (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
@@ -69,7 +69,7 @@
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (let [tmp-file (files/temp-file "lupapiste-attach-tif-file" ".tif")]
+  (let [tmp-file (files/temp-file "lupapiste-attach-tif-file" ".tif")] ; deleted in finally
     (try
       (io/copy content tmp-file)
       (let [valid? (tiff-validation/valid-tiff? tmp-file)]
@@ -80,8 +80,8 @@
 (defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
   (if (and (env/feature? :convert-all-attachments)
            (pdf-conversion/pdf-a-required? (:organization application)))
-    (let [tmp-file (files/temp-file "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf")
+    (let [tmp-file (files/temp-file "lupapiste-attach-jpg-file" ".jpg") ; deleted in finally
+          pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf") ; deleted via temp-file-input-stream
           pdf-title filename]
       (try
         (io/copy content tmp-file)

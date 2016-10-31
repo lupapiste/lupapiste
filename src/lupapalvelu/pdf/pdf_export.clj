@@ -572,10 +572,10 @@
      (generate-pdf-with-child app child-type id lang out)
      (ByteArrayInputStream. (.toByteArray out)))))
 
-(defn generate-pdf-a-application-to-file
-  "Returns application data in PDF/A temp file"
+(defn ^java.io.InputStream generate-application-pdfa
+  "Returns application data in a self-destructing input stream to a PDF/A document"
   [application lang]
-  (let [file (files/temp-file "application-pdf-a-" ".tmp")]
+  (let [file (files/temp-file "application-pdf-a-" ".tmp")] ; deleted via temp-file-input-stream
     (generate application lang file)
     (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
-    file))
+    (files/temp-file-input-stream file)))

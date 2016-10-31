@@ -28,7 +28,7 @@
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (files/temp-file "lupapiste.stamp." ".tmp")]
+        file (files/temp-file "lupapiste.stamp." ".tmp")] ; deleted in finally
     (try
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))

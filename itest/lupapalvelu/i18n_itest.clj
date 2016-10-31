@@ -46,11 +46,11 @@
                                                      english-translations)
             excel-swedish (create-translation-excel! "swedish"
                                                      swedish-translations)]
-        (merge-translations-from-excels-into-source-files (.getAbsolutePath (File. "."))
+        (merge-translations-from-excels-into-source-files (.getAbsolutePath (io/file "."))
                                                           [(.getAbsolutePath excel-english)
                                                            (.getAbsolutePath excel-swedish)])
-        (let [loc-map-from-updated-files (#'lupapalvelu.i18n/txt-files->map [(File. (.getAbsolutePath txt-file1))
-                                                                             (File. (.getAbsolutePath txt-file2))])]
+        (let [loc-map-from-updated-files (#'lupapalvelu.i18n/txt-files->map [(io/file (.getAbsolutePath txt-file1))
+                                                                             (io/file (.getAbsolutePath txt-file2))])]
           (-> loc-map-from-updated-files :translations (get 'avain) :en) => "Key"
           (-> loc-map-from-updated-files :translations (get 'vauhti) :en) => "speed"
           (-> loc-map-from-updated-files :translations (get 'arvo) :sv) => "V\u00e4rde")

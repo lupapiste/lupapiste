@@ -217,7 +217,7 @@
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
                    current-application (domain/get-application-as (:id application) user)
-                   temp-file       (files/temp-file filename "-verdict-attachment.tmp")]]
+                   temp-file       (files/temp-file filename "-verdict-attachment.tmp")]] ; deleted in finally
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
          (try

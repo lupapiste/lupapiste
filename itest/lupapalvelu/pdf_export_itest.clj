@@ -2,11 +2,12 @@
     (:require [clojure.java.io :as io]
               [midje.sweet :refer :all]
               [midje.util :refer [testable-privates]]
+              [pdfboxing.common :refer [is-pdf?]]
               [pdfboxing.text :as pdfbox]
               [sade.files :as files]
               [sade.util :as util]
               [lupapalvelu.test-util :refer [dummy-doc]]
-              [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
+              [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application raw] :as itu]
               [lupapalvelu.pdf.pdf-export :as pdf-export]
               [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]
               [lupapalvelu.i18n :refer [with-lang loc]]
@@ -121,7 +122,7 @@
 
       (pdf-export/generate application lang file)
 
-      (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
+      (let [pdf-content (pdfbox/extract file)
             documents-data (map :data (:documents application))]
 
         ; common fields
@@ -136,7 +137,7 @@
         ; documents
         (doseq [doc-data documents-data]
           (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
-        (.delete file))))
+        (io/delete-file file))))
 
 (facts "Generated statement PDF is valid PDF/A"
   (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -159,4 +160,23 @@
             (fact "File exists " (.exists file))
             (fact "File not empty " (> (.length file) 1))
             (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file))
-            (.delete file)))))))
+            (io/delete-file file)))))))
+
+(facts "download pdfa-casefile"
+  (let [application-id (itu/create-app-id pena)
+        {:keys [body] :as casefile-resp} (raw pena :pdfa-casefile :id application-id :lang "fi" :as :byte-array)
+        temp-file (files/temp-file "test-casefile" ".pdf")]
+    (try
+      application-id => truthy
+      casefile-resp => itu/http200?
+
+      (with-open [out (io/output-stream temp-file)]
+        (.write out body))
+
+      temp-file => is-pdf?
+
+      (let [pdf-content (pdfbox/extract temp-file)]
+        pdf-content => (contains "Sipoo"))
+
+      (finally
+        (io/delete-file temp-file)))))

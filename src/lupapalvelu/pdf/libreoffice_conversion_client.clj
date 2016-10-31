@@ -73,16 +73,17 @@
 (defn convert-to-pdfa [filename content]
   (to-pdfa content filename))
 
-(defn generate-casefile-pdfa [application lang]
-  (let [filename (str (localize lang "caseFile.heading") ".fodt")
-        tmp-file (files/temp-file (str "casefile-" (name lang) "-") ".fodt")]
-    (history/write-history-libre-doc application lang tmp-file)
-    (:content (convert-to-pdfa filename tmp-file))))
+(defn generate-casefile-pdfa [application lang libre-file]
+  (debugf "Generating PDF/A for application %s in %s " (:id application) lang)
+  (let [filename (str (localize lang "caseFile.heading") ".fodt")]
+    (history/write-history-libre-doc application lang libre-file)
+    ;(debug "history:" (slurp libre-file))
+    (:content (convert-to-pdfa filename libre-file))))
 
 (defn generate-verdict-pdfa [application verdict-id paatos-idx lang dst-file]
-  (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
+  (debugf "Generating PDF/A for verdict %s/paatos %s in %s" verdict-id paatos-idx lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
-        tmp-file (files/temp-file (str "verdict-" (name lang) "-") ".fodt")]
+        tmp-file (files/temp-file (str "verdict-" (name lang) "-") ".fodt")] ; deleted in finally
     (try
       (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
       (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
@@ -90,9 +91,9 @@
         (io/delete-file tmp-file :silently)))))
 
 (defn generate-statment-pdfa-to-file! [application id lang dst-file]
-  (debug "Generating PDF/A statement(" id ") for application: " (:id application) ", lang: " lang)
+  (debugf "Generating PDF/A statement %s for application %s in %s" id (:id application) lang)
   (let [filename (str (localize lang "application.statement.status") ".fodt")
-        tmp-file (files/temp-file (str "temp-export-statement-" (name lang) "-") ".fodt")]
+        tmp-file (files/temp-file (str "temp-export-statement-" (name lang) "-") ".fodt")] ; deleted in finally
     (try
       (statement/write-statement-libre-doc application id lang tmp-file)
       (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)

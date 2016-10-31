@@ -74,7 +74,7 @@
 (defn create-attachment-from-children
   "Generates attachment from child and saves it. Returns created attachment version."
   [user application child-type child-id lang]
-  (let [pdf-file (files/temp-file (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")]
+  (let [pdf-file (files/temp-file (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")] ; deleted in finally
     (try
       (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang pdf-file)
             file-options       (select-keys attachment-options [:filename :size :content])]
