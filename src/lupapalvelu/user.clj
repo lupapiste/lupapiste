@@ -660,22 +660,3 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
-
-;;
-;; ==============================================================================
-;; User manipulation
-;; ==============================================================================
-;;
-
-(defn update-user-language!
-  "Sets user's language if given and missing. Returns user that is
-  augmented with indicatorNote and language if the language has been set."
-  [{:keys [id language] :as user} ui-lang]
-  (if (and (not language)
-           (not (virtual-user? user))
-           (not (sc/check i18n/supported-language-schema ui-lang)) )
-    (do (mongo/update-by-id :users id {$set {:language ui-lang}})
-        (assoc user
-               :indicatorNote :user.language.note
-               :language ui-lang))
-    user))

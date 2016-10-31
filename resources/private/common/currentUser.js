@@ -39,11 +39,14 @@ LUPAPISTE.CurrentUser = function() {
   }
 
   function constructor(user) {
-    if( user.indicatorNote ) {
-      hub.send("indicator", {style: "primary",
-                              message: user.indicatorNote,
-                              sticky: true, html: true});
-      delete user.indicatorNote;
+    if( !_.isEmpty(user) && !user.language && !user.impersonating ) {
+      ajax.command("update-user", _.merge(_.pick(user, ["firstName", "lastName"]), {language: loc.getCurrentLanguage()}))
+        .success(function() {
+          hub.send("indicator", {style: "primary",
+                                 message: "user.language.note",
+                                 sticky: true, html: true});
+        })
+        .call();
     }
     if (user.firstLogin) {
       hub.send("first-login", {user: user});
