@@ -140,9 +140,17 @@
     self.disabledFields = ko.observableArray();
     var uneditableFields;
 
+    var authModel = attachmentsService.authModels()[self.attachmentId] || lupapisteApp.models.applicationAuthModel;
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
     var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];
+
+    var saveCommand = "store-tos-metadata-for-application";
+    if (params.caseFile) {
+      saveCommand = "store-tos-metadata-for-process";
+    } else if (self.attachmentId) {
+      saveCommand = "store-tos-metadata-for-attachment";
+    }
 
     self.invalidFields = self.disposedPureComputed(function () {
       return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
@@ -176,22 +184,13 @@
     };
 
     self.modificationAllowed = self.disposedPureComputed(function() {
-      return !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
+      return authModel.ok(saveCommand) && !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
     });
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);
-      var command;
 
-      if (params.caseFile) {
-        command = "store-tos-metadata-for-process";
-      } else if (self.attachmentId) {
-        command = "store-tos-metadata-for-attachment";
-      } else {
-        command = "store-tos-metadata-for-application";
-      }
-
-      ajax.command(command)
+      ajax.command(saveCommand)
         .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
         .success(function(data) {
           self.metadata(ko.mapping.fromJS(data.metadata));

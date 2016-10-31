@@ -14,7 +14,9 @@
       }
       .edit-button-container {
         width: 28px;
-        cursor: pointer;
+        .edit-button {
+          cursor: pointer;
+        }
         i {
           margin: 0;
         }
