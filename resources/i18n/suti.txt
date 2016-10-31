@@ -1,7 +1,7 @@
 "section.column" "en" "Article required"
 "section.column" "fi" "Pykälä vaaditaan"
 "section.column" "sv" "Krävs paragraf"
-"suti.admin.info" "en" "When the basic planning data has been adopted to use, select also on the <a href='#!/operations'>Käyttöön valitut toimenpiteet</a> page those measures, whose starting information was known. Submitting an application will then be prevented without the basic data of Planning."
+"suti.admin.info" "en" "When the basic planning data has been adopted to use, select also on the <a href='#!/operations'>Selected actions</a> page those actions, whose starting information was known. Submitting an application will then be prevented without the basic data of Planning."
 "suti.admin.info" "fi" "Kun Suunnittelun lähtötiedot on otettu käyttöön, valitse lisäksi <a href='#!/operations'>Käyttöön valitut toimenpiteet</a> -sivulla ne toimenpiteet, joissa lähtötiedot on käytössä. Hakemuksen jättäminen on tällöin estetty ilman Suunnittelun lähtötietoja."
 "suti.admin.info" "sv" "Då Planeringens utgångsuppgifter har tagits i bruk, välj också på sidan <a href='#!/operations'>Käyttöön valitut toimenpiteet</a> de åtgärder i vilka utgångsuppgifterna används. På detta sätt är inlämnandet av en ansökan förhindrat utan Planeringens utgångsuppgifter."
 "suti.admin.title" "en" "Basic planning data"

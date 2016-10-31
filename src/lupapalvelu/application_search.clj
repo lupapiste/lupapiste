@@ -20,6 +20,8 @@
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]))
 
+(def search-text-max-length 150)
+
 ;; Operations
 
 (defn- normalize-operation-name [i18n-text]
@@ -214,7 +216,10 @@
       (errorf "Application search query=%s, sort=%s failed: %s" query sort e)
       (fail! :error.unknown))))
 
-(defn applications-for-user [user params]
+
+(defn applications-for-user [user {:keys [searchText] :as params}]
+  (when (> (count searchText) search-text-max-length)
+    (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)

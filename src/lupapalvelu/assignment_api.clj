@@ -36,11 +36,12 @@
 
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
+   :parameters [id]
+   :states states/all-application-states-but-draft-or-terminal
    :user-roles #{:authority}
    :categories #{:documents}
    :feature :assignments}
-  [{user     :user
-    {id :id} :application}]
+  [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
 
 (defquery assignment
