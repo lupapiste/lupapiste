@@ -3,6 +3,7 @@
     [clojure.java.io :as io]
     [midje.sweet :refer :all]
     [midje.util :refer [testable-privates]]
+    [sade.files :as files]
     [sade.util :as util]
     [lupapalvelu.pdf.pdfa-conversion :refer :all])
   (:import [java.io FileInputStream File]))
@@ -13,7 +14,7 @@
   (against-background [(#'lupapalvelu.pdf.pdfa-conversion/store-converted-page-count anything anything) => nil]
     (facts "PDF/A conversion"
       (let [invalid-pdf (io/file "dev-resources/invalid-pdfa.pdf")
-            opts {:target-file-path (.getCanonicalPath (File/createTempFile "pdfa-conversion-test" "pdf"))}]
+            opts {:target-file-path (.getCanonicalPath (files/temp-file "pdfa-conversion-test" "pdf"))}]
         (fact "PDF conversion ok with file"
           (convert-to-pdf-a invalid-pdf
                             opts) => (contains {:output-file (partial instance? java.io.File)
@@ -30,4 +31,4 @@
           (convert-to-pdf-a invalid-pdf opts) => {:pdfa? false}
           (provided
             (#'lupapalvelu.pdf.pdfa-conversion/run-pdf-to-pdf-a-conversion anything anything opts) => {:pdfa? true
-                                                                                                       :output-file (File/createTempFile "pdfa-conversion-test" "pdf")}))))))
+                                                                                                       :output-file (files/temp-file "pdfa-conversion-test" "pdf")}))))))

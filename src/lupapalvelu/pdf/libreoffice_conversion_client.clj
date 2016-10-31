@@ -8,11 +8,12 @@
             [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
             [lupapalvelu.pdf.libreoffice-template-statement :as statement]
             [sade.core :refer [def-]]
-            [sade.strings :as ss]
             [sade.env :as env]
-            [sade.http :as http])
+            [sade.files :as files]
+            [sade.http :as http]
+            [sade.strings :as ss])
   (:import (org.apache.commons.io FilenameUtils)
-           (java.io File ByteArrayOutputStream ByteArrayInputStream)))
+           (java.io ByteArrayOutputStream ByteArrayInputStream)))
 
 
 (def- url (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001)))
@@ -74,14 +75,14 @@
 
 (defn generate-casefile-pdfa [application lang]
   (let [filename (str (localize lang "caseFile.heading") ".fodt")
-        tmp-file (File/createTempFile (str "casefile-" (name lang) "-") ".fodt")]
+        tmp-file (files/temp-file (str "casefile-" (name lang) "-") ".fodt")]
     (history/write-history-libre-doc application lang tmp-file)
     (:content (convert-to-pdfa filename tmp-file))))
 
 (defn generate-verdict-pdfa [application verdict-id paatos-idx lang dst-file]
   (debug "Generating PDF/A for verdict: " verdict-id ", paatos: " paatos-idx ", lang: " lang)
   (let [filename (str (localize lang "application.verdict.title") ".fodt")
-        tmp-file (File/createTempFile (str "verdict-" (name lang) "-") ".fodt")]
+        tmp-file (files/temp-file (str "verdict-" (name lang) "-") ".fodt")]
     (try
       (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
       (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
@@ -91,7 +92,7 @@
 (defn generate-statment-pdfa-to-file! [application id lang dst-file]
   (debug "Generating PDF/A statement(" id ") for application: " (:id application) ", lang: " lang)
   (let [filename (str (localize lang "application.statement.status") ".fodt")
-        tmp-file (File/createTempFile (str "temp-export-statement-" (name lang) "-") ".fodt")]
+        tmp-file (files/temp-file (str "temp-export-statement-" (name lang) "-") ".fodt")]
     (try
       (statement/write-statement-libre-doc application id lang tmp-file)
       (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)

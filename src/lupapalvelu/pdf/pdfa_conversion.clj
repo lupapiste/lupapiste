@@ -1,16 +1,17 @@
 (ns lupapalvelu.pdf.pdfa-conversion
   (:require [clojure.java.shell :as shell]
+            [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
-            [clojure.java.io :as io]
             [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization]
             [sade.files :as files])
-  (:import [java.io File IOException FileNotFoundException InputStream]
+  (:import [java.io IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
            [com.netflix.hystrix HystrixCommandProperties]))
 
@@ -95,7 +96,7 @@
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. ^String output-file)
+                  :output-file (io/file output-file)
                   :autoConversion (not (pdf-was-already-compliant? log-lines))}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
@@ -139,7 +140,7 @@
       (info "Trying to convert PDF to PDF/A")
       (let [stream? (instance? InputStream pdf-file)
             file-path (if stream?
-                        (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
+                        (let [temp-file (files/temp-file "lupapiste-pdfa-stream-conversion" ".pdf")]
                           (io/copy pdf-file temp-file)
                           (.getCanonicalPath temp-file))
                         (.getCanonicalPath pdf-file))
@@ -177,12 +178,12 @@
 
 (defn file-is-valid-pdfa? [pdf-file]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
+    (let [temp-file (files/temp-file "lupapiste-pdfa-stream-conversion" ".pdf")
           file-path (if (instance? InputStream pdf-file)
                       (do (io/copy pdf-file temp-file)
                           (.getCanonicalPath temp-file))
                       (.getCanonicalPath pdf-file))
-          output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
+          output-file (files/temp-file "lupapiste-pdfa-validation" ".pdf")
           {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
       (io/delete-file temp-file :silently)
       (io/delete-file output-file :silently)
@@ -193,7 +194,7 @@
 (defn convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
-  (let [temp-file (File/createTempFile "lupapiste.pdf.a." ".tmp")]
+  (let [temp-file (files/temp-file "lupapiste.pdf.a." ".tmp")]
     (try
       (let [conversion-result (convert-to-pdf-a src-file {:target-file-path (.getCanonicalPath temp-file)})]
         (cond

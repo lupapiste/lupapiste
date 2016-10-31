@@ -52,7 +52,7 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
+    (let [temp (files/temp-file "lupapiste-attach-file" ".pdf")]
       (try
         (io/copy content temp)
         (let [processing-result (pdf-conversion/convert-to-pdf-a (files/temp-file-input-stream temp) {:application application :filename filename})]
@@ -69,7 +69,7 @@
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (let [tmp-file (File/createTempFile "lupapiste-attach-tif-file" ".tif")]
+  (let [tmp-file (files/temp-file "lupapiste-attach-tif-file" ".tif")]
     (try
       (io/copy content tmp-file)
       (let [valid? (tiff-validation/valid-tiff? tmp-file)]
@@ -80,8 +80,8 @@
 (defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
   (if (and (env/feature? :convert-all-attachments)
            (pdf-conversion/pdf-a-required? (:organization application)))
-    (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
+    (let [tmp-file (files/temp-file "lupapiste-attach-jpg-file" ".jpg")
+          pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf")
           pdf-title filename]
       (try
         (io/copy content tmp-file)

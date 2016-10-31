@@ -7,12 +7,13 @@
             [lupapalvelu.i18n :refer [loc] :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.util :as util]
+            [sade.core :refer :all]
+            [sade.files :as files]
             [sade.property :as p]
             [sade.strings :as ss]
-            [sade.core :refer :all]
+            [sade.util :as util]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream File]
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [javax.imageio ImageIO]))
 
 ; *** Deprecated ****
@@ -574,7 +575,7 @@
 (defn generate-pdf-a-application-to-file
   "Returns application data in PDF/A temp file"
   [application lang]
-  (let [file (File/createTempFile "application-pdf-a-" ".tmp")]
+  (let [file (files/temp-file "application-pdf-a-" ".tmp")]
     (generate application lang file)
     (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
     file))

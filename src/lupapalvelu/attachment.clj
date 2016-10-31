@@ -4,11 +4,12 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
-            [sade.util :refer [=as-kw not=as-kw] :as util]
-            [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [=as-kw not=as-kw] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -611,7 +612,7 @@
 (defn get-all-attachments!
   "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
   [attachments & [application lang]]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       ; Add all attachments:
@@ -639,7 +640,7 @@
 (defn get-attachments-for-user!
   "Returns the latest corresponding attachment files readable by the user as a ZIP file"
   [user attachments]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       (doseq [attachment attachments]
@@ -676,7 +677,7 @@
       (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-            temp-pdf (File/createTempFile fileId ".tmp")
+            temp-pdf (files/temp-file fileId ".tmp")
             file-content (mongo/download fileId)]
         (if (nil? file-content)
           (do

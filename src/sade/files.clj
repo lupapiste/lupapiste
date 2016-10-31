@@ -14,6 +14,13 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(defn ^java.io.File temp-file
+  "Creates a file that will be deleted when the JVM exits."
+  ([^String prefix ^String suffix]
+    (doto (java.io.File/createTempFile prefix suffix) (.deleteOnExit)))
+  ([^String prefix ^String suffix ^java.io.File directory]
+    (doto (java.io.File/createTempFile prefix suffix directory) (.deleteOnExit))))
+
 (defn filename-for-pdfa [filename]
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" ".pdf"))

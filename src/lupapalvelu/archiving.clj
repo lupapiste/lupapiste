@@ -1,27 +1,28 @@
 (ns lupapalvelu.archiving
-  (:require [sade.http :as http]
-            [sade.env :as env]
-            [cheshire.core :as json]
-            [lupapiste-commons.tos-metadata-schema :as tms]
-            [schema.core :as s]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
+  (:require [clojure.string :as string]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment :as att]
-            [ring.util.codec :as codec]
-            [lupapalvelu.action :as action]
-            [monger.operators :refer :all]
             [taoensso.timbre :refer [info error warn]]
+            [ring.util.codec :as codec]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
+            [cheshire.core :as json]
+            [monger.operators :refer :all]
+            [schema.core :as s]
+            [sade.env :as env]
+            [sade.files :as files]
+            [sade.http :as http]
+            [sade.strings :as ss]
+            [lupapiste-commons.tos-metadata-schema :as tms]
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as amf]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman]
-            [sade.strings :as ss])
+            [lupapalvelu.foreman :as foreman])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -263,7 +264,7 @@
       (when (document-ids case-file-archive-id)
         (let [case-file-file (libre/generate-casefile-pdfa application :fi)
               case-file-xml (tiedonohjaus/xml-case-file application :fi)
-              xml-tmp-file (File/createTempFile "case-file" "xml")
+              xml-tmp-file (files/temp-file "case-file" "xml")
               metadata (-> (generate-archive-metadata application user)
                            (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
               xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]

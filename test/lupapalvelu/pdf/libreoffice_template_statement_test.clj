@@ -1,18 +1,17 @@
 (ns lupapalvelu.pdf.libreoffice-template-statement-test
-  (:require
-    [clojure.string :as s]
-    [taoensso.timbre :refer [trace debug]]
-    [midje.sweet :refer :all]
-    [midje.util :refer [testable-privates]]
-    [lupapalvelu.test-util :as test-util]
-    [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
-    [lupapalvelu.pdf.libreoffice-template-statement :as statement]
-    [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
-  (:import (java.io File)))
+  (:require [clojure.string :as s]
+            [taoensso.timbre :refer [trace debug]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [sade.files :as files]
+            [lupapalvelu.test-util :as test-util]
+            [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
+            [lupapalvelu.pdf.libreoffice-template-statement :as statement]
+            [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
 
 (facts "Statement fodt export "
        (doseq [lang test-util/test-languages]
-         (let [tmp-file (File/createTempFile (str "statement-" (name lang) "-") ".fodt")]
+         (let [tmp-file (files/temp-file (str "statement-" (name lang) "-") ".fodt")]
            (statement/write-statement-libre-doc application2 "101" lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  doc-start-row (start-pos res)]

@@ -1,5 +1,6 @@
 (ns lupapalvelu.child-to-attachment-test
   (:require [clojure.java.io :as io]
+            [sade.files :as files]
             [lupapalvelu.child-to-attachment :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
@@ -83,7 +84,7 @@
                                (dummy-statement "1" "Minna Malli" "joku status" "Lorem ipsum dolor sit amet, quis sollicitudin, suscipit cupiditate et. Metus pede litora lobortis, vitae sit mauris, fusce sed, justo suspendisse, eu ac augue. Sed vestibulum urna rutrum, at aenean porta aut lorem mollis in. In fusce integer sed ac pellentesque, suspendisse quis sem luctus justo sed pellentesque, tortor lorem urna, aptent litora ac omnis. Eros a quis eu, aut morbi pulvinar in sollicitudin eu ac. Enim pretium ipsum convallis ante condimentum, velit integer at magna nec, etiam sagittis convallis, pellentesque congue ut id id cras. In mauris, platea rhoncus sociis potenti semper, aenean urna nibh dapibus, justo pellentesque sed in rutrum vulputate donec, in lacus vitae sed sint et. Dolor duis egestas pede libero.")]
              application (dummy-application "LP-1" :statements dummy-statements)]
          (doseq [lang i18n/languages]
-           (let [file (File/createTempFile (str "child-test-statement-" (name lang) "-") ".pdf")
+           (let [file (files/temp-file (str "child-test-statement-" (name lang) "-") ".pdf")
                  att (build-attachment-options {} application :statements "2" lang file nil)]
              (io/delete-file file)
              (fact ":contents"
@@ -100,7 +101,7 @@
                                (dummy-neighbour "1" "Minna Malli" "open" "nada")]
              application (dummy-application "LP-1" :neighbors dummy-neighbours)]
          (doseq [lang i18n/languages]
-           (let [file (File/createTempFile (str "child-test-neighbour-" (name lang) "-") ".pdf")
+           (let [file (files/temp-file (str "child-test-neighbour-" (name lang) "-") ".pdf")
                  att (build-attachment-options {} application :neighbors "2" lang file nil)
                  att-other (build-attachment-options {} application :tasks "2" lang file nil)]
              (io/delete-file file)
@@ -120,7 +121,7 @@
                           (dummy-task "1" "muu katselmus")]
              application (dummy-application "LP-1" :tasks dummy-tasks)]
          (doseq [lang i18n/languages]
-           (let [file (File/createTempFile (str "child-test-task-" (name lang) "-") ".pdf")
+           (let [file (files/temp-file (str "child-test-task-" (name lang) "-") ".pdf")
                  att (build-attachment-options {} application :tasks "2" lang file nil)
                  att1 (build-attachment-options {} application :tasks "1" lang file "one")
                  att-other (build-attachment-options {} application :tasks "2" lang file nil)]

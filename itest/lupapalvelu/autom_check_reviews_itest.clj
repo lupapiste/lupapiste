@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [sade.core :refer [now fail]]
+            [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.xml :as sxml]
@@ -27,8 +28,7 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr])
-  (:import [java.io File]
-           [org.xml.sax SAXParseException]))
+  (:import [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
 
@@ -280,7 +280,7 @@
       (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
             last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)
-            temp-pdf-path (File/createTempFile "review-test" ".tmp")]
+            temp-pdf-path (files/temp-file "review-test" ".tmp")]
         (try
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))

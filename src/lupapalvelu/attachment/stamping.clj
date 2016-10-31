@@ -8,9 +8,9 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
             [lupapalvelu.i18n :as i18n]
+            [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss])
-  (:import [java.io File]))
+            [sade.strings :as ss]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -28,7 +28,7 @@
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
         options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (File/createTempFile "lupapiste.stamp." ".tmp")]
+        file (files/temp-file "lupapiste.stamp." ".tmp")]
     (try
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))

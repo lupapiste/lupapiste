@@ -3,6 +3,7 @@
               [midje.sweet :refer :all]
               [midje.util :refer [testable-privates]]
               [pdfboxing.text :as pdfbox]
+              [sade.files :as files]
               [sade.util :as util]
               [lupapalvelu.test-util :refer [dummy-doc]]
               [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
@@ -12,8 +13,7 @@
               [lupapalvelu.mongo :as mongo]
               [lupapalvelu.i18n :as i18n]
               [lupapalvelu.domain :as domain]
-              [lupapalvelu.document.schemas :as schemas])
-  (:import (java.io File FileOutputStream)))
+              [lupapalvelu.document.schemas :as schemas]))
 
 (apply-remote-minimal)
 
@@ -110,7 +110,7 @@
                             :secondaryOperations test-secondaryoperations})
 
         lang        "fi"
-        file        (File/createTempFile "pdf-export-itest-" ".pdf")]
+        file        (files/temp-file "pdf-export-itest-" ".pdf")]
 
 
     (with-lang lang
@@ -153,8 +153,8 @@
       (fact {:midje/description (name lang)}
         (against-background
           [(mongo/update "statistics" {:type "pdfa-conversion"} anything :upsert true) => nil]
-          (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
-                fis (FileOutputStream. file)]
+          (let [file (files/temp-file (str "export-test-statement-pdfa-" (name lang)) ".pdf")
+                fis (io/output-stream file)]
             (pdfa application :statements "2" lang fis)
             (fact "File exists " (.exists file))
             (fact "File not empty " (> (.length file) 1))

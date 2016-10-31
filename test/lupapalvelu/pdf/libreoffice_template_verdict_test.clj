@@ -1,16 +1,15 @@
 (ns lupapalvelu.pdf.libreoffice-template-verdict-test
-  (:require
-    [clojure.string :as s]
-    [taoensso.timbre :refer [trace debug]]
-    [midje.sweet :refer :all]
-    [midje.util :refer [testable-privates]]
-    [lupapalvelu.test-util :as test-util]
-    [lupapalvelu.organization :refer :all]
-    [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
-    [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
-    [lupapalvelu.pdf.libreoffice-template :as template]
-    [lupapalvelu.pdf.libreoffice-template-base-test :refer :all])
-  (:import (java.io File)))
+  (:require [clojure.string :as s]
+            [taoensso.timbre :refer [trace debug]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [sade.files :as files]
+            [lupapalvelu.test-util :as test-util]
+            [lupapalvelu.organization :refer :all]
+            [lupapalvelu.i18n :refer [with-lang loc localize] :as i18n]
+            [lupapalvelu.pdf.libreoffice-template-verdict :as verdict]
+            [lupapalvelu.pdf.libreoffice-template :as template]
+            [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
 
 (def applicant-index #'lupapalvelu.pdf.libreoffice-template/applicant-index)
 (fact "Applicant index"
@@ -84,7 +83,7 @@
 
 (facts "YA Verdict publish export "
        (doseq [lang test-util/test-languages]
-         (let [tmp-file (File/createTempFile (str "verdict-ya-" (name lang) "-") ".fodt")
+         (let [tmp-file (files/temp-file (str "verdict-ya-" (name lang) "-") ".fodt")
                data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                      :data        {:_selected {:value "yritys"}
                                                                    :henkilo   {:henkilotiedot {:etunimi  {:value ""}
@@ -129,7 +128,7 @@
 
 (facts "R Verdict publish export "
        (doseq [lang test-util/test-languages]
-         (let [tmp-file (File/createTempFile (str "verdict-r-" (name lang) "-") ".fodt")
+         (let [tmp-file (files/temp-file (str "verdict-r-" (name lang) "-") ".fodt")
                data (assoc application2 :documents [{:schema-info {:name :tyomaastaVastaava}
                                                      :data        {:_selected {:value "yritys"}
                                                                    :henkilo   {:henkilotiedot {:etunimi  {:value ""}
@@ -157,7 +156,7 @@
 
 (facts "YA contract publish export "
        (doseq [lang test-util/test-languages]
-         (let [tmp-file (File/createTempFile (str "verdict-contract-" (name lang) "-") ".fodt")]
+         (let [tmp-file (files/temp-file (str "verdict-contract-" (name lang) "-") ".fodt")]
            (verdict/write-verdict-libre-doc (assoc application2 :verdicts (map #(assoc % :sopimus true) (:verdicts application2))) "a1" 0 lang tmp-file)
            (let [res (s/split (slurp tmp-file) #"\r?\n")
                  user-fields (filter #(s/includes? % "<text:user-field-decl ") res)]

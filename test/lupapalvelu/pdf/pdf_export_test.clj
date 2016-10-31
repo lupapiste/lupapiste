@@ -1,5 +1,6 @@
 (ns lupapalvelu.pdf.pdf-export-test
   (:require [clojure.string :as str]
+            [sade.files :as files]
             [sade.util :as util]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.domain :as domain]
@@ -84,7 +85,7 @@
              application (merge domain/application-skeleton {:documents dummy-docs
                                                              :municipality "444"
                                                              :state "draft"})
-             file (File/createTempFile "test" ".pdf")]
+             file (files/temp-file "test" ".pdf")]
 
          (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
@@ -116,7 +117,7 @@
                                                              :state "draft"})]
          (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
-                  (let [file (File/createTempFile (str "export-test-statement-" (name lang) "-") ".pdf")
+                  (let [file (files/temp-file (str "export-test-statement-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
                     (pdf-export/generate-pdf-with-child application :statements "2" lang fis)
                     (fact "File exists " (.exists file))
@@ -146,7 +147,7 @@
                                                              :state "draft"})]
          (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
-                  (let [file (File/createTempFile (str "export-test-neighbor-" (name lang) "-") ".pdf")
+                  (let [file (files/temp-file (str "export-test-neighbor-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
                     (pdf-export/generate-pdf-with-child application :neighbors "2" lang fis)
                     (fact "File exists " (.exists file))
@@ -174,7 +175,7 @@
                                                              :state "draft"})]
          (doseq [lang test-util/test-languages]
            (facts {:midje/description (name lang)}
-                  (let [file (File/createTempFile (str "export-test-tasks-" (name lang) "-") ".pdf")
+                  (let [file (files/temp-file (str "export-test-tasks-" (name lang) "-") ".pdf")
                         fis (FileOutputStream. file)]
                     (pdf-export/generate-pdf-with-child application :tasks "2" lang fis)
                     (fact "File exists " (.exists file))
@@ -219,7 +220,7 @@
                                                                   :documents dummy-docs
                                                                   :municipality "888"
                                                                   :state "draft"})
-               file           (File/createTempFile "export-test-foreman" ".pdf")]
+               file           (files/temp-file "export-test-foreman" ".pdf")]
            (pdf-export/generate application "fi" file)
            (fact "File exists " (.exists file))
            (let [pdf-content (pdfbox/extract (.getAbsolutePath file))]

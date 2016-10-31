@@ -1,12 +1,12 @@
 (ns lupapalvelu.i18n-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
+            [sade.files :as files]
             [lupapiste-commons.i18n.resources :as commons-resources]
-            [lupapalvelu.i18n :refer :all])
-  (:import [java.io File]))
+            [lupapalvelu.i18n :refer :all]))
 
 (defn create-translation-file! [name translations]
-  (let [txt-file (File/createTempFile name ".txt" (File. "."))]
+  (let [txt-file (files/temp-file name ".txt" (io/file "."))]
     (spit txt-file
           (apply str
                  (for [[k lang v] translations]
@@ -14,7 +14,7 @@
     txt-file))
 
 (defn create-translation-excel! [name loc-map]
-  (let [excel-file (File/createTempFile name ".xlsx" (File. "."))]
+  (let [excel-file (files/temp-file name ".xlsx" (io/file "."))]
     (commons-resources/write-excel loc-map excel-file)
     excel-file))
 

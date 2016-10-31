@@ -1,17 +1,15 @@
 (ns lupapalvelu.pdf.libreoffice-template-history-test
-  (:require
-    [clojure.string :as s]
-    [taoensso.timbre :refer [trace debug]]
-    [midje.sweet :refer :all]
-    [midje.util :refer [testable-privates]]
-    [lupapalvelu.test-util :as test-util]
-    [lupapalvelu.i18n :refer [loc localize] :as i18n]
-    [lupapalvelu.pdf.libreoffice-template :refer :all]
-    [lupapalvelu.pdf.libreoffice-template-history :as history]
-    [lupapalvelu.tiedonohjaus :refer :all]
-    [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]
-    )
-  (:import (java.io File)))
+  (:require [clojure.string :as s]
+            [taoensso.timbre :refer [trace debug]]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
+            [sade.files :as files]
+            [lupapalvelu.test-util :as test-util]
+            [lupapalvelu.i18n :refer [loc localize] :as i18n]
+            [lupapalvelu.pdf.libreoffice-template :refer :all]
+            [lupapalvelu.pdf.libreoffice-template-history :as history]
+            [lupapalvelu.tiedonohjaus :refer :all]
+            [lupapalvelu.pdf.libreoffice-template-base-test :refer :all]))
 
 (def build-history-rows #'lupapalvelu.pdf.libreoffice-template-history/build-history-rows)
 
@@ -36,7 +34,7 @@
 
        (doseq [lang test-util/test-languages]
          (fact {:midje/description (str "history libre document: " (name lang))}
-               (let [tmp-file (File/createTempFile (str "history-" (name lang) "-") ".fodt")]
+               (let [tmp-file (files/temp-file (str "history-" (name lang) "-") ".fodt")]
                  (history/write-history-libre-doc application1 lang tmp-file)
                  (let [res (s/split (slurp tmp-file) #"\r?\n")]
                    (.delete tmp-file)
