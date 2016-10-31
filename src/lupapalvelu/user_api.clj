@@ -514,7 +514,7 @@
     (let [kw-role (keyword role)
           main-role (if (= :authorityAdmin kw-role) :authorityAdmin :authority)
           role-set (set [kw-role main-role])
-          imposter (assoc user :impersonating true :role main-role :orgAuthz {(keyword organizationId) role-set})]
+          imposter (assoc user :impersonating true :role (name main-role) :orgAuthz {(keyword organizationId) role-set})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
