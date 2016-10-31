@@ -531,6 +531,26 @@
   (update-application command
                       (app/state-transition-update (keyword state) (now) application user)))
 
+(defcommand change-warranty-start-date
+  {:description      "Changes warranty start date"
+   :parameters       [id startDate]
+   :input-validators [(partial action/number-parameters [:startDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+   [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyStart startDate}})
+  (ok))
+
+(defcommand change-warranty-end-date
+  {:description      "Changes warranty end date"
+   :parameters       [id endDate]
+   :input-validators [(partial action/number-parameters [:endDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+  [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyEnd endDate}})
+  (ok))
+
 (defquery change-application-state-targets
   {:description "List of possible target states for
   change-application-state transitions."

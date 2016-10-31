@@ -537,12 +537,22 @@
 
 (assert (= states/all-application-states (set (keys timestamp-key))))
 
+(def two-years-ms 63072000000)
+
+(defn- warranty-period [timestamp]
+  {:warrantyStart timestamp,
+   :warrantyEnd (+ timestamp two-years-ms)})
+
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]
-  (let [ts-key (timestamp-key to-state)]
+  (let [ts-key      (timestamp-key to-state)
+        permit-type (permit/permit-type application)
+        krysp?      (org/krysp-integration? (org/get-organization (:organization application)) permit-type)
+        warranty?   (and (= "YA" permit-type) (= ts-key :closed) (not krysp?))]
     {$set (merge {:state to-state, :modified timestamp}
-                 (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
+                 (when (and ts-key (not (ts-key application))) {ts-key timestamp})
+                 (when warranty? (warranty-period timestamp)))
      $push {:history (history-entry to-state timestamp user)}}))
 
 (defn change-application-state-targets

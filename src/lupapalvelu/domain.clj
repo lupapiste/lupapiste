@@ -389,7 +389,9 @@
    :appealVerdicts           []
    :archived                 {:application nil
                               :completed   nil}
-   :reservations             []})
+   :reservations             []
+   :warrantyStart            nil ; timestamp
+   :warrantyEnd              nil})
 
 (def operation-skeleton
   {:name ""

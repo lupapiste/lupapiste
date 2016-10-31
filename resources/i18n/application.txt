@@ -1018,4 +1018,9 @@
 "application.assignment" "fi" "Tehtävä"
 "application.assignment" "sv" "Uppdrag"
 "application.assignment" "en" "Assignment"
-
+"application.warranty.start" "fi" "Takuuaika alkaa"
+"application.warranty.start" "sv" ""
+"application.warranty.start" "en" ""
+"application.warranty.end" "fi" "Takuuaika päättyy"
+"application.warranty.end" "sv" ""
+"application.warranty.end" "en" ""

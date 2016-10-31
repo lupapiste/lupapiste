@@ -171,6 +171,44 @@
     ko.mapping.fromJS(app, mappingOptions, applicationModel);
   }
 
+  function initWarrantyDates(app, applicationModel) {
+    if (app.warrantyEnd) {
+      app.warrantyEnd = new Date(app.warrantyEnd);
+    }
+
+    if (app.warrantyStart) {
+      app.warrantyStart = new Date(app.warrantyStart);
+    }
+  }
+
+  function subscribeWarrantyDates(app, applicationModel) {
+    applicationModel.warrantyEnd.subscribe(function (value) {
+      if (!isInitializing) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-end-date",
+            {id: app.id, endDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+
+    applicationModel.warrantyStart.subscribe(function (value) {
+      if (!isInitializing) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-start-date",
+            {id: app.id, startDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -180,6 +218,8 @@
 
       // Plain data
       applicationModel._js = app;
+
+      initWarrantyDates(app, applicationModel);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -308,6 +348,8 @@
 
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+
+      subscribeWarrantyDates(app, applicationModel);
 
       isInitializing = false;
       pageutil.hideAjaxWait();
