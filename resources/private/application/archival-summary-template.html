@@ -8,14 +8,18 @@
       <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
       <div data-bind="ltext: 'archivalSummary.guide'"></div>
 
-      <div data-bind="if: !_.isEmpty(archivedDocuments())">
+      <div data-bind="if: !_.isEmpty(archivedDocuments())" data-test-id="archived-application-documents">
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
       </div>
 
-      <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
-      <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
+      <div data-test-id="archived-pre-groups">
+        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
+      </div>
+      <div data-test-id="archived-post-groups">
+        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
+      </div>
 
       <div class="buttons">
         <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected">
@@ -34,14 +38,18 @@
     <div data-bind="if: showNotArchived" class="archival-summary-document-set">
       <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
 
-      <div data-bind="if: !_.isEmpty(notArchivedDocuments())">
+      <div data-bind="if: !_.isEmpty(notArchivedDocuments())" data-test-id="not-archived-application-documents">
         <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
       </div>
 
-      <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
-      <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
-      <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
+      <div data-test-id="not-archived-pre-groups">
+        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
+      </div>
+      <div data-test-id="not-archived-post-groups">
+        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
+        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
+      </div>
     </div>
 
     <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("force-fix-tos-function-for-application") -->
@@ -83,7 +91,7 @@
   </script>
   <script type="text/x-jquery-tmpl" id="archival-summary-attachment-table">
     <div class="table archival-summary-table" data-bind="foreach: groups">
-      <div class="attachment-group-header" data-bind="text: name"></div>
+      <div class="attachment-group-header" data-bind="text: name, testId: $data.groupName + '-header'"></div>
 
       <div class="column-header-row">
         <div class="small-columns">
@@ -97,7 +105,7 @@
       </div>
 
       <!-- ko foreach: attachments -->
-      <div class="attachment-row">
+      <div class="attachment-row" data-bind="testId: 'attachment-' + $data.attachmentType(), attr: {'data-test-group': $parent.groupName}">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
            <input type="checkbox" data-bind="visible: $data.archivable() && $data.state() !== 'arkistoitu', checked: $data.sendToArchive">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !$data.archivable(), attr: {title: loc($data.archivabilityError())}"></i>
@@ -195,7 +203,7 @@
 
   <script type="text/x-jquery-tmpl" id="archival-summary-document-table">
     <div class="table archival-summary-table">
-      <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments'"></div>
+      <div class="attachment-group-header" data-bind="ltext: 'archivalSummary.mainDocuments', testId: 'application-documents-header'"></div>
 
       <div class="column-header-row">
         <div class="small-columns">
@@ -209,7 +217,7 @@
       </div>
 
       <!-- ko foreach: documents -->
-      <div class="attachment-row">
+      <div class="attachment-row" data-bind="testId: $data.documentType + '-document', attr: {'data-test-group': 'application-documents'}">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
            <input type="checkbox" data-bind="visible: $data.state() !== 'arkistoitu', checked: sendToArchive">
            <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
