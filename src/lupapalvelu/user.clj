@@ -148,6 +148,7 @@
 (defschema SessionSummaryUser
   (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
       (assoc (sc/optional-key :orgAuthz) {sc/Keyword #{sc/Keyword}}
+             (sc/optional-key :impersonating) sc/Bool
              :expires ssc/Timestamp)))
 
 (defn session-summary
