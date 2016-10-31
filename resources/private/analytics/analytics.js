@@ -4,13 +4,17 @@
  *   hub.send("track-click", {category:"x", label:"y", event:"z"});
  *
  */
-(function(i,s,o,g,r,a,m) {
+ var analytics = (function() {
   "use strict";
-
   function isTrackingEnabled() {
     var dnt = navigator.doNotTrack || navigator.msDoNotTrack || window.doNotTrack;
     return !(dnt === "1" || dnt === "yes");
   }
+  return {isTrackingEnabled: isTrackingEnabled};
+})();
+
+(function(i,s,o,g,r,a,m) {
+  "use strict";
 
   if (LUPAPISTE.config.analytics && LUPAPISTE.config.analytics.id) {
     i.GoogleAnalyticsObject=r;
@@ -33,13 +37,13 @@
       return !s.match(/^([a-z0-9]{24}|[a-zA-Z0-9]{48}|LP-\d{3}-\d{4}-\d{5})$/);
     });
     var page = [window.location.pathname, e.pageId].concat(nonIdParts).join("/");
-    if (isTrackingEnabled()) {
+    if (analytics.isTrackingEnabled()) {
       ga("send", "pageview", page);
     }
   });
 
   hub.subscribe("track-click", function(e) {
-    if (isTrackingEnabled()) {
+    if (analytics.isTrackingEnabled()) {
       ga("send", "event", e.category, e.event, e.label);
     }
   });

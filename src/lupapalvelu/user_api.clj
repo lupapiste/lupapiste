@@ -1,5 +1,5 @@
 (ns lupapalvelu.user-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -31,7 +31,6 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.calendar :as cal]))
 
 ;;
@@ -47,13 +46,14 @@
       (dissoc full-user :private :personId))))
 
 (defquery user
-  {:optional-parameters [lang]
-   :input-validators [i18n/valid-language]
+  {:on-success (fn [_ {user :user}]
+                 (when (:firstLogin user)
+                   (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user (usr/update-user-language! full-user (ss/lower-case lang)))
-    (fail)))
+    (ok :user full-user)
+    (fail :error.user.not.found)))
 
 (defquery users
   {:user-roles #{:admin}}

@@ -30,17 +30,43 @@ LUPAPISTE.CurrentUser = function() {
     foremanFilters: []
   };
 
+  var fbPixel = null;
+  if (LUPAPISTE.config.facebook && LUPAPISTE.config.facebook.url && analytics.isTrackingEnabled()) {
+    fbPixel = function () {
+      var fbUrl = LUPAPISTE.config.facebook.url;
+      return "<img height='1' width='1' style='display:none' src='" + fbUrl + "'/>";
+    };
+  }
+
   function constructor(user) {
-    if( user.indicatorNote ) {
-      hub.send( "indicator", {style: "primary",
-                              message: user.indicatorNote,
-                              sticky: true, html: true});
-      delete user.indicatorNote;
+    if( !_.isEmpty(user) && !user.language && !user.impersonating ) {
+      user.language = loc.getCurrentLanguage();
+      ajax.command("update-user", _.pick(user, ["firstName", "lastName", "language"]))
+        .success(function() {
+          hub.send("indicator", {style: "primary",
+                                 message: "user.language.note",
+                                 sticky: true, html: true});
+        })
+        .call();
+    }
+    if (user.firstLogin) {
+      hub.send("first-login", {user: user});
     }
     ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
   }
 
   constructor({});
+
+  hub.subscribe("first-login", function() {
+    if (_.isFunction(fbPixel)) {
+      // send a bit to Facebook about firstLogin
+      info("Triggering first login Facebook pixel");
+      hub.send("indicator", {style: "hidden",
+                             rawMessage: fbPixel(),
+                             html: true});
+    }
+  });
+
 
   self.loaded = ko.pureComputed(function() {
     return self.id();
@@ -136,7 +162,7 @@ LUPAPISTE.CurrentUser = function() {
   });
 
   hub.subscribe("reload-current-user", function() {
-    ajax.query("user", {lang: loc.getCurrentLanguage()})
+    ajax.query("user")
       .success(function (res) {
         if (res.user) {
           constructor(res.user);
