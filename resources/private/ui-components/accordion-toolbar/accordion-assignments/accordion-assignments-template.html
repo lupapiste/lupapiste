@@ -1,6 +1,8 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="accordion-assignments-template">
   <div class="accordion-assignments" data-bind="foreach: assignments">
-    <div class="assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
+    <div class="assignment-container">
+      <div class="assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
+    </div>
   </div>
 </script>
 
@@ -8,9 +10,16 @@
   <i class="lupicon-circle-attention"></i>
   <span class="assignment-header" data-bind="text: loc('application.assignment') + ' ' + ($index()+1) + ': '"></span>
   <div class="assignment-text">
-  <span data-bind="text: $parent.descriptionText($data)"></span>
-  <span> - </span>
-  <span data-bind="fullName: createdState.user"></span>
+    <span data-bind="text: $parent.descriptionText($data)"></span>
+    <span> - </span>
+    <span data-bind="fullName: createdState.user"></span>
   </div>
+  <button data-bind="click: $parent.markComplete,
+                     clickBubble: false,
+                     attr: {'data-test-id': 'mark-assignment-complete-' + $component.params.schemaName}"
+          class="positive">
+    <i class="lupicon-check"></i>
+    <span data-bind="ltext: 'application.assignment.complete'"></span>
+  </button>
 </script>
 

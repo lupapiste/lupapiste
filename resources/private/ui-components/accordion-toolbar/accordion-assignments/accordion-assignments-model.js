@@ -5,12 +5,16 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-  //var myService = self.params.myService || "assignmentService";
+  var myService = self.params.myService || "assignmentService";
 
   self.assignments = params.documentAssignments;
 
   self.descriptionText = function(data) {
     return "\"" + data.description + "\"";
+  };
+
+  self.markComplete = function(assignment) {
+    self.sendEvent(myService, "markComplete", {assignmentId: assignment.id, applicationId: params.applicationId});
   };
 
 };

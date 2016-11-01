@@ -94,30 +94,36 @@
   }
 
   div.accordion-assignments {
-    background-color: $primary;
     color: white;
     margin: 0 auto;
     /*
     overflow-y: hidden;
     text-transform: none;
     */
-    padding: $marginS;
     min-height: $grid-min-height;
-    .assignment {
-      margin-top: $marginS;
+    .assignment-container {
+      margin-top: 1px;
+      padding: $marginS $marginS;
       &:first-child {
         margin-top: 0;
       }
-      > i, div.assignment-text, .assignment-header {
+      background-color: $primary;
+    }
+    .assignment {
+      display: table-row;
+      > * {
         display: table-cell;
-        vertical-align: top;
+        vertical-align: middle;
         padding: 0 $marginS;
+      }
+      > .assignment-text {
+        width: 100%; // let text take all the space it can have as it's dynamic
       }
       > .assignment-header {
         white-space: nowrap;
       }
       i {
-        padding: 0 $marginS;
+        padding-left: $icon-pad;
       }
     }
   }

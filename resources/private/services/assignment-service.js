@@ -45,11 +45,6 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     }
   }
 
-  function onAssignmentCompleted(response) {
-    util.showSavedIndicator(response);
-    hub.send("assignmentService::assignmentCompleted", null);
-  }
-
   if( features.enabled( "assignments")) {
 
     hub.subscribe("assignmentService::createAssignment", function(event) {
@@ -64,7 +59,14 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
 
     hub.subscribe("assignmentService::markComplete", function(event) {
       ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
-        .success(onAssignmentCompleted)
+        .success(function(resp) {
+          util.showSavedIndicator(resp);
+          hub.send("assignmentService::assignmentCompleted", null);
+          var appId = util.getIn(event, ["applicationId"]);
+          if (appId) { // refresh application assignments
+            assignmentsForApplication(appId);
+          }
+        })
         .call();
     });
 
