@@ -54,7 +54,7 @@
    :primaryOperation :propertyId :state :verdicts :tasks])
 
 (def attachment-snapshot-fields
-  [:id :type :latestVersion :auth :metadata :contents])
+  [:id :type :latestVersion :auth :metadata :contents :target])
 
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))

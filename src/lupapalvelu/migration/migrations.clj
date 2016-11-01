@@ -2505,7 +2505,7 @@
                                                              $not {$size 0}}}]}}}))
 
 
-(defmigration remove-unnecessary-data-from-bulletin-attachments ;LPK-2171
+#_(defmigration remove-unnecessary-data-from-bulletin-attachments ;LPK-2171
   {:apply-when (pos? (mongo/count :application-bulletins {:versions.attachments
                                                           {$elemMatch
                                                            ;; condition matches to one of the fields to be removed, it should be enough
@@ -2517,7 +2517,7 @@
                                   (update :latestVersion #(select-keys % [:filename :contentType :fileId :size]))))
                             {:versions.attachments {$elemMatch {:applicationState {$exists true}}}}))
 
-(defmigration remove-unnecessary-data-from-bulletin-documents
+#_(defmigration remove-unnecessary-data-from-bulletin-documents
   {:apply-when (pos? (mongo/count :application-bulletins {:versions.documents {$elemMatch {:meta {$exists true}}}}))}
   (update-bulletin-versions :documents
                             #(dissoc % :meta)
