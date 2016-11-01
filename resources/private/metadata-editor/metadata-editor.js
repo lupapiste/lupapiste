@@ -199,7 +199,10 @@
           if (util.getIn(data, ["metadata", "sailytysaika", "arkistointi"]) && ko.unwrap(data.metadata.sailytysaika.arkistointi) === "ikuisesti") {
             self.disabledFields.push("sailytysaika");
           }
-          attachmentsService.queryOne(self.attachmentId);
+          if (self.attachmentId) {
+            attachmentsService.queryOne(self.attachmentId);
+          }
+
         })
         .call();
     };
