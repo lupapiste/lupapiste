@@ -24,3 +24,15 @@
 (defn filename-for-pdfa [filename]
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" ".pdf"))
+
+(defmacro with-temp-file
+  "Creates and deletes a temp file.
+   sym is visible in body, file-pattern should be in form of filename.ext"
+  [sym & body]
+  (assert (symbol? sym))
+  `(let [prefix# (str ~(str *ns*) \_ (:line ~(meta &form)) \_)
+         ~sym (temp-file prefix# ".tmp")]
+     (try
+       (do ~@body)
+       (finally
+         (io/delete-file ~sym :silently)))))
