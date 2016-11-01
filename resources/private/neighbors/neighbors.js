@@ -79,7 +79,7 @@
             });
             self.map.drawDrawings(_.map(resp.wkts, "wkt"), {}, drawingStyle);
           })
-          .onError("error.ktj-down", notify.ajaxError)
+          .onError("error.integration.ktj-down", notify.ajaxError)
           .processing(processing)
           .call();
       }
