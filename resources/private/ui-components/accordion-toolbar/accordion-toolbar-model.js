@@ -154,14 +154,15 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     } else {
       return [];
     }
-   });
+   }).extend({deferred: true});
 
   // Dispose
-
+  var baseDispose = self.dispose;
   self.dispose = function() {
     AccordionState.deregister(self.docModel.docId);
     stickyRefresh.dispose();
     hub.unsubscribe(toggleEditorSubscription);
+    baseDispose();
   };
 
 };
