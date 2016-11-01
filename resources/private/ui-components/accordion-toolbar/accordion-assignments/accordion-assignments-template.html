@@ -1,5 +1,5 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="accordion-assignments-template">
-  <div class="accordion-assignments" data-bind="foreach: assignments">
+  <div class="accordion-assignments" data-bind="foreach: {data: assignments, afterRender: window.Stickyfill.rebuild}">
     <div class="assignment-container">
       <div class="assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
     </div>
