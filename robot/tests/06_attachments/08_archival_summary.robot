@@ -1,6 +1,6 @@
 *** Settings ***
 
-Documentation
+Documentation  Check that attachment information is updated into archival summary tab and attachment metadata can be edited
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
@@ -142,7 +142,7 @@ Type is changed
 
 
 Edit rakennesuunnitelma metadata
-  Fill in archival metadata
+  Fill in archival metadata  myyntipalvelu=True
 
 Rakennesuunnitelma group is changed
   Wait until  Group row count is  not-archived-post-groups  attachments.general  1
@@ -178,8 +178,9 @@ Julkisivupiirustus group is changed
 Close additional controls, julkisivupiirustus section is changed to archived
   Toggle additional controls  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
-Julkisivupiirustus is not archivable
-  Attachment archivability error icon is visible  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+Julkisivupiirustus is archivable
+  [Tags]  pdfa
+  Attachment is archivable  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
 Julkisivupiirustus retention perioid is entered
   Attachment retention perioid is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Määräajan, 5 vuotta
@@ -191,7 +192,26 @@ Julkisivupiirustus is not stamped
   Attachment is stamped  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  False
 
 Julkisivu is marked as will publish
-  Attachment will be published  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+  Attachment will be published  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  False
+
+
+Edit application document metadata
+  Toggle additional controls  not-archived-application-documents  application-documents  application-document
+  Fill in archival metadata
+
+Application document group is changed
+  Wait until  Group row count is  not-archived-application-documents  application-documents  0
+  Group row count is  archived-application-documents  application-documents  1
+
+Close application document additional controls
+  Toggle additional controls  archived-application-documents  application-documents  application-document
+
+
+Select julkissivupiirustus to be archived
+  Element should be disabled  jquery=button[data-test-id=archive-selected]
+  Select attachment to be archived  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+  # Documents cannot be archived since there is no TOJ in dev environment
+  Element should be enabled  jquery=button[data-test-id=archive-selected]
 
 
 *** Keywords ***
@@ -215,42 +235,45 @@ Group row count is
 
 Toggle additional controls
   [Arguments]  ${section}  ${group}  ${type}
-  Scroll and click  div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.attachment-row-top
+  Scroll and click  div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.attachment-row-top
 
 Attachment content is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.attachment-content-desc  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.attachment-content-desc  ${text}
 
 Attachment type group is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.group-label  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.group-label  ${text}
 
 Attachment type id is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.type-id span  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.type-id span  ${text}
+
+Attachment is archivable
+  [Arguments]  ${section}  ${group}  ${type}
+  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] input[data-test-id=send-to-archive]
 
 Attachment archivability error icon is visible
   [Arguments]  ${section}  ${group}  ${type}
-  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] i.lupicon-circle-attention
+  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] i.lupicon-circle-attention
 
 Attachment retention perioid is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.retention-period  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.retention-period  ${text}
 
 Attachment personal data is
   [Arguments]  ${section}  ${group}  ${type}  ${text}
-  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.personal-data  ${text}
+  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.personal-data  ${text}
 
 Attachment is stamped
   [Arguments]  ${section}  ${group}  ${type}  ${value}=True
-  Run keyword If  ${value}  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.stamped i.lupicon-check
-  ...  ELSE  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.stamped  Ei
+  Run keyword If  ${value}  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.stamped i.lupicon-check
+  ...  ELSE  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.stamped  Ei
 
 Attachment will be published
   [Arguments]  ${section}  ${group}  ${type}  ${value}=True
-  Run keyword if  ${value}  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.will-publish i.lupicon-check
-  ...  ELSE  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='attachment-${type}'] div.will-publish  Ei
-
+  Run keyword if  ${value}  Element should be visible  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.will-publish i.lupicon-check
+  ...  ELSE  Element text should be  jquery=div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] div.will-publish  Ei
 
 Change type
   [Arguments]  ${type}
@@ -279,3 +302,10 @@ Fill in archival metadata
   Run Keyword If  ${myyntipalvelu}  Select Checkbox  jquery=input[data-test-id=myyntipalvelu]:visible
   Select from list  jquery=select[data-test-id=nakyvyys]:visible  ${nakyvyys}
   Wait until  Click by test id  save-metadata
+
+Select attachment to be archived
+  [Arguments]  ${section}  ${group}  ${type}
+  ${selector}=  Set Variable  div[data-test-id=${section}] div.attachment-row[data-test-group='${group}'][data-test-id='${type}'] input[data-test-id=send-to-archive]
+  Element should be visible  jquery=${selector}
+  Scroll to  ${selector}
+  Select checkbox  jquery=${selector}
