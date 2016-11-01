@@ -34,8 +34,7 @@
 
        (doseq [lang test-util/test-languages]
          (fact {:midje/description (str "history libre document: " (name lang))}
-               (let [tmp-file (files/temp-file (str "history-" (name lang) "-") ".fodt")]
-                 (history/write-history-libre-doc application1 lang tmp-file)
-                 (let [res (s/split (slurp tmp-file) #"\r?\n")]
-                   (.delete tmp-file)
-                   (nth res 945))) => (str (localize lang "caseFile.operation.review.request") ": rakennuksen paikan tarkastaminen"))))
+           (files/with-temp-file tmp-file
+             (history/write-history-libre-doc application1 lang tmp-file)
+             (let [res (s/split (slurp tmp-file) #"\r?\n")]
+               (nth res 945))) => (str (localize lang "caseFile.operation.review.request") ": rakennuksen paikan tarkastaminen"))))

@@ -77,25 +77,18 @@
   (debugf "Generating PDF/A for application %s in %s " (:id application) lang)
   (let [filename (str (localize lang "caseFile.heading") ".fodt")]
     (history/write-history-libre-doc application lang libre-file)
-    ;(debug "history:" (slurp libre-file))
     (:content (convert-to-pdfa filename libre-file))))
 
 (defn generate-verdict-pdfa [application verdict-id paatos-idx lang dst-file]
   (debugf "Generating PDF/A for verdict %s/paatos %s in %s" verdict-id paatos-idx lang)
-  (let [filename (str (localize lang "application.verdict.title") ".fodt")
-        tmp-file (files/temp-file (str "verdict-" (name lang) "-") ".fodt")] ; deleted in finally
-    (try
+  (let [filename (str (localize lang "application.verdict.title") ".fodt")]
+    (files/with-temp-file tmp-file
       (verdict/write-verdict-libre-doc application verdict-id paatos-idx lang tmp-file)
-      (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
-      (finally
-        (io/delete-file tmp-file :silently)))))
+      (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file))))
 
 (defn generate-statment-pdfa-to-file! [application id lang dst-file]
   (debugf "Generating PDF/A statement %s for application %s in %s" id (:id application) lang)
-  (let [filename (str (localize lang "application.statement.status") ".fodt")
-        tmp-file (files/temp-file (str "temp-export-statement-" (name lang) "-") ".fodt")] ; deleted in finally
-    (try
+  (let [filename (str (localize lang "application.statement.status") ".fodt")]
+    (files/with-temp-file tmp-file
       (statement/write-statement-libre-doc application id lang tmp-file)
-      (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file)
-      (finally
-        (io/delete-file tmp-file :silently)))))
+      (io/copy (:content (convert-to-pdfa filename tmp-file)) dst-file))))

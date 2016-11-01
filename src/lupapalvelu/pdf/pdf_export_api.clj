@@ -65,11 +65,8 @@
    :states           states/all-states}
   [{:keys [user application lang]}]
   (if application
-    (let [libre-file (files/temp-file "raw-pdfa-casefile" ".fodt")] ; deleted in finally
-      (try
-        (-> (libre/generate-casefile-pdfa application lang libre-file)
-            response/response
-            (response/content-type "application/pdf"))
-        (finally
-          (io/delete-file libre-file))))
+    (files/with-temp-file libre-file
+      (-> (libre/generate-casefile-pdfa application lang libre-file)
+          response/response
+          (response/content-type "application/pdf")))
     not-found))

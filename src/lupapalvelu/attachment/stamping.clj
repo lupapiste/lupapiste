@@ -27,9 +27,8 @@
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
-        options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (files/temp-file "lupapiste.stamp." ".tmp")] ; deleted in finally
-    (try
+        options (select-keys context [:x-margin :y-margin :transparency :page])]
+    (files/with-temp-file file
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))
       (debug "uploading stamped file: " (.getAbsolutePath file))
@@ -41,9 +40,7 @@
                      {:filename filename :content file
                       :size (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)
-        (:fileId result))
-      (finally
-        (io/delete-file file :silently)))))
+        (:fileId result)))))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))

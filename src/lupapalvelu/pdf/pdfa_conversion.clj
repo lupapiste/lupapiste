@@ -179,23 +179,21 @@
 
 (defn file-is-valid-pdfa? [pdf-file]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (let [temp-file (files/temp-file "lupapiste-pdfa-stream-conversion" ".pdf") ; Should be deleted in let block
-          file-path (if (instance? InputStream pdf-file)
-                      (do (io/copy pdf-file temp-file)
-                          (.getCanonicalPath temp-file))
-                      (.getCanonicalPath pdf-file))
-          output-file (files/temp-file "lupapiste-pdfa-validation" ".pdf") ; Should be deleted in let block
-          {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
-      (io/delete-file temp-file :silently)
-      (io/delete-file output-file :silently)
-      (= exit 0))
+    (files/with-temp-file temp-file
+      (files/with-temp-file output-file
+        (let [file-path (if (instance? InputStream pdf-file)
+                          (do (io/copy pdf-file temp-file)
+                              (.getCanonicalPath temp-file))
+                          (.getCanonicalPath pdf-file))
+              {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
+          (= exit 0))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
         false)))
 
 (defn convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
-  (let [temp-file (files/temp-file "lupapiste.pdf.a." ".tmp")] ; deleted in finally
+  (files/with-temp-file temp-file
     (try
       (let [conversion-result (convert-to-pdf-a src-file {:target-file-path (.getCanonicalPath temp-file)})]
         (cond
@@ -208,9 +206,7 @@
       (catch Exception e
         (do
           (error "Unknown exception in PDF/A conversion, file was not converted." e)
-          false))
-      (finally
-        (io/delete-file temp-file :silently)))))
+          false)))))
 
 (defn pdf-a-required? [organization-or-id]
   (cond

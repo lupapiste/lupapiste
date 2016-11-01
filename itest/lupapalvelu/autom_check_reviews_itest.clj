@@ -279,12 +279,9 @@
       (verdict/save-review-updates batchrun-user application (:updates read-result) (:added-tasks-with-updated-buildings read-result))
       (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
-            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)
-            temp-pdf-path (files/temp-file "review-test" ".tmp")]
-        (try
+            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
+        (files/with-temp-file temp-pdf-path
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
           (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
-          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy
-          (finally
-            (io/delete-file temp-pdf-path)))))))
+          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))

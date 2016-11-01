@@ -679,13 +679,12 @@
       (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-            temp-pdf (files/temp-file fileId ".tmp") ; deleted in finally
             file-content (mongo/download fileId)]
         (if (nil? file-content)
           (do
             (error "PDF/A conversion: No mongo file for fileId" fileId)
             (fail :error.attachment-not-found))
-          (try
+          (files/with-temp-file temp-pdf
             (with-open [content ((:content file-content))]
               (io/copy content temp-pdf)
               (upload-and-attach! {:application application :user user}
@@ -695,9 +694,7 @@
                                    :created created
                                    :stamped stamped
                                    :original-file-id fileId}
-                                  {:content temp-pdf :filename filename}))
-            (finally
-              (io/delete-file temp-pdf :silently))))))))
+                                  {:content temp-pdf :filename filename}))))))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))

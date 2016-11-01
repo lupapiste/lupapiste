@@ -110,34 +110,32 @@
                             :primaryOperation    test-primaryOperation
                             :secondaryOperations test-secondaryoperations})
 
-        lang        "fi"
-        file        (files/temp-file "pdf-export-itest-" ".pdf")]
+        lang        "fi"]
 
+    (files/with-temp-file file
+      (with-lang lang
+        (fact "Test data assertions (just in case)"
+          (loc (str "municipality." test-municipality)) => "Lohja"
+          (loc (str "operations.kerrostalo-rivitalo")) => "Asuinkerrostalon tai rivitalon rakentaminen"
+          (loc (str "operations.aita")) => "Aidan rakentaminen")
 
-    (with-lang lang
-      (fact "Test data assertions (just in case)"
-        (loc (str "municipality." test-municipality)) => "Lohja"
-        (loc (str "operations.kerrostalo-rivitalo")) => "Asuinkerrostalon tai rivitalon rakentaminen"
-        (loc (str "operations.aita")) => "Aidan rakentaminen")
+        (pdf-export/generate application lang file)
 
-      (pdf-export/generate application lang file)
+        (let [pdf-content (pdfbox/extract file)
+              documents-data (map :data (:documents application))]
 
-      (let [pdf-content (pdfbox/extract file)
-            documents-data (map :data (:documents application))]
-
-        ; common fields
-        pdf-content => (contains test-address)
-        pdf-content => (contains "Lohja")
-        pdf-content => (contains (loc (:state application)))
-        pdf-content => (contains "444-1-10-100")
-        pdf-content => (contains "01.01.2014")
-        pdf-content => (contains (:id application))
-        pdf-content => (contains "Testihenkilo Erkki")
-        pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
-        ; documents
-        (doseq [doc-data documents-data]
-          (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
-        (io/delete-file file))))
+          ; common fields
+          pdf-content => (contains test-address)
+          pdf-content => (contains "Lohja")
+          pdf-content => (contains (loc (:state application)))
+          pdf-content => (contains "444-1-10-100")
+          pdf-content => (contains "01.01.2014")
+          pdf-content => (contains (:id application))
+          pdf-content => (contains "Testihenkilo Erkki")
+          pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
+          ; documents
+          (doseq [doc-data documents-data]
+            (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))))))
 
 (facts "Generated statement PDF is valid PDF/A"
   (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -154,19 +152,17 @@
       (fact {:midje/description (name lang)}
         (against-background
           [(mongo/update "statistics" {:type "pdfa-conversion"} anything :upsert true) => nil]
-          (let [file (files/temp-file (str "export-test-statement-pdfa-" (name lang)) ".pdf")
-                fis (io/output-stream file)]
-            (pdfa application :statements "2" lang fis)
-            (fact "File exists " (.exists file))
-            (fact "File not empty " (> (.length file) 1))
-            (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file))
-            (io/delete-file file)))))))
+          (files/with-temp-file file
+            (let [fis (io/output-stream file)]
+              (pdfa application :statements "2" lang fis)
+              (fact "File exists " (.exists file))
+              (fact "File not empty " (> (.length file) 1))
+              (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file)))))))))
 
 (facts "download pdfa-casefile"
   (let [application-id (itu/create-app-id pena)
-        {:keys [body] :as casefile-resp} (raw pena :pdfa-casefile :id application-id :lang "fi" :as :byte-array)
-        temp-file (files/temp-file "test-casefile" ".pdf")]
-    (try
+        {:keys [body] :as casefile-resp} (raw pena :pdfa-casefile :id application-id :lang "fi" :as :byte-array)]
+    (files/with-temp-file temp-file
       application-id => truthy
       casefile-resp => itu/http200?
 
@@ -176,7 +172,4 @@
       temp-file => is-pdf?
 
       (let [pdf-content (pdfbox/extract temp-file)]
-        pdf-content => (contains "Sipoo"))
-
-      (finally
-        (io/delete-file temp-file)))))
+        pdf-content => (contains "Sipoo")))))

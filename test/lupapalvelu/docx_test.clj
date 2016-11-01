@@ -11,9 +11,8 @@
   (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :zip "99999", :po "Stockholm"}
         contact {:firstName "Etu", :lastName "Suku"}
         account {:type "TEST", :price "BILLIONS!"}
-        pdf-stream (docx/yritystilisopimus company contact account 0)
-        pdf-file (files/temp-file "docx-test" "temp")]
-    (try
+        pdf-stream (docx/yritystilisopimus company contact account 0)]
+    (files/with-temp-file pdf-file
       (io/copy pdf-stream pdf-file)
       (let [pdf-content (pdfbox/extract pdf-file)]
         (fact "PDF contains date"
@@ -22,6 +21,4 @@
         (fact "PDF contains all model data"
           (doseq [[k v] (merge company contact account)]
             (fact {:midje/description k}
-              (ss/contains? pdf-content v) => true))))
-      (finally
-        (io/delete-file pdf-file)))))
+              (ss/contains? pdf-content v) => true)))))))

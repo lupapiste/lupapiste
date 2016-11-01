@@ -216,11 +216,10 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)
-                   temp-file       (files/temp-file filename "-verdict-attachment.tmp")]] ; deleted in finally
+                   current-application (domain/get-application-as (:id application) user)]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (try
+         (files/with-temp-file temp-file
            (if (= 200 (:status resp))
              (with-open [in (:body resp)]
                ; Copy content to a temp file to keep the content close at hand
@@ -237,9 +236,7 @@
                                               {:filename filename
                                                :size content-length
                                                :content temp-file}))
-             (error (str (:status resp) " - unable to download " url ": " resp)))
-           (finally
-             (io/delete-file temp-file :silently)))))
+             (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 

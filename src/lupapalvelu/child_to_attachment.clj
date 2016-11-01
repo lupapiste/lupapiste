@@ -74,13 +74,10 @@
 (defn create-attachment-from-children
   "Generates attachment from child and saves it. Returns created attachment version."
   [user application child-type child-id lang]
-  (let [pdf-file (files/temp-file (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")] ; deleted in finally
-    (try
-      (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang pdf-file)
-            file-options       (select-keys attachment-options [:filename :size :content])]
-        (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))
-      (finally
-        (io/delete-file pdf-file :silently)))))
+  (files/with-temp-file pdf-file
+    (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang pdf-file)
+          file-options       (select-keys attachment-options [:filename :size :content])]
+      (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))))
 
 (defn delete-child-attachment [app child-type id]
   (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))

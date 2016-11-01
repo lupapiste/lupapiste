@@ -260,20 +260,16 @@
               metadata (generate-archive-metadata application user)]
           (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
-        (let [libre-file (files/temp-file "casefile-to-archive" ".fodt") ; deleted in finally
-              xml-tmp-file (files/temp-file "case-file" "xml")] ; deleted in finally
-          (try
+        (files/with-temp-file libre-file
+          (files/with-temp-file xml-tmp-file
             (let [case-file-file (libre/generate-casefile-pdfa application :fi libre-file)
                   case-file-xml (tiedonohjaus/xml-case-file application :fi)
                   metadata (-> (generate-archive-metadata application user)
-                               (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
+                             (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
                   xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
               (spit xml-tmp-file case-file-xml)
               (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
-              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state))
-            (finally
-              (io/delete-file libre-file :silently)
-              (io/delete-file xml-tmp-file :silently)))))
+              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))))
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
