@@ -8,8 +8,14 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
 
   var _data = ko.observableArray([]);
 
+  function enrichAssignment(assignment) {
+    return _.merge(assignment,
+                   {createdState: _.find(assignment.states, function(state) { return state.type === "created"; }),
+                    currentState: _.maxBy(assignment.states, "timestamp")});
+  }
+
   self.assignments = ko.pureComputed(function() {
-    return _data();
+    return _.map(_data(), enrichAssignment);
   });
 
   /*
