@@ -79,7 +79,7 @@
         timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
 
-        history-entries (map #(application/history-entry % created user) (set [:sent next-state]))
+        history-entries (map #(application/history-entry % created user)  [:sent next-state])
 
         app-updates (merge
                       {:state next-state

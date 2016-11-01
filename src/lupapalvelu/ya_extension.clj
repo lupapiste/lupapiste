@@ -23,6 +23,8 @@
           (or (:appsLinkingToUs application)
               (:appsLinkingToUs (meta-fields/enrich-with-link-permit-data
                                 application)))))
+(defn ya-extension-app? [application]
+  (su/=as-kw (-> application :primaryOperation :name) :ya-jatkoaika))
 
 (defn has-extension-info-or-link-permits
   "Prechecker that fails if the application does not have any

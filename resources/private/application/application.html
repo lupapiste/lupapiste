@@ -245,7 +245,7 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()),
+                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                    class="link-btn">
