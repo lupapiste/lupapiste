@@ -67,11 +67,12 @@
         (create-assignment veikko sonja-id id ["target"] "Ei onnistu") => application-not-accessible?)
       (fact "after calling create-assignment, the assignment is created"
         (let [assignment-id (:id (create-assignment sonja ronja-id id ["target"] "Luotu?"))
-              assignment    (query sonja :assignment :assignmentId assignment-id)]
-          (:assignment assignment) => truthy
-          (sc/check Assignment (:assignment assignment)) => nil?
-          (-> assignment :assignment :creator :username)   => "sonja"
-          (-> assignment :assignment :recipient :username) => "ronja"))))
+              assignment    (:assignment (query sonja :assignment :assignmentId assignment-id))]
+          assignment => truthy
+          (sc/check Assignment assignment) => nil?
+          (-> assignment :states first :type)   => "created"
+          (-> assignment :states first :user :username)   => "sonja"
+          (-> assignment :recipient :username) => "ronja"))))
 
   (facts "Completing assignments"
     (let [{id :id}            (create-app sonja :propertyId sipoo-property-id)
@@ -87,7 +88,7 @@
         (complete-assignment sonja assignment-id2) => ok?)
 
       (fact "After calling complete-assignment, the assignment is completed"
-        (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :status) => "completed")))
+        (-> (query sonja :assignment :assignmentId assignment-id1) :assignment :states last :type) => "completed")))
 
   (facts "Assignment targets"
     (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
@@ -113,11 +114,11 @@
 
       (fact "text search finds approximate matches in description"
         (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
-          (->> (query sonja :assignments-search :searchText "uva eks" :status "all")
+          (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :status "active")
+          (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
                :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :status "completed")
+          (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
                :data :assignments) => empty?
           (->> (query sonja :assignments-search :searchText "not even close")
                :data :assignments (map :description)) => empty?)))))

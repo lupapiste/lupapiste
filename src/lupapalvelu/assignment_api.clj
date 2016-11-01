@@ -93,11 +93,10 @@
     application  :application}]
   (ok :id (assignment/insert-assignment {:application    (select-keys application
                                                                       [:id :organization :address :municipality])
-                                         :creator        (usr/summary user)
+                                         :state          (assignment/new-state "created" (usr/summary user) created)
                                          :recipient      (userid->summary recipientId)
                                          :target         target
-                                         :description    description}
-                                        created)))
+                                         :description    description})))
 
 (defcommand complete-assignment
   {:description "Complete an assignment"
