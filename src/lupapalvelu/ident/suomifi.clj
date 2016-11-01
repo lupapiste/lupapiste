@@ -8,7 +8,8 @@
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer [$set]]
             [lupapalvelu.security :as security]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [sade.env :as env]))
 
 (def session-initiator-by-lang
   {"fi" "/Shibboleth.sso/Login"
@@ -30,17 +31,26 @@
    :suomifi-vakinainenkotimainenlahiosoitepostinumero         :zip
    :suomifi-vakinainenkotimainenlahiosoitepostitoimipaikkas   :city})
 
+(def proxy-user-and-pass
+  {"saml-user" (-> (env/get-config) :shibboleth :proxy-key)})
+
 (defpage "/from-shib/login/:trid" {trid :trid}
   (let [sessionid (session-id)
-        headers  (->> (request/ring-request)
-                      :headers
-                      (util/map-keys (comp keyword str/lower-case)))
-        ident    (-> (select-keys headers (keys header-translations))
-                     (clojure.set/rename-keys header-translations)
-                     (assoc :stamp trid))]
-    (info ident)
-    (let [data (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {$set {:user ident}})]
-      (response/redirect (get-in data [:paths :success])))))
+        request (request/ring-request)
+        headers (->> request
+                     :headers
+                     (util/map-keys (comp keyword str/lower-case)))
+        proxy-key-matches (security/check-credentials-from-basic-auth request proxy-user-and-pass)
+        ident (-> (select-keys headers (keys header-translations))
+                  (clojure.set/rename-keys header-translations)
+                  (assoc :stamp trid))]
+    (if proxy-key-matches
+      (let [data (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {$set {:user ident}})]
+        (info ident)
+        (response/redirect (get-in data [:paths :success])))
+      (do
+        (error "Shibboleth forwarding proxy request authentication failed!")
+        (response/status 403 "unauthorized")))))
 
 (defpage [:get "/api/saml/login"] {:keys [success error cancel language]}
   (let [sessionid (session-id)
