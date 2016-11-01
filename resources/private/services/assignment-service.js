@@ -30,7 +30,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   }
 
   function assignmentsForApplication(id) {
-    if (applicationAuthModel.ok("assingments-for-application")) {
+    if (applicationAuthModel.ok("assignments-for-application")) {
       ajax.query("assignments-for-application", {id: id})
         .success(function(resp) {
           _data(resp.assignments);
