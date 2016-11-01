@@ -13,11 +13,4 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
     return "\"" + data.description + "\"";
   };
 
-  self.getCreator = function(assignment) {
-    var createdState = _.find(assignment.states, function(state) {
-      return state.type === "created";
-    });
-    return createdState.user;
-  };
-
 };
