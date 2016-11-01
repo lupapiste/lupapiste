@@ -706,7 +706,7 @@
   (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id id
           user-id (:id user)
-          {:keys [attachment-type attachment-id file-name content-type size created]} attachment
+          {:keys [attachment-type attachment-id file-name content-type size]} attachment
           attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
           maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
           same-attachments       (allowed-attachments-same-type application attachment-type)      ; attachments of same type
@@ -721,7 +721,7 @@
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
                                  :attachment-type attachment-type
-                                 :created created
+                                 :created (now)
                                  :required false
                                  :locked false}
                                 {:content ((:content attachment))
