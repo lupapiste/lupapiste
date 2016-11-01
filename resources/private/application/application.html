@@ -918,10 +918,11 @@
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
                                             <span data-bind="dateString: warrantyStart"
-                                                  data-test-id="warrantyStart-start-date"></span>
+                                                  data-test-id="warranty-start-date-text"></span>
                                             <!-- /ko -->
                                             <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input">
+                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input"
+                                                   data-test-id="warranty-start-date-edit">
                                             <!-- /ko -->
                                         </td>
                                         <td></td>
@@ -934,10 +935,11 @@
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
                                             <span data-bind="dateString: warrantyEnd"
-                                                  data-test-id="warrantyStart-end-date"></span>
+                                                  data-test-id="warranty-end-date-text"></span>
                                             <!-- /ko -->
                                             <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-                                            <input type="text" data-bind="datepicker: warrantyEnd" class="form-input">
+                                            <input type="text" data-bind="datepicker: warrantyEnd" class="form-input"
+                                                   data-test-id="warranty-end-date-edit">
                                             <!-- /ko -->
                                         </td>
                                         <td></td>
