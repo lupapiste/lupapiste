@@ -7,18 +7,22 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.states :as states]))
+            [lupapalvelu.states :as states]
+            [lupapalvelu.ya-extension :as yax]))
 
 (defquery tasks-tab-visible
-  {:parameters [id]
-   :states states/post-verdict-states
-   :org-authz-roles auth/reader-org-authz-roles
+  {:parameters       [id]
+   :states           states/post-verdict-states
+   :org-authz-roles  auth/reader-org-authz-roles
    :user-authz-roles auth/all-authz-roles
-   :user-roles #{:authority :applicant}
-   :pre-checks [(fn [{:keys [application]}]
-                    (when (foreman/foreman-app? application)
-                      (fail :error.foreman.no-tasks)))
-                (permit/validate-permit-type-is permit/R permit/YA)]}
+   :user-roles       #{:authority :applicant}
+   :pre-checks       [(fn [{:keys [application]}]
+                        (cond
+                          (foreman/foreman-app? application)
+                          (fail :error.foreman.no-tasks)
+                          (yax/ya-extension-app? application)
+                          (fail :error.ya-extension.no-tasks)))
+                      (permit/validate-permit-type-is permit/R permit/YA)]}
   [_])
 
 (defn- state-before-last-canceled [{{history :history} :application}]
@@ -47,4 +51,15 @@
    :pre-checks [(fn-> state-before-last-canceled
                       states/post-verdict-states
                       (when-not (fail :error.tabs.no-application-summary)))]}
+  [_])
+
+(defquery application-verdict-tab-visible
+  {:parameters [id]
+   :states states/all-application-states
+   :user-roles #{:authority :applicant}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles
+   :pre-checks [(fn [{:keys [application]}]
+                        (when (yax/ya-extension-app? application)
+                          (fail :error.ya-extension.no-verdict)))]}
   [_])
