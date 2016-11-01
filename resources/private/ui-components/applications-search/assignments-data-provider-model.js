@@ -21,15 +21,20 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
 
   self.pending = ko.observable(false);
 
-  var statusClasses = {
-    active: "lupicon-circle-attention",
+  var stateClasses = {
+    created: "lupicon-circle-attention",
     completed: "lupicon-circle-check"
   };
 
   function enrichAssignmentData(assignment) {
+    var createdState = _.find(assignment.states, function(state) {
+      return state.type === "created";
+    });
+    var currentState = _.maxBy(assignment.states, "timestamp");
     return _.merge(assignment, {
-      creatorName: assignment.creator.firstName + " " + assignment.creator.lastName,
-      statusClass: statusClasses[assignment.status],
+      currentState: currentState,
+      creatorName: createdState.user.firstName + " " + createdState.user.lastName,
+      statusClass: stateClasses[currentState.type],
       addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])
     });
   }
@@ -49,7 +54,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   var searchFields = ko.pureComputed(function() {
     return {
       searchText: self.searchFieldDelayed(),
-      status: self.searchResultType(),
+      state: self.searchResultType(),
       recipient: lupapisteApp.models.currentUser.username(),
       limit: self.limit(),
       skip: self.skip()

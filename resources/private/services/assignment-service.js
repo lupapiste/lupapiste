@@ -6,18 +6,6 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   "use strict";
   var self = this;
 
-   // {:id              ssc/ObjectIdStr
-   // :organization-id sc/Str
-   // :application-id  sc/Str
-   // :target          sc/Any
-   // :created         ssc/Timestamp
-   // :creator-id      ssc/ObjectIdStr
-   // :recipient-id    ssc/ObjectIdStr
-   // :completed       (sc/maybe ssc/Timestamp)
-   // :completer-id    (sc/maybe sc/Str)
-   // :active          sc/Bool
-   // :description     sc/Str})
-
   var _data = ko.observableArray([]);
 
   self.assignments = ko.pureComputed(function() {
