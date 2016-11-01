@@ -113,8 +113,8 @@
             (when-not (ss/blank? recipient)
               {:recipient.username recipient})
             (if (= state "all")
-              {:status {$ne "inactive"}}
-              {:status {$ne "inactive"}
+              {:status {$ne "canceled"}}
+              {:status {$ne "canceled"}
                :states.type state})])})
 
 (defn search [query skip limit]
