@@ -64,7 +64,7 @@ LUPAPISTE.ApplicationsSearchModel = function() {
       lLabel:           "application.assignment.search.label",
       dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
         sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-        searchResultType: "active",
+        searchResultType: "created",
         currentLimit:     self.currentLimit
       }),
       externalApi:      null,

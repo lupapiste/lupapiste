@@ -1,6 +1,6 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
-            [monger.operators :refer [$and $in $ne $options $or $regex $set]]
+            [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
             [monger.query :as query]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
@@ -22,7 +22,16 @@
   (merge query (assignment-in-user-organization-query user)))
 
 (def assignment-statuses
-  ["active" "inactive" "completed"])
+  "Assignment is active, when it's parent application is active.
+   When application is canceled, also assignment status is set to canceled."
+  ["active" "canceled"])
+
+(def assignment-state-types ["created" "completed"])
+
+(sc/defschema AssignmentState
+  {:type (apply sc/enum assignment-state-types)
+   :user usr/SummaryUser
+   :timestamp ssc/Timestamp})
 
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
@@ -31,25 +40,18 @@
                     :address      sc/Str
                     :municipality sc/Str}
    :target         sc/Any
-   :created        ssc/Timestamp
-   :creator        usr/SummaryUser
    :recipient      usr/SummaryUser
-   :completed      (sc/maybe ssc/Timestamp)
-   :completer      (sc/maybe usr/SummaryUser)
    :status         (apply sc/enum assignment-statuses)
+   :states         [AssignmentState]
    :description    sc/Str})
 
 (sc/defschema NewAssignment
-  (select-keys Assignment
-               [:application
-                :creator
-                :description
-                :recipient
-                :target]))
+  (-> (select-keys Assignment [:application :description :recipient :target])
+      (assoc :state AssignmentState)))
 
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
-   :status (apply sc/enum "all" assignment-statuses)
+   :state (apply sc/enum "all" assignment-state-types)
    :recipient (sc/maybe sc/Str)
    :skip   sc/Int
    :limit  sc/Int})
@@ -60,14 +62,20 @@
    :assignments    [Assignment]})
 
 (sc/defn ^:private new-assignment :- Assignment
-  [assignment :- NewAssignment
-   timestamp  :- ssc/Timestamp]
-  (merge assignment
-         {:id        (mongo/create-id)
-          :created   timestamp
-          :completed nil
-          :completer nil
-          :status    "active"}))
+  [assignment :- NewAssignment]
+  (-> assignment
+      (assoc :states [(:state assignment)])                 ; initial state
+      (dissoc :state)
+      (merge {:id        (mongo/create-id)
+              :status    "active"})))
+
+(sc/defn new-state :- AssignmentState
+  [type         :- (:type AssignmentState)
+   user-summary :- (:user AssignmentState)
+   created      :- (:timestamp AssignmentState)]
+  {:type type
+   :user user-summary
+   :timestamp created})
 
 ;;
 ;; Querying assignments
@@ -91,22 +99,23 @@
 
 (defn search-query [data]
   (merge {:searchText nil
-          :status "all"
+          :state "all"
           :recipient nil
           :skip   0
           :limit  100}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText status recipient]}]
+(defn- make-query [query {:keys [searchText state recipient]}]
   {$and
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
             (when-not (ss/blank? recipient)
               {:recipient.username recipient})
-            (if (= status "all")
-              {:status {$ne "inactive"}}
-              {:status status})])})
+            (if (= state "all")
+              {:status {$ne "canceled"}}
+              {:status {$ne "canceled"}
+               :states.type state})])})
 
 (defn search [query skip limit]
   (try
@@ -153,9 +162,8 @@
 ;;
 
 (sc/defn ^:always-validate insert-assignment :- ssc/ObjectIdStr
-  [assignment :- NewAssignment
-   timestamp  :- ssc/Timestamp]
-  (let [created-assignment (new-assignment assignment timestamp)]
+  [assignment :- NewAssignment]
+  (let [created-assignment (new-assignment assignment)]
     (mongo/insert :assignments created-assignment)
     (:id created-assignment)))
 
@@ -169,10 +177,8 @@
    (organization-query-for-user completer
                                 {:_id       assignment-id
                                  :status    "active"
-                                 :completed nil})
-   {$set {:completed timestamp
-          :status    "completed"
-          :completer (usr/summary completer)}}))
+                                 :states.type {$ne "completed"}})
+   {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
 (defn display-text-for-document
   "Return localized text for frontend. Text is schema name + accordion-fields if defined."
