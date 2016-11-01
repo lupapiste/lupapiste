@@ -39,7 +39,7 @@ LUPAPISTE.CurrentUser = function() {
   }
 
   function constructor(user) {
-    if( !_.isEmpty(user) && !user.language && !user.impersonating ) {
+    if( !_.isEmpty(user) && !user.language && !user.virtual ) {
       user.language = loc.getCurrentLanguage();
       ajax.command("update-user", _.pick(user, ["firstName", "lastName", "language"]))
         .success(function() {

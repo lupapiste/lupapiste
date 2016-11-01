@@ -52,7 +52,7 @@
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user full-user)
+    (ok :user (assoc full-user :virtual (usr/virtual-user? user)))
     (fail :error.user.not.found)))
 
 (defquery users
