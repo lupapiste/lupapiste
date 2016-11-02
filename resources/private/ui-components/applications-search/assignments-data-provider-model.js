@@ -57,6 +57,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       state: self.searchResultType(),
       recipient: lupapisteApp.models.currentUser.username(),
       limit: self.limit(),
+      sort: ko.mapping.toJS(self.sort),
       skip: self.skip()
     };
   });

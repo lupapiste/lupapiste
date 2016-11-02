@@ -32,6 +32,7 @@
               <td data-bind="text: $data.target"         data-test-col-name="location"></td>
               <td data-bind="text: $data.description"    data-test-col-name="description"></td>
               <td data-bind="text: $data.creatorName"    data-test-col-name="creator"></td>
+              <td data-bind="text: $data.created"        data-test-col-name="created"></td>
               <td data-test-col-name="complete">
                 <!-- ko ifnot: $data.completed -->
                 <button data-bind="click: $parent.markComplete($data.id),

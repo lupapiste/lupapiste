@@ -30,11 +30,15 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
                               {sortable: false}),
     util.createSortableColumn("fourth",  "application.assignment.subject",
                               {sortable: false}),
-    util.createSortableColumn("fifth",   null,    // Description
+    util.createSortableColumn("fifth",   "common.description",
                               {sortable: false}),
-    util.createSortableColumn("sixth",   "application.assignment.creator",
+    util.createSortableColumn("sixth", "application.assignment.creator",
                               {sortable: false}),
-    util.createSortableColumn("seventh", null,    // Mark complete
+    util.createSortableColumn("seventh",   "common.created",
+                              {sortable: true,
+                               sortField: "created",
+                               currentSort: self.dataProvider.sort}),
+    util.createSortableColumn("eighth", null,    // Mark complete
                               {sortable: false})
 
   ];
