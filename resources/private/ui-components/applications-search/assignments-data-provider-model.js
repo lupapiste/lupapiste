@@ -33,6 +33,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     var currentState = _.maxBy(assignment.states, "timestamp");
     return _.merge(assignment, {
       currentState: currentState,
+      createdState: createdState, 
       creatorName: createdState.user.firstName + " " + createdState.user.lastName,
       statusClass: stateClasses[currentState.type],
       addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])
