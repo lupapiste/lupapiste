@@ -14,6 +14,9 @@
   (def ^:private not-completed?
     (partial expected-failure? "error.assignment-not-completed"))
 
+  (def ^:private assignments-not-enabled?
+    (partial expected-failure? "error.assignments-not-enabled"))
+
   (def ^:private application-not-accessible?
     (partial expected-failure? "error.application-not-accessible"))
 
@@ -35,6 +38,9 @@
     (fact "only authorities can see assignments"
       (query sonja :assignments) => ok?
       (query pena :assignments)  => unauthorized?)
+
+    (fact "cannot query assignments if not enabled in organization"
+      (query veikko :assignments) => assignments-not-enabled?)
 
     (fact "authorities can only see assignments belonging to their organizations"
       (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
@@ -63,6 +69,11 @@
       (fact "only authorities can receive assignments"
         (create-assignment sonja pena-id id ["target"] "Penalle")        => invalid-receiver?
         (create-assignment sonja "does_not_exist_id" id ["target"] "Desc") => invalid-receiver?)
+
+      (fact "assignments cannot be created if not enabled in organization"
+        (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) ["target"] "Ei onnistu")
+        => assignments-not-enabled?)
+
       (fact "authorities can only create assignments for applications in their organizations"
         (create-assignment veikko sonja-id id ["target"] "Ei onnistu") => application-not-accessible?)
       (fact "after calling create-assignment, the assignment is created"
@@ -80,7 +91,7 @@
           {assignment-id2 :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")]
       (fact "Only authorities within the same organization can complete assignment"
         (complete-assignment pena assignment-id1)   => unauthorized?
-        (complete-assignment veikko assignment-id1) => not-completed?
+        (complete-assignment veikko assignment-id1) => assignments-not-enabled?
         (complete-assignment ronja assignment-id1)  => ok?
         (complete-assignment ronja assignment-id1)  => not-completed?)
 

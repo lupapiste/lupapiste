@@ -194,6 +194,11 @@
   [{org-authz :orgAuthz :as user}]
   (->> org-authz keys (map name) set))
 
+(defn organizations
+  "Query organizations for user user"
+  [user]
+  (org/get-organizations {:_id {$in (organization-ids user)}}))
+
 (defn organization-ids-by-roles
   "Returns a set of organization IDs where user has given roles.
   Note: the user must have gone through with-org-auth (the orgAuthz

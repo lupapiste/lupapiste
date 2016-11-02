@@ -80,6 +80,7 @@
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
    (sc/optional-key :app-required-fields-filling-obligatory) sc/Bool
+   (sc/optional-key :assignments-enabled) sc/Bool
    (sc/optional-key :areas) sc/Any
    (sc/optional-key :areas-wgs84) sc/Any
    (sc/optional-key :calendars-enabled) sc/Bool
