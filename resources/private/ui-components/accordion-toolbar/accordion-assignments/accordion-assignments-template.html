@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="accordion-assignments-template">
   <div class="accordion-assignments" data-bind="foreach: {data: assignments, afterRender: window.Stickyfill.rebuild}">
     <div class="assignment-container">
-      <div class="assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
+      <div class="assignment" data-test-id="accordion-assignment" data-bind="template: 'accordion-single-assignment-template'"></div>
     </div>
   </div>
 </script>
@@ -9,7 +9,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="accordion-single-assignment-template">
   <i class="lupicon-circle-attention"></i>
   <span class="assignment-header" data-bind="text: loc('application.assignment') + ' ' + ($index()+1) + ': '"></span>
-  <div class="assignment-text">
+  <div class="assignment-text" data-test-id="assignment-text">
     <span data-bind="text: $parent.descriptionText($data)"></span>
     <span> - </span>
     <span data-bind="fullName: createdState.user"></span>
