@@ -128,6 +128,9 @@
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))
 
+(defschema ApplicationId
+  (sc/pred validators/application-id? "Application ID"))
+
 ;; Schemas for blank or valid values
 
 (sc/defschema OptionalHttpUrl

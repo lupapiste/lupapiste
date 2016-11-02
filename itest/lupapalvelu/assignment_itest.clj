@@ -43,8 +43,8 @@
         (-> (query veikko :assignments) :assignments count) => zero?))
 
     (fact "assignments can be fetched by application id"
-      (let [{id1 :id} (create-app sonja :propertyId sipoo-property-id)
-            {id2 :id} (create-app ronja :propertyId sipoo-property-id)
+      (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
+            id2 (create-app-id ronja :propertyId sipoo-property-id)
             {assignment-id1-1 :id} (create-assignment sonja ronja-id id1 ["target"] "Hakemus 1")
             {assignment-id1-2 :id} (create-assignment sonja ronja-id id1 ["target"] "Hakemus 1")
             {assignment-id2-1 :id} (create-assignment sonja ronja-id id2 ["target"] "Hakemus 1")]
@@ -55,7 +55,7 @@
         (query veikko :assignments-for-application :id id1) => application-not-accessible?)))
 
   (facts "Creating assignments"
-    (let [{id :id} (create-app sonja :propertyId sipoo-property-id)]
+    (let [id (create-app-id sonja :propertyId sipoo-property-id)]
 
       (fact "only authorities can create assignments"
         (create-assignment sonja ronja-id id ["target"] "Kuvaus") => ok?
@@ -72,10 +72,30 @@
           (sc/check Assignment assignment) => nil?
           (-> assignment :states first :type)   => "created"
           (-> assignment :states first :user :username)   => "sonja"
-          (-> assignment :recipient :username) => "ronja"))))
+          (-> assignment :recipient :username) => "ronja"))
+
+      (fact "Assigments are canceled with the application"
+        (fact "initially active"
+          (->> (query sonja :assignments-for-application :id id)
+               :assignments
+               (map :status)) => ["active", "active"])
+
+        (command sonja :cancel-application-authority :id id :text "testing" :lang "fi") => ok?
+        (query sonja :assignments-for-application :id id) => fail?
+
+        (->> (query sonja :assignments)
+             :assignments
+             (filter (comp (partial = id) :id :application))
+             (map :status)) => ["canceled", "canceled"])
+
+      (fact "accessible after undo-cancellation"
+        (command sonja :undo-cancellation :id id) => ok?
+        (->> (query sonja :assignments-for-application :id id)
+             :assignments
+             (map :status)) => ["active", "active"])))
 
   (facts "Completing assignments"
-    (let [{id :id}            (create-app sonja :propertyId sipoo-property-id)
+    (let [id (create-app-id sonja :propertyId sipoo-property-id)
           {assignment-id1 :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")
           {assignment-id2 :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")]
       (fact "Only authorities within the same organization can complete assignment"
@@ -109,8 +129,8 @@
         (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
-    (let [{id1 :id} (create-app sonja :propertyId sipoo-property-id)
-          {id2 :id} (create-app ronja :propertyId sipoo-property-id)]
+    (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
+          id2 (create-app-id ronja :propertyId sipoo-property-id)]
 
       (fact "text search finds approximate matches in description"
         (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
@@ -121,4 +141,15 @@
           (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
                :data :assignments) => empty?
           (->> (query sonja :assignments-search :searchText "not even close")
-               :data :assignments (map :description)) => empty?)))))
+               :data :assignments (map :description)) => empty?))
+
+      (fact "no results after application is canceled"
+        (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?
+
+        (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
+            :data :assignments) => empty?)
+
+      (fact "get results again when cancalation is reverted"
+        (command sonja :undo-cancellation :id id1) => ok?
+        (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
+            :data :assignments count) => 1))))
