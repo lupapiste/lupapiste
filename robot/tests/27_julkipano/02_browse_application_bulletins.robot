@@ -60,10 +60,9 @@ Velho publishes the verdict and creates a new verdict bulletin
   Wait until  Application state should be  verdictGiven
   Bulletin shows as proclaimed and can be moved to verdict given
   Move bulletin to verdict given with appeal period starting today
-  Go to bulletins page
 
 Bulletins should be filterable by state
-  Reload Page
+  Go to bulletins page
   Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Kuulutettavana
 
   Select From Autocomplete By Test Id  states-filter-component  Kuulutettavana

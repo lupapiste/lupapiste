@@ -228,17 +228,25 @@
             (let [{vid :verdict-id} (give-verdict olli (:id oulu-app) :verdictId "12330-2016")
                   ts-now (now)
                   _ (upload-attachment-to-target olli (:id oulu-app) nil true vid "verdict")
-                  _ (command olli :move-to-verdict-given
-                             :id (:id oulu-app)
-                             :verdictGivenAt ts-now
-                             :appealPeriodStartsAt ts-now
-                             :appealPeriodEndsAt (+ 1 ts-now)
-                             :verdictGivenText "foo")
+                  resp (command olli :move-to-verdict-given
+                                     :id (:id oulu-app)
+                                     :verdictGivenAt ts-now
+                                     :appealPeriodStartsAt ts-now
+                                     :appealPeriodEndsAt (+ 1 ts-now)
+                                     :verdictGivenText "foo")
                   bulletin (query-bulletin pena (:id oulu-app))]
+              (fact "move-to-verdict-given ok"
+                resp => ok?)
               (fact "bulletin state is 'verdictGiven'"
                 (:bulletinState bulletin) => "verdictGiven")
               (fact "bulletin contains an attachment that is linked to the verdict"
-                (:attachments bulletin) => (has some (contains {:target {:type "verdict" :id vid}})))))
+                (:attachments bulletin) => (has some (contains {:target {:type "verdict" :id vid}})))
+              (fact "State filter in search still works"
+                (:states (query pena :application-bulletin-states)) => (just ["proclaimed" "verdictGiven"])
+                (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
+                  (count data) => 1)
+                (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "verdictGiven" :sort nil)]
+                  (count data) => 1))))
 
           (facts "Paging"
             (dotimes [_ 20]
