@@ -168,6 +168,12 @@
 
 (register-generator ssc/IpAddress ip-address)
 
+
+(def application-id (gen/fmap (fn [v] (str "LP" \- (s/join (subvec v 0 3)) \- (s/join (subvec v 3 7)) \- (s/join (subvec v 7 12))))
+                              (gen/vector single-number-int 12)))
+
+(register-generator ssc/ApplicationId application-id)
+
 (def http-protocol (gen/elements ["http://" "https://"]))
 (def http-url
   (gen/fmap
