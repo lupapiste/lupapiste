@@ -55,6 +55,9 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
                                                    target: [self.selectedTargetGroup(), self.selectedTargetId()],
                                                    description: self.description()});
     self.editorVisible(false);
+    self.selectedTargetGroup(undefined);
+    self.selectedTargetId(undefined);
+    self.description(undefined);
   };
 
 };
