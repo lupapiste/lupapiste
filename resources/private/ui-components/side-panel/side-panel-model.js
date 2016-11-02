@@ -34,7 +34,7 @@ LUPAPISTE.SidePanelModel = function(params) {
                               event: event});
   }
 
-    self.showConversationPanel.subscribe( function() {
+  self.showConversationPanel.subscribe( function() {
     if( self.showNoticePanel()) {
       track( "openConversation");
     }
@@ -104,6 +104,8 @@ LUPAPISTE.SidePanelModel = function(params) {
     hub.send( "side-panel-closing");
     _.each( panelFlags, flagOff );
   };
+
+  self.addEventListener("contextService", "leave", self.closeSidePanel);
 
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
 

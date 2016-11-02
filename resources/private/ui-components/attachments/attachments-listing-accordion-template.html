@@ -13,7 +13,7 @@
                 text: $parent.accordionName">
     </rollup-status-button>
       <div class="rollup__open attachments-accordion-content">
-        <!-- ko if: !_.isEmpty( $parent.groups() ) -->
+        <!-- ko ifnot: util.isEmpty( $parent, "groups" ) -->
         <div data-bind="foreach: $parent.groups() ">
           <div class="attachments-accordion-content-part"
                data-bind="component: { name: 'attachments-listing-accordion',
@@ -23,7 +23,7 @@
           </div>
         </div>
         <!-- /ko -->
-        <!-- ko if: _.isEmpty( $parent.groups() ) -->
+        <!-- ko if: util.isEmpty( $parent, "groups" ) -->
         <div class="rollup-accordion-content-part">
           <div data-bind="component: { name: 'attachments-table',
                                        params: $parent.filteredAttachments }"></div>

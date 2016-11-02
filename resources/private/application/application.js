@@ -373,13 +373,6 @@
     } else {
       hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
-      if (newId !== currentId) { // close sidepanel if it's open
-        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
-        if (!_.isEmpty(sidePanel)) {
-          var target = sidePanel.attr("id").split("-")[0];
-          $("#open-" + target + "-side-panel").click();
-        }
-      }
       currentId = newId;
 
       repository.load(currentId, applicationModel.pending, function(application) {

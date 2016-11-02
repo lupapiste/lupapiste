@@ -2,18 +2,19 @@
     (:require [clojure.java.io :as io]
               [midje.sweet :refer :all]
               [midje.util :refer [testable-privates]]
+              [pdfboxing.common :refer [is-pdf?]]
               [pdfboxing.text :as pdfbox]
+              [sade.files :as files]
               [sade.util :as util]
               [lupapalvelu.test-util :refer [dummy-doc]]
-              [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application] :as itu]
+              [lupapalvelu.itest-util :refer [apply-remote-minimal pena query-application raw] :as itu]
               [lupapalvelu.pdf.pdf-export :as pdf-export]
               [lupapalvelu.pdf.pdfa-conversion :as pdfa-conversion]
               [lupapalvelu.i18n :refer [with-lang loc]]
               [lupapalvelu.mongo :as mongo]
               [lupapalvelu.i18n :as i18n]
               [lupapalvelu.domain :as domain]
-              [lupapalvelu.document.schemas :as schemas])
-  (:import (java.io File FileOutputStream)))
+              [lupapalvelu.document.schemas :as schemas]))
 
 (apply-remote-minimal)
 
@@ -109,34 +110,32 @@
                             :primaryOperation    test-primaryOperation
                             :secondaryOperations test-secondaryoperations})
 
-        lang        "fi"
-        file        (File/createTempFile "pdf-export-itest-" ".pdf")]
+        lang        "fi"]
 
+    (files/with-temp-file file
+      (with-lang lang
+        (fact "Test data assertions (just in case)"
+          (loc (str "municipality." test-municipality)) => "Lohja"
+          (loc (str "operations.kerrostalo-rivitalo")) => "Asuinkerrostalon tai rivitalon rakentaminen"
+          (loc (str "operations.aita")) => "Aidan rakentaminen")
 
-    (with-lang lang
-      (fact "Test data assertions (just in case)"
-        (loc (str "municipality." test-municipality)) => "Lohja"
-        (loc (str "operations.kerrostalo-rivitalo")) => "Asuinkerrostalon tai rivitalon rakentaminen"
-        (loc (str "operations.aita")) => "Aidan rakentaminen")
+        (pdf-export/generate application lang file)
 
-      (pdf-export/generate application lang file)
+        (let [pdf-content (pdfbox/extract file)
+              documents-data (map :data (:documents application))]
 
-      (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
-            documents-data (map :data (:documents application))]
-
-        ; common fields
-        pdf-content => (contains test-address)
-        pdf-content => (contains "Lohja")
-        pdf-content => (contains (loc (:state application)))
-        pdf-content => (contains "444-1-10-100")
-        pdf-content => (contains "01.01.2014")
-        pdf-content => (contains (:id application))
-        pdf-content => (contains "Testihenkilo Erkki")
-        pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
-        ; documents
-        (doseq [doc-data documents-data]
-          (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
-        (.delete file))))
+          ; common fields
+          pdf-content => (contains test-address)
+          pdf-content => (contains "Lohja")
+          pdf-content => (contains (loc (:state application)))
+          pdf-content => (contains "444-1-10-100")
+          pdf-content => (contains "01.01.2014")
+          pdf-content => (contains (:id application))
+          pdf-content => (contains "Testihenkilo Erkki")
+          pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
+          ; documents
+          (doseq [doc-data documents-data]
+            (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))))))
 
 (facts "Generated statement PDF is valid PDF/A"
   (let [schema-names (remove ignored-schemas (keys (schemas/get-schemas 1)))
@@ -153,10 +152,24 @@
       (fact {:midje/description (name lang)}
         (against-background
           [(mongo/update "statistics" {:type "pdfa-conversion"} anything :upsert true) => nil]
-          (let [file (File/createTempFile (str "export-test-statement-pdfa-" (name lang)) ".pdf")
-                fis (FileOutputStream. file)]
-            (pdfa application :statements "2" lang fis)
-            (fact "File exists " (.exists file))
-            (fact "File not empty " (> (.length file) 1))
-            (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file))
-            (.delete file)))))))
+          (files/with-temp-file file
+            (let [fis (io/output-stream file)]
+              (pdfa application :statements "2" lang fis)
+              (fact "File exists " (.exists file))
+              (fact "File not empty " (> (.length file) 1))
+              (fact "File is valid PDF/A " (pdfa-conversion/convert-file-to-pdf-in-place file)))))))))
+
+(facts "download pdfa-casefile"
+  (let [application-id (itu/create-app-id pena)
+        {:keys [body] :as casefile-resp} (raw pena :pdfa-casefile :id application-id :lang "fi" :as :byte-array)]
+    (files/with-temp-file temp-file
+      application-id => truthy
+      casefile-resp => itu/http200?
+
+      (with-open [out (io/output-stream temp-file)]
+        (.write out body))
+
+      temp-file => is-pdf?
+
+      (let [pdf-content (pdfbox/extract temp-file)]
+        pdf-content => (contains "Sipoo")))))

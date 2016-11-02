@@ -42,6 +42,12 @@
                           :name         {:fi "Tampere" :sv "Tammerfors"}
                           :municipality "837"}])
     (fact (-> r first :location keys) => (just #{:x :y})))
+
+  (facts "empty query, empty response"
+    (let [{:keys [suggestions data]} (-> (get-addresses-proxy {:params {}}) :body (json/decode true))]
+      suggestions => empty?
+      data => empty?))
+
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])

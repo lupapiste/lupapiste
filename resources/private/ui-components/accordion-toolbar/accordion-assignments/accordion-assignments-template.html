@@ -10,7 +10,7 @@
   <div class="assignment-text">
   <span data-bind="text: $parent.descriptionText($data)"></span>
   <span> - </span>
-  <span data-bind="fullName: creator"></span>
+  <span data-bind="fullName: $parent.getCreator($data)"></span>
   </div>
 </script>
 

@@ -14,4 +14,4 @@
   (let [areas (plocation/property-location-info propertyIds)]
     (if (seq areas)
       (ok :wkts (map #(select-keys % [:kiinttunnus :wkt]) areas))
-      (fail :error.ktj-down))))
+      (fail :error.integration.ktj-down))))

@@ -4,11 +4,12 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
-            [sade.util :refer [=as-kw not=as-kw] :as util]
-            [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [=as-kw not=as-kw] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -608,10 +609,12 @@
         (append-stream zip (str fileId "_" filename) in))
       (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
-(defn get-all-attachments!
-  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+(defn ^java.io.File get-all-attachments!
+  "Returns attachments as zip file.
+   If application and lang, application and submitted application PDF are included.
+   Callers responsibility is to delete the returned file when done with it!"
   [attachments & [application lang]]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       ; Add all attachments:
@@ -636,17 +639,17 @@
       (with-open [in ((:content file))]
         (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
 
-(defn get-attachments-for-user!
-  "Returns the latest corresponding attachment files readable by the user as a ZIP file"
+(defn ^java.io.InputStream get-attachments-for-user!
+  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
   [user attachments]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       (doseq [attachment attachments]
         (maybe-append-gridfs-file! zip user (-> attachment :versions last)))
       (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    temp-file))
+    (files/temp-file-input-stream temp-file)))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
@@ -676,13 +679,12 @@
       (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-            temp-pdf (File/createTempFile fileId ".tmp")
             file-content (mongo/download fileId)]
         (if (nil? file-content)
           (do
             (error "PDF/A conversion: No mongo file for fileId" fileId)
             (fail :error.attachment-not-found))
-          (try
+          (files/with-temp-file temp-pdf
             (with-open [content ((:content file-content))]
               (io/copy content temp-pdf)
               (upload-and-attach! {:application application :user user}
@@ -692,9 +694,7 @@
                                    :created created
                                    :stamped stamped
                                    :original-file-id fileId}
-                                  {:content temp-pdf :filename filename}))
-            (finally
-              (io/delete-file temp-pdf :silently))))))))
+                                  {:content temp-pdf :filename filename}))))))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))
