@@ -139,6 +139,11 @@ Bulletin shows as verdict given and ce be moved to final
   Open tab  bulletin
   Wait until  Element Text Should Be  xpath=//p[@data-test-id='bulletin-state-paragraph']  Hakemuksen tila Julkipano-sivustolla: Päätös annettu  Hakemus julkaistaan seuraavaksi tilaan: Lainvoimainen
 
+Bulletin verdict detail list should have rows
+  [Arguments]  ${rows}
+  Wait until  Element should be visible  //table[@id="application-verdict-details"]/tbody/tr
+  Table with id should have rowcount  application-verdict-details  ${rows}
+
 Move bulletin to final
   ${MONTH_FROM_NOW} =  Add time to date  ${CURRENT_DATETIME}  30 days
   ${OFFICIAL_DATE} =   Add time to date  ${MONTH_FROM_NOW}  1 days  %d.%m.%Y
