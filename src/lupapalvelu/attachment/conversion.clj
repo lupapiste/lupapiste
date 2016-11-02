@@ -52,49 +52,40 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
-      (try
-        (io/copy content temp)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a (files/temp-file-input-stream temp) {:application application :filename filename})]
-          (cond
-            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content (:output-file processing-result)}
-            (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
-            (:pdfa? processing-result) {:archivable true
-                                        :filename (files/filename-for-pdfa filename)
-                                        :archivabilityError nil
-                                        :content (:output-file processing-result)
-                                        :autoConversion (:autoConversion processing-result)}))
-        (finally
-          (io/delete-file temp :silently))))
+    (files/with-temp-file temp
+      (io/copy content temp)
+      (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
+        (cond
+          (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content (:output-file processing-result)}
+          (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
+          (:pdfa? processing-result) {:archivable true
+                                      :filename (files/filename-for-pdfa filename)
+                                      :archivabilityError nil
+                                      :content (:output-file processing-result)
+                                      :autoConversion (:autoConversion processing-result)})))
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (let [tmp-file (File/createTempFile "lupapiste-attach-tif-file" ".tif")]
-    (try
-      (io/copy content tmp-file)
-      (let [valid? (tiff-validation/valid-tiff? tmp-file)]
-        {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})
-      (finally
-        (io/delete-file tmp-file :silently)))))
+  (files/with-temp-file tmp-file
+    (io/copy content tmp-file)
+    (let [valid? (tiff-validation/valid-tiff? tmp-file)]
+      {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})))
 
 (defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
   (if (and (env/feature? :convert-all-attachments)
            (pdf-conversion/pdf-a-required? (:organization application)))
-    (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (File/createTempFile "lupapiste-attach-wrapped-jpeg-file" ".pdf")
-          pdf-title filename]
-      (try
-        (io/copy content tmp-file)
-        (pdf-wrapper/wrap! tmp-file pdf-file pdf-title)
-        {:archivable true
-         :archivabilityError nil
-         :autoConversion true
-         :content (files/temp-file-input-stream pdf-file)
-         :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
-        (catch Exception e
-          {:archivable false :archivabilityError :not-validated})
-        (finally
-          (io/delete-file tmp-file :silently))))
+    (files/with-temp-file tmp-file
+      (let [pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf") ] ; deleted via temp-file-input-stream
+        (try
+          (io/copy content tmp-file)
+          (pdf-wrapper/wrap! tmp-file pdf-file filename)
+          {:archivable true
+           :archivabilityError nil
+           :autoConversion true
+           :content (files/temp-file-input-stream pdf-file)
+           :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+          (catch Exception e
+            {:archivable false :archivabilityError :not-validated}))))
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]

@@ -1,12 +1,13 @@
 (ns lupapalvelu.pdf.pdfa-conversion
   (:require [clojure.java.shell :as shell]
+            [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
-            [clojure.java.io :as io]
             [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.statistics :as statistics]
             [lupapalvelu.organization :as organization]
             [sade.files :as files])
@@ -89,13 +90,14 @@
      cl))
 
 (defn- run-pdf-to-pdf-a-conversion [input-file output-file opts]
+  {:pre [(instance? File input-file) (instance? File output-file)]}
   (let [cl (compliance-level input-file output-file opts)
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. ^String output-file)
+                  :output-file (io/file output-file)
                   :autoConversion (not (pdf-was-already-compliant? log-lines))}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
@@ -134,29 +136,29 @@
          (statistics/store-pdf-conversion-page-count db-key))))
 
 (defn- analyze-and-convert-to-pdf-a [pdf-file {:keys [target-file-path] :as opts}]
+  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (try
-      (info "Trying to convert PDF to PDF/A")
-      (let [stream? (instance? InputStream pdf-file)
-            file-path (if stream?
-                        (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
-                          (io/copy pdf-file temp-file)
-                          (.getCanonicalPath temp-file))
-                        (.getCanonicalPath pdf-file))
-            pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
-            conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (store-converted-page-count conversion-result file-path)
-        (if (:pdfa? conversion-result)
-          (if (pos? (-> conversion-result :output-file .length))
-            (info "Converted to PDF/A " pdf-a-file-path)
-            (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
-          (info "Could not convert the file to PDF/A"))
-        (if stream?
-          (io/delete-file (io/file file-path) :silently))
-        conversion-result)
-      (catch Exception e
-        (error "Error in PDF/A conversion, using original" e)
-        {:pdfa? false}))
+    ; run-pdf-to-pdf-a-conversion operates on files.
+    ; Content must be copied to temp file if the input is an InputStream (not a File))
+    (let [temp-file (if (instance? InputStream pdf-file) (files/temp-file "lupapiste-pdfa-stream-conversion" ".pdf"))] ; deleted in finally
+      (try
+        (when temp-file (io/copy pdf-file temp-file))
+        (let [file-path (.getCanonicalPath (or temp-file pdf-file))
+              pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
+              conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
+          (store-converted-page-count conversion-result file-path)
+          (if (:pdfa? conversion-result)
+            (if (pos? (-> conversion-result :output-file .length))
+              (info "Converted to PDF/A " pdf-a-file-path)
+              (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
+            (info "Could not convert the file to PDF/A"))
+          conversion-result)
+        (catch Exception e
+          (error "Error in PDF/A conversion, using original" e)
+          {:pdfa? false})
+        (finally
+          (when temp-file
+            (io/delete-file temp-file :silently)))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
         {:pdfa? false})))
 
@@ -177,23 +179,21 @@
 
 (defn file-is-valid-pdfa? [pdf-file]
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
-          file-path (if (instance? InputStream pdf-file)
-                      (do (io/copy pdf-file temp-file)
-                          (.getCanonicalPath temp-file))
-                      (.getCanonicalPath pdf-file))
-          output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
-          {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
-      (io/delete-file temp-file :silently)
-      (io/delete-file output-file :silently)
-      (= exit 0))
+    (files/with-temp-file temp-file
+      (files/with-temp-file output-file
+        (let [file-path (if (instance? InputStream pdf-file)
+                          (do (io/copy pdf-file temp-file)
+                              (.getCanonicalPath temp-file))
+                          (.getCanonicalPath pdf-file))
+              {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
+          (= exit 0))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
         false)))
 
 (defn convert-file-to-pdf-in-place [src-file]
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
-  (let [temp-file (File/createTempFile "lupapiste.pdf.a." ".tmp")]
+  (files/with-temp-file temp-file
     (try
       (let [conversion-result (convert-to-pdf-a src-file {:target-file-path (.getCanonicalPath temp-file)})]
         (cond
@@ -206,9 +206,7 @@
       (catch Exception e
         (do
           (error "Unknown exception in PDF/A conversion, file was not converted." e)
-          false))
-      (finally
-        (io/delete-file temp-file :silently)))))
+          false)))))
 
 (defn pdf-a-required? [organization-or-id]
   (cond

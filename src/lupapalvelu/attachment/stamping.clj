@@ -8,9 +8,9 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.job :as job]
             [lupapalvelu.i18n :as i18n]
+            [sade.files :as files]
             [sade.util :refer [future* fn-> fn->>] :as util]
-            [sade.strings :as ss])
-  (:import [java.io File]))
+            [sade.strings :as ss]))
 
 (defn status [job-id version timeout]
   (job/status job-id (util/->long version) (util/->long timeout)))
@@ -27,9 +27,8 @@
 
 (defn- update-stamp-to-attachment! [stamp file-info {:keys [application user created] :as context}]
   (let [{:keys [attachment-id fileId filename stamped-original-file-id]} file-info
-        options (select-keys context [:x-margin :y-margin :transparency :page])
-        file (File/createTempFile "lupapiste.stamp." ".tmp")]
-    (try
+        options (select-keys context [:x-margin :y-margin :transparency :page])]
+    (files/with-temp-file file
       (with-open [out (io/output-stream file)]
         (stamper/stamp stamp fileId out options))
       (debug "uploading stamped file: " (.getAbsolutePath file))
@@ -41,9 +40,7 @@
                      {:filename filename :content file
                       :size (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)
-        (:fileId result))
-      (finally
-        (io/delete-file file :silently)))))
+        (:fileId result)))))
 
 (defn- asemapiirros? [{{type :type-id} :attachment-type}]
   (= :asemapiirros (keyword type)))

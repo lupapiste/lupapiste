@@ -14,6 +14,26 @@
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
+(defn ^java.io.File temp-file
+  "Creates a file that will be deleted when the JVM exits.
+   Note: consider using with-temp-file instead!"
+  ([^String prefix ^String suffix]
+    (doto (java.io.File/createTempFile prefix suffix) (.deleteOnExit)))
+  ([^String prefix ^String suffix ^java.io.File directory]
+    (doto (java.io.File/createTempFile prefix suffix directory) (.deleteOnExit))))
+
 (defn filename-for-pdfa [filename]
   {:pre [(string? filename)]}
   (ss/replace filename #"(-PDFA)?\.(?i)pdf$" ".pdf"))
+
+(defmacro with-temp-file
+  "Creates and finally deletes a temp file.
+   Given symbol sym hold the temp file and is visible in macro body."
+  [sym & body]
+  (assert (symbol? sym))
+  `(let [prefix# (str ~(str *ns*) \_ (:line ~(meta &form)) \_)
+         ~sym (temp-file prefix# ".tmp")]
+     (try
+       (do ~@body)
+       (finally
+         (io/delete-file ~sym :silently)))))

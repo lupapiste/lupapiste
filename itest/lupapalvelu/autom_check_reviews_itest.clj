@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [sade.core :refer [now fail]]
+            [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.xml :as sxml]
@@ -27,8 +28,7 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as app-from-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.user :as usr])
-  (:import [java.io File]
-           [org.xml.sax SAXParseException]))
+  (:import [org.xml.sax SAXParseException]))
 
 (def db-name (str "test_autom-check-reviews-itest_" (now)))
 
@@ -279,12 +279,9 @@
       (verdict/save-review-updates batchrun-user application (:updates read-result) (:added-tasks-with-updated-buildings read-result))
       (let [updated-application (domain/get-application-no-access-checking application-id)
             last-attachment-id (last (get-attachment-ids updated-application))
-            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)
-            temp-pdf-path (File/createTempFile "review-test" ".tmp")]
-        (try
+            last-attachment-file-id (att/attachment-latest-file-id updated-application last-attachment-id)]
+        (files/with-temp-file temp-pdf-path
           (with-open [content-fios ((:content (mongo/download last-attachment-file-id)))]
             (pdftk/uncompress-pdf content-fios (.getAbsolutePath temp-pdf-path)))
           (re-seq #"(?ms)\(Kiinteist.tunnus\).{1,100}18600303560006" (slurp temp-pdf-path :encoding "ISO-8859-1")) => not-empty
-          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy
-          (finally
-            (io/delete-file temp-pdf-path)))))))
+          (re-seq #"(?ms)\(Tila\).{1,100}lopullinen" (slurp temp-pdf-path :encoding "ISO-8859-1")) => truthy)))))

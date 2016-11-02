@@ -1,16 +1,15 @@
 (ns lupapalvelu.child-to-attachment
-  (:require
-    [lupapalvelu.attachment :as attachment]
-    [lupapalvelu.pdf.pdf-export :as pdf-export]
-    [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
-    [sade.core :refer [def- now]]
-    [sade.strings :as ss]
-    [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
-    [clojure.pprint :refer [pprint]]
-    [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
-    [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
-    [clojure.java.io :as io]
-    [sade.util :as util])
+  (:require [clojure.java.io :as io]
+            [taoensso.timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
+            [sade.core :refer [def- now]]
+            [sade.files :as files]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre-client]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion])
   (:import (java.io File FileOutputStream)))
 
 (defn- get-child [application type id]
@@ -75,13 +74,10 @@
 (defn create-attachment-from-children
   "Generates attachment from child and saves it. Returns created attachment version."
   [user application child-type child-id lang]
-  (let [pdf-file (File/createTempFile (str "pdf-generation-" (name lang) "-" (name child-type) "-") ".pdf")]
-    (try
-      (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang pdf-file)
-            file-options       (select-keys attachment-options [:filename :size :content])]
-        (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))
-      (finally
-        (io/delete-file pdf-file :silently)))))
+  (files/with-temp-file pdf-file
+    (let [attachment-options (generate-attachment-from-child! user application child-type child-id lang pdf-file)
+          file-options       (select-keys attachment-options [:filename :size :content])]
+      (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))))
 
 (defn delete-child-attachment [app child-type id]
   (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
