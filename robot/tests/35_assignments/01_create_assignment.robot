@@ -26,7 +26,7 @@ Create assignment button is visible in parties tab
   Open tab  parties
   Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor']
 
-Sonja creates assignment for Ronja about suunnttelija
+Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
 
 Sonja sees assignment in document
