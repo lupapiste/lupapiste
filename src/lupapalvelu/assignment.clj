@@ -53,6 +53,8 @@
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
    :recipient (sc/maybe sc/Str)
+   :sort {:asc sc/Bool
+          :field sc/Str}
    :skip   sc/Int
    :limit  sc/Int})
 
