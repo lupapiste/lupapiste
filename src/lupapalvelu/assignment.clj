@@ -16,7 +16,7 @@
 ;; Helpers and schemas
 
 (defn- assignment-in-user-organization-query [user]
-  {:application.organization {$in (into [] (usr/organization-ids-by-roles user #{:authority}))}})
+  {:application.organization {$in (usr/organization-ids-by-roles user #{:authority})}})
 
 (defn- organization-query-for-user [user query]
   (merge query (assignment-in-user-organization-query user)))
