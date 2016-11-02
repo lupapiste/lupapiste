@@ -353,6 +353,15 @@ LUPAPISTE.AttachmentsService = function() {
       .call();
   };
 
+  self.convertToPdfA = function(attachmentId) {
+    ajax
+      .command("convert-to-pdfa", {id: self.applicationId(), attachmentId: attachmentId})
+      .success(function() {
+        self.queryOne(attachmentId, {triggerCommand: "convert-to-pdfa"});
+      })
+      .call();
+  };
+
   function downloadRedirect( uri ) {
     if( location ) {
       location.assign( uri );

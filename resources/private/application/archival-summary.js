@@ -1,8 +1,13 @@
 (function() {
   "use strict";
 
+  var attachmentsService = lupapisteApp.services.attachmentsService;
+
   function GroupModel(groupName, groupDesc, attachments, building) {
     var self = this;
+
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
     self.attachments = ko.observableArray(attachments);
     self.groupName = groupName;
     var fullGroupDesc = "";
@@ -13,7 +18,7 @@
       fullGroupDesc += " - " + building;
     }
     // computed name, depending if attachments belongs to operation or not
-    self.name = ko.computed( function() {
+    self.name = self.disposedComputed( function() {
       if (loc.hasTerm(["operations", self.groupName])) {
         return loc(["operations", self.groupName]) + fullGroupDesc;
       } else {
@@ -22,212 +27,203 @@
     });
   }
 
-  var getPreAttachments = function(attachments) {
-    return _.filter(attachments, function(attachment) {
-      return !_.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
-        attachment.latestVersion;
-    });
-  };
-
-  var getPostAttachments = function(attachments) {
-    return _.filter(attachments, function(attachment) {
-      return _.includes(LUPAPISTE.config.postVerdictStates, ko.unwrap(attachment.applicationState)) &&
-          attachment.latestVersion;
-    });
-  };
-
-  var filterByArchiveStatus = function(attachments, keepArchived) {
-    return _.filter(attachments, function(attachment) {
-      var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
-      if (!arkistointi || arkistointi === "ei") {
-        return !keepArchived;
-      } else {
-        return keepArchived;
-      }
-    });
-  };
+  function isArchived(attachment) {
+    var arkistointi = util.getIn(attachment, ["metadata", "sailytysaika", "arkistointi"]);
+    return arkistointi && arkistointi !== "ei";
+  }
 
   var generalAttachmentsStr = "attachments.general";
 
-  var getGroupList = function(attachments, buildings) {
+  var groupLists = {};
+
+  function getGroupList(groupListId, attachments, buildings) {
+    // Group list for attachments grouped by archived/not-archived and pre-/postverdict
     if (_.isEmpty(attachments)) {
       return [];
     }
-    var grouped = _.groupBy(attachments, function(attachment) {
-      return _.isObject(attachment.op) && attachment.op.id ? attachment.op.id() : generalAttachmentsStr;
-    });
-    var mapped = _.map(grouped, function(attachments, group) {
-      if (group === generalAttachmentsStr) {
-        return new GroupModel(group, null, attachments);
+
+    function getGroup(groupList, attachments, group) {
+      if (!groupList.initializedGroups[group]) {
+        var op  = util.getIn(attachments, [0, "op"]);
+        var groupModel = group === generalAttachmentsStr ? new GroupModel(group, null, attachments) : new GroupModel(op.name, op.description, attachments, buildings[op.id]);
+        groupList.initializedGroups[group] = groupModel;
       } else {
-        var att = _.head(attachments);
-        return new GroupModel(ko.unwrap(att.op.name), ko.unwrap(att.op.description), attachments, buildings[att.op.id()]);
+        groupList.initializedGroups[group].attachments(attachments);
       }
-    });
-    return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
-      if ( group.groupName === generalAttachmentsStr ) {
-        return -1;
-      } else {
-        return (_.head(group.attachments())).op.created();
-      }
-    });
-  };
+      return groupList.initializedGroups[group];
+    }
 
-  var openAttachmentIds = [];
+    var groupList = groupLists[groupListId] || { initializedGroups: {} };
+    groupLists[groupListId] = groupList;
 
-  var isConvertableType = function (contentType) {
-    return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
-  };
-
-  var addAdditionalFieldsToAttachments = function(attachments, applicationId) {
-    return _.map(attachments, function(attachment) {
-      if (!_.isFunction(attachment.metadata)) {
-        attachment.metadata = ko.observable(attachment.metadata);
-      }
-      if (attachment.id) {
-        var idIndex = openAttachmentIds.indexOf(ko.unwrap(attachment.id));
-        attachment.showAdditionalControls = ko.observable(idIndex !== -1);
-        if (idIndex > -1) {
-          openAttachmentIds.splice(idIndex, 1);
+    return  _(attachments)
+      .groupBy(function(attachment) {
+        return util.getIn(attachment, ["op", "id"]) || generalAttachmentsStr;
+      })
+      .map(_.partial(getGroup, groupList))
+      .sortBy(function(group) { // attachments.general on top, else sort by op.created
+        if ( group.groupName === generalAttachmentsStr ) {
+          return -1;
+        } else {
+          return util.getIn(group.attachments, [0, "op", "created"]);
         }
-      } else {
-        attachment.showAdditionalControls = ko.observable(false);
-      }
-      attachment.retentionDescription = ko.pureComputed(function() {
-        var retention = attachment.metadata() ? attachment.metadata().sailytysaika : null;
-        if (retention && retention.arkistointi()) {
-          var retentionMode = retention.arkistointi();
-          var additionalDetail = "";
-          switch(retentionMode) {
-            case "toistaiseksi":
-              var laskentaperuste = util.getIn(retention, ["laskentaperuste"]);
-              if (laskentaperuste) {
-                additionalDetail = ", " + loc("laskentaperuste") + " " + loc(laskentaperuste);
-              }
-              break;
-            case "m\u00E4\u00E4r\u00E4ajan":
-              additionalDetail = ", " + retention.pituus() + " " + loc("vuotta");
-              break;
+      })
+
+      .value();
+
+  }
+
+  function ArchivalSummaryDocumentModel(application, doc) {
+    var self = _.assign(this, doc);
+
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+    self.authModel = attachmentsService.authModels()[doc.id] || lupapisteApp.models.applicationAuthModel;
+
+    self.metadata = ko.observable(ko.unwrap(doc.metadata));
+    self.attachmentType = ko.observable(ko.unwrap(doc.typeString));
+
+    self.typeChange = util.getIn(doc, ["type", "type-group"]) && util.getIn(doc, ["type", "type-id"]) &&
+      new LUPAPISTE.AttachmentsChangeTypeModel({ authModel: self.authModel,
+                                                 allowedAttachmentTypes: lupapisteApp.models.application.allowedAttachmentTypes(),
+                                                 attachmentType: self.type,
+                                                 attachmentId: self.id });
+
+    self.addEventListener("attachments", {eventType: "attachment-type-selected", attachmentId: doc.id}, function(data) {
+      self.type(data.attachmentType);
+    });
+
+    self.showAdditionalControls = ko.observable(false);
+    self.toggleAdditionalControls = function() {
+      self.showAdditionalControls(!self.showAdditionalControls());
+    };
+
+    self.archivable = ko.observable();
+    self.archivabilityError = ko.observable();
+
+    self.sendToArchive = ko.observable(false);
+
+    self.convertableToPdfA = self.disposedPureComputed(function() {
+      return self.authModel.ok("convert-to-pdfa");
+    });
+
+    self.retentionDescription = self.disposedPureComputed(function() {
+      var retention = util.getIn(self.metadata, ["sailytysaika"], {});
+      if (ko.unwrap(retention.arkistointi)) {
+        var retentionMode = ko.unwrap(retention.arkistointi);
+        var additionalDetail = "";
+        switch(retentionMode) {
+        case "toistaiseksi":
+          var laskentaperuste = ko.unwrap(retention.laskentaperuste);
+          if (laskentaperuste) {
+            additionalDetail = ", " + loc("laskentaperuste") + " " + loc(laskentaperuste);
           }
-          return loc(retentionMode) + additionalDetail.toLowerCase();
-        } else {
-          return loc("<Arvo puuttuu>");
+          break;
+        case "m\u00E4\u00E4r\u00E4ajan":
+          additionalDetail = ", " + ko.unwrap(retention.pituus) + " " + loc("vuotta");
+          break;
         }
-      });
-      attachment.personalDataDescription = ko.pureComputed(function() {
-        var personalData = attachment.metadata() ? attachment.metadata().henkilotiedot : null;
-        if (_.isFunction(personalData)) {
-          return loc(personalData());
-        } else {
-          return loc("<Arvo puuttuu>");
-        }
-      });
-      if (attachment.type) {
-        attachment.attachmentType = ko.observable([attachment.type["type-group"](), attachment.type["type-id"]()].join("."));
-        attachment.attachmentType.subscribe(function (value) {
-          ajax
-            .command("set-attachment-type",
-            {id: applicationId, attachmentId: attachment.id(), attachmentType: value})
-            .success(function() {
-              repository.load(applicationId);
-            })
-            .error(function(e) {
-              repository.load(applicationId);
-              error(e.text);
-            })
-            .call();
-        });
-      }
-      if (attachment.contents) {
-        attachment.contents.subscribe(function (value) {
-          ajax
-            .command("set-attachment-contents",
-            {id: applicationId, attachmentId: attachment.id(), contents: value})
-            .success(function() {
-              hub.send("indicator-icon", {style: "positive"});
-              repository.load(applicationId);
-            })
-            .error(function(e) {
-              repository.load(applicationId);
-              error(e.text);
-            })
-            .call();
-        });
-      }
-      var lv = attachment.latestVersion;
-      attachment.archivable = lv && _.isFunction(lv.archivable) ? lv.archivable() : false;
-      attachment.archivabilityError = lv && _.isFunction(lv.archivabilityError) ? lv.archivabilityError() : null;
-      attachment.sendToArchive = ko.observable(false);
-      if (lv && _.isUndefined(lv.archivable) && isConvertableType(lv.contentType())) {
-        attachment.convertableToPdfA = true;
+        return loc(retentionMode) + additionalDetail.toLowerCase();
       } else {
-        attachment.convertableToPdfA = lv && _.isFunction(lv.archivable) ? !lv.archivable() : false;
+        return loc("<Arvo puuttuu>");
       }
-      return attachment;
     });
-  };
 
-  var selectIfArchivable = function(attachment) {
+    self.personalDataDescription = self.disposedPureComputed(function() {
+      return loc(util.getIn(self.metadata, ["henkilotiedot"]) || "<Arvo puuttuu>");
+    });
+
+    function getState(doc, metakey) {
+      return util.getIn(doc, [metakey || "metadata", "tila"]) || "valmis";
+    }
+
+    if (doc.documentType === "application") {
+      self.state = self.disposedPureComputed(_.partial( getState, application ));
+    } else if (doc.documentType === "case-file") {
+      self.state = self.disposedPureComputed(_.partial( getState, application, "processMetadata" ));
+    } else {
+      self.state = self.disposedPureComputed(_.partial( getState, doc ));
+    }
+
+    self.reset = function(doc) {
+      self.metadata(ko.unwrap(doc.metadata));
+      self.attachmentType(ko.unwrap(doc.typeString));
+
+      var latestVersion = doc.latestVersion;
+      self.archivable(Boolean( util.getIn(latestVersion, ["archivable"]) ));
+      self.archivabilityError(util.getIn(latestVersion, ["archivabilityError"]));
+
+    };
+  }
+
+  var initializedDocuments = {};
+
+  function resetDocument(application, document) {
+    // Document can be application doc, case-file doc or attachment.
+    var id = util.getIn(document, ["id"]);
+    var archivalDocumentModel = initializedDocuments[id] || new ArchivalSummaryDocumentModel(application, document());
+    archivalDocumentModel.reset(document());
+    initializedDocuments[id] = archivalDocumentModel;
+    return archivalDocumentModel;
+  }
+
+  function selectIfArchivable(attachment) {
     var tila = util.getIn(attachment, ["metadata", "tila"]);
-    if (attachment.archivable && tila !== "arkistoitu") {
+    if (attachment.archivable() && tila !== "arkistoitu") {
       attachment.sendToArchive(true);
     }
-  };
+  }
 
-  var filteredDocs = function(params) {
-    var applicationState = params.application.state();
-    var appDocId = params.application.id() + "-application";
-    var caseFileDocId = params.application.id() + "-case-file";
-    var docs = [
-      {documentNameKey: "applications.application", metadata: params.application.metadata, id: appDocId, previewAction: "pdf-export"}
-    ];
+  function initApplicationDocs(application) {
+    // Initialize archived non-attachment documents for application.
+    var applicationState = application.state();
+    var appDocId = application.id() + "-application";
+    var caseFileDocId = application.id() + "-case-file";
+    var docs = [ ko.observable({ documentNameKey: "applications.application",
+                                 metadata: application.metadata,
+                                 id: appDocId,
+                                 previewAction: "pdf-export",
+                                 documentType: "application" }) ];
 
     if (applicationState === "extinct" || applicationState === "closed") {
-      docs.push({documentNameKey: "caseFile.heading", metadata: params.application.processMetadata, id: caseFileDocId, previewAction: "pdfa-casefile"});
+      docs.push( ko.observable({ documentNameKey: "caseFile.heading",
+                                 metadata: application.processMetadata,
+                                 id: caseFileDocId,
+                                 previewAction: "pdfa-casefile",
+                                 documentType: "case-file" }) );
     }
     return docs;
-  };
+  }
 
-  var model = function(params) {
+  function ArchivalSummaryModel(params) {
     var self = this;
-    self.attachments = params.application.attachments;
-    var appDocId = params.application.id() + "-application";
-    var caseFileDocId = params.application.id() + "-case-file";
 
-    var docs = filteredDocs(params);
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
-    var mainDocuments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(filteredDocs(params));
-    });
-    self.stateMap = ko.pureComputed(function() {
-      var getState = function(doc) {
-        var tila = util.getIn(doc, ["metadata", "tila"]);
-        if (tila) {
-          return tila;
-        } else {
-          return "valmis";
-        }
-      };
-      var stateMap = _.mapValues(_.keyBy(self.attachments(), function(att) {
-        return ko.unwrap(att.id);
-      }), getState);
-      stateMap[appDocId] = getState(params.application);
-      stateMap[caseFileDocId] = util.getIn(params.application, ["processMetadata", "tila"]) ? params.application.processMetadata().tila() : "valmis";
-      return stateMap;
+    self.attachments = self.disposedPureComputed(function() {
+      return _.map(attachmentsService.attachments(), _.partial(resetDocument, params.application));
     });
 
-    var preAttachments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(getPreAttachments(self.attachments()), params.application.id());
+    var applicationDocs = initApplicationDocs(params.application);
+
+    var mainDocuments = self.disposedPureComputed(function() {
+      return _.map(applicationDocs, _.partial(resetDocument, params.application));
     });
-    var postAttachments = ko.pureComputed(function() {
-      return addAdditionalFieldsToAttachments(getPostAttachments(self.attachments()), params.application.id());
+
+    var preAttachments = self.disposedPureComputed(function() {
+      return attachmentsService.applyFilters(self.attachments(), [["preVerdict"], ["hasFile"]]);
     });
-    var archivedPreAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(preAttachments(), true);
+    var postAttachments = self.disposedPureComputed(function() {
+      return attachmentsService.applyFilters(self.attachments(), [["postVerdict"], ["hasFile"]]);
     });
-    var archivedPostAttachments = ko.pureComputed(function() {
-      return filterByArchiveStatus(postAttachments(), true);
+
+    var archivedPreAttachments = self.disposedPureComputed(function() {
+      return _.filter(preAttachments(), isArchived);
     });
+    var archivedPostAttachments = self.disposedPureComputed(function() {
+      return _.filter(postAttachments(), isArchived);
+    });
+
     var buildings = _
       .chain(params.application._js.buildings)
       .filter(function(val) {
@@ -239,52 +235,31 @@
       })
       .value();
 
-    self.archivedGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPreAttachments(), buildings);
+    self.archivedGroups = self.disposedPureComputed(function() {
+      return getGroupList("archived-pre", archivedPreAttachments(), buildings);
     });
-    self.archivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(archivedPostAttachments(), buildings);
+    self.archivedPostGroups = self.disposedPureComputed(function() {
+      return getGroupList("archived-post", archivedPostAttachments(), buildings);
     });
-    self.notArchivedGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(preAttachments(), false), buildings);
+    self.notArchivedGroups = self.disposedPureComputed(function() {
+      return getGroupList("not-archived-pre", _.reject(preAttachments(), isArchived), buildings);
     });
-    self.notArchivedPostGroups = ko.pureComputed(function() {
-      return getGroupList(filterByArchiveStatus(postAttachments(), false), buildings);
+    self.notArchivedPostGroups = self.disposedPureComputed(function() {
+      return getGroupList("not-archived-post", _.reject(postAttachments(), isArchived), buildings);
     });
 
-    self.archivedDocuments = ko.pureComputed(function() {
-      return filterByArchiveStatus(mainDocuments(), true);
+    self.archivedDocuments = self.disposedPureComputed(function() {
+      return _.filter(mainDocuments(), isArchived);
     });
-    self.notArchivedDocuments = ko.pureComputed(function() {
-      return filterByArchiveStatus(mainDocuments(), false);
+    self.notArchivedDocuments = self.disposedPureComputed(function() {
+      return _.reject(mainDocuments(), isArchived);
     });
-    self.showArchived = ko.pureComputed(function() {
+
+    self.showArchived = self.disposedPureComputed(function() {
       return !_.isEmpty(self.archivedDocuments()) || !_.isEmpty(self.archivedGroups()) || !_.isEmpty(self.archivedPostGroups());
     });
-    self.showNotArchived = ko.pureComputed(function() {
+    self.showNotArchived = self.disposedPureComputed(function() {
       return !_.isEmpty(self.notArchivedDocuments()) || !_.isEmpty(self.notArchivedGroups()) || !_.isEmpty(self.notArchivedPostGroups());
-    });
-
-    var attachmentGroupLabel = function(groupName) {
-      return loc(["attachmentType", groupName, "_group_label"].join("."));
-    };
-
-    var attachmentTypeLabel = function(groupName, typeName) {
-      return loc(["attachmentType", [groupName, typeName].join(".")].join("."));
-    };
-
-    self.selectableAttachmentTypes = ko.pureComputed(function () {
-      return _.map(lupapisteApp.models.application.allowedAttachmentTypes(), function (typeGroup) {
-        return {
-          groupLabel: attachmentGroupLabel(typeGroup[0]),
-          types: _.map(typeGroup[1], function (type) {
-            return {
-              typeLabel: attachmentTypeLabel(typeGroup[0], type),
-              typeValue: [typeGroup[0], type].join(".")
-            };
-          })
-        };
-      });
     });
 
     var isSelectedForArchive = function(attachment) {
@@ -293,7 +268,7 @@
 
     self.archivingInProgressIds = ko.observableArray();
 
-    self.archiveButtonEnabled = ko.pureComputed(function() {
+    self.archiveButtonEnabled = self.disposedPureComputed(function() {
       return  lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
         _.isEmpty(self.archivingInProgressIds()) && (_.some(preAttachments(), isSelectedForArchive) ||
         _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
@@ -371,7 +346,7 @@
       return ko.unwrap(doc.id);
     };
 
-    var allIds = _.map(self.attachments().concat(docs), getId);
+    var allIds = _.map(self.attachments().concat(mainDocuments()), getId);
 
     if (ko.unwrap(params.application.id)) {
       pollChangedState(allIds);
@@ -405,8 +380,10 @@
 
     self.newTosFunction = ko.observable(ko.unwrap(params.application.tosFunction));
     self.tosFunctionCorrectionReason = ko.observable();
-    self.tosFunctionCorrectionEnabled = ko.pureComputed(function() {
-      return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
+    self.tosFunctionCorrectionEnabled = self.disposedPureComputed(function() {
+      return lupapisteApp.models.applicationAuthModel.ok("force-fix-tos-function-for-application") &&
+        self.newTosFunction() !== params.application.tosFunction() &&
+        self.tosFunctionCorrectionReason();
     });
     self.updateTosFunction = function() {
       var data = {
@@ -420,13 +397,13 @@
           LUPAPISTE.ModalDialog.showDynamicOk(loc("application.tosMetadataWasResetTitle"), loc("application.tosMetadataWasReset"));
           self.tosFunctionCorrectionReason(null);
           repository.load(ko.unwrap(params.application.id), null, function(newApplication) {
-            // FIXME added ifs to fix LPK-2110, but why are only docs 0 and 1 updated,
-            // and the values differ???
-            if (util.getIn(docs, [0, "metadata"])) {
-              docs[0].metadata(ko.mapping.fromJS(newApplication.metadata));
+            // Update application document. See initApplicationDocs for additional details.
+            if (util.getIn(applicationDocs, [0, "metadata"])) {
+              applicationDocs[0]().metadata(newApplication.metadata);
             }
-            if (util.getIn(docs, [1, "metadata"])) {
-              docs[1].metadata(ko.mapping.fromJS(newApplication.processMetadata));
+            // Update case-file document. See initApplicationDocs for additional details.
+            if (util.getIn(applicationDocs, [1, "metadata"])) {
+              applicationDocs[1]().metadata(newApplication.processMetadata);
             }
           });
         })
@@ -434,14 +411,9 @@
     };
 
     self.convertToPdfA = function(attachment) {
-      var id = ko.unwrap(attachment.id);
-      openAttachmentIds.push(id);
-      ajax
-        .command("convert-to-pdfa", {id: ko.unwrap(params.application.id), attachmentId: id})
-        .success(function() {
-          repository.load(ko.unwrap(params.application.id));
-        })
-        .call();
+      var attachmentId = ko.unwrap(attachment.id);
+      attachment.showAdditionalControls(true);
+      attachmentsService.convertToPdfA(attachmentId);
     };
 
     self.showMarkArchivedSection = ko.observable(!params.application._js.archived.application);
@@ -454,10 +426,19 @@
         })
         .call();
     };
-  };
+
+    var baseModelDispose = self.dispose;
+    self.dispose = function() {
+      _.invokeMap(initializedDocuments, "dispose");
+      _.forEach(groupLists, function(gl) { _.invokeMap(gl.initializedGroups, "dispose"); });
+      initializedDocuments = {};
+      groupLists = {};
+      baseModelDispose();
+    };
+  }
 
   ko.components.register("archival-summary", {
-    viewModel: model,
+    viewModel: ArchivalSummaryModel,
     template: {element: "archival-summary-template"}
   });
 

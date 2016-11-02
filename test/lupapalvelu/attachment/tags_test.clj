@@ -29,6 +29,9 @@
   (fact "operation"
     (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
 
+  (fact "file"
+    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :general :needed :hasFile} :in-any-order :gaps-ok))
+
   (fact "type"
     (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup} :in-any-order :gaps-ok)
     (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))

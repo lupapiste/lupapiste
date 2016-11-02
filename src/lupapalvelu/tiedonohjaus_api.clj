@@ -154,6 +154,7 @@
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
+   :categories #{:attachments}
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
