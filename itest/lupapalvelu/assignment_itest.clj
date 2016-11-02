@@ -88,7 +88,7 @@
              (filter (comp (partial = id) :id :application))
              (map :status)) => ["canceled", "canceled"])
 
-      (fact "Accissible after undo-cancellation"
+      (fact "accessible after undo-cancellation"
         (command sonja :undo-cancellation :id id) => ok?
         (->> (query sonja :assignments-for-application :id id)
              :assignments
