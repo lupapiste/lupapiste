@@ -73,10 +73,6 @@
 
   }
 
-  function isConvertableType(contentType) {
-    return (LUPAPISTE.config.convertableTypes.indexOf(contentType) !== -1);
-  }
-
   function ArchivalSummaryDocumentModel(application, doc) {
     var self = _.assign(this, doc);
 
@@ -107,7 +103,9 @@
 
     self.sendToArchive = ko.observable(false);
 
-    self.convertableToPdfA = ko.observable();
+    self.convertableToPdfA = self.disposedPureComputed(function() {
+      return self.authModel.ok("convert-to-pdfa");
+    });
 
     self.retentionDescription = self.disposedPureComputed(function() {
       var retention = util.getIn(self.metadata, ["sailytysaika"], {});
@@ -155,11 +153,6 @@
       self.archivable(Boolean( util.getIn(latestVersion, ["archivable"]) ));
       self.archivabilityError(util.getIn(latestVersion, ["archivabilityError"]));
 
-      if (latestVersion && _.isUndefined(latestVersion.archivable) && isConvertableType(ko.unwrap(latestVersion.contentType))) {
-        self.convertableToPdfA(true);
-      } else {
-        self.convertableToPdfA(_.has(latestVersion, "archivable") ? !ko.unwrap(latestVersion.archivable) : false);
-      }
     };
   }
 
@@ -388,7 +381,9 @@
     self.newTosFunction = ko.observable(ko.unwrap(params.application.tosFunction));
     self.tosFunctionCorrectionReason = ko.observable();
     self.tosFunctionCorrectionEnabled = self.disposedPureComputed(function() {
-      return self.newTosFunction() !== params.application.tosFunction() && self.tosFunctionCorrectionReason();
+      return lupapisteApp.models.applicationAuthModel.ok("force-fix-tos-function-for-application") &&
+        self.newTosFunction() !== params.application.tosFunction() &&
+        self.tosFunctionCorrectionReason();
     });
     self.updateTosFunction = function() {
       var data = {
