@@ -857,7 +857,7 @@
                         </div>
 
                         <!-- YA: Info about construction started and construction ready occasions -->
-                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed', 'warrantyStart', 'warrantyEnd'], $data.state())">
+                        <div data-bind="if: $root.authorization.ok('info-construction-status')">
                           <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
                             <table>
                                 <thead>

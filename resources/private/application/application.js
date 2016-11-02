@@ -183,7 +183,7 @@
 
   function subscribeWarrantyDates(app, applicationModel) {
     applicationModel.warrantyEnd.subscribe(function (value) {
-      if (!isInitializing) {
+      if (!isInitializing && value != null) {
         var ms = new Date(moment(value)).getTime();
         ajax
           .command("change-warranty-end-date",
@@ -196,7 +196,7 @@
     });
 
     applicationModel.warrantyStart.subscribe(function (value) {
-      if (!isInitializing) {
+      if (!isInitializing && value != null) {
         var ms = new Date(moment(value)).getTime();
         ajax
           .command("change-warranty-start-date",

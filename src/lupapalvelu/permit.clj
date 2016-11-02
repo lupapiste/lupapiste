@@ -303,3 +303,6 @@
                            (util/map-keys keyword)
                            (util/map-values :allow-state-change))
                       command))
+
+(defn is-ya-permit [permit-type]
+  (= permit-type (name YA)))

@@ -549,7 +549,7 @@
   (let [ts-key      (timestamp-key to-state)
         permit-type (permit/permit-type application)
         krysp?      (org/krysp-integration? (org/get-organization (:organization application)) permit-type)
-        warranty?   (and (= "YA" permit-type) (= ts-key :closed) (not krysp?))]
+        warranty?   (and (permit/is-ya-permit permit-type) (= ts-key :closed) (not krysp?))]
     {$set (merge {:state to-state, :modified timestamp}
                  (when (and ts-key (not (ts-key application))) {ts-key timestamp})
                  (when warranty? (warranty-period timestamp)))

@@ -1,6 +1,6 @@
 (ns lupapalvelu.construction-api
   (:require [monger.operators :refer [$set $elemMatch]]
-            [lupapalvelu.action :refer [defcommand update-application notify] :as action]
+            [lupapalvelu.action :refer [defcommand update-application notify defquery] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.link-permit :as link-permit]
@@ -59,3 +59,10 @@
                                   (application/state-transition-update :closed created orig-app user)
                                   {$set app-updates}))
     (ok :integrationAvailable krysp?)))
+
+(defquery info-construction-status
+  {:parameters [id]
+   :states #{:verdictGiven :constructionStarted :closed}
+   :user-roles #{:applicant :authority}
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]}
+   [_])

@@ -534,9 +534,10 @@
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"
    :parameters       [id startDate]
-   :input-validators [(partial action/number-parameters [:startDate])]
+   :input-validators [(partial action/number-parameters [:startDate])
+                      (partial action/positive-number-parameters [:startDate])]
    :user-roles       #{:authority}
-   :states           states/post-verdict-states}
+   :states           states/all-states}
    [{:keys [application] :as command}]
   (update-application command {$set {:warrantyStart startDate}})
   (ok))
@@ -544,9 +545,10 @@
 (defcommand change-warranty-end-date
   {:description      "Changes warranty end date"
    :parameters       [id endDate]
-   :input-validators [(partial action/number-parameters [:endDate])]
+   :input-validators [(partial action/number-parameters [:endDate])
+                      (partial action/positive-number-parameters [:endDate])]
    :user-roles       #{:authority}
-   :states           states/post-verdict-states}
+   :states           states/all-states}
   [{:keys [application] :as command}]
   (update-application command {$set {:warrantyEnd endDate}})
   (ok))
