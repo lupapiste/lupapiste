@@ -32,7 +32,7 @@ Sonja creates assignment for Ronja about paasuunnittelija
 Sonja sees assignment in document
   Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
-  Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete-paasuunnittelija']
+  Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
   Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Sibbo Sonja
   Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katoppa tää
   Logout
@@ -58,7 +58,7 @@ Ronja logs in, sees assignment in document
   Open application  ${appname}  ${propertyid}
   Open tab  parties
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
-  Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete-paasuunnittelija']
+  Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
 
 Only one assignment has been created
   Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1
