@@ -3,6 +3,7 @@
 Documentation   User browses bulletins from Julkipano.fi bulletin list
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
+Library         Screenshot
 Resource        ../../common_resource.robot
 Resource        ./27_common.robot
 
@@ -44,10 +45,19 @@ Bulletins should be filterable by municipality
   Select From Autocomplete By Test Id  municipalities-filter-component  Sipoo
   Wait Until  Bulletin list should have rows and text  1  Mixintie 15
 
-Velho gives a verdict and publishes it as bulletin
+Velho gives a verdict
   As Olli
   Create application and publish bulletin  Raitotie 2  564-403-4-17
-  Submit empty verdict
+  Go to give new verdict
+  Title Should Be  Raitotie 2 - Lupapiste
+  Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
+  Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
+  Wait test id visible  targetted-attachments-table
+
+Velho publishes the verdict and creates a new verdict bulletin
+  Click enabled by test id  verdict-publish
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Application state should be  verdictGiven
   Bulletin shows as proclaimed and can be moved to verdict given
   Move bulletin to verdict given with appeal period starting today
   Go to bulletins page
@@ -65,6 +75,11 @@ Bulletins should be filterable by state
 
   Select From Autocomplete By Test Id  states-filter-component  Päätös annettu
   Wait Until  Bulletin list should have rows  1
+
+Verdict attachment should be visible on the bulletin page
+  Open bulletin by index  1
+  Open bulletin tab  verdicts
+  Bulletin verdict detail list should have rows  1
 
 *** Keywords ***
 
