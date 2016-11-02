@@ -14,9 +14,8 @@
                       datepickerOptions: datepickerOptions,
                       css: inputClasses,
                       event: events,
-                      disable: disabled,
-                      attr: { readonly: readonly,
-                              'data-test-id': path.join('.')}"/>
+                      disable: disabled() || readonly(),
+                      testId: path.join('.')">
 
   </span>
   <span data-bind="saveIndicator: indicator, label: false"></span>

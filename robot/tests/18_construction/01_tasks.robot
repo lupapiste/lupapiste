@@ -86,7 +86,7 @@ Add attachment to Aloituskokous
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
-  Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
+  Test id enabled  'katselmus.pitoPvm'
   Edit R katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing

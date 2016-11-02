@@ -97,7 +97,7 @@ Review frozen
   Review checkboxes disabled
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
   Element should be disabled  jquery=[data-test-id="katselmus.tila"]
-  Test id readonly  katselmus.pitoPvm
+  Test id disabled  'katselmus.pitoPvm'
   Test id readonly  katselmus.pitaja
   Test id readonly  katselmus.lasnaolijat
   Test id readonly  katselmus.poikkeamat
