@@ -20,6 +20,11 @@
 
 (def today (fmt/unparse-local (fmt/formatter-local "dd.MM.yyyy") (time/today)))
 
+(defn query-doc-id [apikey app-id doc-name]
+  (-> (query-application apikey app-id)
+      (domain/get-document-by-name doc-name)
+      :id))
+
 (facts "YA extension applications"
        (let [r-id (create-app-id pena
                                  :propertyId sipoo-property-id
@@ -69,12 +74,23 @@
                                              :endDate nil
                                              :state "draft"}]})
                  (fact "Edit extension and check again"
-                       (let [doc-id (-> (query-application pena ext-id)
-                                        (domain/get-document-by-name :tyo-aika-for-jatkoaika)
-                                        :id)]
+                       (let [doc-id1 (query-doc-id pena ext-id :hankkeen-kuvaus-jatkoaika)
+                             doc-id2 (query-doc-id pena ext-id :tyo-aika-for-jatkoaika)
+                             doc-id3 (query-doc-id pena ext-id :hakija-ya)
+                             doc-id4 (query-doc-id pena ext-id :yleiset-alueet-maksaja)]
                          (command pena :update-doc :id ext-id :collection "documents"
-                                  :doc doc-id :updates [[:tyoaika-alkaa-pvm "20.09.2016"]
-                                                        [:tyoaika-paattyy-pvm "10.10.2016"]])=> ok?
+                                  :doc doc-id1 :updates [[:kuvaus "Extension request"]])=> ok?
+                         (command pena :update-doc :id ext-id :collection "documents"
+                                  :doc doc-id2 :updates [[:tyoaika-alkaa-pvm "20.09.2016"]
+                                                         [:tyoaika-paattyy-pvm "10.10.2016"]])=> ok?
+                         (command pena :update-doc :id ext-id :collection "documents"
+                                  :doc doc-id3 :updates [[:_selected "henkilo"]])
+                         (command pena :set-user-to-document :id ext-id :collection "documents"
+                                  :documentId doc-id3 :path "henkilo" :userId pena-id) => ok?
+                         (command pena :update-doc :id ext-id :collection "documents"
+                                  :doc doc-id4 :updates [[:_selected "henkilo"]])
+                         (command pena :set-user-to-document :id ext-id :collection "documents"
+                                  :documentId doc-id4 :path "henkilo" :userId pena-id) => ok?
                          (command pena :add-comment :id ext-id :text "Zao!"
                                   :roles ["applicant" "authority"]
                                   :target {:type "application"}
@@ -97,7 +113,14 @@
                  (fact "Submit extension application"
                        (command pena :submit-application :id ext-id) => ok?)
                  (fact "Approve extension pseudo query"
-                       (query sonja :approve-ya-extension :id ext-id) => ok?)))))
+                       (query sonja :approve-ya-extension :id ext-id) => ok?)
+                 (fact "Approve application"
+                       (command sonja :approve-application :id ext-id :lang :fi) => ok?)
+                 (facts "Application state is closed with matching history"
+                       (let [{:keys [state history]} (query-application sonja ext-id)]
+                         (fact "State is closed" state => "closed")
+                         (fact "History is correct"
+                               (map :state history) => ["draft" "open" "submitted" "closed"])))))))
 
 (def local-db-name (str "test_ya_extension_itest_" (sade/now)))
 
