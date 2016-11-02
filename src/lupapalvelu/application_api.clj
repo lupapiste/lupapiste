@@ -192,12 +192,8 @@
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
    :states           #{:canceled}}
-  [{:keys [application created user] :as command}]
-  (update-application command
-                      {:state :canceled}
-                      (merge
-                        (app/state-transition-update (app/get-previous-app-state application) created application user)
-                        {$unset {:canceled 1}})))
+  [command]
+  (app/undo-cancellation command))
 
 
 (defcommand request-for-complement

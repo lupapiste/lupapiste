@@ -24,9 +24,9 @@
 (def assignment-statuses
   "Assignment is active, when it's parent application is active.
    When application is canceled, also assignment status is set to canceled."
-  ["active" "canceled"])
+  #{"active" "canceled"})
 
-(def assignment-state-types ["created" "completed"])
+(def assignment-state-types #{"created" "completed"})
 
 (sc/defschema AssignmentState
   {:type (apply sc/enum assignment-state-types)
@@ -35,7 +35,7 @@
 
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :application    {:id           sc/Str
+   :application    {:id           ssc/ApplicationId
                     :organization sc/Str
                     :address      sc/Str
                     :municipality sc/Str}
@@ -167,18 +167,18 @@
     (mongo/insert :assignments created-assignment)
     (:id created-assignment)))
 
-(defn- update-assignment [query assignment-changes]
-  (mongo/update-n :assignments query assignment-changes))
+(defn- update-assignment [assignment-id query assignment-changes]
+  (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
+
+(defn- update-assignments [query assignment-changes]
+  (mongo/update-n :assignments query assignment-changes :multi true))
 
 (sc/defn ^:always-validate complete-assignment [assignment-id :- ssc/ObjectIdStr
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
-  (update-assignment
-   (organization-query-for-user completer
-                                {:_id       assignment-id
-                                 :status    "active"
-                                 :states.type {$ne "completed"}})
-   {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
+  (update-assignment assignment-id
+                     (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
+                     {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
 (defn display-text-for-document
   "Return localized text for frontend. Text is schema name + accordion-fields if defined."
@@ -189,3 +189,13 @@
     (if (seq accordion-datas)
       (str schema-localized " - " (ss/join " " accordion-datas))
       schema-localized)))
+
+(defn- set-assignments-statuses [application-id status]
+  {:pre [(assignment-statuses status)]}
+  (update-assignments {:application.id application-id} {$set {:status status}}))
+
+(sc/defn ^:always-validate cancel-assignments [application-id :- ssc/ApplicationId]
+  (set-assignments-statuses application-id "canceled"))
+
+(sc/defn ^:always-validate activate-assignments [application-id :- ssc/ApplicationId]
+  (set-assignments-statuses application-id "active"))
