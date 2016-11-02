@@ -12,7 +12,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   self.sort = params.sort ||
-    {field: ko.observable("description"), asc: ko.observable(true)};
+    {field: ko.observable("created"), asc: ko.observable(true)};
   self.data             = ko.observable(params.data || defaultData);
   self.results          = ko.observable(self.data().searchResults);
   self.limit            = params.currentLimit;
