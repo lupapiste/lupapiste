@@ -2,7 +2,7 @@
   (:require [sade.strings :as ss]
             [sade.env :as env]
             [sade.core :refer :all]
-            [clojure.data.codec.base64 :as base64])
+            [sade.crypt :as crypt])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 ;;
@@ -37,7 +37,7 @@
 
 (defn- decode-base64 [string]
   (try
-    (apply str (map char (base64/decode (.getBytes string))))
+    (-> string crypt/str->bytes crypt/base64-decode crypt/bytes->str)
     (catch Exception _)))
 
 (defn check-credentials-from-basic-auth
