@@ -91,7 +91,7 @@
     </div>
     <!-- /ko -->
     <!-- ko if: auth.ok("assignments-for-application") && documentAssignments().length > 0 && features.enabled("assignments") -->
-    <accordion-assignments params="documentAssignments: documentAssignments"></accordion-assignments>
+    <accordion-assignments params="documentAssignments: documentAssignments, schemaName: info.name, applicationId: docModel.appId"></accordion-assignments>
     <!-- /ko -->
   </div>
 </script>
