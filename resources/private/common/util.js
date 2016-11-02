@@ -381,6 +381,11 @@ var util = (function($) {
     return ko.unwrap(party.firstName) + " " + ko.unwrap(party.lastName);
   }
 
+  // Path can be string "a.b.c" or array [a, b, c].
+  function isEmpty( data, path ) {
+    return _.isEmpty( getIn( data, _
+                             .isString( path ) ? _.split( path, ".") : path));
+  }
 
   return {
     zeropad:             zeropad,
@@ -423,7 +428,8 @@ var util = (function($) {
     elementInViewport: elementInViewport,
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
-    partyFullName: partyFullName
+    partyFullName: partyFullName,
+    isEmpty: isEmpty
   };
 
 })(jQuery);
