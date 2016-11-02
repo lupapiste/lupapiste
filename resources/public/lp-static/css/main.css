@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478098057882');
+@import url('main-blessed1.css?z=1478101094969');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -2197,7 +2197,7 @@ table.review-buildings-table div.docgen-checkbox-wrapper.wrapper--disabled {
 
 /* line 302, ../../../private/common-html/sass/partials/_tables.scss */
 table.company-users-table select {
-  width: initial;
+  width: 10em;
 }
 /* line 305, ../../../private/common-html/sass/partials/_tables.scss */
 table.company-users-table tr:hover, table.company-users-table tr:active {
