@@ -390,7 +390,7 @@
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
             user-organizations (lazy-seq (usr/get-organizations (:user command)))
-            command (-> (assoc command :application application :organization organization :user-organizations user-organizations))]
+            command (assoc command :application application :organization organization :user-organizations user-organizations)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -564,16 +564,10 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-(defn foreach-action [{:keys [web user application organization user-organizations data]}]
+(defn foreach-action [command]
   (map
     #(when-let [{type :type categories :categories} (get-meta %)]
-       (assoc
-         (action % :type type :data data :user user)
-         :application application
-         :organization organization
-         :user-organizations user-organizations
-         :web web
-         :categories categories))
+       (merge (action % :type type) command {:categories categories}))
    (remove nil? (keys @actions))))
 
 (defn- validated [command]
