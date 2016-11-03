@@ -14,6 +14,12 @@
     <span> - </span>
     <span data-bind="fullName: createdState.user"></span>
   </div>
+  <button data-bind="toggleClick: edit,
+                     clickBubble: false,
+                     attr: {'data-test-id': 'edit-assignment'}">
+    <i class="lupicon-pen"></i>
+    <span data-bind="ltext: 'edit'"></span>
+  </button>
   <button data-bind="click: $parent.markComplete,
                      clickBubble: false,
                      attr: {'data-test-id': 'mark-assignment-complete'}"
@@ -21,5 +27,19 @@
     <i class="lupicon-check"></i>
     <span data-bind="ltext: 'application.assignment.complete'"></span>
   </button>
+  <!-- ko if: edit -->
+  <assignment-editor data-test-id="accordion-edit-assignment"
+                     params="visible: edit,
+                             authorities: $component.params.authorities,
+                             targets: $component.possibleTargets,
+                             assignmentId: $data.id,
+                             applicationId: $component.params.applicationId,
+                             recipientId: $data.recipient.id,
+                             description: $data.description,
+                             targetGroup: $data.target[0],
+                             targetId: $data.target[1],
+                             editMode: true"></assignment-editor>
+  <!-- /ko -->
+
 </script>
 

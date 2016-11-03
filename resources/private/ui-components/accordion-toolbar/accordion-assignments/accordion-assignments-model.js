@@ -7,7 +7,12 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
 
   var myService = self.params.myService || "assignmentService";
 
-  self.assignments = params.documentAssignments;
+  function enrichAccordionAssignment(assignment) {
+    return _.merge(assignment, {edit: ko.observable(false)});
+  }
+
+  self.assignments = ko.observableArray(_.map(params.documentAssignments(), enrichAccordionAssignment));
+  self.possibleTargets = lupapisteApp.services.assignmentService.targets;
 
   self.descriptionText = function(data) {
     return "\"" + data.description + "\"";
