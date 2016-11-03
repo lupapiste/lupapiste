@@ -143,8 +143,8 @@
     (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)]
 
-      (fact "text search finds approximate matches in description"
-        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
+      (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
+        (fact "text search finds approximate matches in description"
           (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                :data :assignments (map :description)) => (contains "Kuvaava teksti")
           (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
@@ -152,7 +152,19 @@
           (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
                :data :assignments) => empty?
           (->> (query sonja :assignments-search :searchText "not even close")
-               :data :assignments (map :description)) => empty?))
+               :data :assignments (map :description)) => empty?)
+
+        (fact "recipient search finds correct assignments"
+          (distinct
+            (map #(get-in % [:recipient :id])
+                 ; jos tähän vaihtaa datatables -> query, tulee schema error.
+                 ; (query) muuttaa :recipient argumentin non-sequentialiksi..........
+            (-> (datatables sonja :assignments-search :recipient []) :data :assignments)))
+             => (just #{ronja-id})
+          (distinct
+           (map #(get-in % [:recipient :id])
+                (-> (datatables sonja :assignments-search :recipient [sonja-id] :limit 5) :data :assignments)))
+             => empty?))
 
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?

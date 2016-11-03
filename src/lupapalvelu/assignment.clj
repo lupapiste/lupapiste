@@ -53,7 +53,7 @@
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
-   :recipient (sc/maybe sc/Str)
+   :recipient [sc/Str]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -104,6 +104,7 @@
   (merge {:searchText nil
           :state "all"
           :recipient nil
+          :sort   {:asc true :field "id"}
           :skip   0
           :limit  100}
          (select-keys data (keys AssignmentsSearchQuery))))
@@ -113,8 +114,8 @@
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-            (when-not (ss/blank? recipient)
-              {:recipient.username recipient})
+            (when-not (empty? recipient)
+              {:recipient.id {$in recipient}})
             (if (= state "all")
               {:status {$ne "canceled"}}
               {:status {$ne "canceled"}

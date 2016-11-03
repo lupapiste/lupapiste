@@ -6,4 +6,5 @@ LUPAPISTE.AssignmentsSearchFilterModel = function(params) {
   self.gotResults = params.gotResults;
 
   self.searchFieldSelected = ko.observable(false);
+  self.showAdvancedFilters = ko.observable(false);
 };
