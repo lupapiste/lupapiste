@@ -44,7 +44,7 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
   });
 
   self.saveAssignment = function() {
-    self.sendEvent(myService, "saveAssignment", {id: params.applicationId(),
+    self.sendEvent(myService, "saveAssignment", {id: util.getIn(params, ["applicationId"]),
                                                  assignmentId: self.assignmentId(),
                                                  recipientId: self.recipientId(),
                                                  target: [self.selectedTargetGroup(), self.selectedTargetId()],
