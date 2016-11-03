@@ -539,7 +539,7 @@
 
 (def two-years-ms 63072000000)
 
-(defn- warranty-period [timestamp]
+(defn warranty-period [timestamp]
   {:warrantyStart timestamp,
    :warrantyEnd (+ timestamp two-years-ms)})
 

@@ -57,7 +57,7 @@
       (mapping-to-krysp/save-application-as-krysp application lang application organization))
     (update-application command (util/deep-merge
                                   (application/state-transition-update :closed created orig-app user)
-                                  {$set app-updates}))
+                                  {$set (merge app-updates (application/warranty-period timestamp))}))
     (ok :integrationAvailable krysp?)))
 
 (defquery info-construction-status
