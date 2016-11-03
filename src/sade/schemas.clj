@@ -21,6 +21,19 @@
          (or (@dynamically-created-schemas ~schema-key)
              ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
 
+(defprotocol SchemaKey
+  (plain-key [key]))
+
+(extend-protocol SchemaKey
+  schema.core.OptionalKey
+  (plain-key [key] (.-k key))
+  clojure.lang.Keyword
+  (plain-key [key] key))
+
+(defn plain-keys [schema]
+  (->> (keys schema)
+       (map plain-key)))
+
 ;; Predicate / constraint
 
 (defn min-length-constraint [max-len]

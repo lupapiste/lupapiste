@@ -194,10 +194,15 @@
   [{org-authz :orgAuthz :as user}]
   (->> org-authz keys (map name) set))
 
-(defn organizations
-  "Query organizations for user user"
-  [user]
-  (org/get-organizations {:_id {$in (organization-ids user)}}))
+(defn get-organizations
+  "Query organizations for user"
+  ([user]
+   (let [projection (-> (ssc/plain-keys org/Organization)
+                        (zipmap (repeat true))
+                        (dissoc :areas :areas-wgs84))])
+   (get-organizations user projection))
+  ([user projection]
+   (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
 
 (defn organization-ids-by-roles
   "Returns a set of organization IDs where user has given roles.
