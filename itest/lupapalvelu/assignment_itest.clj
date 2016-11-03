@@ -4,6 +4,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [lupapalvelu.domain :as domain]
             [sade.util :as util]))
@@ -20,12 +21,21 @@
   (def ^:private invalid-receiver?
     (partial expected-failure? "error.invalid-assignment-receiver"))
 
+  (def ^:private invalid-assignment?
+    (partial expected-failure? "error.invalid-assignment-id"))
+
   (defn create-assignment [from to application-id target desc]
     (command from :create-assignment
              :id            application-id
              :recipientId   to
              :target        target
              :description   desc))
+  (defn update-assignment [who id assignment-id recipient description]
+    (command who :update-assignment
+             :id id
+             :assignmentId assignment-id
+             :recipientId recipient
+             :description description))
 
   (defn complete-assignment [user assignment-id]
     (command user :complete-assignment :assignmentId assignment-id))
@@ -93,6 +103,29 @@
         (->> (query sonja :assignments-for-application :id id)
              :assignments
              (map :status)) => ["active", "active"])))
+
+  (facts "Editing assignments"
+    (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
+          {assignment-id :id} (create-assignment sonja ronja-id id ["target"] "Edit1")]
+      (fact "can change text"
+        (update-assignment sonja id assignment-id ronja-id "foo") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :description) => "foo")
+      (fact "also ronja can change text"
+        (update-assignment ronja id assignment-id ronja-id "faa") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :description) => "faa")
+      (fact "Ronja can change recipient to sonja"
+        (update-assignment ronja id assignment-id sonja-id "Ota koppi") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :recipient :username) => "sonja")
+      (fact "inputs are validated"
+        (update-assignment ronja id "foo" sonja-id "Ota koppi") => fail?
+        (update-assignment ronja id (mongo/create-id) sonja-id "Ota koppi") => invalid-assignment?
+        (update-assignment ronja id assignment-id "foo" "Ota koppi") => invalid-receiver?)))
 
   (facts "Completing assignments"
     (let [id (create-app-id sonja :propertyId sipoo-property-id)

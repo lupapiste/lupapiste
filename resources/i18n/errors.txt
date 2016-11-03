@@ -787,3 +787,6 @@
 "error.assignment-not-completed" "fi" "Tehtävä on jo merkitty valmiiksi tai tehtävä ei ole aktiivinen"
 "error.assignment-not-completed" "sv" ""
 "error.assignment-not-completed" "en" ""
+"error.invalid-assignment-id" "fi" "Virheellinen tehtävä"
+"error.invalid-assignment-id" "sv" ""
+"error.invalid-assignment-id" "en" ""

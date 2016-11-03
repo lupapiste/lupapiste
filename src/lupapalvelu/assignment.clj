@@ -49,6 +49,9 @@
   (-> (select-keys Assignment [:application :description :recipient :target])
       (assoc :state AssignmentState)))
 
+(sc/defschema UpdateAssignment
+  (select-keys Assignment [:recipient :description]))
+
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
@@ -167,16 +170,23 @@
     (mongo/insert :assignments created-assignment)
     (:id created-assignment)))
 
-(defn- update-assignment [assignment-id query assignment-changes]
+(defn- update-to-db [assignment-id query assignment-changes]
   (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
 
 (defn- update-assignments [query assignment-changes]
   (mongo/update-n :assignments query assignment-changes :multi true))
 
+(defn count-for-assignment-id [assignment-id]
+  (mongo/count :assignments {:_id assignment-id}))
+
+(sc/defn ^:always-validate update-assignment [assignment-id :- ssc/ObjectIdStr
+                                              updated-assignment :- UpdateAssignment]
+  (update-to-db assignment-id {} {$set updated-assignment}))
+
 (sc/defn ^:always-validate complete-assignment [assignment-id :- ssc/ObjectIdStr
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
-  (update-assignment assignment-id
+  (update-to-db assignment-id
                      (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
                      {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
