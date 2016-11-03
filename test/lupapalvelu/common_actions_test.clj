@@ -76,7 +76,7 @@
                           :application-verdict-tab-visible}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {} user application {})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
@@ -125,7 +125,7 @@
                            ; tab visibility
                            :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
                            :application-verdict-tab-visible}]
-    (doseq [command (foreach-action {} user application {})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
       (when (and user-roles (not (user-roles :anonymous)))
