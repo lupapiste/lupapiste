@@ -22,7 +22,7 @@
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
 
-(defn- assignments-enabled [{{orgs :organizations} :user}]
+(defn- assignments-enabled [{orgs :user-organizations}]
   (when (not-any? :assignments-enabled orgs)
     (fail :error.assignments-not-enabled)))
 

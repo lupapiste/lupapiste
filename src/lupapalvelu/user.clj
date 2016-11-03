@@ -199,8 +199,8 @@
   ([user]
    (let [projection (-> (ssc/plain-keys org/Organization)
                         (zipmap (repeat true))
-                        (dissoc :areas :areas-wgs84))])
-   (get-organizations user projection))
+                        (dissoc :areas :areas-wgs84))]
+     (get-organizations user projection)))
   ([user projection]
    (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
 
