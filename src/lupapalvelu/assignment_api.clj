@@ -22,9 +22,8 @@
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
 
-(defn- assignments-enabled [{user :user}]
-  (when (->> (usr/get-organizations user)
-             (not-any? :assignments-enabled))
+(defn- assignments-enabled [{{orgs :organizations} :user}]
+  (when (not-any? :assignments-enabled orgs)
     (fail :error.assignments-not-enabled)))
 
 (defn- assignments-enabled-for-application [{org :organization}]

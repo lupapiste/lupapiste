@@ -389,7 +389,9 @@
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
-            command (assoc command :application application :organization organization)]
+            user-organizations (lazy-seq (usr/get-organizations (:user command)))
+            command (-> (assoc command :application application :organization organization)
+                        (update :user assoc :organizations user-organizations))]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
