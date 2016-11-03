@@ -564,10 +564,10 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-(defn foreach-action [command]
+(defn foreach-action [{:keys [user data] :as command}]
   (map
     #(when-let [{type :type categories :categories} (get-meta %)]
-       (merge (action % :type type) command {:categories categories}))
+       (merge command (action % :type type :data data :user user) {:categories categories}))
    (remove nil? (keys @actions))))
 
 (defn- validated [command]
