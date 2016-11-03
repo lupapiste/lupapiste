@@ -122,12 +122,9 @@
       
 
 (defn sort-query [sort]
-   (let [dir (if (:asc sort) 1 -1)
-         key (cond
-                (= (:field sort) "created")
-                   "created.timestamp"
-                :else (:field sort))]
-      {key dir}))
+   (let [dir (if (:asc sort) 1 -1)]
+      (println "SORT IS " {(:field sort) dir})
+      {(:field sort) dir}))
 
 (defn search [query skip limit sort]
   (try
