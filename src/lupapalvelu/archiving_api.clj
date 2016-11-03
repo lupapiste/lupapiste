@@ -19,7 +19,6 @@
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
-   :feature          :arkistointi
    :pre-checks       [check-user-is-archivist]}
   [{:keys [application user] :as command}]
   (if-let [{:keys [error]} (archiving/send-to-archive command (set attachmentIds) (set documentIds))]
@@ -30,8 +29,7 @@
   {:parameters       [:id documentIds]
    :input-validators [(partial non-blank-parameters [:id :documentIds])]
    :user-roles       #{:authority}
-   :states           (states/all-application-states-but :draft)
-   :feature          :arkistointi}
+   :states           (states/all-application-states-but :draft)}
   [{:keys [application] :as command}]
   (let [id-set (set (json/parse-string documentIds))
         app-doc-id (str (:id application) "-application")
@@ -50,7 +48,6 @@
    :input-validators [(partial non-blank-parameters [:id])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
-   :feature          :arkistointi
    :pre-checks       [check-user-is-archivist]}
   [{:keys [application created]}]
   (archiving/mark-application-archived application created :application)
