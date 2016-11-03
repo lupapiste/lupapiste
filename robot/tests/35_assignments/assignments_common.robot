@@ -21,6 +21,6 @@ Create assignment
   Click by test id  create-assignment-editor
   Wait until  Element should be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${docId}  ${user}  ${description}
-  Click element  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']//button[@data-test-id='bubble-dialog-ok']
+  Scroll and click test id  bubble-dialog-ok
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
