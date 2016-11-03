@@ -27,13 +27,13 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   function enrichAssignmentData(assignment) {
-    var createdState = _.find(assignment.states, function(state) {
-      return state.type === "created";
-    });
+    var createdState = _.find(assignment.states, function(state) { return state.type === "created"; });
     var currentState = _.maxBy(assignment.states, "timestamp");
+    var completed = (currentState.type != "completed");
     return _.merge(assignment, {
       currentState: currentState,
       createdState: createdState, 
+      incomplete: !completed,
       creatorName: createdState.user.firstName + " " + createdState.user.lastName,
       statusClass: stateClasses[currentState.type],
       addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])

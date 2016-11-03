@@ -36,7 +36,7 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
                               {sortable: false}),
     util.createSortableColumn("fifth",   "common.description",
                               {sortable: true,
-                               sortField: "description",
+                               sortField: "description-ci",
                                currentSort: self.dataProvider.sort}),
     util.createSortableColumn("sixth", "application.assignment.creator",
                               {sortable: false}),

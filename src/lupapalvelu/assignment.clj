@@ -123,7 +123,6 @@
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
-      (println "SORT IS " {(:field sort) dir})
       {(:field sort) dir}))
 
 (defn search [query skip limit sort]
@@ -133,7 +132,8 @@
                    {"$project" 
                       ;; pull the creation state to root of document for sorting purposes
                       ;; it might also be possible to use :document "$$ROOT" in aggregation
-                      {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]}
+                      {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
+                       :description-ci {"$toLower" "$description"} ;; for sorting
                        :application "$application"
                        :target "$target"
                        :recipient "$recipient"
@@ -143,7 +143,8 @@
                       }} 
                    {"$sort" (sort-query sort)}])
           converted 
-             (map #(dissoc % :created)
+             (map 
+                 #(dissoc % :description-ci :created)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
     (catch com.mongodb.MongoException e
