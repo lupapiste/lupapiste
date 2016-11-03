@@ -565,7 +565,8 @@ i.toggle {
   margin-left: $btn-spacer;
 }
 
-#partiesDocgen button {
+// Buttons between docgen sections
+div.docgen-content > section + button {
   margin-bottom: $marginS;
 }
 

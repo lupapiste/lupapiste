@@ -594,6 +594,7 @@
 "attachmentType.rakennuspaikan_hallinta.todistus_erityisoikeuden_kirjaamisesta.info" "en" "If the project involves recorded special rights"
 "attachmentType.rakennuspaikan_hallinta.todistus_erityisoikeuden_kirjaamisesta.info" "fi" "Jos hankkeeseen liittyy kirjattavia erityisoikeuksia"
 "attachmentType.rakennuspaikan_hallinta.todistus_erityisoikeuden_kirjaamisesta.info" "sv" "Om inskrivna särskilda rättigheter anknyter till projektet"
+"attachmentType.rakennuspaikan_hallinta.todistus_hallintaoikeudesta.info" "en" ""
 "attachmentType.rakennuspaikan_hallinta.todistus_hallintaoikeudesta.info" "fi" ""
 "attachmentType.rakennuspaikan_hallinta.todistus_hallintaoikeudesta.info" "sv" ""
 "attachmentType.rakennuspaikka.karttaaineisto.info" "en" "Where the authority requests or supplies map data"

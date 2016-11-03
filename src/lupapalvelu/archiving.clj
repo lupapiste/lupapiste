@@ -1,27 +1,28 @@
 (ns lupapalvelu.archiving
-  (:require [sade.http :as http]
-            [sade.env :as env]
-            [cheshire.core :as json]
-            [lupapiste-commons.tos-metadata-schema :as tms]
-            [schema.core :as s]
-            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
-            [lupapalvelu.pdf.pdf-export :as pdf-export]
+  (:require [clojure.string :as string]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment :as att]
-            [ring.util.codec :as codec]
-            [lupapalvelu.action :as action]
-            [monger.operators :refer :all]
             [taoensso.timbre :refer [info error warn]]
+            [ring.util.codec :as codec]
             [clj-time.coerce :as c]
             [clj-time.core :as t]
             [clj-time.format :as f]
+            [cheshire.core :as json]
+            [monger.operators :refer :all]
+            [schema.core :as s]
+            [sade.env :as env]
+            [sade.files :as files]
+            [sade.http :as http]
+            [sade.strings :as ss]
+            [lupapiste-commons.tos-metadata-schema :as tms]
+            [lupapalvelu.tiedonohjaus :as tiedonohjaus]
+            [lupapalvelu.pdf.pdf-export :as pdf-export]
+            [lupapalvelu.attachment :as att]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as amf]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
-            [clojure.string :as string]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman]
-            [sade.strings :as ss])
+            [lupapalvelu.foreman :as foreman])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -132,9 +133,7 @@
                       (info "Response indicates that" id "is already in archive. Updating state.")
                       (state-update-fn :arkistoitu application now id)
                       (mark-application-archived-if-done application now))
-                    (state-update-fn :valmis application now id)))))
-            (when (instance? File is-or-file)
-              (io/delete-file is-or-file :silently)))))
+                    (state-update-fn :valmis application now id))))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -257,19 +256,20 @@
           case-file-archive-id (str id "-case-file")
           case-file-xml-id     (str case-file-archive-id "-xml")]
       (when (document-ids application-archive-id)
-        (let [application-file (pdf-export/generate-pdf-a-application-to-file application :fi)
+        (let [application-file-stream (pdf-export/generate-application-pdfa application :fi)
               metadata (generate-archive-metadata application user)]
-          (upload-and-set-state application-archive-id application-file "application/pdf" metadata application created set-application-state)))
+          (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
-        (let [case-file-file (libre/generate-casefile-pdfa application :fi)
-              case-file-xml (tiedonohjaus/xml-case-file application :fi)
-              xml-tmp-file (File/createTempFile "case-file" "xml")
-              metadata (-> (generate-archive-metadata application user)
-                           (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
-              xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
-          (spit xml-tmp-file case-file-xml)
-          (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
-          (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))
+        (files/with-temp-file libre-file
+          (files/with-temp-file xml-tmp-file
+            (let [case-file-file (libre/generate-casefile-pdfa application :fi libre-file)
+                  case-file-xml (tiedonohjaus/xml-case-file application :fi)
+                  metadata (-> (generate-archive-metadata application user)
+                             (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
+                  xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
+              (spit xml-tmp-file case-file-xml)
+              (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
+              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))))
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]

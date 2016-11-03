@@ -3,6 +3,8 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  var attachmentId = params.attachmentId;
+
   var authModel = params.authModel;
   var allowedTypes = params.allowedAttachmentTypes;
 
@@ -39,6 +41,10 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
         };
       })
     };
+  });
+
+  self.disposedSubscribe(self.attachmentType, function() {
+    self.sendEvent("attachments", "attachment-type-selected", {attachmentId: attachmentId, attachmentType: valueToType[self.attachmentType()]});
   });
 
   self.changingTypeAllowed = function() { return authModel.ok("set-attachment-type"); };

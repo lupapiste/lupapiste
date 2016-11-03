@@ -1,9 +1,9 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
-Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
+Library  DebugLibrary
 
 *** Test Cases ***
 
@@ -114,9 +114,12 @@ Authority opens attachment details
 
 Open archive metadata editor
   Click enabled by test id  show-attachment-tos-metadata
-  Click by test id  editMatadata
-  Element Should Be Disabled  xpath=//section[@id="attachment"]//button[@data-test-id='saveMetadata']
+  Click by test id  edit-metadata
+  Element Should Be Disabled  xpath=//section[@id="attachment"]//button[@data-test-id='save-metadata']
 
 Cancel editing
-  Click by test id  cancelMatadataEdit
-  [Teardown]  Logout
+  Click by test id  cancel-metadata-edit
+  Logout
+
+No frontend errors
+  There are no frontend errors

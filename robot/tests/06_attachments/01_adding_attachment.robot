@@ -3,6 +3,7 @@
 Documentation  Mikko adds an attachment to application
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource       attachment_resource.robot
 Variables      variables.py
 
 *** Test Cases ***
@@ -483,10 +484,3 @@ Not needed should not be visible
 Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
-
-Delete attachment version
-  [Arguments]  ${versionNumber}
-  Wait and click  show-attachment-versions
-  Wait and click  jquery=tr[data-test-id='version-row-${versionNumber}'] a[data-test-id='delete-version']
-  Confirm yes no dialog
-  Wait until  Element should not be visible  show-attachment-versions

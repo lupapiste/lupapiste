@@ -257,7 +257,12 @@
       (command ronja :approve-application :id application-id :lang "fi") => unauthorized?)
 
     (fact "Approver with approver role is authorized"
-      (command sonja :approve-application :id application-id :lang "fi") => ok?)))
+          (command sonja :approve-application :id application-id :lang "fi") => ok?)
+    (facts "Application state is sent with matching history"
+           (let [{:keys [state history]} (query-application sonja application-id)]
+             (fact "State is closed" state => "sent")
+             (fact "History is correct"
+                   (map :state history) => ["draft" "open" "submitted" "sent"])))))
 
 (facts "link to backend system"
   (let [application    (create-and-submit-application mikko :municipality sonja-muni)
@@ -526,7 +531,7 @@
       app => map?
       user => map?)
 
-    (doseq [command (action/foreach-action {} user {} app)
+    (doseq [command (action/foreach-action {:web {} :user user :application {} :data app})
           :let [action (keyword (:action command))
                 result (a/validate-authority-in-drafts command)]]
     (fact {:midje/description (name action)}

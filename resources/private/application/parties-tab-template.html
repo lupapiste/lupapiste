@@ -4,7 +4,8 @@
     <help-toggle params="lhtml: ['help.' + permitType() + '.PartiesDesc', 'company-invite.help']"></help-toggle>
 
     <!-- ko if: $parent.selectedTabName() === 'parties' && $root.authorization.ok("create-assignment") && features.enabled("assignments") -->
-    <create-assignment params="authorities: $root.authorities,
+    <create-assignment data-test-id="create-assignment-component"
+                       params="authorities: $root.authorities,
                                applicationId: id,
                                targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
     <!-- /ko -->

@@ -75,16 +75,12 @@
 
 (defquery get-application-operations
   {:user-roles #{:authority}}
-  [{user :user}]
-  (let [orgIds             (map name (-> user :orgAuthz keys))
-        organizations      (map lupapalvelu.organization/get-organization orgIds)
-        selected-ops       (mapcat :selected-operations organizations)
-        is-R?              (some #(= (:permitType %) "R") (mapcat :scope organizations))
-        selected-ops       (if is-R?
-                             (distinct (conj selected-ops "tyonjohtajan-nimeaminen-v2"))
-                             selected-ops)
-        ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
-    (ok :operationsByPermitType ops-by-permit-type)))
+  [{organizations :user-organizations}]
+  (let [is-R?  (some #(= (:permitType %) "R") (mapcat :scope organizations))]
+    (->> (if is-R? ["tyonjohtajan-nimeaminen-v2"] [])
+         (concat (mapcat :selected-operations organizations))
+         selected-ops-by-permit-type
+         (ok :operationsByPermitType))))
 
 (defn- localize-operation [op]
   (let [keys [:id :created :name :description]

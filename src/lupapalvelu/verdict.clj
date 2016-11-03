@@ -6,14 +6,15 @@
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
             [sade.common-reader :as cr]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
-            [sade.env :as env]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -215,11 +216,10 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)
-                   temp-file       (File/createTempFile filename "-verdict-attachment.tmp")]]
+                   current-application (domain/get-application-as (:id application) user)]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (try
+         (files/with-temp-file temp-file
            (if (= 200 (:status resp))
              (with-open [in (:body resp)]
                ; Copy content to a temp file to keep the content close at hand
@@ -236,9 +236,7 @@
                                               {:filename filename
                                                :size content-length
                                                :content temp-file}))
-             (error (str (:status resp) " - unable to download " url ": " resp)))
-           (finally
-             (io/delete-file temp-file :silently)))))
+             (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 

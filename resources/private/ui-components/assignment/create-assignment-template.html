@@ -6,7 +6,7 @@
     <i class="lupicon-circle-plus"></i>
     <span data-bind="ltext: 'application.assignment.create'"></span>
   </button>
-  <bubble-dialog params="visible: editorVisible, okFun: createAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
+  <bubble-dialog data-test-id="create-assignment-bubble" params="visible: editorVisible, okFun: createAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
     <!-- ko with: $parent -->
     <div class="form-grid">
       <div class="row">

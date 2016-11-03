@@ -64,11 +64,13 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   });
 
   function loadAssignments() {
-    ajax.datatables("assignments-search", searchFields())
+    if (pageutil.getPage() === "applications") {
+      ajax.datatables("assignments-search", searchFields())
       .success(self.onSuccess)
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
       .call();
+    }
   }
 
   hub.onPageLoad("applications", loadAssignments);

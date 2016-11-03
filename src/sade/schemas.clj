@@ -21,6 +21,29 @@
          (or (@dynamically-created-schemas ~schema-key)
              ((swap! dynamically-created-schemas assoc ~schema-key ~form) ~schema-key))))))
 
+(defprotocol SchemaKey
+  (plain-key [key]))
+
+(extend-protocol SchemaKey
+  schema.core.OptionalKey
+  (plain-key [key] (.-k key))
+  clojure.lang.Keyword
+  (plain-key [key] key)
+  java.lang.String
+  (plain-key [key] (keyword key))
+  java.lang.Number
+  (plain-key [key] (keyword (str key)))
+  java.lang.Character
+  (plain-key [key] (keyword (str key)))
+  java.lang.Object
+  (plain-key [key] key))
+
+(defn plain-keys
+  "Returns all keys for schema as keywords without optional-key wrapper."
+  [schema]
+  (->> (keys schema)
+       (map plain-key)))
+
 ;; Predicate / constraint
 
 (defn min-length-constraint [max-len]
@@ -128,6 +151,9 @@
 (defschema IpAddress
   (sc/pred validators/ip-address? "IP address"))
 
+(defschema ApplicationId
+  (sc/pred validators/application-id? "Application ID"))
+
 ;; Schemas for blank or valid values
 
 (sc/defschema OptionalHttpUrl
@@ -173,4 +199,3 @@
 (defdynamicschema min-max-valued-decimal-string [min max]
   (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))
-

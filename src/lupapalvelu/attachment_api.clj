@@ -514,7 +514,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (files/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+       :body (attachment/get-attachments-for-user! user atts)}))
 
 ;;
 ;; Upload
@@ -587,17 +587,16 @@
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")
-          attachment-options (util/assoc-when {:comment-text nil
-                                               :required false
-                                               :original-file-id originalFileId
-                                               :attachment-id attachmentId
-                                               :attachment-type (:type attachment)
-                                               :created created
-                                               :user user}
-                                              :autoConversion autoConversion)]
-      (try
+    (files/with-temp-file temp-pdf
+      (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
+           attachment-options (util/assoc-when {:comment-text nil
+                                                :required false
+                                                :original-file-id originalFileId
+                                                :attachment-id attachmentId
+                                                :attachment-type (:type attachment)
+                                                :created created
+                                                :user user}
+                                               :autoConversion autoConversion)]
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
@@ -607,9 +606,7 @@
                                           :filename filename
                                           :content-type contentType
                                           :size (.length temp-pdf)}))
-        (ok)
-        (finally
-          (io/delete-file temp-pdf :silently))))
+        (ok)))
     (fail :error.unknown)))
 
 (defcommand stamp-attachments
@@ -828,9 +825,8 @@
    :states           (states/all-application-states-but :draft)}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")]
-      (try
+    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))]
+      (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
           (attachment/upload-and-attach! {:application application :user user}
@@ -840,7 +836,5 @@
                                           :created created
                                           :stamped stamped
                                           :original-file-id fileId}
-                                         {:content temp-pdf :filename filename}))
-        (finally
-          (io/delete-file temp-pdf :silently)))
+                                         {:content temp-pdf :filename filename})))
       (ok))))

@@ -4,7 +4,7 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [clojure.java.io :as io])
-  (:import (java.io InputStream File)))
+  (:import (java.io InputStream)))
 
 (facts "Conversion"
   ;; TODO remove attachemnt-type specific keys when convert-all-attachments feature is in PROD
@@ -48,7 +48,7 @@
                                      :contentType "application/pdf"
                                      :content (io/file "dev-resources/invalid-pdfa.pdf")}) => (contains {:archivabilityError nil
                                                                                                          :archivable         true
-                                                                                                         :content            (partial instance? File)
+                                                                                                         :content            (partial instance? InputStream)
                                                                                                          :filename           "foo.pdf"})
       (provided
         (pdfa/pdf-a-required? anything) => true))))
