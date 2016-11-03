@@ -12,8 +12,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.document.schemas :as schemas]))
 
 
 (fact "update-document"
@@ -102,31 +101,15 @@
 (facts "State transitions"
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
     (fact "update"
-      (state-transition-update :open 1 {:created 0 :permitType "R" :organization "123-R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :open 1 {:opened nil :permitType "R" :organization "123-R"} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-      (state-transition-update :submitted 2 {:created 0 :opened 1 :permitType "R" :organization "123-R"} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
-      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2 :permitType "R" :organization "123-R"} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
-    (fact "re-update"
-      (state-transition-update :open 4 {:opened 3 :permitType "R" :organization "123-R"} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
-      (state-transition-update :submitted 5 {:submitted 4 :permitType "R" :organization "123-R"} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
-      (state-transition-update :constructionStarted 6 {:started 5 :permitType "R" :organization "123-R"} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}}))
-  (against-background
-    (org/get-organization "123-R") => "123-R"
-    (org/krysp-integration? "123-R" "R") => false))
+      (state-transition-update :open 1 {:created 0} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :open 1 {:opened nil} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :submitted 2 {:created 0 :opened 1} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
 
-(facts "State transition wih warranty"
-  (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
-    (fact "should set warranty period"
-      (state-transition-update :closed 1 {:created 0 :permitType "YA" :organization "123-YA"} pena) =>  {$set {:state :closed, :closed 1, :modified 1, :warrantyStart 1, :warrantyEnd 63072000001},
-                                                                                                         $push {:history {:state :closed, :ts 1, :user pena}}})
-    (fact "should not set warranty period when krysp in use"
-      (state-transition-update :closed 1 {:created 0 :permitType "YA" :organization "456-YA"} pena) =>  {$set {:state :closed, :closed 1, :modified 1},
-                                                                                                             $push {:history {:state :closed, :ts 1, :user pena}}}))
-  (against-background
-    (org/get-organization "123-YA") => "123-YA"
-    (org/krysp-integration? "123-YA" "YA") => false
-    (org/get-organization "456-YA") => "456-YA"
-    (org/krysp-integration? "456-YA" "YA") => true))
+    (fact "re-update"
+      (state-transition-update :open 4 {:opened 3} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
+      (state-transition-update :submitted 5 {:submitted 4} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
+      (state-transition-update :constructionStarted 6 {:started 5} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
 
 (fact "Valid permit types pre-checker"
       (let [error {:ok false :text "error.unsupported-permit-type"}

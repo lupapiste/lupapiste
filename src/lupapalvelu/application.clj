@@ -546,13 +546,9 @@
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]
-  (let [ts-key      (timestamp-key to-state)
-        permit-type (permit/permit-type application)
-        krysp?      (org/krysp-integration? (org/get-organization (:organization application)) permit-type)
-        warranty?   (and (permit/is-ya-permit permit-type) (= ts-key :closed) (not krysp?))]
+  (let [ts-key (timestamp-key to-state)]
     {$set (merge {:state to-state, :modified timestamp}
-                 (when (and ts-key (not (ts-key application))) {ts-key timestamp})
-                 (when warranty? (warranty-period timestamp)))
+                 (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
      $push {:history (history-entry to-state timestamp user)}}))
 
 (defn change-application-state-targets

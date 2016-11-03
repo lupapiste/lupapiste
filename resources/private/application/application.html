@@ -913,7 +913,7 @@
                                     </tr>
 
                                     <!-- Takuu alkaa -->
-                                    <tr data-bind="if: _.includes(['closed'], $data.state())">
+                                    <tr data-bind="if: warrantyStart">
                                         <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
@@ -930,7 +930,7 @@
                                     </tr>
 
                                     <!-- Takuu loppuu -->
-                                    <tr data-bind="if: _.includes(['closed'], $data.state())">
+                                    <tr data-bind="if: warrantyEnd">
                                         <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
                                         <td>
                                             <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
