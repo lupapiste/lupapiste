@@ -3,6 +3,7 @@
 Documentation  Mikko adds an attachment to application
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource       attachment_resource.robot
 Variables      variables.py
 
 *** Test Cases ***
