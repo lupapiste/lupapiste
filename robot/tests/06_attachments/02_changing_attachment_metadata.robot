@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation  Sonja should see only applications from Sipoo
-Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
 Library  DebugLibrary
@@ -120,4 +119,7 @@ Open archive metadata editor
 
 Cancel editing
   Click by test id  cancel-metadata-edit
-  [Teardown]  Logout
+  Logout
+
+No frontend errors
+  There are no frontend errors
