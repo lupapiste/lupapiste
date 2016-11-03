@@ -131,10 +131,10 @@
     (when-let [arvo (:haetaan-kausilupaa mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
-(defn- get-construction-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (util/to-xml-datetime (:started application))
-                                    :loppuHetki (util/to-xml-datetime (:closed application))}}
-   :valmistumisilmoitusPvm (util/to-xml-date (now))})
+(defn- get-construction-period-info [{:keys [started closed]}]
+  (cond-> {:kayttojaksotieto {:Kayttojakso {:alkuHetki (util/to-xml-datetime started)}}}
+      closed (assoc :valmistumisilmoitusPvm (util/to-xml-date (now)))
+      closed (assoc-in [:kayttojaksotieto :Kayttojakso :loppuHetki] (util/to-xml-datetime closed))))
 
 
 ;; Configs
@@ -275,8 +275,8 @@
                             :sijoituslupaviitetieto sijoituslupaviitetieto}
                            (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
                              {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
-                           (when (:closed application)
-                             (get-construction-ready-info application))))]
+                           (when (:started application)
+                             (get-construction-period-info application))))]
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 

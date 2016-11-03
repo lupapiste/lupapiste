@@ -207,7 +207,8 @@
                    url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (http/get url :as :stream :throw-exceptions false)
                    header-filename (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                                     (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                                     (last (re-find #".*filename=\"?([^\"]+)"
+                                                    content-disposition)))
                    filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
