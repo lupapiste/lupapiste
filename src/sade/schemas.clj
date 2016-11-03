@@ -30,7 +30,9 @@
   clojure.lang.Keyword
   (plain-key [key] key))
 
-(defn plain-keys [schema]
+(defn plain-keys
+  "Returns all keys for schema without optional-key wrapper."
+  [schema]
   (->> (keys schema)
        (map plain-key)))
 

@@ -195,7 +195,7 @@
   (->> org-authz keys (map name) set))
 
 (defn get-organizations
-  "Query organizations for user"
+  "Query organizations for user. Area data is omitted by default."
   ([user]
    (let [projection (-> (ssc/plain-keys org/Organization)
                         (zipmap (repeat true))
