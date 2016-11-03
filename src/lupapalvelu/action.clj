@@ -565,20 +565,19 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-
-(defn foreach-action [web user application data]
+(defn foreach-action [{:keys [web user application organization data]}]
   (map
     #(when-let [{type :type categories :categories} (get-meta %)]
        (assoc
          (action % :type type :data data :user user)
          :application application
+         :organization organization
          :web web
          :categories categories))
    (remove nil? (keys @actions))))
 
 (defn- validated [command]
   {(:action command) (validate command)})
-
 
 (def validate-actions
   (if (env/dev-mode?)
@@ -596,10 +595,11 @@
   nil)
 
 (defn allowed-actions-for-collection
-  [collection-key command-builder {:keys [web user application] :as command}]
+  [collection-key command-builder {:keys [application] :as command}]
   (let [coll (get application collection-key)]
     (->> (map (partial command-builder application) coll)
-         (map (partial foreach-action web user application))
+         (map (partial assoc command :data))
+         (map foreach-action)
          (map (partial filter-actions-by-category collection-key))
          (map validate-actions)
          (zipmap (map :id coll)))))
