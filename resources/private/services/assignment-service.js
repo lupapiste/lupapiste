@@ -47,11 +47,13 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
 
   if( features.enabled( "assignments")) {
 
-    hub.subscribe("assignmentService::createAssignment", function(event) {
-      ajax.command("create-assignment", _.omit(event, "eventType"))
+    hub.subscribe("assignmentService::saveAssignment", function(event) {
+      var assignment = _.omit(event, "eventType");
+      var commandName = util.isEmpty(assignment.assignmentId) ? "create-assignment" : "update-assignment";
+
+      ajax.command(commandName, assignment)
         .success(function(resp) {
           util.showSavedIndicator(resp);
-          // Refresh application assignments
           assignmentsForApplication(event.id);
         })
         .call();

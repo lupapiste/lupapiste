@@ -146,7 +146,8 @@ jQuery(document).ready(function() {
     {name: "open-3d-map"},
     {name: "extension-applications"},
     {name: "create-assignment"},
-    {name: "accordion-assignments"}
+    {name: "accordion-assignments"},
+    {name: "assignment-editor"}
 ];
 
   ko.registerLupapisteComponents(components);

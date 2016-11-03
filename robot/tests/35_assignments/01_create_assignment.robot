@@ -22,9 +22,9 @@ Sonja logs in and opens application
   Tab should be visible  info
 
 Create assignment button is visible in parties tab
-  Element should not be visible  xpath=//button[@data-test-id="create-assignment-editor"]
+  Element should not be visible  xpath=//button[@data-test-id="create-assignment-editor-button"]
   Open tab  parties
-  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor']
+  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor-button']
 
 Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
