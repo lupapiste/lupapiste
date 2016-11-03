@@ -82,7 +82,10 @@
         .query("organization-by-id", {organizationId: orgId})
         .pending(self.pending)
         .success(function(result) {
-          self.organization(ko.mapping.fromJS(result.data));
+          // Omit the coordinate properties, since their (unnecessary)
+          // mapping freezes the UI.
+          self.organization(ko.mapping.fromJS(_.omit(result.data,
+                                                     ["areas", "areas-wgs84"])));
           isLoading = true;
           self.names(_.map(util.getIn(result, ["data", "name"]), wrapName));
           self.permanentArchiveEnabled(result.data["permanent-archive-enabled"]);
