@@ -28,10 +28,18 @@
   schema.core.OptionalKey
   (plain-key [key] (.-k key))
   clojure.lang.Keyword
+  (plain-key [key] key)
+  java.lang.String
+  (plain-key [key] (keyword key))
+  java.lang.Number
+  (plain-key [key] (keyword (str key)))
+  java.lang.Character
+  (plain-key [key] (keyword (str key)))
+  java.lang.Object
   (plain-key [key] key))
 
 (defn plain-keys
-  "Returns all keys for schema without optional-key wrapper."
+  "Returns all keys for schema as keywords without optional-key wrapper."
   [schema]
   (->> (keys schema)
        (map plain-key)))
@@ -188,4 +196,3 @@
 (defdynamicschema min-max-valued-decimal-string [min max]
   (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))
-
