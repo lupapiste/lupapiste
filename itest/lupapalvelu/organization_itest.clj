@@ -97,7 +97,7 @@
 
       (fact "oulu user sees other users in oulu & naantali"
         (map :username oulu-sees) =>
-        (contains ["olli" "rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi"] :in-any-order)))))
+        (contains ["olli" "olli-ya" "rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi"] :in-any-order)))))
 
 (fact* "Organization details query works"
  (let [resp  (query pena "organization-details" :municipality "753" :operation "kerrostalo-rivitalo" :lang "fi") => ok?]
