@@ -3,6 +3,8 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]))
 
+(apply-remote-minimal)
+
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [initial-application (create-and-submit-application sonja
                               :operation "ya-katulupa-vesi-ja-viemarityot"
@@ -12,7 +14,9 @@
         _              (generate-documents initial-application sonja)
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
         documents-after-approve (:documents (query-application sonja application-id)) => seq
-        _              (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.command-illegal-state")
+        _              (command sonja :inform-construction-started :id application-id
+                                :startedTimestampStr "31.12.2013" :lang "fi")
+        => (partial expected-failure? "error.command-illegal-state")
         _              (give-verdict sonja application-id) => ok?
         application    (query-application sonja application-id) => truthy]
 
@@ -25,8 +29,10 @@
 
     (:state application) => "verdictGiven"
     sonja => (allowed? :create-continuation-period-permit :id application-id)
-    (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => (partial expected-failure? "error.command-illegal-state")
-    (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => ok?
+    (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013"
+             :lang "fi") => (partial expected-failure? "error.command-illegal-state")
+    (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013"
+             :lang "fi") => ok?
 
     ;; Started application
     (let [application (query-application sonja application-id) => truthy
@@ -68,4 +74,5 @@
         _              (give-verdict sonja application-id) => ok?
         application    (query-application sonja application-id) => truthy
         _              (:state application) => "verdictGiven"]
-    (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013") => (partial expected-failure? "error.invalid-permit-type")))
+    (command sonja :inform-construction-started :id application-id :startedTimestampStr "31.12.2013"
+             :lang "fi") => (partial expected-failure? "error.invalid-permit-type")))
