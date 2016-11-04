@@ -172,7 +172,7 @@
     ko.mapping.fromJS(app, mappingOptions, applicationModel);
   }
 
-  function initWarrantyDates(app, applicationModel) {
+  function initWarrantyDates(app) {
     if (app.warrantyEnd) {
       app.warrantyEnd = new Date(app.warrantyEnd);
     }
@@ -220,7 +220,7 @@
       // Plain data
       applicationModel._js = app;
 
-      initWarrantyDates(app, applicationModel);
+      initWarrantyDates(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
