@@ -11,7 +11,8 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   function enrichAssignment(assignment) {
     return _.merge(assignment,
                    {createdState: _.find(assignment.states, function(state) { return state.type === "created"; }),
-                    currentState: _.maxBy(assignment.states, "timestamp")});
+                    currentState: _.maxBy(assignment.states, "timestamp"),
+                    edit: ko.observable(false)});
   }
 
   self.assignments = ko.pureComputed(function() {
