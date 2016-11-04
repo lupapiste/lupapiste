@@ -40,10 +40,12 @@ Sonja edits description of the assignment
   Click by test id  edit-assignment
   Wait until  Element should be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
   ${description}=  Get Value  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']//textarea[@id='assignment-description']
-  Should contain  ${description}  Katoppa tää
+  Should be equal  ${description}  Katoppa tää
   Input text  xpath=//bubble-dialog[@data-test-id='edit-assignment-bubble']//textarea[@id='assignment-description']  Katsoisitko?
   Scroll and click test id  bubble-dialog-ok
   Positive indicator should be visible
+  Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
   Logout
 
 
