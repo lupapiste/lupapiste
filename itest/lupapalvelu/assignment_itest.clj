@@ -135,24 +135,28 @@
       (fact "targets are returned as key-val vectors"
         (:targets targets-resp) => (has every? (fn [[k v]] (and (string? k) (vector? v)))))
       (fact "keys for values look right"
-        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:displayText :id]))))
+        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type]))))
       (fact "data from accordion-field is in display text"
-        (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
+        (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
     (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)]
 
-      (fact "text search finds approximate matches in description"
+      (facts "text search finds approximate matches in description"
         (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
-               :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
-               :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
-               :data :assignments) => empty?
-          (->> (query sonja :assignments-search :searchText "not even close")
-               :data :assignments (map :description)) => empty?))
+          (fact "uva eks - all"
+              (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
+                   :data :assignments (map :description)) => (contains "Kuvaava teksti"))
+          (fact "uva eks - created"
+              (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
+                   :data :assignments (map :description)) => (contains "Kuvaava teksti"))
+          (fact "uva eks - compeleted"
+            (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
+                 :data :assignments) => empty?)
+          (fact "not even close"
+            (->> (query sonja :assignments-search :searchText "not even close")
+                 :data :assignments (map :description)) => empty?)))
 
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?

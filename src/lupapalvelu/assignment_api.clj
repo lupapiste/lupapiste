@@ -72,11 +72,7 @@
    :states   states/all-application-states-but-draft-or-terminal
    :feature :assignments}
   [{:keys [application]}]
-  (let [party-docs (domain/get-documents-by-type application :party)
-        parties    (for [doc party-docs]
-                     {:id (:id doc)
-                      :displayText (assignment/display-text-for-document doc lang)})]
-    (ok :targets [["parties" parties]])))
+  (ok :targets (assignment/assignment-targets application)))
 
 (defquery assignments-search
   {:description "Service point for attachment search component"
