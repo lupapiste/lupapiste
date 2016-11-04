@@ -39,11 +39,10 @@
                       docs)])]
     (->> metas flatten (remove nil?) )))
 
-(defn- get-attachment-meta [attachment application]
+(defn- get-attachment-meta
+  [{:keys [signatures latestVersion id forPrinting :as attachment]} application]
   (let [op-metas (operation-attachment-meta attachment application)
-        signatures (:signatures attachment)
-        latestVersion (:latestVersion attachment)
-        liitepohja [(create-metatieto "liiteId" (:id attachment))]
+        liitepohja [(create-metatieto "liiteId" id)]
         signatures (->> signatures
                         (filter #(and
                                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
@@ -55,8 +54,9 @@
                                [(create-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
                                 (create-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
                         (flatten)
-                        (vec))]
-    (remove empty? (concat liitepohja op-metas signatures))))
+                        (vec))
+        verdict-attachment (some->> forPrinting (create-metatieto "paatoksen liite") vector)]
+    (remove empty? (concat liitepohja op-metas signatures verdict-attachment))))
 
 
 (defn- get-Liite [title link attachment type file-id filename & [meta building-ids]]
