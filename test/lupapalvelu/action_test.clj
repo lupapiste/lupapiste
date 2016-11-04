@@ -80,7 +80,7 @@
   (facts "Test valid-states"
     (against-background
       (get-actions) => {:test-command {:parameters [:id]
-                                       :states     [:open]}})
+                                       :states     #{:open}}})
     (fact "invalid state"
           (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "closed"})
           => (contains {:ok false, :text "error.command-illegal-state"}))
