@@ -27,7 +27,7 @@
     (fail :error.assignments-not-enabled)))
 
 (defn- assignments-enabled-for-application [{org :organization}]
-  (when-not (:assignments-enabled @org)
+  (when-not (and org (:assignments-enabled @org))
     (fail :error.assignments-not-enabled)))
 
 ;;
@@ -81,7 +81,8 @@
    :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user data :data}]
-  (ok :data (assignment/assignments-search user (assignment/search-query data))))
+  (let [query (assignment/search-query data)]
+    (ok :data (assignment/assignments-search user query))))
 
 ;;
 ;; Commands

@@ -14,37 +14,12 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]))
 
 (def search-text-max-length 150)
-
-;; Operations
-
-(defn- normalize-operation-name [i18n-text]
-  (when-let [lc (ss/lower-case i18n-text)]
-    (-> lc
-      (s/replace #"\p{Punct}" "")
-      (s/replace #"\s{2,}"    " "))))
-
-(def operation-index
-  (reduce
-    (fn [ops k]
-      (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
-            normalized (map normalize-operation-name localizations)]
-        (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
-    []
-    (keys operations/operations)))
-
-(defn- operation-names [filter-search]
-  (let [normalized (normalize-operation-name filter-search)]
-    (map :op
-      (filter
-        (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
-        operation-index))))
 
 ;;
 ;; Query construction
@@ -54,7 +29,7 @@
   (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
-        ops         (operation-names filter-search)]
+        ops         (app-utils/operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
                                         {:secondaryOperations.name {$in ops}}])
