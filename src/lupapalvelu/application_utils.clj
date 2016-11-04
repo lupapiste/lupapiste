@@ -29,9 +29,6 @@
            (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
            operation-index))))
 
-
-
-
 (defn with-application-kind [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
                      (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
