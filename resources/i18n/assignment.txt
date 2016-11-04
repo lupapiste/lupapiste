@@ -49,3 +49,6 @@
 "application.assignment" "fi" "Tehtävä"
 "application.assignment" "sv" "Uppdrag"
 "application.assignment" "en" "Assignment"
+"application.assignment.type.documents" "en" "Application data"
+"application.assignment.type.documents" "fi" "Hakemuksen tiedot"
+"application.assignment.type.documents" "sv" "Uppgifter om ansökan"
