@@ -14,6 +14,24 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
+(defonce ^:private registered-assignment-targets (atom {}))
+
+(sc/defschema Target
+  {:id                               ssc/ObjectIdStr
+   :type                             sc/Str
+   (sc/optional-key :info-key)       sc/Str          ; localization key for additional target info
+   (sc/optional-key :description)    sc/Str})        ; localized description for additional target info
+
+(sc/defschema TargetGroup
+  (sc/pair sc/Keyword "Group name" [Target] "Targets"))
+
+(defn register-assignment-target! [target-group target-descriptor-fn]
+  {:pre [(fn? target-descriptor-fn)]}
+  (swap! registered-assignment-targets assoc (keyword target-group) target-descriptor-fn))
+
+(defn assignment-targets [application]
+  (map (fn [[group resolver]] [group (resolver application)]) @registered-assignment-targets))
+
 ;; Helpers and schemas
 
 (defn- assignment-in-user-organization-query [user]
