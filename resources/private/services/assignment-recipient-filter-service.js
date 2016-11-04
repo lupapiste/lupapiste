@@ -2,19 +2,19 @@ LUPAPISTE.AssignmentRecipientFilterService = function(applicationFiltersService)
   "use strict";
   var self = this;
 
-  self.selected = ko.observableArray([]);
-
   // dummy elements for autocomplete
   self.myown = {id: "my-own", fullName: loc("applications.search.recipient.my-own"), behaviour: "singleSelection"};
   self.all = {id: "all", fullName: loc("all"), behaviour: "clearSelected"};
 
-  var savedFilter = ko.pureComputed(function() {
+  self.selected = ko.observableArray([self.myown]);
+
+  /*var savedFilter = ko.pureComputed(function() {
     return util.getIn(applicationFiltersService.selected(), ["filter", "recipient"]);
-  });
+  });*/
 
   var usersInSameOrganizations = ko.observable();
 
-  ko.computed(function() {
+  /*ko.computed(function() {
     if (savedFilter() && _.includes(savedFilter(), "my-own")) {
       self.selected(["my-own"]);
     } else {
@@ -25,7 +25,7 @@ LUPAPISTE.AssignmentRecipientFilterService = function(applicationFiltersService)
           }
         }));
     }
-  });
+  }); */
 
   self.data = ko.pureComputed(function() {
     return usersInSameOrganizations();
