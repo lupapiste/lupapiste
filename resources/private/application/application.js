@@ -217,7 +217,7 @@
       // Documents
       var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
       var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
-      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
+      var nonpartyDocs = _.reject(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);

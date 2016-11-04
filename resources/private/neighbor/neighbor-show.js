@@ -69,7 +69,7 @@
 
       self.application(a).map.updateSize().clear().center(x, y, 14).add({x: x, y: y});
 
-      var nonpartyDocs = _.filter(a.documents, util.isNotPartyDoc);
+      var nonpartyDocs = _.reject(a.documents, util.isPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(a.documents, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
