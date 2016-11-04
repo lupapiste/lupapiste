@@ -320,6 +320,23 @@
     :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
               :apikey "7634919923210010829057754770828315568705"}}
 
+   ;; YA viranomainen
+   ;; Olli Ule\u00E5borg - Oulun lupa-arkkitehti:  olli-ya / olli
+   ;; Viranomaisena myos Naantalissa
+   {:id "777777777777777777000035"
+    :email "olliya.uleaborg@ouka.fi"
+    :enabled true
+    :language "fi"
+    :role "authority"
+    :orgAuthz {:564-YA #{:authority :approver :archivist :tos-editor :tos-publisher}
+               :564-YMP #{:authority :approver}}
+    :firstName "Olli-ya"
+    :lastName "Ule\u00E5borg"
+    :phone "121212"
+    :username "olli-ya"
+    :private {:password "$2a$10$JXFA55BPpNDpI/jDuPv76uW9TTgGHcDI2l5daelFcJbWvefB6THmi"
+              :apikey "7634919923210010829057754770828315568706"}}
+
    ;; Naantali
 
    ;; Naantali R paakayttaja: admin@naantali.fi / naantali
@@ -854,6 +871,21 @@
                                      "http://oulu.ouka.fi/rakennusvalvonta/")]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
                        :permanent-archive-enabled false}
+
+                      ;; Oulu YA
+                      {:id "564-YA"
+                       :name (names {:fi "Oulun yleiset alueet"
+                                     :sv "Oulun yleiset alueet"})
+                       :scope [{:municipality "564" :permitType "YA" :inforequest-enabled true :new-application-enabled true}]
+                       :statementGivers [{:id "521f1e82e4b0d14f5a87f179"
+                                          :text "Paloviranomainen"
+                                          :email "oulu.viranomainen@oulu.fi"
+                                          :name "Oulu Viranomainen"}]
+                       :links [(link {:fi "Oulu", :sv "Ule\u00E5borg"}
+                                     "http://www.ouka.fi")]
+                       :operations-attachments ya-default-attachments-for-operations
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YA"} (name (:permit-type v)))) operations/operations))
+                       :permanent-archive-enabled true}
 
                       ;; Naantali R
                       {:id "529-R"

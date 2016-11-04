@@ -310,6 +310,10 @@ Olli logs in
   [Arguments]  ${showAll}=True
   Authority logs in  olli  olli  Olli Ule\u00e5borg  ${showAll}
 
+Olli-ya logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  olli-ya  olli  Olli-ya Ule\u00e5borg  ${showAll}
+
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 

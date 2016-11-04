@@ -68,6 +68,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-areas", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-handlers"},
+    {name: "autocomplete-recipient"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},

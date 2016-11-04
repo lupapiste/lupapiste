@@ -857,7 +857,7 @@
                         </div>
 
                         <!-- YA: Info about construction started and construction ready occasions -->
-                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed'], $data.state())">
+                        <div data-bind="if: $root.authorization.ok('info-construction-status')">
                           <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
                             <table>
                                 <thead>
@@ -910,6 +910,40 @@
                                                                visible: $root.authorization.ok('inform-construction-ready'),
                                                                enable: $root.authorization.ok('inform-construction-ready')"></button>
                                         </td>
+                                    </tr>
+
+                                    <!-- Takuu alkaa -->
+                                    <tr data-bind="if: warrantyStart">
+                                        <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyStart"
+                                                  data-test-id="warranty-start-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input"
+                                                   data-test-id="warranty-start-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <!-- Takuu loppuu -->
+                                    <tr data-bind="if: warrantyEnd">
+                                        <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyEnd"
+                                                  data-test-id="warranty-end-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyEnd" class="form-input"
+                                                   data-test-id="warranty-end-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
 
                                 </tbody>
