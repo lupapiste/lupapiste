@@ -30,7 +30,7 @@
   (swap! registered-assignment-targets assoc (keyword target-group) target-descriptor-fn))
 
 (defn assignment-targets [application]
-  (map (fn [[group resolver]] [group (resolver application)]) @registered-assignment-targets))
+  (map (fn [[group descriptor]] [group (descriptor application)]) @registered-assignment-targets))
 
 ;; Helpers and schemas
 
