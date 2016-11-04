@@ -368,7 +368,8 @@
                           (fail :error.attachment.id)))
                       foreman-must-be-uploader
                       ram/ram-not-linked
-                      ram/attachment-status-ok]
+                      ram/attachment-status-ok
+                      ram/attachment-type-allows-ram]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
