@@ -36,15 +36,17 @@
 
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :application    {:id           ssc/ApplicationId
-                    :organization sc/Str
-                    :address      sc/Str
-                    :municipality sc/Str}
+   :application    {:id               ssc/ApplicationId
+                    :organization     sc/Str
+                    :address          sc/Str
+                    :municipality     sc/Str
+                    :primaryOperation sc/Str}
    :target         sc/Any
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
-   :description    sc/Str})
+   :description    sc/Str
+   sc/Keyword sc/Any})
 
 (sc/defschema NewAssignment
   (-> (select-keys Assignment [:application :description :recipient :target])
@@ -110,11 +112,13 @@
           :limit  100}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient]}]
+(defn- make-query [query {:keys [searchText state recipient operation]}]
   {$and
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
+            (when-not (empty? operation)
+              {:applicationDetails.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
             (if (= state "all")
@@ -130,19 +134,28 @@
 (defn search [query skip limit sort]
   (try
     (let [res (collection/aggregate (mongo/get-db) "assignments"
-                  [{"$match" query}
-                   {"$project" 
+                  [{"$lookup" {:from :applications
+                               :localField "application.id"
+                               :foreignField "_id"
+                               :as "applicationDetails"}}
+                   {"$unwind" "$applicationDetails"}
+                   {"$match" query}
+                   {"$project"
                       ;; pull the creation state to root of document for sorting purposes
                       ;; it might also be possible to use :document "$$ROOT" in aggregation
                       {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
                        :description-ci {"$toLower" "$description"} ;; for sorting
-                       :application "$application"
+                       :application {:id "$applicationDetails._id"
+                                     :organization "$applicationDetails.organization"
+                                     :address "$applicationDetails.address"
+                                     :municipality "$applicationDetails.municipality"
+                                     :primaryOperation "$applicationDetails.primaryOperation.name"}
                        :target "$target"
                        :recipient "$recipient"
                        :status "$status"
                        :states "$states"
                        :description "$description"
-                      }} 
+                      }}
                    {"$sort" (sort-query sort)}])
           converted 
              (map 
