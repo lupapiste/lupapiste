@@ -52,20 +52,20 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")] ; deleted via temp-file-input-stream, when not pdfa or in catch
+    (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")] ; deleted via temp-file-input-stream, when input was not converted or in catch
       (try
         (let [processing-result (pdf-conversion/convert-to-pdf-a content pdf-file {:application application :filename filename})
-              output-file (:output-file processing-result)
-              output-stream (when output-file (files/temp-file-input-stream output-file))]
-          (when-not (:pdfa? processing-result) (io/delete-file pdf-file :silently))
+              {:keys [output-file missing-fonts] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
+              archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
+          (when-not auto-conversion (io/delete-file pdf-file :silently))
           (cond
-            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil :content output-stream}
-            (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
+            (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
+            (not (:pdfa? processing-result)) {:archivable false :missing-fonts missing-fonts :archivabilityError archivability-error}
             (:pdfa? processing-result) {:archivable true
                                         :filename (files/filename-for-pdfa filename)
                                         :archivabilityError nil
-                                        :content output-stream
-                                        :autoConversion (:autoConversion processing-result)}))
+                                        :content (when output-file (files/temp-file-input-stream output-file))
+                                        :autoConversion auto-conversion}))
         (catch Throwable t
           (io/delete-file pdf-file :silently)
           (throw t))))

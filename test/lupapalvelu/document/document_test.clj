@@ -5,7 +5,7 @@
             [lupapalvelu.document.document-api :as dapi]
             [lupapalvelu.document.document :refer [create-doc-validator]]))
 
-(testable-privates lupapalvelu.document.document deny-remove-of-last-document)
+(testable-privates lupapalvelu.document.document deny-remove-of-last-document document-assignment-info)
 
 (facts create-doc-validator
   ; type is "YA" and at least one doc is "party" -> fail
@@ -71,3 +71,54 @@
 
     (fact "foreman does not have access to applicant doc"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
+
+(facts document-assignment-info
+  (fact "yritys"
+    (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",
+                                             :accordion-fields [["_selected"]
+                                                                ["henkilo" "henkilotiedot" "etunimi"]
+                                                                ["henkilo" "henkilotiedot" "sukunimi"]
+                                                                ["yritys" "yritysnimi"]],
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "yritys"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Firma 5"})
+
+  (fact "henkilo"
+    (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",
+                                             :accordion-fields [["_selected"]
+                                                                ["henkilo" "henkilotiedot" "etunimi"]
+                                                                ["henkilo" "henkilotiedot" "sukunimi"]
+                                                                ["yritys" "yritysnimi"]],
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "henkilo"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Pena Panaani"})
+
+  (fact "without accordion fields"
+    (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",,
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "henkilo"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r"}))

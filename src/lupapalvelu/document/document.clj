@@ -3,7 +3,9 @@
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
@@ -110,3 +112,21 @@
         {collection {$elemMatch {:id doc}}}
         (->approval-mongo-model path approval))
        approval))))
+
+
+;;
+;; Assignments
+;;
+
+(defn- document-assignment-info
+  "Return document info as assignment target"
+  [{{name :name} :schema-info id :id :as doc}]
+  (let [accordion-datas (schemas/resolve-accordion-field-values doc)]
+    (util/assoc-when-pred {:id id :type name} ss/not-blank?
+                          :description (ss/join " " accordion-datas))))
+
+(defn- describe-parties-assignment-targets [application]
+  (->> (domain/get-documents-by-type application :party)
+       (map document-assignment-info)))
+
+(assignment/register-assignment-target! :parties describe-parties-assignment-targets)
