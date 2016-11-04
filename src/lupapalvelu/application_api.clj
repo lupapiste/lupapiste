@@ -532,12 +532,12 @@
   (let [organization    (deref (:organization command))
         application     (:application command)
         krysp?          (organization/krysp-integration? organization (permit/permit-type application))
-        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (= (keyword state) :closed) (not krysp?))]
-    (if (not warranty?)
-      (update-application command (app/state-transition-update (keyword state) (now) application user))
+        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (if warranty?
       (update-application command (util/deep-merge
-                                    (app/state-transition-update (keyword state) (now) application user)
-                                    {$set (app/warranty-period (now))})))))
+                                    (app/state-transition-update (keyword state) (:created command) application user)
+                                    {$set (app/warranty-period (:created command))}))
+      (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
 
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"
