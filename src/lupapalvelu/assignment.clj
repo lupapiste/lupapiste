@@ -45,8 +45,7 @@
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
-   :description    sc/Str
-   sc/Keyword sc/Any})
+   :description    sc/Str})
 
 (sc/defschema NewAssignment
   (-> (select-keys Assignment [:application :description :recipient :target])
@@ -107,6 +106,7 @@
   (merge {:searchText nil
           :state "all"
           :recipient nil
+          :operation nil
           :sort   {:asc true :field "id"}
           :skip   0
           :limit  100}
@@ -188,13 +188,16 @@
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
-        mongo-query (make-query user-query query)]
+        mongo-query (make-query user-query query)
+        assignments (search mongo-query
+                            (util/->long (:skip query))
+                            (util/->long (:limit query))
+                            (:sort query))]
     {:userTotalCount (mongo/count :assignments )
-     :totalCount     (mongo/count :assignments mongo-query)
-     :assignments    (search mongo-query
-                             (util/->long (:skip query))
-                             (util/->long (:limit query))
-                             (:sort query))}))
+     ; TODO proper count skip and limit for aggregate query
+     ; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
+     :totalCount     (count assignments)
+     :assignments    assignments}))
 
 ;;
 ;; Inserting and modifying assignments

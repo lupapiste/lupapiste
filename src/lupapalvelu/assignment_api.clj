@@ -85,7 +85,7 @@
    :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user data :data}]
-  (let [query (assignment/search-query (assoc data :operation []))]
+  (let [query (assignment/search-query data)]
     (ok :data (assignment/assignments-search user query))))
 
 ;;
