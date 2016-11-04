@@ -31,7 +31,8 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
+            [lupapalvelu.organization :as organization]))
 
 ;; Notifications
 
@@ -524,8 +525,37 @@
    :notified         true
    :on-success       (notify :application-state-change)}
   [{:keys [user application] :as command}]
-  (update-application command
-                      (app/state-transition-update (keyword state) (now) application user)))
+  (let [organization    (deref (:organization command))
+        application     (:application command)
+        krysp?          (organization/krysp-integration? organization (permit/permit-type application))
+        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (if warranty?
+      (update-application command (util/deep-merge
+                                    (app/state-transition-update (keyword state) (:created command) application user)
+                                    {$set (app/warranty-period (:created command))}))
+      (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
+
+(defcommand change-warranty-start-date
+  {:description      "Changes warranty start date"
+   :parameters       [id startDate]
+   :input-validators [(partial action/number-parameters [:startDate])
+                      (partial action/positive-number-parameters [:startDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+   [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyStart startDate}})
+  (ok))
+
+(defcommand change-warranty-end-date
+  {:description      "Changes warranty end date"
+   :parameters       [id endDate]
+   :input-validators [(partial action/number-parameters [:endDate])
+                      (partial action/positive-number-parameters [:endDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+  [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyEnd endDate}})
+  (ok))
 
 (defquery change-application-state-targets
   {:description "List of possible target states for

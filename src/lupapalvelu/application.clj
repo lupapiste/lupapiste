@@ -538,6 +538,12 @@
 
 (assert (= states/all-application-states (set (keys timestamp-key))))
 
+(def two-years-ms 63072000000)
+
+(defn warranty-period [timestamp]
+  {:warrantyStart timestamp,
+   :warrantyEnd (+ timestamp two-years-ms)})
+
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]

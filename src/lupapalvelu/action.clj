@@ -134,6 +134,9 @@
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
 
+(defn positive-number-parameters [params command]
+  (filter-params-of-command params command (complement pos?) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
