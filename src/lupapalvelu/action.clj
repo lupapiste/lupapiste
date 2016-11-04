@@ -280,7 +280,7 @@
 
 (defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (when-not (.contains valid-states (keyword state))
+    (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command]
