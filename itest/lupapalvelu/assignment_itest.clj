@@ -169,9 +169,6 @@
            (map #(get-in % [:recipient :id])
                 (-> (datatables sonja :assignments-search :recipient [sonja-id] :limit 5) :data :assignments)))
              => empty?)))
-          
-
-        )
 
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?

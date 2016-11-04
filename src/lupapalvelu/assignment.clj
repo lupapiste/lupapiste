@@ -58,8 +58,7 @@
    :application    {:id               ssc/ApplicationId
                     :organization     sc/Str
                     :address          sc/Str
-                    :municipality     sc/Str
-                    :primaryOperation sc/Str}
+                    :municipality     sc/Str}
    :target         sc/Any
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
@@ -131,7 +130,6 @@
           :state "all"
           :recipient nil
           :operation nil
-          :sort   {:asc true :field "id"}
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
@@ -173,8 +171,7 @@
                        :application {:id "$applicationDetails._id"
                                      :organization "$applicationDetails.organization"
                                      :address "$applicationDetails.address"
-                                     :municipality "$applicationDetails.municipality"
-                                     :primaryOperation "$applicationDetails.primaryOperation.name"}
+                                     :municipality "$applicationDetails.municipality"}
                        :target "$target"
                        :recipient "$recipient"
                        :status "$status"
