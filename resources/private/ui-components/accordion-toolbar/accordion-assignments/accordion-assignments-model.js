@@ -22,4 +22,9 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
     self.sendEvent(myService, "markComplete", {assignmentId: assignment.id, applicationId: params.applicationId});
   };
 
+  self.editAssignment = function(assignment) {
+    assignment.edit(!assignment.edit()); // toggle
+    _.delay(window.Stickyfill.rebuild, 0);
+  };
+
 };
