@@ -58,7 +58,11 @@
                     :organization sc/Str
                     :address      sc/Str
                     :municipality sc/Str}
-   :target         sc/Any
+   :target         {:group                         sc/Str
+                    :id                            ssc/ObjectIdStr
+                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :info-key)    sc/Str
+                    (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]

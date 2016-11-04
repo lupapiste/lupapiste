@@ -57,7 +57,8 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   self.createAssignment = function() {
     self.sendEvent(myService, "createAssignment", {id: params.applicationId(),
                                                    recipientId: self.recipientId(),
-                                                   target: [self.selectedTargetGroup(), self.selectedTargetId()],
+                                                   target: { group: self.selectedTargetGroup(),
+                                                             id: self.selectedTargetId() },
                                                    description: self.description()});
     self.editorVisible(false);
     self.selectedTargetGroup(undefined);

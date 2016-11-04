@@ -92,7 +92,7 @@
    :user-roles       #{:authority}
    :parameters       [recipientId target description]
    :input-validators [(partial action/non-blank-parameters [:recipientId :description])
-                      (partial action/vector-parameters [:target])]
+                      (partial action/map-parameters [:target])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application]
    :states           states/all-application-states-but-draft-or-terminal
