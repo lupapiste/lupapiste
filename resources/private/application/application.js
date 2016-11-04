@@ -270,6 +270,7 @@
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
+        lupapisteApp.services.accordionService.authorities = authorities;
       }
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));

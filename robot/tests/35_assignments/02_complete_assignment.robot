@@ -21,7 +21,7 @@ Sonja creates assignment for Ronja about paasuunnittelija
   Open application  ${appname}  ${propertyid}
   Tab should be visible  info
   Open tab  parties
-  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor']
+  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor-button']
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
 
 Sonja creates another assignment for herself

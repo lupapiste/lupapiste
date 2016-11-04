@@ -1,0 +1,89 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="assignment-editor-template">
+  <div data-bind="template: edit ? 'edit-assignment-editor-template' : 'create-assignment-editor-template'"></div>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-editor-template">
+  <bubble-dialog data-test-id="create-assignment-bubble" params="visible: editorVisible, okFun: saveAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
+       <!-- ko with: $parent -->
+      <div class="form-grid form-grid--no-border">
+        <div class="row">
+          <div class="col-1"
+               data-bind="component: {name: 'select-field',
+                            params: {value: selectedTargetGroup,
+                                     options: targetGroups,
+                                     optionsText: mainTypeLoc,
+                                     valueAllowUnset: true,
+                                     id: 'assignment-target-group',
+                                     label: 'Aihe',
+                                     required: false}}">
+          </div>
+          <div class="col-1"
+               data-bind="component: {name: 'select-field',
+                           params: {value: selectedTargetId,
+                                    options: targetIds,
+                                    optionsText: displayText,
+                                    optionsValue: 'id',
+                                    valueAllowUnset: true,
+                                    id: 'assignment-target-id',
+                                    label: subTypeLabel,
+                                    disable: targetIds().length == 0,
+                                    required: false}}">
+           </div>
+           <div class="col-1"
+               data-bind="component: {name: 'select-field',
+                           params: {value: recipientId,
+                                    options: authorities,
+                                    optionsValue: 'id',
+                                    optionsText: util.partyFullName,
+                                    valueAllowUnset: true,
+                                    id: 'assignment-recipient',
+                                    label: loc('application.assignment.recipient.label'),
+                                    required: true}}">
+           </div>
+        </div>
+        <div class="row">
+          <div class="col-3"
+               data-bind="component: {name: 'textarea-field',
+                                      params: {value: description,
+                                               lPlaceholder: 'application.assignment.description.placeholder',
+                                               id: 'assignment-description'}}">
+
+          </div>
+        </div>
+      </div>
+      <!-- /ko -->
+    </bubble-dialog>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="edit-assignment-editor-template">
+  <bubble-dialog data-test-id="edit-assignment-bubble" params="visible: editorVisible, okFun: saveAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
+   <!-- ko with: $parent -->
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+         <div class="col-1"
+             data-bind="component: {name: 'select-field',
+                         params: {value: recipientId,
+                                  options: authorities,
+                                  optionsValue: 'id',
+                                  optionsText: util.partyFullName,
+                                  valueAllowUnset: true,
+                                  id: 'assignment-recipient',
+                                  label: loc('application.assignment.recipient.label'),
+                                  required: true}}">
+         </div>
+      </div>
+      <div class="row">
+        <div class="col-3"
+             data-bind="component: {name: 'textarea-field',
+                                    params: {value: description,
+                                             lPlaceholder: 'application.assignment.description.placeholder',
+                                             id: 'assignment-description'}}">
+
+        </div>
+      </div>
+    </div>
+    <!-- /ko -->
+  </bubble-dialog>
+</script>
+
+
