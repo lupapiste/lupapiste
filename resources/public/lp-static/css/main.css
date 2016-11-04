@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478268143147');
+@import url('main-blessed1.css?z=1478270804397');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -4028,20 +4028,32 @@ ul.no-bullets {
   white-space: nowrap;
 }
 /* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .creator:before {
+  content: " (";
+}
+/* line 126, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .receiver:before {
+  content: "→";
+}
+/* line 129, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .receiver:after {
+  content: "):";
+}
+/* line 134, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.accordion-assignments .assignment div.no-wrap-whitespace button:first-child {
   margin-right: 6px;
 }
-/* line 124, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 137, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.accordion-assignments .assignment .editor {
   display: table-row;
 }
 
-/* line 131, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 144, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-fields > .button-group:last-child {
   border-bottom: none;
 }
 
-/* line 135, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 148, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -4050,25 +4062,25 @@ ul.no-bullets {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 143, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 156, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 148, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 161, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 155, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 168, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 162, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 175, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;

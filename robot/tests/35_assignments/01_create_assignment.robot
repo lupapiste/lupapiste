@@ -33,7 +33,8 @@ Sonja sees assignment in document
   Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
   Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
-  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Sibbo Sonja
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='creator']  Sonja Sibbo
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='receiver']  Ronja Sibbo
   Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katoppa tää
 
 Sonja edits description of the assignment
@@ -47,7 +48,6 @@ Sonja edits description of the assignment
   Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
   Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
   Logout
-
 
 Pena does not see assignment
   Pena logs in
