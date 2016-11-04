@@ -53,7 +53,8 @@
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
-   :recipient [sc/Str]
+   :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
+   :recipient [(sc/maybe sc/Str)]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int

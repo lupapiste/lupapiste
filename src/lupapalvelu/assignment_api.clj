@@ -85,8 +85,7 @@
    :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user data :data}]
-  (let [data (update data :recipient #(if (empty? %) nil %)) ; joku schema-core-härö tyhjän vektorin kaa
-        query (assignment/search-query data)]
+  (let [query (assignment/search-query (assoc data :operation []))]
     (ok :data (assignment/assignments-search user query))))
 
 ;;
