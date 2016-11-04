@@ -271,9 +271,7 @@
                               (map get-viitelupatieto link-permits))
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
-                            (= operation-name "suunnittelijan-nimeaminen")
-                            (= operation-name "jatkoaika")
-                            (= operation-name "raktyo-aloit-loppuunsaat"))
+                              (= operation-name "suunnittelijan-nimeaminen"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
                       util/assoc-when-pred util/not-empty-or-nil?
                       :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)
