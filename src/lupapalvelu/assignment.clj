@@ -123,7 +123,8 @@
           :state "all"
           :recipient nil
           :skip   0
-          :limit  100}
+          :limit  100
+          :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
 (defn- make-query [query {:keys [searchText state recipient]}]
