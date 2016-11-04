@@ -57,5 +57,7 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
     self.editorVisible(false);
   };
 
+  // refresh targets from service
+  self.sendEvent(myService, "targetsQuery", {applicationId: util.getIn(params, ["applicationId"])});
 
 };
