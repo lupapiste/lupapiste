@@ -8,6 +8,7 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   self.authorities = self.params.authorities;
   self.applicationId = self.params.applicationId;
   self.targets = self.params.targets;
+  self.initialTarget = self.params.initialTarget;
 
   self.editorVisible = ko.observable(false);
 
