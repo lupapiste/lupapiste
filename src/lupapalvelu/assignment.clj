@@ -174,13 +174,25 @@
       (errorf "Assignment search query=%s failed: %s" query e)
       (fail! :error.unknown))))
 
+(defn- enrich-assignment-target [application-targets assignment]
+  (let [group-targets ((into {} application-targets) (keyword (get-in assignment [:target :group])))]
+    (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
+
+(defn- enrich-targets [assignments]
+  (let [app-id->targets (->> (mongo/select :applications {:_id {$in (map (comp :id :application) assignments)}} {:documents true})
+                             (util/key-by :id)
+                             (util/map-values assignment-targets))]
+    (map #(enrich-assignment-target (-> % :application :id app-id->targets) %) assignments)))
+
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
    (get-assignments user {}))
   ([user query]
-   (mongo/select :assignments (organization-query-for-user user query)))
+   (->> (mongo/select :assignments (organization-query-for-user user query))
+        (enrich-targets)))
   ([user query projection]
-   (mongo/select :assignments (organization-query-for-user user query) projection)))
+   (->> (mongo/select :assignments (organization-query-for-user user query) projection)
+        (enrich-targets))))
 
 (sc/defn ^:always-validate get-assignment :- (sc/maybe Assignment)
   [user           :- usr/SessionSummaryUser
@@ -199,10 +211,11 @@
         mongo-query (make-query user-query query)]
     {:userTotalCount (mongo/count :assignments )
      :totalCount     (mongo/count :assignments mongo-query)
-     :assignments    (search mongo-query
-                             (util/->long (:skip query))
-                             (util/->long (:limit query))
-                             (:sort query))}))
+     :assignments    (->> (search mongo-query
+                                  (util/->long (:skip query))
+                                  (util/->long (:limit query))
+                                  (:sort query))
+                          (enrich-targets))}))
 
 ;;
 ;; Inserting and modifying assignments
