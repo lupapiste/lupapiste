@@ -22,8 +22,8 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
    * Targets are two levels deep and represented as objects.
    * Keys are the "target groups", and value for each key is array of corresponding items in application.
    * Example with only parties group:
-   * {"parties": [{id: "5808c517f16562feee6856fb", displayText: "Paasuunnittelija"},
-                  {id: "5808c517f16562feee6856fc", displayText: "Suunnittelija"}]}
+   * {"parties": [{id: "5808c517f16562feee6856fb", type: "paasuunnittelija", description: "Antero Arkkitehti"},
+                  {id: "5808c517f16562feee6856fc", type: "suunnittelija", info-key: "info.text.key"}]}
    */
   self.targets = ko.observableArray([]);
 

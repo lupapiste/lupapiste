@@ -40,6 +40,11 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
     return loc("application.assignment.type." + optionValue);
   };
 
+  self.displayText = function (target) {
+    var info = target["info-key"] && loc(target["info-key"]) || target.description;
+    return loc(target.type + "._group_label") + (info ? " - " + info : "");
+  };
+
   self.subTypeLabel = self.disposedPureComputed(function() {
     return self.selectedTargetGroup() ? loc("application.assignment.target." + self.selectedTargetGroup()) : loc("application.assignment.type");
   });
