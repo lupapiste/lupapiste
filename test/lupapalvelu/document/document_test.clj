@@ -72,22 +72,6 @@
     (fact "foreman does not have access to applicant doc"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
 
-
-   :schema-info {:name "hakija-r",
-                 :i18name "osapuoli",
-                 :type "party",
-                 :subtype "hakija"}
-
-
-
-,
-                 :after-update "applicant-index-update",
-                 :repeating true,
-                 :order 3,
-                 :removable true,
-                 :deny-removing-last-document true,
-                 :version 1,
-
 (facts document-assignment-info
   (fact "yritys"
     (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
@@ -106,6 +90,7 @@
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
     => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Firma 5"})
+
   (fact "henkilo"
     (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
                                :schema-info {:name "hakija-r",
