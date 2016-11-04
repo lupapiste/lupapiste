@@ -41,6 +41,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
       ajax.query("assignments-for-application", {id: id})
         .success(function(resp) {
           _data(resp.assignments);
+          _.delay(window.Stickyfill.rebuild,0);
         })
         .call();
     }
