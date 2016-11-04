@@ -12,7 +12,8 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.application-utils :as app-utils]))
 
 ;; Helpers and schemas
 
@@ -86,12 +87,17 @@
 ;; Querying assignments
 ;;
 
+
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:description]
-        fuzzy (ss/fuzzy-re filter-search)]
-    {$or (map #(hash-map % {$regex   fuzzy
+  (let [search-keys [:description :applicationDetails.address]
+        fuzzy       (ss/fuzzy-re filter-search)
+        ops         (app-utils/operation-names filter-search)]
+    {$or (concat
+           (map #(hash-map % {$regex   fuzzy
                             $options "i"})
-              search-keys)}))
+              search-keys)
+           [{:applicationDetails.primaryOperation.name {$in ops}}
+            {:applicationDetails.secondaryOperations.name {$in ops}}])}))
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
