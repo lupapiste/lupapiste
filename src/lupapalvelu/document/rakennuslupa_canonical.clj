@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
+            [swiss.arrows :refer [-<>]]
             [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -96,7 +97,11 @@
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge
-                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
+                            (-<> mitat
+                                 (select-keys [:tilavuus :kokonaisala :kellarinpinta-ala
+                                               :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
+                                 (filter #(-> % last (ss/replace "," ".") util/->double pos?) <>)
+                                 (into {} <>))
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
