@@ -1,4 +1,4 @@
-LUPAPISTE.AssignmentRecipientFilterService = function(applicationFiltersService) {
+LUPAPISTE.AssignmentRecipientFilterService = function() {
   "use strict";
   var self = this;
 
