@@ -222,16 +222,6 @@
                      (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
                      {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
-(defn display-text-for-document
-  "Return localized text for frontend. Text is schema name + accordion-fields if defined."
-  [doc lang]
-  (let [schema-loc-key (str (get-in doc [:schema-info :name]) "._group_label")
-        schema-localized (i18n/localize lang schema-loc-key)
-        accordion-datas (schemas/resolve-accordion-field-values doc)]
-    (if (seq accordion-datas)
-      (str schema-localized " - " (ss/join " " accordion-datas))
-      schema-localized)))
-
 (defn- set-assignments-statuses [application-id status]
   {:pre [(assignment-statuses status)]}
   (update-assignments {:application.id application-id} {$set {:status status}}))
