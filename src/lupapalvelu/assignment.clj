@@ -174,14 +174,18 @@
       (errorf "Assignment search query=%s failed: %s" query e)
       (fail! :error.unknown))))
 
+(defn- get-targets-for-applications [application-ids]
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} {:documents true})
+       (util/key-by :id)
+       (util/map-values (comp (partial into {}) assignment-targets))))
+
 (defn- enrich-assignment-target [application-targets assignment]
-  (let [group-targets ((into {} application-targets) (keyword (get-in assignment [:target :group])))]
+  (let [group-targets (-> assignment :target :group keyword application-targets)]
     (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
 
 (defn- enrich-targets [assignments]
-  (let [app-id->targets (->> (mongo/select :applications {:_id {$in (map (comp :id :application) assignments)}} {:documents true})
-                             (util/key-by :id)
-                             (util/map-values assignment-targets))]
+  (let [app-id->targets (->> (map (comp :id :application) assignments)
+                             get-targets-for-applications)]
     (map #(enrich-assignment-target (-> % :application :id app-id->targets) %) assignments)))
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
