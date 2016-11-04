@@ -62,7 +62,7 @@
 
 (defn log-event [level event]
   (let [stripped (-> event
-                   (dissoc :application :organization :ns)
+                   (dissoc :application :organization :user-organizations :ns)
                    (util/dissoc-in [:data :tempfile]) ; Temporary java.io.File set by ring
                    (update-in [:data :files] (partial map #(if (:tempfile %)
                                                              (dissoc % :tempfile)

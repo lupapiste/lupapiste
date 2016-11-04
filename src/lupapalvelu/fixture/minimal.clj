@@ -699,6 +699,7 @@
                        :permanent-archive-enabled false
                        :permanent-archive-in-use-since 1451613600000
                        :tags [{:id "111111111111111111111111" :label "yl\u00E4maa"} {:id "222222222222222222222222" :label "ullakko"}]
+                       :assignments-enabled true
                        :areas {:type "FeatureCollection"
                                :features [{:id "sipoo_keskusta",
                                            :properties {:nimi "Keskusta", :id 3},

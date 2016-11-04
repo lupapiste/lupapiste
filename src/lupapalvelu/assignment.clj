@@ -2,6 +2,7 @@
   (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
             [monger.query :as query]
+            [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as schemas]
@@ -12,6 +13,24 @@
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]))
+
+(defonce ^:private registered-assignment-targets (atom {}))
+
+(sc/defschema Target
+  {:id                               ssc/ObjectIdStr
+   :type                             sc/Str
+   (sc/optional-key :info-key)       sc/Str          ; localization key for additional target info
+   (sc/optional-key :description)    sc/Str})        ; localized description for additional target info
+
+(sc/defschema TargetGroup
+  (sc/pair sc/Keyword "Group name" [Target] "Targets"))
+
+(defn register-assignment-target! [target-group target-descriptor-fn]
+  {:pre [(fn? target-descriptor-fn)]}
+  (swap! registered-assignment-targets assoc (keyword target-group) target-descriptor-fn))
+
+(defn assignment-targets [application]
+  (map (fn [[group descriptor]] [group (descriptor application)]) @registered-assignment-targets))
 
 ;; Helpers and schemas
 
@@ -56,6 +75,8 @@
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
    :recipient (sc/maybe sc/Str)
+   :sort {:asc sc/Bool
+          :field sc/Str}
    :skip   sc/Int
    :limit  sc/Int})
 
@@ -105,7 +126,8 @@
           :state "all"
           :recipient nil
           :skip   0
-          :limit  100}
+          :limit  100
+          :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
 (defn- make-query [query {:keys [searchText state recipient]}]
@@ -119,14 +141,34 @@
               {:status {$ne "canceled"}}
               {:status {$ne "canceled"}
                :states.type state})])})
+      
 
-(defn search [query skip limit]
+(defn sort-query [sort]
+   (let [dir (if (:asc sort) 1 -1)]
+      {(:field sort) dir}))
+
+(defn search [query skip limit sort]
   (try
-    (->> (mongo/with-collection "assignments"
-           (query/find query)
-           (query/skip skip)
-           (query/limit limit))
-         (map #(rename-keys % {:_id :id})))
+    (let [res (collection/aggregate (mongo/get-db) "assignments"
+                  [{"$match" query}
+                   {"$project" 
+                      ;; pull the creation state to root of document for sorting purposes
+                      ;; it might also be possible to use :document "$$ROOT" in aggregation
+                      {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
+                       :description-ci {"$toLower" "$description"} ;; for sorting
+                       :application "$application"
+                       :target "$target"
+                       :recipient "$recipient"
+                       :status "$status"
+                       :states "$states"
+                       :description "$description"
+                      }} 
+                   {"$sort" (sort-query sort)}])
+          converted 
+             (map 
+                 #(dissoc % :description-ci :created)
+                 (map #(rename-keys % {:_id :id}) res))]
+      converted)
     (catch com.mongodb.MongoException e
       (errorf "Assignment search query=%s failed: %s" query e)
       (fail! :error.unknown))))
@@ -158,7 +200,8 @@
      :totalCount     (mongo/count :assignments mongo-query)
      :assignments    (search mongo-query
                              (util/->long (:skip query))
-                             (util/->long (:limit query)))}))
+                             (util/->long (:limit query))
+                             (:sort query))}))
 
 ;;
 ;; Inserting and modifying assignments
@@ -189,16 +232,6 @@
   (update-to-db assignment-id
                      (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
                      {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
-
-(defn display-text-for-document
-  "Return localized text for frontend. Text is schema name + accordion-fields if defined."
-  [doc lang]
-  (let [schema-loc-key (str (get-in doc [:schema-info :name]) "._group_label")
-        schema-localized (i18n/localize lang schema-loc-key)
-        accordion-datas (schemas/resolve-accordion-field-values doc)]
-    (if (seq accordion-datas)
-      (str schema-localized " - " (ss/join " " accordion-datas))
-      schema-localized)))
 
 (defn- set-assignments-statuses [application-id status]
   {:pre [(assignment-statuses status)]}

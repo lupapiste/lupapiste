@@ -15,6 +15,9 @@
   (def ^:private not-completed?
     (partial expected-failure? "error.assignment-not-completed"))
 
+  (def ^:private assignments-not-enabled?
+    (partial expected-failure? "error.assignments-not-enabled"))
+
   (def ^:private application-not-accessible?
     (partial expected-failure? "error.application-not-accessible"))
 
@@ -46,6 +49,9 @@
       (query sonja :assignments) => ok?
       (query pena :assignments)  => unauthorized?)
 
+    (fact "cannot query assignments if not enabled in organization"
+      (query veikko :assignments) => assignments-not-enabled?)
+
     (fact "authorities can only see assignments belonging to their organizations"
       (let [{id :id} (create-app sonja :propertyId sipoo-property-id)
             {assignment-id :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")]
@@ -73,6 +79,11 @@
       (fact "only authorities can receive assignments"
         (create-assignment sonja pena-id id ["target"] "Penalle")        => invalid-receiver?
         (create-assignment sonja "does_not_exist_id" id ["target"] "Desc") => invalid-receiver?)
+
+      (fact "assignments cannot be created if not enabled in organization"
+        (create-assignment veikko veikko-id (:id (create-app veikko :propertyId tampere-property-id)) ["target"] "Ei onnistu")
+        => assignments-not-enabled?)
+
       (fact "authorities can only create assignments for applications in their organizations"
         (create-assignment veikko sonja-id id ["target"] "Ei onnistu") => application-not-accessible?)
       (fact "after calling create-assignment, the assignment is created"
@@ -133,7 +144,7 @@
           {assignment-id2 :id} (create-assignment sonja ronja-id id ["target"] "Valmistuva")]
       (fact "Only authorities within the same organization can complete assignment"
         (complete-assignment pena assignment-id1)   => unauthorized?
-        (complete-assignment veikko assignment-id1) => not-completed?
+        (complete-assignment veikko assignment-id1) => assignments-not-enabled?
         (complete-assignment ronja assignment-id1)  => ok?
         (complete-assignment ronja assignment-id1)  => not-completed?)
 
@@ -157,24 +168,28 @@
       (fact "targets are returned as key-val vectors"
         (:targets targets-resp) => (has every? (fn [[k v]] (and (string? k) (vector? v)))))
       (fact "keys for values look right"
-        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:displayText :id]))))
+        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type]))))
       (fact "data from accordion-field is in display text"
-        (:displayText (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
+        (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
     (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)]
 
-      (fact "text search finds approximate matches in description"
+      (facts "text search finds approximate matches in description"
         (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 ["target"] "Kuvaava teksti")]
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
-               :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
-               :data :assignments (map :description)) => (contains "Kuvaava teksti")
-          (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
-               :data :assignments) => empty?
-          (->> (query sonja :assignments-search :searchText "not even close")
-               :data :assignments (map :description)) => empty?))
+          (fact "uva eks - all"
+              (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
+                   :data :assignments (map :description)) => (contains "Kuvaava teksti"))
+          (fact "uva eks - created"
+              (->> (query sonja :assignments-search :searchText "uva eks" :state "created")
+                   :data :assignments (map :description)) => (contains "Kuvaava teksti"))
+          (fact "uva eks - compeleted"
+            (->> (query sonja :assignments-search :searchText "uva eks" :state "completed")
+                 :data :assignments) => empty?)
+          (fact "not even close"
+            (->> (query sonja :assignments-search :searchText "not even close")
+                 :data :assignments (map :description)) => empty?)))
 
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?

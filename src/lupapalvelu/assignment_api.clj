@@ -26,6 +26,14 @@
   (when-not (pos? (assignment/count-for-assignment-id assignmentId))
     (fail :error.invalid-assignment-id)))
 
+(defn- assignments-enabled [{orgs :user-organizations}]
+  (when (not-any? :assignments-enabled orgs)
+    (fail :error.assignments-not-enabled)))
+
+(defn- assignments-enabled-for-application [{org :organization}]
+  (when-not (:assignments-enabled @org)
+    (fail :error.assignments-not-enabled)))
+
 
 ;;
 ;; Queries
@@ -34,6 +42,7 @@
 (defquery assignments
   {:description "Return all the assignments the user is allowed to see"
    :user-roles #{:authority}
+   :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user}]
   (ok :assignments (assignment/get-assignments user)))
@@ -41,6 +50,7 @@
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
    :parameters [id]
+   :pre-checks [assignments-enabled-for-application]
    :states states/all-application-states-but-draft-or-terminal
    :user-roles #{:authority}
    :categories #{:documents}
@@ -52,29 +62,28 @@
   {:description "Return a single assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
+   :pre-checks [assignments-enabled]
    :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :feature :assignments}
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
 
 (defquery assignment-targets
-  {:description "Possible assigment targets per application for frontend"
+  {:description "Possible assignment targets per application for frontend"
    :parameters [id lang]
    :user-roles #{:authority}
+   :pre-checks [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :states   states/all-application-states-but-draft-or-terminal
    :feature :assignments}
   [{:keys [application]}]
-  (let [party-docs (domain/get-documents-by-type application :party)
-        parties    (for [doc party-docs]
-                     {:id (:id doc)
-                      :displayText (assignment/display-text-for-document doc lang)})]
-    (ok :targets [["parties" parties]])))
+  (ok :targets (assignment/assignment-targets application)))
 
 (defquery assignments-search
   {:description "Service point for attachment search component"
    :parameters []
    :user-roles #{:authority}
+   :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user data :data}]
   (ok :data (assignment/assignments-search user (assignment/search-query data))))
@@ -89,7 +98,8 @@
    :parameters       [id recipientId target description]
    :input-validators [(partial action/non-blank-parameters [:recipientId :description])
                       (partial action/vector-parameters [:target])]
-   :pre-checks       [validate-receiver]
+   :pre-checks       [validate-receiver
+                      assignments-enabled-for-application]
    :states           states/all-application-states-but-draft-or-terminal
    :feature          :assignments}
   [{user         :user
@@ -120,6 +130,7 @@
   {:description "Complete an assignment"
    :user-roles #{:authority}
    :parameters [assignmentId]
+   :pre-checks [assignments-enabled]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
    :categories #{:documents}
    :feature :assignments}

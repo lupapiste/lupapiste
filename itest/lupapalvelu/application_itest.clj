@@ -531,7 +531,7 @@
       app => map?
       user => map?)
 
-    (doseq [command (action/foreach-action {} user {} app)
+    (doseq [command (action/foreach-action {:web {} :user user :application {} :data app})
           :let [action (keyword (:action command))
                 result (a/validate-authority-in-drafts command)]]
     (fact {:midje/description (name action)}

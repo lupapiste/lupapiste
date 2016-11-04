@@ -14,6 +14,7 @@
       {commandName         : "inform-construction-started",
        checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
+       extraParameters     : {lang: loc.getCurrentLanguage()},
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
        dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",

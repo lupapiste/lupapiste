@@ -280,7 +280,7 @@
 
 (defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (when-not (.contains valid-states (keyword state))
+    (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command]
@@ -389,7 +389,8 @@
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
-            command (assoc command :application application :organization organization)]
+            user-organizations (lazy-seq (usr/get-organizations (:user command)))
+            command (assoc command :application application :organization organization :user-organizations user-organizations)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -563,20 +564,14 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-
-(defn foreach-action [web user application data]
+(defn foreach-action [{:keys [user data] :as command}]
   (map
     #(when-let [{type :type categories :categories} (get-meta %)]
-       (assoc
-         (action % :type type :data data :user user)
-         :application application
-         :web web
-         :categories categories))
+       (merge command (action % :type type :data data :user user) {:categories categories}))
    (remove nil? (keys @actions))))
 
 (defn- validated [command]
   {(:action command) (validate command)})
-
 
 (def validate-actions
   (if (env/dev-mode?)
@@ -594,10 +589,11 @@
   nil)
 
 (defn allowed-actions-for-collection
-  [collection-key command-builder {:keys [web user application] :as command}]
+  [collection-key command-builder {:keys [application] :as command}]
   (let [coll (get application collection-key)]
     (->> (map (partial command-builder application) coll)
-         (map (partial foreach-action web user application))
+         (map (partial assoc command :data))
+         (map foreach-action)
          (map (partial filter-actions-by-category collection-key))
          (map validate-actions)
          (zipmap (map :id coll)))))

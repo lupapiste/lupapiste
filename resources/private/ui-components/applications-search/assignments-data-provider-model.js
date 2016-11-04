@@ -12,7 +12,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   self.sort = params.sort ||
-    {field: ko.observable("description"), asc: ko.observable(true)};
+    {field: ko.observable("created"), asc: ko.observable(true)};
   self.data             = ko.observable(params.data || defaultData);
   self.results          = ko.observable(self.data().searchResults);
   self.limit            = params.currentLimit;
@@ -27,12 +27,13 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   };
 
   function enrichAssignmentData(assignment) {
-    var createdState = _.find(assignment.states, function(state) {
-      return state.type === "created";
-    });
+    var createdState = _.find(assignment.states, function(state) { return state.type === "created"; });
     var currentState = _.maxBy(assignment.states, "timestamp");
+    var completed = (currentState.type !== "completed");
     return _.merge(assignment, {
       currentState: currentState,
+      createdState: createdState, 
+      incomplete: !completed,
       creatorName: createdState.user.firstName + " " + createdState.user.lastName,
       statusClass: stateClasses[currentState.type],
       addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])
@@ -57,6 +58,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       state: self.searchResultType(),
       recipient: lupapisteApp.models.currentUser.username(),
       limit: self.limit(),
+      sort: ko.mapping.toJS(self.sort),
       skip: self.skip()
     };
   });
