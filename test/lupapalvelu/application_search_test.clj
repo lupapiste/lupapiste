@@ -7,8 +7,6 @@
              [lupapalvelu.application-utils :refer [operation-names make-area-query]]
              [lupapalvelu.geojson :as geo]))
 
-(testable-privates lupapalvelu.application-utils make-area-query)
-
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
   (operation-names "grilli") => ["auto-katos"]
