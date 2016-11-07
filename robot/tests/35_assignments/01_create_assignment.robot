@@ -73,7 +73,20 @@ Ronja logs in, sees assignment in document
   Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
   Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
 
+Ronja changes assignment back to Sonja
+  Click by test id  edit-assignment
+  Wait until  Element should be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
+  List selection should be  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']//select[@id='assignment-recipient']  Ronja Sibbo
+  Select from list by label  xpath=//${docPath}//select[@id='assignment-recipient']  Sonja Sibbo
+  Scroll and click test id  bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
+  Wait until  Element text should be  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']/span[@class='receiver']  Sonja Sibbo
+
+
 Only one assignment has been created
   Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1
 
-
+No frontend errors
+  Logout
+  There are no frontend errors
