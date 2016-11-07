@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -18,8 +19,6 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]))
-
-(def search-text-max-length 150)
 
 ;;
 ;; Query construction
@@ -193,7 +192,7 @@
 
 
 (defn applications-for-user [user {:keys [searchText] :as params}]
-  (when (> (count searchText) search-text-max-length)
+  (when (> (count searchText) (env/value :search-text-max-length))
     (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)

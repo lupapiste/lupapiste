@@ -55,6 +55,7 @@
                  :gtm                   (env/value :gtm)
                  :facebook              (env/value :facebook)
                  :frontpage             (env/value :frontpage)
+                 :searchTextMaxLength   (env/value :search-text-max-length)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
