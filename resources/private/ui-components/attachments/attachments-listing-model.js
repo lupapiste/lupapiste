@@ -37,6 +37,8 @@ LUPAPISTE.AttachmentsListingModel = function() {
     return filterSet.apply(attachments());
   });
 
+  self.applicationId = appModel.id;
+
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );

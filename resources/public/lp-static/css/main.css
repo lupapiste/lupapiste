@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478500571754');
+@import url('main-blessed1.css?z=1478517714277');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -6614,6 +6614,11 @@ h2 > i.is-right {
 /* line 938, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
+}
+
+/* line 943, ../../../private/common-html/sass/views/_application.scss */
+#create-assignment {
+  margin-bottom: 6px;
 }
 
 /* line 1, ../../../private/common-html/sass/views/_create_application.scss */

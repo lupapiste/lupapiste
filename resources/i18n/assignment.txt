@@ -40,7 +40,7 @@
 "application.assignment.target.operations" "fi" "Osio"
 "application.assignment.target.operations" "sv" "Del"
 "application.assignment.target.operations" "en" "Section"
-"application.assignment.target.attachments" "fi" "Liiteryhmä"
+"application.assignment.target.attachments" "fi" "Liite"
 "application.assignment.target.attachments" "sv" ""
 "application.assignment.target.attachments" "en" ""
 "application.assignment.type" "fi" "Tyyppi"
