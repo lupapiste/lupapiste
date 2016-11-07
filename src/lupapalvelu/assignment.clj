@@ -164,12 +164,12 @@
 (defn search [query skip limit sort]
   (try
     (let [res (collection/aggregate (mongo/get-db) "assignments"
-                  [{"$lookup" {:from :applications
+                  [{"$match" query}
+                   {"$lookup" {:from :applications
                                :localField "application.id"
                                :foreignField "_id"
                                :as "applicationDetails"}}
                    {"$unwind" "$applicationDetails"}
-                   {"$match" query}
                    {"$project"
                       ;; pull the creation state to root of document for sorting purposes
                       ;; it might also be possible to use :document "$$ROOT" in aggregation
