@@ -273,3 +273,8 @@ Appeals row file check
   [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
   Set Row Selector  ${postfix}  ${row}
   Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
+
+No frontend errors
+  Logout
+  There are no frontend errors
+

@@ -152,4 +152,7 @@ Sonja removes Vainamoinen
   Scroll and click test id  delete-statement-1
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  1
-  [Teardown]  Logout
+  Logout
+
+No frontend errors
+  There are no frontend errors
