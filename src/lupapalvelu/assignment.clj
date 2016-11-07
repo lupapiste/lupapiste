@@ -55,11 +55,15 @@
 
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :application    {:id               ssc/ApplicationId
-                    :organization     sc/Str
-                    :address          sc/Str
-                    :municipality     sc/Str}
-   :target         sc/Any
+   :application    {:id           ssc/ApplicationId
+                    :organization sc/Str
+                    :address      sc/Str
+                    :municipality sc/Str}
+   :target         {:group                         sc/Str
+                    :id                            ssc/ObjectIdStr
+                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :info-key)    sc/Str
+                    (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
@@ -147,57 +151,73 @@
               {:applicationDetails.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
-            (if (= state "all")
-              {:status {$ne "canceled"}}
-              {:status {$ne "canceled"}
-               :states.type state})])})
-      
+            {:status {$ne "canceled"}}])})
+
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
       {(:field sort) dir}))
 
-(defn search [query skip limit sort]
+(defn search [{state :state} mongo-query skip limit sort]
   (try
-    (let [res (collection/aggregate (mongo/get-db) "assignments"
-                  [{"$lookup" {:from :applications
-                               :localField "application.id"
-                               :foreignField "_id"
-                               :as "applicationDetails"}}
-                   {"$unwind" "$applicationDetails"}
-                   {"$match" query}
-                   {"$project"
-                      ;; pull the creation state to root of document for sorting purposes
-                      ;; it might also be possible to use :document "$$ROOT" in aggregation
-                      {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
-                       :description-ci {"$toLower" "$description"} ;; for sorting
-                       :application {:id "$applicationDetails._id"
-                                     :organization "$applicationDetails.organization"
-                                     :address "$applicationDetails.address"
-                                     :municipality "$applicationDetails.municipality"}
-                       :target "$target"
-                       :recipient "$recipient"
-                       :status "$status"
-                       :states "$states"
-                       :description "$description"
-                      }}
-                   {"$sort" (sort-query sort)}])
-          converted 
-             (map 
-                 #(dissoc % :description-ci :created)
+    (let [aggregate (->> [{"$match" mongo-query}
+                          {"$lookup" {:from :applications
+                                      :localField "application.id"
+                                      :foreignField "_id"
+                                      :as "applicationDetails"}}
+                          {"$unwind" "$applicationDetails"}
+                          {"$project"
+                           ;; pull the creation state to root of document for sorting purposes
+                           ;; it might also be possible to use :document "$$ROOT" in aggregation
+                           {:currentState   {"$arrayElemAt" ["$states" -1]} ;; for sorting
+                            :created        {"$arrayElemAt" ["$states" 0]}
+                            :description-ci {"$toLower" "$description"} ;; for sorting
+                            :application    {:id           "$applicationDetails._id"
+                                             :organization "$applicationDetails.organization"
+                                             :address      "$applicationDetails.address"
+                                             :municipality "$applicationDetails.municipality"}
+                            :target         "$target"
+                            :recipient      "$recipient"
+                            :status         "$status"
+                            :states         "$states"
+                            :description    "$description"}}
+                          (when (and (string? state) (not= "all" state))
+                            {"$match" {:currentState.type state}})
+                          {"$sort" (sort-query sort)}]
+                         (remove nil?))
+          res (collection/aggregate (mongo/get-db) "assignments" aggregate)
+          converted
+             (map
+                 #(dissoc % :description-ci :created :currentState)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
     (catch com.mongodb.MongoException e
-      (errorf "Assignment search query=%s failed: %s" query e)
+      (errorf "Assignment search query=%s failed: %s" mongo-query e)
       (fail! :error.unknown))))
+
+(defn- get-targets-for-applications [application-ids]
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :primaryOperation :secondaryOperations])
+       (util/key-by :id)
+       (util/map-values (comp (partial into {}) assignment-targets))))
+
+(defn- enrich-assignment-target [application-targets assignment]
+  (let [group-targets (-> assignment :target :group keyword application-targets)]
+    (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
+
+(defn- enrich-targets [assignments]
+  (let [app-id->targets (->> (map (comp :id :application) assignments)
+                             get-targets-for-applications)]
+    (map #(enrich-assignment-target (-> % :application :id app-id->targets) %) assignments)))
 
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
    (get-assignments user {}))
   ([user query]
-   (mongo/select :assignments (organization-query-for-user user query)))
+   (->> (mongo/select :assignments (organization-query-for-user user query))
+        (enrich-targets)))
   ([user query projection]
-   (mongo/select :assignments (organization-query-for-user user query) projection)))
+   (->> (mongo/select :assignments (organization-query-for-user user query) projection)
+        (enrich-targets))))
 
 (sc/defn ^:always-validate get-assignment :- (sc/maybe Assignment)
   [user           :- usr/SessionSummaryUser
@@ -214,15 +234,16 @@
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
         mongo-query (make-query user-query query)
-        assignments (search mongo-query
+        assignments (search query
+                            mongo-query
                             (util/->long (:skip query))
                             (util/->long (:limit query))
                             (:sort query))]
-    {:userTotalCount (mongo/count :assignments )
-     ; TODO proper count skip and limit for aggregate query
-     ; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
+    {:userTotalCount (mongo/count :assignments)
+     ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
      :totalCount     (count assignments)
-     :assignments    assignments}))
+     :assignments    (->> assignments
+                          (enrich-targets))}))
 
 ;;
 ;; Inserting and modifying assignments

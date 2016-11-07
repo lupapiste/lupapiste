@@ -12,8 +12,8 @@
                                  applicationId: $component.params.applicationId,
                                  recipientId: $data.recipient.id,
                                  description: $data.description,
-                                 targetGroup: $data.target[0],
-                                 targetId: $data.target[1],
+                                 targetGroup: $data.target.group,
+                                 targetId: $data.target.id,
                                  editMode: true"></assignment-editor>
       <!-- /ko -->
     </div>
@@ -22,11 +22,13 @@
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="accordion-single-assignment-template">
   <i class="lupicon-circle-attention"></i>
-  <span class="assignment-header" data-bind="text: loc('application.assignment') + ' ' + ($index()+1) + ': '"></span>
+  <div class="assignment-header" data-test-id="assignment-header">
+    <span data-bind="text: loc('application.assignment') + ' ' + ($index()+1)"></span>
+    <span class="creator" data-bind="text: util.partyFullName($data.createdState.user)"></span>
+    <span class="receiver" data-bind="text: $parent.receiverName($data)"></span>
+  </div>
   <div class="assignment-text" data-test-id="assignment-text">
     <span data-bind="text: $parent.descriptionText($data)"></span>
-    <span> - </span>
-    <span data-bind="fullName: createdState.user"></span>
   </div>
   <div class="no-wrap-whitespace">
     <button data-bind="click: $parent.editAssignment,

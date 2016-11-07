@@ -24,7 +24,7 @@ Solita admin goes to organizations page
 
 Admin shows all organizations
   Scroll and click test id  organization-show-all
-  Test id text is  organization-result-count  18 organisaatiota.
+  Test id text is  organization-result-count  19 organisaatiota.
 
 Admin searchs just 753-R
   Fill test id  organization-search-term  753-R

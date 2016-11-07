@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478243052918');
+@import url('main-blessed1.css?z=1478500571754');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -904,99 +904,104 @@ textarea.grid-style-input {
 }
 
 /* line 1464, ../../../private/common-html/sass/partials/_forms.scss */
+textarea.grid-style-input.really-high {
+  height: 320px;
+}
+
+/* line 1468, ../../../private/common-html/sass/partials/_forms.scss */
 .no-wrap-whitespace {
   white-space: nowrap;
 }
 
-/* line 1468, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1472, ../../../private/common-html/sass/partials/_forms.scss */
 .wrapped_text {
   white-space: pre-wrap;
 }
 
-/* line 1472, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1476, ../../../private/common-html/sass/partials/_forms.scss */
 .cell-span {
   line-height: 40px;
 }
 
-/* line 1476, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1480, ../../../private/common-html/sass/partials/_forms.scss */
 .check-string {
   display: block;
 }
 
-/* line 1481, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
 div.review-done {
   margin: 24px;
 }
 
-/* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1489, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table {
   padding-top: 6px;
 }
-/* line 1488, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1492, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .form-label {
   display: inline;
   width: initial;
   vertical-align: initial;
   font-weight: bold;
 }
-/* line 1495, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1499, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .checkbox-wrapper {
   border: none;
 }
-/* line 1498, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1502, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
-/* line 1504, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1508, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
-/* line 1510, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1514, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
-/* line 1516, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1520, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
-/* line 1521, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1525, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
 
-/* line 1527, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
 }
 
-/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1535, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container {
   margin-left: 6px;
 }
-/* line 1533, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1537, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container .building-select-box {
   position: relative;
   width: 30em;
 }
 
-/* line 1539, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1543, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector {
   padding-left: 6px;
 }
-/* line 1541, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector label.form-label {
   width: 100%;
 }
-/* line 1544, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector .errorPanel {
   top: -80px;
   left: 200px;
@@ -4023,20 +4028,32 @@ ul.no-bullets {
   white-space: nowrap;
 }
 /* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .creator:before {
+  content: " (";
+}
+/* line 126, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .receiver:before {
+  content: "→";
+}
+/* line 129, ../../../private/common-html/sass/partials/_accordion.scss */
+.accordion div.accordion-assignments .assignment > .assignment-header .receiver:after {
+  content: "):";
+}
+/* line 134, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.accordion-assignments .assignment div.no-wrap-whitespace button:first-child {
   margin-right: 6px;
 }
-/* line 124, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 137, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion div.accordion-assignments .assignment .editor {
   display: table-row;
 }
 
-/* line 131, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 144, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-fields > .button-group:last-child {
   border-bottom: none;
 }
 
-/* line 135, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 148, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -4045,25 +4062,25 @@ ul.no-bullets {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 143, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 156, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 148, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 161, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 155, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 168, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 162, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 175, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
@@ -4972,11 +4989,11 @@ div.search i {
 }
 /* line 254, ../../../private/common-html/sass/partials/_applications_search.scss */
 .assignments-search-result__table th.fourth {
-  width: 10%;
+  width: 25%;
 }
 /* line 257, ../../../private/common-html/sass/partials/_applications_search.scss */
 .assignments-search-result__table th.fifth {
-  width: 40%;
+  width: 25%;
 }
 /* line 260, ../../../private/common-html/sass/partials/_applications_search.scss */
 .assignments-search-result__table th.sixth {
@@ -7219,7 +7236,7 @@ td.comment-text {
 }
 /* line 41, ../../../private/common-html/sass/views/_statement.scss */
 #statement textarea {
-  resize: none;
+  resize: vertical;
   width: 99%;
 }
 /* line 45, ../../../private/common-html/sass/views/_statement.scss */

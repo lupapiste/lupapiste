@@ -117,6 +117,19 @@
       }
       > .assignment-header {
         white-space: nowrap;
+        .creator {
+          &:before {
+             content: " (";
+          }
+        }
+        .receiver {
+          &:before {
+            content: "\2192"
+          }
+          &:after {
+            content: "):";
+          }
+        }
       }
       div.no-wrap-whitespace button:first-child {
         margin-right: $marginS;

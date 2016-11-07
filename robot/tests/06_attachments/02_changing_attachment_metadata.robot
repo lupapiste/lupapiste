@@ -3,7 +3,6 @@
 Documentation  Sonja should see only applications from Sipoo
 Resource       ../../common_resource.robot
 Variables      variables.py
-Library  DebugLibrary
 
 *** Test Cases ***
 

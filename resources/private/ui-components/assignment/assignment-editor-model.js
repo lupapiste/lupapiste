@@ -52,10 +52,13 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
     self.sendEvent(myService, "saveAssignment", {id: util.getIn(params, ["applicationId"]),
                                                  assignmentId: self.assignmentId(),
                                                  recipientId: self.recipientId(),
-                                                 target: [self.selectedTargetGroup(), self.selectedTargetId()],
+                                                 target: { group: self.selectedTargetGroup(),
+                                                           id: self.selectedTargetId() },
                                                  description: self.description()});
     self.editorVisible(false);
   };
 
+  // refresh targets from service
+  self.sendEvent(myService, "targetsQuery", {applicationId: util.getIn(params, ["applicationId"])});
 
 };

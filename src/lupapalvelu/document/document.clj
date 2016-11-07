@@ -120,13 +120,22 @@
 
 (defn- document-assignment-info
   "Return document info as assignment target"
-  [{{name :name} :schema-info id :id :as doc}]
-  (let [accordion-datas (schemas/resolve-accordion-field-values doc)]
+  [operations {{name :name doc-op :op} :schema-info id :id :as doc}]
+  (let [accordion-datas (schemas/resolve-accordion-field-values doc)
+        op-description  (:description (util/find-by-id (:id doc-op) operations))]
     (util/assoc-when-pred {:id id :type name} ss/not-blank?
-                          :description (ss/join " " accordion-datas))))
+                          :description (or op-description (ss/join " " accordion-datas)))))
 
 (defn- describe-parties-assignment-targets [application]
   (->> (domain/get-documents-by-type application :party)
-       (map document-assignment-info)))
+       (map (partial document-assignment-info nil))))
+
+(defn- describe-non-party-document-assignment-targets [{:keys [documents primaryOperation secondaryOperations] :as application}]
+  (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))
+        operations (cons primaryOperation secondaryOperations)]
+    (->> (remove (comp party-doc-ids :id) documents)
+         (map (partial document-assignment-info operations)))))
 
 (assignment/register-assignment-target! :parties describe-parties-assignment-targets)
+
+(assignment/register-assignment-target! :documents describe-non-party-document-assignment-targets)

@@ -15,6 +15,10 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
     return "\"" + data.description + "\"";
   };
 
+  self.receiverName = function(data) {
+    return data.recipient.id ? util.partyFullName(data.recipient) : "<"+loc("not-known")+">";
+  };
+
   self.markComplete = function(assignment) {
     self.sendEvent(myService, "markComplete", {assignmentId: assignment.id, applicationId: params.applicationId});
   };

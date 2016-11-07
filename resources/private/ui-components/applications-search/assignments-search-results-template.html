@@ -26,10 +26,13 @@
               <td data-bind="css: $data.currentState.type" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>
               </td>
-              <td data-bind="text: $data.application.id" data-test-col-name="id"></td>
-              <td data-bind="text: $data.addressAndMunicipality"
-                  data-test-col-name="target"></td>
-              <td data-bind="text: $data.target"                 data-test-col-name="location"></td>
+              <td data-bind="text: $data.application.id"         data-test-col-name="id"></td>
+              <td data-bind="text: $data.addressAndMunicipality" data-test-col-name="address"></td>
+              <td data-test-col-name="targetGroup">
+                <span data-bind="text: $data.targetGroup, testId: 'target-group'"></span></br>
+                <span data-bind="text: $data.targetType,  testId: 'target-type'"></span></br>
+                <span data-bind="text: $data.targetInfo,  testId: 'target-info'"></span>
+              </td>
               <td data-bind="text: $data.description"            data-test-col-name="description"></td>
               <td data-bind="fullName: $data.createdState.user"  data-test-col-name="creator"></td>
               <td data-bind="dateTimeString: $data.createdState.timestamp" data-test-col-name="created"></td>
