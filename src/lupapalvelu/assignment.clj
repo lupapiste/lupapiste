@@ -55,11 +55,15 @@
 
 (sc/defschema Assignment
   {:id             ssc/ObjectIdStr
-   :application    {:id               ssc/ApplicationId
-                    :organization     sc/Str
-                    :address          sc/Str
-                    :municipality     sc/Str}
-   :target         sc/Any
+   :application    {:id           ssc/ApplicationId
+                    :organization sc/Str
+                    :address      sc/Str
+                    :municipality sc/Str}
+   :target         {:group                         sc/Str
+                    :id                            ssc/ObjectIdStr
+                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :info-key)    sc/Str
+                    (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser
    :status         (apply sc/enum assignment-statuses)
    :states         [AssignmentState]
@@ -151,7 +155,7 @@
               {:status {$ne "canceled"}}
               {:status {$ne "canceled"}
                :states.type state})])})
-      
+
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
@@ -182,8 +186,8 @@
                        :description "$description"
                       }}
                    {"$sort" (sort-query sort)}])
-          converted 
-             (map 
+          converted
+             (map
                  #(dissoc % :description-ci :created)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
@@ -191,13 +195,29 @@
       (errorf "Assignment search query=%s failed: %s" query e)
       (fail! :error.unknown))))
 
+(defn- get-targets-for-applications [application-ids]
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} {:documents true})
+       (util/key-by :id)
+       (util/map-values (comp (partial into {}) assignment-targets))))
+
+(defn- enrich-assignment-target [application-targets assignment]
+  (let [group-targets (-> assignment :target :group keyword application-targets)]
+    (update assignment :target #(merge % (util/find-by-id (:id %) group-targets)))))
+
+(defn- enrich-targets [assignments]
+  (let [app-id->targets (->> (map (comp :id :application) assignments)
+                             get-targets-for-applications)]
+    (map #(enrich-assignment-target (-> % :application :id app-id->targets) %) assignments)))
+
 (sc/defn ^:always-validate get-assignments :- [Assignment]
   ([user :- usr/SessionSummaryUser]
    (get-assignments user {}))
   ([user query]
-   (mongo/select :assignments (organization-query-for-user user query)))
+   (->> (mongo/select :assignments (organization-query-for-user user query))
+        (enrich-targets)))
   ([user query projection]
-   (mongo/select :assignments (organization-query-for-user user query) projection)))
+   (->> (mongo/select :assignments (organization-query-for-user user query) projection)
+        (enrich-targets))))
 
 (sc/defn ^:always-validate get-assignment :- (sc/maybe Assignment)
   [user           :- usr/SessionSummaryUser
@@ -218,11 +238,11 @@
                             (util/->long (:skip query))
                             (util/->long (:limit query))
                             (:sort query))]
-    {:userTotalCount (mongo/count :assignments )
-     ; TODO proper count skip and limit for aggregate query
-     ; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
+    {:userTotalCount (mongo/count :assignments)
+     ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
      :totalCount     (count assignments)
-     :assignments    assignments}))
+     :assignments    (->> assignments
+                          (enrich-targets))}))
 
 ;;
 ;; Inserting and modifying assignments

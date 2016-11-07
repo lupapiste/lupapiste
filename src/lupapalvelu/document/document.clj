@@ -129,4 +129,11 @@
   (->> (domain/get-documents-by-type application :party)
        (map document-assignment-info)))
 
+(defn- describe-non-party-document-assignment-targets [{docs :documents :as application}]
+  (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))]
+    (->> (remove (comp party-doc-ids :id) docs)
+         (map document-assignment-info))))
+
 (assignment/register-assignment-target! :parties describe-parties-assignment-targets)
+
+(assignment/register-assignment-target! :documents describe-non-party-document-assignment-targets)

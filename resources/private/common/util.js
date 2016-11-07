@@ -137,7 +137,6 @@ var util = (function($) {
   }
 
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
-  function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
   function isValidY(y) {
     var m = /^(\d{7})-(\d)$/.exec(y || ""),
@@ -413,7 +412,6 @@ var util = (function($) {
     locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
     extractWarnErrors: extractWarnErrors,
     dissoc: dissoc,

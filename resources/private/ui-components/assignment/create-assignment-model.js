@@ -15,5 +15,4 @@ LUPAPISTE.CreateAssignmentModel = function(params) {
   // query targets from service
   self.sendEvent(myService, "targetsQuery", {applicationId: self.applicationId()});
 
-
 };
