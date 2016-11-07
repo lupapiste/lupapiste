@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [schema.core :as sc]
             [lupapalvelu.assignment :refer :all]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.data-schema :as dds]
             [sade.schema-generators :as ssg]
@@ -18,15 +19,23 @@
 
 (testable-privates lupapalvelu.assignment enrich-targets enrich-assignment-target get-targets-for-applications)
 
-(defn validate-target [doc-schema-name]
+(defn validate-document-target [doc-schema-name]
   (fact {:midje/description (str doc-schema-name " is valid assignment target")}
     (let [target-groups (assignment-targets {:documents [(ssg/generate (dds/doc-data-schema doc-schema-name))]})]
       (sc/check [TargetGroup] target-groups) => nil)))
 
 (facts "Validate assignment targets to all documents"
   (doseq [doc-schema-name (->> (schemas/get-all-schemas) vals (apply merge) keys)]
-    (validate-target doc-schema-name)))
+    (validate-document-target doc-schema-name)))
 
+(facts "Validate assignment targets to attachments"
+  (doseq [attachment (repeatedly 20 #(ssg/generate {:id                         sc/Str
+                                                    :type                       att/Type
+                                                    (sc/optional-key :contents) sc/Str}))]
+    (fact {:midje/description (str "Attachment " attachment " is valid assignment target")}
+      (sc/check [TargetGroup] (assignment-targets {:id          "application-id"
+                                                   :documents   []
+                                                   :attachments [attachment]})) => nil)))
 
 (facts get-targets-for-applications
   (fact "one application - one target"
