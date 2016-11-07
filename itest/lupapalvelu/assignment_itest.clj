@@ -121,7 +121,8 @@
 
   (facts "Editing assignments"
     (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
-          {assignment-id :id} (create-assignment sonja ronja-id id ["target"] "Edit1")]
+          doc-id (-> (query-application sonja id) :documents first :id)
+          {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Edit1")]
       (fact "can change text"
         (update-assignment sonja id assignment-id ronja-id "foo") => ok?
         (-> (query ronja :assignment :assignmentId assignment-id)
@@ -201,7 +202,7 @@
           (fact "recipient search finds correct assignments"
             (distinct
               (map #(get-in % [:recipient :id])
-                   ; jos tähän vaihtaa datatables -> query, tulee schema error.
+                   ; jos tahan vaihtaa datatables -> query, tulee schema error.
                    ; (query) muuttaa :recipient argumentin non-sequentialiksi..........
                    (-> (datatables sonja :assignments-search :recipient []) :data :assignments)))
             => (just #{ronja-id})

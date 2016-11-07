@@ -240,7 +240,7 @@
                             (:sort query))]
     {:userTotalCount (mongo/count :assignments)
      ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
-     :totalCount     (mongo/count assignments)
+     :totalCount     (count assignments)
      :assignments    (->> assignments
                           (enrich-targets))}))
 
