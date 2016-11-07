@@ -225,12 +225,7 @@
                   </span>
               </td>
               <td class="attachment-type-id">
-                  <span data-bind="if: type">
-                    <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-                  </span>
-                  <span data-bind="if: !type">
-                    <i data-bind="ltext: 'attachment.noName'"></i>
-                  </span>
+                <attachment-type-id params="attachment: $data"></attachment-type-id>
                   <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
               </td>
               <td class="attachment-file-info">

@@ -30,8 +30,7 @@
           <td>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
-              <span data-bind="text: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id'])])"></span>
-              <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+              <attachment-type-id params="attachment: $data"></attachment-type-id>
             </a>
             <br>
             <span data-bind="text: $data.contents() || ''"
@@ -46,8 +45,7 @@
           <!-- /ko -->
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id'])])"></span>
-            <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+            <attachment-type-id params="attachment: $data"></attachment-type-id>
             <br>
             <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
