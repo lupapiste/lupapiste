@@ -21,10 +21,10 @@ Sonja logs in and opens application
   Open application  ${appname}  ${propertyid}
   Tab should be visible  info
 
-Create assignment button is visible in parties tab
-  Element should not be visible  xpath=//button[@data-test-id="create-assignment-editor-button"]
+Create assignment button is visible in both info and parties tab
+  Element should be visible  xpath=//div[@id='application-info-tab']//button[@data-test-id="create-assignment-editor-button"]
   Open tab  parties
-  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor-button']
+  Wait until  Element should be visible  xpath=//div[@id='application-parties-tab']//button[@data-test-id='create-assignment-editor-button']
 
 Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää

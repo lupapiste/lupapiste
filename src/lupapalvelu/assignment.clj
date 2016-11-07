@@ -151,52 +151,52 @@
               {:applicationDetails.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
-            (if (= state "all")
-              {:status {$ne "canceled"}}
-              {:status {$ne "canceled"}
-               :states.type state})])})
+            {:status {$ne "canceled"}}])})
 
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
       {(:field sort) dir}))
 
-(defn search [query skip limit sort]
+(defn search [{state :state} mongo-query skip limit sort]
   (try
-    (let [res (collection/aggregate (mongo/get-db) "assignments"
-                  [{"$lookup" {:from :applications
-                               :localField "application.id"
-                               :foreignField "_id"
-                               :as "applicationDetails"}}
-                   {"$unwind" "$applicationDetails"}
-                   {"$match" query}
-                   {"$project"
-                      ;; pull the creation state to root of document for sorting purposes
-                      ;; it might also be possible to use :document "$$ROOT" in aggregation
-                      {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
-                       :description-ci {"$toLower" "$description"} ;; for sorting
-                       :application {:id "$applicationDetails._id"
-                                     :organization "$applicationDetails.organization"
-                                     :address "$applicationDetails.address"
-                                     :municipality "$applicationDetails.municipality"}
-                       :target "$target"
-                       :recipient "$recipient"
-                       :status "$status"
-                       :states "$states"
-                       :description "$description"
-                      }}
-                   {"$sort" (sort-query sort)}])
+    (let [aggregate (->> [{"$match" mongo-query}
+                          {"$lookup" {:from :applications
+                                      :localField "application.id"
+                                      :foreignField "_id"
+                                      :as "applicationDetails"}}
+                          {"$unwind" "$applicationDetails"}
+                          {"$project"
+                           ;; pull the creation state to root of document for sorting purposes
+                           ;; it might also be possible to use :document "$$ROOT" in aggregation
+                           {:currentState   {"$arrayElemAt" ["$states" -1]} ;; for sorting
+                            :created        {"$arrayElemAt" ["$states" 0]}
+                            :description-ci {"$toLower" "$description"} ;; for sorting
+                            :application    {:id           "$applicationDetails._id"
+                                             :organization "$applicationDetails.organization"
+                                             :address      "$applicationDetails.address"
+                                             :municipality "$applicationDetails.municipality"}
+                            :target         "$target"
+                            :recipient      "$recipient"
+                            :status         "$status"
+                            :states         "$states"
+                            :description    "$description"}}
+                          (when (and (string? state) (not= "all" state))
+                            {"$match" {:currentState.type state}})
+                          {"$sort" (sort-query sort)}]
+                         (remove nil?))
+          res (collection/aggregate (mongo/get-db) "assignments" aggregate)
           converted
              (map
-                 #(dissoc % :description-ci :created)
+                 #(dissoc % :description-ci :created :currentState)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
     (catch com.mongodb.MongoException e
-      (errorf "Assignment search query=%s failed: %s" query e)
+      (errorf "Assignment search query=%s failed: %s" mongo-query e)
       (fail! :error.unknown))))
 
 (defn- get-targets-for-applications [application-ids]
-  (->> (mongo/select :applications {:_id {$in (set application-ids)}} {:documents true})
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :primaryOperation :secondaryOperations])
        (util/key-by :id)
        (util/map-values (comp (partial into {}) assignment-targets))))
 
@@ -234,7 +234,8 @@
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
         mongo-query (make-query user-query query)
-        assignments (search mongo-query
+        assignments (search query
+                            mongo-query
                             (util/->long (:skip query))
                             (util/->long (:limit query))
                             (:sort query))]
