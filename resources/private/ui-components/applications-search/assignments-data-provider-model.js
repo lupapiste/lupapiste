@@ -36,7 +36,10 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       incomplete: !completed,
       creatorName: createdState.user.firstName + " " + createdState.user.lastName,
       statusClass: stateClasses[currentState.type],
-      addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality])
+      addressAndMunicipality: assignment.application.address + ", " + loc(["municipality", assignment.application.municipality]),
+      targetGroup: loc("application.assignment.type." + assignment.target.group),
+      targetType: loc(assignment.target.type + "._group_label"),
+      targetInfo: assignment.target["info-key"] && loc(assignment.target["info-key"]) || assignment.target.description
     });
   }
 
