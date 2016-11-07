@@ -82,6 +82,8 @@
    :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
    :recipient [(sc/maybe sc/Str)]
    :area [(sc/maybe sc/Str)]
+   :createdDate (sc/maybe {:start (sc/maybe ssc/Timestamp)
+                           :end   (sc/maybe ssc/Timestamp)})
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -139,22 +141,26 @@
           :recipient nil
           :operation nil
           :area nil
+          :createdDate nil
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient operation area]} user]
+(defn- make-query [query {:keys [searchText state recipient operation area createdDate]} user]
   {$and
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
             (when-not (empty? operation)
-              {:applicationDetails.primaryOperation.name {$in operation}})
+              {:applicationDetails.0.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
             (when-not (empty? area)
-              (app-utils/make-area-query area user :applicationDetails))
+              (app-utils/make-area-query area user :applicationDetails.0))
+            (when-not (empty? createdDate)
+              {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
+                                    "$lt"  (or (:end createdDate) (clj-time.coerce/to-long (clj-time.core/now)))}})
             {:status {$ne "canceled"}}])})
 
 
@@ -164,11 +170,11 @@
 
 (defn search [{state :state} mongo-query skip limit sort]
   (try
-    (let [aggregate (->> [{"$match" mongo-query}
-                          {"$lookup" {:from :applications
+    (let [aggregate (->> [{"$lookup" {:from :applications
                                       :localField "application.id"
                                       :foreignField "_id"
                                       :as "applicationDetails"}}
+                          {"$match" mongo-query}
                           {"$unwind" "$applicationDetails"}
                           {"$project"
                            ;; pull the creation state to root of document for sorting purposes
@@ -176,15 +182,15 @@
                            {:currentState   {"$arrayElemAt" ["$states" -1]} ;; for sorting
                             :created        {"$arrayElemAt" ["$states" 0]}
                             :description-ci {"$toLower" "$description"} ;; for sorting
-                            :application    {:id           "$applicationDetails._id"
-                                             :organization "$applicationDetails.organization"
-                                             :address      "$applicationDetails.address"
-                                             :municipality "$applicationDetails.municipality"}
-                            :target         "$target"
-                            :recipient      "$recipient"
-                            :status         "$status"
-                            :states         "$states"
-                            :description    "$description"}}
+                            :application {:id "$applicationDetails._id"
+                                          :organization "$applicationDetails.organization"
+                                          :address "$applicationDetails.address"
+                                          :municipality "$applicationDetails.municipality"}
+                            :target "$target"
+                            :recipient "$recipient"
+                            :status "$status"
+                            :states "$states"
+                            :description "$description"}}
                           (when (and (string? state) (not= "all" state))
                             {"$match" {:currentState.type state}})
                           {"$sort" (sort-query sort)}]
@@ -238,7 +244,8 @@
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
         mongo-query (make-query user-query query user)
-        assignments (search mongo-query
+        assignments (search query
+                            mongo-query
                             (util/->long (:skip query))
                             (util/->long (:limit query))
                             (:sort query))]

@@ -55,6 +55,9 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.searchFieldDelayed = ko.pureComputed(self.searchField)
     .extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
+  self.searchStartDate = ko.observable();
+  self.searchEndDate = ko.observable();
+
   function recipientSearchCond(selected, myid) {
     if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.myown)) {
       return [myid];
@@ -77,6 +80,8 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       operation: _.map(lupapisteApp.services.operationFilterService.selected(), "id"),
       limit: self.limit(),
       area: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
+      createdDate: {start: self.searchStartDate() ? new Date(self.searchStartDate()).getTime() : null,
+                    end: self.searchEndDate() ? moment(new Date(self.searchEndDate()).getTime()).add(1, 'days').valueOf() : null},
       sort: ko.mapping.toJS(self.sort),
       skip: self.skip()
     };

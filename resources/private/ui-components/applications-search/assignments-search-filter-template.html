@@ -44,6 +44,16 @@
               <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete-operations', params: {lPlaceholder: 'application.filter.search.placeholder.operations-filter'}}"></div>
             </div>
           </div>
+
+          <div class="row">
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.created-date'" /><br/>
+              <nobr>
+                <input type="text" class="form-input" style="min-width: 100px; width: 30%; display: inline;" data-bind="datepicker: dataProvider.searchStartDate" /> &#8211;
+                <input type="text" class="form-input" style="min-width: 100px; width: 30%; display: inline;" data-bind="datepicker: dataProvider.searchEndDate" />
+              </nobr>
+            </div>
+          </div>
         </div>
       </div>
 
