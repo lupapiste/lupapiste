@@ -47,6 +47,10 @@
 
           <div class="row">
             <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.assignment-targets'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-assignment-targets', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
+            </div>
+            <div class="col-2">
               <label data-bind="ltext: 'applications.filter.created-date'" /><br/>
               <nobr>
                 <input type="text" class="form-input" style="min-width: 100px; width: 30%; display: inline;" data-bind="datepicker: dataProvider.searchStartDate" /> &#8211;

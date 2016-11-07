@@ -84,6 +84,7 @@
    :area [(sc/maybe sc/Str)]
    :createdDate (sc/maybe {:start (sc/maybe ssc/Timestamp)
                            :end   (sc/maybe ssc/Timestamp)})
+   :targetType [(sc/maybe sc/Str)]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -142,12 +143,13 @@
           :operation nil
           :area nil
           :createdDate nil
+          :targetType nil
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient operation area createdDate]} user]
+(defn- make-query [query {:keys [searchText state recipient operation area createdDate targetType]} user]
   {$and
    (filter seq
            [query
@@ -161,6 +163,8 @@
             (when-not (empty? createdDate)
               {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
                                     "$lt"  (or (:end createdDate) (clj-time.coerce/to-long (clj-time.core/now)))}})
+            (when-not (empty? targetType)
+              {:target.group {$in targetType}})
             {:status {$ne "canceled"}}])})
 
 
