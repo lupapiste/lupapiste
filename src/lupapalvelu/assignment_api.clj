@@ -22,13 +22,18 @@
                                                           organization)))
     (fail :error.invalid-assignment-receiver)))
 
+(defn- validate-assignment-id [{{:keys [assignmentId]} :data}]
+  (when-not (pos? (assignment/count-for-assignment-id assignmentId))
+    (fail :error.invalid-assignment-id)))
+
 (defn- assignments-enabled [{orgs :user-organizations}]
   (when (not-any? :assignments-enabled orgs)
     (fail :error.assignments-not-enabled)))
 
 (defn- assignments-enabled-for-application [{org :organization}]
-  (when-not (:assignments-enabled @org)
+  (when-not (and org (:assignments-enabled @org))
     (fail :error.assignments-not-enabled)))
+
 
 ;;
 ;; Queries
@@ -81,7 +86,8 @@
    :pre-checks [assignments-enabled]
    :feature :assignments}
   [{user :user data :data}]
-  (ok :data (assignment/assignments-search user (assignment/search-query data))))
+  (let [query (assignment/search-query data)]
+    (ok :data (assignment/assignments-search user query))))
 
 ;;
 ;; Commands
@@ -90,7 +96,7 @@
 (defcommand create-assignment
   {:description      "Create an assignment"
    :user-roles       #{:authority}
-   :parameters       [recipientId target description]
+   :parameters       [id recipientId target description]
    :input-validators [(partial action/non-blank-parameters [:recipientId :description])
                       (partial action/map-parameters [:target])]
    :pre-checks       [validate-receiver
@@ -106,6 +112,20 @@
                                          :recipient      (userid->summary recipientId)
                                          :target         target
                                          :description    description})))
+
+(defcommand update-assignment
+  {:description      "Updates an assignment"
+   :user-roles       #{:authority}
+   :parameters       [id assignmentId recipientId description]
+   :input-validators [(partial action/non-blank-parameters [:recipientId :description])
+                      (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
+   :pre-checks       [validate-receiver
+                      validate-assignment-id]
+   :states           states/all-application-states-but-draft-or-terminal
+   :feature          :assignments}
+  [_]
+  (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
+                                                      :description description})))
 
 (defcommand complete-assignment
   {:description "Complete an assignment"

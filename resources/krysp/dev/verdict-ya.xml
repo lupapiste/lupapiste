@@ -207,6 +207,15 @@
                   <yak:tyyppi>Muu liite</yak:tyyppi>
                 </yak:Liite>
               </yak:liitetieto>
+              <yak:liitetieto>
+                <yak:Liite>
+                  <yht:kuvaus>liite</yht:kuvaus>
+                  <yht:linkkiliitteeseen>http://localhost:8000/dev/filecho/Lupapäätös.txt</yht:linkkiliitteeseen>
+                  <yht:muokkausHetki>2016-11-03T14:28:15</yht:muokkausHetki>
+                  <yht:versionumero />
+                  <yak:tyyppi>Muu liite</yak:tyyppi>
+                </yak:Liite>
+              </yak:liitetieto>
             </yak:Paatos>
           </yak:paatostieto>
           <yak:lupakohtainenLisatietotieto>

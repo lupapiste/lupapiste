@@ -35,6 +35,14 @@
                                                               :created-date  (util/to-local-date created)}}))
 
 
+(defn attachment-type-allows-ram
+  "Pre-checker that fails if the attachment type is review/statement
+  minutes."
+  [{{attachment-id :attachmentId} :data app :application}]
+  (let [{:keys [type]} (util/find-by-id attachment-id (:attachments app))]
+    (when (util/=as-kw (:type-id type) :katselmuksen_tai_tarkastuksen_poytakirja)
+      (fail :error.ram-not-allowed))))
+
 (defn attachment-status-ok
   "Pre-checker that fails only if the attachment is not approved"
   [{{attachment-id :attachmentId} :data app :application}]

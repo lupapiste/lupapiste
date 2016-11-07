@@ -12,7 +12,8 @@
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.application-utils :as app-utils]))
 
 (defonce ^:private registered-assignment-targets (atom {}))
 
@@ -72,10 +73,14 @@
   (-> (select-keys Assignment [:application :description :recipient :target])
       (assoc :state AssignmentState)))
 
+(sc/defschema UpdateAssignment
+  (select-keys Assignment [:recipient :description]))
+
 (sc/defschema AssignmentsSearchQuery
   {:searchText (sc/maybe sc/Str)
    :state (apply sc/enum "all" assignment-state-types)
-   :recipient (sc/maybe sc/Str)
+   :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
+   :recipient [(sc/maybe sc/Str)]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -106,12 +111,17 @@
 ;; Querying assignments
 ;;
 
+
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:description]
-        fuzzy (ss/fuzzy-re filter-search)]
-    {$or (map #(hash-map % {$regex   fuzzy
+  (let [search-keys [:description :applicationDetails.address]
+        fuzzy       (ss/fuzzy-re filter-search)
+        ops         (app-utils/operation-names filter-search)]
+    {$or (concat
+           (map #(hash-map % {$regex   fuzzy
                             $options "i"})
-              search-keys)}))
+              search-keys)
+           [{:applicationDetails.primaryOperation.name {$in ops}}
+            {:applicationDetails.secondaryOperations.name {$in ops}}])}))
 
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
@@ -126,23 +136,26 @@
   (merge {:searchText nil
           :state "all"
           :recipient nil
+          :operation nil
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient]}]
+(defn- make-query [query {:keys [searchText state recipient operation]}]
   {$and
    (filter seq
            [query
             (when-not (ss/blank? searchText) (make-text-query (ss/trim searchText)))
-            (when-not (ss/blank? recipient)
-              {:recipient.username recipient})
+            (when-not (empty? operation)
+              {:applicationDetails.primaryOperation.name {$in operation}})
+            (when-not (empty? recipient)
+              {:recipient.id {$in recipient}})
             (if (= state "all")
               {:status {$ne "canceled"}}
               {:status {$ne "canceled"}
                :states.type state})])})
-      
+
 
 (defn sort-query [sort]
    (let [dir (if (:asc sort) 1 -1)]
@@ -151,22 +164,30 @@
 (defn search [query skip limit sort]
   (try
     (let [res (collection/aggregate (mongo/get-db) "assignments"
-                  [{"$match" query}
-                   {"$project" 
+                  [{"$lookup" {:from :applications
+                               :localField "application.id"
+                               :foreignField "_id"
+                               :as "applicationDetails"}}
+                   {"$unwind" "$applicationDetails"}
+                   {"$match" query}
+                   {"$project"
                       ;; pull the creation state to root of document for sorting purposes
                       ;; it might also be possible to use :document "$$ROOT" in aggregation
                       {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
                        :description-ci {"$toLower" "$description"} ;; for sorting
-                       :application "$application"
+                       :application {:id "$applicationDetails._id"
+                                     :organization "$applicationDetails.organization"
+                                     :address "$applicationDetails.address"
+                                     :municipality "$applicationDetails.municipality"}
                        :target "$target"
                        :recipient "$recipient"
                        :status "$status"
                        :states "$states"
                        :description "$description"
-                      }} 
+                      }}
                    {"$sort" (sort-query sort)}])
-          converted 
-             (map 
+          converted
+             (map
                  #(dissoc % :description-ci :created)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
@@ -212,13 +233,15 @@
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
-        mongo-query (make-query user-query query)]
-    {:userTotalCount (mongo/count :assignments )
-     :totalCount     (mongo/count :assignments mongo-query)
-     :assignments    (->> (search mongo-query
-                                  (util/->long (:skip query))
-                                  (util/->long (:limit query))
-                                  (:sort query))
+        mongo-query (make-query user-query query)
+        assignments (search mongo-query
+                            (util/->long (:skip query))
+                            (util/->long (:limit query))
+                            (:sort query))]
+    {:userTotalCount (mongo/count :assignments)
+     ;; https://docs.mongodb.com/v3.0/reference/operator/aggregation/match/#match-perform-a-count
+     :totalCount     (mongo/count assignments)
+     :assignments    (->> assignments
                           (enrich-targets))}))
 
 ;;
@@ -231,16 +254,23 @@
     (mongo/insert :assignments created-assignment)
     (:id created-assignment)))
 
-(defn- update-assignment [assignment-id query assignment-changes]
+(defn- update-to-db [assignment-id query assignment-changes]
   (mongo/update-n :assignments (assoc query :_id assignment-id) assignment-changes))
 
 (defn- update-assignments [query assignment-changes]
   (mongo/update-n :assignments query assignment-changes :multi true))
 
+(defn count-for-assignment-id [assignment-id]
+  (mongo/count :assignments {:_id assignment-id}))
+
+(sc/defn ^:always-validate update-assignment [assignment-id :- ssc/ObjectIdStr
+                                              updated-assignment :- UpdateAssignment]
+  (update-to-db assignment-id {} {$set updated-assignment}))
+
 (sc/defn ^:always-validate complete-assignment [assignment-id :- ssc/ObjectIdStr
                                                 completer     :- usr/SessionSummaryUser
                                                 timestamp     :- ssc/Timestamp]
-  (update-assignment assignment-id
+  (update-to-db assignment-id
                      (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
                      {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 

@@ -809,4 +809,12 @@
         xml/parse
         strip-xml-namespaces
         yax/update-application-extensions)
-    (resp/status 200 "YA extension KRYSP processed.")))
+    (resp/status 200 "YA extension KRYSP processed."))
+
+  (defpage [:get "/dev/filecho/:filename"] {filename :filename}
+    (->> filename
+         (format "This is file %s\n")
+         (resp/content-type "text/plain; charset=utf-8")
+         (resp/set-headers (assoc http/no-cache-headers
+                                  "Content-Disposition" (format "attachment; filename=\"%s\"" filename)))
+         (resp/status 200))))

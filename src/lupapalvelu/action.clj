@@ -134,6 +134,9 @@
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
 
+(defn positive-number-parameters [params command]
+  (filter-params-of-command params command (complement pos?) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
@@ -280,7 +283,7 @@
 
 (defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (when-not (.contains valid-states (keyword state))
+    (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command]

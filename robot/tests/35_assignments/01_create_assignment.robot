@@ -22,9 +22,9 @@ Sonja logs in and opens application
   Tab should be visible  info
 
 Create assignment button is visible in parties tab
-  Element should not be visible  xpath=//button[@data-test-id="create-assignment-editor"]
+  Element should not be visible  xpath=//button[@data-test-id="create-assignment-editor-button"]
   Open tab  parties
-  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor']
+  Wait until  Element should be visible  xpath=//button[@data-test-id='create-assignment-editor-button']
 
 Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
@@ -33,8 +33,20 @@ Sonja sees assignment in document
   Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
   Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
-  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Sibbo Sonja
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='creator']  Sonja Sibbo
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-header']//span[@class='receiver']  Ronja Sibbo
   Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katoppa tää
+
+Sonja edits description of the assignment
+  Click by test id  edit-assignment
+  Wait until  Element should be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
+  ${description}=  Get Value  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']//textarea[@id='assignment-description']
+  Should be equal  ${description}  Katoppa tää
+  Input text  xpath=//bubble-dialog[@data-test-id='edit-assignment-bubble']//textarea[@id='assignment-description']  Katsoisitko?
+  Scroll and click test id  bubble-dialog-ok
+  Positive indicator should be visible
+  Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
+  Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
   Logout
 
 Pena does not see assignment
@@ -59,6 +71,7 @@ Ronja logs in, sees assignment in document
   Open tab  parties
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
   Wait until  Element should be visible  xpath=//${docPath}//button[@data-test-id='mark-assignment-complete']
+  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
 
 Only one assignment has been created
   Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1

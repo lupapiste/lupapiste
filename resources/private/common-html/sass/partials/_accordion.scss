@@ -96,10 +96,6 @@
   div.accordion-assignments {
     color: white;
     margin: 0 auto;
-    /*
-    overflow-y: hidden;
-    text-transform: none;
-    */
     min-height: $grid-min-height;
     .assignment-container {
       margin-top: 1px;
@@ -121,9 +117,25 @@
       }
       > .assignment-header {
         white-space: nowrap;
+        .creator {
+          &:before {
+             content: " (";
+          }
+        }
+        .receiver {
+          &:before {
+            content: "\2192"
+          }
+          &:after {
+            content: "):";
+          }
+        }
       }
-      i {
-        padding-left: $icon-pad;
+      div.no-wrap-whitespace button:first-child {
+        margin-right: $marginS;
+      }
+      .editor {
+        display: table-row;
       }
     }
   }

@@ -1,7 +1,9 @@
 LUPAPISTE.EmptyApplicationModel = function() {
   "use strict";
   return {startedBy: {firstName: "", lastName: ""},
-          closedBy: {firstName: "", lastName: ""}};
+          closedBy: {firstName: "", lastName: ""},
+          warrantyStart: null,
+          warrantyEnd: null};
 };
 
 LUPAPISTE.ApplicationModel = function() {
@@ -37,6 +39,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.closed = ko.observable();
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
+  self.warrantyStart = ko.observable();
+  self.warrantyEnd = ko.observable();
 
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();

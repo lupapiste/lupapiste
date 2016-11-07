@@ -85,7 +85,9 @@
         (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
         (application/get-link-permit-apps irrelevant) => [link-app]
         (action/update-application irrelevant irrelevant) => nil
-        (lupapalvelu.attachment/upload-and-attach! irrelevant irrelevant irrelevant) => nil))))
+        (lupapalvelu.attachment/upload-and-attach! irrelevant irrelevant irrelevant) => nil
+        (organization/get-organization nil) => "753-R"
+        (organization/krysp-integration? "753-R" "R") => false))))
 
 (def example-meaningful-tj-krysp
   {:tag :Rakennusvalvonta,

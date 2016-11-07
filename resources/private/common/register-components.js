@@ -68,6 +68,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-areas", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-handlers"},
+    {name: "autocomplete-recipient"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
@@ -146,7 +147,8 @@ jQuery(document).ready(function() {
     {name: "open-3d-map"},
     {name: "extension-applications"},
     {name: "create-assignment"},
-    {name: "accordion-assignments"}
+    {name: "accordion-assignments"},
+    {name: "assignment-editor"}
 ];
 
   ko.registerLupapisteComponents(components);

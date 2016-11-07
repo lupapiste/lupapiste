@@ -4,6 +4,7 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [lupapalvelu.domain :as domain]
             [sade.util :as util]))
@@ -23,12 +24,21 @@
   (def ^:private invalid-receiver?
     (partial expected-failure? "error.invalid-assignment-receiver"))
 
+  (def ^:private invalid-assignment?
+    (partial expected-failure? "error.invalid-assignment-id"))
+
   (defn create-assignment [from to application-id target desc]
     (command from :create-assignment
              :id            application-id
              :recipientId   to
              :target        target
              :description   desc))
+  (defn update-assignment [who id assignment-id recipient description]
+    (command who :update-assignment
+             :id id
+             :assignmentId assignment-id
+             :recipientId recipient
+             :description description))
 
   (defn complete-assignment [user assignment-id]
     (command user :complete-assignment :assignmentId assignment-id))
@@ -109,6 +119,29 @@
              :assignments
              (map :status)) => ["active", "active"])))
 
+  (facts "Editing assignments"
+    (let [id (:id (create-and-submit-application pena :propertyId sipoo-property-id))
+          {assignment-id :id} (create-assignment sonja ronja-id id ["target"] "Edit1")]
+      (fact "can change text"
+        (update-assignment sonja id assignment-id ronja-id "foo") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :description) => "foo")
+      (fact "also ronja can change text"
+        (update-assignment ronja id assignment-id ronja-id "faa") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :description) => "faa")
+      (fact "Ronja can change recipient to sonja"
+        (update-assignment ronja id assignment-id sonja-id "Ota koppi") => ok?
+        (-> (query ronja :assignment :assignmentId assignment-id)
+            :assignment
+            :recipient :username) => "sonja")
+      (fact "inputs are validated"
+        (update-assignment ronja id "foo" sonja-id "Ota koppi") => fail?
+        (update-assignment ronja id (mongo/create-id) sonja-id "Ota koppi") => invalid-assignment?
+        (update-assignment ronja id assignment-id "foo" "Ota koppi") => invalid-receiver?)))
+
   (facts "Completing assignments"
     (let [id (create-app-id sonja :propertyId sipoo-property-id)
           doc-id (-> (query-application sonja id) :documents first :id)
@@ -145,6 +178,7 @@
         (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
+    (apply-remote-minimal)
     (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
           doc-id1 (-> (query-application sonja id1) :documents first :id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)]
@@ -162,7 +196,19 @@
                  :data :assignments) => empty?)
           (fact "not even close"
             (->> (query sonja :assignments-search :searchText "not even close")
-                 :data :assignments (map :description)) => empty?)))
+                 :data :assignments (map :description)) => empty?)
+
+          (fact "recipient search finds correct assignments"
+            (distinct
+              (map #(get-in % [:recipient :id])
+                   ; jos tähän vaihtaa datatables -> query, tulee schema error.
+                   ; (query) muuttaa :recipient argumentin non-sequentialiksi..........
+                   (-> (datatables sonja :assignments-search :recipient []) :data :assignments)))
+            => (just #{ronja-id})
+            (distinct
+              (map #(get-in % [:recipient :id])
+                   (-> (datatables sonja :assignments-search :recipient [sonja-id] :limit 5) :data :assignments)))
+            => empty?)))
 
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?

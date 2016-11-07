@@ -14,6 +14,7 @@
       {commandName         : "inform-construction-started",
        checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
+       extraParameters     : {lang: loc.getCurrentLanguage()},
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
        dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
@@ -171,6 +172,44 @@
     ko.mapping.fromJS(app, mappingOptions, applicationModel);
   }
 
+  function initWarrantyDates(app) {
+    if (app.warrantyEnd) {
+      app.warrantyEnd = new Date(app.warrantyEnd);
+    }
+
+    if (app.warrantyStart) {
+      app.warrantyStart = new Date(app.warrantyStart);
+    }
+  }
+
+  function subscribeWarrantyDates(app, applicationModel) {
+    applicationModel.warrantyEnd.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-end-date",
+            {id: app.id, endDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+
+    applicationModel.warrantyStart.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-start-date",
+            {id: app.id, startDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -180,6 +219,8 @@
 
       // Plain data
       applicationModel._js = app;
+
+      initWarrantyDates(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -229,6 +270,7 @@
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
+        lupapisteApp.services.accordionService.authorities = authorities;
       }
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
@@ -308,6 +350,8 @@
 
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+
+      subscribeWarrantyDates(app, applicationModel);
 
       isInitializing = false;
       pageutil.hideAjaxWait();

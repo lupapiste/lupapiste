@@ -55,11 +55,26 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.searchFieldDelayed = ko.pureComputed(self.searchField)
     .extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
+  function recipientSearchCond(selected, myid) {
+    if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.myown)) {
+      return [myid];
+    } else if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.all)) {
+      return [];
+    } else {
+      return _.map(selected, "id");
+    }
+  }
+
   var searchFields = ko.pureComputed(function() {
+    var myid = lupapisteApp.models.currentUser.id();
+    if (myid == null) {
+      return;
+    }
     return {
       searchText: self.searchFieldDelayed(),
       state: self.searchResultType(),
-      recipient: lupapisteApp.models.currentUser.username(),
+      recipient: recipientSearchCond(lupapisteApp.services.assignmentRecipientFilterService.selected(), myid),
+      operation: _.map(lupapisteApp.services.operationFilterService.selected(), "id"),
       limit: self.limit(),
       sort: ko.mapping.toJS(self.sort),
       skip: self.skip()

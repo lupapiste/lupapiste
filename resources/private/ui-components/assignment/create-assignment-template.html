@@ -1,60 +1,22 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-template">
-  <!-- ko if: targetGroups().length > 0 -->
-  <button class="primary"
-          data-bind="toggleClick: editorVisible,
-                     testId:'create-assignment-editor'">
-    <i class="lupicon-circle-plus"></i>
-    <span data-bind="ltext: 'application.assignment.create'"></span>
-  </button>
-  <bubble-dialog data-test-id="create-assignment-bubble" params="visible: editorVisible, okFun: createAssignment, okEnabled: assignmentOk, buttonIcon: 'lupicon-save'">
-    <!-- ko with: $parent -->
-    <div class="form-grid">
-      <div class="row">
-        <div class="col-1"
-             data-bind="component: {name: 'select-field',
-                          params: {value: selectedTargetGroup,
-                                   options: targetGroups,
-                                   optionsText: mainTypeLoc,
-                                   valueAllowUnset: true,
-                                   id: 'assignment-target-group',
-                                   label: 'Aihe',
-                                   required: false}}">
-        </div>
-        <div class="col-1"
-             data-bind="component: {name: 'select-field',
-                         params: {value: selectedTargetId,
-                                  options: targetIds,
-                                  optionsText: displayText,
-                                  optionsValue: 'id',
-                                  valueAllowUnset: true,
-                                  id: 'assignment-target-id',
-                                  label: subTypeLabel,
-                                  disable: targetIds().length == 0,
-                                  required: false}}">
-         </div>
-         <div class="col-1"
-             data-bind="component: {name: 'select-field',
-                         params: {value: recipientId,
-                                  options: params.authorities,
-                                  optionsValue: 'id',
-                                  optionsText: util.partyFullName,
-                                  valueAllowUnset: true,
-                                  id: 'assignment-recipient',
-                                  label: loc('application.assignment.recipient.label'),
-                                  required: true}}">
-         </div>
-      </div>
-      <div class="row">
-        <div class="col-3"
-             data-bind="component: {name: 'textarea-field',
-                                    params: {value: description,
-                                             lPlaceholder: 'application.assignment.description.placeholder',
-                                             id: 'assignment-description'}}">
-
-        </div>
-      </div>
+  <!-- ko if: _.keys(targets()).length > 0 -->
+    <div class="stacked--inline">
+      <button class="primary"
+              data-bind="toggleClick: editorVisible,
+                         testId: 'create-assignment-editor-button'">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.assignment.create'"></span>
+      </button>
+      <div class="bubble-dialog-arrow" data-bind="visible: editorVisible"></div>
     </div>
-   <!-- /ko -->
-  </bubble-dialog>
+    <!-- ko if: editorVisible -->
+    <assignment-editor data-test-id="create-assignment-editor"
+                       params="visible: editorVisible,
+                               authorities: $root.authorities,
+                               targets: lupapisteApp.services.assignmentService.targets,
+                               applicationId: applicationId,
+                               targetGroup: initialTarget,
+                               editMode: false"></assignment-editor>
+    <!-- /ko -->
   <!-- /ko -->
 </script>

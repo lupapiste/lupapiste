@@ -18,7 +18,7 @@ Fill assignment editor
 Create assignment
   [Arguments]  ${user}  ${targetGroup}  ${doctype}  ${description}=Foosignment
   ${docId}=  Get Element Attribute  xpath=//section[@class='accordion' and @data-doc-type='${doctype}']@data-doc-id
-  Click by test id  create-assignment-editor
+  Click by test id  create-assignment-editor-button
   Wait until  Element should be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${docId}  ${user}  ${description}
   Scroll and click test id  bubble-dialog-ok
