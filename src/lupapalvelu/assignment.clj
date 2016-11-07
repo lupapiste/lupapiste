@@ -196,7 +196,7 @@
       (fail! :error.unknown))))
 
 (defn- get-targets-for-applications [application-ids]
-  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :attachments])
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :attachments :primaryOperation :secondaryOperations])
        (util/key-by :id)
        (util/map-values (comp (partial into {}) assignment-targets))))
 

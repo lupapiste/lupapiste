@@ -304,6 +304,13 @@
                                              params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
+                        <!-- ko if: $parent.selectedTabName() === 'info' && $root.authorization.ok("create-assignment") && features.enabled("assignments") -->
+                        <create-assignment data-test-id="create-assignment-component"
+                                           params="authorities: $root.authorities,
+                                                   applicationId: id,
+                                                   initialTarget: 'documents',
+                                                   targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+                        <!-- /ko -->
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
