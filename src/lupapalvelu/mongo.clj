@@ -439,7 +439,8 @@
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
   (ensure-index :buildingCache {:created 1} {:expireAfterSeconds (* 60 60 12)}) ; 12 h
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
-  (ensure-index :ssoKeys {:ip 1} {:unique true}))
+  (ensure-index :ssoKeys {:ip 1} {:unique true})
+  (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]
