@@ -169,7 +169,7 @@
                           {"$project"
                            ;; pull the creation state to root of document for sorting purposes
                            ;; it might also be possible to use :document "$$ROOT" in aggregation
-                           {:created {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
+                           {:currentState {"$arrayElemAt" [{"$slice" ["$states" -1]} 0]} ;; for sorting
                             :description-ci {"$toLower" "$description"} ;; for sorting
                             :application {:id "$applicationDetails._id"
                                           :organization "$applicationDetails.organization"
@@ -181,13 +181,13 @@
                             :states "$states"
                             :description "$description"}}
                           (when (and (string? state) (not= "all" state))
-                            {"$match" {:created.type state}})
+                            {"$match" {:currentState.type state}})
                           {"$sort" (sort-query sort)}]
                          (remove nil?))
           res (collection/aggregate (mongo/get-db) "assignments" aggregate)
           converted
              (map
-                 #(dissoc % :description-ci :created)
+                 #(dissoc % :description-ci :currentState)
                  (map #(rename-keys % {:_id :id}) res))]
       converted)
     (catch com.mongodb.MongoException e
