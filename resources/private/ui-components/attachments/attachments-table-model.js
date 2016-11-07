@@ -66,7 +66,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
     if (assignmentService && features.enabled("assignments")) {
       return  _(assignmentService.assignments())
         .filter(function(assignment) {
-          return assignment.target.group === "attachments" && _.includes(attachmentIds, assignment.target.id);
+          return assignment.target.group === "attachments"
+            && _.includes(attachmentIds, assignment.target.id)
+            && assignment.currentState.type !== "completed";
         })
         .keyBy("target.id")
         .value();
