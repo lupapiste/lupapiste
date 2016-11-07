@@ -77,7 +77,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     // Datepicker returns a timestamp representing the selected date at midnight local time
     // search end date must be adjusted by one full day forward to include the end date as a whole into the search range
     var searchStartDateInMillis = self.searchStartDate() ? new Date(self.searchStartDate()).getTime() : null;
-    var searchEndDateInMillis = self.searchEndDate() ? moment(new Date(self.searchEndDate()).getTime()).add(1, 'days').valueOf() : null;
+    var searchEndDateInMillis = self.searchEndDate() ? moment(new Date(self.searchEndDate()).getTime()).add(1, "days").valueOf() : null;
 
     return {
       searchText: self.searchFieldDelayed(),
