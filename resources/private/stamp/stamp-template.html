@@ -211,10 +211,8 @@
                 data-bind="click: $parents[2].selectRow, 
                            clickBubble: false, 
                            css: {selected: selected}">
-              <td class="attachment-state-icons" 
-                  data-bind="foreach: $parents[2].stateIcons( $data.id )">
-                <i data-bind="attr: {'class': $data.css,
-                              'data-test-icon':  $data.icon + '-icon'}"></i>
+              <td>
+                <state-icons params="attachment: $data"></state-icons>
               </td>
               <td class="attachment-type-group">
                   <span data-bind="if: type">

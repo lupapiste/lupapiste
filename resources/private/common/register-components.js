@@ -150,7 +150,8 @@ jQuery(document).ready(function() {
     {name: "create-assignment"},
     {name: "accordion-assignments"},
     {name: "assignment-editor"},
-    {name: "attachment-type-id"}
+    {name: "attachment-type-id"},
+    {name: "state-icons"}
 ];
 
   ko.registerLupapisteComponents(components);

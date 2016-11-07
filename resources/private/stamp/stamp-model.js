@@ -82,16 +82,6 @@ LUPAPISTE.StampModel = function(params) {
   self.status = ko.observable();
   self.attachmentsDict = {};
 
-  self.stateIcons = function( attachmentId ) {
-    var att = _.find( params.attachments(),
-                      function( a ) {
-                        return a().id === attachmentId;
-                      });
-    return att
-      ? lupapisteApp.services.attachmentsService.stateIcons( ko.unwrap( att ))
-      : [];
-  };
-
   self.disposedComputed( function() {
     if( !_.size( self.attachments())) {
       self.attachments( _.map( params.attachments(),

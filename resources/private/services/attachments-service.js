@@ -413,50 +413,6 @@ LUPAPISTE.AttachmentsService = function() {
 
   ko.options.deferUpdates = false;
 
-  // Attachments table icon column. Used both by the regular attachments table and stamping template.
-  self.stateIcons = function(attachment) {
-    function showSentToCaseManagementIcon(attachment) {
-      return attachment.sent && !_.isEmpty(_.filter(lupapisteApp.models.application._js.transfers,
-                                                    {type: "attachments-to-asianhallinta"}));
-    }
-
-    function showSentIcon(attachment) {
-      return attachment.sent && !showSentToCaseManagementIcon(attachment);
-    }
-
-    var hasFile = _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
-
-    function canVouch(attachment) {
-      return hasFile && !self.isNotNeeded(attachment);
-    }
-
-    var data = ko.utils.unwrapObservable(attachment);
-    var notNeeded = attachment.notNeeded();
-    var approved = self.isApproved(data) && canVouch(data);
-    var rejected = self.isRejected(data) && canVouch(data);
-
-    return _( [[approved, {css: "lupicon-circle-check positive", icon: "approved"}],
-               [rejected || (!hasFile && !notNeeded), {css: "lupicon-circle-attention negative",
-                                                       icon: "rejected"}],
-               [ _.get( data, "signatures.0"), {css: "lupicon-circle-pen positive",
-                                                icon: "signed"}],
-               [data.state === "requires_authority_action", {css: "lupicon-circle-star primary",
-                                                             icon: "state"}],
-               [_.get(data, "latestVersion.stamped"), {css: "lupicon-circle-stamp positive",
-                                                       icon: "stamped"}],
-               [showSentIcon(data), {css: "lupicon-circle-arrow-up positive",
-                                     icon: "sent"}],
-               [showSentToCaseManagementIcon(data), {css: "lupicon-circle-arrow-up positive",
-                                                     icon: "sent-to-case-management"}],
-               [ko.unwrap(attachment.forPrinting), {css: "lupicon-circle-section-sign positive",
-                                          icon: "for-printing"}],
-               [_.get( data, "metadata.nakyvyys", "julkinen") !== "julkinen", {css: "lupicon-lock primary",
-                                                                               icon: "not-public"}]] )
-      .filter(_.first)
-      .map(_.last)
-      .value();
-  };
-
   //
   // Missing required attachments
   //
