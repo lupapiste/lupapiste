@@ -57,7 +57,8 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.reports.reports-api])
-  (:import (java.io OutputStreamWriter BufferedWriter)))
+  (:import (java.io OutputStreamWriter BufferedWriter)
+           (java.nio.charset StandardCharsets)))
 
 ;;
 ;; Helpers
@@ -816,5 +817,9 @@
          (format "This is file %s\n")
          (resp/content-type "text/plain; charset=utf-8")
          (resp/set-headers (assoc http/no-cache-headers
-                                  "Content-Disposition" (format "attachment; filename=\"%s\"" filename)))
+                                  "Content-Disposition" (String. (.getBytes (format "attachment; filename=\"%s\""
+                                                                                    filename)
+                                                                            StandardCharsets/UTF_8)
+                                                                 StandardCharsets/ISO_8859_1)
+                                  "Server" "Microsoft-IIS/7.5"))
          (resp/status 200))))
