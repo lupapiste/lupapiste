@@ -22,17 +22,17 @@
 
 (mongocheck :assignments created-is-first-in-states :states)
 
-(defonce canceled-applications (delay (get-canceled-application-ids)))
-
 (defn- get-canceled-application-ids []
   (let [query {:state "canceled"}]
     (->> (try
-           (mongo/select "applications" query [])
+           (mongo/select "applications" query {:_id 1})
            (catch com.mongodb.MongoException e
              (errorf "Application search query=%s failed: %s" query e)
              (fail! :error.unknown)))
          (map :_id)
          (set))))
+
+(defonce canceled-applications (delay (get-canceled-application-ids)))
 
 (defn- application-canceled? [id]
   (boolean (@canceled-applications id)))
