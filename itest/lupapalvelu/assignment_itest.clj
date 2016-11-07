@@ -220,4 +220,27 @@
       (fact "get results again when cancalation is reverted"
         (command sonja :undo-cancellation :id id1) => ok?
         (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
-            :data :assignments count) => 1))))
+            :data :assignments count) => 1)
+
+      (facts "state"
+        (let [assignments (-> (datatables sonja :assignments-search :state "all") :data :assignments)
+              first-assignment (first assignments)]
+          (fact "count for all"
+            (count assignments) => 1)
+          (fact "count for created"
+              (-> (datatables sonja :assignments-search :state "created") :data :assignments count) => 1)
+          (fact "count for completed"
+            (-> (datatables sonja :assignments-search :state "completed") :data :assignments count) => 0)
+          (fact "count for invalid"
+            (-> (datatables sonja :assignments-search :state "foo")) => fail?)
+
+          (complete-assignment sonja (:id first-assignment)) => ok?
+
+          (facts "after completion"
+            (fact "count for all"
+              (count assignments) => 1)
+            (fact "count for created"
+              (-> (datatables sonja :assignments-search :state "created") :data :assignments count) => 0)
+            (fact "count for completed"
+              (-> (datatables sonja :assignments-search :state "completed") :data :assignments count) => 1)))
+        ))))
