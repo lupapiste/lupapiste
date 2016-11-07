@@ -19,7 +19,7 @@
 
 (sc/defschema Target
   {:id                               ssc/ObjectIdStr
-   :type                             sc/Str
+   :type-key                         sc/Str
    (sc/optional-key :info-key)       sc/Str          ; localization key for additional target info
    (sc/optional-key :description)    sc/Str})        ; localized description for additional target info
 
@@ -61,7 +61,7 @@
                     :municipality sc/Str}
    :target         {:group                         sc/Str
                     :id                            ssc/ObjectIdStr
-                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :type-key)    sc/Str
                     (sc/optional-key :info-key)    sc/Str
                     (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser

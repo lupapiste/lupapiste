@@ -122,7 +122,7 @@
   "Return document info as assignment target"
   [{{name :name} :schema-info id :id :as doc}]
   (let [accordion-datas (schemas/resolve-accordion-field-values doc)]
-    (util/assoc-when-pred {:id id :type name} ss/not-blank?
+    (util/assoc-when-pred {:id id :type-key (ss/join "." [name "_group_label"])} ss/not-blank?
                           :description (ss/join " " accordion-datas))))
 
 (defn- describe-parties-assignment-targets [application]

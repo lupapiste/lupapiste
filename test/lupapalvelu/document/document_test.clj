@@ -89,7 +89,7 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Firma 5"})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Firma 5"})
 
   (fact "henkilo"
     (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
@@ -107,7 +107,7 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Pena Panaani"})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Pena Panaani"})
 
   (fact "without accordion fields"
     (document-assignment-info {:id "4e2d57b9eb6b91890f33efd7",
@@ -121,4 +121,4 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r"}))
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label"}))

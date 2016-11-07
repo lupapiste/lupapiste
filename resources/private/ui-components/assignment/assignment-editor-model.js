@@ -36,7 +36,7 @@ LUPAPISTE.AssignmentEditorModel = function(params) {
 
   self.displayText = function (target) {
     var info = target["info-key"] && loc(target["info-key"]) || target.description;
-    return loc(target.type + "._group_label") + (info ? " - " + info : "");
+    return loc(target["type-key"]) + (info ? " - " + info : "");
   };
 
   self.subTypeLabel = self.disposedPureComputed(function() {
