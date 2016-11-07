@@ -63,3 +63,10 @@
 (defpage [:post "/api/csp-report"] request
   (log-csp-report request)
   "OK")
+
+(env/in-dev
+  (defcommand reset-frontend-log
+    {:user-roles #{:admin}}
+    [_]
+    (reset! frontend-log {})
+    (ok)))

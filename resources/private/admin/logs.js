@@ -20,6 +20,13 @@
         })
         .call();
     };
+
+    self.resetLog = function() {
+      ajax
+        .command("reset-frontend-log")
+        .success(self.load)
+        .call();
+    };
   }
 
   var logsModel = new LogsModel();
