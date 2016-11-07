@@ -180,7 +180,7 @@
 
   (facts "Assignments search"
     (apply-remote-minimal)
-    (let [id1 (create-app-id sonja :propertyId sipoo-property-id :x 404369.304 :y 6693806.957) ; Included into Nikkilä area
+    (let [id1 (create-app-id sonja :propertyId sipoo-property-id :x 404369.304 :y 6693806.957) ; Included into Nikkila area
           doc-id1 (-> (query-application sonja id1) :documents first :id)
           id2 (create-app-id ronja :propertyId sipoo-property-id)
           doc-id2 (-> (query-application ronja id2) :documents first :id)
