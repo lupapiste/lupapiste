@@ -160,12 +160,12 @@
 
 (defn search [{state :state} mongo-query skip limit sort]
   (try
-    (let [aggregate (->> [{"$match" mongo-query}
-                          {"$lookup" {:from :applications
+    (let [aggregate (->> [{"$lookup" {:from :applications
                                       :localField "application.id"
                                       :foreignField "_id"
                                       :as "applicationDetails"}}
                           {"$unwind" "$applicationDetails"}
+                          {"$match" mongo-query}
                           {"$project"
                            ;; pull the creation state to root of document for sorting purposes
                            ;; it might also be possible to use :document "$$ROOT" in aggregation
