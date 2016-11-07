@@ -58,4 +58,21 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   self.reject = function(attachment) {
     service.rejectAttachment(attachment.id);
   };
+
+  self.authorities = accordionService.authorities;
+
+  self.assignments = self.disposedPureComputed(function() {
+    var attachmentIds = _.map(attachments, function(att) { return util.getIn(att, ["id"]); });
+    if (assignmentService && features.enabled("assignments")) {
+      return  _(assignmentService.assignments())
+        .filter(function(assignment) {
+          return assignment.target.group === "attachments" && _.includes(attachmentIds, assignment.target.id);
+        })
+        .keyBy("target.id")
+        .value();
+    } else {
+      return {};
+    }
+  }).extend({deferred: true});
+
 };
