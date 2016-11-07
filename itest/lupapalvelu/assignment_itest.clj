@@ -174,7 +174,7 @@
       (fact "targets are returned as key-val vectors"
         (:targets targets-resp) => (has every? (fn [[k v]] (and (string? k) (vector? v)))))
       (fact "keys for values look right"
-        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type]))))
+        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type-key]))))
       (fact "data from accordion-field is in display text"
         (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
