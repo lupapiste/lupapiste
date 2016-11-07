@@ -3,6 +3,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.user :as user]
+            [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]))
 
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
