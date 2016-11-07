@@ -180,12 +180,17 @@
 
   (facts "Assignments search"
     (apply-remote-minimal)
-    (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
+    (let [id1 (create-app-id sonja :propertyId sipoo-property-id :x 404369.304 :y 6693806.957) ; Included into Nikkilä area
           doc-id1 (-> (query-application sonja id1) :documents first :id)
-          id2 (create-app-id ronja :propertyId sipoo-property-id)]
+          id2 (create-app-id ronja :propertyId sipoo-property-id)
+          doc-id2 (-> (query-application ronja id2) :documents first :id)
+          nikkila-area (first (filter (fn [feature]
+                                    (= "Nikkil\u00e4" (get-in feature [:properties :nimi])))
+                                      (get-in (:body (decode-response (upload-area sipoo))) [:areas :features])))]
 
       (facts "text search finds approximate matches in description"
-        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")]
+        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")
+              {assignment-id2 :id} (create-assignment ronja sonja-id id2 {:group "group" :id doc-id2} "Kuvaava teksti")]
           (fact "uva eks - all"
               (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                    :data :assignments (map :description)) => (contains "Kuvaava teksti"))
@@ -205,14 +210,17 @@
                    ; jos tahan vaihtaa datatables -> query, tulee schema error.
                    ; (query) muuttaa :recipient argumentin non-sequentialiksi..........
                    (-> (datatables sonja :assignments-search :recipient []) :data :assignments)))
-            => (just #{ronja-id})
+            => (just #{ronja-id sonja-id} :in-any-order)
             (distinct
               (map #(get-in % [:recipient :id])
                    (-> (datatables sonja :assignments-search :recipient [sonja-id] :limit 5) :data :assignments)))
-            => empty?)))
+            => (just #{sonja-id}))))
 
+      (fact "areas search"
+        (-> (datatables sonja :assignments-search :area [(-> nikkila-area :id)]) :data :assignments count) => 1)
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?
+        (command sonja :cancel-application-authority :id id2 :text "testing" :lang "fi") => ok?
 
         (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
             :data :assignments) => empty?)

@@ -76,6 +76,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       recipient: recipientSearchCond(lupapisteApp.services.assignmentRecipientFilterService.selected(), myid),
       operation: _.map(lupapisteApp.services.operationFilterService.selected(), "id"),
       limit: self.limit(),
+      area: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
       sort: ko.mapping.toJS(self.sort),
       skip: self.skip()
     };

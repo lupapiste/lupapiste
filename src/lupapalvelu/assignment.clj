@@ -81,6 +81,7 @@
    :state (apply sc/enum "all" assignment-state-types)
    :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
    :recipient [(sc/maybe sc/Str)]
+   :area [(sc/maybe sc/Str)]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -137,12 +138,13 @@
           :state "all"
           :recipient nil
           :operation nil
+          :area nil
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient operation]}]
+(defn- make-query [query {:keys [searchText state recipient operation area]} user]
   {$and
    (filter seq
            [query
@@ -151,6 +153,8 @@
               {:applicationDetails.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
+            (when-not (empty? area)
+              (app-utils/make-area-query area user :applicationDetails))
             {:status {$ne "canceled"}}])})
 
 
@@ -233,9 +237,8 @@
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
-        mongo-query (make-query user-query query)
-        assignments (search query
-                            mongo-query
+        mongo-query (make-query user-query query user)
+        assignments (search mongo-query
                             (util/->long (:skip query))
                             (util/->long (:limit query))
                             (:sort query))]

@@ -28,9 +28,13 @@
       <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
         <div class="form-grid form-grid--no-border">
           <div class="row row--no-margin">
-            <div class="col-2"  data-test-id="handler-filter-component">
+            <div class="col-2" data-test-id="recipient-filter-item">
               <label data-bind="ltext: 'applications.filter.recipient'" />
               <div data-test-id="recipient-filter-component" data-bind="component: {name: 'autocomplete-recipient', params: {lPlaceholder: 'application.filter.search.placeholder.recipient-filter'}}"></div>
+            </div>
+            <div class="col-2" data-test-id="areas-filter-item">
+              <label data-bind="ltext: 'applications.filter.areas'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-areas', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
             </div>
           </div>
 

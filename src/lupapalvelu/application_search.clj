@@ -43,16 +43,6 @@
     (re-matches v/rakennustunnus-pattern filter-search) {:buildings.nationalId filter-search}
     :else (make-free-text-query filter-search)))
 
-(defn- make-area-query [areas user]
-  {:pre [(sequential? areas)]}
-  (let [orgs (user/organization-ids-by-roles user #{:authority :commenter :reader})
-        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas-wgs84.features.id {$in areas}} [:areas-wgs84])
-        features (flatten (map (comp :features :areas-wgs84) orgs-with-areas))
-        selected-areas (set areas)
-        filtered-features (filter (comp selected-areas :id) features)]
-    (when (seq filtered-features)
-      {$or (map (fn [feature] {:location-wgs84 {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)})))
-
 (def applicant-application-states
   {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
 
@@ -124,7 +114,7 @@
         {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
                                               (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
       (when-not (empty? areas)
-        (make-area-query areas user))])})
+        (app-utils/make-area-query areas user))])})
 
 ;;
 ;; Fields
