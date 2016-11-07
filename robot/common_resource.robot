@@ -435,6 +435,10 @@ Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
   Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
 
+Autocomplete selection is
+  [Arguments]  ${container}  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
   # Open dropdown if it is not open

@@ -238,7 +238,7 @@
 
           (facts "after completion"
             (fact "count for all"
-              (count assignments) => 1)
+              (count (-> (datatables sonja :assignments-search :state "all") :data :assignments)) => 1)
             (fact "count for created"
               (-> (datatables sonja :assignments-search :state "created") :data :assignments count) => 0)
             (fact "count for completed"

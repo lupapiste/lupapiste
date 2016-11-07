@@ -11,7 +11,7 @@
         </div>
         <!-- /ko -->
         <!-- ko ifnot: dataProvider.pending -->
-        <table id="applications-list" class="assignments-search-result__table" data-bind="if: gotResults()">
+        <table id="assignments-list" class="assignments-search-result__table" data-bind="if: gotResults()">
           <thead>
             <tr data-bind="foreach: columns">
               <th data-bind="click: $data.click, css: $data.css, attr: $data.attr">
@@ -22,7 +22,7 @@
             </tr>
           </thead>
           <tbody data-bind="foreach: results">
-            <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
+            <tr class="assignment-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
               <td data-bind="css: $data.currentState.type" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>
               </td>
@@ -40,6 +40,7 @@
                 <!-- ko if: $data.incomplete -->
                 <button data-bind="click: $parent.markComplete($data.id),
                                    clickBubble: false"
+                        data-test-id="complete-assignment"
                         class="positive right">
                   <i class="lupicon-check"></i>
                   <span data-bind="ltext: 'application.assignment.complete'"></span>

@@ -26,3 +26,7 @@ Create assignment
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
   Wait until  Element should contain  xpath=(//section[@data-doc-type='${doctype}']//div[@data-test-id='accordion-assignment'])[${assignmentIdx}]//div[@data-test-id='assignment-text']  ${description}
+
+Open assignments search
+  Go to page  applications
+  Select Radio Button  searchType  searchTypeAssignments
