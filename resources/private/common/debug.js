@@ -10,6 +10,14 @@ jQuery(function($) {
     return false;
   }
 
+  function resetLog() {
+    ajax.command("reset-frontend-log", {})
+      .success(function() { $("#debug-apply-done").text(" DONE!").show().delay(1000).fadeOut(); })
+      .error(function(e) {alert(e.text);})
+      .call();
+    return false;
+  }
+
   function doCreateApplication (operation, permitType, appIdCallback) {
     appIdCallback = appIdCallback || _.noop;
 
@@ -91,6 +99,7 @@ jQuery(function($) {
                   .append($("<br>"))
                   .append($("<a href='/api/last-email' target='_blank'>Last Email</a> - <a href='/api/last-emails' target='_blank'>All</a><br>"))
                   .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
+                  .append($("<a>").attr("id", "debug-reset-log").attr("href", "#").text("Reset frontend log").click(function() { resetLog(); }))
                   .append($("<p>")
                           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))

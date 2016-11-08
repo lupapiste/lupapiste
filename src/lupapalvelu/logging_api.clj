@@ -66,7 +66,7 @@
 
 (env/in-dev
   (defcommand reset-frontend-log
-    {:user-roles #{:admin}}
+    {:user-roles #{:anonymous}}
     [_]
     (reset! frontend-log {})
     (ok)))
