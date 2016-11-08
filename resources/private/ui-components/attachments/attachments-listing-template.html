@@ -6,6 +6,13 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
+  <!-- ko if: authModel.ok("create-assignment") && features.enabled("assignments") -->
+  <create-assignment data-test-id="create-assignment-component"
+                     params="authorities: $root.authorities,
+                             applicationId: applicationId,
+                             initialTarget: 'attachments',
+                             targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+  <!-- /ko -->
   <div class="clear"></div>
   <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
 

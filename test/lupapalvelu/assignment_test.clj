@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [schema.core :as sc]
             [lupapalvelu.assignment :refer :all]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.data-schema :as dds]
             [sade.schema-generators :as ssg]
@@ -18,15 +19,23 @@
 
 (testable-privates lupapalvelu.assignment enrich-targets enrich-assignment-target get-targets-for-applications)
 
-(defn validate-target [doc-schema-name]
+(defn validate-document-target [doc-schema-name]
   (fact {:midje/description (str doc-schema-name " is valid assignment target")}
     (let [target-groups (assignment-targets {:documents [(ssg/generate (dds/doc-data-schema doc-schema-name))]})]
       (sc/check [TargetGroup] target-groups) => nil)))
 
 (facts "Validate assignment targets to all documents"
   (doseq [doc-schema-name (->> (schemas/get-all-schemas) vals (apply merge) keys)]
-    (validate-target doc-schema-name)))
+    (validate-document-target doc-schema-name)))
 
+(facts "Validate assignment targets to attachments"
+  (doseq [attachment (repeatedly 20 #(ssg/generate {:id                         sc/Str
+                                                    :type                       att/Type
+                                                    (sc/optional-key :contents) sc/Str}))]
+    (fact {:midje/description (str "Attachment " attachment " is valid assignment target")}
+      (sc/check [TargetGroup] (assignment-targets {:id          "application-id"
+                                                   :documents   []
+                                                   :attachments [attachment]})) => nil)))
 
 (facts get-targets-for-applications
   (fact "one application - one target"
@@ -54,42 +63,42 @@
 
 (facts enrich-assignment-target
   (fact "one target"
-    (enrich-assignment-target {:group1 [{:id ..target-id.. :type ..type..}]} {:target {:id ..target-id.. :group "group1"}})
-    => {:target {:id ..target-id.. :group "group1" :type ..type..}})
+    (enrich-assignment-target {:group1 [{:id ..target-id.. :type-key ..type..}]} {:target {:id ..target-id.. :group "group1"}})
+    => {:target {:id ..target-id.. :group "group1" :type-key ..type..}})
 
   (fact "many targets"
-    (enrich-assignment-target {:group1 [{:id ..target-id1.. :type ..type1..} {:id ..target-id2.. :type ..type2..}]
-                               :group2 [{:id ..target-id3.. :type ..type3..}]}
+    (enrich-assignment-target {:group1 [{:id ..target-id1.. :type-key ..type1..} {:id ..target-id2.. :type-key ..type2..}]
+                               :group2 [{:id ..target-id3.. :type-key ..type3..}]}
                               {:target {:id ..target-id2.. :group "group1"}})
-    => {:target {:id ..target-id2.. :group "group1" :type ..type2..}})
+    => {:target {:id ..target-id2.. :group "group1" :type-key ..type2..}})
 
   (fact "target not found - assignment is returned unenriched"
-    (enrich-assignment-target {:group1 [{:id ..target-id1.. :type ..type..} {:id ..target-id2.. :type ..type..}]
-                               :group2 [{:id ..target-id2.. :type ..type..}]}
+    (enrich-assignment-target {:group1 [{:id ..target-id1.. :type-key ..type..} {:id ..target-id2.. :type-key ..type..}]
+                               :group2 [{:id ..target-id2.. :type-key ..type..}]}
                               {:target {:id ..not-found-target-id.. :group "group1"}})
     => {:target {:id ..not-found-target-id.. :group "group1"}}))
 
 (facts enrich-targets
   (fact "one assignment"
     (enrich-targets [{:application {:id ..app-id1..} :target {:id ..target-id..}}])
-    => [{:application {:id ..app-id1..} :target {:id ..target-id.. :type ..type..}}]
+    => [{:application {:id ..app-id1..} :target {:id ..target-id.. :type-key ..type..}}]
 
     (provided (#'lupapalvelu.assignment/get-targets-for-applications [..app-id1..])
               => {..app-id1.. {..group11.. ..targets11..}})
     (provided (#'lupapalvelu.assignment/enrich-assignment-target {..group11.. ..targets11..}
                                                                  {:application {:id ..app-id1..} :target {:id ..target-id..}})
-              => {:application {:id ..app-id1..} :target {:id ..target-id.. :type ..type..}}))
+              => {:application {:id ..app-id1..} :target {:id ..target-id.. :type-key ..type..}}))
 
   (fact "many assignments"
     (enrich-targets [{:application {:id ..app-id1..} :target {:id ..target-id12.. :group "group11"}}
                      {:application {:id ..app-id2..} :target {:id ..target-id20.. :group "group20"}}
                      {:application {:id ..app-id3..} :target {:id ..target-id32.. :group "group32"}}])
-    => [{:application {:id ..app-id1..} :target {:id ..target-id12.. :group "group11" :type ..type12..}}
+    => [{:application {:id ..app-id1..} :target {:id ..target-id12.. :group "group11" :type-key ..type12..}}
         {:application {:id ..app-id2..} :target {:id ..target-id20.. :group "group20"}}
-        {:application {:id ..app-id3..} :target {:id ..target-id32.. :group "group32" :type ..type32..}}]
+        {:application {:id ..app-id3..} :target {:id ..target-id32.. :group "group32" :type-key ..type32..}}]
 
     (provided (#'lupapalvelu.assignment/get-targets-for-applications [..app-id1.. ..app-id2.. ..app-id3..])
-              => {..app-id1.. {:group11 [{:id ..target-id11.. :type ..type11..} {:id ..target-id12.. :type ..type12..}]}
+              => {..app-id1.. {:group11 [{:id ..target-id11.. :type-key ..type11..} {:id ..target-id12.. :type-key ..type12..}]}
                   ..app-id2.. {}
-                  ..app-id3.. {:group31 [{:id ..target-id31.. :type ..type31..} {:id ..target-id32.. :type ..type32..}]
-                               :group32 [{:id ..target-id32.. :type ..type32..}]}})))
+                  ..app-id3.. {:group31 [{:id ..target-id31.. :type-key ..type31..} {:id ..target-id32.. :type-key ..type32..}]
+                               :group32 [{:id ..target-id32.. :type-key ..type32..}]}})))

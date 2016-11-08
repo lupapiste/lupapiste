@@ -124,7 +124,7 @@
   [operations {{name :name doc-op :op} :schema-info id :id :as doc}]
   (let [accordion-datas (schemas/resolve-accordion-field-values doc)
         op-description  (:description (util/find-by-id (:id doc-op) operations))]
-    (util/assoc-when-pred {:id id :type name} ss/not-blank?
+    (util/assoc-when-pred {:id id :type-key (ss/join "." [name "_group_label"])} ss/not-blank?
                           :description (or op-description (ss/join " " accordion-datas)))))
 
 (defn- describe-parties-assignment-targets [application]

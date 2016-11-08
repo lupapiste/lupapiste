@@ -18,8 +18,8 @@
 (defonce ^:private registered-assignment-targets (atom {}))
 
 (sc/defschema Target
-  {:id                               ssc/ObjectIdStr
-   :type                             sc/Str
+  {:id                               sc/Str
+   :type-key                         sc/Str
    (sc/optional-key :info-key)       sc/Str          ; localization key for additional target info
    (sc/optional-key :description)    sc/Str})        ; localized description for additional target info
 
@@ -61,7 +61,7 @@
                     :municipality sc/Str}
    :target         {:group                         sc/Str
                     :id                            ssc/ObjectIdStr
-                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :type-key)    sc/Str
                     (sc/optional-key :info-key)    sc/Str
                     (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser
@@ -196,7 +196,7 @@
       (fail! :error.unknown))))
 
 (defn- get-targets-for-applications [application-ids]
-  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :primaryOperation :secondaryOperations])
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :attachments :primaryOperation :secondaryOperations])
        (util/key-by :id)
        (util/map-values (comp (partial into {}) assignment-targets))))
 

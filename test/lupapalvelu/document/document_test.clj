@@ -94,7 +94,7 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Firma 5"})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Firma 5"})
 
   (fact "henkilo"
     (document-assignment-info nil
@@ -113,7 +113,7 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r", :description "Pena Panaani"})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Pena Panaani"})
 
   (fact "without accordion fields"
     (document-assignment-info nil
@@ -128,7 +128,7 @@
                                                                 :sukunimi {:value "Panaani", :modified 1458471382290}}},
                                       :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
                                                :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
-    => {:id "4e2d57b9eb6b91890f33efd7", :type "hakija-r"})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label"})
 
   (fact "operation doc description > accordion-field"
     (document-assignment-info [{:id "581c7225b5a61a6ed47bfb43"
@@ -144,7 +144,8 @@
                                              :accordion-fields [["valtakunnallinenNumero"]],
                                              :version 1},
                                :created 1478259237586,
-                               :data {:valtakunnallinenNumero {:value "1234"}}}) => {:id "581c7226b5a61a6ed47bfb48", :type "uusiRakennus", :description "FOO"})
+                               :data {:valtakunnallinenNumero {:value "1234"}}})
+    => {:id "581c7226b5a61a6ed47bfb48", :type-key "uusiRakennus._group_label", :description "FOO"})
 
   (fact "without operation description"
     (document-assignment-info [{:id "581c7225b5a61a6ed47bfb43"
@@ -160,7 +161,8 @@
                                              :accordion-fields [["valtakunnallinenNumero"]],
                                              :version 1},
                                :created 1478259237586,
-                               :data {:valtakunnallinenNumero {:value "1234"}}}) => {:id "581c7226b5a61a6ed47bfb48", :type "uusiRakennus", :description "1234"}))
+                               :data {:valtakunnallinenNumero {:value "1234"}}})
+    => {:id "581c7226b5a61a6ed47bfb48", :type-key "uusiRakennus._group_label", :description "1234"}))
 
 (facts "sorting of documents for assignment targets"
   (let [schema1 {:id "s1",

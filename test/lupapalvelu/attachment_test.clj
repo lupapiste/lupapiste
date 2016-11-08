@@ -26,7 +26,8 @@
                    latest-version-after-removing-file
                    build-version-updates
                    default-metadata-for-attachment-type
-                   make-ram-attachment)
+                   make-ram-attachment
+                   attachment-assignment-info)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -325,3 +326,15 @@
                 (let [updates (build-version-updates user attachment version-model options)]
                   (and (not (contains? (get updates $set) :attachments.$.latestVersion))
                        (= (get-in updates [$set "attachments.$.versions.1"]) version-model)))))
+
+(facts attachment-assignment-info
+  (fact "without contents"
+    (attachment-assignment-info {:id ..id..
+                                 :type {:type-group "some-type-group" :type-id "some-type-id"}})
+    => {:id ..id.. :type-key "attachmentType.some-type-group.some-type-id"})
+
+  (fact "with contents"
+    (attachment-assignment-info {:id ..id..
+                                 :type {:type-group "some-type-group" :type-id "some-type-id"}
+                                 :contents "some content"})
+    => {:id ..id.. :type-key "attachmentType.some-type-group.some-type-id" :description "some content"}))

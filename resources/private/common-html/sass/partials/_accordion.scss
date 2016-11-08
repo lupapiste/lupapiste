@@ -92,54 +92,56 @@
   .accordion_content.expanded {
     display: block;
   }
+}
 
-  div.accordion-assignments {
-    color: white;
-    margin: 0 auto;
-    min-height: $grid-min-height;
-    .assignment-container {
-      margin-top: 1px;
-      padding: $marginS $marginS;
-      &:first-child {
-        margin-top: 0;
-      }
-      background-color: $primary;
+div.accordion-assignments {
+  color: white;
+  margin: 0 auto;
+  min-height: $grid-min-height;
+  .assignment-container {
+    margin-top: 1px;
+    padding: $marginS $marginS;
+    &:first-child {
+      margin-top: 0;
     }
-    .assignment {
+    background-color: $primary;
+  }
+  .assignment {
+    width: 100%;
+    display: block;
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 $marginS;
+    }
+    > .assignment-text {
+      width: 100%; // let text take all the space it can have as it's dynamic
+    }
+    > .assignment-header {
+      white-space: nowrap;
+      .creator {
+        &:before {
+         content: " (";
+        }
+      }
+      .receiver {
+        &:before {
+          content: "\2192"
+        }
+        &:after {
+          content: "):";
+        }
+      }
+    }
+    div.no-wrap-whitespace button:first-child {
+      margin-right: $marginS;
+    }
+    .editor {
       display: table-row;
-      > * {
-        display: table-cell;
-        vertical-align: middle;
-        padding: 0 $marginS;
-      }
-      > .assignment-text {
-        width: 100%; // let text take all the space it can have as it's dynamic
-      }
-      > .assignment-header {
-        white-space: nowrap;
-        .creator {
-          &:before {
-             content: " (";
-          }
-        }
-        .receiver {
-          &:before {
-            content: "\2192"
-          }
-          &:after {
-            content: "):";
-          }
-        }
-      }
-      div.no-wrap-whitespace button:first-child {
-        margin-right: $marginS;
-      }
-      .editor {
-        display: table-row;
-      }
     }
   }
 }
+
 
 .accordion-fields > .button-group:last-child {
   border-bottom: none;
