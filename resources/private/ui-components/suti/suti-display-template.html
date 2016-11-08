@@ -10,10 +10,10 @@
                              text: $parent.sutiTitle">
       </rollup-button>
       <div class="rollup__open attachments-accordion-content">
-        <div>
-          <span data-bind="ltext: 'suti.display-id.help'"></span>
+        <div class="top-marginM">
+          <span data-bind="ltext: 'suti.display-id.help.header'"></span>
           <span>
-            <help-toggle params="lhtml: 'suti.display-id.help2'"></help-toggle>
+            <help-toggle params="lhtml: 'suti.display-id.help'"></help-toggle>
           </span>
         </div>
         <div class="form-grid">
@@ -59,7 +59,7 @@
                data-bind="visible: $parent.note,
                           if: $parent.note">
             <div class="col-4">
-              <span data-bind="ltext: $parent.note().text,
+              <span data-bind="lhtml: $parent.note().text,
                                css: {'suti-display--error': $parent.note().error}"
                     data-test-id="suti-display-note">
               </span>
