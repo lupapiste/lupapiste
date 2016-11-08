@@ -237,8 +237,11 @@
 
 (defn missing-command [command]
   (when-not (meta-data command)
-    (errorf "command '%s' not found" (log/sanitize 50 (:action command)))
-    (fail :error.invalid-command)))
+    (let [{:keys [action web]} command
+          {:keys [user-agent client-ip] web}]
+      (errorf "action '%s' not found. User agent '%s' from %s"
+             (log/sanitize 50 action) (log/sanitize 100 action) client-ip)
+      (fail :error.invalid-command))))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
