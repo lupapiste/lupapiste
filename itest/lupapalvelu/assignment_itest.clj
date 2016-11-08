@@ -180,7 +180,7 @@
           (command sonja :remove-doc :id app-id :docId (:id designer-doc)) => ok?
           (let [new-query (get-user-assignments sonja)]
             (count new-query) => (dec (count assignments))
-            (map :id new-query) =not=> (contains assignment-id)))))
+            new-query =not=> (contains {:id assignment-id})))))
     (facts "attachments"
       (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
             app (query-application sonja app-id)
