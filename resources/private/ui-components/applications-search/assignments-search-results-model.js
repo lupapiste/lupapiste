@@ -15,6 +15,9 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
       case "parties":
         target = "parties";
         break;
+      case "attachments":
+        target = "attachments";
+        break;
     }
     ajax.query("application", {id: model.application.id, lang: loc.getCurrentLanguage()})
       .success(function(res) {
