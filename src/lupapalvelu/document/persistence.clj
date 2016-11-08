@@ -7,7 +7,7 @@
             [sade.core :refer [ok fail fail! unauthorized!]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [update-application application->command] :as action]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.attachment :as att]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.company :as company]
             [lupapalvelu.domain :as domain]
@@ -15,7 +15,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]))
 
 (defn by-id [application collection id]
@@ -204,7 +203,7 @@
                      :op nil
                      :groupType nil)))}))
     (when (seq removable-attachment-ids)
-      (update-application command {$pull {:attachments {:id {$in removable-attachment-ids}}}}))))
+      (att/delete-attachments! application removable-attachment-ids))))
 
 (defn removing-updates-by-path [collection doc-id paths]
   (letfn [(build-path [path] (->> (map name path)

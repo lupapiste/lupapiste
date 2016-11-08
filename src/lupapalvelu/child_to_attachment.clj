@@ -80,4 +80,4 @@
       (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))))
 
 (defn delete-child-attachment [app child-type id]
-  (attachment/delete-attachment! app (get-child-attachment-id app child-type id)))
+  (attachment/delete-attachments! app [(get-child-attachment-id app child-type id)]))

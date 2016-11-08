@@ -95,8 +95,7 @@
    :states     valid-states
    :pre-checks [(task-state-assertion (tasks/all-states-but :sent))]}
   [{:keys [application created] :as command}]
-  (doseq [{:keys [id]} (tasks/task-attachments application taskId)]
-    (attachment/delete-attachment! application id))
+  (attachment/delete-attachments! application (map :id (tasks/task-attachments application taskId)))
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))

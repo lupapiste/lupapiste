@@ -403,7 +403,7 @@
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
-  (attachment/delete-attachment! application attachmentId)
+  (attachment/delete-attachments! application [attachmentId])
   (ok))
 
 (defcommand delete-attachment-version
