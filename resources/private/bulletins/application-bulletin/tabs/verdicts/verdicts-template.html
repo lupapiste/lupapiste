@@ -76,12 +76,12 @@
                                   </div>
                               </div>
                           </div>
-
+                          
                           <div>
+                            <!-- ko if: $data.lupamaaraykset -->
                               <h4 data-bind="ltext: 'verdict.lupamaaraukset'"></h4>
                               <div class="accordion-content-part">
 
-                                  <!--  ko if:  $data.lupamaaraykset -->
                                   <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                                       <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                                   <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -151,13 +151,8 @@
                                           </tbody>
                                       </table>
                                   </div>
-                                  <!-- /ko --> <!-- /lupamaaraykset -->
-
-                                  <!--  ko ifnot:  $data.lupamaaraykset -->
-                                  <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
-                                  <!-- /ko -->
-
                               </div>
+                              <!-- /ko --> <!-- /lupamaaraykset -->
 
                               <h4 data-bind="ltext: 'verdict.poytakirjat'"></h4>
                               <div class="accordion-content-part">
