@@ -863,3 +863,9 @@
                 (map? v)        (->xml v)
                 (sequential? v) (apply concat (map ->xml v))
                 :default        [(str v)])}))
+
+(defn get-user-assignments [apikey]
+  (let [resp (query apikey :assignments)]
+    (fact "assignments query ok"
+      resp => ok?)
+    (:assignments resp)))

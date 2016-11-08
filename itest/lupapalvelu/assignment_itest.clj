@@ -188,17 +188,26 @@
             app (query-application sonja app-id)
             designer-doc     (domain/get-document-by-name app "suunnittelija")
             assignment-id (:id (create-assignment sonja sonja-id app-id {:group "parties" :id (:id designer-doc)} "Tarkista!"))
-            assignments         (:assignments (query sonja :assignments))
+            assignments         (get-user-assignments sonja)
             designer-assignment (util/find-first #(= "parties" (get-in % [:target :group])) assignments)]
         (fact "assignment has designer target"
           (:id designer-assignment) => assignment-id)
         (fact "party assignment is deleted after party document deletion"
           (command sonja :remove-doc :id app-id :docId (:id designer-doc)) => ok?
-          (let [new-query (:assignments (query sonja :assignments))]
+          (let [new-query (get-user-assignments sonja)]
             (count new-query) => (dec (count assignments))
             (map :id new-query) =not=> (contains assignment-id)))))
-    #_(facts "attachments"
-      ))
+    (facts "attachments"
+      (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
+            app (query-application sonja app-id)
+            target-attachment (first (:attachments app))]
+        (fact "assignment for attachment"
+          (create-assignment sonja sonja-id app-id {:group "attachments" :id (:id target-attachment)} "Onko liite kunnossa?") => ok?
+          (map (comp :id :target) (get-user-assignments sonja)) => (contains (:id target-attachment)))
+        (fact "attachment deletion deletes assignment"
+          (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
+          (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))
+        ))
 
   (facts "Assignments search"
     (apply-remote-minimal)
