@@ -13,8 +13,7 @@
  (defn- validate-assignment-against-schema [assignment]
    (sc/check assignment/Assignment (rename-keys assignment {:_id :id})))
 
- (apply mongocheck :assignments validate-assignment-against-schema
-        (keys assignment/Assignment))
+ (mongocheck :assignments validate-assignment-against-schema)
 
  (defn- created-is-first-in-states [assignment]
    (when-not (= "created"
