@@ -70,4 +70,7 @@
        (let [data (mongo/select-one :vetuma {:sessionid (:id session) :trid trid})]
          (response/redirect (get-in data [:paths :cancel])))
        (let [data (mongo/update-one-and-return :vetuma {:sessionid (:id session) :trid trid} {$set {:user ident}})]
-         (response/redirect (get-in data [:paths :success])))))))
+         (response/redirect (get-in data [:paths :success]))))))
+
+  (defpage [:get "/dev/saml-logout"] {:keys [return]}
+    (response/redirect return)))

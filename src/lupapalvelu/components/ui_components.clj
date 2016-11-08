@@ -85,6 +85,12 @@
                  :supportedLangs        i18n/supported-langs
                  :urgencyStates         ["normal" "urgent" "pending"]
                  :calendars             (cal/ui-params)
+                 :identMethods          (into {}
+                                          (remove nil?
+                                            [(when (env/feature? :suomifi-ident)
+                                               {:logoutUrl (str (env/value :host) "/Shibboleth.sso/Logout")})
+                                             (when (env/feature? :dummy-ident)
+                                               {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
                  :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
