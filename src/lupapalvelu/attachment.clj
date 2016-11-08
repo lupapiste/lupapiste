@@ -476,8 +476,8 @@
           attachment-ids))
 
 (defn delete-attachments!
-  "Delete attachement with all it's versions. does not delete comments.
-   Deletes also assignments that are targets of attachment in question.
+  "Delete attachments with all it's versions. does not delete comments.
+   Deletes also assignments that are targets of attachments in question.
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
   (info "1/4 deleting assignments regarding attachments" attachment-ids)
