@@ -3,9 +3,9 @@
             [clojure.set :refer [intersection]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
@@ -117,6 +117,7 @@
   (if-let [document (domain/get-document-by-id application docId)]
     (do
       (doc-persistence/remove! command docId "documents")
+      (assignment/remove-assignments-by-target id document)
       (ok))
     (fail :error.document-not-found)))
 
