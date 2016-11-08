@@ -7905,7 +7905,7 @@ div.alleYli-radioGroup {
 .form-grid .select-arrow {
   position: absolute;
   right: 2px;
-  bottom: 2px;
+  bottom: 1px;
   color: #f39129;
   pointer-events: none;
   background-color: #fff;

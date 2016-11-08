@@ -6,7 +6,16 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
 
   self.results = self.dataProvider.results;
 
-  self.openApplication = function(model, event, target) {
+  self.openApplication = function(model) {
+    var target = null;
+    switch (model.target.group) {
+      case "documents":
+        target = "info";
+        break;
+      case "parties":
+        target = "parties";
+        break;
+    }
     ajax.query("application", {id: model.application.id, lang: loc.getCurrentLanguage()})
       .success(function(res) {
         self.offset = window.pageYOffset;

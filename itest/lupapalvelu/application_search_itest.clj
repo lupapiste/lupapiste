@@ -73,7 +73,8 @@
       (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?))
 
     (fact "by a very very long search term"
-          (search (ss/join (repeat 22 "1234567890"))) => fail?)
+      (search (ss/join (repeat 50 "1234567890"))) => ok?
+      (search (ss/join (repeat 51 "1234567890"))) => fail?)
 
     (fact "Submitted application is returned by latest-applications"
       (let [resp (query pena :latest-applications)

@@ -11,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :refer [=as-kw not=as-kw] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
@@ -716,3 +717,14 @@
   (assoc attachment
          :tags (att-tags/attachment-tags attachment)
          :manuallySetConstructionTime (manually-set-construction-time attachment)))
+
+(defn- attachment-assignment-info
+  "Return attachment info as assignment target"
+  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
+                        :description contents))
+
+(defn- describe-assignment-targets [{attachments :attachments :as application}]
+  (map attachment-assignment-info attachments))
+
+(assignment/register-assignment-target! :attachments describe-assignment-targets)

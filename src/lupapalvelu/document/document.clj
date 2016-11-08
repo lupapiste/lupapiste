@@ -12,6 +12,7 @@
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
@@ -123,17 +124,19 @@
   [operations {{name :name doc-op :op} :schema-info id :id :as doc}]
   (let [accordion-datas (schemas/resolve-accordion-field-values doc)
         op-description  (:description (util/find-by-id (:id doc-op) operations))]
-    (util/assoc-when-pred {:id id :type name} ss/not-blank?
+    (util/assoc-when-pred {:id id :type-key (ss/join "." [name "_group_label"])} ss/not-blank?
                           :description (or op-description (ss/join " " accordion-datas)))))
 
 (defn- describe-parties-assignment-targets [application]
   (->> (domain/get-documents-by-type application :party)
+       (sort-by tools/document-ordering-fn)
        (map (partial document-assignment-info nil))))
 
 (defn- describe-non-party-document-assignment-targets [{:keys [documents primaryOperation secondaryOperations] :as application}]
   (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))
         operations (cons primaryOperation secondaryOperations)]
     (->> (remove (comp party-doc-ids :id) documents)
+         (sort-by tools/document-ordering-fn)
          (map (partial document-assignment-info operations)))))
 
 (assignment/register-assignment-target! :parties describe-parties-assignment-targets)

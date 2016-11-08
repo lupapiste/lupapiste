@@ -1,25 +1,24 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
-            [monger.query :as query]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.application-utils :as app-utils]))
+            [lupapalvelu.application-utils :as app-utils]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]))
 
 (defonce ^:private registered-assignment-targets (atom {}))
 
 (sc/defschema Target
-  {:id                               ssc/ObjectIdStr
-   :type                             sc/Str
+  {:id                               sc/Str
+   :type-key                         sc/Str
    (sc/optional-key :info-key)       sc/Str          ; localization key for additional target info
    (sc/optional-key :description)    sc/Str})        ; localized description for additional target info
 
@@ -61,7 +60,7 @@
                     :municipality sc/Str}
    :target         {:group                         sc/Str
                     :id                            ssc/ObjectIdStr
-                    (sc/optional-key :type)        sc/Str
+                    (sc/optional-key :type-key)    sc/Str
                     (sc/optional-key :info-key)    sc/Str
                     (sc/optional-key :description) sc/Str}
    :recipient      usr/SummaryUser
@@ -81,6 +80,10 @@
    :state (apply sc/enum "all" assignment-state-types)
    :operation [(sc/maybe sc/Str)] ; allows for empty filter vector
    :recipient [(sc/maybe sc/Str)]
+   :area [(sc/maybe sc/Str)]
+   :createdDate (sc/maybe {:start (sc/maybe ssc/Timestamp)
+                           :end   (sc/maybe ssc/Timestamp)})
+   :targetType [(sc/maybe sc/Str)]
    :sort {:asc sc/Bool
           :field sc/Str}
    :skip   sc/Int
@@ -137,12 +140,15 @@
           :state "all"
           :recipient nil
           :operation nil
+          :area nil
+          :createdDate nil
+          :targetType nil
           :skip   0
           :limit  100
           :sort   {:asc true :field "created"}}
          (select-keys data (keys AssignmentsSearchQuery))))
 
-(defn- make-query [query {:keys [searchText state recipient operation]}]
+(defn- make-query [query {:keys [searchText state recipient operation area createdDate targetType]} user]
   {$and
    (filter seq
            [query
@@ -151,6 +157,13 @@
               {:applicationDetails.primaryOperation.name {$in operation}})
             (when-not (empty? recipient)
               {:recipient.id {$in recipient}})
+            (when-not (empty? area)
+              (app-utils/make-area-query area user :applicationDetails))
+            (when-not (empty? createdDate)
+              {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
+                                    "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
+            (when-not (empty? targetType)
+              {:target.group {$in targetType}})
             {:status {$ne "canceled"}}])})
 
 
@@ -160,21 +173,21 @@
 
 (defn search [{state :state} mongo-query skip limit sort]
   (try
-    (let [aggregate (->> [{"$match" mongo-query}
-                          {"$lookup" {:from :applications
+    (let [aggregate (->> [{"$lookup" {:from :applications
                                       :localField "application.id"
                                       :foreignField "_id"
                                       :as "applicationDetails"}}
                           {"$unwind" "$applicationDetails"}
+                          {"$match"  mongo-query}
                           {"$project"
                            ;; pull the creation state to root of document for sorting purposes
                            ;; it might also be possible to use :document "$$ROOT" in aggregation
                            {:currentState   {"$arrayElemAt" ["$states" -1]} ;; for sorting
                             :created        {"$arrayElemAt" ["$states" 0]}
                             :description-ci {"$toLower" "$description"} ;; for sorting
-                            :application    {:id           "$applicationDetails._id"
+                            :application    {:id "$applicationDetails._id"
                                              :organization "$applicationDetails.organization"
-                                             :address      "$applicationDetails.address"
+                                             :address "$applicationDetails.address"
                                              :municipality "$applicationDetails.municipality"}
                             :target         "$target"
                             :recipient      "$recipient"
@@ -196,7 +209,7 @@
       (fail! :error.unknown))))
 
 (defn- get-targets-for-applications [application-ids]
-  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :primaryOperation :secondaryOperations])
+  (->> (mongo/select :applications {:_id {$in (set application-ids)}} [:documents :attachments :primaryOperation :secondaryOperations])
        (util/key-by :id)
        (util/map-values (comp (partial into {}) assignment-targets))))
 
@@ -233,7 +246,7 @@
   [user  :- usr/SessionSummaryUser
    query :- AssignmentsSearchQuery]
   (let [user-query  (organization-query-for-user user {})
-        mongo-query (make-query user-query query)
+        mongo-query (make-query user-query query user)
         assignments (search query
                             mongo-query
                             (util/->long (:skip query))

@@ -16,11 +16,17 @@ Fill assignment editor
   Wait until  Element should be enabled  xpath=//${componentXpath}//button[@data-test-id='bubble-dialog-ok']
 
 Create assignment
-  [Arguments]  ${user}  ${targetGroup}  ${doctype}  ${description}=Foosignment
+  [Arguments]  ${user}  ${targetGroup}  ${doctype}  ${description}=Foosignment  ${assignmentIdx}=1
   ${docId}=  Get Element Attribute  xpath=//section[@class='accordion' and @data-doc-type='${doctype}']@data-doc-id
+  Wait test id visible  create-assignment-editor-button
   Click by test id  create-assignment-editor-button
   Wait until  Element should be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
   Fill assignment editor  bubble-dialog[@data-test-id='create-assignment-bubble']  ${targetGroup}  ${docId}  ${user}  ${description}
   Scroll and click test id  bubble-dialog-ok
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//bubble-dialog[@data-test-id='create-assignment-bubble']/div[@class='bubble-dialog']/div
+  Wait until  Element should contain  xpath=(//section[@data-doc-type='${doctype}']//div[@data-test-id='accordion-assignment'])[${assignmentIdx}]//div[@data-test-id='assignment-text']  ${description}
+
+Open assignments search
+  Go to page  applications
+  Select Radio Button  searchType  searchTypeAssignments

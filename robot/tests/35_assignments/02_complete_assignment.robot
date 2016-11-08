@@ -25,7 +25,7 @@ Sonja creates assignment for Ronja about paasuunnittelija
   Create assignment  Ronja Sibbo  parties  paasuunnittelija  Katoppa tää
 
 Sonja creates another assignment for herself
-  Create assignment  Sonja Sibbo  parties  paasuunnittelija  Muista tarkistaa!
+  Create assignment  Sonja Sibbo  parties  paasuunnittelija  Muista tarkistaa!  2
   Logout
 
 Ronja logs in, sees two assignments in document

@@ -318,3 +318,27 @@ td.comment-text {
     bottom: 2em;
   }
 }
+
+.attachment-assignment-row {
+  border: {
+    top: none;
+    bottom: none;
+  }
+  td {
+   padding: 0px;
+   margin: 0px;
+  }
+}
+
+.hidden-row {
+  height: 0px;
+  border: {
+    top: none;
+    bottom: none;
+  }
+  td {
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+  }
+}

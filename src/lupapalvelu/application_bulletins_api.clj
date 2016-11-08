@@ -3,9 +3,10 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -18,8 +19,6 @@
             [lupapalvelu.permit :as permit]))
 
 (def bulletin-page-size 10)
-
-(def search-text-max-length 150)
 
 (defn- make-query [search-text municipality state]
   (let [text-query         (when-not (ss/blank? search-text)
@@ -69,7 +68,7 @@
     (fail :error.page-is-too-big)))
 
 (defn- search-text-validator [{{:keys [searchText]} :data}]
-  (when (> (count searchText) search-text-max-length)
+  (when (> (count searchText) (env/value :search-text-max-length))
     (fail :error.search-text-is-too-long)))
 
 (defquery application-bulletins

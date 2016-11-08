@@ -7,7 +7,9 @@
             [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 (when (env/feature? :assignments)
   (apply-remote-minimal)
@@ -174,18 +176,27 @@
       (fact "targets are returned as key-val vectors"
         (:targets targets-resp) => (has every? (fn [[k v]] (and (string? k) (vector? v)))))
       (fact "keys for values look right"
-        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type]))))
+        (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type-key]))))
       (fact "data from accordion-field is in display text"
         (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
 
   (facts "Assignments search"
     (apply-remote-minimal)
-    (let [id1 (create-app-id sonja :propertyId sipoo-property-id)
+    (let [id1 (create-app-id sonja :propertyId sipoo-property-id :x 404369.304 :y 6693806.957) ; Included into Nikkila area
           doc-id1 (-> (query-application sonja id1) :documents first :id)
-          id2 (create-app-id ronja :propertyId sipoo-property-id)]
+          id2 (create-app-id ronja :propertyId sipoo-property-id)
+          doc-id2 (-> (query-application ronja id2) :documents first :id)
+          nikkila-area (first (filter (fn [feature]
+                                    (= "Nikkil\u00e4" (get-in feature [:properties :nimi])))
+                                      (get-in (:body (decode-response (upload-area sipoo))) [:areas :features])))]
+
+      (facts "ids exist"
+        id1 => truthy
+        id2 => truthy)
 
       (facts "text search finds approximate matches in description"
-        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")]
+        (let [{assignment-id1 :id} (create-assignment sonja ronja-id id1 {:group "group" :id doc-id1} "Kuvaava teksti")
+              {assignment-id2 :id} (create-assignment ronja sonja-id id2 {:group "group" :id doc-id2} "Kuvaava teksti")]
           (fact "uva eks - all"
               (->> (query sonja :assignments-search :searchText "uva eks" :state "all")
                    :data :assignments (map :description)) => (contains "Kuvaava teksti"))
@@ -205,14 +216,30 @@
                    ; jos tahan vaihtaa datatables -> query, tulee schema error.
                    ; (query) muuttaa :recipient argumentin non-sequentialiksi..........
                    (-> (datatables sonja :assignments-search :recipient []) :data :assignments)))
-            => (just #{ronja-id})
+            => (just #{ronja-id sonja-id} :in-any-order)
             (distinct
               (map #(get-in % [:recipient :id])
                    (-> (datatables sonja :assignments-search :recipient [sonja-id] :limit 5) :data :assignments)))
-            => empty?)))
+            => (just #{sonja-id}))
 
+          (fact "date filter"
+            (let [today-12am      (t/today-at-midnight)
+                  yesterday-12am  (t/minus today-12am (-> 1 clj-time.core/days))
+                  tomorrow-12am   (t/plus today-12am (-> 1 clj-time.core/days))
+                  result-empty    (datatables sonja :assignments-search :createdDate {:start (tc/to-long yesterday-12am)
+                                                                                      :end   (tc/to-long today-12am)})
+                  result-has-data (datatables sonja :assignments-search :createdDate {:start (tc/to-long today-12am)
+                                                                                      :end   (tc/to-long tomorrow-12am)})]
+              result-empty => ok?
+              (-> result-empty :data :assignments) => empty?
+              result-has-data => ok?
+              (-> result-has-data :data :assignments count) => 2))))
+
+      (fact "areas search"
+        (-> (datatables sonja :assignments-search :area [(-> nikkila-area :id)]) :data :assignments count) => 1)
       (fact "no results after application is canceled"
         (command sonja :cancel-application-authority :id id1 :text "testing" :lang "fi") => ok?
+        (command sonja :cancel-application-authority :id id2 :text "testing" :lang "fi") => ok?
 
         (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
             :data :assignments) => empty?)
@@ -220,4 +247,27 @@
       (fact "get results again when cancalation is reverted"
         (command sonja :undo-cancellation :id id1) => ok?
         (-> (query sonja :assignments-search :searchText "uva eks" :state "all")
-            :data :assignments count) => 1))))
+            :data :assignments count) => 1)
+
+      (facts "state"
+        (let [assignments (-> (datatables sonja :assignments-search :state "all") :data :assignments)
+              first-assignment (first assignments)]
+          (fact "count for all"
+            (count assignments) => 1)
+          (fact "count for created"
+              (-> (datatables sonja :assignments-search :state "created") :data :assignments count) => 1)
+          (fact "count for completed"
+            (-> (datatables sonja :assignments-search :state "completed") :data :assignments count) => 0)
+          (fact "count for invalid"
+            (-> (datatables sonja :assignments-search :state "foo")) => fail?)
+
+          (complete-assignment sonja (:id first-assignment)) => ok?
+
+          (facts "after completion"
+            (fact "count for all"
+              (count (-> (datatables sonja :assignments-search :state "all") :data :assignments)) => 1)
+            (fact "count for created"
+              (-> (datatables sonja :assignments-search :state "created") :data :assignments count) => 0)
+            (fact "count for completed"
+              (-> (datatables sonja :assignments-search :state "completed") :data :assignments count) => 1)))
+        ))))

@@ -70,6 +70,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-handlers"},
     {name: "autocomplete-recipient"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-assignment-targets", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},

@@ -55,6 +55,7 @@
                  :gtm                   (env/value :gtm)
                  :facebook              (env/value :facebook)
                  :frontpage             (env/value :frontpage)
+                 :searchTextMaxLength   (env/value :search-text-max-length)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
@@ -203,7 +204,8 @@
                    "context-service.js"
                    "building-service.js"
                    "assignment-service.js"
-                   "assignment-recipient-filter-service.js"]}
+                   "assignment-recipient-filter-service.js"
+                   "assignment-target-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
