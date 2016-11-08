@@ -10,6 +10,12 @@
                              text: $parent.sutiTitle">
       </rollup-button>
       <div class="rollup__open attachments-accordion-content">
+        <div class="top-marginM">
+          <span data-bind="ltext: 'suti.display-id.help.header'"></span>
+          <span>
+            <help-toggle params="lhtml: 'suti.display-id.help'"></help-toggle>
+          </span>
+        </div>
         <div class="form-grid">
           <div class="row">
             <div class="col-2">
@@ -21,7 +27,8 @@
                          id="suti-display-id"
                          data-test-id="suti-display-id"
                          data-bind="value: $parent.sutiId,
-                                    enable: $parent.enabled().id"><button class="primary"
+                                    enable: $parent.enabled().id,
+                                    lplaceholder: 'suti.display-id.placeholder'"><button class="primary"
                                                                           data-bind="enable: $parent.enabled().link,
                                                                                      click: $parent.sutiLink,
                                                                                      css: {waiting: $parent.waiting},
@@ -52,7 +59,7 @@
                data-bind="visible: $parent.note,
                           if: $parent.note">
             <div class="col-4">
-              <span data-bind="ltext: $parent.note().text,
+              <span data-bind="lhtml: $parent.note().text,
                                css: {'suti-display--error': $parent.note().error}"
                     data-test-id="suti-display-note">
               </span>
