@@ -149,7 +149,9 @@ jQuery(document).ready(function() {
     {name: "extension-applications"},
     {name: "create-assignment"},
     {name: "accordion-assignments"},
-    {name: "assignment-editor"}
+    {name: "assignment-editor"},
+    {name: "attachment-type-id"},
+    {name: "state-icons"}
 ];
 
   ko.registerLupapisteComponents(components);

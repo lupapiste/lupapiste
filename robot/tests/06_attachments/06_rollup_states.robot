@@ -34,6 +34,7 @@ Sonja adds another Pääpiirustus
   Return to application
 
 Sonja approves Julkisivupiirustus
+  Wait Until  Element should be visible  jquery=tr[data-test-type='paapiirustus.julkisivupiirustus']
   Approve row  tr[data-test-type='paapiirustus.julkisivupiirustus']
 
 Pääpiirrustukset accordion still rejected since Pohjapiirustus not uploaded
