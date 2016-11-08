@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478588472246');
+@import url('main-blessed1.css?z=1478613410436');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -5254,13 +5254,18 @@ button.rollup-button {
   cursor: pointer;
 }
 
-/* line 19, ../../../private/common-html/sass/views/_applications.scss */
+/* line 9, ../../../private/common-html/sass/views/_applications.scss */
+.assignment-row {
+  cursor: pointer;
+}
+
+/* line 23, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state {
   margin-top: 24px;
   margin-right: 72px;
   width: 100%;
 }
-/* line 23, ../../../private/common-html/sass/views/_applications.scss */
+/* line 27, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-box, .applications-empty-state .app-type-button {
   display: inline-block;
   box-sizing: border-box;
@@ -5270,22 +5275,22 @@ button.rollup-button {
   vertical-align: top;
   position: relative;
 }
-/* line 36, ../../../private/common-html/sass/views/_applications.scss */
+/* line 40, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-button {
   margin-top: 0;
   padding-bottom: 0 !important;
 }
-/* line 42, ../../../private/common-html/sass/views/_applications.scss */
+/* line 46, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .missing-wrapper {
   width: 100%;
 }
-/* line 46, ../../../private/common-html/sass/views/_applications.scss */
+/* line 50, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .first-box {
   padding-left: 0;
   padding-right: 24px;
   min-height: 250px;
 }
-/* line 50, ../../../private/common-html/sass/views/_applications.scss */
+/* line 54, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .middle-box {
   padding-left: 24px;
   padding-right: 24px;
@@ -5294,38 +5299,38 @@ button.rollup-button {
   border-right: 1px dotted #888a8c;
   padding-bottom: 95px;
 }
-/* line 57, ../../../private/common-html/sass/views/_applications.scss */
+/* line 61, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .last-box {
   padding-left: 24px;
   padding-right: 0;
   min-height: 250px;
 }
-/* line 59, ../../../private/common-html/sass/views/_applications.scss */
+/* line 63, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .last-box p {
   margin-bottom: 0px;
 }
 
-/* line 66, ../../../private/common-html/sass/views/_applications.scss */
+/* line 70, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
   width: 33%;
 }
-/* line 70, ../../../private/common-html/sass/views/_applications.scss */
+/* line 74, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .last-box {
   border-right: none;
 }
-/* line 74, ../../../private/common-html/sass/views/_applications.scss */
+/* line 78, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .missing-prev-permit-box {
   display: none;
 }
 
-/* line 79, ../../../private/common-html/sass/views/_applications.scss */
+/* line 83, ../../../private/common-html/sass/views/_applications.scss */
 .first-box.app-type-button,
 .middle-box.app-type-button,
 .last-box.app-type-button {
   min-height: 0;
 }
 
-/* line 87, ../../../private/common-html/sass/views/_applications.scss */
+/* line 91, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
@@ -5344,31 +5349,31 @@ button.rollup-button {
   /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
   /* } */
 }
-/* line 104, ../../../private/common-html/sass/views/_applications.scss */
+/* line 108, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 109, ../../../private/common-html/sass/views/_applications.scss */
+/* line 113, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 114, ../../../private/common-html/sass/views/_applications.scss */
+/* line 118, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 120, ../../../private/common-html/sass/views/_applications.scss */
+/* line 124, ../../../private/common-html/sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 124, ../../../private/common-html/sass/views/_applications.scss */
+/* line 128, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_asc:after, .sorting.asc:after {
   content: "";
   display: block;
@@ -5382,7 +5387,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 135, ../../../private/common-html/sass/views/_applications.scss */
+/* line 139, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_desc:after, .sorting.desc:after {
   content: "";
   display: block;
@@ -5396,7 +5401,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 147, ../../../private/common-html/sass/views/_applications.scss */
+/* line 151, ../../../private/common-html/sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -5405,61 +5410,61 @@ button.rollup-button {
   bottom: 12px;
 }
 
-/* line 155, ../../../private/common-html/sass/views/_applications.scss */
+/* line 159, ../../../private/common-html/sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 157, ../../../private/common-html/sass/views/_applications.scss */
+/* line 161, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation {
   display: table-row;
 }
-/* line 159, ../../../private/common-html/sass/views/_applications.scss */
+/* line 163, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
-/* line 162, ../../../private/common-html/sass/views/_applications.scss */
+/* line 166, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div {
   padding-right: 24px;
   display: table-cell;
 }
-/* line 165, ../../../private/common-html/sass/views/_applications.scss */
+/* line 169, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
   margin: 0 6px 0 6px;
 }
-/* line 169, ../../../private/common-html/sass/views/_applications.scss */
+/* line 173, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation p {
   max-width: 35em;
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 175, ../../../private/common-html/sass/views/_applications.scss */
+/* line 179, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation h3 {
   max-width: 35em;
   margin-top: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 181, ../../../private/common-html/sass/views/_applications.scss */
+/* line 185, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation .invitation-actions {
   white-space: nowrap;
 }
 
-/* line 187, ../../../private/common-html/sass/views/_applications.scss */
+/* line 191, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 191, ../../../private/common-html/sass/views/_applications.scss */
+/* line 195, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 194, ../../../private/common-html/sass/views/_applications.scss */
+/* line 198, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 200, ../../../private/common-html/sass/views/_applications.scss */
+/* line 204, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -5469,31 +5474,31 @@ button.rollup-button {
   width: 22px;
   padding: 3px;
 }
-/* line 209, ../../../private/common-html/sass/views/_applications.scss */
+/* line 213, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 
-/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+/* line 249, ../../../private/common-html/sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 250, ../../../private/common-html/sass/views/_applications.scss */
+/* line 254, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 253, ../../../private/common-html/sass/views/_applications.scss */
+/* line 257, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 256, ../../../private/common-html/sass/views/_applications.scss */
+/* line 260, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -5504,7 +5509,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 266, ../../../private/common-html/sass/views/_applications.scss */
+/* line 270, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }

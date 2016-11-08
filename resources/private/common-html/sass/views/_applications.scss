@@ -6,6 +6,10 @@
   cursor: pointer;
 }
 
+.assignment-row {
+  cursor: pointer;
+}
+
 @mixin missing-type ( $left, $right ) {
   padding: {
     left: $left;
