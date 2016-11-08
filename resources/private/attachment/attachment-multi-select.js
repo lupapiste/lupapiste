@@ -32,7 +32,6 @@ LUPAPISTE.AttachmentMultiSelect = function() {
 
     cancelSelecting: function() {
       self.model.selectingMode(false);
-      self.model.filteredAttachments = undefined;
       self.model.authorization = undefined;
       self.model.appModel.open("attachments");
       self.model.appModel.reload();
