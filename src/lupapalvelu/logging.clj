@@ -76,4 +76,4 @@
 (defn sanitize
   "Replaces newlines and limits length"
   [limit ^String s]
-  (ss/limit (s/replace (str s) #"[\r\n]" "\\n") limit "... (truncated)"))
+  (ss/limit (s/replace (str s) #"(\r?\n|\r)" (s/re-quote-replacement "\\n")) limit "... (truncated)"))
