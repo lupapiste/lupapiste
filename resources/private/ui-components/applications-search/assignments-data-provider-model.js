@@ -55,6 +55,9 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.searchFieldDelayed = ko.pureComputed(self.searchField)
     .extend({rateLimit: {method: "notifyWhenChangesStop", timeout: 750}});
 
+  self.searchStartDate = ko.observable();
+  self.searchEndDate = ko.observable();
+
   function recipientSearchCond(selected, myid) {
     if (_.includes(selected, lupapisteApp.services.assignmentRecipientFilterService.myown)) {
       return [myid];
@@ -70,12 +73,21 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
     if (myid == null) {
       return;
     }
+
+    // Datepicker returns a timestamp representing the selected date at midnight local time
+    // search end date must be adjusted by one full day forward to include the end date as a whole into the search range
+    var searchStartDateInMillis = self.searchStartDate() ? new Date(self.searchStartDate()).getTime() : null;
+    var searchEndDateInMillis = self.searchEndDate() ? moment(new Date(self.searchEndDate()).getTime()).add(1, "days").valueOf() : null;
+
     return {
       searchText: self.searchFieldDelayed(),
       state: self.searchResultType(),
       recipient: recipientSearchCond(lupapisteApp.services.assignmentRecipientFilterService.selected(), myid),
       operation: _.map(lupapisteApp.services.operationFilterService.selected(), "id"),
       limit: self.limit(),
+      area: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
+      createdDate: {start: searchStartDateInMillis, end: searchEndDateInMillis},
+      targetType: _.map(lupapisteApp.services.assignmentTargetFilterService.selected(), "id"),
       sort: ko.mapping.toJS(self.sort),
       skip: self.skip()
     };

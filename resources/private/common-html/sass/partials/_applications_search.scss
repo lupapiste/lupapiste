@@ -96,6 +96,16 @@ div.search {
   }
 }
 
+.application-search-component {
+  input[type=text].hasDatepicker {
+    min-width: 100px;
+    width: 30%;
+    display: inline;
+    margin-top: 0px;
+    margin-right: 0px;
+  }
+}
+
 .applications-search-filters-list {
 
   .applications-search-filters-list__filters {

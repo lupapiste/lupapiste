@@ -26,5 +26,6 @@
   lupapisteApp.services.buildingService = new LUPAPISTE.BuildingService();
   lupapisteApp.services.assignmentService = new LUPAPISTE.AssignmentService(lupapisteApp.models.applicationAuthModel);
   lupapisteApp.services.assignmentRecipientFilterService = new LUPAPISTE.AssignmentRecipientFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.assignmentTargetFilterService = new LUPAPISTE.AssignmentTargetFilterService();
 
 })();
