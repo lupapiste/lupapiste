@@ -4,10 +4,8 @@
              [monger.operators :refer [$in]]
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]
-             [lupapalvelu.application-utils :refer [operation-names]]
+             [lupapalvelu.application-utils :refer [operation-names make-area-query]]
              [lupapalvelu.geojson :as geo]))
-
-(testable-privates lupapalvelu.application-search make-area-query)
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]

@@ -28,9 +28,13 @@
       <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
         <div class="form-grid form-grid--no-border">
           <div class="row row--no-margin">
-            <div class="col-2"  data-test-id="handler-filter-component">
+            <div class="col-2" data-test-id="recipient-filter-item">
               <label data-bind="ltext: 'applications.filter.recipient'" />
               <div data-test-id="recipient-filter-component" data-bind="component: {name: 'autocomplete-recipient', params: {lPlaceholder: 'application.filter.search.placeholder.recipient-filter'}}"></div>
+            </div>
+            <div class="col-2" data-test-id="areas-filter-item">
+              <label data-bind="ltext: 'applications.filter.areas'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-areas', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
             </div>
           </div>
 
@@ -38,6 +42,19 @@
             <div class="col-4" data-test-id="operation-filter-item">
               <label data-bind="ltext: 'applications.filter.operations'" />
               <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete-operations', params: {lPlaceholder: 'application.filter.search.placeholder.operations-filter'}}"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.assignment-targets'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-assignment-targets', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
+            </div>
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.created-date'" /><br/>
+              <span>
+                <input type="text" class="form-input" data-bind="datepicker: dataProvider.searchStartDate" />&nbsp;&#8211;&nbsp;<input type="text" class="form-input" data-bind="datepicker: dataProvider.searchEndDate" />
+              </span>
             </div>
           </div>
         </div>
