@@ -864,6 +864,26 @@
                 (sequential? v) (apply concat (map ->xml v))
                 :default        [(str v)])}))
 
+;;
+;; Assignments
+;;
+
+(defn create-assignment [from to application-id target desc]
+  (command from :create-assignment
+           :id            application-id
+           :recipientId   to
+           :target        target
+           :description   desc))
+(defn update-assignment [who id assignment-id recipient description]
+  (command who :update-assignment
+           :id id
+           :assignmentId assignment-id
+           :recipientId recipient
+           :description description))
+
+(defn complete-assignment [user assignment-id]
+  (command user :complete-assignment :assignmentId assignment-id))
+
 (defn get-user-assignments [apikey]
   (let [resp (query apikey :assignments)]
     (fact "assignments query ok"

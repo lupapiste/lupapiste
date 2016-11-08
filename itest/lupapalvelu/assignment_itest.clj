@@ -29,22 +29,6 @@
   (def ^:private invalid-assignment?
     (partial expected-failure? "error.invalid-assignment-id"))
 
-  (defn create-assignment [from to application-id target desc]
-    (command from :create-assignment
-             :id            application-id
-             :recipientId   to
-             :target        target
-             :description   desc))
-  (defn update-assignment [who id assignment-id recipient description]
-    (command who :update-assignment
-             :id id
-             :assignmentId assignment-id
-             :recipientId recipient
-             :description description))
-
-  (defn complete-assignment [user assignment-id]
-    (command user :complete-assignment :assignmentId assignment-id))
-
   (facts "Querying assignments"
 
     (fact "only authorities can see assignments"
