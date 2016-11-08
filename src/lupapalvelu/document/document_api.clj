@@ -117,7 +117,7 @@
   (if-let [document (domain/get-document-by-id application docId)]
     (do
       (doc-persistence/remove! command docId "documents")
-      (assignment/remove-assignments-by-target id document)
+      (assignment/remove-assignments-by-target id docId)
       (ok))
     (fail :error.document-not-found)))
 

@@ -298,5 +298,5 @@
 (sc/defn ^:always-validate activate-assignments [application-id :- ssc/ApplicationId]
   (set-assignments-statuses application-id "active"))
 
-(defn remove-assignments-by-target [application-id target-document]
-  (mongo/remove-many :assignments {:application.id application-id :target.id (:id target-document)}))
+(defn remove-assignments-by-target [application-id target-id]
+  (mongo/remove-many :assignments {:application.id application-id :target.id target-id}))
