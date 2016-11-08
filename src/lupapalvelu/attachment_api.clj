@@ -13,7 +13,6 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.application-bulletins :as bulletins]
             [lupapalvelu.application :as app]
-            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
@@ -405,7 +404,6 @@
                  ram/ram-not-linked]}
   [{:keys [application user]}]
   (attachment/delete-attachment! application attachmentId)
-  (assignment/remove-assignments-by-target id attachmentId)
   (ok))
 
 (defcommand delete-attachment-version
