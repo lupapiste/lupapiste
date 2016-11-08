@@ -42,8 +42,7 @@
 (defquery assignments
   {:description "Return all the assignments the user is allowed to see"
    :user-roles #{:authority}
-   :pre-checks [assignments-enabled]
-   :feature :assignments}
+   :pre-checks [assignments-enabled]}
   [{user :user}]
   (ok :assignments (assignment/get-assignments user)))
 
@@ -53,8 +52,7 @@
    :pre-checks [assignments-enabled-for-application]
    :states states/all-application-states-but-draft-or-terminal
    :user-roles #{:authority}
-   :categories #{:documents}
-   :feature :assignments}
+   :categories #{:documents}}
   [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
 
@@ -63,8 +61,7 @@
    :user-roles #{:authority}
    :parameters [assignmentId]
    :pre-checks [assignments-enabled]
-   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
-   :feature :assignments}
+   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]}
   [{user :user}]
   (ok :assignment (assignment/get-assignment user assignmentId)))
 
@@ -74,8 +71,7 @@
    :user-roles #{:authority}
    :pre-checks [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :states   states/all-application-states-but-draft-or-terminal
-   :feature :assignments}
+   :states   states/all-application-states-but-draft-or-terminal}
   [{:keys [application]}]
   (ok :targets (assignment/assignment-targets application)))
 
@@ -83,8 +79,7 @@
   {:description "Service point for attachment search component"
    :parameters []
    :user-roles #{:authority}
-   :pre-checks [assignments-enabled]
-   :feature :assignments}
+   :pre-checks [assignments-enabled]}
   [{user :user data :data}]
   (let [query (assignment/search-query data)]
     (ok :data (assignment/assignments-search user query))))
@@ -101,8 +96,7 @@
                       (partial action/map-parameters [:target])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application]
-   :states           states/all-application-states-but-draft-or-terminal
-   :feature          :assignments}
+   :states           states/all-application-states-but-draft-or-terminal}
   [{user         :user
     created      :created
     application  :application}]
@@ -121,8 +115,7 @@
                       (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :pre-checks       [validate-receiver
                       validate-assignment-id]
-   :states           states/all-application-states-but-draft-or-terminal
-   :feature          :assignments}
+   :states           states/all-application-states-but-draft-or-terminal}
   [_]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
                                                       :description description})))
@@ -133,8 +126,7 @@
    :parameters [assignmentId]
    :pre-checks [assignments-enabled]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
-   :categories #{:documents}
-   :feature :assignments}
+   :categories #{:documents}}
   [{user    :user
     created :created}]
   (if (> (assignment/complete-assignment assignmentId user created) 0)

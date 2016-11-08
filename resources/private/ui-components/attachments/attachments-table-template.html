@@ -103,7 +103,7 @@
             </button>
           </td>
         </tr>
-        <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) && features.enabled("assignments") -->
+        <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
         <tr class="attachment-assignment-row">
           <td colspan="7">
             <accordion-assignments params="documentAssignments: $component.assignments()[$data.id],

@@ -3,7 +3,7 @@
     <h1 data-bind="ltext: 'application.tabParties'"></h1>
     <help-toggle params="lhtml: ['help.' + permitType() + '.PartiesDesc', 'company-invite.help']"></help-toggle>
 
-    <!-- ko if: $parent.selectedTabName() === 'parties' && $root.authorization.ok("create-assignment") && features.enabled("assignments") -->
+    <!-- ko if: $parent.selectedTabName() === 'parties' && $root.authorization.ok("create-assignment") -->
     <create-assignment data-test-id="create-assignment-component"
                        params="authorities: $root.authorities,
                                applicationId: id,
