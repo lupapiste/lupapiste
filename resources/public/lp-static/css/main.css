@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1478585768752');
+@import url('main-blessed1.css?z=1478588472246');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -6628,7 +6628,7 @@ div.review-tasks {
 }
 
 /* line 943, ../../../private/common-html/sass/views/_application.scss */
-#create-assignment {
+.assignment-creator {
   margin-bottom: 12px;
 }
 
