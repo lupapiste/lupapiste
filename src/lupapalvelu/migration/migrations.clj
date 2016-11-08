@@ -2328,7 +2328,7 @@
             (if (= (:id task) (:id (:source att)))
               (try
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
-                (attachment/delete-attachment! failed (:id att))
+                (attachment/delete-attachments! failed (:id att))
                 (catch Exception e
                   (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))

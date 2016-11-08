@@ -33,8 +33,7 @@
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as tos])
-  (:import [java.io File]))
+            [lupapalvelu.tiedonohjaus :as tos]))
 
 ;; Action category: attachments
 
@@ -404,7 +403,7 @@
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
-  (attachment/delete-attachment! application attachmentId)
+  (attachment/delete-attachments! application [attachmentId])
   (ok))
 
 (defcommand delete-attachment-version
