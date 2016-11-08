@@ -724,7 +724,10 @@
   (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
                         :description contents))
 
-(defn- describe-assignment-targets [{attachments :attachments :as application}]
-  (map attachment-assignment-info attachments))
+(defn- describe-assignment-targets [application]
+  (let [attachments (map enrich-attachment (:attachments application))]
+    (->> (att-tags/attachment-tag-groups (assoc application :attachments attachments))
+         (att-tags/sort-by-tags attachments)
+         (map attachment-assignment-info))))
 
 (assignment/register-assignment-target! :attachments describe-assignment-targets)

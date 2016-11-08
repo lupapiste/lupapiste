@@ -107,6 +107,15 @@
   (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
 
+(defn- filter-tag-group-attachments [attachments [tag & _]]
+  (filter #((-> % :tags set) tag) attachments))
+
+(defn sort-by-tags [attachments tag-groups]
+  (if (not-empty tag-groups)
+    (->> (map (partial filter-tag-group-attachments attachments) tag-groups)
+         (mapcat #(sort-by-tags %2 (rest %1)) tag-groups))
+    attachments))
+
 (defn- application-state-filters [{attachments :attachments state :state}]
   (let [states (-> (map tag-by-applicationState attachments) set)]
     (->> [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
