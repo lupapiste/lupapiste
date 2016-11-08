@@ -5,7 +5,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.env :as env]))
 
 ;; Helpers and validators
 
@@ -39,13 +40,6 @@
 ;; Queries
 ;;
 
-(defquery assignments
-  {:description "Return all the assignments the user is allowed to see"
-   :user-roles #{:authority}
-   :pre-checks [assignments-enabled]}
-  [{user :user}]
-  (ok :assignments (assignment/get-assignments user)))
-
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
    :parameters [id]
@@ -55,15 +49,6 @@
    :categories #{:documents}}
   [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
-
-(defquery assignment
-  {:description "Return a single assignment"
-   :user-roles #{:authority}
-   :parameters [assignmentId]
-   :pre-checks [assignments-enabled]
-   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]}
-  [{user :user}]
-  (ok :assignment (assignment/get-assignment user assignmentId)))
 
 (defquery assignment-targets
   {:description "Possible assignment targets per application for frontend"
@@ -83,6 +68,23 @@
   [{user :user data :data}]
   (let [query (assignment/search-query data)]
     (ok :data (assignment/assignments-search user query))))
+
+(env/in-dev                                                 ; These are only used in itest
+  (defquery assignments
+    {:description "Return all the assignments the user is allowed to see"
+     :user-roles #{:authority}
+     :pre-checks [assignments-enabled]}
+    [{user :user}]
+    (ok :assignments (assignment/get-assignments user)))
+
+  (defquery assignment
+    {:description "Return a single assignment"
+     :user-roles #{:authority}
+     :parameters [assignmentId]
+     :pre-checks [assignments-enabled]
+     :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]}
+    [{user :user}]
+    (ok :assignment (assignment/get-assignment user assignmentId))))
 
 ;;
 ;; Commands
