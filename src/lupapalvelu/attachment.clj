@@ -469,14 +469,24 @@
   (let [file-ids (attachment-file-ids (get-attachment-info application attachment-id))]
     (boolean (some #{file-id} file-ids))))
 
-(defn delete-attachment!
-  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [application attachment-id]
-  (info "1/3 deleting files of attachment" attachment-id)
-  (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
-  (info "2/3 deleted files of attachment" attachment-id)
-  (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
-  (info "3/3 deleted meta-data of attachment" attachment-id))
+(defn- get-file-ids-for-attachments-ids [application attachment-ids]
+  (reduce (fn [file-ids attachment-id]
+            (concat file-ids (attachment-file-ids (get-attachment-info application attachment-id))))
+          []
+          attachment-ids))
+
+(defn delete-attachments!
+  "Delete attachments with all it's versions. does not delete comments.
+   Deletes also assignments that are targets of attachments in question.
+   Non-atomic operation: first deletes files, then updates document."
+  [application attachment-ids]
+  (info "1/4 deleting assignments regarding attachments" attachment-ids)
+  (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+  (info "2/4 deleting files of attachments" attachment-ids)
+  (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+  (info "3/4 deleted files of attachments" attachment-ids)
+  (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
+  (info "4/4 deleted meta-data of attachments" attachment-ids))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."

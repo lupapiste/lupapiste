@@ -790,3 +790,6 @@
 "file_not_linked_to_the_document" "en" "Attachment not found in application"
 "file_not_linked_to_the_document" "fi" "Liitetiedostoa ei löydy hakemuksesta"
 "file_not_linked_to_the_document" "sv" "Bilagan kan inte hittas i ansökan"
+"error.assignments-not-enabled" "fi" "Tehtävät eivät ole käytössä organisaatiossa"
+"error.assignments-not-enabled" "sv" "Uppgifter-funktionalitet är inte användning av organisationen"
+"error.assignments-not-enabled" "en" "Assignments functionality not in use in the organization"

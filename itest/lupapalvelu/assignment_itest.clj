@@ -1,13 +1,13 @@
 (ns lupapalvelu.assignment-itest
   (:require [midje.sweet :refer :all]
             [schema.core :as sc]
+            [sade.env :as env]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.assignment :refer [Assignment]]
             [lupapalvelu.assignment-api :refer :all]
             [lupapalvelu.mongo :as mongo]
-            [sade.env :as env]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]
             [clj-time.core :as t]
             [clj-time.coerce :as tc]))
 
@@ -28,22 +28,6 @@
 
   (def ^:private invalid-assignment?
     (partial expected-failure? "error.invalid-assignment-id"))
-
-  (defn create-assignment [from to application-id target desc]
-    (command from :create-assignment
-             :id            application-id
-             :recipientId   to
-             :target        target
-             :description   desc))
-  (defn update-assignment [who id assignment-id recipient description]
-    (command who :update-assignment
-             :id id
-             :assignmentId assignment-id
-             :recipientId recipient
-             :description description))
-
-  (defn complete-assignment [user assignment-id]
-    (command user :complete-assignment :assignmentId assignment-id))
 
   (facts "Querying assignments"
 
@@ -165,7 +149,8 @@
   (facts "Assignment targets"
     (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
           _ (generate-documents app-id sonja)
-          hakija-doc-id (:id (domain/get-applicant-document (:documents (query-application sonja app-id))))
+          app (query-application sonja app-id)
+          hakija-doc-id (:id (domain/get-applicant-document (:documents app)))
           update-resp (command sonja :update-doc :id app-id :doc hakija-doc-id :updates [["henkilo.henkilotiedot.etunimi" "SONJA"]])
           targets-resp (query sonja :assignment-targets :id app-id :lang "fi")
           party-target-values (second (first (filter (fn [[k _]] (= k "parties")) (:targets targets-resp))))]
@@ -179,6 +164,34 @@
         (second (first (:targets targets-resp))) => (has every? (fn [target] (every? (partial contains? target) [:id :type-key]))))
       (fact "data from accordion-field is in display text"
         (:description (util/find-by-id hakija-doc-id party-target-values)) => (contains "SONJA"))))
+
+  (facts "Deleting targets"
+    (facts "documents"
+      (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
+            _ (generate-documents app-id sonja)
+            app (query-application sonja app-id)
+            designer-doc     (domain/get-document-by-name app "suunnittelija")
+            assignment-id (:id (create-assignment sonja sonja-id app-id {:group "parties" :id (:id designer-doc)} "Tarkista!"))
+            assignments         (get-user-assignments sonja)
+            designer-assignment (util/find-first #(= "parties" (get-in % [:target :group])) assignments)]
+        (fact "assignment has designer target"
+          (:id designer-assignment) => assignment-id)
+        (fact "party assignment is deleted after party document deletion"
+          (command sonja :remove-doc :id app-id :docId (:id designer-doc)) => ok?
+          (let [new-query (get-user-assignments sonja)]
+            (count new-query) => (dec (count assignments))
+            new-query =not=> (contains {:id assignment-id})))))
+    (facts "attachments"
+      (let [app-id (create-app-id sonja :propertyId sipoo-property-id)
+            app (query-application sonja app-id)
+            target-attachment (first (:attachments app))]
+        (fact "assignment for attachment"
+          (create-assignment sonja sonja-id app-id {:group "attachments" :id (:id target-attachment)} "Onko liite kunnossa?") => ok?
+          (map (comp :id :target) (get-user-assignments sonja)) => (contains (:id target-attachment)))
+        (fact "attachment deletion deletes assignment"
+          (command sonja :delete-attachment :id app-id :attachmentId (:id target-attachment)) => ok?
+          (map (comp :id :target) (get-user-assignments sonja)) =not=> (contains (:id target-attachment))))
+        ))
 
   (facts "Assignments search"
     (apply-remote-minimal)

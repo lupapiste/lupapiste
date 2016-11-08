@@ -661,6 +661,7 @@
                                                                       [:pelastusviranomaiselle_esitettavat_suunnitelmat :vaestonsuojasuunnitelma]]}
                        :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))
+                       :assignments-enabled true
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000}
 
