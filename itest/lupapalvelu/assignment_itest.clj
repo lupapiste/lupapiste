@@ -7,7 +7,9 @@
             [lupapalvelu.mongo :as mongo]
             [sade.env :as env]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 (when (env/feature? :assignments)
   (apply-remote-minimal)
@@ -217,13 +219,13 @@
             => (just #{sonja-id}))
 
           (fact "date filter"
-            (let [today-12am      (clj-time.core/today-at-midnight)
-                  yesterday-12am  (clj-time.core/minus today-12am (-> 1 clj-time.core/days))
-                  tomorrow-12am   (clj-time.core/plus today-12am (-> 1 clj-time.core/days))
-                  result-empty    (datatables sonja :assignments-search :createdDate {:start (clj-time.coerce/to-long yesterday-12am)
-                                                                                      :end   (clj-time.coerce/to-long today-12am)})
-                  result-has-data (datatables sonja :assignments-search :createdDate {:start (clj-time.coerce/to-long today-12am)
-                                                                                      :end   (clj-time.coerce/to-long tomorrow-12am)})]
+            (let [today-12am      (t/today-at-midnight)
+                  yesterday-12am  (t/minus today-12am (-> 1 clj-time.core/days))
+                  tomorrow-12am   (t/plus today-12am (-> 1 clj-time.core/days))
+                  result-empty    (datatables sonja :assignments-search :createdDate {:start (tc/to-long yesterday-12am)
+                                                                                      :end   (tc/to-long today-12am)})
+                  result-has-data (datatables sonja :assignments-search :createdDate {:start (tc/to-long today-12am)
+                                                                                      :end   (tc/to-long tomorrow-12am)})]
               result-empty => ok?
               (-> result-empty :data :assignments) => empty?
               result-has-data => ok?

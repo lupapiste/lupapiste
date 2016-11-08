@@ -1,19 +1,18 @@
 (ns lupapalvelu.assignment
   (:require [clojure.set :refer [rename-keys]]
             [monger.operators :refer [$and $in $ne $options $or $regex $set $push]]
-            [monger.query :as query]
             [monger.collection :as collection]
             [taoensso.timbre :as timbre :refer [errorf]]
             [schema.core :as sc]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.application-utils :as app-utils]))
+            [lupapalvelu.application-utils :as app-utils]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]))
 
 (defonce ^:private registered-assignment-targets (atom {}))
 
@@ -162,7 +161,7 @@
               (app-utils/make-area-query area user :applicationDetails.0))
             (when-not (empty? createdDate)
               {:states.0.timestamp {"$gte" (or (:start createdDate) 0)
-                                    "$lt"  (or (:end createdDate) (clj-time.coerce/to-long (clj-time.core/now)))}})
+                                    "$lt"  (or (:end createdDate) (tc/to-long (t/now)))}})
             (when-not (empty? targetType)
               {:target.group {$in targetType}})
             {:status {$ne "canceled"}}])})
