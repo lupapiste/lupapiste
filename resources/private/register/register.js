@@ -9,7 +9,7 @@
                       vtj:     urlPrefix + "/error",
                       id:      "vetuma-init"};
 
-  function logoutRedirect() {
+  function logoutRedirect(email) {
     var url = util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
     if (url) {
       window.location = _.escape(url) + "?return=/app/" + loc.getCurrentLanguage() + "/welcome#!/register3";
@@ -35,7 +35,6 @@
   $(function(){
     $("#register").applyBindings({status:statusModel, vetuma: vetumaParams});
     $("#register2").applyBindings(registrationModel.model);
-    $("#register3").applyBindings(registrationModel.model);
   });
 
 })();
