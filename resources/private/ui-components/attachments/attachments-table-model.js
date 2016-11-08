@@ -70,7 +70,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
             && _.includes(attachmentIds, assignment.target.id)
             && assignment.currentState.type !== "completed";
         })
-        .keyBy("target.id")
+        .groupBy("target.id")
         .value();
     } else {
       return {};
