@@ -71,6 +71,7 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
             assignmentsForApplication(appId);
           }
         })
+        .onError("error.assignment-not-completed", util.showSavedIndicator)
         .call();
     });
 
