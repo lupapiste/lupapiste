@@ -151,7 +151,8 @@ jQuery(document).ready(function() {
     {name: "accordion-assignments"},
     {name: "assignment-editor"},
     {name: "attachment-type-id"},
-    {name: "state-icons"}
+    {name: "state-icons"},
+    {name: "organization-links"}
 ];
 
   ko.registerLupapisteComponents(components);
