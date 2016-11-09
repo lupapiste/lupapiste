@@ -184,6 +184,8 @@ Sonja logs in and deletes the first verdict.
 There is only one appeal in the Attachments tab
   Open tab  attachments
   Xpath should match X times  //tr[@data-test-type='muutoksenhaku.valitus']  1
+  Xpath should match X times  //tr[@data-test-type='muutoksenhaku.oikaisuvaatimus']  0
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
   Open tab  verdict
 
 Fetching new verdicts will nuke appeals
