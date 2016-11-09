@@ -23,6 +23,12 @@
                    function(e) {$("#register-email-error").text(loc(e.text));});
   });
 
+  hub.onPageLoad("register3", function() {
+    if (pageutil.subPage() === "cancel") {
+
+    }
+  });
+
   $(function(){
     $("#register").applyBindings({status:statusModel, vetuma: vetumaParams});
     $("#register2").applyBindings(registrationModel.model);

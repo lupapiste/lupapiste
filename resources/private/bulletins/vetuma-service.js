@@ -27,7 +27,7 @@ LUPAPISTE.VetumaService = function() {
   hub.subscribe("vetumaService::logoutRequested", function() {
     vetuma.logoutUser(function() { // onSuccess
       self.authenticated(false);
-      util.identLogoutRedirect("/app/" + loc.getCurrentLanguage() + "/bulletins");
+      util.identLogoutRedirectBulletins();
     });
   });
 

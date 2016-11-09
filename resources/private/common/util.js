@@ -390,14 +390,22 @@ var util = (function($) {
     return util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
   }
 
-  function identLogoutRedirect(returnUrl) {
+  function identLogoutRedirect() {
     var url = identLogoutUrl();
-    var suffix = returnUrl || "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    console.log(suffix);
     if (url) {
       window.location = _.escape(url) + "?return=" + suffix;
     }
   }
 
+  function identLogoutRedirectBulletins() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
 
   return {
     zeropad:             zeropad,
@@ -442,7 +450,8 @@ var util = (function($) {
     partyFullName: partyFullName,
     isEmpty: isEmpty,
     identLogoutUrl: identLogoutUrl,
-    identLogoutRedirect: identLogoutRedirect
+    identLogoutRedirect: identLogoutRedirect,
+    identLogoutRedirectBulletins: identLogoutRedirectBulletins
   };
 
 })(jQuery);
