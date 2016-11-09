@@ -68,7 +68,8 @@
 
 (sc/defschema Organization
   {:id sc/Str
-   :name  (i18n/localization-schema sc/Str)
+   ;:name  (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
+   :name {:fi sc/Str :en sc/Str :sv sc/Str}
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
