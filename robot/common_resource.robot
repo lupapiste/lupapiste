@@ -1461,3 +1461,20 @@ There are no frontend errors
   # These test cases will fail if errors exist
   Javascript?  ${FATAL_COUNT} === 0
   Javascript?  ${ERR_COUNT} === 0
+
+#
+# YA
+#
+
+Fill tyoaika fields
+  [Arguments]  ${startDate}=01.05.2014  ${endDate}=02.05.2014
+  Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-pvm')]
+  Execute Javascript  $("input[id*='tyoaika-alkaa-pvm']").val("${startDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-pvm')]  ${startDate}
+
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
+  Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
