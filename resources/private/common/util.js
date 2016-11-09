@@ -386,6 +386,19 @@ var util = (function($) {
                              .isString( path ) ? _.split( path, ".") : path));
   }
 
+  function identLogoutUrl() {
+    return util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
+  }
+
+  function identLogoutRedirect(returnUrl) {
+    var url = identLogoutUrl();
+    var suffix = returnUrl || "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -427,7 +440,9 @@ var util = (function($) {
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
     partyFullName: partyFullName,
-    isEmpty: isEmpty
+    isEmpty: isEmpty,
+    identLogoutUrl: identLogoutUrl,
+    identLogoutRedirect: identLogoutRedirect
   };
 
 })(jQuery);

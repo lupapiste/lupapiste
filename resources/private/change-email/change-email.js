@@ -25,15 +25,6 @@
   var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
   var vetumaParams = new LUPAPISTE.VetumaButtonModel(urlPrefix, "vetuma-init-email", "email", "change-email");
 
-  function logoutRedirect(result) {
-    var url = util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
-    if (url) {
-      window.location = _.escape(url) + "?return=/app/" + loc.getCurrentLanguage() + "/welcome#!/change-email2/" + result;
-    } else {
-      pageutil.openPage("register3");
-    }
-  }
-
 
   hub.onPageLoad("email", function() {
     var token = getToken();
@@ -54,9 +45,9 @@
     vetuma.getUser(
         function(vetumaData) {
           ajax.command("change-email", {tokenId: token, stamp: vetumaData.stamp})
-            .success(_.partial(logoutRedirect, "ok"))
+            .success(_.partial(changingModel.success, true))
             .error(function(e) {
-              _.partial(logoutRedirect, e.text);
+              changingModel.error(e.text);
             })
             .complete(_.partial(changingModel.done, true))
             .call();
@@ -67,19 +58,9 @@
         });
   });
 
-  hub.onPageLoad("change-email2", function() {
-    var returnStatus = pageutil.lastSubPage();
-    if (returnStatus === "ok") {
-      changingModel.success(true);
-    } else {
-      changingModel.error(returnStatus);
-    }
-  });
-
   $(function(){
     $("#email").applyBindings({error: initError, status: statusModel, vetuma: vetumaParams, info: infoModel});
     $("#change-email").applyBindings(changingModel);
-    $("#change-email2").applyBindings(changingModel);
   });
 
 })();
