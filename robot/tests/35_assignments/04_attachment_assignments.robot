@@ -62,5 +62,4 @@ Pena does not see assignment
   Logout
 
 No frontend errors
-  Logout
   There are no frontend errors
