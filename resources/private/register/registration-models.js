@@ -79,6 +79,15 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       return false;
     };
 
+    function logoutRedirectOnCancel() {
+      var url = util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
+      if (url) {
+        window.location = _.escape(url) + "?return=/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+      } else {
+        pageutil.openPage("welcome");
+      }
+    }
+
     self.cancel = function() {
       hub.send("show-dialog", {ltitle: "areyousure",
                                size: "medium",
@@ -86,7 +95,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
                                componentParams: {ltext: "register.confirm-cancel",
                                                  yesFn: function() {
                                                    self.reset();
-                                                   pageutil.openPage("welcome");
+                                                   logoutRedirectOnCancel();
                                                  }}});
     };
 

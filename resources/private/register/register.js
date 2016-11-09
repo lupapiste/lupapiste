@@ -9,7 +9,7 @@
                       vtj:     urlPrefix + "/error",
                       id:      "vetuma-init"};
 
-  function logoutRedirect(email) {
+  function logoutRedirect() {
     var url = util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
     if (url) {
       window.location = _.escape(url) + "?return=/app/" + loc.getCurrentLanguage() + "/welcome#!/register3";
