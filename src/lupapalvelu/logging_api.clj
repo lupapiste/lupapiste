@@ -1,6 +1,7 @@
 (ns lupapalvelu.logging-api
   (:require [taoensso.timbre :as timbre :refer [error errorf]]
             [noir.core :refer [defpage]]
+            [net.cgrand.enlive-html :as enlive]
             [sade.env :as env]
             [sade.core :refer [ok fail]]
             [sade.strings :as ss]
@@ -69,4 +70,25 @@
     {:user-roles #{:anonymous}}
     [_]
     (reset! frontend-log {})
-    (ok)))
+    (ok))
+
+  (defn log-entries [reset]
+    (let [entries (->> (mapcat (fn [[level entries]] (map #(assoc % :level (name level)) entries)) @frontend-log)
+                       (sort-by :ts))]
+      (when reset (reset! frontend-log {}))
+      entries))
+
+  (defpage "/api/frontend-log" {reset :reset}
+    (enlive/emit*
+     {:tag :html
+      :content [{:tag :head
+                 :content [{:tag :title, :content "Frontend log"}
+                           {:tag :style, :content "* {font-family: sans-serif}\npre {font-family: courier; font-size: 10pt}\ndl {background-color: #eee}"}]}
+                {:tag :body
+                 :content (cons {:tag :h1 :content "Frontend log"}
+                                (map (fn [msg] {:tag :div
+                                                :attrs {:style "border-bottom: 4px dashed black;margin: 2em"
+                                                        :data-test-id "log entry"
+                                                        :data-test-level (:level msg)}
+                                                :content (:msg msg)})
+                                     (log-entries reset)))}]})))
