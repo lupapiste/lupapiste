@@ -86,14 +86,7 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
       <div class="operation-description" data-bind="html: loc(['operations', operation(), 'desc'])"></div>
 
-      <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
-        <div data-bind="ltext: 'organization.links'"></div>
-        <ul data-bind="foreach: organizationLinks">
-          <li>
-            <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url[loc.getCurrentLanguage()]}" href="#" target="_blank"></a>
-          </li>
-        </ul>
-      </div>
+      <organization-links params="organization: organization"></organization-links>
 
       <div class="organization-attachments" data-bind="visible: attachmentsForOp() && attachmentsForOp().length">
         <div data-bind="ltext: 'organization.attachments'"></div>
