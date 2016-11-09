@@ -116,7 +116,8 @@
 
 
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:description :applicationDetails.address :applicationDetails._id]
+  (let [search-keys [:description :applicationDetails.address :applicationDetails._id
+                     :applicationDetails.verdicts.kuntalupatunnus]
         fuzzy       (ss/fuzzy-re filter-search)
         ops         (app-utils/operation-names filter-search)]
     {$or (concat
