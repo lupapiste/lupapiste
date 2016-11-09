@@ -304,7 +304,7 @@
                        "application.js"]
                   :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"
+                         "foreman-template.html" "archival-summary-template.html"
                          "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "application-actions-template.html"]}
 

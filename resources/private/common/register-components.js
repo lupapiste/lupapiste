@@ -142,7 +142,8 @@ jQuery(document).ready(function() {
     {name: "targeted-attachments"},
     {name: "open-3d-map"},
     {name: "extension-applications"},
-    {name: "create-assignment"}
+    {name: "create-assignment"},
+    {name: "organization-links"}
 ];
 
   ko.registerLupapisteComponents(components);
