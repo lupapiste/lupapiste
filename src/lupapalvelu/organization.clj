@@ -54,8 +54,10 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  (i18n/localization-schema ssc/OptionalHttpUrl)
-   :name (i18n/localization-schema sc/Str)
+  {:url  {:fi ssc/OptionalHttpUrl :en ssc/OptionalHttpUrl :sv ssc/OptionalHttpUrl}
+   ;:url  (i18n/localization-schema ssc/OptionalHttpUrl) TODO uncomment when feature.english is used in production
+   ;:name (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
+   :name {:fi sc/Str :en sc/Str :sv sc/Str}
    (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
