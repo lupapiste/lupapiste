@@ -24,6 +24,6 @@
         (map :wkt results) => (n-of #"^POLYGON\(" 3))))
 
   (fact "multiple property ids, multiple areas"
-    (let [results (property-location-info ["75341600380021" "75342300050029" "75342300020195"])]
+    (let [results (property-location-info ["75341600380021" "75342300080021" "75342300020195"])]
       (count results) => (+ 1 3 2) ; 1 + 3 from previous cases + 2 new
       (map :wkt results) => (n-of #"^POLYGON\(" 6))))
