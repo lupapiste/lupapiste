@@ -19,8 +19,8 @@
   {:user-roles       #{:anonymous}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
-  [{:keys [web data user application]}]
-  (ok :actions (->> (action/foreach-action web user application data)
+  [command]
+  (ok :actions (->> (action/foreach-action command)
                     (action/validate-actions))))
 
 (defquery allowed-actions-for-category

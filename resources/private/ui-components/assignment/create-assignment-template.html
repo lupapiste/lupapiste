@@ -1,38 +1,24 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-template">
-  <button class="primary"
-          data-bind="toggleClick: editorVisible,
-                     testId:'create-assignment-editor'">
-    <i class="lupicon-add"></i>
-    <span data-bind="ltext: 'application.assignment.create'"></span>
-  </button>
-  <bubble-dialog params="visible: editorVisible, okFun: createAssignment, buttonIcon: 'lupicon-save'">
-    <!-- ko with: $parent -->
-    <div class="form-grid">
-      <div class="row">
-        <div class="col-1"
-             data-bind="component: {name: 'select-field',
-                          params: {value: selectedType,
-                                  options: types,
-                                  optionsValue: 'type',
-                                  optionsText: mainTypeLoc,
-                                  valueAllowUnset: true,
-                                  id: 'assignment-target-group',
-                                  label: 'Aihe',
-                                  required: false}}">
-        </div>
-        <!-- ko if: subTypes() && subTypes().length > 0 -->
-        <div class="col-1"
-             data-bind="component: {name: 'select-field',
-                         params: {value: selectedSubtype,
-                                  options: subTypes,
-                                  valueAllowUnset: true,
-                                  id: 'assignment-target-id',
-                                  label: 'Kohde',
-                                  required: false}}">
-         </div>
-         <!-- /ko -->
-      </div>
+  <!-- ko if: _.keys(targets()).length > 0 -->
+  <div class="assignment-creator">
+    <div class="stacked--inline">
+      <button class="primary"
+              data-bind="toggleClick: editorVisible,
+                         testId: 'create-assignment-editor-button'">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.assignment.create'"></span>
+      </button>
+      <div class="bubble-dialog-arrow" data-bind="visible: editorVisible"></div>
     </div>
-   <!-- /ko -->
-  </bubble-dialog>
+    <!-- ko if: editorVisible -->
+    <assignment-editor data-test-id="create-assignment-editor"
+                       params="visible: editorVisible,
+                               authorities: $root.authorities,
+                               targets: lupapisteApp.services.assignmentService.targets,
+                               applicationId: applicationId,
+                               targetGroup: initialTarget,
+                               editMode: false"></assignment-editor>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
 </script>

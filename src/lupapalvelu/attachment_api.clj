@@ -33,8 +33,7 @@
             [lupapalvelu.pdftk :as pdftk]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.states :as states]
-            [lupapalvelu.tiedonohjaus :as tos])
-  (:import [java.io File]))
+            [lupapalvelu.tiedonohjaus :as tos]))
 
 ;; Action category: attachments
 
@@ -168,6 +167,24 @@
              (ss/not-blank? (:attachmentId data)))
     (access/has-attachment-auth-role :uploader command)))
 
+(defn- is-verdict-attachment? [{target :target}] (= (:type target) "verdict"))
+(defn- is-statement-attachment? [{target :target}] (= (:type target) "statement"))
+
+(defn- verdict-attachment-edit-by-authority-only
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (let [attachment-info (attachment/get-attachment-info application attachmentId)]
+    (when (and (is-verdict-attachment? attachment-info)
+               (not (auth/application-authority? application user)))
+      (fail :error.unauthorized))))
+
+(defn- statement-attachment-edit-by-authority-or-statement-giver-only
+  [{{attachmentId :attachmentId} :data user :user application :application}]
+  (let [attachment-info (attachment/get-attachment-info application attachmentId)]
+    (when (is-statement-attachment? attachment-info)
+      (when-not (or (auth/application-authority? application user)
+                    (auth/has-auth-role? application (:id user) :statementGiver))
+        (fail :error.unauthorized)))))
+
 ;;
 ;; Attachments
 ;;
@@ -249,6 +266,8 @@
    :states     (states/all-states-but (conj states/terminal-states :answered :sent))
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
+                verdict-attachment-edit-by-authority-only
+                statement-attachment-edit-by-authority-or-statement-giver-only
                 attachment-editable-by-application-state
                 attachment-not-readOnly]}
   [{:keys [application user created] :as command}]
@@ -348,7 +367,8 @@
                           (fail :error.attachment.id)))
                       foreman-must-be-uploader
                       ram/ram-not-linked
-                      ram/attachment-status-ok]
+                      ram/attachment-status-ok
+                      ram/attachment-type-allows-ram]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
@@ -378,10 +398,12 @@
                  attachment-not-readOnly
                  attachment-not-required
                  attachment-editable-by-application-state
+                 verdict-attachment-edit-by-authority-only
+                 statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
-  (attachment/delete-attachment! application attachmentId)
+  (attachment/delete-attachments! application [attachmentId])
   (ok))
 
 (defcommand delete-attachment-version
@@ -396,6 +418,8 @@
                  foreman-must-be-uploader
                  attachment-not-readOnly
                  attachment-editable-by-application-state
+                 verdict-attachment-edit-by-authority-only
+                 statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
@@ -490,7 +514,7 @@
       {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (files/temp-file-input-stream (attachment/get-attachments-for-user! user atts))}))
+       :body (attachment/get-attachments-for-user! user atts)}))
 
 ;;
 ;; Upload
@@ -563,17 +587,16 @@
    :description "Rotate PDF by -90, 90 or 180 degrees (clockwise). Replaces old file, doesn't create new version. Uploader is not changed."}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")
-          attachment-options (util/assoc-when {:comment-text nil
-                                               :required false
-                                               :original-file-id originalFileId
-                                               :attachment-id attachmentId
-                                               :attachment-type (:type attachment)
-                                               :created created
-                                               :user user}
-                                              :autoConversion autoConversion)]
-      (try
+    (files/with-temp-file temp-pdf
+      (let [{:keys [contentType fileId originalFileId filename user created autoConversion] :as latest-version} (last (:versions attachment))
+           attachment-options (util/assoc-when {:comment-text nil
+                                                :required false
+                                                :original-file-id originalFileId
+                                                :attachment-id attachmentId
+                                                :attachment-type (:type attachment)
+                                                :created created
+                                                :user user}
+                                               :autoConversion autoConversion)]
         (when-not (= "application/pdf" (:contentType latest-version)) (fail! :error.not-pdf))
         (with-open [content ((:content (mongo/download fileId)))]
           (pdftk/rotate-pdf content (.getAbsolutePath temp-pdf) rotation)
@@ -583,9 +606,7 @@
                                           :filename filename
                                           :content-type contentType
                                           :size (.length temp-pdf)}))
-        (ok)
-        (finally
-          (io/delete-file temp-pdf :silently))))
+        (ok)))
     (fail :error.unknown)))
 
 (defcommand stamp-attachments
@@ -596,7 +617,7 @@
                       (partial action/non-blank-parameters [:page])]
    :pre-checks [any-attachment-has-version]
    :user-roles #{:authority}
-   :states     (conj states/post-submitted-states :submitted)
+   :states     states/post-submitted-states
    :description "Stamps all attachments of given application"}
   [{application :application org :organization {transparency :transparency} :data :as command}]
   (let [parsed-timestamp (cond
@@ -692,6 +713,8 @@
                 foreman-must-be-uploader
                 attachment-editable-by-application-state
                 attachment-not-readOnly
+                verdict-attachment-edit-by-authority-only
+                statement-attachment-edit-by-authority-or-statement-giver-only
                 validate-operation-in-application]}
   [{:keys [created] :as command}]
   (let [data (attachment/meta->attachment-data meta)]
@@ -802,9 +825,8 @@
    :states           (states/all-application-states-but :draft)}
   [{:keys [application]}]
   (if-let [attachment (attachment/get-attachment-info application attachmentId)]
-    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-          temp-pdf (File/createTempFile fileId ".tmp")]
-      (try
+    (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))]
+      (files/with-temp-file temp-pdf
         (with-open [content ((:content (mongo/download fileId)))]
           (io/copy content temp-pdf)
           (attachment/upload-and-attach! {:application application :user user}
@@ -814,7 +836,5 @@
                                           :created created
                                           :stamped stamped
                                           :original-file-id fileId}
-                                         {:content temp-pdf :filename filename}))
-        (finally
-          (io/delete-file temp-pdf :silently)))
+                                         {:content temp-pdf :filename filename})))
       (ok))))

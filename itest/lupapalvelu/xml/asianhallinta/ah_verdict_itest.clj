@@ -18,10 +18,11 @@
             [sade.core :refer [now] :as core]
             [sade.common-reader :as cr]
             [sade.env :as env]
+            [sade.files :as files]
             [sade.util :as util]
             [sade.email]
             [sade.dummy-email-server :as dummy-email])
-  (:import (java.io File ByteArrayOutputStream)))
+  (:import (java.io ByteArrayOutputStream)))
 
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
@@ -70,7 +71,7 @@
     file))
 
 (defn- build-zip! [fpaths]
-  (let [temp-file (File/createTempFile "ah-verdict-itest" ".zip")]
+  (let [temp-file (files/temp-file "ah-verdict-itest" ".zip")]
     (zip-files! temp-file fpaths)
     temp-file))
 

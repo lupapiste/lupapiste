@@ -69,14 +69,40 @@
             [lupapalvelu.ya-extension-api]
             [lupapalvelu.assignment-api])
   (:import [javax.imageio ImageIO]
-           [javax.activation MailcapCommandMap]))
+           [javax.activation MailcapCommandMap]
+           [fi.lupapiste.jmx ServerFactory]))
 
 (defonce jetty (atom nil))
+(defonce jmx-server (atom nil))
+(defonce nrepl-server (atom nil))
 
 (defn- calendar-mime-type-setup []
   (let [mc (MailcapCommandMap/getDefaultCommandMap)]
       (.addMailcap mc "text/calendar;; x-java-content-handler=com.sun.mail.handlers.text_plain")
       (MailcapCommandMap/setDefaultCommandMap mc)))
+
+(defn start-nrepl! []
+  (when (env/feature? :nrepl)
+    (require 'clojure.tools.nrepl.server)
+    (let [start-server (resolve 'clojure.tools.nrepl.server/start-server)]
+      (swap! nrepl-server
+             (fn [old-server]
+               (if (nil? old-server)
+                 (let [port 9090
+                       server (start-server :port port :bind "localhost")]
+                   (warn "*** Started nrepl in port" port)
+                   server)
+                 (do
+                   (warn "nrepl already started!")
+                   old-server)))))))
+
+(defn stop-nrepl! []
+  (swap! nrepl-server
+         (fn [server]
+           (when-not (nil? server)
+             (let [stop-server (resolve 'clojure.tools.nrepl.server/stop-server)]
+               (stop-server server)
+               (info "nrepl stopped"))))))
 
 (defn- init! []
   (calendar-mime-type-setup)
@@ -112,12 +138,7 @@
   (perf-mon/init)
 
   (server/add-middleware headers/sanitize-header-values)
-  (server/add-middleware control/lockdown-middleware)
-
-  (when (env/feature? :nrepl)
-    (warn "*** Starting nrepl in port 9090")
-    (require 'clojure.tools.nrepl.server)
-    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090 :bind "localhost")))
+  (server/add-middleware control/lockdown-middleware))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}
@@ -144,10 +165,12 @@
       (reset! jetty jetty-instance)
       (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
       "server running")
-    (warn "Server already started!")))
+    (warn "Jetty already started!")))
 
 (defn- stop-jetty! []
-  (when-not (nil? @jetty) (swap! jetty server/stop)))
+  (when-not (nil? @jetty)
+    (swap! jetty server/stop)
+    (info "Jetty stopped")))
 
 (defcontrol "/internal/hot-restart" []
   (util/future*
@@ -159,6 +182,29 @@
     (mongo/disconnect!)
     (mongo/connect!)
     (start-jetty!)))
+
+(defn start-jmx-server! []
+  (swap! jmx-server
+         (fn [old-server]
+           (if (nil? old-server)
+             (let [port (env/value :lupapiste :jmx :port)
+                   new-server (ServerFactory/start port)]
+               (info "Started JMX server on port" port)
+               new-server)
+             (do
+               (warn "JMX server already started!")
+               old-server)))))
+
+(defn- stop-jmx-server! []
+  (when-not (nil? @jmx-server)
+    (swap! jmx-server #(ServerFactory/stop %))
+    (info "JXM Server stopped")))
+
+(defn stop-all! []
+  (stop-jetty!)
+  (stop-jmx-server!)
+  (stop-nrepl!)
+  (mongo/disconnect!))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
@@ -172,6 +218,9 @@
   (info "ImageIO: Registered image MIME types:" (s/join " " (ImageIO/getReaderMIMETypes)))
 
   (init!)
-  (start-jetty!))
+  (start-jetty!)
+  (start-jmx-server!)
+  (start-nrepl!)
+  (-> (Runtime/getRuntime) (.addShutdownHook (Thread. stop-all!))))
 
 "server ready to start"

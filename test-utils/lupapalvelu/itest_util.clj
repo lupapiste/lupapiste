@@ -11,11 +11,12 @@
             [midje.sweet :refer :all]
             [midje.util.exceptions :refer :all]
             [slingshot.slingshot :refer [try+]]
-            [sade.strings :as ss]
             [sade.core :refer [fail! unauthorized not-accessible now]]
-            [sade.http :as http]
-            [sade.env :as env]
             [sade.dummy-email-server]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
@@ -145,12 +146,13 @@
 (def http-post (partial http http/post))
 
 (defn raw [apikey action & args]
-  (http-get
-    (str (server-address) "/api/raw/" (name action))
-    {:oauth-token apikey
-     :query-params (apply hash-map args)
-     :throw-exceptions false
-     :follow-redirects false}))
+  (let [params (apply hash-map args)
+        options (util/assoc-when {:oauth-token apikey
+                                  :query-params (dissoc params :as)
+                                  :throw-exceptions false
+                                  :follow-redirects false}
+                                 :as (:as params))]
+    (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
 (defn raw-query [apikey query-name & args]
   (decode-response
@@ -861,3 +863,29 @@
                 (map? v)        (->xml v)
                 (sequential? v) (apply concat (map ->xml v))
                 :default        [(str v)])}))
+
+;;
+;; Assignments
+;;
+
+(defn create-assignment [from to application-id target desc]
+  (command from :create-assignment
+           :id            application-id
+           :recipientId   to
+           :target        target
+           :description   desc))
+(defn update-assignment [who id assignment-id recipient description]
+  (command who :update-assignment
+           :id id
+           :assignmentId assignment-id
+           :recipientId recipient
+           :description description))
+
+(defn complete-assignment [user assignment-id]
+  (command user :complete-assignment :assignmentId assignment-id))
+
+(defn get-user-assignments [apikey]
+  (let [resp (query apikey :assignments)]
+    (fact "assignments query ok"
+      resp => ok?)
+    (:assignments resp)))

@@ -52,7 +52,10 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :gtm                   (env/value :gtm)
+                 :facebook              (env/value :facebook)
                  :frontpage             (env/value :frontpage)
+                 :searchTextMaxLength   (env/value :search-text-max-length)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
@@ -200,7 +203,9 @@
                    "info-service.js"
                    "context-service.js"
                    "building-service.js"
-                   "assignment-service.js"]}
+                   "assignment-service.js"
+                   "assignment-recipient-filter-service.js"
+                   "assignment-target-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -447,9 +452,10 @@
    :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
+   :welcome {:depends [:welcome-app  :analytics :global-models :ui-components :login :register :register-company
+                       :link-account :debug :header :screenmessages :password-reset :change-email :footer]
              :js ["company-user.js"]
-             :html ["index.html" "login.html" "company-user.html"]}
+             :html ["index.html" "login.html" "company-user.html" "gtm.html"]}
 
    :oskari  {:css ["oskari.css"]}
 

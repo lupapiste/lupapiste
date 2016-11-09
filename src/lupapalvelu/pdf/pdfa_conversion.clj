@@ -1,15 +1,14 @@
 (ns lupapalvelu.pdf.pdfa-conversion
   (:require [clojure.java.shell :as shell]
-            [clojure.pprint :refer [pprint]]
+            [clojure.java.io :as io]
             [clojure.core.memoize :as memo]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [com.netflix.hystrix.core :as hystrix]
             [sade.strings :as ss]
-            [clojure.java.io :as io]
             [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.statistics :as statistics]
-            [lupapalvelu.organization :as organization]
-            [sade.files :as files])
+            [lupapalvelu.organization :as organization])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
            [com.netflix.hystrix HystrixCommandProperties]))
@@ -36,24 +35,31 @@
 
 (def pdf2pdf-enabled? (and (string? (pdf2pdf-executable)) (string? (pdf2pdf-key))))
 
+(defn- pdf2pdf-command [input-file output-file & options]
+  (let [input-file-path  (.getCanonicalPath input-file)
+        output-file-path (.getCanonicalPath output-file)]
+     (concat [(pdf2pdf-executable) "-lk" (pdf2pdf-key)] options [input-file-path output-file-path])))
+
 (defn- pdftools-pdfa-command
   "Conversion error mask 68 means that the following things will cause the conversion to fail:
    - Visual differences in output file (4)
    - Removal of embedded files (64)"
   [input-file output-file cl]
-  [(pdf2pdf-executable) "-ad" "-au" "-rd" "-lk" (pdf2pdf-key) "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore" input-file output-file])
+  (pdf2pdf-command input-file output-file "-ad" "-au" "-rd" "-cl" cl "-cem" "68" "-fd" "/usr/share/fonts/msttcore"))
 
 (defn- pdftools-analyze-command [input-file output-file]
-  [(pdf2pdf-executable) "-ma" "-rd" "-lk" (pdf2pdf-key) "-cl" "pdfa-2u" input-file output-file])
+  (pdf2pdf-command input-file output-file "-ma" "-rd" "-cl" "pdfa-2u"))
 
-(defn- parse-log-file [output-filename]
+(defn- parse-log-file [output-file]
   (try
-    (let [log-filename (str (ss/substring output-filename 0 (- (count output-filename) 4)) "-log.txt")
+    (let [output-filename (.getCanonicalPath output-file)
+          log-filename (str (ss/substring output-filename 0 (- (count output-filename) 4)) "-log.txt")
           lines (with-open [reader (io/reader log-filename)]
                   (vec (line-seq reader)))]
       (io/delete-file log-filename :silently)
       lines)
     (catch FileNotFoundException fnf
+      (error "Returning empty log because of" (.getMessage fnf))
       [])))
 
 (defn- parse-errors-from-log-lines [lines]
@@ -89,20 +95,19 @@
      cl))
 
 (defn- run-pdf-to-pdf-a-conversion [input-file output-file opts]
+  {:pre [(instance? File input-file) (instance? File output-file)]}
   (let [cl (compliance-level input-file output-file opts)
         {:keys [exit err]} (apply shell/sh (pdftools-pdfa-command input-file output-file cl))
         log-lines (parse-log-file output-file)]
     (cond
       (= exit 0) {:pdfa? true
                   :already-valid-pdfa? (pdf-was-already-compliant? log-lines)
-                  :output-file (File. ^String output-file)
+                  :output-file output-file
                   :autoConversion (not (pdf-was-already-compliant? log-lines))}
       (= exit 5) (do (warn "PDF/A conversion failed because it can't be done losslessly")
                      (warn log-lines)
-                     (io/delete-file output-file :silently)
                      {:pdfa? false})
       (#{6 139} exit) (let [error-lines (parse-errors-from-log-lines log-lines)]
-                        (io/delete-file output-file :silently)
                         (if-let [fonts (parse-missing-fonts-from-log-lines error-lines)]
                           {:pdfa? false
                            :missing-fonts fonts}
@@ -124,8 +129,9 @@
       (warn "Failed to read page count from PDF file - " e)
       0)))
 
-(defn- store-converted-page-count [{:keys [already-valid-pdfa? pdfa? output-file]} original-file-path]
-  (let [db-key (cond
+(defn- store-converted-page-count [{:keys [already-valid-pdfa? pdfa? output-file]} original-file]
+  (let [original-file-path (.getCanonicalPath original-file)
+        db-key (cond
                  already-valid-pdfa? :copied-pages
                  pdfa? :converted-pages
                  :else :invalid-pages)
@@ -133,38 +139,39 @@
     (->> (get-pdf-page-count file-path)
          (statistics/store-pdf-conversion-page-count db-key))))
 
-(defn- analyze-and-convert-to-pdf-a [pdf-file {:keys [target-file-path] :as opts}]
+(defn- analyze-and-convert-to-pdf-a [pdf-file output-file opts]
+  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))
+         (instance? File output-file)]}
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (try
-      (info "Trying to convert PDF to PDF/A")
-      (let [stream? (instance? InputStream pdf-file)
-            file-path (if stream?
-                        (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")]
-                          (io/copy pdf-file temp-file)
-                          (.getCanonicalPath temp-file))
-                        (.getCanonicalPath pdf-file))
-            pdf-a-file-path (or target-file-path (str file-path "-pdfa.pdf"))
-            conversion-result (run-pdf-to-pdf-a-conversion file-path pdf-a-file-path opts)]
-        (store-converted-page-count conversion-result file-path)
-        (if (:pdfa? conversion-result)
-          (if (pos? (-> conversion-result :output-file .length))
-            (info "Converted to PDF/A " pdf-a-file-path)
-            (throw (Exception. (str "PDF/A conversion resulted in empty file. Original file: " file-path))))
-          (info "Could not convert the file to PDF/A"))
-        (if stream?
-          (io/delete-file (io/file file-path) :silently))
-        conversion-result)
-      (catch Exception e
-        (error "Error in PDF/A conversion, using original" e)
-        {:pdfa? false}))
+    ; run-pdf-to-pdf-a-conversion operates on files.
+    ; Content must be copied to temp file if the input is an InputStream (not a File))
+    (let [temp-input-file (when (instance? InputStream pdf-file) (files/temp-file "lupapiste-pdfa-stream-conversion" ".pdf"))] ; deleted in finally
+      (try
+        (when temp-input-file (io/copy pdf-file temp-input-file))
+        (let [input-file (or temp-input-file pdf-file)
+              original-filename (:filename opts (.getName input-file))
+              conversion-result (run-pdf-to-pdf-a-conversion input-file output-file opts)]
+          (if (:pdfa? conversion-result)
+            (if (pos? (-> conversion-result :output-file .length))
+              (do
+                (store-converted-page-count conversion-result input-file)
+                (infof "Converted '%s' to PDF/A" original-filename))
+              (throw (Exception. (format "PDF/A conversion of '%s' resulted in empty file" original-filename))))
+            (infof "Could not convert '%s' to PDF/A" original-filename))
+          conversion-result)
+        (catch Exception e
+          (error "Error in PDF/A conversion, using original" e)
+          {:pdfa? false})
+        (finally
+          (when temp-input-file
+            (io/delete-file temp-input-file :silently)))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, using original")
         {:pdfa? false})))
 
 (hystrix/defcommand convert-to-pdf-a
   "Takes a PDF File and returns a File that is PDF/A
   opts is a map possible containing the following keys:
-  {:target-file-path \"Output conversion to this file\"
-   :application      \"Application data for logging purposes\"
+  {:application      \"Application data for logging purposes\"
    :filename         \"Original filename for logging purposes\"}"
   {:hystrix/group-key   "Attachment"
    :hystrix/command-key "Convert to PDF/A with PDF Tools utility"
@@ -172,49 +179,48 @@
                           (doto setter
                             (.andCommandPropertiesDefaults
                               (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))))}
-  [pdf-file & [opts]]
-  (analyze-and-convert-to-pdf-a pdf-file opts))
+  [pdf-file output-file & [opts]]
+  (analyze-and-convert-to-pdf-a pdf-file output-file opts))
 
 (defn file-is-valid-pdfa? [pdf-file]
+  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
   (if (and (pdf2pdf-executable) (pdf2pdf-key))
-    (let [temp-file (File/createTempFile "lupapiste-pdfa-stream-conversion" ".pdf")
-          file-path (if (instance? InputStream pdf-file)
-                      (do (io/copy pdf-file temp-file)
-                          (.getCanonicalPath temp-file))
-                      (.getCanonicalPath pdf-file))
-          output-file (File/createTempFile "lupapiste-pdfa-validation" ".pdf")
-          {:keys [exit]} (apply shell/sh (pdftools-analyze-command file-path (.getCanonicalPath output-file)))]
-      (io/delete-file temp-file :silently)
-      (io/delete-file output-file :silently)
-      (= exit 0))
+    (files/with-temp-file temp-file
+      (files/with-temp-file output-file
+        (let [input-file (if (instance? InputStream pdf-file)
+                           (do (io/copy pdf-file temp-file)
+                               temp-file)
+                           pdf-file)
+              {:keys [exit]} (apply shell/sh (pdftools-analyze-command input-file output-file))]
+          (= exit 0))))
     (do (warn "Cannot find pdf2pdf executable or license key for PDF/A conversion, cannot validate file")
         false)))
 
-(defn convert-file-to-pdf-in-place [src-file]
+(defn convert-file-to-pdf-in-place [pdf-file]
+  {:pre [(or (instance? InputStream pdf-file) (instance? File pdf-file))]}
   "Convert a PDF file to PDF/A in place. Fail-safe, if conversion fails returns false otherwise true.
    Original file is overwritten."
-  (let [temp-file (File/createTempFile "lupapiste.pdf.a." ".tmp")]
+  (files/with-temp-file temp-file
     (try
-      (let [conversion-result (convert-to-pdf-a src-file {:target-file-path (.getCanonicalPath temp-file)})]
+      (let [conversion-result (convert-to-pdf-a pdf-file temp-file)]
         (cond
           (:already-valid-pdfa? conversion-result) (debug "File was valid PDF/A, no conversion")
           (:pdfa? conversion-result) (do
-                                       (io/copy temp-file src-file)
+                                       (io/copy temp-file pdf-file)
                                        (debug "File converted to PDF/A"))
           :else (warn "PDF/A conversion failed, file is not PDF/A" ))
         (:pdfa? conversion-result))
       (catch Exception e
         (do
           (error "Unknown exception in PDF/A conversion, file was not converted." e)
-          false))
-      (finally
-        (io/delete-file temp-file :silently)))))
+          false)))))
 
 (defn pdf-a-required? [organization-or-id]
   (cond
     (string? organization-or-id) (organization/some-organization-has-archive-enabled? #{organization-or-id})
     (map? organization-or-id)    (true? (:permanent-archive-enabled organization-or-id))
-    (delay? organization-or-id)  (true? (:permanent-archive-enabled @organization-or-id))))
+    (delay? organization-or-id)  (true? (:permanent-archive-enabled @organization-or-id))
+    :else (throw (IllegalArgumentException. (str "Not an organization: " organization-or-id)))))
 
 (defn ensure-pdf-a-by-organization
   "Ensures PDF file PDF/A compatibility status if the organization uses permanent archive"

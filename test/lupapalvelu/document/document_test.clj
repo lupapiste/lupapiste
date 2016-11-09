@@ -5,7 +5,11 @@
             [lupapalvelu.document.document-api :as dapi]
             [lupapalvelu.document.document :refer [create-doc-validator]]))
 
-(testable-privates lupapalvelu.document.document deny-remove-of-last-document)
+(testable-privates lupapalvelu.document.document
+                   deny-remove-of-last-document
+                   document-assignment-info
+                   describe-parties-assignment-targets
+                   describe-non-party-document-assignment-targets)
 
 (facts create-doc-validator
   ; type is "YA" and at least one doc is "party" -> fail
@@ -71,3 +75,147 @@
 
     (fact "foreman does not have access to applicant doc"
       (dapi/validate-user-authz-by-doc (-> command (assoc-in [:data :doc] "2"), (assoc-in [:user :id] "4"))) => unauthorized?)))
+
+(facts document-assignment-info
+  (fact "yritys"
+    (document-assignment-info nil
+                              {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",
+                                             :accordion-fields [["_selected"]
+                                                                ["henkilo" "henkilotiedot" "etunimi"]
+                                                                ["henkilo" "henkilotiedot" "sukunimi"]
+                                                                ["yritys" "yritysnimi"]],
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "yritys"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Firma 5"})
+
+  (fact "henkilo"
+    (document-assignment-info nil
+                              {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",
+                                             :accordion-fields [["_selected"]
+                                                                ["henkilo" "henkilotiedot" "etunimi"]
+                                                                ["henkilo" "henkilotiedot" "sukunimi"]
+                                                                ["yritys" "yritysnimi"]],
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "henkilo"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label", :description "Pena Panaani"})
+
+  (fact "without accordion fields"
+    (document-assignment-info nil
+                              {:id "4e2d57b9eb6b91890f33efd7",
+                               :schema-info {:name "hakija-r",
+                                             :i18name "osapuoli",
+                                             :type "party",,
+                                             :subtype "hakija"}
+                               :data {:_selected {:value "henkilo"},
+                                      :henkilo {:userId {:value nil},
+                                                :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                                :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                                      :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                               :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}})
+    => {:id "4e2d57b9eb6b91890f33efd7", :type-key "hakija-r._group_label"})
+
+  (fact "operation doc description > accordion-field"
+    (document-assignment-info [{:id "581c7225b5a61a6ed47bfb43"
+                                :description "FOO"}]
+                              {:id "581c7226b5a61a6ed47bfb48",
+                               :schema-info {:op {:id "581c7225b5a61a6ed47bfb43",
+                                                  :name "kerrostalo-rivitalo",
+                                                  :description nil,
+                                                  :created 1478259237586},
+                                             :removable true,
+                                             :name "uusiRakennus",
+                                             :approvable true,
+                                             :accordion-fields [["valtakunnallinenNumero"]],
+                                             :version 1},
+                               :created 1478259237586,
+                               :data {:valtakunnallinenNumero {:value "1234"}}})
+    => {:id "581c7226b5a61a6ed47bfb48", :type-key "uusiRakennus._group_label", :description "FOO"})
+
+  (fact "without operation description"
+    (document-assignment-info [{:id "581c7225b5a61a6ed47bfb43"
+                                :description nil}]
+                              {:id "581c7226b5a61a6ed47bfb48",
+                               :schema-info {:op {:id "581c7225b5a61a6ed47bfb43",
+                                                  :name "kerrostalo-rivitalo",
+                                                  :description nil,
+                                                  :created 1478259237586},
+                                             :removable true,
+                                             :name "uusiRakennus",
+                                             :approvable true,
+                                             :accordion-fields [["valtakunnallinenNumero"]],
+                                             :version 1},
+                               :created 1478259237586,
+                               :data {:valtakunnallinenNumero {:value "1234"}}})
+    => {:id "581c7226b5a61a6ed47bfb48", :type-key "uusiRakennus._group_label", :description "1234"}))
+
+(facts "sorting of documents for assignment targets"
+  (let [schema1 {:id "s1",
+                 :schema-info {:name "hakija-r",
+                               :i18name "osapuoli",
+                               :type "party",
+                               :order 1
+                               :accordion-fields [["_selected"]
+                                                  ["henkilo" "henkilotiedot" "etunimi"]
+                                                  ["henkilo" "henkilotiedot" "sukunimi"]
+                                                  ["yritys" "yritysnimi"]],
+                               :subtype "hakija"}
+                 :data {:_selected {:value "yritys"},
+                        :henkilo {:userId {:value nil},
+                                  :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                  :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                        :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                 :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}}
+        schema2 {:id "s2",
+                 :schema-info {:name "hakija-r",
+                               :i18name "osapuoli",
+                               :type "party",
+                               :accordion-fields [["_selected"]
+                                                  ["henkilo" "henkilotiedot" "etunimi"]
+                                                  ["henkilo" "henkilotiedot" "sukunimi"]
+                                                  ["yritys" "yritysnimi"]],
+                               :subtype "hakija"}
+                 :data {:_selected {:value "yritys"},
+                        :henkilo {:userId {:value nil},
+                                  :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                  :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                        :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                 :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}}
+        schema3 {:id "s3",
+                 :schema-info {:name "hakija-r",
+                               :i18name "osapuoli",
+                               :type "party",
+                               :order 3
+                               :accordion-fields [["_selected"]
+                                                  ["henkilo" "henkilotiedot" "etunimi"]
+                                                  ["henkilo" "henkilotiedot" "sukunimi"]
+                                                  ["yritys" "yritysnimi"]],
+                               :subtype "hakija"}
+                 :data {:_selected {:value "yritys"},
+                        :henkilo {:userId {:value nil},
+                                  :henkilotiedot {:etunimi {:value "Pena", :modified 1458471382290},
+                                                  :sukunimi {:value "Panaani", :modified 1458471382290}}},
+                        :yritys {:yritysnimi {:value "Firma 5", :modified 1458471382290},
+                                 :yhteyshenkilo {:henkilotiedot {:etunimi {:value ""}, :sukunimi {:value ""}}}}}}]
+    (fact "party targets"
+      (->> (describe-parties-assignment-targets {:documents [schema1 schema2 schema3]})
+           (map :id)) => (just ["s1" "s3" "s2"]))
+    (fact "document targets"
+      (let [docs (map #(update % :schema-info (fn [schema] (dissoc schema :type))) [schema1 schema2 schema3])]
+        (->> (describe-non-party-document-assignment-targets {:documents docs})
+             (map :id))) => (just ["s1" "s3" "s2"]))))

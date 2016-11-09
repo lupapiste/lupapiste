@@ -56,6 +56,7 @@ Sonja cannot approve application but extension
   Sonja logs in
   Open application  ${ext1}  ${propertyid}
   No such test id  approve-application
+  No such test id  application-open-verdict-tab
   Scroll and click test id  approve-extension
   Deny  dynamic-yes-no-confirm-dialog
 
@@ -91,7 +92,30 @@ Now the third row has the draft state
   Check row  1  20.9.2016  10.10.2016  Hakemus jätetty
   Check row  2  ${kryspstart}  ${kryspend}  Luonnos  ${reason}
   Check row  3  11.11.2016  12.12.2016  Luonnos
-    
+
+Pena fills out the first extension
+  Open application  ${ext1}  ${propertyid}
+  Input text with jQuery  textarea[name=kuvaus]  Description
+  Invite company to application  Solita Oy
+  Select from list by value  jquery=select[name=company-select]:first  solita
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Solita Oy
+  Select from list by value  jquery=select[name=company-select]:last  solita
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:last  Solita Oy
+  [Teardown]  Logout
+
+Sonja approves the first extension
+  Sonja logs in
+  Open application  ${ext1}  ${propertyid}
+  No such test id  approve-application
+  Scroll and click test id  approve-extension
+  Confirm  dynamic-yes-no-confirm-dialog
+
+Tasks tab is not visible
+  No such test id  application-open-tasks-tab
+
+Verdict tab is not visible
+  No such test id  application-open-verdict-tab
+  [Teardown]  Logout
 
 *** Keywords ***
 

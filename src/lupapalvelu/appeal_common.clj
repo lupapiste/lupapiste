@@ -1,11 +1,11 @@
 (ns lupapalvelu.appeal-common
-  (:require [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.schemas :as ssc]
             [schema.core :refer [defschema] :as sc]
-            [sade.util :as util]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapalvelu.attachment.appeal :as att-appeal]
+            [lupapalvelu.attachment :as att]))
 
 (defschema FrontendAppealFile
   "File presentation expected by the frontend from appeals query."
@@ -20,11 +20,10 @@
   [{application :application :as command} appeal-id]
   (let [k (if (some #(= appeal-id (:id %)) (:appealVerdicts application))
             :appealVerdicts
-            :appeals)]
-    (action/update-application
-     command
-     {$pull {k           {:id appeal-id}
-             :attachments {:target.id appeal-id}}})))
+            :appeals)
+        removable-attachment-ids (map :id (att-appeal/appeals-attachments application [appeal-id]))]
+    (att/delete-attachments! application removable-attachment-ids)
+    (action/update-application command {$pull {k {:id appeal-id}}})))
 
 (defn- id-list [vid xs]
   (->> xs (filter #(= vid (:target-verdict %))) (map :id)))
@@ -33,21 +32,21 @@
   "Deletes every appeal/appealVerdict and their attachments for the
   given verdict."
   [{application :application :as command} verdict-id]
-  (let [appeal-ids         (id-list verdict-id (:appeals application) )
-        appeal-verdict-ids (id-list verdict-id (:appealVerdicts application))]
+  (let [appeal-ids               (id-list verdict-id (:appeals application) )
+        appeal-verdict-ids       (id-list verdict-id (:appealVerdicts application))
+        removable-attachment-ids (map :id (att-appeal/appeals-attachments application (concat appeal-ids appeal-verdict-ids)))]
+    (att/delete-attachments! application removable-attachment-ids)
     (action/update-application
      command
      {$pull {:appeals        {:id {$in appeal-ids}}
-             :appealVerdicts {:id {$in appeal-verdict-ids}}
-             :attachments    {:target.id {$in (concat appeal-ids
-                                                      appeal-verdict-ids)}}}})))
+             :appealVerdicts {:id {$in appeal-verdict-ids}}}})))
 
 (defn delete-all
   "Deletes every appeal/appealVerdict and their attachments for the
   application."
-  [{application :application :as command}]
-  (action/update-application
-     command
-     {$set {:appeals        []
-            :appealVerdicts []}
-      $pull {:attachments {:target.type {$in [:appeal :appealVerdict]}}}}))
+  [{{:keys [appeals appealVerdicts] :as application} :application :as command}]
+  (let [appeal-ids (concat (map :id appeals) (map :id appealVerdicts))
+        removable-attachment-ids (map :id (att-appeal/appeals-attachments application appeal-ids))]
+    (att/delete-attachments! application removable-attachment-ids)
+    (action/update-application command {$set {:appeals        []
+                                              :appealVerdicts []}})))

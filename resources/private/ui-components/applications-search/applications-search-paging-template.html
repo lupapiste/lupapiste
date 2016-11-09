@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="applications-search-paging-template">
       <div class="paging"
            data-bind="ifnot: dataProvider.pending">
-        <label data-bind="text: loc('applications.results', start(), end(), count())"></label>
+        <label data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></label>
         <div>
           <button class="btn secondary" data-bind="click: prev, enable: enablePrevButton">
             <i class="lupicon-chevron-left"></i>

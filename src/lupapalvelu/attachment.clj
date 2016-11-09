@@ -4,12 +4,14 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
-            [sade.util :refer [=as-kw not=as-kw] :as util]
-            [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [=as-kw not=as-kw] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
@@ -467,14 +469,24 @@
   (let [file-ids (attachment-file-ids (get-attachment-info application attachment-id))]
     (boolean (some #{file-id} file-ids))))
 
-(defn delete-attachment!
-  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [application attachment-id]
-  (info "1/3 deleting files of attachment" attachment-id)
-  (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
-  (info "2/3 deleted files of attachment" attachment-id)
-  (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
-  (info "3/3 deleted meta-data of attachment" attachment-id))
+(defn- get-file-ids-for-attachments-ids [application attachment-ids]
+  (reduce (fn [file-ids attachment-id]
+            (concat file-ids (attachment-file-ids (get-attachment-info application attachment-id))))
+          []
+          attachment-ids))
+
+(defn delete-attachments!
+  "Delete attachments with all it's versions. does not delete comments.
+   Deletes also assignments that are targets of attachments in question.
+   Non-atomic operation: first deletes files, then updates document."
+  [application attachment-ids]
+  (info "1/4 deleting assignments regarding attachments" attachment-ids)
+  (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+  (info "2/4 deleting files of attachments" attachment-ids)
+  (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+  (info "3/4 deleted files of attachments" attachment-ids)
+  (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
+  (info "4/4 deleted meta-data of attachments" attachment-ids))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
@@ -608,10 +620,12 @@
         (append-stream zip (str fileId "_" filename) in))
       (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
-(defn get-all-attachments!
-  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+(defn ^java.io.File get-all-attachments!
+  "Returns attachments as zip file.
+   If application and lang, application and submitted application PDF are included.
+   Callers responsibility is to delete the returned file when done with it!"
   [attachments & [application lang]]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       ; Add all attachments:
@@ -636,17 +650,17 @@
       (with-open [in ((:content file))]
         (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
 
-(defn get-attachments-for-user!
-  "Returns the latest corresponding attachment files readable by the user as a ZIP file"
+(defn ^java.io.InputStream get-attachments-for-user!
+  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
   [user attachments]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       (doseq [attachment attachments]
         (maybe-append-gridfs-file! zip user (-> attachment :versions last)))
       (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    temp-file))
+    (files/temp-file-input-stream temp-file)))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
@@ -676,13 +690,12 @@
       (fail :error.attachment.content-type)
       ;; else
       (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
-            temp-pdf (File/createTempFile fileId ".tmp")
             file-content (mongo/download fileId)]
         (if (nil? file-content)
           (do
             (error "PDF/A conversion: No mongo file for fileId" fileId)
             (fail :error.attachment-not-found))
-          (try
+          (files/with-temp-file temp-pdf
             (with-open [content ((:content file-content))]
               (io/copy content temp-pdf)
               (upload-and-attach! {:application application :user user}
@@ -692,9 +705,7 @@
                                    :created created
                                    :stamped stamped
                                    :original-file-id fileId}
-                                  {:content temp-pdf :filename filename}))
-            (finally
-              (io/delete-file temp-pdf :silently))))))))
+                                  {:content temp-pdf :filename filename}))))))))
 
 (defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
   (boolean (and (states/post-verdict-states (keyword app-state))
@@ -716,3 +727,17 @@
   (assoc attachment
          :tags (att-tags/attachment-tags attachment)
          :manuallySetConstructionTime (manually-set-construction-time attachment)))
+
+(defn- attachment-assignment-info
+  "Return attachment info as assignment target"
+  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
+                        :description contents))
+
+(defn- describe-assignment-targets [application]
+  (let [attachments (map enrich-attachment (:attachments application))]
+    (->> (att-tags/attachment-tag-groups (assoc application :attachments attachments))
+         (att-tags/sort-by-tags attachments)
+         (map attachment-assignment-info))))
+
+(assignment/register-assignment-target! :attachments describe-assignment-targets)

@@ -95,7 +95,8 @@
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
            (sc/optional-key :language)            i18n/supported-language-schema
-           (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}})
+           (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
+           (sc/optional-key :firstLogin)          sc/Bool})
 
 (defschema RegisterUser
                   {:email                            ssc/Email
@@ -147,6 +148,7 @@
 (defschema SessionSummaryUser
   (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
       (assoc (sc/optional-key :orgAuthz) {sc/Keyword #{sc/Keyword}}
+             (sc/optional-key :impersonating) sc/Bool
              :expires ssc/Timestamp)))
 
 (defn session-summary
@@ -191,6 +193,16 @@
   "Returns user's organizations as a set of strings"
   [{org-authz :orgAuthz :as user}]
   (->> org-authz keys (map name) set))
+
+(defn get-organizations
+  "Query organizations for user. Area data is omitted by default."
+  ([user]
+   (let [projection (-> (ssc/plain-keys org/Organization)
+                        (zipmap (repeat true))
+                        (dissoc :areas :areas-wgs84))]
+     (get-organizations user projection)))
+  ([user projection]
+   (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
 
 (defn organization-ids-by-roles
   "Returns a set of organization IDs where user has given roles.
@@ -659,22 +671,3 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
-
-;;
-;; ==============================================================================
-;; User manipulation
-;; ==============================================================================
-;;
-
-(defn update-user-language!
-  "Sets user's language if given and missing. Returns user that is
-  augmented with indicatorNote and language if the language has been set."
-  [{:keys [id language] :as user} ui-lang]
-  (if (and (not language)
-           (not (virtual-user? user))
-           (not (sc/check i18n/supported-language-schema ui-lang)) )
-    (do (mongo/update-by-id :users id {$set {:language ui-lang}})
-        (assoc user
-               :indicatorNote :user.language.note
-               :language ui-lang))
-    user))

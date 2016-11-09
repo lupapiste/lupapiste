@@ -3,6 +3,7 @@
 Documentation  Mikko adds an attachment to application
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
+Resource       attachment_resource.robot
 Variables      variables.py
 
 *** Test Cases ***
@@ -253,7 +254,7 @@ One signature is visible in attachment page
 Signature icon is visible in attachments tab, and only one
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  1
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  1
 
 Mikko signs all attachments
   [Tags]  attachments
@@ -263,7 +264,7 @@ Signature icon is visible
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
   Wait Until  Attachment indicator icon should be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  2
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  2
 
 Signature is visible
   [Tags]  attachments
@@ -483,10 +484,3 @@ Not needed should not be visible
 Not needed should be disabled
   [Arguments]  ${type}
   Not needed matches  ${type}  disabled  1
-
-Delete attachment version
-  [Arguments]  ${versionNumber}
-  Wait and click  show-attachment-versions
-  Wait and click  jquery=tr[data-test-id='version-row-${versionNumber}'] a[data-test-id='delete-version']
-  Confirm yes no dialog
-  Wait until  Element should not be visible  show-attachment-versions

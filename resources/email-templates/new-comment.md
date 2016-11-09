@@ -13,7 +13,7 @@ Terveisin,
 
 # Hej {{name}},
 
-En ny kommentar har inkommit till diskusionet:
+En ny kommentar har inkommit till diskussionet:
 
 {{link-sv}}
 

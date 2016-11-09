@@ -60,12 +60,17 @@ jQuery(document).ready(function() {
     {name: "applications-foreman-search-tabs", template: "applications-search-tabs-template"},
     {name: "applications-foreman-search-filters-list", template: "applications-search-filters-list-template"},
     {name: "applications-foreman-search-results"},
+    {name: "assignments-search-tabs", template: "applications-search-tabs-template"},
+    {name: "assignments-search-results"},
+    {name: "assignments-search-filter"},
     {name: "autocomplete-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-operations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-organizations", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-areas", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-handlers"},
+    {name: "autocomplete-recipient"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-assignment-targets", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
@@ -143,7 +148,11 @@ jQuery(document).ready(function() {
     {name: "open-3d-map"},
     {name: "extension-applications"},
     {name: "create-assignment"},
-    {name: "organization-links"}
+    {name: "organization-links"},
+    {name: "accordion-assignments"},
+    {name: "assignment-editor"},
+    {name: "attachment-type-id"},
+    {name: "state-icons"}
 ];
 
   ko.registerLupapisteComponents(components);

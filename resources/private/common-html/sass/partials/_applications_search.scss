@@ -96,6 +96,16 @@ div.search {
   }
 }
 
+.application-search-component {
+  input[type=text].hasDatepicker {
+    min-width: 100px;
+    width: 30%;
+    display: inline;
+    margin-top: 0px;
+    margin-right: 0px;
+  }
+}
+
 .applications-search-filters-list {
 
   .applications-search-filters-list__filters {
@@ -236,6 +246,38 @@ div.search {
     }
     &.eight {
       width: 15%;
+    }
+  }
+}
+
+.assignments-search-result__table {
+  th {
+    &.first {
+      width: 5%;
+    }
+    &.second {
+      width: 15%;
+    }
+    &.third {
+      width: 10%;
+    }
+    &.fourth {
+      width: 25%;
+    }
+    &.fifth {
+      width: 25%;
+    }
+    &.sixth {
+      width: 15%;
+    }
+  }
+
+  tr {
+    td.created {
+      color: $red-dark;
+    }
+    td.completed {
+      color: $green;
     }
   }
 }

@@ -72,10 +72,11 @@
                           :ya-extensions
                           :tasks-tab-visible
                           :application-info-tab-visible
-                          :application-summary-tab-visible}
+                          :application-summary-tab-visible
+                          :application-verdict-tab-visible}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {} user application {})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
@@ -113,16 +114,18 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                           :get-building-info-from-wfs :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
-                           :mark-seen :info-links :organization-links :mark-seen-organization-links
-                           :pdfa-casefile :suti-application-data :suti-application-products
+                           :get-building-info-from-wfs :mark-seen :info-links :organization-links
+                           :mark-seen-organization-links :pdfa-casefile :suti-application-data :suti-application-products
                            :redirect-to-3d-map :ya-extensions
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
                            :pdf-export
-                           :application-guests :latest-attachment-version :submitted-application-pdf-export}]
-    (doseq [command (foreach-action {} user application {})
+                           :application-guests :latest-attachment-version :submitted-application-pdf-export
+                           ; tab visibility
+                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
+                           :application-verdict-tab-visible}]
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
       (when (and user-roles (not (user-roles :anonymous)))

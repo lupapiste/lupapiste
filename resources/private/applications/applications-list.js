@@ -12,6 +12,7 @@
 
   hub.onPageLoad("applications", function() {
     model.init(true);
+    lupapisteApp.models.globalAuthModel.refreshWithCallback({});
   });
 
   $(function() {

@@ -116,8 +116,14 @@
      pre-verdict-states)))
 
 (def post-submitted-states
- (let [graphs (filter :submitted all-graphs)]
-   (disj (apply union (map #(all-next-states % :submitted) graphs)) :canceled :submitted)))
+  "Submitted state and all states after. Cancelled omitted."
+  (let [graphs (filter :submitted all-graphs)]
+    (disj (apply union (map #(all-next-states % :submitted) graphs)) :canceled)))
+
+(def post-sent-states
+  "Sent state and all states after. Cancelled omitted."
+  (let [graphs (filter :sent all-graphs)]
+    (disj (apply union (map #(all-next-states % :sent) graphs)) :canceled)))
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))

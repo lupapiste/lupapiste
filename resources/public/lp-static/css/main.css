@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1476874996021');
+@import url('main-blessed1.css?z=1478613410436');
 
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
@@ -904,99 +904,104 @@ textarea.grid-style-input {
 }
 
 /* line 1464, ../../../private/common-html/sass/partials/_forms.scss */
+textarea.grid-style-input.really-high {
+  height: 320px;
+}
+
+/* line 1468, ../../../private/common-html/sass/partials/_forms.scss */
 .no-wrap-whitespace {
   white-space: nowrap;
 }
 
-/* line 1468, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1472, ../../../private/common-html/sass/partials/_forms.scss */
 .wrapped_text {
   white-space: pre-wrap;
 }
 
-/* line 1472, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1476, ../../../private/common-html/sass/partials/_forms.scss */
 .cell-span {
   line-height: 40px;
 }
 
-/* line 1476, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1480, ../../../private/common-html/sass/partials/_forms.scss */
 .check-string {
   display: block;
 }
 
-/* line 1481, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
 div.review-done {
   margin: 24px;
 }
 
-/* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1489, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table {
   padding-top: 6px;
 }
-/* line 1488, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1492, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .form-label {
   display: inline;
   width: initial;
   vertical-align: initial;
   font-weight: bold;
 }
-/* line 1495, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1499, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .checkbox-wrapper {
   border: none;
 }
-/* line 1498, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1502, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
-/* line 1504, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1508, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
-/* line 1510, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1514, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
-/* line 1516, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1520, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
-/* line 1521, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1525, ../../../private/common-html/sass/partials/_forms.scss */
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
 
-/* line 1527, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
 .foreman-info {
   padding-left: 6px;
 }
 
-/* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1535, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container {
   margin-left: 6px;
 }
-/* line 1533, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1537, ../../../private/common-html/sass/partials/_forms.scss */
 .building-select-container .building-select-box {
   position: relative;
   width: 30em;
 }
 
-/* line 1539, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1543, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector {
   padding-left: 6px;
 }
-/* line 1541, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector label.form-label {
   width: 100%;
 }
-/* line 1544, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector .errorPanel {
   top: -80px;
   left: 200px;
@@ -2197,7 +2202,7 @@ table.review-buildings-table div.docgen-checkbox-wrapper.wrapper--disabled {
 
 /* line 302, ../../../private/common-html/sass/partials/_tables.scss */
 table.company-users-table select {
-  width: initial;
+  width: 10em;
 }
 /* line 305, ../../../private/common-html/sass/partials/_tables.scss */
 table.company-users-table tr:hover, table.company-users-table tr:active {
@@ -3990,11 +3995,67 @@ ul.no-bullets {
 }
 
 /* line 97, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments {
+  color: white;
+  margin: 0 auto;
+  min-height: 40px;
+}
+/* line 101, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment-container {
+  margin-top: 1px;
+  padding: 6px 6px;
+  background-color: #f39129;
+}
+/* line 104, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment-container:first-child {
+  margin-top: 0;
+}
+/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment {
+  width: 100%;
+  display: block;
+}
+/* line 112, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > * {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 0 6px;
+}
+/* line 117, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > .assignment-text {
+  width: 100%;
+}
+/* line 120, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > .assignment-header {
+  white-space: nowrap;
+}
+/* line 123, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > .assignment-header .creator:before {
+  content: " (";
+}
+/* line 128, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > .assignment-header .receiver:before {
+  content: "→";
+}
+/* line 131, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment > .assignment-header .receiver:after {
+  content: "):";
+}
+/* line 136, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment div.no-wrap-whitespace button:first-child {
+  margin-right: 6px;
+}
+/* line 139, ../../../private/common-html/sass/partials/_accordion.scss */
+div.accordion-assignments .assignment .editor {
+  display: table-row;
+}
+
+/* line 146, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-fields > .button-group:last-child {
   border-bottom: none;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 150, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -4003,25 +4064,25 @@ ul.no-bullets {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 109, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 158, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 114, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 163, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 121, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 170, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 128, ../../../private/common-html/sass/partials/_accordion.scss */
+/* line 177, ../../../private/common-html/sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
@@ -4287,77 +4348,80 @@ ul.no-bullets {
 /* line 15, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-header .edit-button-container {
   width: 28px;
+}
+/* line 17, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header .edit-button-container .edit-button {
   cursor: pointer;
 }
-/* line 18, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 20, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-header .edit-button-container i {
   margin: 0;
 }
-/* line 30, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 32, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form {
   padding: 0 15px 15px 15px;
 }
-/* line 32, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 34, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
   width: 100%;
   box-sizing: border-box;
   height: 30px;
 }
-/* line 37, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 39, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=checkbox] {
   width: auto;
   height: auto;
   vertical-align: middle;
 }
-/* line 42, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 44, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=number] {
   width: 50px;
   text-align: right;
   display: inline-block;
 }
-/* line 47, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 49, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form label {
   display: inline-block;
   margin: 5px 0 5px 0;
   font-weight: 700;
 }
-/* line 53, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 55, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .text-input-container div {
   display: inline-block;
   margin: 0;
 }
-/* line 57, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 59, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .text-input-container .form-input, .metadata-editor-container .editor .editor-form .text-input-container .form-input--inline {
   margin: 0;
 }
-/* line 64, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 66, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor button:disabled {
   cursor: not-allowed;
 }
-/* line 69, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 71, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .invalid {
   border: 2px solid #ff0643;
   border-radius: 2px;
   outline: none;
 }
-/* line 75, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 77, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable {
   background-color: #e8e8e7;
   padding: 10px;
   border-radius: 4px;
   margin-top: 10px;
 }
-/* line 80, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 82, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h4 {
   font-size: 16px;
   margin-top: 0;
 }
-/* line 84, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 86, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h5 {
   font-weight: 700;
   margin-bottom: 5px;
 }
-/* line 89, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 91, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons {
   *zoom: 1;
   padding-top: 15px;
@@ -4371,11 +4435,11 @@ ul.no-bullets {
 .metadata-editor-container .editor .editor-buttons:after {
   clear: both;
 }
-/* line 92, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 94, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .save {
   float: left;
 }
-/* line 95, ../../../private/common-html/sass/partials/_metadata-editor.scss */
+/* line 97, ../../../private/common-html/sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .delete {
   float: right;
 }
@@ -4768,77 +4832,86 @@ div.search i {
   right: 8px;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 100, ../../../private/common-html/sass/partials/_applications_search.scss */
+.application-search-component input[type=text].hasDatepicker {
+  min-width: 100px;
+  width: 30%;
+  display: inline;
+  margin-top: 0px;
+  margin-right: 0px;
+}
+
+/* line 111, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filters {
   display: table;
 }
-/* line 105, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 115, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-row {
   display: table-row;
 }
-/* line 109, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 119, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item {
   background-color: #fff;
   display: table-cell;
   vertical-align: top;
   height: 40px;
 }
-/* line 114, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 124, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item:first-child {
   width: 100%;
 }
-/* line 117, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 127, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item button {
   width: 100%;
 }
-/* line 121, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 131, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--default-filter {
   min-width: 250px;
   max-width: 250px;
   width: 250px;
   overflow: hidden;
 }
-/* line 127, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 137, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-filters-list .applications-search-filters-list__filter-item--remove {
   min-width: 105px;
   max-width: 105px;
   width: 105px;
 }
 
-/* line 134, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 144, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator {
   color: #f39129;
   padding: 3px 0 0 0 !important;
   word-wrap: break-word;
 }
-/* line 138, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 148, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator div {
   text-align: center;
   height: auto !important;
   padding: 0 6px !important;
   white-space: nowrap;
 }
-/* line 143, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 153, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator div i {
   display: table-cell;
 }
-/* line 146, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 156, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator div span {
   padding-left: 2px;
   display: table-cell;
   vertical-align: middle;
   color: #595959;
 }
-/* line 154, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 164, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.urgent {
   color: #df3215;
 }
-/* line 157, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 167, ../../../private/common-html/sass/partials/_applications_search.scss */
 .applications-search-results__indicator .application-search-results__urgency.pending {
   color: #f39129;
 }
 
-/* line 164, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 174, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th, .application-foreman-search-result__table th {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -4849,76 +4922,109 @@ div.search i {
   white-space: nowrap;
   padding-right: 16px;
 }
-/* line 169, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 179, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.sorting:hover, .application-foreman-search-result__table th.sorting:hover {
   color: #f7ac2e;
   text-decoration: underline;
 }
-/* line 174, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 184, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th span, .application-search-result__table th i, .application-foreman-search-result__table th span, .application-foreman-search-result__table th i {
   vertical-align: middle;
 }
-/* line 177, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 187, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th i, .application-foreman-search-result__table th i {
   position: absolute;
 }
 
-/* line 197, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 207, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.fifth {
   width: 10%;
 }
-/* line 200, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 210, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.sixth {
   width: 5%;
 }
-/* line 203, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 213, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.seventh {
   width: 5%;
 }
-/* line 206, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 216, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.eight {
   width: 10%;
 }
-/* line 209, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 219, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-search-result__table th.ninth {
   width: 10%;
 }
 
-/* line 219, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 229, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.second {
   width: 15%;
 }
-/* line 222, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 232, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.third {
   width: 5%;
 }
-/* line 225, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 235, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.fourth {
   width: 20%;
 }
-/* line 228, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 238, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.fifth {
   width: 15%;
 }
-/* line 231, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 241, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.sixth {
   width: 15%;
 }
-/* line 234, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 244, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.seventh {
   width: 5%;
 }
-/* line 237, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 247, ../../../private/common-html/sass/partials/_applications_search.scss */
 .application-foreman-search-result__table th.eight {
   width: 15%;
 }
 
-/* line 244, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 255, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.first {
+  width: 5%;
+}
+/* line 258, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.second {
+  width: 15%;
+}
+/* line 261, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.third {
+  width: 10%;
+}
+/* line 264, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.fourth {
+  width: 25%;
+}
+/* line 267, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.fifth {
+  width: 25%;
+}
+/* line 270, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table th.sixth {
+  width: 15%;
+}
+/* line 276, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table tr td.created {
+  color: #df3215;
+}
+/* line 279, ../../../private/common-html/sass/partials/_applications_search.scss */
+.assignments-search-result__table tr td.completed {
+  color: #46b02d;
+}
+
+/* line 286, ../../../private/common-html/sass/partials/_applications_search.scss */
 .search-results-waiting i.spin {
   font-size: 44px;
   padding: 0;
 }
-/* line 248, ../../../private/common-html/sass/partials/_applications_search.scss */
+/* line 290, ../../../private/common-html/sass/partials/_applications_search.scss */
 .search-results-waiting span {
   padding-left: 2em;
 }
@@ -4960,13 +5066,17 @@ div.search i {
 #indicator .indicator-bar.negative {
   background-color: #df3215;
 }
-/* line 41, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 40, ../../../private/common-html/sass/partials/_indicator.scss */
+#indicator .indicator-bar.hidden {
+  visibility: hidden;
+}
+/* line 44, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-info {
   vertical-align: top;
   display: table-cell;
   margin-right: 24px;
 }
-/* line 47, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 50, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-message {
   vertical-align: top;
   display: table-cell;
@@ -4974,13 +5084,13 @@ div.search i {
   padding-left: 6px;
   padding-right: 6px;
 }
-/* line 57, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 60, ../../../private/common-html/sass/partials/_indicator.scss */
 #indicator .indicator-close {
   vertical-align: top;
   display: table-cell;
 }
 
-/* line 64, ../../../private/common-html/sass/partials/_indicator.scss */
+/* line 67, ../../../private/common-html/sass/partials/_indicator.scss */
 .admin #indicator .indicator-bar, .authority-admin #indicator .indicator-bar {
   z-index: 2003;
   margin-top: -38px;
@@ -5144,13 +5254,18 @@ button.rollup-button {
   cursor: pointer;
 }
 
-/* line 19, ../../../private/common-html/sass/views/_applications.scss */
+/* line 9, ../../../private/common-html/sass/views/_applications.scss */
+.assignment-row {
+  cursor: pointer;
+}
+
+/* line 23, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state {
   margin-top: 24px;
   margin-right: 72px;
   width: 100%;
 }
-/* line 23, ../../../private/common-html/sass/views/_applications.scss */
+/* line 27, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-box, .applications-empty-state .app-type-button {
   display: inline-block;
   box-sizing: border-box;
@@ -5160,22 +5275,22 @@ button.rollup-button {
   vertical-align: top;
   position: relative;
 }
-/* line 36, ../../../private/common-html/sass/views/_applications.scss */
+/* line 40, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .app-type-button {
   margin-top: 0;
   padding-bottom: 0 !important;
 }
-/* line 42, ../../../private/common-html/sass/views/_applications.scss */
+/* line 46, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .missing-wrapper {
   width: 100%;
 }
-/* line 46, ../../../private/common-html/sass/views/_applications.scss */
+/* line 50, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .first-box {
   padding-left: 0;
   padding-right: 24px;
   min-height: 250px;
 }
-/* line 50, ../../../private/common-html/sass/views/_applications.scss */
+/* line 54, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .middle-box {
   padding-left: 24px;
   padding-right: 24px;
@@ -5184,38 +5299,38 @@ button.rollup-button {
   border-right: 1px dotted #888a8c;
   padding-bottom: 95px;
 }
-/* line 57, ../../../private/common-html/sass/views/_applications.scss */
+/* line 61, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .last-box {
   padding-left: 24px;
   padding-right: 0;
   min-height: 250px;
 }
-/* line 59, ../../../private/common-html/sass/views/_applications.scss */
+/* line 63, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state .last-box p {
   margin-bottom: 0px;
 }
 
-/* line 66, ../../../private/common-html/sass/views/_applications.scss */
+/* line 70, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .app-type-box, .applications-empty-state.wide .app-type-button {
   width: 33%;
 }
-/* line 70, ../../../private/common-html/sass/views/_applications.scss */
+/* line 74, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .last-box {
   border-right: none;
 }
-/* line 74, ../../../private/common-html/sass/views/_applications.scss */
+/* line 78, ../../../private/common-html/sass/views/_applications.scss */
 .applications-empty-state.wide .missing-prev-permit-box {
   display: none;
 }
 
-/* line 79, ../../../private/common-html/sass/views/_applications.scss */
+/* line 83, ../../../private/common-html/sass/views/_applications.scss */
 .first-box.app-type-button,
 .middle-box.app-type-button,
 .last-box.app-type-button {
   min-height: 0;
 }
 
-/* line 87, ../../../private/common-html/sass/views/_applications.scss */
+/* line 91, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
@@ -5234,31 +5349,31 @@ button.rollup-button {
   /*   @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%)); */
   /* } */
 }
-/* line 104, ../../../private/common-html/sass/views/_applications.scss */
+/* line 108, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 109, ../../../private/common-html/sass/views/_applications.scss */
+/* line 113, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 114, ../../../private/common-html/sass/views/_applications.scss */
+/* line 118, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 120, ../../../private/common-html/sass/views/_applications.scss */
+/* line 124, ../../../private/common-html/sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc, .sorting.asc, .sorting.desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 124, ../../../private/common-html/sass/views/_applications.scss */
+/* line 128, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_asc:after, .sorting.asc:after {
   content: "";
   display: block;
@@ -5272,7 +5387,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 135, ../../../private/common-html/sass/views/_applications.scss */
+/* line 139, ../../../private/common-html/sass/views/_applications.scss */
 .sorting_desc:after, .sorting.desc:after {
   content: "";
   display: block;
@@ -5286,7 +5401,7 @@ button.rollup-button {
   right: 2px;
 }
 
-/* line 147, ../../../private/common-html/sass/views/_applications.scss */
+/* line 151, ../../../private/common-html/sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -5295,61 +5410,61 @@ button.rollup-button {
   bottom: 12px;
 }
 
-/* line 155, ../../../private/common-html/sass/views/_applications.scss */
+/* line 159, ../../../private/common-html/sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 157, ../../../private/common-html/sass/views/_applications.scss */
+/* line 161, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation {
   display: table-row;
 }
-/* line 159, ../../../private/common-html/sass/views/_applications.scss */
+/* line 163, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
-/* line 162, ../../../private/common-html/sass/views/_applications.scss */
+/* line 166, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div {
   padding-right: 24px;
   display: table-cell;
 }
-/* line 165, ../../../private/common-html/sass/views/_applications.scss */
+/* line 169, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation div .btn, .invitations .invitation div .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .invitations .invitation div .paginate_disabled_previous, .invitations .invitation div .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .invitations .invitation div .paginate_disabled_next {
   margin: 0 6px 0 6px;
 }
-/* line 169, ../../../private/common-html/sass/views/_applications.scss */
+/* line 173, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation p {
   max-width: 35em;
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 175, ../../../private/common-html/sass/views/_applications.scss */
+/* line 179, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation h3 {
   max-width: 35em;
   margin-top: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 181, ../../../private/common-html/sass/views/_applications.scss */
+/* line 185, ../../../private/common-html/sass/views/_applications.scss */
 .invitations .invitation .invitation-actions {
   white-space: nowrap;
 }
 
-/* line 187, ../../../private/common-html/sass/views/_applications.scss */
+/* line 191, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 191, ../../../private/common-html/sass/views/_applications.scss */
+/* line 195, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 194, ../../../private/common-html/sass/views/_applications.scss */
+/* line 198, ../../../private/common-html/sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 200, ../../../private/common-html/sass/views/_applications.scss */
+/* line 204, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list .indicator-count, .applications-table .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -5359,31 +5474,31 @@ button.rollup-button {
   width: 22px;
   padding: 3px;
 }
-/* line 209, ../../../private/common-html/sass/views/_applications.scss */
+/* line 213, ../../../private/common-html/sass/views/_applications.scss */
 #applications-list div, .applications-table div {
   padding-top: 3px;
   height: 30px;
 }
 
-/* line 245, ../../../private/common-html/sass/views/_applications.scss */
+/* line 249, ../../../private/common-html/sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 250, ../../../private/common-html/sass/views/_applications.scss */
+/* line 254, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 253, ../../../private/common-html/sass/views/_applications.scss */
+/* line 257, ../../../private/common-html/sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 256, ../../../private/common-html/sass/views/_applications.scss */
+/* line 260, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -5394,7 +5509,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 266, ../../../private/common-html/sass/views/_applications.scss */
+/* line 270, ../../../private/common-html/sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
@@ -6141,156 +6256,161 @@ span.icon_clear:before {
   margin-right: 6px;
 }
 
-/* line 604, ../../../private/common-html/sass/views/_application.scss */
+/* line 603, ../../../private/common-html/sass/views/_application.scss */
+.content--neighbors-owners {
+  min-height: 20em;
+}
+
+/* line 608, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .dialog-content, #dialog-verdict-attachment-prints-order-history .dialog-content {
   padding-left: 15px;
 }
-/* line 607, ../../../private/common-html/sass/views/_application.scss */
+/* line 611, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .order-amount, #dialog-verdict-attachment-prints-order-history .order-amount {
   width: 18px;
 }
-/* line 610, ../../../private/common-html/sass/views/_application.scss */
+/* line 614, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .btn-prints-dialog-ok, #dialog-verdict-attachment-prints-order-history .btn-prints-dialog-ok {
   margin-left: 15px;
 }
-/* line 614, ../../../private/common-html/sass/views/_application.scss */
+/* line 618, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .context-error, #dialog-verdict-attachment-prints-order-history .context-error {
   max-width: 820px;
   word-wrap: break-word;
 }
-/* line 628, ../../../private/common-html/sass/views/_application.scss */
+/* line 632, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers, #dialog-verdict-attachment-prints-order-history .fixed-headers {
   width: 820px;
   table-layout: fixed;
   margin-right: 20px;
 }
-/* line 633, ../../../private/common-html/sass/views/_application.scss */
+/* line 637, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers .center, #dialog-verdict-attachment-prints-order-history .fixed-headers .center {
   text-align: center;
 }
-/* line 637, ../../../private/common-html/sass/views/_application.scss */
+/* line 641, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td, #dialog-verdict-attachment-prints-order-history .fixed-headers td {
   word-wrap: break-word;
 }
-/* line 641, ../../../private/common-html/sass/views/_application.scss */
+/* line 645, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(1) {
   width: 200px;
   max-width: 200px;
 }
-/* line 645, ../../../private/common-html/sass/views/_application.scss */
+/* line 649, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(2) {
   width: 200px;
   max-width: 200px;
 }
-/* line 649, ../../../private/common-html/sass/views/_application.scss */
+/* line 653, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(3) {
   width: 300px;
   max-width: 300px;
 }
-/* line 653, ../../../private/common-html/sass/views/_application.scss */
+/* line 657, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(4) {
   width: 120px;
   max-width: 120px;
 }
-/* line 659, ../../../private/common-html/sass/views/_application.scss */
+/* line 663, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers thead tr, #dialog-verdict-attachment-prints-order-history .fixed-headers thead tr {
   display: block;
   position: relative;
 }
-/* line 664, ../../../private/common-html/sass/views/_application.scss */
+/* line 668, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers tbody, #dialog-verdict-attachment-prints-order-history .fixed-headers tbody {
   display: block;
   overflow: auto;
   width: 100%;
   max-height: 200px;
 }
-/* line 672, ../../../private/common-html/sass/views/_application.scss */
+/* line 676, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper {
   max-height: 200px;
   width: 820px;
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 677, ../../../private/common-html/sass/views/_application.scss */
+/* line 681, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper tbody, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper tbody {
   height: auto;
 }
 
-/* line 682, ../../../private/common-html/sass/views/_application.scss */
+/* line 686, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-dialog-description {
   margin-bottom: 12px;
 }
-/* line 686, ../../../private/common-html/sass/views/_application.scss */
+/* line 690, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items {
   margin-top: 6px;
   overflow-y: auto;
   max-height: 500px;
 }
-/* line 691, ../../../private/common-html/sass/views/_application.scss */
+/* line 695, ../../../private/common-html/sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items .history-item {
   margin: 6px 0;
 }
 
-/* line 698, ../../../private/common-html/sass/views/_application.scss */
+/* line 702, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 703, ../../../private/common-html/sass/views/_application.scss */
+/* line 707, ../../../private/common-html/sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 709, ../../../private/common-html/sass/views/_application.scss */
+/* line 713, ../../../private/common-html/sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
 
-/* line 713, ../../../private/common-html/sass/views/_application.scss */
+/* line 717, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 715, ../../../private/common-html/sass/views/_application.scss */
+/* line 719, ../../../private/common-html/sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 721, ../../../private/common-html/sass/views/_application.scss */
+/* line 725, ../../../private/common-html/sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 724, ../../../private/common-html/sass/views/_application.scss */
+/* line 728, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 726, ../../../private/common-html/sass/views/_application.scss */
+/* line 730, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 730, ../../../private/common-html/sass/views/_application.scss */
+/* line 734, ../../../private/common-html/sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 738, ../../../private/common-html/sass/views/_application.scss */
+/* line 742, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 743, ../../../private/common-html/sass/views/_application.scss */
+/* line 747, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 748, ../../../private/common-html/sass/views/_application.scss */
+/* line 752, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -6306,165 +6426,165 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 763, ../../../private/common-html/sass/views/_application.scss */
+/* line 767, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 769, ../../../private/common-html/sass/views/_application.scss */
+/* line 773, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 771, ../../../private/common-html/sass/views/_application.scss */
+/* line 775, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 776, ../../../private/common-html/sass/views/_application.scss */
+/* line 780, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 780, ../../../private/common-html/sass/views/_application.scss */
+/* line 784, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333;
 }
-/* line 783, ../../../private/common-html/sass/views/_application.scss */
+/* line 787, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 787, ../../../private/common-html/sass/views/_application.scss */
+/* line 791, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 791, ../../../private/common-html/sass/views/_application.scss */
+/* line 795, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 795, ../../../private/common-html/sass/views/_application.scss */
+/* line 799, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 798, ../../../private/common-html/sass/views/_application.scss */
+/* line 802, ../../../private/common-html/sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 807, ../../../private/common-html/sass/views/_application.scss */
+/* line 811, ../../../private/common-html/sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 812, ../../../private/common-html/sass/views/_application.scss */
+/* line 816, ../../../private/common-html/sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 816, ../../../private/common-html/sass/views/_application.scss */
+/* line 820, ../../../private/common-html/sass/views/_application.scss */
 .info-line {
   display: table-row;
 }
-/* line 818, ../../../private/common-html/sass/views/_application.scss */
+/* line 822, ../../../private/common-html/sass/views/_application.scss */
 .info-line span, .info-line a {
   display: table-cell;
 }
-/* line 821, ../../../private/common-html/sass/views/_application.scss */
+/* line 825, ../../../private/common-html/sass/views/_application.scss */
 .info-line a {
   padding-left: 12px;
 }
-/* line 824, ../../../private/common-html/sass/views/_application.scss */
+/* line 828, ../../../private/common-html/sass/views/_application.scss */
 .info-line .required-field-error-element-name {
   padding-left: 6px;
 }
-/* line 827, ../../../private/common-html/sass/views/_application.scss */
+/* line 831, ../../../private/common-html/sass/views/_application.scss */
 .info-line .lupicon-circle-attention {
   color: #e34319;
 }
-/* line 831, ../../../private/common-html/sass/views/_application.scss */
+/* line 835, ../../../private/common-html/sass/views/_application.scss */
 .info-line.warning .lupicon-circle-attention {
   color: #f39129;
 }
 
-/* line 837, ../../../private/common-html/sass/views/_application.scss */
+/* line 841, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 839, ../../../private/common-html/sass/views/_application.scss */
+/* line 843, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 841, ../../../private/common-html/sass/views/_application.scss */
+/* line 845, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 849, ../../../private/common-html/sass/views/_application.scss */
+/* line 853, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 852, ../../../private/common-html/sass/views/_application.scss */
+/* line 856, ../../../private/common-html/sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 858, ../../../private/common-html/sass/views/_application.scss */
+/* line 862, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 861, ../../../private/common-html/sass/views/_application.scss */
+/* line 865, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input, .tasks-foreman .form-input--inline {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 867, ../../../private/common-html/sass/views/_application.scss */
+/* line 871, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman .combobox.long.form-input--inline, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 872, ../../../private/common-html/sass/views/_application.scss */
+/* line 876, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 877, ../../../private/common-html/sass/views/_application.scss */
+/* line 881, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 880, ../../../private/common-html/sass/views/_application.scss */
+/* line 884, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 885, ../../../private/common-html/sass/views/_application.scss */
+/* line 889, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 888, ../../../private/common-html/sass/views/_application.scss */
+/* line 892, ../../../private/common-html/sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 894, ../../../private/common-html/sass/views/_application.scss */
+/* line 898, ../../../private/common-html/sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 899, ../../../private/common-html/sass/views/_application.scss */
+/* line 903, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 904, ../../../private/common-html/sass/views/_application.scss */
+/* line 908, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 906, ../../../private/common-html/sass/views/_application.scss */
+/* line 910, ../../../private/common-html/sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #f39129;
   text-decoration: none;
@@ -6484,32 +6604,37 @@ span.icon_clear:before {
   text-decoration: underline;
 }
 
-/* line 913, ../../../private/common-html/sass/views/_application.scss */
+/* line 917, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab h1 {
   float: none;
 }
-/* line 916, ../../../private/common-html/sass/views/_application.scss */
+/* line 920, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata {
   max-width: 875px;
 }
-/* line 918, ../../../private/common-html/sass/views/_application.scss */
+/* line 922, ../../../private/common-html/sass/views/_application.scss */
 #application-archival-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 925, ../../../private/common-html/sass/views/_application.scss */
+/* line 929, ../../../private/common-html/sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
 
-/* line 930, ../../../private/common-html/sass/views/_application.scss */
+/* line 934, ../../../private/common-html/sass/views/_application.scss */
 h2 > i.is-right {
   float: right;
 }
 
-/* line 934, ../../../private/common-html/sass/views/_application.scss */
+/* line 938, ../../../private/common-html/sass/views/_application.scss */
 div.review-tasks {
   margin-top: 20px;
+}
+
+/* line 943, ../../../private/common-html/sass/views/_application.scss */
+.assignment-creator {
+  margin-bottom: 12px;
 }
 
 /* line 1, ../../../private/common-html/sass/views/_create_application.scss */
@@ -7080,14 +7205,38 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 620, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 621, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 626, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 627, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
+}
+
+/* line 322, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-assignment-row {
+  border-top: none;
+  border-bottom: none;
+}
+/* line 327, ../../../private/common-html/sass/views/_attachment.scss */
+.attachment-assignment-row td {
+  padding: 0px;
+  margin: 0px;
+}
+
+/* line 333, ../../../private/common-html/sass/views/_attachment.scss */
+.hidden-row {
+  height: 0px;
+  border-top: none;
+  border-bottom: none;
+}
+/* line 339, ../../../private/common-html/sass/views/_attachment.scss */
+.hidden-row td {
+  height: 0px;
+  padding: 0px;
+  margin: 0px;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
@@ -7132,7 +7281,7 @@ td.comment-text {
 }
 /* line 41, ../../../private/common-html/sass/views/_statement.scss */
 #statement textarea {
-  resize: none;
+  resize: vertical;
   width: 99%;
 }
 /* line 45, ../../../private/common-html/sass/views/_statement.scss */

@@ -6,14 +6,15 @@
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
             [sade.common-reader :as cr]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
             [sade.strings :as ss]
             [sade.util :refer [fn-> fn->>] :as util]
             [sade.xml :as xml]
-            [sade.env :as env]
             [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -42,7 +43,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
   (:import [java.net URL]
-           [java.io File]))
+           [java.io File]
+           [java.nio.charset StandardCharsets]))
 
 (notifications/defemail :application-verdict
                         {:subject-key    "verdict"
@@ -184,6 +186,19 @@
     "lupaehto" "lupaehto"
     "paatosote"))
 
+(defn- content-disposition-filename
+  "Extracts the filename from the Content-Disposition header of the
+  given respones. Decodes string according to the Server information."
+  [{headers :headers}]
+  (when-let [raw-filename (some->> (get headers "content-disposition")
+                                    (re-find #".*filename=\"?([^\"]+)")
+                                    last)]
+    (case (some-> (get headers "server") ss/trim ss/lower-case)
+      "microsoft-iis/7.5" (-> raw-filename
+                              (.getBytes StandardCharsets/ISO_8859_1)
+                              (String. StandardCharsets/UTF_8))
+      raw-filename)))
+
 (defn- get-poytakirja
   "At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
@@ -205,8 +220,7 @@
                    _ (debug "Download " url)
                    url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (http/get url :as :stream :throw-exceptions false)
-                   header-filename (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                                     (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                   header-filename (content-disposition-filename resp)
                    filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
@@ -215,11 +229,10 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)
-                   temp-file       (File/createTempFile filename "-verdict-attachment.tmp")]]
+                   current-application (domain/get-application-as (:id application) user)]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (try
+         (files/with-temp-file temp-file
            (if (= 200 (:status resp))
              (with-open [in (:body resp)]
                ; Copy content to a temp file to keep the content close at hand
@@ -236,9 +249,7 @@
                                               {:filename filename
                                                :size content-length
                                                :content temp-file}))
-             (error (str (:status resp) " - unable to download " url ": " resp)))
-           (finally
-             (io/delete-file temp-file :silently)))))
+             (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 

@@ -108,10 +108,17 @@
 (defn- statement-summary [statement]
   (select-keys statement [:id :person :requested :given :state]))
 
+(defn- can-read-comments? [app user]
+  (or (auth/user-authz? auth/comment-user-authz-roles app user)
+      (auth/has-organization-authz-roles? auth/commenter-org-authz-roles app user)
+      (auth/has-auth? app (get-in user [:company :id]))))
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
-        (update-in [:comments] (partial filter (fn [comment] ((set (:roles comment)) (name (:role user))))))
+        (update-in [:comments] (partial filter (fn [comment] (and
+                                                               (can-read-comments? application user)
+                                                               ((set (:roles comment)) (name (:role user)))))))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
@@ -389,7 +396,9 @@
    :appealVerdicts           []
    :archived                 {:application nil
                               :completed   nil}
-   :reservations             []})
+   :reservations             []
+   :warrantyStart            nil ; timestamp
+   :warrantyEnd              nil})
 
 (def operation-skeleton
   {:name ""

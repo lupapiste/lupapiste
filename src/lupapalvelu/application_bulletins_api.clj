@@ -3,9 +3,10 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.strings :as ss]
             [sade.util :as util]
             [slingshot.slingshot :refer [try+]]
-            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.application-bulletins :as bulletins]
@@ -66,11 +67,16 @@
   (when (> (* page bulletin-page-size) (Integer/MAX_VALUE))
     (fail :error.page-is-too-big)))
 
+(defn- search-text-validator [{{:keys [searchText]} :data}]
+  (when (> (count searchText) (env/value :search-text-max-length))
+    (fail :error.search-text-is-too-long)))
+
 (defquery application-bulletins
   {:description "Query for Julkipano"
    :parameters [page searchText municipality state sort]
    :input-validators [(partial action/number-parameters [:page])
-                      page-size-validator]
+                      page-size-validator
+                      search-text-validator]
    :user-roles #{:anonymous}}
   [_]
   (let [parameters [page searchText municipality state sort]]

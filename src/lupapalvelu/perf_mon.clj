@@ -13,7 +13,7 @@
 ;; Instrumenting:
 ;;
 
-(defn instrument [f v]
+(defn instrument [f ^clojure.lang.Var v]
   (alter-var-root v f (str (.ns v) \/ (.sym v))))
 
 (defn instrument-ns [f & namespaces]

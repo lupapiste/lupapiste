@@ -30,7 +30,7 @@
 (defn activate-account [activation-key]
   (let [act     (mongo/select-one :activation {:activation-key activation-key})
         userid  (:user-id act)
-        updated-user (mongo/update-one-and-return :users {:_id userid} {$set {:enabled true}})]
+        updated-user (mongo/update-one-and-return :users {:_id userid} {$set {:enabled true :firstLogin true}})]
     (when updated-user
       (user/clear-logins (:username updated-user))
       (mongo/remove :activation (:id act))

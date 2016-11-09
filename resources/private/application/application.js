@@ -14,6 +14,7 @@
       {commandName         : "inform-construction-started",
        checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
+       extraParameters     : {lang: loc.getCurrentLanguage()},
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
        dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
@@ -161,6 +162,54 @@
     }
   }
 
+  function resetApplication() {
+    var app = _.merge(LUPAPISTE.EmptyApplicationModel(), {});
+
+    // Plain data
+    applicationModel._js = app;
+    // Update observables
+    var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
+    ko.mapping.fromJS(app, mappingOptions, applicationModel);
+  }
+
+  function initWarrantyDates(app) {
+    if (app.warrantyEnd) {
+      app.warrantyEnd = new Date(app.warrantyEnd);
+    }
+
+    if (app.warrantyStart) {
+      app.warrantyStart = new Date(app.warrantyStart);
+    }
+  }
+
+  function subscribeWarrantyDates(app, applicationModel) {
+    applicationModel.warrantyEnd.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-end-date",
+            {id: app.id, endDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+
+    applicationModel.warrantyStart.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-start-date",
+            {id: app.id, startDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -170,6 +219,8 @@
 
       // Plain data
       applicationModel._js = app;
+
+      initWarrantyDates(app);
 
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -207,7 +258,7 @@
       // Documents
       var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
       var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
-      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
+      var nonpartyDocs = _.reject(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
@@ -219,6 +270,7 @@
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
+        lupapisteApp.services.accordionService.authorities = authorities;
       }
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
@@ -299,6 +351,8 @@
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
 
+      subscribeWarrantyDates(app, applicationModel);
+
       isInitializing = false;
       pageutil.hideAjaxWait();
 
@@ -363,13 +417,6 @@
     } else {
       hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
-      if (newId !== currentId) { // close sidepanel if it's open
-        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
-        if (!_.isEmpty(sidePanel)) {
-          var target = sidePanel.attr("id").split("-")[0];
-          $("#open-" + target + "-side-panel").click();
-        }
-      }
       currentId = newId;
 
       repository.load(currentId, applicationModel.pending, function(application) {
@@ -398,6 +445,7 @@
     if( currentId && !_.includes( _.get( window, "location.hash"),
                                   currentId)) {
       currentId = null;
+      resetApplication();
     }
   });
 

@@ -20,57 +20,6 @@ var repository = (function() {
     return _.clone(s);
   }
 
-  function calculateAttachmentStateIndicators(attachment, application) {
-    var auths = _(application.auth).filter(function(a) {return _.includes(LUPAPISTE.config.writerRoles, a.role);}).map("id").value();
-
-    attachment.signed = false;
-    var lastSignature = _.last(attachment.signatures || []);
-    var versions = _.filter(attachment.versions);
-    if (lastSignature && versions.length > 0) {
-      var signedVersion = _.find(versions, function(v) {
-        return v.fileId === lastSignature.fileId;
-      });
-
-      var unsignedVersions = _(versions)
-        // Drop previous, signed versions
-        .dropWhile(function(v) {
-          return v.version.major !== lastSignature.version.major || v.version.minor !== lastSignature.version.minor;
-        })
-        // Drop current, signed versions
-        .tail()
-        // Keep new versions added by applicants
-        .filter(function(v) {
-          return v.user.role === "applicant" ||  _.includes(auths, v.user.id);
-        })
-        .value();
-      attachment.signed = signedVersion && unsignedVersions.length === 0;
-    }
-
-    attachment.isSent = false;
-    attachment.sentDateString = "-";
-    if (attachment.sent) {
-      // TODO check if sent to KRYSP afterwards (not yet in transfers log)
-      if (!_.isEmpty(_.filter(application.transfers, {type: "attachments-to-asianhallinta"}))) {
-        attachment.isSentToAsianhallinta = true;
-      }
-      attachment.isSent = true;
-      attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
-    }
-
-    attachment.stamped = attachment.latestVersion ? attachment.latestVersion.stamped : false;
-  }
-
-  function setAttachmentOperation(operations, attachment) {
-    if (attachment.op) {
-      var op = _.find(operations, {id: attachment.op.id});
-      if (op) {
-        attachment.op = op;
-      } else {
-        attachment.op = null;
-      }
-    }
-  }
-
   function getAllOperations(application) {
     return _.filter([application.primaryOperation].concat(application.secondaryOperations), function(item) {
       return !_.isEmpty(item);
@@ -119,11 +68,6 @@ var repository = (function() {
           });
 
           _.each(application.tasks || [], setSchema);
-
-          _.each(application.attachments ||[], function(att) {
-            calculateAttachmentStateIndicators(att, application);
-            setAttachmentOperation(application.allOperations, att);
-          });
 
           application.verdicts = util.verdictsWithTasks(application);
 

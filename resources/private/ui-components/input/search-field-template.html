@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="search-field-template">
       <div class="search-field bulletins-search" data-bind="css: {toggled: throttledValue, active: isSelected}">
         <div data-bind="component: {name: 'text-field',
-                                    params: {value: throttledValue, hasFocus: isSelected}}"></div>
+                                    params: {value: throttledValue, hasFocus: isSelected, maxlength: maxlength}}"></div>
         <i class="search-icon lupicon-search"></i>
         <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(throttledValue, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
       </div>

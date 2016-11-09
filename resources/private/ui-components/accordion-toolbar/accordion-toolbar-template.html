@@ -90,6 +90,11 @@
       <!-- /ko -->
     </div>
     <!-- /ko -->
-
+    <!-- ko if: auth.ok("assignments-for-application") && documentAssignments().length > 0 -->
+    <accordion-assignments params="documentAssignments: documentAssignments,
+                                   schemaName: info.name,
+                                   applicationId: docModel.appId,
+                                   authorities: accordionService.authorities"></accordion-assignments>
+    <!-- /ko -->
   </div>
 </script>

@@ -28,17 +28,19 @@ LUPAPISTE.CompanySelectorModel = function(params) {
       companyId: id ? id : "",
       path: params.path
     };
-    ajax.command("set-company-to-document", p)
-    .success(function() {
-      function cb() {
-        repository.load(params.id);
-      }
+    if (self.authorization.ok("set-company-to-document")) {
+      ajax.command("set-company-to-document", p)
+      .success(function() {
+        function cb() {
+          repository.load(params.id);
+        }
 
-      self.service.updateDoc(params.documentId,
-                             [[self.path, id]],
-                             self.indicator,
-                             cb);
-    })
-    .call();
+        self.service.updateDoc(params.documentId,
+                               [[self.path, id]],
+                               self.indicator,
+                               cb);
+      })
+      .call();
+    }
   });
 };

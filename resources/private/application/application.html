@@ -245,7 +245,7 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()),
+                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                    class="link-btn">
@@ -269,7 +269,7 @@
                               </a>
                             </li>
 
-                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
+                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
                                 <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
                                     <span data-bind="ltext: 'arkistointi'"></span>
@@ -304,6 +304,13 @@
                                              params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
+                        <!-- ko if: $parent.selectedTabName() === 'info' && $root.authorization.ok("create-assignment") -->
+                        <create-assignment data-test-id="create-assignment-component"
+                                           params="authorities: $root.authorities,
+                                                   applicationId: id,
+                                                   initialTarget: 'documents',
+                                                   targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+                        <!-- /ko -->
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
@@ -488,7 +495,7 @@
 
                     <!-- Archival tab -->
 
-                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archiving-operations-enabled') -->
+                    <!--ko if: selectedTabName() === 'archival' && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archiving-operations-enabled') -->
                     <div id="application-archival-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
@@ -857,7 +864,7 @@
                         </div>
 
                         <!-- YA: Info about construction started and construction ready occasions -->
-                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed'], $data.state())">
+                        <div data-bind="if: $root.authorization.ok('info-construction-status')">
                           <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
                             <table>
                                 <thead>
@@ -910,6 +917,40 @@
                                                                visible: $root.authorization.ok('inform-construction-ready'),
                                                                enable: $root.authorization.ok('inform-construction-ready')"></button>
                                         </td>
+                                    </tr>
+
+                                    <!-- Takuu alkaa -->
+                                    <tr data-bind="if: warrantyStart">
+                                        <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyStart"
+                                                  data-test-id="warranty-start-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input"
+                                                   data-test-id="warranty-start-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <!-- Takuu loppuu -->
+                                    <tr data-bind="if: warrantyEnd">
+                                        <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyEnd"
+                                                  data-test-id="warranty-end-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyEnd" class="form-input"
+                                                   data-test-id="warranty-end-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
 
                                 </tbody>
@@ -1180,7 +1221,7 @@
                     </div>
                     <div class="dialog-content" data-bind="with: application">
                         <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea grid-style-input really-long high"
+                        <textarea rows=10 class="form-input textarea grid-style-input high"
                                   data-bind="textInput: cancelText"
                                   data-test-id="cancel-application-reason"></textarea>
                         <div class='dialog-user-content application-cancel-text-content'></div>

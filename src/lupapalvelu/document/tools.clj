@@ -319,3 +319,6 @@
     (#{:hakija :hakijan-asiamies :maksaja} (doc-subtype doc)) (doc-subtype doc)
     (#{"tyonjohtaja" "tyonjohtaja-v2"}     (doc-name doc))    :tyonjohtaja
     (= :party (doc-type doc))                                 (keyword (doc-name doc))))
+
+
+(def document-ordering-fn (fn [document] (get-in document [:schema-info :order] 7)))

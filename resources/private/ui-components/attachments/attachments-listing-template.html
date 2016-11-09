@@ -6,6 +6,13 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
+  <!-- ko if: authModel.ok("create-assignment") -->
+  <create-assignment data-test-id="create-assignment-component"
+                     params="authorities: $root.authorities,
+                             applicationId: applicationId,
+                             initialTarget: 'attachments',
+                             targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+  <!-- /ko -->
   <div class="clear"></div>
   <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
 
@@ -20,8 +27,7 @@
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
   <div data-bind="component: { name: 'attachments-accordions',
-                               params: { pageName: $data.pageName,
-                               noDownloadButton: true} }"></div>
+                               params: { pageName: $data.pageName} }"></div>
   <!-- /ko -->
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">

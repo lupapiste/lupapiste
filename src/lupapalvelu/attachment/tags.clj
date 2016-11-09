@@ -25,11 +25,14 @@
     (states/post-verdict-states (keyword app-state)) :postVerdict
     :else :preVerdict))
 
-
 (defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
   (if not-needed
     :notNeeded
     :needed))
+
+(defn- tag-by-file-status [{{file-id :fileId} :latestVersion :as attachment}]
+  (when file-id
+    :hasFile))
 
 (defn- op-id->tag [op-id]
   (when op-id
@@ -54,7 +57,8 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              tag-by-type)
+              tag-by-type
+              tag-by-file-status)
         attachment)
        (remove nil?)))
 
@@ -102,6 +106,15 @@
   [{attachments :attachments :as application}]
   (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
+
+(defn- filter-tag-group-attachments [attachments [tag & _]]
+  (filter #((-> % :tags set) tag) attachments))
+
+(defn sort-by-tags [attachments tag-groups]
+  (if (not-empty tag-groups)
+    (->> (map (partial filter-tag-group-attachments attachments) tag-groups)
+         (mapcat #(sort-by-tags %2 (rest %1)) tag-groups))
+    attachments))
 
 (defn- application-state-filters [{attachments :attachments state :state}]
   (let [states (-> (map tag-by-applicationState attachments) set)]

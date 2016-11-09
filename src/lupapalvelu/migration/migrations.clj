@@ -2328,7 +2328,7 @@
             (if (= (:id task) (:id (:source att)))
               (try
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
-                (attachment/delete-attachment! failed (:id att))
+                (attachment/delete-attachments! failed (:id att))
                 (catch Exception e
                   (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
@@ -2389,36 +2389,34 @@
                   {$pull {:documents {:schema-info.name "suunnittelija"}}}
                   :multi true))
 
-(when (env/feature? :english)
-  (defmigration organization-name-english-defaults
-    {:apply-when (pos? (mongo/count  :organizations {:name.en nil}))}
-    (let [changed-organizations (mongo/count  :organizations {:name.en nil})]
-      (doseq [organization (mongo/select :organizations {:name.en nil})]
-        (mongo/update-by-id :organizations (:id organization)
-                            {$set {:name.en (-> organization :name :fi)}}))
-      changed-organizations)))
+(defmigration organization-name-english-defaults
+  {:apply-when (pos? (mongo/count  :organizations {:name.en nil}))}
+  (let [changed-organizations (mongo/count  :organizations {:name.en nil})]
+    (doseq [organization (mongo/select :organizations {:name.en nil})]
+      (mongo/update-by-id :organizations (:id organization)
+                          {$set {:name.en (-> organization :name :fi)}}))
+    changed-organizations))
 
 (defn- english-default-for-link-name [link]
   (if (not (-> link :name :en))
     (assoc-in link [:name :en] (-> link :name :fi))
     link))
 
-(when (env/feature? :english)
-  (defmigration set-english-defaults-for-organization-link-names
-    {:apply-when (pos? (mongo/count :organizations
-                                    {$and
-                                     [{:links {$exists true}}
-                                      {:links {$elemMatch {:name.en nil}}}]}))}
-    (reduce + 0
-            (for [organization (mongo/select :organizations
-                                             {$and
-                                              [{:links {$exists true}}
-                                               {:links {$elemMatch {:name.en nil}}}]}
-                                             {:links 1})]
-              (mongo/update-n :organizations
-                              {:_id (:id organization)}
-                              {$set {:links (map english-default-for-link-name
-                                                 (:links organization))}})))))
+(defmigration set-english-defaults-for-organization-link-names
+  {:apply-when (pos? (mongo/count :organizations
+                                  {$and
+                                   [{:links {$exists true}}
+                                    {:links {$elemMatch {:name.en nil}}}]}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {$and
+                                            [{:links {$exists true}}
+                                             {:links {$elemMatch {:name.en nil}}}]}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map english-default-for-link-name
+                                               (:links organization))}}))))
 
 (defn- missing-url-map [lang]
   {(keyword (str "url." (name lang))) nil})
@@ -2455,22 +2453,21 @@
     (assoc-in link [:url :en] (-> link :url :fi))
     link))
 
-(when (env/feature? :english)
-  (defmigration set-english-defaults-for-organization-link-urls
-    {:apply-when (pos? (mongo/count :organizations
-                                    {$and
-                                     [{:links {$exists true}}
-                                      {:links {$elemMatch {:url.en nil}}}]}))}
-    (reduce + 0
-            (for [organization (mongo/select :organizations
-                                             {$and
-                                              [{:links {$exists true}}
-                                               {:links {$elemMatch {:url.en nil}}}]}
-                                             {:links 1})]
-              (mongo/update-n :organizations
-                              {:_id (:id organization)}
-                              {$set {:links (map english-default-for-link-url
-                                                 (:links organization))}})))))
+(defmigration set-english-defaults-for-organization-link-urls
+  {:apply-when (pos? (mongo/count :organizations
+                                  {$and
+                                   [{:links {$exists true}}
+                                    {:links {$elemMatch {:url.en nil}}}]}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {$and
+                                            [{:links {$exists true}}
+                                             {:links {$elemMatch {:url.en nil}}}]}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map english-default-for-link-url
+                                               (:links organization))}}))))
 
 (defn not-needed-to-false                                   ;; LP-6232
   "If there are versions, it doesn't make sense to flag attachment as 'not needed'.

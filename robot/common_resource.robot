@@ -25,6 +25,7 @@ ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
 ${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
+${FRONTEND LOG URL}             ${SERVER}/api/frontend-log
 ${SELENIUM}                     ${EMPTY}
 ${DB COOKIE}                    test_db_name
 ${DB PREFIX}                    test_
@@ -310,6 +311,10 @@ Olli logs in
   [Arguments]  ${showAll}=True
   Authority logs in  olli  olli  Olli Ule\u00e5borg  ${showAll}
 
+Olli-ya logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  olli-ya  olli  Olli-ya Ule\u00e5borg  ${showAll}
+
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
 
@@ -334,6 +339,10 @@ Luukas logs in
 Velho logs in
   [Arguments]  ${showAll}=True
   Authority logs in  velho  velho  Velho Viranomainen  ${showAll}
+
+Hannu logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  rakennustarkastaja@hel.fi  helsinki  Hannu Helsinki  ${showAll}
 
 Sonja logs in
   [Arguments]  ${showAll}=True
@@ -426,6 +435,10 @@ Select From Autocomplete
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
   Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+
+Autocomplete selection is
+  [Arguments]  ${container}  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
@@ -657,6 +670,7 @@ Add attachment
   Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
+  Run Keyword If  '${kind}' == 'statement'  Click enabled by test id  add-statement-attachment
 
   Wait until  Element should be visible  upload-dialog
 
@@ -1427,24 +1441,23 @@ Print frontend error texts
   :FOR  ${elem_idx}  IN RANGE  1  10
   \  ${ELEM_COUNT}=  Get Matching Xpath Count  ${ROW_XPATH}[${elem_idx}]
   \  Exit for loop if  ${ELEM_COUNT} == 0
-  \  ${VAL}=  Get Text  ${ROW_XPATH}[${elem_idx}]/td[2]
+  \  ${VAL}=  Get Text  ${ROW_XPATH}[${elem_idx}]
   \  Log To Console  ${ERROR_LEVEL}: ${VAL}
 
+Open frontend log
+  Go to  ${FRONTEND LOG URL}
+  Wait until  Element text should be  xpath=//h1  Frontend log
+
 There are no frontend errors
-  Go to login page
-  SolitaAdmin logs in
-  Wait until  Click element  xpath=//a[@data-test-id='fontend-logs']
-  Wait until  Element should be visible  xpath=//section[@id='logs']
-  # Allow log to load
-  Sleep  1
-  Wait for jQuery
-  Set test variable  ${FATAL_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr
-  Set test variable  ${ERROR_LOG_XPATH}  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr
+  Open frontend log
+  Set test variable  ${FATAL_LOG_XPATH}  //div[@data-test-level='fatal']
+  Set test variable  ${ERROR_LOG_XPATH}  //div[@data-test-level='error']
   ${FATAL_COUNT}=  Get Matching Xpath Count  ${FATAL_LOG_XPATH}
   ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
   Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
   Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
-  # These test cases will fail
-  Xpath Should Match X Times  ${FATAL_LOG_XPATH}  0
-  Xpath Should Match X Times  ${ERROR_LOG_XPATH}  0
-  [Teardown]  Logout
+  Go to  ${LOGIN URL}
+  Logout
+  # These test cases will fail if errors exist
+  Javascript?  ${FATAL_COUNT} === 0
+  Javascript?  ${ERR_COUNT} === 0

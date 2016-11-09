@@ -5950,27 +5950,27 @@ i.toggle {
   margin-left: 12px;
 }
 
-/* line 568, ../../../private/common-html/sass/partials/_buttons.scss */
-#partiesDocgen button {
+/* line 569, ../../../private/common-html/sass/partials/_buttons.scss */
+div.docgen-content > section + button {
   margin-bottom: 6px;
 }
 
-/* line 572, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 573, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 578, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 579, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 583, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 584, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 585, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 586, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -5980,35 +5980,35 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 593, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 594, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 596, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 597, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 599, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 600, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 607, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 608, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 609, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 610, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 614, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 615, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
 
-/* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 634, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-events {
   pointer-events: none;
 }

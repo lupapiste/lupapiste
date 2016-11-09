@@ -3,13 +3,16 @@
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
@@ -110,3 +113,32 @@
         {collection {$elemMatch {:id doc}}}
         (->approval-mongo-model path approval))
        approval))))
+
+
+;;
+;; Assignments
+;;
+
+(defn- document-assignment-info
+  "Return document info as assignment target"
+  [operations {{name :name doc-op :op} :schema-info id :id :as doc}]
+  (let [accordion-datas (schemas/resolve-accordion-field-values doc)
+        op-description  (:description (util/find-by-id (:id doc-op) operations))]
+    (util/assoc-when-pred {:id id :type-key (ss/join "." [name "_group_label"])} ss/not-blank?
+                          :description (or op-description (ss/join " " accordion-datas)))))
+
+(defn- describe-parties-assignment-targets [application]
+  (->> (domain/get-documents-by-type application :party)
+       (sort-by tools/document-ordering-fn)
+       (map (partial document-assignment-info nil))))
+
+(defn- describe-non-party-document-assignment-targets [{:keys [documents primaryOperation secondaryOperations] :as application}]
+  (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))
+        operations (cons primaryOperation secondaryOperations)]
+    (->> (remove (comp party-doc-ids :id) documents)
+         (sort-by tools/document-ordering-fn)
+         (map (partial document-assignment-info operations)))))
+
+(assignment/register-assignment-target! :parties describe-parties-assignment-targets)
+
+(assignment/register-assignment-target! :documents describe-non-party-document-assignment-targets)

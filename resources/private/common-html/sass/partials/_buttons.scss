@@ -152,9 +152,9 @@ i.btn-small {
 // rectangular.
 .btn-icon-only {
   padding: {
-  left: 9px;
-  right: 9px;
-}
+    left: 9px;
+    right: 9px;
+  }
 }
 
 // You probably still need to tweak
@@ -565,7 +565,8 @@ i.toggle {
   margin-left: $btn-spacer;
 }
 
-#partiesDocgen button {
+// Buttons between docgen sections
+div.docgen-content > section + button {
   margin-bottom: $marginS;
 }
 

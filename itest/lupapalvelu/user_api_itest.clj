@@ -104,9 +104,33 @@
 (facts update-default-application-filter
   (apply-remote-minimal)
 
+  (fact "Default search returns minimal query since there is no saved default filter"
+        (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                                 :skip 0
+                                                                 :limit 100
+                                                                 :sort {:asc false
+                                                                        :field "modified"}}
+        (:search (query pena :applications-search-default)) => {:applicationType "all"
+                                                                :skip 0
+                                                                :limit 100
+                                                                :sort {:asc false
+                                                                       :field "modified"}})
+
   (fact (command sonja :update-default-application-filter :filterId "foobar" :filterType "application") => ok?)
 
   (fact (->> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :defaultFilter :id) => "foobar")
+
+  (fact "Default search returns query"
+        (:search (query sonja :applications-search-default)) => {:applicationType "application"
+                                                                 :skip 0
+                                                                 :limit 100
+                                                                 :sort {:asc false
+                                                                        :field "modified"}
+                                                                 :handlers []
+                                                                 :tags []
+                                                                 :operations []
+                                                                 :organizations []
+                                                                 :areas []})
 
   (fact "Overwrite default filter"
     (command sonja :update-default-application-filter :filterId "barfoo" :filterType "application") => ok?)
@@ -189,6 +213,7 @@
                                                         :role "applicant"
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
+                                                        :virtual false
                                                         :zip "33560"})})))
   (fact
     (let [data {:firstName "Seppo"
@@ -207,21 +232,6 @@
                 :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
-
-(facts "Implicit user language"
-       (defn lang-check [lang note]
-         (fn [{{:keys [language indicatorNote]} :user}]
-           (fact "language and note" [language indicatorNote] => [lang note])))
-
-       (fact "Bad language"
-             (query sven :user :lang "cn") => fail?)
-       (fact "Set language to UI language"
-             (query sven :user :lang "sv") => (lang-check "sv" "user.language.note"))
-       (fact "Subsequent user queries do not contain indicator note"
-             (query sven :user :lang "sv") => (lang-check "sv" nil)
-             (query sven :user :lang "fi") => (lang-check "sv" nil)
-             (query sven :user :lang nil) => (lang-check "sv" nil)
-             (query sven :user) => (lang-check "sv" nil)))
 
 ;;
 ;; historical tests, dragons be here...

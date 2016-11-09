@@ -4,10 +4,11 @@
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push $in]]
+            [monger.operators :refer [$set $push $in $unset]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.company :as com]
@@ -103,7 +104,7 @@
       (fail :error.permit-has-no-such-subtype))))
 
 (defn submitted? [{:keys [state]}]
-  (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
+  (boolean (states/post-submitted-states (keyword state))))
 
 (defn- contains-primary-operation? [application op-set]
   {:pre [(set? op-set)]}
@@ -537,6 +538,12 @@
 
 (assert (= states/all-application-states (set (keys timestamp-key))))
 
+(def two-years-ms 63072000000)
+
+(defn warranty-period [timestamp]
+  {:warrantyStart timestamp,
+   :warrantyEnd (+ timestamp two-years-ms)})
+
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
   [to-state timestamp application user]
@@ -574,7 +581,8 @@
 (defn cancel-inforequest [{:keys [created user data application] :as command}]
   {:pre [(seq (:application command))]}
   (action/update-application command (state-transition-update :canceled created application user))
-  (remove-app-links (:id data))
+  (remove-app-links (:id application))
+  (assignment/cancel-assignments (:id application))
   (ok))
 
 (defn cancel-application
@@ -588,4 +596,15 @@
             (comment/comment-mongo-update state comment-text {:type "application"} role false user nil created)))
          (action/update-application command)))
   (remove-app-links id)
+  (assignment/cancel-assignments id)
+  (ok))
+
+(defn undo-cancellation
+  [{:keys [application created user] :as command}]
+  (action/update-application command
+                             {:state :canceled}
+                             (merge
+                               (state-transition-update (get-previous-app-state application) created application user)
+                               {$unset {:canceled 1}}))
+  (assignment/activate-assignments (:id application))
   (ok))

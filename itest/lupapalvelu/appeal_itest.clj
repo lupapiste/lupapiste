@@ -393,24 +393,45 @@
               (-> pdf-versions first :fileId) => file-id-2
               (-> pdf-versions first :archivabilityError) => "not-validated"))))
 
-      (fact "removing second attachment from appeal"
-        (command raktark-jarvenpaa :upsert-appeal
-                 :id app-id
-                 :verdictId vid
-                 :type "appeal"
-                 :appellant "Pena"
-                 :datestamp created
-                 :text "foo"
-                 :appealId aid
-                 :fileIds [converted-file-id-1]) => ok?
-        (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
-              appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
-          (count appeals) => 1
-          (count attachments) => (+ expected-att-cnt 1)
-          (count appeal-attachments) => 1
-          (-> appeal-attachments first :latestVersion :originalFileId) => file-id-1
-          (-> appeal-attachments first :latestVersion :fileId) => converted-file-id-1
-          (count (-> appeal-attachments first :versions)) => 1)
+      (fact "assignment can be created for appeal attachment"
+        (let [target-attachment (util/find-first
+                                  #(and (= "appeal" (-> % :target :type))
+                                        (or (= (get-in % [:latestVersion :fileId]) file-id-2)
+                                            (= (get-in % [:latestVersion :originalFileId]) file-id-2)))
+                                  (:attachments (query-application raktark-jarvenpaa app-id)))]
+          (create-assignment raktark-jarvenpaa
+                             raktark-jarvenpaa-id
+                             app-id
+                             {:group "attachments" :id (:id target-attachment)}
+                             "Onko aiheellinen?") => ok?))
 
-        (fact "file doesn't exist"
-          (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-2) => http404?)))))
+      (fact "removing second attachment from appeal"
+        (let [assignment (first (get-user-assignments raktark-jarvenpaa))
+              assignment-attachment-id (get-in assignment [:target :id])]
+          (get-in assignment [:target :group]) => "attachments"
+          (fact "assignment has correct attachment target"
+            (:target (get-attachment-by-id raktark-jarvenpaa app-id assignment-attachment-id)) => {:type "appeal"
+                                                                                                   :id aid})
+          (command raktark-jarvenpaa :upsert-appeal
+                   :id app-id
+                   :verdictId vid
+                   :type "appeal"
+                   :appellant "Pena"
+                   :datestamp created
+                   :text "foo"
+                   :appealId aid
+                   :fileIds [converted-file-id-1]) => ok?
+          (let [{:keys [attachments appeals]} (query-application raktark-jarvenpaa app-id)
+                appeal-attachments (filter #(= "appeal" (-> % :target :type)) attachments)]
+            (count appeals) => 1
+            (count attachments) => (+ expected-att-cnt 1)
+            (count appeal-attachments) => 1
+            (-> appeal-attachments first :latestVersion :originalFileId) => file-id-1
+            (-> appeal-attachments first :latestVersion :fileId) => converted-file-id-1
+            (count (-> appeal-attachments first :versions)) => 1)
+
+          (fact "assignment is deleted with appeal attachment"
+            (map :id (get-user-assignments raktark-jarvenpaa)) =not=> (contains (:id assignment)))
+
+          (fact "file doesn't exist"
+            (raw raktark-jarvenpaa "download-attachment" :attachment-id file-id-2) => http404?))))))

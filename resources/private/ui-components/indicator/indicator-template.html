@@ -3,13 +3,15 @@
 <body>
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="indicator-template">
-      <div class="indicator-bar" data-bind="fader: showIndicator, duration: 250, css: indicatorStyle, attr: {'data-test-id': 'indicator-' + indicatorStyle()}">
+      <!-- ko with: currentIndicator -->
+      <div class="indicator-bar" data-bind="fader: $parent.showIndicator, duration: 250, css: style, attr: {'data-test-id': 'indicator-' + style}">
         <div class="indicator-box">
           <div class="indicator-info" data-bind="css: iconStyle"></div>
-          <div class="indicator-message" data-bind="html: indicatorMessage"></div>
-          <div class="indicator-close lupicon-remove" data-bind="visible: showCloseButton, click: closeIndicator"></div>
+          <div class="indicator-message" data-bind="html: message"></div>
+          <div class="indicator-close lupicon-remove" data-bind="visible: $parent.showCloseButton($data), click: $parent.closeIndicator"></div>
         </div>
       </div>
+      <!-- /ko -->
     </script>
   </section>
 </body>

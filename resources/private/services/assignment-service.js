@@ -2,44 +2,90 @@
  * Assignments for application
  *
  */
-LUPAPISTE.AssignmentService = function() {
+LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   "use strict";
   var self = this;
 
- // {:id              ssc/ObjectIdStr
-   // :organization-id sc/Str
-   // :application-id  sc/Str
-   // :target          sc/Any
-   // :created         ssc/Timestamp
-   // :creator-id      ssc/ObjectIdStr
-   // :recipient-id    ssc/ObjectIdStr
-   // :completed       (sc/maybe ssc/Timestamp)
-   // :completer-id    (sc/maybe sc/Str)
-   // :active          sc/Bool
-   // :description     sc/Str})
-   var test = {id: "123", organizationId: "753-R", applicationId:"LP-753-2016-00001",
-               target: ["documents", "parties", "1234"], created: 1476772272398,
-               creator: {id: "321", username: "pena@example.com"},
-               recipient: {id: "4123", username: "sonja"},
-               status: "active", description: "FOOFAA"};
+  var _data = ko.observableArray([]);
 
-  var _data = ko.observableArray([test]);
+  function enrichAssignment(assignment) {
+    return _.merge(assignment,
+                   {createdState: _.find(assignment.states, function(state) { return state.type === "created"; }),
+                    currentState: _.maxBy(assignment.states, "timestamp"),
+                    edit: ko.observable(false)});
+  }
 
   self.assignments = ko.pureComputed(function() {
-    return _data();
+    return _.map(_data(), enrichAssignment);
   });
 
+  /*
+   * Targets are two levels deep and represented as objects.
+   * Keys are the "target groups", and value for each key is array of corresponding items in application.
+   * Example with only parties group:
+   * {"parties": [{id: "5808c517f16562feee6856fb", type: "paasuunnittelija", description: "Antero Arkkitehti"},
+                  {id: "5808c517f16562feee6856fc", type: "suunnittelija", info-key: "info.text.key"}]}
+   */
+  self.targets = ko.observableArray([]);
 
-  hub.subscribe("assignmentService::createAssignment", function() {
-    // ajax.command("create-assignment", _.pick(event, ["target", "creator", "description", ]))
-    // .success(util.showSavedIndicator)
-    // .call();
+  function assignmentTargetsQuery(id) {
+    ajax.query("assignment-targets", {id: id, lang: loc.getCurrentLanguage()})
+      .success(function(resp) {
+        self.targets(_.fromPairs(resp.targets));
+      })
+      .call();
+  }
+
+  function assignmentsForApplication(id) {
+    if (applicationAuthModel.ok("assignments-for-application")) {
+      ajax.query("assignments-for-application", {id: id})
+        .success(function(resp) {
+          _data(resp.assignments);
+          _.delay(window.Stickyfill.rebuild,0);
+        })
+        .call();
+    }
+  }
+
+  hub.subscribe("assignmentService::saveAssignment", function(event) {
+    var assignment = _.omit(event, "eventType");
+    var commandName = util.isEmpty(assignment.assignmentId) ? "create-assignment" : "update-assignment";
+
+    ajax.command(commandName, assignment)
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        assignmentsForApplication(event.id);
+      })
+      .call();
   });
 
-  hub.subscribe("assignmentService::markComplete", function() {
-    // ajax.command("complete-assignment", _.get(event, "assignmentId"))
-    // .success(util.showSavedIndicator)
-    // .call();
+  hub.subscribe("assignmentService::markComplete", function(event) {
+    ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        hub.send("assignmentService::assignmentCompleted", null);
+        var appId = util.getIn(event, ["applicationId"]);
+        if (appId) { // refresh application assignments
+          assignmentsForApplication(appId);
+        }
+      })
+      .onError("error.assignment-not-completed", util.showSavedIndicator)
+      .call();
   });
+
+  hub.subscribe("assignmentService::targetsQuery", function(event) {
+    assignmentTargetsQuery(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("assignmentService::applicationAssignments", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
+  });
+
+  hub.subscribe("application-model-updated", function(event) {
+    if (!_.isEmpty(event.applicationId)) {
+      assignmentsForApplication(_.get(event, "applicationId"));
+    }
+  });
+
 
 };

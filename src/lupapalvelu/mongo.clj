@@ -19,8 +19,8 @@
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
-           [com.mongodb WriteConcern MongoClientOptions$Builder]
-           [com.mongodb.gridfs GridFSInputFile]))
+           [com.mongodb DB WriteConcern MongoClientOptions$Builder]
+           [com.mongodb.gridfs GridFS GridFSDBFile GridFSInputFile]))
 
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
@@ -48,7 +48,7 @@
       (with-db db-name
         (handler request)))))
 
-(defn ^{:perfmon-exclude true} get-db []
+(defn ^{:perfmon-exclude true} ^DB get-db []
   {:pre [@connection]}
   (locking dbs
     (or (get @dbs *db-name*)
@@ -56,7 +56,7 @@
           (swap! dbs assoc *db-name* db)
           db))))
 
-(defn ^{:perfmon-exclude true} get-gfs []
+(defn ^{:perfmon-exclude true} ^GridFS get-gfs []
   (m/get-gridfs @connection (.getName (get-db))))
 
 (defn ^{:perfmon-exclude true} with-_id [m]
@@ -276,7 +276,7 @@
         (gfs/content-type content-type)
         (gfs/metadata (assoc meta :uploaded (now)))))))
 
-(defn- gridfs-file-as-map [attachment]
+(defn- gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
@@ -439,7 +439,8 @@
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
   (ensure-index :buildingCache {:created 1} {:expireAfterSeconds (* 60 60 12)}) ; 12 h
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
-  (ensure-index :ssoKeys {:ip 1} {:unique true}))
+  (ensure-index :ssoKeys {:ip 1} {:unique true})
+  (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

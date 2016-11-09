@@ -345,6 +345,14 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory enabled}})
   (ok))
 
+(defcommand set-organization-assignments
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-validate-verdict-given-date
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}

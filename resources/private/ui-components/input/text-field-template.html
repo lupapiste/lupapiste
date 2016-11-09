@@ -6,11 +6,10 @@
       <div class="col--vertical">
         <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
         <input class="input" type="text"
-               data-bind="textInput: value, attr: {placeholder: placeholder, id: id, name: id, 'data-test-id': id},
+               data-bind="textInput: value, attr: {placeholder: placeholder, id: id, name: id, 'data-test-id': id, maxlength: maxlength},
                           hasFocus: isSelected,
                           css: {required: required && !value()},
-                          disable: disable"
-               maxlength="255"/>
+                          disable: disable"/>
       </div>
     </script>
   </section>

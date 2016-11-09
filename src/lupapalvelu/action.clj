@@ -1,7 +1,6 @@
 (ns lupapalvelu.action
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
-            [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull]]
             [schema.core :as sc]
@@ -91,7 +90,7 @@
       extra-error-data)))
 
 (defn non-blank-parameters [params command]
-  (filter-params-of-command params command #(or (not (string? %)) (s/blank? %)) :error.missing-parameters))
+  (filter-params-of-command params command #(or (not (string? %)) (ss/blank? %)) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
@@ -100,7 +99,7 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (not (string? %)) (s/blank? %)))
+      (partial some #(or (not (string? %)) (ss/blank? %)))
       :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
@@ -135,6 +134,9 @@
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
 
+(defn positive-number-parameters [params command]
+  (filter-params-of-command params command (complement pos?) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
 
@@ -148,7 +150,7 @@
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
-    (trace "invalid property id parameters:" (s/join ", " invalid))
+    (trace "invalid property id parameters:" (ss/join ", " invalid))
     (fail :error.invalid-property-id)))
 
 (defn map-parameters [params command]
@@ -235,8 +237,11 @@
 
 (defn missing-command [command]
   (when-not (meta-data command)
-    (errorf "command '%s' not found" (log/sanitize 50 (:action command)))
-    (fail :error.invalid-command)))
+    (let [{:keys [action web]} command
+          {:keys [user-agent client-ip]} web]
+      (errorf "action '%s' not found. User agent '%s' from %s"
+             (log/sanitize 50 action) (log/sanitize 100 action) client-ip)
+      (fail :error.invalid-command))))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
@@ -271,7 +276,7 @@
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
-    (info "missing parameters:" (s/join ", " missing))
+    (info "missing parameters:" (ss/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
 
 (defn input-validators-fail [command]
@@ -281,7 +286,7 @@
 
 (defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (when-not (.contains valid-states (keyword state))
+    (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command]
@@ -390,7 +395,8 @@
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
-            command (assoc command :application application :organization organization)]
+            user-organizations (lazy-seq (usr/get-organizations (:user command)))
+            command (assoc command :application application :organization organization :user-organizations user-organizations)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -564,20 +570,14 @@
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
 
-
-(defn foreach-action [web user application data]
+(defn foreach-action [{:keys [user data] :as command}]
   (map
     #(when-let [{type :type categories :categories} (get-meta %)]
-       (assoc
-         (action % :type type :data data :user user)
-         :application application
-         :web web
-         :categories categories))
+       (merge command (action % :type type :data data :user user) {:categories categories}))
    (remove nil? (keys @actions))))
 
 (defn- validated [command]
   {(:action command) (validate command)})
-
 
 (def validate-actions
   (if (env/dev-mode?)
@@ -595,10 +595,11 @@
   nil)
 
 (defn allowed-actions-for-collection
-  [collection-key command-builder {:keys [web user application] :as command}]
+  [collection-key command-builder {:keys [application] :as command}]
   (let [coll (get application collection-key)]
     (->> (map (partial command-builder application) coll)
-         (map (partial foreach-action web user application))
+         (map (partial assoc command :data))
+         (map foreach-action)
          (map (partial filter-actions-by-category collection-key))
          (map validate-actions)
          (zipmap (map :id coll)))))

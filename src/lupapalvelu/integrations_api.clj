@@ -34,7 +34,8 @@
             [sade.strings :as ss]
             [sade.http :as http]
             [sade.util :as util]
-            [sade.validators :as validators]))
+            [sade.validators :as validators]
+            [lupapalvelu.ya-extension :as yax]))
 
 ;;
 ;; Application approval
@@ -69,17 +70,16 @@
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user organization] :as command}]
-  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        current-state  (:state application)
-        next-state   (if jatkoaika-app?
+  (let [current-state  (:state application)
+        next-state   (if (yax/ya-extension-app? application)
                        :closed ; FIXME create a state machine for :ya-jatkoaika
                        (sm/next-state application))
         _           (assert next-state)
 
-        timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
+        timestamps  (zipmap [:modified next-state] (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
 
-        history-entries (map #(application/history-entry % created user) (set [:sent next-state]))
+        history-entry (application/history-entry next-state created user)
 
         app-updates (merge
                       {:state next-state
@@ -87,9 +87,7 @@
                       timestamps)
         application (-> application
                       meta-fields/enrich-with-link-permit-data
-                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                         (link-permit/update-link-permit-data-with-kuntalupatunnus-from-verdict %)
-                         %))
+                      link-permit/update-backend-ids-in-link-permit-data
                       (merge app-updates))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)
@@ -98,7 +96,7 @@
                     (update-application command
                       mongo-query
                       {$push {:transfers transfer
-                              :history {$each history-entries}}
+                              :history history-entry}
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
