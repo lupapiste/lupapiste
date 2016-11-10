@@ -104,9 +104,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.asianhallintaEnabled = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
   });
-  self.organizationLinks = ko.pureComputed(function() {
-    return self.organizationMeta() ? self.organizationMeta().links() : "";
-  });
+
   self.organizationName = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().name() : "";
   });

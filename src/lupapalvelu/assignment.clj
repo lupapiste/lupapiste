@@ -116,7 +116,8 @@
 
 
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:description :applicationDetails.address]
+  (let [search-keys [:description :applicationDetails.address :applicationDetails._id
+                     :applicationDetails.verdicts.kuntalupatunnus]
         fuzzy       (ss/fuzzy-re filter-search)
         ops         (app-utils/operation-names filter-search)]
     {$or (concat
@@ -297,3 +298,6 @@
 
 (sc/defn ^:always-validate activate-assignments [application-id :- ssc/ApplicationId]
   (set-assignments-statuses application-id "active"))
+
+(defn remove-assignments-by-target [application-id target-id]
+  (mongo/remove-many :assignments {:application.id application-id :target.id target-id}))

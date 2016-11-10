@@ -99,7 +99,9 @@ jQuery(function($) {
                   .append($("<br>"))
                   .append($("<a href='/api/last-email' target='_blank'>Last Email</a> - <a href='/api/last-emails' target='_blank'>All</a><br>"))
                   .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
+                  .append($("<a href='/api/frontend-log' target='_blank'>Show frontend log</a><br>"))
                   .append($("<a>").attr("id", "debug-reset-log").attr("href", "#").text("Reset frontend log").click(function() { resetLog(); }))
+
                   .append($("<p>")
                           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))
@@ -123,6 +125,7 @@ jQuery(function($) {
                                   .append($("<a>").attr("id", "debug-create-application-and-publish-bulletin").attr("href", "#").text("YM/lannan-varastointi x 5")
                                           .click(function() { createApplicationAndPublishBulletin(5); }))
                                   ))
+
                   .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
                   .append($("<span>").text("Throttle web: "))
                   .append($("<b>").addClass("dev-throttle-web").text("0"))

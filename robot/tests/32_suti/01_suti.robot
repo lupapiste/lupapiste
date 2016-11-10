@@ -136,7 +136,7 @@ Application can't be submitted
 
 No products
   Open tab  attachments
-  Suti id and note  empty  Ei lähtötietoja.
+  Suti id and note  empty  Ei tietoja.
 
 Backend error
   Suti id and note  bad  Tietojen haku ei onnistunut.  True
@@ -188,7 +188,7 @@ Application could be submitted as Suti ID is set
 Selection added checkbox clears products
   Open tab  attachments
   Click label  suti-display-added
-  Test id text is  suti-display-note  Lisää suunnittelun lähtötiedot Suunnitelmat ja liitteet -välilehdelle käsin.
+  Test id text is  suti-display-note  HUOM! Lisää kartta-aineisto Suunnitelmat ja liitteet -välilehdelle käsin.
   Test id disabled  suti-display-id
   Test id disabled  suti-display-link
   No such test id  suti-display-products

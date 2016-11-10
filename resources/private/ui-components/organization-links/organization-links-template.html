@@ -1,0 +1,13 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="organization-links-template">
+  <div class="organization-links"
+       data-bind="ifnot: util.isEmpty( organizationLinks )">
+    <h3 data-bind="ltext: 'organization.links'"></h3>
+    <ul data-bind="foreach: organizationLinks">
+      <li>
+        <a data-bind="text: text, 
+                      attr: {href: url}"
+           href="#" target="_blank"></a>
+      </li>
+    </ul>
+  </div>
+</script>

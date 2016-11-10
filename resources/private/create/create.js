@@ -46,10 +46,6 @@
 
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
-    self.organizationLinks = ko.pureComputed(function() {
-      var m = self.organization();
-      return m ? m.links : null;
-    });
     self.attachmentsForOp = ko.pureComputed(function() {
       var m = self.organization();
       return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null;

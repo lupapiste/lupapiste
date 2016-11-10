@@ -57,3 +57,12 @@
                           file-objects)]
     (when (seq new-attachments)
       {$push {:attachments {$each new-attachments}}})))
+
+
+(defn appeals-attachments
+  "Returns attachments regarding given appeal-ids"
+  [{attachments :attachments} appeal-ids]
+  (letfn [(appeal-filter [{target :target}]
+            (and (some (hash-set (:type target)) ["appeal" "appealVerdict" "rectification"])
+                 (some (hash-set (:id target)) appeal-ids)))]
+    (filter appeal-filter attachments)))

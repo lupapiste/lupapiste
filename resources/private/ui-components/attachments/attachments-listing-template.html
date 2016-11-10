@@ -6,7 +6,7 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
-  <!-- ko if: authModel.ok("create-assignment") && features.enabled("assignments") -->
+  <!-- ko if: authModel.ok("create-assignment") -->
   <create-assignment data-test-id="create-assignment-component"
                      params="authorities: $root.authorities,
                              applicationId: applicationId,

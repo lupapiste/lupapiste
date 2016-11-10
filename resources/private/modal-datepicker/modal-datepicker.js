@@ -20,6 +20,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
 
   self.onError = function(resp) {
     self.errorMessage(resp.text);
+    hub.send("indicator", {style: "negative", message: resp.text, html: true});
   };
 
   self.reset = function(app) {

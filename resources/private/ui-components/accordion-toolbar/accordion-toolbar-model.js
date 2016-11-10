@@ -147,7 +147,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
    ************/
 
    self.documentAssignments = self.disposedPureComputed(function() {
-    if (self.assignmentService && features.enabled("assignments")) {
+    if (self.assignmentService) {
       return _.filter(self.assignmentService.assignments(), function(assignment) {
         return assignment.target.id === self.docModel.docId && assignment.currentState.type !== "completed";
       });

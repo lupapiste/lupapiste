@@ -63,7 +63,7 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.assignments = self.disposedPureComputed(function() {
     var attachmentIds = _.map(attachments, function(att) { return util.getIn(att, ["id"]); });
-    if (assignmentService && features.enabled("assignments")) {
+    if (assignmentService) {
       return  _(assignmentService.assignments())
         .filter(function(assignment) {
           return assignment.target.group === "attachments"

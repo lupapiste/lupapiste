@@ -47,46 +47,45 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
     }
   }
 
-  if( features.enabled( "assignments")) {
+  hub.subscribe("assignmentService::saveAssignment", function(event) {
+    var assignment = _.omit(event, "eventType");
+    var commandName = util.isEmpty(assignment.assignmentId) ? "create-assignment" : "update-assignment";
 
-    hub.subscribe("assignmentService::saveAssignment", function(event) {
-      var assignment = _.omit(event, "eventType");
-      var commandName = util.isEmpty(assignment.assignmentId) ? "create-assignment" : "update-assignment";
+    ajax.command(commandName, assignment)
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        assignmentsForApplication(event.id);
+      })
+      .call();
+  });
 
-      ajax.command(commandName, assignment)
-        .success(function(resp) {
-          util.showSavedIndicator(resp);
-          assignmentsForApplication(event.id);
-        })
-        .call();
-    });
+  hub.subscribe("assignmentService::markComplete", function(event) {
+    ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
+      .success(function(resp) {
+        util.showSavedIndicator(resp);
+        hub.send("assignmentService::assignmentCompleted", null);
+        var appId = util.getIn(event, ["applicationId"]);
+        if (appId) { // refresh application assignments
+          assignmentsForApplication(appId);
+        }
+      })
+      .onError("error.assignment-not-completed", util.showSavedIndicator)
+      .call();
+  });
 
-    hub.subscribe("assignmentService::markComplete", function(event) {
-      ajax.command("complete-assignment", {assignmentId: _.get(event, "assignmentId")})
-        .success(function(resp) {
-          util.showSavedIndicator(resp);
-          hub.send("assignmentService::assignmentCompleted", null);
-          var appId = util.getIn(event, ["applicationId"]);
-          if (appId) { // refresh application assignments
-            assignmentsForApplication(appId);
-          }
-        })
-        .call();
-    });
+  hub.subscribe("assignmentService::targetsQuery", function(event) {
+    assignmentTargetsQuery(_.get(event, "applicationId"));
+  });
 
-    hub.subscribe("assignmentService::targetsQuery", function(event) {
-      assignmentTargetsQuery(_.get(event, "applicationId"));
-    });
+  hub.subscribe("assignmentService::applicationAssignments", function(event) {
+    assignmentsForApplication(_.get(event, "applicationId"));
+  });
 
-    hub.subscribe("assignmentService::applicationAssignments", function(event) {
+  hub.subscribe("application-model-updated", function(event) {
+    if (!_.isEmpty(event.applicationId)) {
       assignmentsForApplication(_.get(event, "applicationId"));
-    });
+    }
+  });
 
-    hub.subscribe("application-model-updated", function(event) {
-      if (!_.isEmpty(event.applicationId)) {
-        assignmentsForApplication(_.get(event, "applicationId"));
-      }
-    });
-  }
 
 };

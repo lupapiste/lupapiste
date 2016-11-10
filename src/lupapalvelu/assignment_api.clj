@@ -5,7 +5,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [sade.core :refer :all]
-            [sade.schemas :as ssc]))
+            [sade.schemas :as ssc]
+            [sade.env :as env]))
 
 ;; Helpers and validators
 
@@ -39,34 +40,15 @@
 ;; Queries
 ;;
 
-(defquery assignments
-  {:description "Return all the assignments the user is allowed to see"
-   :user-roles #{:authority}
-   :pre-checks [assignments-enabled]
-   :feature :assignments}
-  [{user :user}]
-  (ok :assignments (assignment/get-assignments user)))
-
 (defquery assignments-for-application
   {:description "Return the assignments for the current application"
    :parameters [id]
    :pre-checks [assignments-enabled-for-application]
    :states states/all-application-states-but-draft-or-terminal
    :user-roles #{:authority}
-   :categories #{:documents}
-   :feature :assignments}
+   :categories #{:documents}}
   [{user     :user}]
   (ok :assignments (assignment/get-assignments-for-application user id)))
-
-(defquery assignment
-  {:description "Return a single assignment"
-   :user-roles #{:authority}
-   :parameters [assignmentId]
-   :pre-checks [assignments-enabled]
-   :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
-   :feature :assignments}
-  [{user :user}]
-  (ok :assignment (assignment/get-assignment user assignmentId)))
 
 (defquery assignment-targets
   {:description "Possible assignment targets per application for frontend"
@@ -74,8 +56,7 @@
    :user-roles #{:authority}
    :pre-checks [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :states   states/all-application-states-but-draft-or-terminal
-   :feature :assignments}
+   :states   states/all-application-states-but-draft-or-terminal}
   [{:keys [application]}]
   (ok :targets (assignment/assignment-targets application)))
 
@@ -83,11 +64,27 @@
   {:description "Service point for attachment search component"
    :parameters []
    :user-roles #{:authority}
-   :pre-checks [assignments-enabled]
-   :feature :assignments}
+   :pre-checks [assignments-enabled]}
   [{user :user data :data}]
   (let [query (assignment/search-query data)]
     (ok :data (assignment/assignments-search user query))))
+
+(env/in-dev                                                 ; These are only used in itest
+  (defquery assignments
+    {:description "Return all the assignments the user is allowed to see"
+     :user-roles #{:authority}
+     :pre-checks [assignments-enabled]}
+    [{user :user}]
+    (ok :assignments (assignment/get-assignments user)))
+
+  (defquery assignment
+    {:description "Return a single assignment"
+     :user-roles #{:authority}
+     :parameters [assignmentId]
+     :pre-checks [assignments-enabled]
+     :input-validators [(partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]}
+    [{user :user}]
+    (ok :assignment (assignment/get-assignment user assignmentId))))
 
 ;;
 ;; Commands
@@ -101,8 +98,7 @@
                       (partial action/map-parameters [:target])]
    :pre-checks       [validate-receiver
                       assignments-enabled-for-application]
-   :states           states/all-application-states-but-draft-or-terminal
-   :feature          :assignments}
+   :states           states/all-application-states-but-draft-or-terminal}
   [{user         :user
     created      :created
     application  :application}]
@@ -121,8 +117,7 @@
                       (partial action/parameters-matching-schema [:assignmentId] ssc/ObjectIdStr)]
    :pre-checks       [validate-receiver
                       validate-assignment-id]
-   :states           states/all-application-states-but-draft-or-terminal
-   :feature          :assignments}
+   :states           states/all-application-states-but-draft-or-terminal}
   [_]
   (ok :id (assignment/update-assignment assignmentId {:recipient   (userid->summary recipientId)
                                                       :description description})))
@@ -133,8 +128,7 @@
    :parameters [assignmentId]
    :pre-checks [assignments-enabled]
    :input-validators [(partial action/non-blank-parameters [:assignmentId])]
-   :categories #{:documents}
-   :feature :assignments}
+   :categories #{:documents}}
   [{user    :user
     created :created}]
   (if (> (assignment/complete-assignment assignmentId user created) 0)

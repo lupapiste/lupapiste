@@ -156,7 +156,7 @@
         (:mongo-updates updates)
         new-updates))
     (when (seq removable-attachment-ids)
-      (run! (partial att/delete-attachment! (domain/get-application-no-access-checking (:id app))) removable-attachment-ids))
+      (att/delete-attachments! (domain/get-application-no-access-checking (:id app)) removable-attachment-ids))
     (when (seq new-file-ids)
       ; Link files to application, as files uploaded by file-upload-api to GridFS are not associated to application initially.
       (att/link-files-to-application (:id app) new-file-ids))

@@ -254,7 +254,7 @@ One signature is visible in attachment page
 Signature icon is visible in attachments tab, and only one
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  1
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  1
 
 Mikko signs all attachments
   [Tags]  attachments
@@ -264,7 +264,7 @@ Signature icon is visible
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
   Wait Until  Attachment indicator icon should be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td/i[@data-test-icon='signed-icon']  2
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  2
 
 Signature is visible
   [Tags]  attachments
