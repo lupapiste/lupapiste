@@ -17,6 +17,10 @@
    (opt :enabled)  [sc/Keyword]  ;; Disabled if any listed action is not allowed.
    })
 
+(defschema single-value (sc/conditional string? sc/Str
+                                        number? sc/Num
+                                        :else   (sc/enum true false nil)))
+
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
@@ -45,7 +49,12 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   })
+   (opt :pre-values)  [single-value] ;; Used inside pre-selector element to toggle element visibility
+   (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
+                       :values [single-value]}
+   (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
+                       :values [single-value]}
+})
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -76,7 +85,7 @@
   "Integer string type"
   (merge GenString
          {:subtype            (sc/eq :number)
-          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle :db)
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :tonnia :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle :db)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
@@ -84,7 +93,7 @@
   "Numeric string type"
   (merge GenString
          {:subtype            (sc/eq :decimal)
-          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko)
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :tonnia :hehtaaria :y :kuukautta :tuntiaviikko)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
@@ -231,7 +240,11 @@
    (opt :repeating)            sc/Bool      ;; Should be  always repeating -> default true
    (opt :repeating-init-empty) sc/Bool      ;;
    (opt :copybutton)           sc/Bool      ;;
-   (opt :validator)            sc/Keyword}) ;;
+   (opt :validator)            sc/Keyword
+   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}})
 
 (defschema Group
   "Group type that groups any doc elements."
@@ -254,7 +267,13 @@
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)            {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
-   (opt :listen)               [sc/Keyword]}) ;; Events to listen
+   (opt :listen)               [sc/Keyword] ;; Events to listen
+   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :template)             sc/Str       ;; Component template to use
+   (opt :rows)                 [[sc/Str]]})
 
 (defschema Element
   "Any doc element."
