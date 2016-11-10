@@ -70,9 +70,15 @@ var docgen = (function () {
                     newDoc.schema = newDocSchema;
 
                     lupapisteApp.services.accordionService.addDocument(newDoc);
+                    var newAuthModel = authorization.create({});
 
-                    var newDocModel = new DocModel(newDocSchema, newDoc, application, authorizationModel);
+                    var newDocModel = new DocModel(newDocSchema, newDoc, application, newAuthModel );
                     newDocModel.triggerEvents();
+                    authorization.refreshModelsForCategory( _.set( _.set({}, doc.id, authorizationModel),
+                                                                   newDocId,
+                                                                   newAuthModel ),
+                                                            application.id,
+                                                            "documents");
 
                     $(self).before(newDocModel.element);
                     $(".sticky", newDocModel.element).Stickyfill();
