@@ -87,13 +87,12 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     return self.docModel.testId( id + "-" + self.docModel.schemaName);
   };
 
-  self.remove = {};
   // Remove
+  self.remove = {testClass: "delete-schemas."  + self.docModel.schemaName};
+
   self.showRemove = self.disposedComputed( function() {
     if (self.auth.ok("remove-doc") && !self.isPrimaryOperation()) {
       self.remove.fun = self.docModel.removeDocument;
-      self.remove.testClass = self.docModel.testId( "delete-schemas."
-                                                    + self.docModel.schemaName );
       return true;
     }
   });

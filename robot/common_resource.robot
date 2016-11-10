@@ -1432,6 +1432,10 @@ Test id select is
   [Arguments]  ${id}  ${value}
   List selection should be  jquery=select[data-test-id=${id}]  ${value}
 
+jQuery should match X times
+  [Arguments]  ${selector}  ${count}
+  Wait until  Javascript?  $("${selector}").length === ${count}
+
 
 # Frontend error log
 
