@@ -667,11 +667,13 @@
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                                                           <li data-bind="if: $data.katselmuksenLaji">
                                                               <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
+                                                            <span data-bind="if: !$data.tarkastuksenTaiKatselmuksenNimi">
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                            </span>
                                                               <!-- /ko -->
-                                                              <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
-                                                                  (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
-                                                              </span>
+                                                            <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
+                                                              <span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>
+                                                            </span>
                                                           </li>
                                                       </ul>
                                                   </div>
