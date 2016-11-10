@@ -178,7 +178,7 @@
                                     :approvable false
                                     :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
                                            {:name "maara" :type :string :subtype :number :size :s}
-                                           {:name "yksikko" :type :select :body (map #(hash-map :name %) ["kg" "tonni"])}
+                                           {:name "yksikko" :type :select :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
                                            {:name "sijoituspaikka" :type :string}]}
                                    {:name "muuJate"
                                     :type :table
