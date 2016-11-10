@@ -5,7 +5,8 @@
     <ul data-bind="foreach: organizationLinks">
       <li>
         <a data-bind="text: text, 
-                      attr: {href: url}"
+                      attr: {href: url},
+                      testId: 'org-link-' + $index()"
            href="#" target="_blank"></a>
       </li>
     </ul>
