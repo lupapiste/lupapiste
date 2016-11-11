@@ -273,7 +273,9 @@
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values [single-value]}
    (opt :template)             sc/Str       ;; Component template to use
-   (opt :rows)                 [[sc/Str]]})
+   (opt :rows)                 [(sc/if map?
+                                  {sc/Keyword sc/Str}
+                                  [sc/Str])]})
 
 (defschema Element
   "Any doc element."

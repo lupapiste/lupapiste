@@ -17,27 +17,53 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
 
-  self.subSchemas = _.map(params.schema.body, function(schema) {
-    var uicomponent = schema.uicomponent || "docgen-" + schema.type;
-    var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
-    var finalschema = _.extend({}, schema, {
-      path: self.path.concat(schema.name),
-      uicomponent: uicomponent,
-      schemaI18name: params.schemaI18name,
-      i18npath: i18npath,
-      applicationId: params.applicationId,
-      documentId: params.documentId,
-      service: self.service
-    });
-    return finalschema;
+  function getValueByPathString(groupPath, pathString) {
+    var path = pathString.split("/");
+    var absolutePath = path[0] === "" ? _.tail(path) : groupPath.concat(path);
+    return util.getIn(self.service.getInDocument(self.documentId, absolutePath), ["model"]);
+  }
+
+  self.subSchemas = ko.pureComputed(function() {
+    return _(params.schema.body)
+      .reject(function(schema) {
+        var hideWhen = schema["hide-when"];
+        return hideWhen ? _.includes(hideWhen.values, getValueByPathString(self.path, hideWhen.path)) : false;
+      })
+      .filter(function(schema) {
+        var showWhen = schema["show-when"];
+        return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
+      })
+      .map(function(schema) {
+        var uicomponent = schema.uicomponent || "docgen-" + schema.type;
+        var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
+        return _.extend({}, schema, {
+          path: self.path.concat(schema.name),
+          uicomponent: uicomponent,
+          schemaI18name: params.schemaI18name,
+          i18npath: i18npath,
+          applicationId: params.applicationId,
+          documentId: params.documentId,
+          service: self.service
+        });
+      }).value();
   });
 
-  function getInSchema(schema, path) {
+  function hideSchema(schema, parentPath) {
+    var hideWhen = _.get(schema, "hide-when");
+    var showWhen = _.get(schema, "show-when");
+    return hideWhen && _.includes(hideWhen.values, getValueByPathString(parentPath, hideWhen.path)) ||
+      showWhen && !_.includes(showWhen.values, getValueByPathString(parentPath, showWhen.path));
+  }
+
+  function getInSchema(schema, schemaPath, path) {
     var pathArray = _.isArray(path) ? path : path.split("/");
-    if (_.isEmpty(pathArray)) {
+    if (hideSchema(schema, _.dropRight(schemaPath))) {
+      return null;
+    } else if (_.isEmpty(pathArray)) {
       return schema;
     } else {
-      return getInSchema(_.find(schema.body, {name: _.head(pathArray)}), _.tail(pathArray));
+      var schemaName = _.head(pathArray);
+      return getInSchema(_.find(schema.body, {name: schemaName}), schemaPath.concat(schemaName), _.tail(pathArray));
     }
   }
 
@@ -45,29 +71,37 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return "col-" + schema.cols;
   };
 
-  self.rowSchemas = _.map(self.schemaRows, function(row) {
-    if ( _.isArray(row)) {
-      return _.map(row, function(schemaName) {
-        var splitted = schemaName.split("::");
-        var cols = splitted[1] || 1;
-        var schema = getInSchema(params.schema, splitted[0]);
-        var path = self.path.concat(splitted[0].split("/"));
-        return _.extend({}, schema, {
-          path: path,
-                  uicomponent: schema.uicomponent || "docgen-" + schema.type,
-                  schemaI18name: params.schemaI18name,
-                  i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(path),
-                  applicationId: params.applicationId,
-                  documentId: params.documentId,
-                  service: self.service,
-                  cols: cols
-                });
-      });
-    } else {
-      var headerTag = _.head(_.keys(row));
-      var ltext = row[headerTag];
-      return {ltext: ltext, css: _.fromPairs( [[headerTag, true]])};
-    }
+  self.rowSchemas = ko.pureComputed(function() {
+    return _(self.schemaRows)
+      .map(function(row) {
+        if ( _.isArray(row)) {
+          return _(row)
+            .map(function(schemaName) {
+              var splitted = schemaName.split("::");
+              var cols = splitted[1] || 1;
+              var path = self.path.concat(splitted[0].split("/"));
+              var schema = getInSchema(params.schema, self.path, splitted[0]);
+              return schema && _.extend({}, schema, {
+                path: path,
+                uicomponent: schema.uicomponent || "docgen-" + schema.type,
+                schemaI18name: params.schemaI18name,
+                i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(splitted[0].split("/")),
+                applicationId: params.applicationId,
+                documentId: params.documentId,
+                service: self.service,
+                cols: cols
+              });
+            })
+            .filter()
+            .value();
+        } else {
+          var headerTag = _.head(_.keys(row));
+          var ltext = row[headerTag];
+          return {ltext: ltext, css: _.fromPairs( [[headerTag, true]])};
+        }
+      })
+      .reject(_.isEmpty)
+      .value();
   });
 
 };
