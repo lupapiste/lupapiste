@@ -117,10 +117,10 @@
 ;; Simple cache support
 ;;
 
-(defn with-mongo-meta [m]
+(defn ^{:perfmon-exclude true} with-mongo-meta [m]
   (assoc m :created (java.util.Date.)))
 
-(defn without-mongo-meta [m]
+(defn ^{:perfmon-exclude true} without-mongo-meta [m]
   (dissoc m :id :_id :created))
 
 ;;
