@@ -25,7 +25,7 @@
         </form>
         <p data-bind="text: organizationsModel.countText()"
            data-test-id="organization-result-count"></p>
-        <!-- ko if: _.some( organizationsModel.organizations()) -->        
+        <!-- ko if: _.some( organizationsModel.organizations()) -->
         <table data-test-id="organizations-table"
           <thead>
             <tr>
@@ -77,6 +77,9 @@
           </tbody>
         </table>
 <!-- /ko -->
+
+
+        <p><a href="/api/raw/admin-attachment-report-csv">Lataa liitetiedostoraportti</a></p>
       </div>
 
       <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">
