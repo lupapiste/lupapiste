@@ -17,9 +17,9 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.indicator = ko.observable().extend({notify: "always"});
   self.result = ko.observable().extend({notify: "always"});
 
-  function getValueByPathString(pathString) {
+  function getValueByPathString(groupPath, pathString) {
     var path = pathString.split("/");
-    var absolutePath = path[0] === "" ? _.tail(path) : self.path.concat(path);
+    var absolutePath = path[0] === "" ? _.tail(path) : groupPath.concat(path);
     return util.getIn(self.service.getInDocument(self.documentId, absolutePath), ["model"]);
   }
 
@@ -27,11 +27,11 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     return _(params.schema.body)
       .reject(function(schema) {
         var hideWhen = schema["hide-when"];
-        return hideWhen ? _.includes(hideWhen.values, getValueByPathString(hideWhen.path)) : false;
+        return hideWhen ? _.includes(hideWhen.values, getValueByPathString(self.path, hideWhen.path)) : false;
       })
       .filter(function(schema) {
         var showWhen = schema["show-when"];
-        return showWhen ? _.includes(showWhen.values, getValueByPathString(showWhen.path)) : true;
+        return showWhen ? _.includes(showWhen.values, getValueByPathString(self.path, showWhen.path)) : true;
       })
       .map(function(schema) {
         var uicomponent = schema.uicomponent || "docgen-" + schema.type;
@@ -48,12 +48,22 @@ LUPAPISTE.DocgenGroupModel = function(params) {
       }).value();
   });
 
-  function getInSchema(schema, path) {
+  function hideSchema(schema, parentPath) {
+    var hideWhen = _.get(schema, "hide-when");
+    var showWhen = _.get(schema, "show-when");
+    return hideWhen && _.includes(hideWhen.values, getValueByPathString(parentPath, hideWhen.path)) ||
+      showWhen && !_.includes(showWhen.values, getValueByPathString(parentPath, showWhen.path));
+  }
+
+  function getInSchema(schema, schemaPath, path) {
     var pathArray = _.isArray(path) ? path : path.split("/");
-    if (!schema || _.isEmpty(pathArray)) {
+    if (hideSchema(schema, _.dropRight(schemaPath))) {
+      return null;
+    } else if (_.isEmpty(pathArray)) {
       return schema;
     } else {
-      return getInSchema(_.find(schema.body, {name: _.head(pathArray)}), _.tail(pathArray));
+      var schemaName = _.head(pathArray);
+      return getInSchema(_.find(schema.body, {name: schemaName}), schemaPath.concat(schemaName), _.tail(pathArray));
     }
   }
 
@@ -69,8 +79,8 @@ LUPAPISTE.DocgenGroupModel = function(params) {
             .map(function(schemaName) {
               var splitted = schemaName.split("::");
               var cols = splitted[1] || 1;
-              var schema = getInSchema({body: self.subSchemas()}, splitted[0]);
               var path = self.path.concat(splitted[0].split("/"));
+              var schema = getInSchema(params.schema, self.path, splitted[0]);
               return schema && _.extend({}, schema, {
                 path: path,
                 uicomponent: schema.uicomponent || "docgen-" + schema.type,
