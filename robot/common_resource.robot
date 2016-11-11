@@ -786,6 +786,11 @@ Select operations path R
   Click tree item by text  "Uuden rakennuksen rakentaminen"
   Click tree item by text  "Asuinkerrostalon tai rivitalon rakentaminen"
 
+Select operations path R in Swedish
+  Click tree item by text  "Byggande, rivning eller åtgärd som inverkar på landskapet"
+  Click tree item by text  "Byggande av ny byggnad"
+  Click tree item by text  "Byggande av flervåningshus eller radhus"
+
 Select operations path YA kayttolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
   Click tree item by text  "Yleisten alueiden tai muiden kunnan omistamien alueiden käyttö (tapahtumat, mainokset, yms.)"

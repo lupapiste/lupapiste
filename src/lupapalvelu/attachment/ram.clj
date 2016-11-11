@@ -36,12 +36,18 @@
 
 
 (defn attachment-type-allows-ram
-  "Pre-checker that fails if the attachment type is review/statement
-  minutes."
+  "Pre-checker that fails if the attachment type does not support RAMs."
   [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [type]} (util/find-by-id attachment-id (:attachments app))]
-    (when (util/=as-kw (:type-id type) :katselmuksen_tai_tarkastuksen_poytakirja)
-      (fail :error.ram-not-allowed))))
+  (when-not (contains? #{:paapiirustus :suunnitelmat :erityissuunnitelmat
+                         :pelastusviranomaiselle_esitettavat_suunnitelmat
+                         :tietomallit}
+                       (some->> app
+                                :attachments
+                                (util/find-by-id attachment-id)
+                                :type
+                                :type-group
+                                keyword))
+    (fail :error.ram-not-allowed)))
 
 (defn attachment-status-ok
   "Pre-checker that fails only if the attachment is not approved"

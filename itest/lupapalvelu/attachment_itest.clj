@@ -830,7 +830,8 @@
           => (partial expected-failure? :error.ram-linked))
 
     (facts "Pena uploads new post-verdict attachment and corresponding RAM attachment"
-          (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
+           (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus"
+                                                                 :type-id "pohjapiirustus"}} true) => truthy
           (let [base (latest-attachment)]
             (fact "RAM creation fails do to unapproved base attachment"
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
@@ -840,7 +841,8 @@
                   (command sonja :approve-attachment :id application-id
                            :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
-            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
+            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "paapiirustus"
+                                                                                         :type-id "pohjapiirustus"}} true) => truthy
             (fact "Applicant cannot delete base attachment"
                   (command pena :delete-attachment :id application-id :attachmentId (:id base))
                   => (partial expected-failure? :error.ram-linked))
@@ -900,7 +902,17 @@
                                  :attachmentId (:id middle)
                                  :fileId (-> middle :latestVersion :fileId)
                                  :originalFileId (-> middle :latestVersion :originalFileId))
-                        => (partial expected-failure? :error.ram-linked)))))))))
+                        => (partial expected-failure? :error.ram-linked)))))))
+    (facts "Pena uploads new post-verdict attachment that does not support RAMs"
+           (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet"
+                                                                 :type-id "cv"}} true) => truthy
+          (let [base (latest-attachment)]
+            (fact "Approve"
+                  (command sonja :approve-attachment :id application-id
+                           :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
+            (fact "RAM creation fails"
+                  (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
+                  => (partial expected-failure? :error.ram-not-allowed))))))
 
 (facts "Marking attachment manually as as construction time attachment"
   (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
