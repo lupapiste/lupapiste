@@ -26,7 +26,7 @@ LUPAPISTE.PropertyGroupModel = function(params) {
            params.propertyId;
   });
 
-  var partitionedSchemas = _.partition(self.subSchemas, function(schema) {
+  var partitionedSchemas = _.partition(self.subSchemas(), function(schema) {
     return schema.name === "maaraalaTunnus";
   });
 
