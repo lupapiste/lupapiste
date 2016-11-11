@@ -34,17 +34,17 @@ LUPAPISTE.DocgenGroupModel = function(params) {
         return showWhen ? _.includes(showWhen.values, getValueByPathString(showWhen.path)) : true;
       })
       .map(function(schema) {
-    var uicomponent = schema.uicomponent || "docgen-" + schema.type;
-    var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
-    return _.extend({}, schema, {
-      path: self.path.concat(schema.name),
-      uicomponent: uicomponent,
-      schemaI18name: params.schemaI18name,
-      i18npath: i18npath,
-      applicationId: params.applicationId,
-      documentId: params.documentId,
-      service: self.service
-    });
+        var uicomponent = schema.uicomponent || "docgen-" + schema.type;
+        var i18npath = schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(schema.name);
+        return _.extend({}, schema, {
+          path: self.path.concat(schema.name),
+          uicomponent: uicomponent,
+          schemaI18name: params.schemaI18name,
+          i18npath: i18npath,
+          applicationId: params.applicationId,
+          documentId: params.documentId,
+          service: self.service
+        });
       }).value();
   });
 
@@ -64,32 +64,32 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.rowSchemas = ko.pureComputed(function() {
     return _(self.schemaRows)
       .map(function(row) {
-    if ( _.isArray(row)) {
-      return _(row)
-       .map(function(schemaName) {
-        var splitted = schemaName.split("::");
-        var cols = splitted[1] || 1;
-        var schema = getInSchema({body: self.subSchemas()}, splitted[0]);
-        var path = self.path.concat(splitted[0].split("/"));
-        return schema && _.extend({}, schema, {
-          path: path,
-                  uicomponent: schema.uicomponent || "docgen-" + schema.type,
-                  schemaI18name: params.schemaI18name,
-                  i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(splitted[0].split("/")),
-                  applicationId: params.applicationId,
-                  documentId: params.documentId,
-                  service: self.service,
-                  cols: cols
-                });
-      })
+        if ( _.isArray(row)) {
+          return _(row)
+            .map(function(schemaName) {
+              var splitted = schemaName.split("::");
+              var cols = splitted[1] || 1;
+              var schema = getInSchema({body: self.subSchemas()}, splitted[0]);
+              var path = self.path.concat(splitted[0].split("/"));
+              return schema && _.extend({}, schema, {
+                path: path,
+                uicomponent: schema.uicomponent || "docgen-" + schema.type,
+                schemaI18name: params.schemaI18name,
+                i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(splitted[0].split("/")),
+                applicationId: params.applicationId,
+                documentId: params.documentId,
+                service: self.service,
+                cols: cols
+              });
+            })
             .filter()
             .value();
-    } else {
-      var headerTag = _.head(_.keys(row));
-      var ltext = row[headerTag];
-      return {ltext: ltext, css: _.fromPairs( [[headerTag, true]])};
-    }
-  })
+        } else {
+          var headerTag = _.head(_.keys(row));
+          var ltext = row[headerTag];
+          return {ltext: ltext, css: _.fromPairs( [[headerTag, true]])};
+        }
+      })
       .reject(_.isEmpty)
       .value();
   });
