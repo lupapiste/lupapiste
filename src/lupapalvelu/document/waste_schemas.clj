@@ -132,7 +132,7 @@
                          ["purettavaKerrosala" "rakennusvuosi"]
                          ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
                          ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella"]
-                         ["mineraalisenPurkujatteenKasittely/kasittelutapa" "mineraalisenPurkujatteenKasittely/muuKasittelutapa"]
+                         ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa"]
                          ["polynLeviamisenEsto::4"]
                          ["ilmoitusHairitsevastaMelusta/ilmoitusTehty" "ilmoitusHairitsevastaMelusta/pvm" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin" "ilmoitusHairitsevastaMelusta/syy"]]
                  :template "form-grid-docgen-group-template"
