@@ -116,13 +116,13 @@
                :approvable false
                :rows [{:h3 "laajennettuRakennusjateselvitys.toteutus"}
                       ["purkuAlku" "purkuLoppu" "rakennusAlku" "rakennusLoppu"]
-                      ["paaurakoitsijanYhteystiedot"]]
+                      ["paaurakoitsijanYhteystiedot::4"]]
                :template "form-grid-docgen-group-template"
                :body [{:name "purkuAlku" :type :date}
                       {:name "purkuLoppu" :type :date}
                       {:name "rakennusAlku" :type :date}
                       {:name "rakennusLoppu" :type :date}
-                      {:name "paaurakoitsijanYhteystiedot" :type :text :max-len 4000 :layout :full-width}]})
+                      {:name "paaurakoitsijanYhteystiedot" :type :text :max-len 4000}]})
 
 (def purkaminen {:name "purkaminen"
                  :type :group
@@ -133,7 +133,7 @@
                          ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
                          ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella"]
                          ["mineraalisenPurkujatteenKasittely/kasittelutapa" "mineraalisenPurkujatteenKasittely/muuKasittelutapa"]
-                         ["polynLeviamisenEsto"]
+                         ["polynLeviamisenEsto::4"]
                          ["ilmoitusHairitsevastaMelusta/ilmoitusTehty" "ilmoitusHairitsevastaMelusta/pvm" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin" "ilmoitusHairitsevastaMelusta/syy"]]
                  :template "form-grid-docgen-group-template"
                  :body [{:name "purettavaKerrosala" :type :string :subtype :decimal}
@@ -149,7 +149,7 @@
                          :type :group
                          :body [{:name "kasittelytapa" :type :select :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
                                 {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values ["muu"]} :type :string}]}
-                        {:name "polynLeviamisenEsto" :type :text :max-len 4000 :layout :full-width}
+                        {:name "polynLeviamisenEsto" :type :text :max-len 4000}
                         {:name "ilmoitusHairitsevastaMelusta"
                          :type :group
                          :body [{:name "ilmoitusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
@@ -207,7 +207,7 @@
                         :rows [{:h3 "laajennettuRakennusjateselvitys.pilaantuneetMaat"}
                                ["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
                                ["ilmoitusPuhdistuksesta/ilmoitusTehty" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
-                               ["poitettavatAinekset" "sijoituspaikka"]]
+                               ["poistettavatAinekset" "sijoituspaikka::3"]]
                         :template "form-grid-docgen-group-template"
                         :body [{:name "tutkimusPilaantuneistaMaista"
                                 :type :group
@@ -221,7 +221,7 @@
                                         {:name "pvm" :show-when {:path "ilmoitusTehty" :values [true]} :type :date}
                                         {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values [true]} :type :checkbox}]}
                                {:name "poistettavatAinekset" :type :string :subtype :decimal :unit :tonnia}
-                               {:name "sijoituspaikka" :type :string :size :l}]})
+                               {:name "sijoituspaikka" :type :string}]})
 
 (defn ainekset-table [ainekset]
   {:name "ainekset"
@@ -272,7 +272,7 @@
                          ["selvitysVieraslajeista::4"]]
                   :template "form-grid-docgen-group-template"
                   :body [{:name "vieraslajit" :type :select :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
-                         {:name "selvitysVieraslajeista" :type :text :max-len 4000 :layout :full-width}]})
+                         {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
 (def laajennettu-rakennusjateselvitys [toteutus
                                        purkaminen
