@@ -5,6 +5,7 @@ LUPAPISTE.DocgenTableModel = function(params) {
   // inherit from DocgenGroupModel
   ko.utils.extend(self, new LUPAPISTE.DocgenRepeatingGroupModel(params));
 
+  self.schemaCss = self.schemaCss || "form-table";
   self.componentTemplate = (params.template || params.schema.template) || "default-docgen-table-template";
 
   self.groupId = ["table", params.documentId].concat(self.path).join("-");

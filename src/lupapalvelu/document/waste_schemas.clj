@@ -197,7 +197,7 @@
                                     :repeating true
                                     :approvable false
                                     :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
-                                           {:name "maara" :type :string :subtype :number :unit :tonnia :size :s}
+                                           {:name "maara" :type :string :subtype :number}
                                            {:name "sijoituspaikka" :type :string}]}]})
 
 (def pilaantuneet-maat {:name "pilaantuneetMaat"
@@ -227,11 +227,23 @@
   {:name "ainekset"
    :type :table
    :repeating true
+   :css [:form-table :form-table--waste]
    :approvable false
-   :body [{:name "aines" :type :select :body (map #(hash-map :name %) ainekset)}
-          {:name "hyodynnetaan" :type :string :subtype :number :unit :tonnia :size :s}
-          {:name "poisajettavia" :type :string :subtype :number :unit :tonnia :size :s}
-          {:name "yhteensa" :type :string :subtype :number :unit :tonnia :size :s}
+   :body [{:name "aines-group"
+           :type :group
+           :i18nkey "waste"
+           :approvable false
+           :template "simple-docgen-group-template"
+           :body [{:name "aines" :type :select :label false
+                   :css [:dropdown]
+                   :body (conj (mapv #(hash-map :name %) ainekset)
+                               {:name "muu" :i18nkey "select-other"})
+                   :hide-when {:path "aines" :values ["muu"]}}
+                  {:name "muu" :type :string :label false
+                   :show-when {:path "aines" :values ["muu"]}}]}
+          {:name "hyodynnetaan" :type :string :subtype :number}
+          {:name "poisajettavia" :type :string :subtype :number}
+          {:name "yhteensa" :type :string :subtype :number}
           {:name "sijoituspaikka" :type :string}]})
 
 (def kaivettava-maa {:name "kaivettavaMaa"

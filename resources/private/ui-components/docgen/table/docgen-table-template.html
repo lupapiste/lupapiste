@@ -3,7 +3,8 @@
 </script>
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="default-docgen-table-template">
-  <div class="form-table" data-bind="attr: {id: groupId}">
+  <div data-bind="attr: {id: groupId,
+                  'class': schemaCss}">
 
     <label class="form-label form-label-table" data-bind="ltext: groupLabel"></label>
 

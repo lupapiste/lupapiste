@@ -54,3 +54,19 @@
 </div>
 </script>
 
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="simple-docgen-group-template">
+    <div data-bind="foreach: subSchemas">
+      <!-- ko ifnot: $data.hidden -->
+        <span data-bind="component: { name: uicomponent,
+                         params: { schema: $data,
+                         path: path,
+                         i18npath: i18npath,
+                         applicationId: applicationId,
+                         documentId: documentId,
+                         authModel: $component.authModel,
+                         service: $component.service }}">
+        </span>
+      <!-- /ko -->
+    </div>
+</script>

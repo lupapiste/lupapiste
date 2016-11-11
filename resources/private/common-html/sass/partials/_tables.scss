@@ -385,3 +385,10 @@ div.suti-admin-container .serversettings--wide {
 th.full-width-column {
   width: 100%;
 }
+
+.form-table.form-table--waste {
+  @include no-row-hover;
+  .form-input {
+    height: initial;
+  }
+}
