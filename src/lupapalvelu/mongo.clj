@@ -242,7 +242,13 @@
     (str "function(" (s/join \, (map name args)) "){" s "}")))
 
 (defn map-reduce
-  "Returns map-reduce results inline"
+  "Returns map-reduce results inline.
+   Mapper-js and reducer-js are JavaScript functions or their bodies as Strings.
+   Both should return the same keys:
+   - reducer is not called if there is only one result
+   - Mapped results are reduced in chucks and reducer is called multible times
+     as more data is processed. This means that reducer 'values' paramerter
+     might not contain all the data at once, if there are multiple chucks."
   [collection query mapper-js reducer-js]
   {:pre [(keyword? collection) (map? query) (string? mapper-js) (string? reducer-js)]}
   (let [mapper-js-fn  (wrap-js-function mapper-js)
