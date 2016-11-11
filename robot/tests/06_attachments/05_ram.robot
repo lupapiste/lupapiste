@@ -6,6 +6,11 @@ Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
 Variables      variables.py
 
+*** Variables ***
+
+${type}           paapiirustus.pohjapiirustus
+${shelter}        pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
+
 
 *** Test Cases ***
 
@@ -15,9 +20,9 @@ Mikko creates application
   Mikko logs in
   Create application with state   ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
 
-Mikko adds txt attachment without comment
+Mikko adds png attachment without comment
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  ${type}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  submitted
 
 Mikko opens attachment details
@@ -41,7 +46,7 @@ There are no RAM filters
   No such test id  ram-filter-label
   
 Sonja opens attachment details
-  Open attachment details  muut.muu
+  Open attachment details  ${type}
   No such test id  ram-links-table
 
 Sonja cannot add RAM because the attachment has not been approved
@@ -92,11 +97,11 @@ Mikko logs in and unselects post verdict filter
   Open attachments tab and unselect post verdict filter
 
 RAM indicator is visible for RAM attachment
-  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='muut.muu'] span[data-test-id=ram-indicator]:visible
+  Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] span[data-test-id=ram-indicator]:visible
 
 Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
   # Only RAM is visible
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
   Element should be visible by test id  ram-prefix
@@ -123,7 +128,7 @@ Sonja logs in and goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Sonja rejects attachment but could not delete base attachment
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Follow ram link  0
   No such test id  ram-prefix
   Delete disallowed
@@ -144,7 +149,7 @@ Mikko logs in and goes to attachment tab
   Open attachments tab and unselect post verdict filter
 
 Mikko opens RAM
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Element should be visible by test id  ram-prefix
 
 Mikko adds new RAM attachment and uploads file
@@ -172,7 +177,7 @@ Sonja goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Sonja rejects the first RAM but cannot delete it
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Element should be visible by test id  ram-prefix
   Wait Until  Click button  id=test-attachment-reject
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
@@ -185,13 +190,13 @@ Mikko goes to attachments tab
   Open attachments tab and unselect post verdict filter
 
 Mikko deletes RAM
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Element should be visible by test id  ram-prefix
   Follow ram link  2
   Element should be visible by test id  delete-attachment
   Click by test id  delete-attachment
   Confirm yes no dialog
-  Open attachment details  muut.muu  0
+  Open attachment details  ${type}  0
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   No such test id  ram-link-type-2
@@ -203,16 +208,16 @@ Sonja logs in to test filters
   Open attachments tab and unselect post verdict filter 
   Scroll and click test id  ram-filter-label
 
-Add pohjapiirustus file and approve it
-  Add attachment file  tr[data-test-type='paapiirustus.pohjapiirustus']  ${PNG_TESTFILE_PATH}
+Add shelter file and approve it
+  Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}
   Return to application
-  Approve row  tr[data-test-type='paapiirustus.pohjapiirustus']
+  Approve row  tr[data-test-type='${shelter}']
 
-Remove vaestonsuojasuunnitelma
-  Remove row  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']
+Remove Pohjapiirustus
+  Remove row  tr[data-test-type='${type}']
 
-Approve first muut.muu
-  Approve row  tr[data-test-type='muut.muu']:first
+Approve first Pohjapiirustus
+  Approve row  tr[data-test-type='${type}']:first
 
 Hide RAM attachments
   Scroll and click test id  preVerdict-filter-label
@@ -220,23 +225,29 @@ Hide RAM attachments
   Checkbox wrapper not selected by test id  ram-filter-checkbox
 
 Rollup states
-  Rollup approved  Pääpiirustukset
-  Rollup rejected  Muut suunnitelmat
+  Rollup rejected  Pääpiirustukset
+  Rollup approved  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja approves RAM
   Scroll and click test id  ram-filter-label
   Checkbox wrapper selected by test id  ram-filter-checkbox
-  Approve row  tr[data-test-type='muut.muu']:last
+  Approve row  tr[data-test-type='${type}']:last
   Rollup approved  Pääpiirustukset
   Rollup approved  Muut suunnitelmat
   Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
 
-Sonja rejects Pohjapiirustus
-  Reject row  tr[data-test-type='paapiirustus.pohjapiirustus']  
-  Rollup rejected  Pääpiirustukset
-  Rollup approved  Muut suunnitelmat
+Sonja rejects shelter
+  Reject row  tr[data-test-type='${shelter}']  
+  Rollup approved  Pääpiirustukset
+  Rollup rejected  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+
+Sonja adds CV. It does not support RAMs
+  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
+  Wait Until  Click button  id=test-attachment-approve
+  Wait Until  Element should be disabled  test-attachment-approve
+  No such test id  add-ram-attachment    
   [Teardown]  Logout
 
 *** Keywords ***
