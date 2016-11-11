@@ -112,8 +112,10 @@
 
 (def toteutus {:name "toteutus"
                :type :group
+               :uicomponent :docgenGroup
                :approvable false
-               :rows [["purkuAlku" "purkuLoppu" "rakennusAlku" "rakennusLoppu"]
+               :rows [{:h3 "laajennettuRakennusjateselvitys.toteutus"}
+                      ["purkuAlku" "purkuLoppu" "rakennusAlku" "rakennusLoppu"]
                       ["paaurakoitsijanYhteystiedot"]]
                :template "form-grid-docgen-group-template"
                :body [{:name "purkuAlku" :type :date}
@@ -124,8 +126,10 @@
 
 (def purkaminen {:name "purkaminen"
                  :type :group
+                 :uicomponent :docgenGroup
                  :approvable false
-                 :rows  [["purettavaKerrosala" "rakennusvuosi"]
+                 :rows  [{:h3 "laajennettuRakennusjateselvitys.purkaminen"}
+                         ["purettavaKerrosala" "rakennusvuosi"]
                          ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
                          ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella"]
                          ["mineraalisenPurkujatteenKasittely/kasittelutapa" "mineraalisenPurkujatteenKasittely/muuKasittelutapa"]
@@ -155,8 +159,10 @@
 
 (def vaaralliset-aineet {:name "vaarallisetAineet"
                          :type :group
+                         :uicomponent :docgenGroup
                          :approvable false
-                         :rows [["eiVaarallisiaAineita"]
+                         :rows [{:h3 "laajennettuRakennusjateselvitys.vaarallisetAineet"}
+                                ["eiVaarallisiaAineita"]
                                 ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy"]]
                          :template "form-grid-docgen-group-template"
                          :body [{:name "eiVaarallisiaAineita" :type :checkbox}
@@ -171,10 +177,16 @@
 
 (def rakennus-ja-purkujate {:name "rakennusJaPurkujate"
                             :type :group
+                            :uicomponent :docgenGroup
+                            :rows [{:h3 "laajennettuRakennusjateselvitys.rakennusJaPurkujate"}
+                                   ["vaarallisetJatteet::4"]
+                                   ["muuJate::4"]]
+                            :template "form-grid-docgen-group-template"
                             :body [{:name "vaarallisetJatteet"
                                     :hide-when {:path "/vaarallisetAineet/eiVaarallisiaAineita"
                                                 :values [true]}
                                     :type :table
+                                    :repeating true
                                     :approvable false
                                     :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
                                            {:name "maara" :type :string :subtype :number :size :s}
@@ -182,6 +194,7 @@
                                            {:name "sijoituspaikka" :type :string}]}
                                    {:name "muuJate"
                                     :type :table
+                                    :repeating true
                                     :approvable false
                                     :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
                                            {:name "maara" :type :string :subtype :number :unit :tonnia :size :s}
@@ -189,8 +202,10 @@
 
 (def pilaantuneet-maat {:name "pilaantuneetMaat"
                         :type :group
+                        :uicomponent :docgenGroup
                         :approvable false
-                        :rows [["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
+                        :rows [{:h3 "laajennettuRakennusjateselvitys.pilaantuneetMaat"}
+                               ["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
                                ["ilmoitusPuhdistuksesta/ilmoitusTehty" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
                                ["poitettavatAinekset" "sijoituspaikka"]]
                         :template "form-grid-docgen-group-template"
@@ -211,6 +226,7 @@
 (defn ainekset-table [ainekset]
   {:name "ainekset"
    :type :table
+   :repeating true
    :approvable false
    :body [{:name "aines" :type :select :body (map #(hash-map :name %) ainekset)}
           {:name "hyodynnetaan" :type :string :subtype :number :unit :tonnia :size :s}
@@ -220,13 +236,17 @@
 
 (def kaivettava-maa {:name "kaivettavaMaa"
                      :type :group
+                     :uicomponent :docgenGroup
                      :approvable false
+                     :rows [["ainekset::4"]]
+                     :template "form-grid-docgen-group-template"
                      :body [(ainekset-table ["louhe" "hiekkaSoraMurskeKivet" "moreeniSiltti" "jaykkaSavi" "pehmeaSavi" "liejuRuoppausmassa" "turve" "kasvualustaMulta"])]})
 
 (def muut-kaivettavat-massat {:name "muutKaivettavatMassat"
                               :type :group
+                              :uicomponent :docgenGroup
                               :approvable false
-                              :rows [["ainekset"]
+                              :rows [["ainekset::4"]
                                      ["kaivettavienMassojenSelvitys/selvitystapa" "kaivettavienMassojenSelvitys/muuSelvitystapa"]]
                               :template "form-grid-docgen-group-template"
                               :body [(ainekset-table ["betoni" "asfalttijate" "betoniAsfalttiMaaAines" "stabiloituSavi" "kevytsoraVaahtolasimurske" "maatuhka"])
@@ -235,14 +255,22 @@
                                       :body [{:name "selvitystapa" :type :select :body (map #(hash-map :name %) ["koekuopilla" "vanhoistaSuunnitelmista" "eiSelvitetty" "muu"])}
                                              {:name "muuSelvitystapa" :pre-values ["muu"] :type :string}]}]})
 
-(def orgaaninen-aines {:name "organinenAines"
+(def orgaaninen-aines {:name "orgaaninenAines"
                        :type :group
+                       :uicomponent :docgenGroup
                        :approvable false
+                       :rows [["ainekset::4"]]
+                       :template "form-grid-docgen-group-template"
                        :body [(ainekset-table ["risutHavutOksat" "juurakotKannot"])]})
 
 (def vieraslajit {:name "vieraslajit"
                   :type :group
+                  :uicomponent :docgenGroup
                   :approvable false
+                  :rows [{:h3 "laajennettuRakennusjateselvitys.vieraslajit"}
+                         ["vieraslajit"]
+                         ["selvitysVieraslajeista::4"]]
+                  :template "form-grid-docgen-group-template"
                   :body [{:name "vieraslajit" :type :select :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000 :layout :full-width}]})
 
