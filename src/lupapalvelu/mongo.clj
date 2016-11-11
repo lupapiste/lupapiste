@@ -276,7 +276,7 @@
         (gfs/content-type content-type)
         (gfs/metadata (assoc meta :uploaded (now)))))))
 
-(defn- gridfs-file-as-map [^GridFSDBFile attachment]
+(defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
