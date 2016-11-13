@@ -234,7 +234,9 @@
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :table)
-   :body                       [(sc/if #(= :group (:type %)) Group Input)]      ;;
+   ;; TODO: each body item could be either Input or Group, but the
+   ;; most obvious definitions do not compile.
+   :body                       [Input]      ;;
    (opt :i18nkey)              sc/Str       ;; Absolute localization key
    (opt :group-help)           sc/Str       ;;
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components

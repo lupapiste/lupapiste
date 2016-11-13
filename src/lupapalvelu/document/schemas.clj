@@ -1544,7 +1544,7 @@
            :section-help "rakennusjate.help"}
     :body (body waste-schemas/rakennusjateselvitys)}
 
-   {:info {:name "laajennettuRakennusjateselvitys"
+   #_{:info {:name "laajennettuRakennusjateselvitys"
            :order 200
            :section-help "rakennusjate.help"}
     :body (body waste-schemas/laajennettu-rakennusjateselvitys)}
