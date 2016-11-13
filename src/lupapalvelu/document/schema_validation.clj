@@ -228,11 +228,13 @@
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
+(declare Group)
+
 (defschema Table
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :table)
-   :body                       [Input]      ;;
+   :body                       [(sc/if #(= :group (:type %)) Group Input)]      ;;
    (opt :i18nkey)              sc/Str       ;; Absolute localization key
    (opt :group-help)           sc/Str       ;;
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components
@@ -241,6 +243,7 @@
    (opt :repeating-init-empty) sc/Bool      ;;
    (opt :copybutton)           sc/Bool      ;;
    (opt :validator)            sc/Keyword
+   (opt :css)                  [sc/Keyword]
    (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values [single-value]}
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
@@ -273,6 +276,11 @@
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values [single-value]}
    (opt :template)             sc/Str       ;; Component template to use
+   ;; Row item format: "<path><cols><css>"
+   ;; <path>  path1/path2/...
+   ;; <cols>  ::n  where n is 1-4 (default 1)
+   ;; <css>   [class1 class2 ...]
+   ;; <cols> and <css> are optional, either or both can be omitted.
    (opt :rows)                 [(sc/if map?
                                   {sc/Keyword sc/Str}
                                   [sc/Str])]})

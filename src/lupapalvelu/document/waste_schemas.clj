@@ -56,6 +56,7 @@
                                :i18nkey "rakennusJaPurkujate"
                                :type :table
                                :uicomponent :docgenTable
+                               :css [:form-table :form-table--waste]
                                :repeating true
                                :approvable false
                                :body (tools/body jatetyyppi rakennusjatesuunnitelmaRow)}
@@ -131,30 +132,34 @@
                  :rows  [{:h3 "laajennettuRakennusjateselvitys.purkaminen"}
                          ["purettavaKerrosala" "rakennusvuosi"]
                          ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
-                         ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella"]
+                         ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
                          ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa"]
                          ["polynLeviamisenEsto::4"]
-                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty" "ilmoitusHairitsevastaMelusta/pvm" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin" "ilmoitusHairitsevastaMelusta/syy"]]
+                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty[col-fixed]" "ilmoitusHairitsevastaMelusta/pvm[col-fixed]" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin[col-fixed]" "ilmoitusHairitsevastaMelusta/syy[col-fixed]"]]
                  :template "form-grid-docgen-group-template"
                  :body [{:name "purettavaKerrosala" :type :string :subtype :decimal}
                         {:name "rakennusvuosi" :type :string :subtype :number}
                         {:name "oljysailioidenLukumaara" :type :string :subtype :number}
                         {:name "sailioilleSuunnitellutToimenpiteet"
                          :type :group
-                         :body [{:name "toimenpide" :type :select :body (map #(hash-map :name %) ["jaavatKayttoon" "poistetaan" "muu"])}
+                         :body [{:name "toimenpide" :type :select :css [:form-input :dropdown]
+                                 :body (map #(hash-map :name %) ["jaavatKayttoon" "poistetaan" "muu"])}
                                 {:name "muuToimenpide" :show-when {:path "toimenpide" :values ["muu"]} :type :string}]}
                         {:name "etaisyysPohjavesialueesta" :type :string}
-                        {:name "tarkeallaPohjavesialueella" :type :checkbox}
+                        {:name "tarkeallaPohjavesialueella" :type :checkbox :inputType :checkbox-wrapper}
                         {:name "mineraalisenPurkujatteenKasittely"
                          :type :group
-                         :body [{:name "kasittelytapa" :type :select :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
+                         :body [{:name "kasittelytapa" :type :select :css [:dropdown]
+                                 :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
                                 {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values ["muu"]} :type :string}]}
                         {:name "polynLeviamisenEsto" :type :text :max-len 4000}
                         {:name "ilmoitusHairitsevastaMelusta"
                          :type :group
-                         :body [{:name "ilmoitusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
+                         :body [{:name "ilmoitusTehty" :type :select :css [:dropdown]
+                                 :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
                                 {:name "pvm" :show-when {:path "ilmoitusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]} :type :checkbox}
+                                {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]}
+                                 :type :checkbox :inputType :checkbox-wrapper}
                                 {:name "syy" :show-when {:path "ilmoitusTehty" :values ["eiTehda"]} :type :string}]}]})
 
 (def vaaralliset-aineet {:name "vaarallisetAineet"
@@ -165,14 +170,16 @@
                                 ["eiVaarallisiaAineita"]
                                 ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy"]]
                          :template "form-grid-docgen-group-template"
-                         :body [{:name "eiVaarallisiaAineita" :type :checkbox}
+                         :body [{:name "eiVaarallisiaAineita" :type :checkbox :inputType :checkbox-wrapper}
                                 {:name "kartoitusVaarallisistaAineista"
                                  :hide-when {:path "/vaarallisetAineet/eiVaarallisiaAineita"
                                              :values [true]}
                                  :type :group
-                                 :body [{:name "ilmoitusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
+                                 :body [{:name "ilmoitusTehty" :type :select :css [:form-input :dropdown]
+                                         :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
                                         {:name "pvm" :show-when {:path "ilmoitusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]} :type :checkbox}
+                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]}
+                                         :type :checkbox :inputType :checkbox-wrapper}
                                         {:name "syy" :show-when {:path "ilmoitusTehty" :values ["eiTehda"]} :type :string}]}]})
 
 (def rakennus-ja-purkujate {:name "rakennusJaPurkujate"
@@ -186,18 +193,23 @@
                                     :hide-when {:path "/vaarallisetAineet/eiVaarallisiaAineita"
                                                 :values [true]}
                                     :type :table
+                                    :css [:form-table :form-table--waste]
                                     :repeating true
                                     :approvable false
-                                    :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
+                                    :body [{:name "jate" :type :select :css [:dropdown]
+                                            :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
                                            {:name "maara" :type :string :subtype :number :size :s}
-                                           {:name "yksikko" :type :select :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
+                                           {:name "yksikko" :type :select :css [:dropdown]
+                                            :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
                                            {:name "sijoituspaikka" :type :string}]}
                                    {:name "muuJate"
                                     :type :table
+                                    :css [:form-table :form-table--waste]
                                     :repeating true
                                     :approvable false
-                                    :body [{:name "jate" :type :select :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
-                                           {:name "maara" :type :string :subtype :number :unit :tonnia :size :s}
+                                    :body [{:name "jate" :type :select :css [:dropdown]
+                                            :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
+                                           {:name "maara" :type :string :subtype :number}
                                            {:name "sijoituspaikka" :type :string}]}]})
 
 (def pilaantuneet-maat {:name "pilaantuneetMaat"
@@ -206,20 +218,23 @@
                         :approvable false
                         :rows [{:h3 "laajennettuRakennusjateselvitys.pilaantuneetMaat"}
                                ["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
-                               ["ilmoitusPuhdistuksesta/ilmoitusTehty" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
+                               ["ilmoitusPuhdistuksesta/ilmoitusTehty::2" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
                                ["poistettavatAinekset" "sijoituspaikka::3"]]
                         :template "form-grid-docgen-group-template"
                         :body [{:name "tutkimusPilaantuneistaMaista"
                                 :type :group
-                                :body [{:name "tutkimusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
+                                :body [{:name "tutkimusTehty" :type :select :css [:form-input :dropdown]
+                                        :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
                                        {:name "pvm" :show-when {:path "tutkimusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                       {:name "lisattyLiitteisiin" :show-when {:path "tutkimusTehty" :values ["tehty"]} :type :checkbox}
+                                       {:name "lisattyLiitteisiin" :show-when {:path "tutkimusTehty" :values ["tehty"]}
+                                        :type :checkbox :inputType :checkbox-wrapper}
                                        {:name "syy" :show-when {:path "tutkimusTehty" :values ["eiTehda"]} :type :string}]}
                                 {:name "ilmoitusPuhdistuksesta"
                                  :type :group
-                                 :body [{:name "ilmoitusTehty" :type :checkbox}
+                                 :body [{:name "ilmoitusTehty" :type :checkbox :inputType :checkbox-wrapper}
                                         {:name "pvm" :show-when {:path "ilmoitusTehty" :values [true]} :type :date}
-                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values [true]} :type :checkbox}]}
+                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values [true]}
+                                         :type :checkbox :inputType :checkbox-wrapper}]}
                                {:name "poistettavatAinekset" :type :string :subtype :decimal :unit :tonnia}
                                {:name "sijoituspaikka" :type :string}]})
 
@@ -227,11 +242,23 @@
   {:name "ainekset"
    :type :table
    :repeating true
+   :css [:form-table :form-table--waste]
    :approvable false
-   :body [{:name "aines" :type :select :body (map #(hash-map :name %) ainekset)}
-          {:name "hyodynnetaan" :type :string :subtype :number :unit :tonnia :size :s}
-          {:name "poisajettavia" :type :string :subtype :number :unit :tonnia :size :s}
-          {:name "yhteensa" :type :string :subtype :number :unit :tonnia :size :s}
+   :body [{:name "aines-group"
+           :type :group
+           :i18nkey "waste"
+           :approvable false
+           :template "simple-docgen-group-template"
+           :body [{:name "aines" :type :select :label false
+                   :css [:dropdown]
+                   :body (conj (mapv #(hash-map :name %) ainekset)
+                               {:name "muu" :i18nkey "select-other"})
+                   :hide-when {:path "aines" :values ["muu"]}}
+                  {:name "muu" :type :string :label false
+                   :show-when {:path "aines" :values ["muu"]}}]}
+          {:name "hyodynnetaan" :type :string :subtype :number}
+          {:name "poisajettavia" :type :string :subtype :number}
+          {:name "yhteensa" :type :string :subtype :number}
           {:name "sijoituspaikka" :type :string}]})
 
 (def kaivettava-maa {:name "kaivettavaMaa"

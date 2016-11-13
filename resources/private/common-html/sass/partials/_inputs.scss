@@ -86,6 +86,10 @@
 // Checkboxes
 @include toggle-helper ( checkbox, "\e604", "\e603" ) {}
 @include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
+.docgen-checkbox-wrapper.form-input {
+  height: auto;
+  width: auto;
+}
 @include toggle-helper ( sectionbox, "\e61d", "\e620" ) {}
 
 @include toggle-helper ( stampbox, "\e61e", "\e620", $selected: white ) {}

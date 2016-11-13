@@ -1550,3 +1550,12 @@ div.review-done {
     left: 200px;
   }
 }
+
+.col-fixed .inline {
+  display: table-cell;
+  vertical-align: bottom;
+  height: 120px;
+  .form-input {
+    margin-bottom: 0;
+  }
+}
