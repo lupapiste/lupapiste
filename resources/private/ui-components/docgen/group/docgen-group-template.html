@@ -36,7 +36,7 @@
     <!-- /ko -->
     <!-- ko ifnot: $data.tag -->
     <div data-bind="foreach: $data">
-      <div class="col--vertical" data-bind="css: $component.getColClass($data),
+      <div class="col--vertical" data-bind="css: $data.colClass,
                                             component: { name: $data.uicomponent,
                                                          params: { schema: $data,
                                                                    path: $data.path,

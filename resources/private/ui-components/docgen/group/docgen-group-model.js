@@ -67,9 +67,9 @@ LUPAPISTE.DocgenGroupModel = function(params) {
     }
   }
 
-  self.getColClass = function(schema) {
-    return "col-" + schema.cols;
-  };
+  function parsePart( s, re, defaultValue ) {
+    return _.last( re.exec( s )) || defaultValue;
+  }
 
   self.rowSchemas = ko.pureComputed(function() {
     return _(self.schemaRows)
@@ -77,19 +77,20 @@ LUPAPISTE.DocgenGroupModel = function(params) {
         if ( _.isArray(row)) {
           return _(row)
             .map(function(schemaName) {
-              var splitted = schemaName.split("::");
-              var cols = splitted[1] || 1;
-              var path = self.path.concat(splitted[0].split("/"));
-              var schema = getInSchema(params.schema, self.path, splitted[0]);
+              var cols = parsePart( schemaName, /::([\d+])/, 1);
+              var colClass = ["col-" + cols, parsePart( schemaName, /\[([^\]]+)\]/)].join( " ");
+              var pathString = parsePart( schemaName, /^[^[:]+/ );
+              var path = self.path.concat(pathString.split("/"));
+              var schema = getInSchema(params.schema, self.path, pathString);
               return schema && _.extend({}, schema, {
                 path: path,
                 uicomponent: schema.uicomponent || "docgen-" + schema.type,
                 schemaI18name: params.schemaI18name,
-                i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(splitted[0].split("/")),
+                i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(pathString.split("/")),
                 applicationId: params.applicationId,
                 documentId: params.documentId,
                 service: self.service,
-                cols: cols
+                colClass: colClass
               });
             })
             .filter()

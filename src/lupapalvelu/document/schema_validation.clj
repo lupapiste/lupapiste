@@ -276,6 +276,11 @@
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values [single-value]}
    (opt :template)             sc/Str       ;; Component template to use
+   ;; Row item format: "<path><cols><css>"
+   ;; <path>  path1/path2/...
+   ;; <cols>  ::n  where n is 1-4 (default 1)
+   ;; <css>   [class1 class2 ...]
+   ;; <cols> and <css> are optional, either or both can be omitted.
    (opt :rows)                 [(sc/if map?
                                   {sc/Keyword sc/Str}
                                   [sc/Str])]})

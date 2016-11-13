@@ -1,5 +1,10 @@
-@import url('main-blessed1.css?z=1478873676084');
+@import url('main-blessed1.css?z=1479052646957');
 
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-9 .col--vertical, .form-grid .col-9 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+}
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9 .col--vertical label {
   display: block;
@@ -1005,6 +1010,17 @@ div.review-done {
 .link-permit-selector .errorPanel {
   top: -80px;
   left: 200px;
+}
+
+/* line 1554, ../../../private/common-html/sass/partials/_forms.scss */
+.col-fixed .inline {
+  display: table-cell;
+  vertical-align: bottom;
+  height: 120px;
+}
+/* line 1558, ../../../private/common-html/sass/partials/_forms.scss */
+.col-fixed .inline .form-input, .col-fixed .inline .form-input--inline {
+  margin-bottom: 0;
 }
 
 /* line 18, ../../../private/common-html/sass/partials/_tables.scss */

@@ -6271,6 +6271,12 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   background-color: #f6f6f6;
 }
 
+/* line 89, ../../../private/common-html/sass/partials/_inputs.scss */
+.docgen-checkbox-wrapper.form-input, .docgen-checkbox-wrapper.form-input--inline {
+  height: auto;
+  width: auto;
+}
+
 /* line 34, ../../../private/common-html/sass/partials/_inputs.scss */
 label.sectionbox-label {
   width: 100%;
@@ -6443,7 +6449,7 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 92, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 96, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   border: none;
 }
@@ -6620,17 +6626,17 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 103, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 107, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 108, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 112, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 112, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 116, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -6721,7 +6727,7 @@ input:disabled + .filter-label:hover.filter-label:before {
   background-color: #f6f6f6;
 }
 
-/* line 124, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 128, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6730,51 +6736,51 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 134, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 138, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 138, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 142, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 141, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 145, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 145, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 149, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 152, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 154, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 158, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 157, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 161, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
 }
 
-/* line 164, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 168, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput {
   box-sizing: border-box;
   padding: 4px;
   display: block;
 }
-/* line 168, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 172, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput:focus {
   border-color: #fbc732;
 }
 
-/* line 173, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 177, ../../../private/common-html/sass/partials/_inputs.scss */
 .textinput.textinput--big {
   min-height: 40px;
   max-height: 40px;
@@ -8230,9 +8236,4 @@ div.alleYli-radioGroup {
 .form-grid .col-9 label.required:after {
   content: " *";
   color: #df3215;
-}
-/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-9 .col--vertical, .form-grid .col-9 .col--horizontal {
-  width: 100%;
-  box-sizing: border-box;
 }
