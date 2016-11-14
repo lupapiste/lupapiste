@@ -61,6 +61,7 @@
       :fillMyInfoButton nil
       :foremanHistory   nil
       :maaraalaTunnus   nil
+      :calculation      nil
       :string           (condp = (keyword subtype)
                           :maaraala-tunnus   "0003"
                           :email            "example@example.com"

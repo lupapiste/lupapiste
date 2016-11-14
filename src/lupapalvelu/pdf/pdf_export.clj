@@ -114,6 +114,7 @@
                         (remove :exclude-from-pdf)
                         (remove :hidden)
                         (remove schemas/select-one-of-schema?)
+                        (remove #(util/=as-kw :calculation (:type %)))
                         (filter-fields-by-group-subtype doc group-schema))
         fields     (filter is-field-type subschemas)
         groups     (filter is-printable-group-type subschemas)]

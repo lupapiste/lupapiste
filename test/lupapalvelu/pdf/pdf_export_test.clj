@@ -14,7 +14,7 @@
             [clojure.java.io :as io])
   (:import (java.io File FileOutputStream)))
 
-(testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups get-subschemas)
+(testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
