@@ -142,20 +142,20 @@
                         {:name "sailioilleSuunnitellutToimenpiteet"
                          :type :group
                          :body [{:name "toimenpide" :type :select :body (map #(hash-map :name %) ["jaavatKayttoon" "poistetaan" "muu"])}
-                                {:name "muuToimenpide" :show-when {:path "toimenpide" :values ["muu"]} :type :string}]}
+                                {:name "muuToimenpide" :show-when {:path "toimenpide" :values #{"muu"}} :type :string}]}
                         {:name "etaisyysPohjavesialueesta" :type :string}
                         {:name "tarkeallaPohjavesialueella" :type :checkbox}
                         {:name "mineraalisenPurkujatteenKasittely"
                          :type :group
                          :body [{:name "kasittelytapa" :type :select :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
-                                {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values ["muu"]} :type :string}]}
+                                {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values #{"muu"}} :type :string}]}
                         {:name "polynLeviamisenEsto" :type :text :max-len 4000}
                         {:name "ilmoitusHairitsevastaMelusta"
                          :type :group
                          :body [{:name "ilmoitusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
-                                {:name "pvm" :show-when {:path "ilmoitusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]} :type :checkbox}
-                                {:name "syy" :show-when {:path "ilmoitusTehty" :values ["eiTehda"]} :type :string}]}]})
+                                {:name "pvm" :show-when {:path "ilmoitusTehty" :values #{"tehty" "tehdaan"}} :type :date}
+                                {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values #{"tehty"}} :type :checkbox}
+                                {:name "syy" :show-when {:path "ilmoitusTehty" :values #{"eiTehda"}} :type :string}]}]})
 
 (def vaaralliset-aineet {:name "vaarallisetAineet"
                          :type :group
@@ -168,12 +168,12 @@
                          :body [{:name "eiVaarallisiaAineita" :type :checkbox}
                                 {:name "kartoitusVaarallisistaAineista"
                                  :hide-when {:path "/vaarallisetAineet/eiVaarallisiaAineita"
-                                             :values [true]}
+                                             :values #{true}}
                                  :type :group
                                  :body [{:name "ilmoitusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
-                                        {:name "pvm" :show-when {:path "ilmoitusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values ["tehty"]} :type :checkbox}
-                                        {:name "syy" :show-when {:path "ilmoitusTehty" :values ["eiTehda"]} :type :string}]}]})
+                                        {:name "pvm" :show-when {:path "ilmoitusTehty" :values #{"tehty" "tehdaan"}} :type :date}
+                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values #{"tehty"}} :type :checkbox}
+                                        {:name "syy" :show-when {:path "ilmoitusTehty" :values #{"eiTehda"}} :type :string}]}]})
 
 (def rakennus-ja-purkujate {:name "rakennusJaPurkujate"
                             :type :group
@@ -184,7 +184,7 @@
                             :template "form-grid-docgen-group-template"
                             :body [{:name "vaarallisetJatteet"
                                     :hide-when {:path "/vaarallisetAineet/eiVaarallisiaAineita"
-                                                :values [true]}
+                                                :values #{true}}
                                     :type :table
                                     :repeating true
                                     :approvable false
@@ -212,14 +212,14 @@
                         :body [{:name "tutkimusPilaantuneistaMaista"
                                 :type :group
                                 :body [{:name "tutkimusTehty" :type :select :body (map #(hash-map :name %) ["tehty" "tehdaan" "eiTehda"])}
-                                       {:name "pvm" :show-when {:path "tutkimusTehty" :values ["tehty" "tehdaan"]} :type :date}
-                                       {:name "lisattyLiitteisiin" :show-when {:path "tutkimusTehty" :values ["tehty"]} :type :checkbox}
-                                       {:name "syy" :show-when {:path "tutkimusTehty" :values ["eiTehda"]} :type :string}]}
+                                       {:name "pvm" :show-when {:path "tutkimusTehty" :values #{"tehty" "tehdaan"}} :type :date}
+                                       {:name "lisattyLiitteisiin" :show-when {:path "tutkimusTehty" :values #{"tehty"}} :type :checkbox}
+                                       {:name "syy" :show-when {:path "tutkimusTehty" :values #{"eiTehda"}} :type :string}]}
                                 {:name "ilmoitusPuhdistuksesta"
                                  :type :group
                                  :body [{:name "ilmoitusTehty" :type :checkbox}
-                                        {:name "pvm" :show-when {:path "ilmoitusTehty" :values [true]} :type :date}
-                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values [true]} :type :checkbox}]}
+                                        {:name "pvm" :show-when {:path "ilmoitusTehty" :values #{true}} :type :date}
+                                        {:name "lisattyLiitteisiin" :show-when {:path "ilmoitusTehty" :values #{true}} :type :checkbox}]}
                                {:name "poistettavatAinekset" :type :string :subtype :decimal :unit :tonnia}
                                {:name "sijoituspaikka" :type :string}]})
 
@@ -253,7 +253,7 @@
                                      {:name "kaivettavienMassojenSelvitys"
                                       :type :group
                                       :body [{:name "selvitystapa" :type :select :body (map #(hash-map :name %) ["koekuopilla" "vanhoistaSuunnitelmista" "eiSelvitetty" "muu"])}
-                                             {:name "muuSelvitystapa" :show-when {:path "selvitystapa" :values ["muu"]} :type :string}]}]})
+                                             {:name "muuSelvitystapa" :show-when {:path "selvitystapa" :values #{"muu"}} :type :string}]}]})
 
 (def orgaaninen-aines {:name "orgaaninenAines"
                        :type :group

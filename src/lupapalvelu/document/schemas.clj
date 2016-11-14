@@ -104,6 +104,9 @@
 
 (def select-one-of-key "_selected")
 
+(defn select-one-of-schema? [{schema-name :name :as schema}]
+  (= select-one-of-key (name schema-name)))
+
 ;;
 ;; helpers
 ;;

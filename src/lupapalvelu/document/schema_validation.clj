@@ -51,9 +51,9 @@
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
    (opt :pre-values)  [single-value] ;; Used inside pre-selector element to toggle element visibility
    (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values [single-value]}
+                       :values #{single-value}}
    (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values [single-value]}
+                       :values #{single-value}}
 })
 
 (defschema Text
@@ -242,9 +242,9 @@
    (opt :copybutton)           sc/Bool      ;;
    (opt :validator)            sc/Keyword
    (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
+                                :values #{single-value}}
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}})
+                                :values #{single-value}}})
 
 (defschema Group
   "Group type that groups any doc elements."
@@ -269,9 +269,9 @@
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :listen)               [sc/Keyword] ;; Events to listen
    (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
+                                :values #{single-value}}
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
+                                :values #{single-value}}
    (opt :template)             sc/Str       ;; Component template to use
    (opt :rows)                 [(sc/if map?
                                   {sc/Keyword sc/Str}

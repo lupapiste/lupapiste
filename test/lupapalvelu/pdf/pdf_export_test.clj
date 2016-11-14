@@ -8,10 +8,13 @@
             [lupapalvelu.test-util :as test-util]
             [lupapalvelu.i18n :refer [with-lang loc] :as i18n]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [pdfboxing.text :as pdfbox]
             [clojure.java.io :as io])
   (:import (java.io File FileOutputStream)))
+
+(testable-privates lupapalvelu.pdf.pdf-export get-value-by-path get-subschemas hide-by-hide-when show-by-show-when removable-groups get-subschemas)
 
 (def ignored-schemas #{"hankkeen-kuvaus-jatkoaika"
                        "poikkeusasian-rakennuspaikka"
@@ -78,6 +81,168 @@
                             "1" {:kayttoonottava {:value false} :rakennus {:rakennusnro {:value "rak1"}}}
                             "2" {:kayttoonottava {:value true} :rakennus {:rakennusnro {:value "rak2"}}}
                                     }}})
+
+(facts get-value-by-path
+  (fact "simple strcuture"
+    (get-value-by-path {:value ..value..} [] "") => ..value..)
+
+  (fact "simple strcuture - with absolute path"
+    (get-value-by-path {:value ..value..} [:foo :bar] "/") => ..value..)
+
+  (fact "absolute path"
+    (get-value-by-path {:foo {:bar {:value ..value..}}} [:hii :hoo] "/foo/bar") => ..value..)
+
+  (fact "relative path"
+    (get-value-by-path {:foo {:quu {:bar {:value ..value..}}}} [:foo] "quu/bar") => ..value..)
+
+  (fact "not found"
+    (get-value-by-path {:foo {:quu {:bar {:value ..value..}}}} [:foo] "buz") => nil)
+
+  (fact "no data"
+    (get-value-by-path nil [:foo] "buz") => nil))
+
+(facts hide-by-hide-when
+  (fact "match"
+    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :hide-when {:path "foo" :values #{..foo..}}}) => truthy)
+
+  (fact "no value match"
+    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :hide-when {:path "foo" :values #{..fiu..}}}) => falsey)
+
+  (fact "no hide-when"
+    (hide-by-hide-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar"}) => falsey))
+
+(facts show-by-show-when
+  (fact "match"
+    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :show-when {:path "foo" :values #{..foo..}}}) => truthy)
+
+  (fact "no value match"
+    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar" :show-when {:path "foo" :values #{..fiu..}}}) => falsey)
+
+  (fact "no hide-when"
+    (show-by-show-when {:foo {:value ..foo..} :bar {:value ..bar..}} [] {:name "bar"}) => truthy))
+
+(facts removable-groups
+  (fact "simple structure"
+    (removable-groups {:_selected {:value "foo"}}
+                      {:body [{:name "_selected" :body [{:name "foo"} {:name "bar"}]}]}
+                      []) => #{"bar"})
+
+  (fact "simple structure - multiple omitted groups"
+    (removable-groups {:_selected {:value "foo"}}
+                      {:body [{:name "_selected" :body [{:name "foo"} {:name "bar"} {:name "quu"}  {:name "quz"}]}]}
+                      []) => #{"bar" "quu" "quz"})
+
+  (fact "deeper structure"
+    (removable-groups {:quu {:quz {:_selected {:value "foo"}}}}
+                      {:body [{:name "_selected" :body [{:name "foo"} {:name "bar"}]}]}
+                      [:quu :quz]) => #{"bar"})
+
+  (fact "no value selected -> remove all"
+    (removable-groups {:_selected {:value nil}}
+                      {:body [{:name "_selected" :body [{:name "foo"} {:name "bar"}]}]}
+                      []) => #{"foo" "bar"})
+
+  (fact "no _selected"
+    (removable-groups {:quu {:quz {:justGroup {:value "foo"}}}}
+                      {:body [{:name "justGroup" :body [{:name "foo"} {:name "bar"}]}]}
+                      [:quu :quz]) => #{}))
+
+(facts get-subschemas
+  (fact "exclude fields by schema"
+    (get-subschemas {:_selected {:value "foo"}}
+                    {:name "doc"
+                     :type :group
+                     :body [{:name "goo"
+                             :type :group
+                             :body [{:name "sub"}]}
+                            {:name "foo" :type :text :exclude-from-pdf true}
+                            {:name "fiu" :type :text :hidden true}
+                            {:name "bar" :type :text}]}
+                    [])
+    => {[] {:fields [{:name "bar", :type :text}],
+            :groups [{:name "goo", :type :group, :body [{:name "sub"}]}]}})
+
+  (fact "excluded by _selected - two options"
+    (get-subschemas {:_selected {:value "foo"}}
+                    {:name "doc"
+                     :type :group
+                     :body [{:name "_selected"
+                             :type :radioGroup
+                             :body [{:name "foo" :type :text}
+                                    {:name "bar" :type :text}]}
+                            {:name "foo" :type :text}
+                            {:name "bar" :type :text}]}
+                    [])
+    => {[] {:fields [{:name "foo", :type :text}],
+                             :groups []}})
+
+  (fact "excluded by _selected - many options"
+    (get-subschemas {:_selected {:value "foo"}}
+                    {:name "doc"
+                     :type :group
+                     :body [{:name "_selected"
+                             :type :radioGroup
+                             :body [{:name "foo" :type :text}
+                                    {:name "bar" :type :text}
+                                    {:name "fuz" :type :text}]}
+                            {:name "foo" :type :text}
+                            {:name "bar" :type :text}
+                            {:name "fuz" :type :text}
+                            {:name "waz" :type :text}]}
+                    [])
+    => {[] {:fields [{:name "foo", :type :text}
+                     {:name "waz", :type :text}],
+            :groups []}})
+
+  (fact "excluded by hide-when / show-when - root doc - non-repeating"
+    (get-subschemas {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
+                    {:name "doc"
+                     :type :group
+                     :body [{:name "quu" :type :group :body [{:name "buz"} {:name "fuz"}]}
+                            {:name "fiu" :type :text :show-when {:path "quu/buz" :values #{..fuz..}}}
+                            {:name "fau" :type :text :show-when {:path "quu/fuz" :values #{..waz..}}}
+                            {:name "foo" :type :text :show-when {:path "quu/fuz" :values #{..fuz..}}}
+                            {:name "bar" :type :text :hide-when {:path "foo" :values #{..goo..}}}
+                            {:name "boo" :type :text :hide-when {:path "foo" :values #{..foo..}}}]}
+                    [])
+    => {[] {:fields [{:name "foo", :type :text, :show-when {:path "quu/fuz", :values #{..fuz..}}},
+                     {:name "bar", :type :text, :hide-when {:path "foo", :values #{..goo..}}}]
+            :groups [{:name "quu", :type :group, :body [{:name "buz"} {:name "fuz"}]}]}})
+
+  (fact "excluded by hide-when / show-when - inner group - non-repeating"
+    (get-subschemas {:foo {:value ..foo..} :bar {:value ..bar..} :quu {:fuz {:value ..fuz..}}}
+                    {:name "quu"
+                     :type :group
+                     :body [{:name "buz" :type :text :hide-when {:path "fuz" :values #{..fuz..}}}
+                            {:name "biz" :type :text :hide-when {:path "fuz" :values #{..guz..}}}
+                            {:name "fiz" :type :text :show-when {:path "/foo" :values #{..foo..}}}
+                            {:name "fuz" :type :text :show-when {:path "/foo" :values #{..goo..}}}]}
+                    [:quu])
+    => {[:quu] {:fields [{:name "biz", :type :text, :hide-when {:path "fuz", :values #{..guz..}}},
+                         {:name "fiz", :type :text, :show-when {:path "/foo", :values #{..foo..}}}]
+                :groups []}})
+
+  (fact "excluded by hide-when / show-when - inner group - repeating"
+    (get-subschemas {:foo {:value ..foo..}
+                     :quu {:0 {:fuz {:value ..0-fuz..}
+                               :bar {:value ..0-bar..}}
+                           :2 {:fuz {:value ..2-fuz..}
+                               :bar {:value ..2-bar..}}}}
+                    {:name "quu"
+                     :type :group
+                     :repeating true
+                     :body [{:name "buz" :type :text :hide-when {:path "fuz" :values #{..2-fuz..}}}
+                            {:name "bar" :type :text :hide-when {:path "fuz" :values #{..2-guz..}}}
+                            {:name "fiz" :type :text :hide-when {:path "/foo" :values #{..foo..}}}
+                            {:name "fuz" :type :text :hide-when {:path "/foo" :values #{..goo..}}}]}
+                    [:quu])
+    => {[:quu :0] {:fields [{:name "buz", :type :text, :hide-when {:path "fuz", :values #{..2-fuz..}}}
+                            {:name "bar", :type :text, :hide-when {:path "fuz", :values #{..2-guz..}}}
+                            {:name "fuz", :type :text, :hide-when {:path "/foo", :values #{..goo..}}}],
+                   :groups []},
+        [:quu :2] {:fields [{:name "bar", :type :text, :hide-when {:path "fuz", :values #{..2-guz..}}}
+                            {:name "fuz", :type :text, :hide-when {:path "/foo", :values #{..goo..}}}],
+                   :groups []}}))
 
 (facts "Generate PDF file from application with all documents"
   (files/with-temp-file file
