@@ -50,12 +50,13 @@ Sonja corrects the email address of neighbor c
   Click by test id  modal-dialog-submit-button
   Wait until  Element should not be visible  xpath=//tr[@data-test-id='manage-neighbors-email-x@example.com']//a[@data-test-id='manage-neighbors-remove']
   Wait until  Element should be visible  xpath=//tr[@data-test-id='manage-neighbors-email-c@example.com']//a[@data-test-id='manage-neighbors-remove']
+  Scroll to top
 
 Sonja adds owners - luonnollinen henkilo
   Mock proxy  property-info-by-wkt  [{"kiinttunnus": "75341600380013"}, {"kiinttunnus": "75341600380014"}]
-  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'  
-  Scroll to top  
+  Mock datatables  owners  '{"ok":true,"owners":[{"propertyId": "75341600380013","postinumero":"04130","sukunimi":"Lönnroth","ulkomaalainen":false,"henkilolaji":"luonnollinen","etunimet":"Tage","syntymapvm":-454204800000,"paikkakunta":"SIBBO","jakeluosoite":"Präståkersvägen 1"}]}'
   Sleep  0.5s
+  Scroll to top
   Start drawing a point
   Click Element At Coordinates  xpath=//*[@id='neighbors-map']/div  100  100
   Wait until  Element Should Contain  xpath=//span[@class='owner-name']  Lönnroth, Tage
