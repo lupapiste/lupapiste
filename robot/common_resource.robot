@@ -1487,3 +1487,31 @@ Fill tyoaika fields
   Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
   Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
   Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
+
+Fill in yritys info
+  [Arguments]  ${dataDocType}
+  ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
+  ${docSectionPath} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='${dataDocType}']
+  ${docjQuery}=  Set Variable  \#application-parties-tab section[data-doc-type="${dataDocType}"]
+  Element should be visible  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']
+
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.henkilotiedot.etunimi"]  John
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.henkilotiedot.sukunimi"]  Rambo
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.yhteystiedot.puhelin"]  0401234567
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yritysnimi"]  Rambol Oy
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.liikeJaYhteisoTunnus"]  1234567-1
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.katu"]  Katu
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.postinumero"]  98765
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.postitoimipaikannimi"]  Sipoo
+  Focus  ${docSectionPath}
+  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
+  Wait for jQuery
+
+
+Fill required fields for the parties
+  Wait until  Element should be visible  //section[@id='application']//div[@id='application-parties-tab']
+  Execute Javascript  $("input[value='yritys']").click();
+  # Maksaja's default is Henkilo, that is why we have to wait its type has changed to Yritys.
+  Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
+  Fill in yritys info  hakija-ya
+  Fill in yritys info  yleiset-alueet-maksaja

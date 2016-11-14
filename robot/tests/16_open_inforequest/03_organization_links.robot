@@ -24,8 +24,8 @@ Organization links on the inforequest
   Check link  0  Sipoo  ${sipoo-url}
 
 Pena does the same things in Swedish
-  Go to page  applications  
-  Language to  SV  
+  Go to page  applications
+  Language to  SV
   Open inforequest tree
   Select operations path R in Swedish
 
@@ -44,7 +44,7 @@ Check link
   [Arguments]  ${index}  ${text}  ${url}
   Wait Until  Javascript?  $("div.organization-links a[data-test-id=org-link-${index}]").attr("href") === "${url}"
   Test id text is  org-link-${index}  ${text}
-  
+
 Open inforequest tree
   Scroll and click test id  applications-create-new-inforequest
   Input text  create-search  ${propertyId}
@@ -53,6 +53,7 @@ Open inforequest tree
   Wait until element is enabled  create-location-continue
   Click by test id  create-continue
   Set animations off
+  Wait until  Element should be visible  xpath=//section[@id='create-part-2']//div[@class='tree-page']
 
 
 Finish creation
