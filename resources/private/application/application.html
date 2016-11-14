@@ -1153,27 +1153,6 @@
                     </div>
                 </div>
 
-                <div id="dialog-add-party" class="window autosized">
-                    <div data-bind="with: $root.addPartyModel">
-                        <div class="dialog-header">
-                            <p data-bind="ltext: 'addParty.heading'"></p>
-                            <p class="dialog-close close lupicon-remove"></p>
-                        </div>
-                        <div class="dialog-content">
-                            <div>
-                                <select data-bind="options: partyDocumentNames(),
-                                                   optionsText: function(item) { return loc(['schemas', item]); },
-                                                   optionsValue: function(item) { return item; },
-                                                   value: documentName,
-                                                   optionsCaption: loc('choose')"
-                                        data-test-id="select-party-document">
-                                </select>
-                                <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div id="dialog-neighbor-status" class="window autosized">
                     <div class="dialog-header">
                         <p data-bind="ltext: 'neighbors.status-dialog.title'"></p>

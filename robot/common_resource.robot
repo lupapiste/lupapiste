@@ -842,6 +842,7 @@ Cancel current application as authority
 # New yes no modal dialog
 Confirm yes no dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Wait until  Element should be enabled  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]

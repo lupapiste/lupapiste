@@ -5,6 +5,8 @@ LUPAPISTE.YesNoButtonGroupModel = function (params) {
   self.yesTitle = params.yesTitle || loc("yes");
   self.noTitle = params.noTitle || loc("no");
 
+  self.yesEnabled = params.yesEnabled || true;
+
   self.yes = function() {
     hub.send("close-dialog");
     if (_.isFunction(params.yesFn)) {

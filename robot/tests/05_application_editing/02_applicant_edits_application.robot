@@ -135,21 +135,21 @@ Mikko can't delete maksaja, as it's only removable by authority
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
   Wait until  Xpath Should Match X Times  ${asiamiesXpath}  1
