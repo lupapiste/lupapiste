@@ -38,12 +38,17 @@ var authorization = (function() {
       self.data(data);
     };
 
+    self.clone = function() {
+      return new AuthorizationModel( self.data() );
+    };
+
     return {
       ok: self.ok,
       clear: self.clear,
       refreshWithCallback: self.refreshWithCallback,
       refresh: self.refresh,
-      setData: self.setData
+      setData: self.setData,
+      clone: self.clone
     };
   }
 
