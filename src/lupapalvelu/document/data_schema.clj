@@ -119,6 +119,9 @@
 (defmethod coerce-type :fillMyInfoButton [elem-schema]
   {:value (sc/eq nil)})
 
+(defmethod coerce-type :calculation [elem-schema]
+  {:value (sc/eq nil)})
+
 (defmethod coerce-type :personSelector [elem-schema]
   (data-leaf elem-schema ssc/ObjectIdStr))
 
