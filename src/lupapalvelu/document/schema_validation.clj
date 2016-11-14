@@ -236,7 +236,7 @@
    :type                       (sc/eq :table)
    ;; TODO: each body item could be either Input or Group, but the
    ;; most obvious definitions do not compile.
-   :body                       [Input]      ;;
+   :body                       [(sc/if (type-pred :group) (sc/recursive #'Group) Input)]      ;;
    (opt :i18nkey)              sc/Str       ;; Absolute localization key
    (opt :group-help)           sc/Str       ;;
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components
