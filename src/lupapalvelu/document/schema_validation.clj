@@ -49,7 +49,6 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   (opt :pre-values)  [single-value] ;; Used inside pre-selector element to toggle element visibility
    (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
                        :values #{single-value}}
    (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
