@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
+            [swiss.arrows :refer [-<>]]
             [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -42,7 +43,7 @@
   (:description (util/find-by-id op-id (cons primary secondaries)) ))
 
 (defn get-rakennustunnus [unwrapped-doc-data application {{op-id :id} :op}]
-  (let [{:keys [tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
+  (let [{:keys [buildingId tunnus rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} unwrapped-doc-data
         description-parts (remove ss/blank? [tunnus (operation-description application op-id)])
         defaults (util/assoc-when-pred {:jarjestysnumero nil
                                         :kiinttun (:propertyId application)
@@ -52,7 +53,7 @@
                    :rakennusnro rakennusnro
                    :rakennuksenSelite (ss/join ": " description-parts)
                    :valtakunnallinenNumero valtakunnallinenNumero)]
-    (if manuaalinen_rakennusnro
+    (if (and (ss/not-blank? manuaalinen_rakennusnro) (= buildingId "other"))
       (assoc defaults :rakennusnro manuaalinen_rakennusnro)
       defaults)))
 
@@ -96,7 +97,11 @@
                                        :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))
                                        :rakennustunnus (get-rakennustunnus toimenpide application info)}
         rakennuksen-tiedot (merge
-                             (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
+                            (-<> mitat
+                                 (select-keys [:tilavuus :kokonaisala :kellarinpinta-ala
+                                               :kerrosluku :kerrosala :rakennusoikeudellinenKerrosala])
+                                 (filter #(-> % last (ss/replace "," ".") util/->double pos?) <>)
+                                 (into {} <>))
                              (select-keys luokitus [:energialuokka :energiatehokkuusluku :paloluokka])
                              (when-not (ss/blank? (:energiatehokkuusluku luokitus))
                                (select-keys luokitus [:energiatehokkuusluvunYksikko]))
@@ -271,9 +276,7 @@
                               (map get-viitelupatieto link-permits))
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
-                            (= operation-name "suunnittelijan-nimeaminen")
-                            (= operation-name "jatkoaika")
-                            (= operation-name "raktyo-aloit-loppuunsaat"))
+                              (= operation-name "suunnittelijan-nimeaminen"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
                       util/assoc-when-pred util/not-empty-or-nil?
                       :rakennuspaikkatieto (get-bulding-places (concat (:rakennuspaikka documents-by-type)

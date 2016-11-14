@@ -15,10 +15,10 @@
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-    (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-    (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
 
   (fact "defaults"
     (attachment-tags {}) => (just #{:preVerdict :general :needed} :in-any-order :gaps-ok))
@@ -29,9 +29,15 @@
   (fact "operation"
     (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
 
+  (fact "file"
+    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :general :needed :hasFile} :in-any-order :gaps-ok))
+
   (fact "type"
     (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup} :in-any-order :gaps-ok)
-    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup)))
+    (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))
+
+  (fact "verdictGiven - RAM"
+        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :general :needed} :in-any-order :gaps-ok)))
 
 (facts type-groups-for-operation
   (fact "one attachment"
@@ -143,7 +149,7 @@
                           {:applicationState "draft"}]
             application {:state "open"
                          :attachments attachments}]
-        (application-state-filters application) =>  nil)
+        (application-state-filters application) =>  [{:tag :preVerdict :default true}]))
 
     (fact "pre verdict - with post verdict attachment"
       (let [attachments  [{:applicationState "submitted"}
@@ -161,7 +167,26 @@
             application {:state "verdictGiven"
                          :attachments attachments}]
         (application-state-filters application) =>  [{:tag :preVerdict :default false}
-                                                     {:tag :postVerdict :default true}]))))
+                                                     {:tag :postVerdict :default true}]))
+
+    (fact "pre verdict - with ram"
+      (let [attachments  [{:applicationState "verdictGiven" :ramLink "anyid"}
+                          {:applicationState "open"}
+                          {:applicationState "draft"}]
+            application {:state "open"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default true}
+                                                     {:tag :ram :default true}]))
+
+    (fact "post verdict - with ram"
+      (let [attachments  [{:applicationState "verdictGiven" :ramLink "anyid"}
+                          {:applicationState "open"}
+                          {:applicationState "constructionStarted"}]
+            application {:state "verdictGiven"
+                         :attachments attachments}]
+        (application-state-filters application) =>  [{:tag :preVerdict :default false}
+                                                     {:tag :postVerdict :default true}
+                                                     {:tag :ram :default true}])))
 
   (facts "group and type"
     (fact "with parties group"
@@ -185,7 +210,7 @@
 
     (fact "attachment type - one attachment"
 
-      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}]
+      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :iv_suunnitelma :default false}]
@@ -195,9 +220,9 @@
 
     (fact "attachment type - many attachments"
 
-      (let [attachments  [{:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+      (let [attachments  [{:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :paapiirustus :default false}
@@ -214,9 +239,9 @@
       (let [attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
                           {:type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "sometype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "anothertype"}}
-                          {:groupType "operation" :type {:type-group "somegroup" :type-id "othertype"}}]
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "sometype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "anothertype"}}
+                          {:groupType "operation" :op {:id "op"} :type {:type-group "somegroup" :type-id "othertype"}}]
             application  {:attachments attachments}]
 
         (group-and-type-filters application) =>   [{:tag :general :default false}
@@ -276,3 +301,42 @@
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other)
       (provided (att-type/tag-by-type anything) => nil))))
+
+(facts sort-by-tags
+  (fact "one main group"
+    (sort-by-tags [{:tags [:main-tag :some-tag]} {:tags [:main-tag :another-tag]}] [[:main-tag]])
+    => [{:tags [:main-tag :some-tag]} {:tags [:main-tag :another-tag]}])
+
+  (fact "empty group equals no sorting"
+    (sort-by-tags [{:tags [:some-tag]} {:tags [:another-tag]} {:tags [:just-tag]}] [])
+    => [{:tags [:some-tag]} {:tags [:another-tag]} {:tags [:just-tag]}])
+
+  (fact "two main groups"
+    (sort-by-tags [{:tags [:main-tag :some-tag]} {:tags [:another-main-tag]}] [[:another-main-tag] [:main-tag]])
+    => [{:tags [:another-main-tag]} {:tags [:main-tag :some-tag]}])
+
+  (fact "attachments not in a group are omitted"
+    (sort-by-tags [{:tags [:some-tag]} {:tags [:main-tag :another-tag]}] [[:main-tag]])
+    => [{:tags [:main-tag :another-tag]}])
+
+  (fact "attachments not in any sub group are omitted"
+    (sort-by-tags [{:tags [:main-tag :some-tag]} {:tags [:main-tag :another-tag]}] [[:main-tag [:some-tag]]])
+    => [{:tags [:main-tag :some-tag]}])
+
+  (fact "multiple attachments and multiple groups"
+    (sort-by-tags [{:n 1 :tags [:main-tag :group1 :just-tag]}
+                   {:n 2 :tags [:main-tag :group2 :deep2-tag :deep-group-tag :inner-group-tag]}
+                   {:n 3 :tags [:another-main-tag :whatever-tag]}
+                   {:n 4 :tags [:main-tag :group2 :deep2-tag :deep-group-tag :inner-group-tag]}
+                   {:n 5 :tags [:main-tag :group1 :another-tag]}
+                   {:n 6 :tags [:main-tag :group2 :deep1-tag :deep-group-tag :inner-group-tag]}]
+                       [[:main-tag
+                         [:group1 [:another-tag] [:just-tag]]
+                         [:group2 [:inner-group-tag [:deep-group-tag [:deep1-tag] [:deep2-tag]]]]]
+                        [:another-main-tag]])
+    => [{:n 5 :tags [:main-tag :group1 :another-tag]}
+        {:n 1 :tags [:main-tag :group1 :just-tag]}
+        {:n 6 :tags [:main-tag :group2 :deep1-tag :deep-group-tag :inner-group-tag]}
+        {:n 2 :tags [:main-tag :group2 :deep2-tag :deep-group-tag :inner-group-tag]}
+        {:n 4 :tags [:main-tag :group2 :deep2-tag :deep-group-tag :inner-group-tag]}
+        {:n 3 :tags [:another-main-tag :whatever-tag]}]))

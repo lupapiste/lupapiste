@@ -20,6 +20,7 @@ Sonja logs in and creates an application
 
 Sonja opens search page
   Go to page  applications
+  Show all applications
   Click by test id  toggle-advanced-filters
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
   Handler filter should contain text  ${all handlers}
@@ -59,6 +60,7 @@ Sonja selects application sorting
 
 Sonja reloads the page and expects that saved filter is applied as default
   Reload Page
+  Show all applications
   Click by test id  toggle-advanced-filters
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
 
@@ -139,6 +141,7 @@ Sonja closes saved filters
 
 Default filter should be sort-by-location filter
   Reload page
+  Show all applications
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
 ...no advanced filters shown

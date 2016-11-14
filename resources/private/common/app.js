@@ -100,7 +100,13 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.hashChanged = function () {
-      self.previousHash = self.currentHash;
+      if (lupapisteApp.services.scrollService) {
+        // Service might not be initialized yet
+        lupapisteApp.services.scrollService.push({hash: "#!/" + self.currentHash,
+                                                   followed: true,
+                                                   override: true});
+        self.previousHash = self.currentHash;
+      }
       self.currentHash = (location.hash || "").substr(3);
 
       var q = self.currentHash.indexOf("?");
@@ -120,7 +126,7 @@ var LUPAPISTE = LUPAPISTE || {};
       var path = self.currentHash.split("/");
 
       if (!self.allowAnonymous && self.session === undefined) {
-        ajax.query("user", {lang: loc.getCurrentLanguage()})
+        ajax.query("user")
           .success(function (e) {
             if (e.user) {
               self.session = true;
@@ -241,19 +247,22 @@ var LUPAPISTE = LUPAPISTE || {};
         lupapisteApp.models.globalAuthModel.ok("tos-operations-enabled");
     };
 
-    var isAuthorizedToCalendars = function() {
-      return lupapisteApp.models.globalAuthModel.ok("calendars-enabled");
-    };
+    self.calendarsEnabledInAuthModel = ko.observable(false);
 
     self.showArchiveMenuOptions = ko.observable(false);
-    self.showCalendarMenuOptions = ko.observable(false);
+    self.showCalendarMenuOptions = ko.pureComputed(function() {
+      var isApplicant = lupapisteApp.models.currentUser.isApplicant();
+      var enabledInAuthModel = self.calendarsEnabledInAuthModel();
+      return enabledInAuthModel || (isApplicant && features.enabled("ajanvaraus"));
+    });
+
     if (util.getIn(window, ["lupapisteApp", "models", "globalAuthModel"])) {
       self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
-      self.showCalendarMenuOptions(isAuthorizedToCalendars());
+      self.calendarsEnabledInAuthModel(lupapisteApp.models.globalAuthModel.ok("calendars-enabled"));
     }
     hub.subscribe("global-auth-model-loaded", function() {
       self.showArchiveMenuOptions(isAuthorizedToTosAndSearch());
-      self.showCalendarMenuOptions(isAuthorizedToCalendars());
+      self.calendarsEnabledInAuthModel(lupapisteApp.models.globalAuthModel.ok("calendars-enabled"));
     });
 
     /**
@@ -299,6 +308,7 @@ var LUPAPISTE = LUPAPISTE || {};
         showUserMenu: self.showUserMenu,
         showArchiveMenuOptions: self.showArchiveMenuOptions,
         showCalendarMenuOptions: self.showCalendarMenuOptions,
+        calendarMenubarVisible: self.calendarMenubarVisible,
         // TODO: sync with side-panel.js sidePanelPages
         sidePanelPages: ["application","attachment","statement","neighbors","verdict"]
       };

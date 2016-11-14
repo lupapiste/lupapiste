@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [monger.operators :refer [$set $push]]
+            [swiss.arrows :refer :all]
             [sade.core :refer [now]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
@@ -25,7 +26,10 @@
 
 (facts "mark-indicators-seen-updates"
   (let [timestamp 123
-        expected-seen-bys {"_comments-seen-by.pena" timestamp, "_statements-seen-by.pena" timestamp, "_verdicts-seen-by.pena" timestamp}
+        expected-seen-bys (-<>> ["comments" "statements" "verdicts"
+                                 "authority-notices" "info-links"]
+                               (map (partial format "_%s-seen-by.pena"))
+                               (zipmap <> (repeat timestamp)))
         expected-attachment (assoc expected-seen-bys :_attachment_indicator_reset timestamp)
         expected-docs (assoc expected-attachment "documents.0.meta._indicator_reset.timestamp" timestamp)]
     (mark-indicators-seen-updates {} {:id "pena"} timestamp) => expected-seen-bys
@@ -94,11 +98,18 @@
   (validate-has-subtypes {:application {:permitType "R"}}) => {:ok false :text "error.permit-has-no-subtypes"}
   (validate-has-subtypes nil) => {:ok false :text "error.permit-has-no-subtypes"})
 
-(fact "State transitions"
+(facts "State transitions"
   (let [pena {:username "pena", :firstName "Pena" :lastName "Panaani"}]
-    (state-transition-update :open 1 pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
-    (state-transition-update :submitted 2 pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
-    (state-transition-update :verdictGiven 3 pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}}))
+    (fact "update"
+      (state-transition-update :open 1 {:created 0} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :open 1 {:opened nil} pena) => {$set {:state :open, :opened 1, :modified 1}, $push {:history {:state :open, :ts 1, :user pena}}}
+      (state-transition-update :submitted 2 {:created 0 :opened 1} pena) => {$set {:state :submitted, :submitted 2, :modified 2}, $push {:history {:state :submitted, :ts 2, :user pena}}}
+      (state-transition-update :verdictGiven 3 {:created 0 :opened 1 :submitted 2} pena) => {$set {:state :verdictGiven, :modified 3}, $push {:history {:state :verdictGiven, :ts 3, :user pena}}})
+
+    (fact "re-update"
+      (state-transition-update :open 4 {:opened 3} pena) => {$set {:state :open, :modified 4}, $push {:history {:state :open, :ts 4, :user pena}}}
+      (state-transition-update :submitted 5 {:submitted 4} pena) => {$set {:state :submitted, :modified 5}, $push {:history {:state :submitted, :ts 5, :user pena}}}
+      (state-transition-update :constructionStarted 6 {:started 5} pena) => {$set {:state :constructionStarted, :modified 6}, $push {:history {:state :constructionStarted, :ts 6, :user pena}}})))
 
 (fact "Valid permit types pre-checker"
       (let [error {:ok false :text "error.unsupported-permit-type"}
@@ -148,3 +159,17 @@
                    state-seq)}]
     (fact "only entries with :state are regarded"
       (get-previous-app-state history) => :two)))
+
+(facts "Primary operation prechecks"
+       (let [app {:application {:primaryOperation {:name "foobar"}}}
+             err {:ok false :text "error.unsupported-primary-operation"}]
+         (fact "Allow"
+               ((allow-primary-operations #{:hii :foobar}) app) => nil?
+               ((allow-primary-operations #{:foobar}) app) => nil?
+               ((allow-primary-operations #{:hii}) app) => err
+               ((allow-primary-operations #{}) app) => err)
+         (fact "Reject"
+               ((reject-primary-operations #{:hii :foobar}) app) => err
+               ((reject-primary-operations #{:foobar}) app) => err
+               ((reject-primary-operations #{:hii}) app) => nil?
+               ((reject-primary-operations #{}) app) => nil?)))

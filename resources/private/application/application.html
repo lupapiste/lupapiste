@@ -71,8 +71,8 @@
                               </div>
 
                               <!-- Authorities: -->
-                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' -->
-                              <div data-bind="component: {name: 'authority-select'}"></div>
+                              <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'application' && $root.authorities -->
+                              <div data-bind="component: {name: 'authority-select', params: {authorities: $root.authorities}}"></div>
                               <!-- /ko -->
 
                               <!-- Operations: -->
@@ -192,7 +192,10 @@
                           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
                           <div class="application-map-actions" data-bind="with: application">
                             <!-- ko if: location() -->
-                            <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
+                            <button data-bind="click: openOskariMap,
+                                               ltext:'map.open'"
+                                    class="function" ></button>
+                            <open-3d-map></open-3d-map>
                             <!-- /ko -->
                           </div>
                         </div>
@@ -206,7 +209,7 @@
                     <!-- Tabs: -->
                     <div class="tabs-container" data-bind="with: application">
                         <ul class="tabs" id="applicationTabs">
-                            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'info'}">
+                            <li data-bind="if: $root.authorization.ok('application-info-tab-visible'), css: {'active': $parent.selectedTabName() === 'info'}">
                                 <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab" class="link-btn">
                                     <span data-bind="ltext: 'application.tabInfo'"></span>
                                     <span data-bind="if: nonpartyDocumentIndicator">
@@ -229,13 +232,6 @@
                                     <span data-bind="if: attachmentsRequiringAction">
                                         <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-                            <li data-bind="feature: 'attachments-poc',
-                                           css: {'active': $parent.selectedTabName() === 'attachmentsPOC'}">
-                                <a data-bind="click: changeTab" href="#" data-target="attachmentsPOC" data-test-id="application-open-attachmentsPOC-tab" class="link-btn">
-                                    <span>Suunnitelmat ja liitteet, Vanha sivu</span>
-                                    <span data-bind="if: attachmentsRequiringAction">
-                                        <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
-
                             <li data-bind="if: _.includes(['draft', 'open', 'submitted', 'complementNeeded'], state()),
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
@@ -249,7 +245,7 @@
                                     <span data-bind="if: unseenStatements">
                                         <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()),
+                            <li data-bind="ifnot: _.includes(['draft', 'open'], state()) || !$root.authorization.ok( 'application-verdict-tab-visible'),
                                            css: {'active': $parent.selectedTabName() === 'verdict'}">
                                 <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab"
                                    class="link-btn">
@@ -258,13 +254,13 @@
                                         <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
                             <!-- In post-verdict states plus 'canceled' -->
-                            <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+                            <li data-bind="if: $root.authorization.ok('application-summary-tab-visible'), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab"
                                    class="link-btn">
                                     <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
                             <!-- Can be shown if calendars are active in the target municipality and sector -->
-                            <li data-bind="if: $root.authorization.ok('calendars-enabled'), css: {'active': $parent.selectedTabName() === 'calendar'}">
+                            <li data-bind="if: $root.calendarConfig.initialized, css: {'active': $parent.selectedTabName() === 'calendar'}">
                               <a data-bind="click: changeTab" href="#" data-target="calendar" data-test-id="application-open-calendar-tab" class="link-btn">
                                 <span data-bind="ltext: 'application.tabCalendar'"></span>
                                 <span data-bind="if: calendarNotificationIndicator">
@@ -273,7 +269,7 @@
                               </a>
                             </li>
 
-                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && features.enabled('arkistointi') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
+                            <li data-bind="if: $root.authorization.ok('permanent-archive-enabled') && $root.authorization.ok('archiving-operations-enabled') && $root.application.inPostVerdictState(),
                                            css: {'active': $parent.selectedTabName() === 'archival'}">
                                 <a data-bind="click: changeTab" href="#" data-target="archival" data-test-id="application-open-archival-tab" class="link-btn">
                                     <span data-bind="ltext: 'arkistointi'"></span>
@@ -308,6 +304,13 @@
                                              params: {lhtml: 'help.' + permitType() + '.applicationInfoDesc' }
                                              }"></span>
                         </div>
+                        <!-- ko if: $parent.selectedTabName() === 'info' && $root.authorization.ok("create-assignment") -->
+                        <create-assignment data-test-id="create-assignment-component"
+                                           params="authorities: $root.authorities,
+                                                   applicationId: id,
+                                                   initialTarget: 'documents',
+                                                   targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+                        <!-- /ko -->
                         <div data-bind="if: $root.application.state() == 'draft'">
                             <p data-bind="lhtml: 'application.state.draft.help'"></p>
                         </div>
@@ -335,9 +338,6 @@
                               </div>
                             </div>
                         </div>
-                        <div class="organizationLinks"
-                             data-bind="template: 'organization-links-template'">
-                        </div>
                         <p class="top-marginM" data-bind="lhtml: 'required.field.desc'"></p>
                         <!-- docgen generated content: -->
                         <div class="application_section">
@@ -356,172 +356,15 @@
 
                     <!-- Parties tab -->
 
-                    <div id="application-parties-tab" class="tab-content" data-bind="with: application">
-                        <h1 data-bind="ltext: 'application.tabParties'"></h1>
-                        <span data-bind="component: {
-                                         name: 'help-toggle',
-                                         params: { lhtml: ['help.' + permitType() + '.PartiesDesc',
-                                         'company-invite.help']}
-                                         }"></span>
-                        <div class="application_section">
-                            <div class="application_section_content content_expanded">
-                                <div data-bind="component: {name: 'authorized-parties'}"></div>
-                            </div>
-                        </div>
-
-                        <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === "application" -->
-                        <div data-bind="component: 'application-guests'"></div>
-                        <!-- /ko -->
-
-                        <p data-bind="lhtml: 'required.field.desc'"></p>
-
-                        <!-- docgen generated content: -->
-                        <div class="application_section">
-                            <div id="partiesDocgen" class="docgen-content">
-                                <!-- This is where generated document will be placed. -->
-                            </div>
-                            <!-- ko if: $root.foreman.isVisible -->
-                            <section class="accordion" id="accordion-application-foreman">
-                                <button onclick="accordion.click(this)"
-                                        data-test-id="accordion-application-foreman-header"
-                                        class="accordion-toggle secondary">
-                                    <i class="lupicon-chevron-down"></i>
-                                    <i class="lupicon-chevron-up toggle"></i>
-                                    <span class="bar-text" data-bind="ltext: 'application.parties.foreman'"></span>
-                                </button>
-                                <div class="accordion_content" data-accordion-state="closed">
-                                    <div class="accordion-fields">
-                                        <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
-                                    </div>
-                                </div>
-                            </section>
-                            <!-- /ko -->
-                        </div>
-
-                        <button data-bind="click: $parent.addPartyModel.init, visible: $parent.authorization.ok('create-doc')"
-                                class="secondary modal"
-                                data-test-id="add-party">
-                            <i class="lupicon-circle-plus"></i>
-                            <span data-bind="ltext: 'application.addParty'"></span>
-                        </button>
-
-                        <div class="process-nav">
-                            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
-                                <span data-bind="ltext: 'application.next-tab'"></span>
-                                <i class="lupicon-chevron-right"></i>
-                            </a>
-                            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="info">
-                                <i class="lupicon-chevron-left"></i>
-                                <span data-bind="ltext: 'application.previous-tab'"></span>
-                            </a>
-                        </div>
-                    </div>
+                    <div data-bind="template: 'parties-tab-template'"></div>
 
                     <!-- Attachments tab -->
-                    <!-- ko if: selectedTabName() === 'attachmentsPOC' -->
-                    <div id="application-attachmentsPOC-tab" class="tab-content"
-                         data-bind="with: $root.attachmentsTab, feature: 'attachments-poc'">
-                        <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
-                        <span data-bind="component: {
-                                         name: 'help-toggle',
-                                         params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
-                                         }"></span>
-                        <div class="clear"></div>
-                        <div class="stacked">
-                            <div class="like-btn">
-                                <i class="lupicon-circle-check"></i>
-                                <span data-bind="ltext: 'ok.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-star"></i>
-                                <span data-bind="ltext: 'new.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-attention"></i>
-                                <span data-bind="ltext: 'missing.title'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-pen"></i>
-                                <span data-bind="ltext: 'attachment.signed'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-arrow-up"></i>
-                                <span data-bind="ltext: 'application.attachmentSentDate'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-stamp"></i>
-                                <span data-bind="ltext: 'attachment.stamped'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-circle-section-sign"></i>
-                                <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
-                            </div>
-                            <div class="like-btn">
-                                <i class="lupicon-lock"></i>
-                                <span data-bind="ltext: 'attachment.not-public-attachment'"></span>
-                            </div>
-                        </div>
 
-                        <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
-                            <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
-                        </div>
-
-                        <!-- ko if: showPostAttachmentsActions -->
-                        <div data-bind="template: {name: 'attachment-actions-template',
-                                        data: {appModel: $data.appModel,
-                                        attachmentsOperation: $data.attachmentsOperation,
-                                        attachmentsOperations: $data.attachmentsOperations,
-                                        testId: 'upper'}}"></div>
-
-                        <div data-bind="component: {name: 'export-attachments'}"></div>
-                        <!-- /ko -->
-                        <suti-display></suti-display>
-
-                        <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
-                            <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- ko if: !$root.application.inPostVerdictState() -->
-                        <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- /ko -->
-
-                        <div data-bind="template: {name: 'attachment-actions-template',
-                                        data: {appModel: $data.appModel,
-                                        attachmentsOperation: $data.attachmentsOperation,
-                                        attachmentsOperations: $data.attachmentsOperations,
-                                        testId: 'lower'}}"></div>
-
-                        <div data-bind="component: {name: 'export-attachments'}"></div>
-
-                        <!-- ko if: $root.application.inPostVerdictState() -->
-                        <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-                            <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-                            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-                        </div>
-                        <!-- /ko -->
-
-                        <div class="process-nav">
-                            <a class="btn primary process-next" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
-                                <span data-bind="ltext: 'application.next-tab'"></span>
-                                <i class="lupicon-chevron-right"></i>
-                            </a>
-                            <a class="btn secondary process-previous" data-bind="click: $root.application.nextTab" href="#" data-target="parties">
-                                <i class="lupicon-chevron-left"></i>
-                                <span data-bind="ltext: 'application.previous-tab'"></span>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- /ko -->
-
-                    <!-- Attachments tab -->
                     <!-- ko if: selectedTabName() === 'attachments' -->
-                    <div id="application-attachments-tab" class="tab-content feature--no-border">
+                    <div id="application-attachments-tab" class="tab-content">
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->
-
 
                     <!-- Required field summary tab -->
 
@@ -652,7 +495,7 @@
 
                     <!-- Archival tab -->
 
-                    <!--ko if: selectedTabName() === 'archival' && features.enabled('arkistointi') && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archiving-operations-enabled') -->
+                    <!--ko if: selectedTabName() === 'archival' && $root.authorization.ok("permanent-archive-enabled") && $root.application.inPostVerdictState() && $root.authorization.ok('archiving-operations-enabled') -->
                     <div id="application-archival-tab" class="tab-content">
                       <div>
                         <div data-bind="component: {name: 'archival-summary', params: {application: application}}"></div>
@@ -777,10 +620,10 @@
                                           </div>
 
                                           <div>
-                                              <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
+                                            <!--  ko if:  $data.lupamaaraykset -->
+                                            <h2 data-bind="ltext: 'verdict.lupamaaraukset',
+                                                           testId: 'verdict-requirements-' + $parentContext.$index()"></h2>
                                               <div class="accordion-content-part">
-
-                                                  <!--  ko if:  $data.lupamaaraykset -->
                                                   <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                                                       <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                                                   <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -824,11 +667,13 @@
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                                                           <li data-bind="if: $data.katselmuksenLaji">
                                                               <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
+                                                            <span data-bind="if: !$data.tarkastuksenTaiKatselmuksenNimi">
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                            </span>
                                                               <!-- /ko -->
-                                                              <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
-                                                                  (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
-                                                              </span>
+                                                            <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
+                                                              <span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>
+                                                            </span>
                                                           </li>
                                                       </ul>
                                                   </div>
@@ -852,13 +697,10 @@
                                                           </tbody>
                                                       </table>
                                                   </div>
-                                                  <!-- /ko --> <!-- /lupamaaraykset -->
-
-                                                  <!--  ko ifnot:  $data.lupamaaraykset -->
-                                                  <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
                                                   <!-- /ko -->
-
                                               </div>
+                                              <!-- /ko -->
+                                              <!-- /lupamaaraykset -->
 
                                               <h2 data-bind="ltext: 'verdict.poytakirjat'"></h2>
                                               <div class="accordion-content-part">
@@ -905,8 +747,10 @@
                                                   <!-- /ko -->
                                               </div>
                                               <!-- Muutoksenhaku -->
+                                              <!-- ko ifnot: $parentContext.$data.draft -->
                                               <div data-bind="component: {name: 'verdict-appeal',
                                                               params: {id: verdict.id, test: $parentContext.$index() + '-' +$index()}}"></div>
+                                              <!-- /ko -->
                                           </div>
                                       </div>
                                   </div>
@@ -989,11 +833,13 @@
                                          name: 'help-toggle',
                                          params: {lhtml: 'help.' + permitType() + '.tasksDesc'}
                                          }"></span>
-                        <div data-bind="if: _js.buildings && _js.buildings.length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
+                        <extension-applications></extension-applications>
+
+                        <div data-bind="if: _.some( _js.buildings ) && $root.authorization.ok('inform-building-construction-started')">
+                          <h2 data-bind="ltext:'application.aloitusilmoitukset'"></h2>
                             <table>
                                 <thead>
-                                    <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
                                     <tr>
                                         <th data-bind="ltext: 'application.buildingStatus'"></th>
                                         <th data-bind="ltext: 'application.buildingOperation'"></th>
@@ -1020,10 +866,10 @@
                         </div>
 
                         <!-- YA: Info about construction started and construction ready occasions -->
-                        <div data-bind="if: $root.authorization.ok('inform-construction-started') || _.includes(['constructionStarted', 'closed'], $data.state())">
+                        <div data-bind="if: $root.authorization.ok('info-construction-status')">
+                          <h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'"></h2>
                             <table>
                                 <thead>
-                                    <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusjavalmistumisilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
                                     <tr>
                                         <th data-bind="ltext: 'application.constructionStateChangeOperation'"></th>
                                         <th data-bind="ltext: 'application.constructionStateChangeDate'"></th>
@@ -1075,6 +921,40 @@
                                         </td>
                                     </tr>
 
+                                    <!-- Takuu alkaa -->
+                                    <tr data-bind="if: warrantyStart">
+                                        <td><span data-bind="ltext: 'application.warranty.start'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyStart"
+                                                  data-test-id="warranty-start-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyStart" class="form-input"
+                                                   data-test-id="warranty-start-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    <!-- Takuu loppuu -->
+                                    <tr data-bind="if: warrantyEnd">
+                                        <td><span data-bind="ltext: 'application.warranty.end'"></span></td>
+                                        <td>
+                                            <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+                                            <span data-bind="dateString: warrantyEnd"
+                                                  data-test-id="warranty-end-date-text"></span>
+                                            <!-- /ko -->
+                                            <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
+                                            <input type="text" data-bind="datepicker: warrantyEnd" class="form-input"
+                                                   data-test-id="warranty-end-date-edit">
+                                            <!-- /ko -->
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
                                 </tbody>
                             </table>
                         </div>
@@ -1088,7 +968,7 @@
 
                         <div class="tasks-content">
                             <div data-bind="foreach: taskGroups">
-                                <h2 data-bind="text: name" style="padding-top:1em"></h2>
+                                <h2 data-bind="text: name"></h2>
                                 <div class="stacked legends">
                                     <div class="like-btn">
                                         <i class="lupicon-circle-check"></i>
@@ -1141,13 +1021,13 @@
                     <!-- /ko -->
 
                     <!-- Calendars tab -->
-                    <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' -->
-                    <div id="application-calendar-tab" data-bind="with: application, visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
+                    <!-- ko if: selectedTabName() === 'calendar' && lupapisteApp.models.rootVMO.currentPage() === 'application' && calendarConfig.initialized -->
+                    <div id="application-calendar-tab" data-bind="visible: $root.authorization.ok('calendars-enabled')" class="tab-content">
                       <!-- ko if: lupapisteApp.models.currentUser.isAuthority -->
-                        <application-authority-calendar/>
+                        <application-authority-calendar params="calendarConfig: calendarConfig" />
                       <!-- /ko -->
                       <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
-                        <applicant-calendar/>
+                        <applicant-calendar params="calendarConfig: calendarConfig"/>
                       <!-- /ko -->
                     </div>
                     <!-- /ko -->
@@ -1343,7 +1223,7 @@
                     </div>
                     <div class="dialog-content" data-bind="with: application">
                         <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea grid-style-input really-long high"
+                        <textarea rows=10 class="form-input textarea grid-style-input high"
                                   data-bind="textInput: cancelText"
                                   data-test-id="cancel-application-reason"></textarea>
                         <div class='dialog-user-content application-cancel-text-content'></div>

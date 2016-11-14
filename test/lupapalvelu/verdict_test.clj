@@ -1,5 +1,5 @@
 (ns lupapalvelu.verdict-test
-  (require [midje.sweet :refer :all]
+  (:require [midje.sweet :refer :all]
            [midje.util :refer [testable-privates]]
            [lupapalvelu.itest-util :refer [expected-failure? ->xml]]
            [lupapalvelu.action :as action]
@@ -13,14 +13,15 @@
            [sade.common-reader :as cr]
            [sade.core :refer [now]]
            [sade.xml :as xml]
-           [sade.util :as util]))
+           [sade.util :as util])
+  (:import [java.nio.charset StandardCharsets]))
 
-(testable-privates lupapalvelu.verdict get-verdicts-with-attachments)
+(testable-privates lupapalvelu.verdict get-verdicts-with-attachments content-disposition-filename)
 
 (facts "Verdicts parsing"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/verdict-r-no-verdicts.xml"))]
     (fact "No verdicts found in the attachment parsing phase"
-      (count (get-verdicts-with-attachments {:permitType "R"} {} (now) xml (permit/get-verdict-reader "R"))) => 0
+      (count (get-verdicts-with-attachments {:permitType "R"} {} (now) xml permit/read-verdict-xml)) => 0
       )))
 
 (def tj-doc {:schema-info {:name "tyonjohtaja-v2"}
@@ -83,9 +84,11 @@
         (krysp-fetch/get-application-xml-by-application-id link-app) => xml
         (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.8"}}}
         (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
-        (application/get-link-permit-app irrelevant) => link-app
+        (application/get-link-permit-apps irrelevant) => [link-app]
         (action/update-application irrelevant irrelevant) => nil
-        (lupapalvelu.attachment/upload-and-attach! irrelevant irrelevant irrelevant) => nil))))
+        (lupapalvelu.attachment/upload-and-attach! irrelevant irrelevant irrelevant) => nil
+        (organization/get-organization nil) => "753-R"
+        (organization/krysp-integration? "753-R" "R") => false))))
 
 (def example-meaningful-tj-krysp
   {:tag :Rakennusvalvonta,
@@ -170,3 +173,16 @@
          (fact "Section not required for the operation"
                (validate-section-requirement pool no-xml1 {:section {:operations ["sauna" "house"]
                                                                      :enabled    true}}) => nil)))
+
+(facts "Content-Disposition and string encoding"
+       (fact "No header"
+             (content-disposition-filename {:headers {}}) => nil?)
+       (fact "No decoding"
+             (content-disposition-filename {:headers {"content-disposition" "attachment; filename=P\u00e4\u00e4t\u00f6sote.txt"}})
+             => "P\u00e4\u00e4t\u00f6sote.txt")
+       (fact "Encoding: Microsoft-IIS/7.5"
+             (content-disposition-filename {:headers {"content-disposition" (String. (.getBytes  "attachment; filename=\"P\u00e4\u00e4t\u00f6sote.txt\""
+                                                                                                 StandardCharsets/UTF_8)
+                                                                                     StandardCharsets/ISO_8859_1)
+                                                      "server"              "Microsoft-IIS/7.5"}})
+             => "P\u00e4\u00e4t\u00f6sote.txt"))

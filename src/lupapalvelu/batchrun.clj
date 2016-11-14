@@ -1,11 +1,12 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [debug debugf error errorf]]
+  (:require [taoensso.timbre :refer [debug debugf error errorf info]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [monger.operators :refer :all]
             [clojure.set :as set]
             [clojure.string :as s]
             [lupapalvelu.action :refer :all]
+            [lupapalvelu.application :as app]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.mongo :as mongo]
@@ -17,11 +18,16 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.xml.krysp.reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
-            [sade.util :as util]
+            [lupapalvelu.attachment :as attachment]
+            [sade.util :refer [fn->] :as util]
             [sade.env :as env]
             [sade.dummy-email-server]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [sade.strings :as ss]
+            [clj-time.coerce :as c])
+  (:import [org.xml.sax SAXParseException]))
 
 
 (defn- older-than [timestamp] {$lt timestamp})
@@ -287,7 +293,7 @@
                                                          {:krysp.YI.url {$exists true}}
                                                          {:krysp.YL.url {$exists true}}]}
                                                    {:krysp 1})
-        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
+        orgs-by-id (util/key-by :id orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
         eraajo-user (user/batchrun-user org-ids)]
@@ -295,7 +301,7 @@
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
           (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
-            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+            (let [url (get-in orgs-by-id [organization :krysp (keyword permitType) :url])]
               (try
                 (if-not (s/blank? url)
                   (let [command (assoc (application->command app) :user eraajo-user :created (now))
@@ -366,49 +372,150 @@
   (mongo/connect!)
   (fetch-asianhallinta-verdicts))
 
-(defn batchrun-user-for-review-fetch [orgs-by-id]
-  ;; modified from fetch-verdicts.
-  (let [org-ids (keys orgs-by-id)
-        eraajo-user (user/batchrun-user org-ids)]
-    eraajo-user))
-
-(defn orgs-for-review-fetch []
-  (let [orgs-with-wfs-url-defined-for-r (organization/get-organizations
-                                         {:krysp.R.url {$exists true},
+(defn orgs-for-review-fetch [& organization-ids]
+  (organization/get-organizations (merge {:krysp.R.url {$exists true},
                                           :krysp.R.version {$gte "2.1.5"}}
-                                                   {:krysp 1})
-        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-r)]
-    orgs-by-id))
+                                         (when (seq organization-ids) {:_id {$in organization-ids}}))
+                                  {:krysp 1}))
 
-(defn fetch-reviews-for-application [orgs-by-id eraajo-user {:keys [id permitType organization] :as app}]
-  (logging/with-logging-context {:applicationId id, :userId (:id eraajo-user)}
+(defn- save-reviews-for-application [user application {:keys [updates added-tasks-with-updated-buildings] :as result}]
+  (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+    (when (ok? result)
+      (try
+        (verdict/save-review-updates user application updates added-tasks-with-updated-buildings)
+        (catch Throwable t
+          (logging/log-event :error {:run-by "Automatic review checking"
+                                     :event "Failed to save"
+                                     :exception-message (.getMessage t)}))))))
+
+(defn- read-reviews-for-application [user created application app-xml]
+  (try
+    (when (and application app-xml)
+      (logging/with-logging-context {:applicationId (:id application) :userId (:id user)}
+        (let [{:keys [review-count updated-tasks validation-errors] :as result} (verdict/read-reviews-from-xml user created application app-xml)]
+          (cond
+            (and (ok? result) (pos? review-count)) (logging/log-event :info {:run-by "Automatic review checking"
+                                                                             :event "Reviews found"
+                                                                             :updated-tasks updated-tasks})
+            (fail? result)                         (logging/log-event :error {:run-by "Automatic review checking"
+                                                                              :event "Failed to read reviews"
+                                                                              :validation-errors validation-errors}))
+          result)))
+    (catch Throwable t
+      (errorf "error.integration - Could not read reviews for %s" (:id application)))))
+
+(defn- fetch-reviews-for-organization-permit-type [eraajo-user organization permit-type applications]
+  (logging/with-logging-context {:org (:id organization), :permitType permit-type, :userId (:id eraajo-user)}
     (try
-      (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
-        (debugf "fetch-reviews-for-application: processing application id %s" id)
-        (logging/with-logging-context {:applicationId id}
-        (if-not (s/blank? url)
-          ;; url means there's a defined location (eg sftp) for polling xml verdicts
-          (let [command (assoc (application->command app) :user eraajo-user :created (now))
-                result (verdict/do-check-for-reviews command)]
-            result))))
+      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application ids: [%s]"
+              (:id organization) permit-type (ss/join ", " (map :id applications)))
+      (krysp-fetch/fetch-xmls-for-applications organization permit-type applications)
+      (catch SAXParseException e
+        (errorf "error.integration - Could not understand response when getting reviews in chunks for %s from %s backend" permit-type (:id organization))
+        ;; Fallcback into fetching xmls consecutively
+        (->> (map (fn [app]
+                    (try
+                      (debugf "fetch-reviews-for-organization-permit-type. org: %s, permit-type: %s: processing application id: %s"
+                              (:id organization) permit-type (:id app))
+                      (krysp-fetch/fetch-xmls-for-applications organization permit-type [app])
+                      (catch Throwable t
+                        (errorf "error.integration - Unable to get reviews for %s from %s backend: %s - %s"
+                                (:id app) (:id organization) (.getName (class t)) (.getMessage t))
+                        nil)))
+                  applications)
+             (apply concat)
+             (remove nil?)))
       (catch Throwable t
-        (errorf "Unable to get review for %s from %s backend: %s - %s" id organization (.getName (class t)) (.getMessage t))))))
+        (errorf "error.integration - Unable to get reviews in chunks for %s from %s backend: %s - %s"
+                permit-type (:id organization) (.getName (class t)) (.getMessage t))))))
 
-(defn poll-verdicts-for-reviews [& args]
-  (let [orgs-by-id (orgs-for-review-fetch)
-        eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})
-        apps (if (= 1 (count args))
-               (mongo/select :applications {:_id (first args)})
-               ;; else
-               (mongo/select :applications {:state {$in eligible-application-states} :organization {$in (keys orgs-by-id)}}))
-        eraajo-user (batchrun-user-for-review-fetch orgs-by-id)]
-    (doall
-     (pmap (partial fetch-reviews-for-application orgs-by-id eraajo-user) apps))))
+(defn- organization-applications-for-review-fetching
+  [organization-id permit-type]
+  (let [eligible-application-states (set/difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})]
+    (mongo/select :applications {:state {$in eligible-application-states}
+                                 :permitType permit-type
+                                 :organization organization-id
+                                 :primaryOperation.name {$nin ["tyonjohtajan-nimeaminen-v2" "suunnittelijan-nimeaminen"]}}
+                  (merge app/timestamp-key
+                         {:state true
+                          :permitType true
+                          :permitSubtype true
+                          :organization true
+                          :primaryOperation true
+                          :tasks true
+                          :verdicts true
+                          :history true}))))
+
+(defn- fetch-review-updates-for-organization
+  [eraajo-user created applications permit-types {org-krysp :krysp :as organization}]
+  (let [grouped-apps (if (seq applications)
+                       (group-by :permitType applications)
+                       (->> (remove (fn-> keyword org-krysp :url s/blank?) permit-types)
+                            (map #(vector % (organization-applications-for-review-fetching (:id organization) %)))))]
+    (->> (mapcat (partial apply fetch-reviews-for-organization-permit-type eraajo-user organization) grouped-apps)
+         (map (fn [[app app-xml]] [app (read-reviews-for-application eraajo-user created app app-xml)])))))
+
+(defn poll-verdicts-for-reviews [& {:keys [application-ids organization-ids]}]
+  (let [applications (when (seq application-ids)
+                       (mongo/select :applications {:_id {$in application-ids}}))
+        organizations (apply orgs-for-review-fetch (concat organization-ids (map :organization applications)))
+        eraajo-user (user/batchrun-user (map :id organizations))]
+    (->> (pmap (partial fetch-review-updates-for-organization eraajo-user (now) applications [:R]) organizations)
+         (apply concat)
+         (run! (partial apply save-reviews-for-application eraajo-user)))))
 
 (defn check-for-reviews [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started"})
   (mongo/connect!)
-  (poll-verdicts-for-reviews))
+  (poll-verdicts-for-reviews)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished"}))
 
-(defn check-review-for-id [& args]
+(defn check-reviews-for-orgs [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :organizations args})
   (mongo/connect!)
-  (poll-verdicts-for-reviews (first args)))
+  (poll-verdicts-for-reviews :organization-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :organizations args}))
+
+(defn check-reviews-for-ids [& args]
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Started" :applications args})
+  (mongo/connect!)
+  (poll-verdicts-for-reviews :application-ids args)
+  (logging/log-event :info {:run-by "Automatic review checking" :event "Finished" :applications args}))
+
+(defn pdfa-convert-review-pdfs [& args]
+  (mongo/connect!)
+  (debug "# of applications with background generated tasks:"
+           (mongo/count :applications {:tasks.source.type "background"}))
+  (let [eraajo-user (user/batchrun-user (map :id (orgs-for-review-fetch)))]
+    (doseq [application (mongo/select :applications {:tasks.source.type "background"})]
+      (let [command (assoc (application->command application) :user eraajo-user :created (now))]
+        (doseq [task (:tasks application)]
+          (if (= "background" (:type (:source task)))
+            (do
+              (doseq [att (:attachments application)]
+                (if (= (:id task) (:id (:source att)))
+                  (do
+                    (debug "application" (:id (:application command)) "- converting task" (:id task) "-> attachment" (:id att) )
+                    (attachment/convert-existing-to-pdfa! (:application command) (:user command) att)))))))))))
+
+(defn pdf-to-pdfa-conversion [& args]
+  (info "Starting pdf to pdf/a conversion")
+  (mongo/connect!)
+  (let [organization (first args)
+        start-ts (c/to-long (c/from-string (second args)))
+        end-ts (c/to-long (c/from-string (second (next args))))]
+  (doseq [application (mongo/select :applications {:organization organization :state :verdictGiven})]
+    (let [command (application->command application)
+          last-verdict-given-date (:ts (last (sort-by :ts (filter #(= (:state % ) "verdictGiven") (:history application)))))]
+      (logging/with-logging-context {:applicationId (:id application)}
+        (when (and (= (:state application) "verdictGiven") (< start-ts last-verdict-given-date end-ts))
+          (info "Converting attachments of application" (:id application))
+          (doseq [attachment (:attachments application)]
+            (when (:latestVersion attachment)
+              (when-not (get-in attachment [:latestVersion :archivable])
+                  (do
+                    (info "Trying to convert attachment" (get-in attachment [:latestVersion :filename]))
+                    (let [result (attachment/convert-existing-to-pdfa! (:application command) nil attachment)]
+                      (if (:archivabilityError result)
+                        (error "Conversion failed to" (:id application) "/" (:id attachment) "/" (get-in attachment [:latestVersion :filename]) "with error:" (:archivabilityError result))
+                        (info "Conversion succeed to" (get-in attachment [:latestVersion :filename]) "/" (:id application))))))))))))))

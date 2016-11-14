@@ -2,11 +2,12 @@ LUPAPISTE.VerdictsModel = function() {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel() );
+
   function getApplicationId(bindings) {
     return bindings.application.id();
   }
 
-  self.authorities = [];
   self.verdicts = ko.observable();
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
@@ -16,28 +17,34 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.applicationId = null;
 
-  self.refresh = function(application, authorities) {
+  function poytakirjaAttachments( verdict, pk ) {
+    return self.disposedComputed( function() {
+      return _.filter(lupapisteApp.services.attachmentsService.attachments(),
+                      function(attachment) {
+                        var target = attachment().target;
+                        var idMatch = false;
+                        if (target && target.type === "verdict") {
+                          if (target.poytakirjaId) {
+                            idMatch = target.poytakirjaId === pk.id;
+                          } else if (target.urlHash) {
+                            idMatch = target.urlHash === pk.urlHash;
+                          } else {
+                            idMatch = target.id === verdict.id;
+                          }
+                        }
+                        return idMatch;
+                      });
+    });
+  }
+
+  self.refresh = function(application) {
     self.applicationId = application.id;
     var verdicts = _(application.verdicts || [])
       .cloneDeep()
       .map(function(verdict) {
         var paatokset = _.map(verdict.paatokset || [], function(paatos) {
           var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-            var myAttachments = _.filter(application.attachments || [], function(attachment) {
-              var target = attachment.target;
-              var idMatch = false;
-              if (target && target.type === "verdict") {
-                if (target.poytakirjaId) {
-                  idMatch = target.poytakirjaId === pk.id;
-                } else if (target.urlHash) {
-                  idMatch = target.urlHash === pk.urlHash;
-                } else {
-                  idMatch = target.id === verdict.id;
-                }
-              }
-              return idMatch;
-            }) || [];
-            pk.attachments = myAttachments;
+            pk.attachments = poytakirjaAttachments( verdict, pk );
             return pk;
           });
           paatos.poytakirjat = poytakirjat;
@@ -56,7 +63,6 @@ LUPAPISTE.VerdictsModel = function() {
       .filter(function(v) {return !_.isEmpty(v.paatokset);});
 
     self.verdicts(verdicts);
-    self.authorities = authorities;
   };
 
   self.newVerdict = function() {
@@ -65,7 +71,7 @@ LUPAPISTE.VerdictsModel = function() {
       .pending(self.newPending)
       .success(function(d) {
         repository.load(self.applicationId, self.newPending, function(application) {
-          LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, self.authorities, d.verdictId);
+          LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, d.verdictId);
           pageutil.openPage("verdict", self.applicationId + "/" + d.verdictId);
         });})
     .call();
@@ -74,7 +80,7 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.openVerdict = function(bindings, verdict) {
     var applicationId = getApplicationId(bindings);
-    LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, self.authorities, verdict.id);
+    LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(bindings.application._js, verdict.id);
     pageutil.openPage("verdict", applicationId + "/" + verdict.id);
     return false;
   };

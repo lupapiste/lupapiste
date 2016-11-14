@@ -1,5 +1,5 @@
 (ns lupapalvelu.user-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+  (:require [taoensso.timbre :refer [trace debug info infof warn warnf error fatal]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -31,7 +31,6 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.password-reset :as pw-reset]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.calendar :as cal]))
 
 ;;
@@ -47,13 +46,14 @@
       (dissoc full-user :private :personId))))
 
 (defquery user
-  {:optional-parameters [lang]
-   :input-validators [i18n/valid-language]
+  {:on-success (fn [_ {user :user}]
+                 (when (:firstLogin user)
+                   (mongo/update-by-id :users (:id user) {$unset {:firstLogin true}})))
    :user-roles auth/all-authenticated-user-roles}
   [{user :user}]
   (if-let [full-user (get-user user)]
-    (ok :user (usr/update-user-language! full-user (ss/lower-case lang)))
-    (fail)))
+    (ok :user (assoc full-user :virtual (usr/virtual-user? user)))
+    (fail :error.user.not.found)))
 
 (defquery users
   {:user-roles #{:admin}}
@@ -158,7 +158,8 @@
 (defcommand create-rest-api-user
   {:description "Creates REST API user for organization. Admin only."
    :parameters [username]
-   :input-validators [(partial action/string-parameters [:username])]
+   :input-validators [(partial action/string-parameters [:username])
+                      (partial action/ascii-parameters  [:username])]
    :user-roles #{:admin}}
   [{user-data :data caller :user :as command}]
   (let [rest-user-email (str username "@example.com")
@@ -513,7 +514,7 @@
     (let [kw-role (keyword role)
           main-role (if (= :authorityAdmin kw-role) :authorityAdmin :authority)
           role-set (set [kw-role main-role])
-          imposter (assoc user :impersonating true :role main-role :orgAuthz {(keyword organizationId) role-set})]
+          imposter (assoc user :impersonating true :role (name main-role) :orgAuthz {(keyword organizationId) role-set})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
@@ -523,35 +524,37 @@
 ;; ==============================================================================
 ;;
 
+(defn- register [user stamp rakentajafi]
+  (activation/send-activation-mail-for user)
+  (vetuma/consume-user stamp)
+  (when rakentajafi
+    (util/future* (idf/send-user-data user "rakentaja.fi")))
+  user)
+
+(defn- vetuma-data-to-user [vetuma-data {:keys [architect email] :as data}]
+  (merge
+    (set/rename-keys vetuma-data {:userid :personId})
+    (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
+    (when architect
+      (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
+    {:email (usr/canonize-email email) :role "applicant" :enabled false}))
+
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :optional-parameters [language]
    :user-roles       #{:anonymous}
    :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
-  (let [vetuma-data (vetuma/get-user stamp)
-        email (usr/canonize-email email)]
-    (when-not vetuma-data (fail! :error.create-user))
+  (if-let [vetuma-data (vetuma/get-user stamp)]
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (usr/create-new-user
-                      nil
-                      (merge
-                        (set/rename-keys vetuma-data {:userid :personId})
-                        (select-keys data [:password :language :street :zip :city :phone :allowDirectMarketing])
-                        (when (:architect data)
-                          (select-keys data [:architect :degree :graduatingYear :fise :fiseKelpoisuus]))
-                        {:email email :role "applicant" :enabled false}))]
-        (do
-          (activation/send-activation-mail-for user)
-          (vetuma/consume-user stamp)
-          (when rakentajafi
-            (util/future* (idf/send-user-data user "rakentaja.fi")))
-          (ok :id (:id user)))
+      (if-let [user (usr/create-new-user nil (vetuma-data-to-user vetuma-data data))]
+        (ok :id (:id (register user stamp rakentajafi)))
         (fail :error.create-user))
 
       (catch IllegalArgumentException e
-        (fail (keyword (.getMessage e)))))))
+        (fail (keyword (.getMessage e)))))
+    (fail :error.create-user)))
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
@@ -686,19 +689,24 @@
        (filter (partial allowed-state? (:state application)))
        (remove #(or (att/attachment-is-readOnly? %) (att/attachment-is-locked? %)))))
 
+(defn user-attachments-exists [{user :user}]
+  (when (empty? (:attachments (mongo/by-id :users (:id user) {:attachments true})))
+    (fail :error.no-user-attachments)))
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
    :user-roles #{:applicant}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [(fn [command]
                   (when-not (-> command :user :architect)
-                    unauthorized))]}
+                    unauthorized))
+                user-attachments-exists]}
   [{application :application user :user :as command}]
-  (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
+  (doseq [attachment (:attachments (mongo/by-id :users (:id user) {:attachments true}))]
     (let [application-id id
           user-id (:id user)
-          {:keys [attachment-type attachment-id file-name content-type size created]} attachment
+          {:keys [attachment-type attachment-id file-name content-type size]} attachment
           attachment             (mongo/download-find {:id attachment-id :metadata.user-id user-id})
           maybe-attachment-id    (str application-id "." user-id "." attachment-id)               ; proposed attachment id (if empty placeholder is not found)
           same-attachments       (allowed-attachments-same-type application attachment-type)      ; attachments of same type
@@ -713,7 +721,7 @@
         (att/upload-and-attach! command
                                 {:attachment-id attachment-id
                                  :attachment-type attachment-type
-                                 :created created
+                                 :created (now)
                                  :required false
                                  :locked false}
                                 {:content ((:content attachment))
@@ -744,16 +752,6 @@
                     (if-not application
                       (when-not (pos? (mongo/count :organizations {:_id {$in org-ids} :scope.permitType permit/R }))
                         unauthorized)
-                      unauthorized)))]}
-  [_])
-
-(defquery permanent-archive-enabled
-  {:user-roles #{:applicant :authority}
-   :pre-checks [(fn [{user :user {:keys [organization]} :application}]
-                  (let [org-set (if organization
-                                  #{organization}
-                                  (usr/organization-ids-by-roles user #{:authority :tos-editor :tos-publisher :archivist}))]
-                    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
                       unauthorized)))]}
   [_])
 

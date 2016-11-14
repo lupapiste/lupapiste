@@ -137,7 +137,6 @@ var util = (function($) {
   }
 
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
-  function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
   function isValidY(y) {
     var m = /^(\d{7})-(\d)$/.exec(y || ""),
@@ -251,6 +250,14 @@ var util = (function($) {
       hub.send("indicator", {style: "positive"});
     } else {
       hub.send("indicator", {style: "negative", message: response.text});
+    }
+  }
+
+  function showSavedIndicatorIcon(response) {
+    if (response.ok) {
+      hub.send("indicator-icon", {style: "positive"});
+    } else {
+      hub.send("indicator-icon", {style: "negative", message: response.text});
     }
   }
 
@@ -370,9 +377,14 @@ var util = (function($) {
   }
 
   function partyFullName(party) {
-    return getIn(party, ["firstName"], "") + " " + getIn(party, ["lastName"], "");
+    return ko.unwrap(party.firstName) + " " + ko.unwrap(party.lastName);
   }
 
+  // Path can be string "a.b.c" or array [a, b, c].
+  function isEmpty( data, path ) {
+    return _.isEmpty( getIn( data, _
+                             .isString( path ) ? _.split( path, ".") : path));
+  }
 
   return {
     zeropad:             zeropad,
@@ -400,7 +412,6 @@ var util = (function($) {
     locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
     extractWarnErrors: extractWarnErrors,
     dissoc: dissoc,
@@ -408,13 +419,15 @@ var util = (function($) {
     withSuffix: withSuffix,
     filterDataByQuery: filterDataByQuery,
     showSavedIndicator: showSavedIndicator,
+    showSavedIndicatorIcon: showSavedIndicatorIcon,
     showErrorDialog: showErrorDialog,
     isNonNegative: isNonNegative,
     createSortableColumn: createSortableColumn,
     elementInViewport: elementInViewport,
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
-    partyFullName: partyFullName
+    partyFullName: partyFullName,
+    isEmpty: isEmpty
   };
 
 })(jQuery);

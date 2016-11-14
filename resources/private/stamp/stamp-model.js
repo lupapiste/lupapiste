@@ -2,6 +2,8 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+
   function allVersionsStamped(versions) {
     return _.every(versions, function(v) {
       return v.stamped;
@@ -22,14 +24,15 @@ LUPAPISTE.StampModel = function(params) {
       return version.stamped;
     })).last();
 
+    var stamped = _.get( a, "latestVersion.stamped");
     a.contentType = selected.contentType;
     a.filename = selected.filename;
     a.version = {major: selected.version.major, minor: selected.version.minor};
     a.size = selected.size;
-    a.selected = ko.observable(a.forPrinting && !a.stamped);
+    a.selected = ko.observable(a.forPrinting && !stamped);
     a.status = ko.observable("");
-    a.restamp = _(a.versions).last().stamped;
-    a.stamped = ko.observable(a.stamped);
+    a.restamp = stamped;
+    a.stamped = ko.observable(stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
     return a;
   }
@@ -52,7 +55,7 @@ LUPAPISTE.StampModel = function(params) {
   function getSelectedAttachments(files) {
     return _(files).map("attachments").flatten()
       .filter(function(f) {
-          return f.selected();
+        return f.selected();
       }).value();
   }
 
@@ -73,28 +76,45 @@ LUPAPISTE.StampModel = function(params) {
 
   // Init
   self.application = params.application;
-  self.attachments = params.attachments;
-  self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
+  self.attachments = ko.observableArray();
+  self.preFiles = ko.observableArray();
+  self.postFiles = ko.observableArray();
+  self.status = ko.observable();
+  self.attachmentsDict = {};
 
-  // group by post/pre verdict attachments
-  var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+  self.disposedComputed( function() {
+    if( !_.size( self.attachments())) {
+      self.attachments( _.map( params.attachments(),
+                                function( obs ) {
+                                  return ko.observable( ko.unwrap( obs ));
+                                }));
+    }
   });
 
-  // group attachments by operation
-  grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
-  grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
+  self.disposedComputed( function() {
+    var filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
 
-  // map files for stamping
-  self.preFiles = ko.observableArray(_.map(grouped.pre, mapAttachmentGroup));
-  self.postFiles = ko.observableArray(_.map(grouped.post, mapAttachmentGroup));
+    // group by post/pre verdict attachments
+    var grouped = _.groupBy(filteredFiles, function(a) {
+      return _.includes(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
+    });
 
-  self.status = ko.observable(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
+    // group attachments by operation
+    grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
+    grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
 
-  self.selectedFiles = ko.computed(function() {
+    // map files for stamping
+    self.preFiles(_.map(grouped.pre, mapAttachmentGroup));
+    self.postFiles(_.map(grouped.post, mapAttachmentGroup));
+    self.status(_.size(filteredFiles) > 0 ? self.statusReady : self.statusNoFiles);
+  });
+
+
+
+  self.selectedFiles = self.disposedComputed(function() {
     return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
-  self.allSelected = ko.computed(function() {
+  self.allSelected = self.disposedComputed(function() {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
 
@@ -205,7 +225,7 @@ LUPAPISTE.StampModel = function(params) {
 
       if (update.status === "done") {
         _(self.selectedFiles()).map(function(f) { return f.stamped(true); }).value();
-        lupapisteApp.models.application.reload();
+        lupapisteApp.services.attachmentsService.queryAll();
         return self.status(self.statusDone);
       }
     }

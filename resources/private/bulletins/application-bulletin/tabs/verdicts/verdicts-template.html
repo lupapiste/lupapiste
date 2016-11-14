@@ -76,12 +76,12 @@
                                   </div>
                               </div>
                           </div>
-
+                          
                           <div>
+                            <!-- ko if: $data.lupamaaraykset -->
                               <h4 data-bind="ltext: 'verdict.lupamaaraukset'"></h4>
                               <div class="accordion-content-part">
 
-                                  <!--  ko if:  $data.lupamaaraykset -->
                                   <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                                       <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                                   <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -124,9 +124,11 @@
                                       <h5 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h5>
                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                                           <li data-bind='if: $data.katselmuksenLaji'>
-                                              <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                              <span data-bind="if: !$data.tarkastuksenTaiKatselmuksenNimi">
+                                                <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                              </span>
                                               <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
-                                                  (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
+                                                <span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>
                                               </span>
                                           </li>
                                       </ul>
@@ -151,13 +153,8 @@
                                           </tbody>
                                       </table>
                                   </div>
-                                  <!-- /ko --> <!-- /lupamaaraykset -->
-
-                                  <!--  ko ifnot:  $data.lupamaaraykset -->
-                                  <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
-                                  <!-- /ko -->
-
                               </div>
+                              <!-- /ko --> <!-- /lupamaaraykset -->
 
                               <h4 data-bind="ltext: 'verdict.poytakirjat'"></h4>
                               <div class="accordion-content-part">

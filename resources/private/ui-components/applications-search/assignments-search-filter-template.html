@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/x-jquery-tmpl" id="assignments-search-filter-template">
+    <div class="form-grid form-grid--no-border">
+      <div class="row">
+        <div class="col-2">
+          <label data-bind="ltext: 'application.filter.assignment.search'"></label>
+          <div class="search" data-bind="css: {toggled: dataProvider.searchField(), active: searchFieldSelected}">
+            <input type="text" data-bind="attr: {placeholder: loc('application.filter.search.placeholder')},
+                                          textInput: dataProvider.searchField, hasFocus: searchFieldSelected"/>
+            <i class="search-icon lupicon-search"></i>
+            <i class="search-icon lupicon-remove toggle" data-bind="click: _.partial(dataProvider.searchField, ''), attr: {title: loc('applications.filter.search.clear')}"></i>
+          </div>
+        </div>
+
+        <div class="col-1 col--full">
+          <br/>
+          <button class="secondary" data-test-id="toggle-advanced-filters" data-bind="toggleClick: showAdvancedFilters, css: {toggled: showAdvancedFilters}">
+            <i class="lupicon-chevron-down"></i>
+            <i class="lupicon-chevron-up toggle"></i>
+            <span data-bind="ltext: 'applications.filter.advancedFilters'"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row" data-test-id="advanced-filters" data-bind="slider: showAdvancedFilters">
+        <div class="form-grid form-grid--no-border">
+          <div class="row row--no-margin">
+            <div class="col-2" data-test-id="recipient-filter-item">
+              <label data-bind="ltext: 'applications.filter.recipient'" />
+              <div data-test-id="recipient-filter-component" data-bind="component: {name: 'autocomplete-recipient', params: {lPlaceholder: 'application.filter.search.placeholder.recipient-filter'}}"></div>
+            </div>
+            <div class="col-2" data-test-id="areas-filter-item">
+              <label data-bind="ltext: 'applications.filter.areas'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-areas', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4" data-test-id="operation-filter-item">
+              <label data-bind="ltext: 'applications.filter.operations'" />
+              <div data-test-id="operations-filter-component" data-bind="component: {name: 'autocomplete-operations', params: {lPlaceholder: 'application.filter.search.placeholder.operations-filter'}}"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.assignment-targets'" />
+              <div data-test-id="areas-filter-component" data-bind="component: {name: 'autocomplete-assignment-targets', params: {lPlaceholder: 'application.filter.search.placeholder.areas-filter'}}"></div>
+            </div>
+            <div class="col-2">
+              <label data-bind="ltext: 'applications.filter.created-date'" /><br/>
+              <span>
+                <input type="text" class="form-input" data-bind="datepicker: dataProvider.searchStartDate" />&nbsp;&#8211;&nbsp;<input type="text" class="form-input" data-bind="datepicker: dataProvider.searchEndDate" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </script>
+  </section>
+</body>
+</html>

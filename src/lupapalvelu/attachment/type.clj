@@ -45,7 +45,9 @@
    {:type-id :patevyystodistus :type-group :osapuolet}
    {:type-id :cv               :type-group :osapuolet}
    {:type-id :valtakirja       :type-group :hakija}
-   {:type-id :muu              :type-group :muut}])
+   {:type-id :muu              :type-group :muut}
+   {:type-id :paatos           :type-group :paatoksenteko}
+   {:type-id :paatosote        :type-group :paatoksenteko}])
 
 (defn- for-operations [attachment-type]
   (cond-> #{}
@@ -146,7 +148,9 @@
                    {:type-id :suunnittelijan_tiedot :type-group :osapuolet}]})
 
 (def- type-grouping ; Force array-map to ensure fixed order of the type groups
-  (array-map {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
+  (array-map {:type-id :asemapiirros       :type-group :paapiirustus}        :paapiirustus
+             {:type-id :aitapiirustus      :type-group :paapiirustus}        :paapiirustus
+             {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
              {:type-id :leikkauspiirustus  :type-group :paapiirustus}        :paapiirustus
              {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
              {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus

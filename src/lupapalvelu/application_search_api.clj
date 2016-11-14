@@ -9,7 +9,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.operations :as operations]))
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.application-utils :as app-utils]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.user :as usr]))
 
 (defquery applications-search
   {:description "Service point for application search component"
@@ -23,6 +26,48 @@
                 [:tags :organizations :applicationType :handlers
                  :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
 
+(defquery applications-search-default
+  {:description "The initial applications search. Returns data and used search."
+   :parameters  []
+   :user-roles  #{:applicant :authority}}
+  [{user :user}]
+  (let [{:keys [defaultFilter applicationFilters]} (usr/get-user-by-id (:id user))
+        {:keys [sort filter]} (or (some-> defaultFilter
+                                          :id
+                                          (util/find-by-id applicationFilters))
+                                  {:sort   {:field "modified"
+                                            :asc   false}
+                                   :filter {}})
+        search (assoc filter
+                      :sort sort
+                      :applicationType (if (usr/authority? user)
+                                         "application"
+                                         "all")
+                      :limit 100
+                      :skip 0)]
+    (ok :data (search/applications-for-user user search)
+        :search search)))
+
+(defquery applications-for-new-appointment-page
+  {:description "Service point for application list in new-appointment page"
+   :parameters []
+   :user-roles #{:applicant}}
+  [{user :user data :data}]
+  (let [fields [:id :kind :organization :municipality :organizationName
+                :permitType :address :primaryOperation]
+        query  (search/make-query
+                   (domain/applications-with-writer-authz-query-for user)
+                   {:organizations (org/organizations-with-calendars-enabled)} user)
+        skip   (or (util/->long (:skip data)) 0)
+        limit  (or (util/->long (:limit data)) Integer/MAX_VALUE)
+        apps   (search/search query fields (search/make-sort data) skip limit)
+        apps   (app-utils/enrich-applications-with-organization-name apps)] ; Mapping of org ids to names
+    (ok :data (map #(-> (mongo/with-id %)
+                        (domain/filter-application-content-for user)
+                        app-utils/with-application-kind
+                        (select-keys fields))
+                   apps))))
+
 (defn- selected-ops-by-permit-type [selected-ops]
   (let [selected-ops-set (set (map keyword selected-ops))]
     (-> operations/operation-names-by-permit-type
@@ -30,16 +75,12 @@
 
 (defquery get-application-operations
   {:user-roles #{:authority}}
-  [{user :user}]
-  (let [orgIds             (map name (-> user :orgAuthz keys))
-        organizations      (map lupapalvelu.organization/get-organization orgIds)
-        selected-ops       (mapcat :selected-operations organizations)
-        is-R?              (some #(= (:permitType %) "R") (mapcat :scope organizations))
-        selected-ops       (if is-R?
-                             (distinct (conj selected-ops "tyonjohtajan-nimeaminen-v2"))
-                             selected-ops)
-        ops-by-permit-type (selected-ops-by-permit-type selected-ops)]
-    (ok :operationsByPermitType ops-by-permit-type)))
+  [{organizations :user-organizations}]
+  (let [is-R?  (some #(= (:permitType %) "R") (mapcat :scope organizations))]
+    (->> (if is-R? ["tyonjohtajan-nimeaminen-v2"] [])
+         (concat (mapcat :selected-operations organizations))
+         selected-ops-by-permit-type
+         (ok :operationsByPermitType))))
 
 (defn- localize-operation [op]
   (let [keys [:id :created :name :description]

@@ -17,9 +17,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
+            [lupapalvelu.organization :as org]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.states :as states]
@@ -33,31 +34,12 @@
             [sade.strings :as ss]
             [sade.http :as http]
             [sade.util :as util]
-            [sade.validators :as validators]))
+            [sade.validators :as validators]
+            [lupapalvelu.ya-extension :as yax]))
 
 ;;
 ;; Application approval
 ;;
-
-; TODO needs refactoring
-(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
-  (let [link-permit-app-id (-> application :linkPermitData first :id)
-        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
-    ; TODO why we check only link permit data on index 0?
-    (if kuntalupatunnus
-      (-> application
-         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
-         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} states/post-submitted-states))
-        application
-        (do
-          (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
-                 " Associated Link-permit data: " (:linkPermitData application))
-          (if (foreman/foreman-app? application)
-            (fail! :error.link-permit-app-not-in-post-sent-state)
-            (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
 
 (defn get-transfer-item [type {:keys [created user]} & [attachments]]
   (let [transfer {:type type
@@ -67,13 +49,13 @@
       transfer
       (assoc transfer :attachments (map :id attachments)))))
 
-(defn- do-approve [application organization created id lang do-rest-fn]
-  (if (organization/krysp-integration? organization (permit/permit-type application))
+(defn- do-approve [application organization created id current-state lang do-rest-fn]
+  (if (org/krysp-integration? organization (permit/permit-type application))
     (or
       (application/validate-link-permits application)
       (let [all-attachments (:attachments (domain/get-application-no-access-checking (:id application) [:attachments]))
             sent-file-ids   (let [submitted-application (mongo/by-id :submitted-applications id)]
-                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization))
+                              (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization :current-state current-state))
             attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created) {})]
         (do-rest-fn attachments-updates)))
     ;; Integration details not defined for the organization -> let the approve command pass
@@ -88,16 +70,16 @@
    :states           #{:submitted :complementNeeded}
    :org-authz-roles  #{:approver}}
   [{:keys [application created user organization] :as command}]
-  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        next-state   (if jatkoaika-app?
+  (let [current-state  (:state application)
+        next-state   (if (yax/ya-extension-app? application)
                        :closed ; FIXME create a state machine for :ya-jatkoaika
                        (sm/next-state application))
         _           (assert next-state)
 
-        timestamps  (zipmap (conj #{:modified :sent} next-state) (repeat created))
+        timestamps  (zipmap [:modified next-state] (repeat created))
         _           (assert (every? (partial contains? domain/application-skeleton) (keys timestamps)))
 
-        history-entries (map #(application/history-entry % created user) (set [:sent next-state]))
+        history-entry (application/history-entry next-state created user)
 
         app-updates (merge
                       {:state next-state
@@ -105,9 +87,7 @@
                       timestamps)
         application (-> application
                       meta-fields/enrich-with-link-permit-data
-                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                         (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
-                         %))
+                      link-permit/update-backend-ids-in-link-permit-data
                       (merge app-updates))
         mongo-query {:state {$in ["submitted" "complementNeeded"]}}
         indicator-updates (application/mark-indicators-seen-updates application user created)
@@ -116,11 +96,11 @@
                     (update-application command
                       mongo-query
                       {$push {:transfers transfer
-                              :history {$each history-entries}}
+                              :history history-entry}
                        $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application @organization created id lang do-update)))
+    (do-approve application @organization created id current-state lang do-update)))
 
 (defn- application-already-exported [type]
   (fn [{application :application}]
@@ -197,7 +177,7 @@
    :states     krysp-enrichment-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (let [{url :url credentials :credentials} (organization/get-krysp-wfs application)
+  (let [{url :url credentials :credentials} (org/get-krysp-wfs application)
         clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
     (if (or clear-ids? url)
       (let [document     (doc-persistence/by-id application collection documentId)
@@ -249,10 +229,8 @@
    :states     states/all-application-states
    :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization municipality propertyId] :as application} :application}]
-  (if-let [{url :url credentials :credentials} (organization/get-krysp-wfs application)]
-    (let [kryspxml    (building-reader/building-xml url credentials propertyId)
-          buildings   (building-reader/->buildings-summary kryspxml)]
-      (ok :data buildings))
+  (if-let [{url :url credentials :credentials} (org/get-krysp-wfs application)]
+    (ok :data (building-reader/building-info-list url credentials propertyId))
     (ok)))
 
 ;;
@@ -262,12 +240,20 @@
 (defn- fetch-linked-kuntalupatunnus
   "Fetch kuntalupatunnus from application's link permit's verdicts"
   [application]
-  (when-let [link-permit-app (application/get-link-permit-app application)]
+  (when-let [link-permit-app (first (application/get-link-permit-apps application))]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
 (defn- has-asianhallinta-operation [{{:keys [primaryOperation]} :application}]
   (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
+
+(defn- update-kuntalupatunnus [application]
+  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+    (update-in application
+               [:linkPermitData]
+               conj {:id kuntalupatunnus
+                     :type "kuntalupatunnus"})
+    application))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
@@ -277,36 +263,23 @@
    :on-success (action/notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]
    :states     #{:submitted :complementNeeded}}
-  [{:keys [application created user organization]:as command}]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-                      (update-in application
-                                 [:linkPermitData]
-                                 conj {:id kuntalupatunnus
-                                       :type "kuntalupatunnus"})
-                      application)
+  [{orig-app :application created :created user :user org :organization :as command}]
+  (let [application (-> (meta-fields/enrich-with-link-permit-data orig-app)
+                        update-kuntalupatunnus)
         submitted-application (mongo/by-id :submitted-applications id)
         all-attachments (:attachments (domain/get-application-no-access-checking id [:attachments]))
 
         app-updates {:modified created, :authority (if (domain/assigned? application) (:authority application) (user/summary user))}
         indicator-updates (application/mark-indicators-seen-updates application user created)
-        file-ids (ah/save-as-asianhallinta application lang submitted-application @organization) ; Writes to disk
+        file-ids (ah/save-as-asianhallinta application lang submitted-application @org) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements all-attachments file-ids created) {})
         transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         (util/deep-merge
-                          (application/state-transition-update (sm/next-state application) created user)
+                          (application/state-transition-update (sm/next-state application) created orig-app user)
                           {$push {:transfers transfer}
                            $set (util/deep-merge app-updates attachments-updates indicator-updates)}))
     (ok)))
-
-(defn- update-kuntalupatunnus [application]
-  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-    (update-in application
-               [:linkPermitData]
-               conj {:id kuntalupatunnus
-                     :type "kuntalupatunnus"})
-    application))
 
 (defn- application-already-in-asianhallinta [_ application]
   (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]
@@ -380,14 +353,20 @@
      :error []}))
 
 (defquery integration-messages
-  {:parameters [id]
-   :user-roles #{:authority}
-   :org-authz-roles  #{:approver}
-   :states #{:sent :complementNeeded}}
+  {:parameters      [id]
+   :user-roles      #{:authority}
+   :org-authz-roles #{:approver}
+   :pre-checks      [(fn [{app :application organization :organization}]
+                       (when-let [org (and organization @organization)]
+                         (when-not (or (org/krysp-integration? org (permit/permit-type app))
+                                       (ah/asianhallinta-enabled?
+                                         (org/resolve-organization-scope (:municipality app) (permit/permit-type app) org)))
+                           (fail :error.sftp.user-not-set))))]
+   :states          #{:sent :complementNeeded}}
   [{{municipality :municipality permit-type :permitType} :application org :organization}]
   (let [organization     @org
         krysp-output-dir (mapping-to-krysp/resolve-output-directory organization permit-type)
-        ah-scope         (organization/resolve-organization-scope municipality permit-type organization)
+        ah-scope         (org/resolve-organization-scope municipality permit-type organization)
         ah-output-dir    (when (ah/asianhallinta-enabled? ah-scope) (ah/resolve-output-directory ah-scope))]
     (ok :krysp (list-integration-dirs krysp-output-dir id)
         :ah    (list-integration-dirs ah-output-dir id))))
@@ -414,7 +393,7 @@
         dir (case transfer-type
               "krysp" (mapping-to-krysp/resolve-output-directory organization permit-type)
               "ah" (ah/resolve-output-directory
-                     (organization/resolve-organization-scope municipality permit-type organization)))
+                     (org/resolve-organization-scope municipality permit-type organization)))
         subdir (case file-type
                  "ok" (str env/file-separator "archive" env/file-separator)
                  "error" (str env/file-separator "error" env/file-separator))

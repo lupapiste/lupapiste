@@ -8,6 +8,7 @@
     width: 0;
     height: 0;
     margin: 0;
+    position: absolute;
     font-size: 0;
   }
 }
@@ -16,7 +17,7 @@
 // Defines the following classes:
 // .cls-label
 // .cls-wrapper
-// and the definition 
+// and the definition
 // .cls-wrapper.wrapper--disabled
 @mixin toggle-helper ($cls, $on, $off,
                       $size: $lupicon-size,
@@ -85,7 +86,16 @@
 // Checkboxes
 @include toggle-helper ( checkbox, "\e604", "\e603" ) {}
 @include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
-@include toggle-helper ( sectionbox, "\e61d", "\e620" ) {} 
+.docgen-checkbox-wrapper.form-input {
+  height: auto;
+  width: auto;
+}
+@include toggle-helper ( sectionbox, "\e61d", "\e620" ) {}
+
+@include toggle-helper ( stampbox, "\e61e", "\e620", $selected: white ) {}
+.stampbox-wrapper {
+  border: none;
+}
 
 // Radio buttons
 @include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
@@ -108,7 +118,7 @@
 }
 
 .wrapper--block {
-  
+
 }
 
 
@@ -144,15 +154,28 @@
 
 
 .button-input {
-  width: 100%;
+  white-space: nowrap;
   input, button {
-    display: table-cell;
     vertical-align: middle;
   }
   input {
     // Forcefully override the .form-grid styles.
     width: 50% !important;
-    -webkit-appearance: textfield !important;        
+    -webkit-appearance: textfield !important;
   }
 }
 
+input[type=text].textinput {
+  box-sizing: border-box;
+  padding: 4px;
+  display: block;
+  &:focus {
+    border-color: $input-focus-border-color;
+  }
+}
+
+.textinput.textinput--big {
+  @include btn-height;
+  line-height: 1;
+  font-size: $font-size;
+}

@@ -13,7 +13,7 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.processing = ko.observable();
 
-    self.statuses = _.range(1,43); // 42 different values in verdict in krysp (verdict.clj)
+    self.statuses = ko.observable(_.range(1,43)); // 42 different values in verdict in krysp (verdict.clj)
 
     self.backendId = ko.observable();
     self.draft = ko.observable();
@@ -27,10 +27,15 @@ LUPAPISTE.verdictPageController = (function($) {
 
     self.taskGroups = ko.observable();
 
+
     self.refresh = function(application, verdictId) {
       self.refreshing = true;
 
       self.applicationTitle(application.title);
+
+      if (application.permitType === "YA") {
+        self.statuses([1,2,21,37]);
+      }
 
       var verdict = _.find((application.verdicts || []), function (v) {return v.id === verdictId;});
       if (verdict) {
@@ -157,11 +162,12 @@ LUPAPISTE.verdictPageController = (function($) {
 
   var verdictModel = new VerdictEditModel();
   var authorizationModel = lupapisteApp.models.applicationAuthModel;
-  var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({});
+  var targeted = {target: ko.observable(),
+                  type: ko.observable(),
+                  typeSelector: null};
   var createTaskController = LUPAPISTE.createTaskController;
-  var authorities = ko.observableArray([]);
 
-  function refresh(application, authorityUsers, verdictId) {
+  function refresh(application, verdictId) {
     var target = {type: "verdict", id: verdictId};
     currentApplication = application;
     currentApplicationId = currentApplication.id;
@@ -175,17 +181,17 @@ LUPAPISTE.verdictPageController = (function($) {
       .query("verdict-attachment-type", {id: currentApplicationId})
       .success(function(result) {
         var type = [result.attachmentType["type-group"], result.attachmentType["type-id"]].join(".");
-        attachmentsModel.refresh(application, target, type);
+        targeted.target( target );
+        targeted.type( type );
       })
       .call();
 
     createTaskController.reset(currentApplicationId, target);
-    authorities(authorityUsers);
   }
 
-  repository.loaded(["verdict"], function(application, applicationDetails) {
+  repository.loaded(["verdict"], function(application) {
     if (currentApplicationId === application.id) {
-      refresh(application, applicationDetails.authorities, currentVerdictId);
+      refresh(application, currentVerdictId);
     }
   });
 
@@ -198,7 +204,7 @@ LUPAPISTE.verdictPageController = (function($) {
     } else {
       lupapisteApp.setTitle(currentApplication.title);
       if (currentVerdictId !== verdictId){
-        refresh(currentApplication, authorities(), currentVerdictId);
+        refresh(currentApplication, currentVerdictId);
       }
     }
     currentApplicationId = applicationId;
@@ -209,10 +215,8 @@ LUPAPISTE.verdictPageController = (function($) {
     $("#verdict").applyBindings({
       verdictModel: verdictModel,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel,
       createTask: createTaskController,
-      authorities: authorities, // Authorities for comment template
-      application: {} // Dummy application for comment template
+      targeted: targeted
     });
   });
 

@@ -93,7 +93,7 @@ var pageutil = (function($) {
     } else {
       window.location.hash = buildPagePath(page, suffix);
     }
-    hub.send( "scrollService::pop", {delay: 200});
+    hub.send( "scrollService::pop", {delay: 250});
   }
 
   function openApplicationPage(application, suffix) {
@@ -111,6 +111,12 @@ var pageutil = (function($) {
       .appendTo($("body"));
   });
 
+  // Extracts application id from the current hash.
+  function hashApplicationId() {
+    var match = /LP-[\d-]+/.exec( _.get( window, "location.hash", ""));
+    return _.first( match );
+  }
+
   return {
     getURLParameter:      getURLParameter,
     getPage:              getPage,
@@ -124,7 +130,8 @@ var pageutil = (function($) {
     openPage:             openPage,
     frontpage:            frontpage,
     getPagePath:          pagePath,
-    buildPageHash:        buildPageHash
+    buildPageHash:        buildPageHash,
+    hashApplicationId:    hashApplicationId
   };
 
 })(jQuery);

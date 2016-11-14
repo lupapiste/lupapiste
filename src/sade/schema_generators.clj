@@ -168,6 +168,12 @@
 
 (register-generator ssc/IpAddress ip-address)
 
+
+(def application-id (gen/fmap (fn [v] (str "LP" \- (s/join (subvec v 0 3)) \- (s/join (subvec v 3 7)) \- (s/join (subvec v 7 12))))
+                              (gen/vector single-number-int 12)))
+
+(register-generator ssc/ApplicationId application-id)
+
 (def http-protocol (gen/elements ["http://" "https://"]))
 (def http-url
   (gen/fmap
@@ -228,6 +234,8 @@
 (register-generator ssc/min-max-valued-integer-string min-max-valued-integer-string)
 
 (defn min-max-valued-decimal-string [min max]
-  (gen/fmap (partial format "%f") (gen/double* {:infinite? false :NaN? false :min min :max max})))
+  (gen/fmap
+    (comp #(s/replace % \, \.) (partial format "%f"))
+    (gen/double* {:infinite? false :NaN? false :min min :max max})))
 
 (register-generator ssc/min-max-valued-decimal-string min-max-valued-decimal-string)

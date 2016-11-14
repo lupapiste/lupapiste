@@ -1,5 +1,9 @@
 (ns lupapalvelu.pdf.pdf-export-api
-  (:require [lupapalvelu.action :refer [defraw]]
+  (:require [taoensso.timbre :as timbre :refer [info]]
+            [ring.util.response :as response]
+            [clojure.java.io :as io]
+            [sade.files :as files]
+            [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.application :as a]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
@@ -61,5 +65,8 @@
    :states           states/all-states}
   [{:keys [user application lang]}]
   (if application
-    (ok (libre/generate-casefile-pdfa application lang))
+    (files/with-temp-file libre-file
+      (-> (libre/generate-casefile-pdfa application lang libre-file)
+          response/response
+          (response/content-type "application/pdf")))
     not-found))

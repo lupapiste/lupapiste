@@ -1,7 +1,8 @@
 (ns lupapalvelu.security
   (:require [sade.strings :as ss]
             [sade.env :as env]
-            [sade.core :refer :all])
+            [sade.core :refer :all]
+            [sade.crypt :as crypt])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 ;;
@@ -33,3 +34,15 @@
 (defn check-password [candidate hashed]
   (when (and candidate (not (ss/blank? hashed)))
     (BCrypt/checkpw candidate hashed)))
+
+(defn- decode-base64 [string]
+  (try
+    (-> string crypt/str->bytes crypt/base64-decode crypt/bytes->str)
+    (catch Exception _)))
+
+(defn check-credentials-from-basic-auth
+  [request pwd-hash-fn]
+  (let [auth ((:headers request) "authorization")
+        cred (and auth (decode-base64 (last (re-find #"^Basic (.*)$" auth))))
+        [user pass] (and cred (ss/split (str cred) #":" 2))]
+    (= pass (pwd-hash-fn user))))

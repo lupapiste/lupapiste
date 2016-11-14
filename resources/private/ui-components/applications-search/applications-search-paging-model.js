@@ -5,7 +5,9 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
 
   self.dataProvider = params.dataProvider;
   self.limits = params.limits;
-  self.count = params.count;
+  self.count = ko.pureComputed(function() {
+    return self.dataProvider.data().totalCount;
+  });
 
   self.limit = params.dataProvider.limit;
 
@@ -17,6 +19,8 @@ LUPAPISTE.ApplicationsSearchPagingModel = function(params) {
       self.dataProvider.skip(skipVal + multiplier);
     }
   };
+
+  self.resultsTextKey = params.resultsTextKey || "applications.results";
 
   self.next = _.partial(self.paging, 1);
   self.prev = _.partial(self.paging, -1);

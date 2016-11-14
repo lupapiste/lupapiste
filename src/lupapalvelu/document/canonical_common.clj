@@ -263,7 +263,7 @@
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
      util/not-empty-or-nil?
      :saapumisPvm (util/to-xml-date submitted)
-     :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
+     :kuntalupatunnus (->> application :verdicts (some :kuntalupatunnus)))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
   {"Rakennusvalvonta-asian hakija"  "hakija"
@@ -886,3 +886,10 @@
   (if app
     (mat-helper property (:propertyId app))
     (mat-helper property (:kiinteistoTunnus property))))
+
+(defn link-permit-selector-value [doc-data link-permit-data [schema-name & link-permit-selector-path]]
+  (let [valid-operations (-> (schemas/get-in-schemas schema-name link-permit-selector-path)
+                             :operationsPath
+                             op/operations-in)]
+    (or (:id (util/find-first (comp (set valid-operations) keyword :operation) link-permit-data))
+        (get-in doc-data link-permit-selector-path))))

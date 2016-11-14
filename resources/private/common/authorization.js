@@ -1,10 +1,10 @@
 var authorization = (function() {
   "use strict";
 
-  function AuthorizationModel() {
+  function AuthorizationModel(data) {
     var self = this;
 
-    self.data = ko.observable({});
+    self.data = ko.observable(_.isObject(data) ? data : {});
 
     self.ok = function(command) {
       var authz = self.data()[command];
@@ -47,6 +47,9 @@ var authorization = (function() {
     };
   }
 
+  // authModels is an object where, field names are ids and values the
+  // actual auth models.  For example, for documents category, the
+  // field names are document ids and values document auth models.
   function refreshModelsForCategory(authModels, applicationId, category) {
     ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
       .success(function(d) {
@@ -64,7 +67,7 @@ var authorization = (function() {
   }
 
   return {
-    create: function() { return new AuthorizationModel(); },
+    create: function(data) { return new AuthorizationModel(data); },
     refreshModelsForCategory: refreshModelsForCategory
   };
 

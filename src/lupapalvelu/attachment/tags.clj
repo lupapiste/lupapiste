@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment.tags
-  (:require [lupapalvelu.states :as states]
+  (:require [sade.util :refer [fn->>]]
+            [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]))
 
 (def attachment-groups [:parties :building-site :operation])
@@ -18,22 +19,27 @@
 (defn attachment-groups-for-application [application]
   (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
 
-(defn- tag-by-applicationState [{app-state :applicationState :as attachment}]
-  (if (states/post-verdict-states (keyword app-state))
-    :postVerdict
-    :preVerdict))
+(defn- tag-by-applicationState [{ram :ramLink app-state :applicationState :as attachment}]
+  (cond
+    ram :ram
+    (states/post-verdict-states (keyword app-state)) :postVerdict
+    :else :preVerdict))
 
 (defn- tag-by-notNeeded [{not-needed :notNeeded :as attachment}]
   (if not-needed
     :notNeeded
     :needed))
 
+(defn- tag-by-file-status [{{file-id :fileId} :latestVersion :as attachment}]
+  (when file-id
+    :hasFile))
+
 (defn- op-id->tag [op-id]
   (when op-id
     (str "op-id-" op-id)))
 
 (defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
-  (or (keyword group-type)
+  (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))
       (when op-id :operation)
       general-group-tag))
 
@@ -51,7 +57,8 @@
               tag-by-group-type
               tag-by-operation
               tag-by-notNeeded
-              tag-by-type)
+              tag-by-type
+              tag-by-file-status)
         attachment)
        (remove nil?)))
 
@@ -100,12 +107,23 @@
   (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
        (mapcat (partial tag-grouping-for-group-type application))))
 
+(defn- filter-tag-group-attachments [attachments [tag & _]]
+  (filter #((-> % :tags set) tag) attachments))
+
+(defn sort-by-tags [attachments tag-groups]
+  (if (not-empty tag-groups)
+    (->> (map (partial filter-tag-group-attachments attachments) tag-groups)
+         (mapcat #(sort-by-tags %2 (rest %1)) tag-groups))
+    attachments))
+
 (defn- application-state-filters [{attachments :attachments state :state}]
-  (let [existing-state-tags (-> (map tag-by-applicationState attachments) set)]
-    (when (or (states/post-verdict-states (keyword state))
-              (existing-state-tags :postVerdict))
-      [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
-       {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))}])))
+  (let [states (-> (map tag-by-applicationState attachments) set)]
+    (->> [{:tag :preVerdict  :default (boolean (states/pre-verdict-states (keyword state)))}
+          (when (or (states/post-verdict-states (keyword state)) (:postVerdict states))
+            {:tag :postVerdict :default (boolean (states/post-verdict-states (keyword state)))})
+          (when (:ram states)
+            {:tag :ram :default true})]
+         (remove nil?))))
 
 (defn- group-and-type-filters [{attachments :attachments}]
   (let [existing-groups-and-types (->> (mapcat (juxt tag-by-type tag-by-group-type) attachments)
@@ -125,4 +143,5 @@
   "Get all possible filters with default values for attachments based on attachment data."
   [application]
   (->> ((juxt application-state-filters group-and-type-filters not-needed-filters) application)
-       (remove nil?)))
+       (remove nil?)
+       (filter (fn->> count (< 1)))))

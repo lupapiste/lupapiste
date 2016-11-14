@@ -1,14 +1,14 @@
 LUPAPISTE.CalendarViewModel = function (params) {
   "use strict";
-  var self = this,
-      calendarService = lupapisteApp.services.calendarService;
+  var self = this;
 
   self.calendarWeekdays = ko.observableArray();
-  self.reservationTypes = ko.observableArray();
   self.startOfWeek = ko.observable(moment().startOf("isoWeek"));
   self.calendarId = ko.observable();
   self.userId = ko.observable();
   self.view = ko.observable();
+
+  self.currentRole = params.currentRole;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
@@ -21,13 +21,14 @@ LUPAPISTE.CalendarViewModel = function (params) {
   self.authority = params.searchConditions.authority; // observable from parent
   self.reservationTypes = params.reservationTypes; // observable from parent
   self.client = params.searchConditions.client; // observable from parent
-  self.reservationTypeId = params.searchConditions.reservationTypeId; // observable from parent
+  self.reservationType = params.searchConditions.reservationType; // observable from parent
   self.defaultLocation = params.defaultLocation;
+  self.applicationModel = params.applicationModel;
 
   self.view = params.view;
 
-  self.firstFullHour = calendarService.params().firstFullHour;
-  self.lastFullHour = calendarService.params().lastFullHour;
+  self.firstFullHour = LUPAPISTE.config.calendars.firstFullHour;
+  self.lastFullHour = LUPAPISTE.config.calendars.lastFullHour;
 
   var timelineTimesBuilder = function() {
     var times = [];
@@ -47,7 +48,7 @@ LUPAPISTE.CalendarViewModel = function (params) {
                    calendarId: weekday.calendarId,
                    hour: hour,
                    minutes:  0,
-                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00" });
+                   dataTestId: "timeline-slot-" + weekdayStr + "-" + _.padStart(hour, 2, "0") + "00"});
     });
     return times;
   };
@@ -66,6 +67,9 @@ LUPAPISTE.CalendarViewModel = function (params) {
   };
 
   self.clickHandler = function(clazz) {
+    if (self.isDirty()) {
+      return;
+    }
     if (clazz === "timeline-slot") {
       self.sendEvent("calendarView", "timelineSlotClicked",
         { calendarId: this.calendarId,
@@ -80,19 +84,40 @@ LUPAPISTE.CalendarViewModel = function (params) {
       self.sendEvent("calendarView", "availableSlotClicked",
         { slot: this.slot,
           weekday: this.calendarWeekday });
+    } else if (clazz === "booked-slot") {
+      self.sendEvent("calendarView", "bookedSlotClicked",
+        { slot: this.slot,
+          weekday: this.calendarWeekday });
     }
   };
 
+  self.isDirty = ko.observable(false);
+  self.addEventListener("calendarView", "updateOperationCalled", function() {
+    self.isDirty(true);
+  });
+  self.addEventListener("calendarView", "updateOperationProcessed", function() {
+    if (self.currentRole === "authority") {
+      self.client(null);
+    } else {
+      self.authority(null);
+    }
+    self.reservationType(null);
+    self.isDirty(false);
+  });
+
   self.disposedComputed(function() {
+    if (self.isDirty()) {
+      return;
+    }
     if (params.view === "applicationView") {
-      hub.send("calendarService::fetchApplicationCalendarSlots",
-        { clientId: _.get(self.client(), "id"),
-          authorityId: _.get(self.authority(), "id"),
-          applicationId: lupapisteApp.models.application.id(),
-          reservationTypeId: self.reservationTypeId(),
-          week: self.startOfWeek().isoWeek(),
-          year: self.startOfWeek().year(),
-          weekObservable: self.calendarWeekdays });
+      var data = { clientId: ko.unwrap(_.get(self.client(), "id")),
+                   authorityId: _.get(self.authority(), "id"),
+                   reservationTypeId: _.get(self.reservationType(), "id"),
+                   applicationId: _.get(self.applicationModel(), "id"),
+                   week: self.startOfWeek().isoWeek(),
+                   year: self.startOfWeek().year(),
+                   weekObservable: self.calendarWeekdays };
+      hub.send("calendarService::fetchApplicationCalendarSlots", data);
     } else {
       hub.send("calendarService::fetchCalendarSlots",
         { calendarId: self.calendarId(),

@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.document-api-itest
   (:require [midje.sweet :refer :all]
-            [sade.util :refer [fn->]]
+            [sade.util :refer [fn->] :as util]
             [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.itest-util :refer :all]
@@ -88,7 +88,11 @@
     (let [application-id (create-app-id pena :operation :puun-kaataminen)]
       (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => ok?
       (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
-      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?
+      (fact "application for puun-kaataminen does not contain 'suunnittelija' document"
+        (let [application (query-application pena application-id)]
+          (domain/get-document-by-name (:documents application)
+                                       "suunnittelija") => falsey)))))
 
 (facts "facts about remove-document-data command"
   (let [application-id             (create-app-id pena)
@@ -224,5 +228,10 @@
           (count (:secondaryOperations updated-app)) => 1
           (fact "attachments belonging to operation don't exist anymore"
             (count (attachment/get-attachments-by-operation updated-app (:id (first sec-operations)))) => 0)
-          (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
-            (some (hash-set (:id sauna-attachment)) (map :id (:attachments updated-app)))))))))
+          (let [attachment (util/find-by-id (:id sauna-attachment) (:attachments updated-app))]
+            (fact "old sauna attachment still exists after remove, because it had attachment versions uploaded"
+              attachment)
+            (fact "attachment op is unset"
+              (:op attachment) => nil)
+            (fact "attachment groupType is unset"
+              (:groupType attachment) => nil)))))))

@@ -19,7 +19,7 @@
             [sade.strings :as ss]
             [sade.util :refer [fn->>] :as util]
             [sade.validators :as v]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-optional-url] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator validate-url validate-optional-url map-parameters-with-required-keys] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.authorization :as auth]
@@ -172,34 +172,47 @@
         (ok))
       (fail :error.organization.duplicate-scope))))
 
+(defn- validate-map-with-optional-url-values [param command]
+  (let [urls (map ss/trim (vals (get-in command [:data param])))]
+    (some #(when-not (ss/blank? %)
+             (validate-url %))
+          urls)))
+
 (defcommand add-organization-link
   {:description "Adds link to organization."
-   :parameters [url nameFi nameSv]
+   :parameters [url name]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
-                      (partial validate-optional-url :url)]}
-  [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values :url)]}
+  [{user :user created :created}]
+  (org/add-organization-link (usr/authority-admins-organization-id user)
+                             name url created)
   (ok))
 
 (defcommand update-organization-link
   {:description "Updates organization link."
-   :parameters [url nameFi nameSv index]
+   :parameters [url name index]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])
-                      (partial validate-optional-url :url)
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values :url)
                       (partial number-parameters [:index])]}
-  [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url (ss/trim url)}}})
+  [{user :user created :created}]
+  (org/update-organization-link (usr/authority-admins-organization-id user)
+                                index name url created)
   (ok))
 
 (defcommand remove-organization-link
   {:description "Removes organization link."
-   :parameters [url nameFi nameSv]
-   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]
+   :parameters [url name]
+   :input-validators [(partial map-parameters-with-required-keys
+                               [:url :name] i18n/supported-langs)
+                      (partial validate-map-with-optional-url-values :url)]
    :user-roles #{:authorityAdmin}}
   [{user :user}]
-  (org/update-organization (usr/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (org/remove-organization-link (usr/authority-admins-organization-id user)
+                                name url)
   (ok))
 
 (defquery organizations
@@ -330,6 +343,14 @@
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory enabled}})
+  (ok))
+
+(defcommand set-organization-assignments
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
   (ok))
 
 (defcommand set-organization-validate-verdict-given-date

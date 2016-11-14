@@ -3,7 +3,7 @@
 Documentation   Neighbor logs in with Vetuma and comments the application
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/ident_helpers.robot
 
 *** Test Cases ***
 
@@ -61,7 +61,7 @@ Neighbor sees some of the documents
 
 Neighbor clicks vetuma button to identify herself
   [Tags]  integration
-  Authenticate via Nordea via Vetuma
+  Authenticate via dummy page  vetuma-init
 
 Neighbor is back and leaves a comment
   [Tags]  integration
@@ -84,8 +84,8 @@ Mikko opens dialog to see neighbors response
   [Tags]  integration
   Click element  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  Teemu
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  Testaaja
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
 
 Mikko can not see neighbor sotu
@@ -105,8 +105,8 @@ Sonja sees that the neighbour has given a comment
   Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']
   Click element  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
-  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  Teemu
+  Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  Testaaja
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-message']  No fucking way
 
 Sonja can see neighbor sotu

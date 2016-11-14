@@ -56,5 +56,12 @@
       <i class="lupicon-envelope"></i>
       <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
     </button>
+    <button class="ghost"
+            data-bind="click: downloadAll,
+                       visible: hasFiles()"
+            data-test-id="download-all">
+      <i class="lupicon-download"></i>
+      <span data-bind="ltext: 'download-all-short'"></span>
+    </button>
   </div>
 </script>

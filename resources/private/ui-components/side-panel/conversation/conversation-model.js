@@ -72,12 +72,12 @@ LUPAPISTE.ConversationModel = function(params) {
   var previousPage = self.currentPage();
 
   function highlightConversation() {
-    self.sendEvent("side-panel", "show-conversation");
+    self.sendEvent("side-panel", "show-conversation", {delay: 300});
     self.textSelected(true);
     self.highlightConversation(true);
     setTimeout(function() {
       self.highlightConversation(false);
-    }, 2000);
+    }, 2500);
   }
 
   self.disposedComputed(function() {
@@ -109,6 +109,13 @@ LUPAPISTE.ConversationModel = function(params) {
 
   self.isForAttachment = function(comment) {
     return util.getIn(comment, ["target", "type"]) === "attachment";
+  };
+
+  self.getAttachmentTypeLocKey = function(comment) {
+    return ["attachmentType",
+            util.getIn(comment, ["target", "attachmentType", "type-group"]),
+            util.getIn(comment, ["target", "attachmentType", "type-id"])]
+      .join(".");
   };
 
   function isPreparationComment(comment) {
@@ -163,10 +170,6 @@ LUPAPISTE.ConversationModel = function(params) {
   // handle outside authorities correctly. The more robust approach
   // would be to resolve the role in the backend.
   self.commentRole = function( data ) {
-    var role = data.type;
-    if( role === "system" ) {
-      role = _.get( data, "user.role" );
-    }
-    return role;
+    return "applicationRole." + _.get(data, "user.application-role", "unknown");
   };
 };

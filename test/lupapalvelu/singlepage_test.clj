@@ -6,8 +6,7 @@
 
 (facts "compose-resource js without Exceptions"
   (against-background
-   (env/feature? :no-minification) => false
-   (env/feature? :updated-attachments) => true)
+   (env/feature? :no-minification) => false)
 
   (fact "common"
     (compose-resource :js :common) => truthy)

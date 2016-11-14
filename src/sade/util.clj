@@ -75,6 +75,11 @@
   (->> (map (fn [[k v]] [k (f v)]) m)
        (into {})))
 
+(defn key-by
+  "Like group-by but returns values unwrapped. Multiple values for same key are omitted, last value is used."
+  [f coll]
+  (reduce #(assoc %1 (f %2) %2) {} coll))
+
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
   nested structure. keys is a sequence of keys. Any empty maps that result
@@ -358,7 +363,7 @@
 (defn boolean? [x] (instance? Boolean x))
 
 (defn assoc-when
-  "Assocs entries with falsey values into m."
+  "Assocs entries with truthy values into m."
   [m & kvs]
   (apply merge m (filter val (apply hash-map kvs))))
 
@@ -526,3 +531,22 @@
        (map name)
        (ss/join ".")
        keyword))
+
+(defn get-in-tree
+  "Gets a branch in (operation)tree by path. Tree should be represented as vectors of pairs.
+  (get-in-tree [[:n1 [[:n11 :l11] [:n12 [[:n121 :l121]]]]] [:n2 [[:n21 :l21]]] [:n3 :l3]] [:n1 :n12])
+  ; => [[:n121 :l121]]"
+  [tree path]
+  (reduce #(second (find-first (comp #{%2} first) %1)) tree path))
+
+(defn get-leafs
+  "Gets all leafs in (operation)tree. Tree should be represented as vectors of pairs.
+  (get-leafs [[:n1 [[:n11 :l11] [:n12 [[:n121 :l121]]]]] [:n2 [[:n21 :l21]]] [:n3 :l3]])
+  ; => (:l3 :l11 :l21 :l121)"
+  [tree]
+  (if (sequential? tree)
+    (loop [leafs [] t tree]
+      (if-let [children (not-empty (map second t))]
+        (recur (concat leafs (remove sequential? children)) (apply concat (filter sequential? children)))
+        leafs))
+    [tree]))

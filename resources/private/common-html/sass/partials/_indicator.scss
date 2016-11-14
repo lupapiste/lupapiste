@@ -25,7 +25,7 @@
     color: white;
     font-weight: bold;
   }
-  
+
   .indicator-bar.positive {
     background-color: $positive;
    }
@@ -36,6 +36,9 @@
 
   .indicator-bar.negative {
     background-color: $negative;
+  }
+  .indicator-bar.hidden {
+    visibility: hidden;
   }
 
   .indicator-info {
@@ -50,7 +53,7 @@
     width: 100%;
     padding: {
       left: $marginS;
-      right: $marginS;      
+      right: $marginS;
     }
   }
 
@@ -63,5 +66,5 @@
 // Tabs on (authority) admin page block the view
 .admin #indicator .indicator-bar, .authority-admin #indicator .indicator-bar {
   z-index: 2003;
-  margin-top: -38px;  
+  margin-top: -38px;
 }

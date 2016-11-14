@@ -12,7 +12,7 @@
                 <th data-bind="ltext: 'guest-authority.description'"></th>
                 <th data-bind="ltext: 'authorized.invite'"></th>
                 <th data-bind="ltext: 'application-guests.notifications'"></th>
-                <th data-bind="ltext: 'application.remove-auth'"></th>
+                <th data-bind="ltext: 'application.edit-auth'"></th>
               </thead>
               <tbody data-bind="foreach: authorizedParties">
                 <tr class="party">
@@ -32,20 +32,28 @@
                     </span>
                   </td>
                   <td data-bind="if: $parent.showSubscriptionStatus($data)">
-                    <a class="invite-action" href="#"
+                    <button class="ghost"
                        data-test-id="subscribeNotifications"
                        data-bind="visible: !$parent.subscriptionOn( $data ),
                                   click: $root.application.subscribeNotifications,
-                                  ltext: 'subscribeNotifications'"></a>
-                    <a class="invite-action" href="#"
+                                  ltext: 'subscribeNotifications'"></button>
+                    <button class="ghost"
                        data-test-id="unsubscribeNotifications"
                        data-bind="visible: $parent.subscriptionOn( $data ),
                                   click: $root.application.unsubscribeNotifications,
-                                  ltext: 'unsubscribeNotifications'"></a>
+                                  ltext: 'unsubscribeNotifications'"></button>
                   </td>
-                  <td data-bind="if: $parent.showRemove( $data )">
-                    <i class="primary lupicon-remove"
-                       data-bind="click: $root.application.removeAuth"></i>
+                  <td>
+                    <button class="ghost"
+                            data-bind="visible: $parent.showChangeAuth( $data ),
+                                       click: $parent.changeAuth,
+                                       attr: {'data-test-id':'change-auth-' + $data.username()},
+                                       ltext: 'application.grant-writer-access'"></button>
+                    <button class="secondary"
+                            data-bind="visible: $parent.showRemove( $data ),
+                                       click: $parent.removeAuth,
+                                       attr: {'data-test-id':'remove-auth-' + $data.username()},
+                                       ltext: 'remove'"></button>
                   </td>
                 </tr>
               </tbody>

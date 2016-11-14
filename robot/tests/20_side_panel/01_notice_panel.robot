@@ -3,6 +3,10 @@
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
 
+*** Variables ***
+  
+${notice}  Hakmuss on tosi kiirreeliene!
+
 *** Test Cases ***
 
 Mikko opens an application
@@ -23,21 +27,23 @@ Mikko opens application to authorities
 Sonja can see notice button
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Wait until  Element should be visible  //div[@id='side-panel']//button[@id='open-notice-side-panel']
+  Check status  normal
 
 Sonja can add tags
   Open side panel  notice
   Select From Autocomplete  div[@id="notice-panel"]  ylämaa
+  Wait save
 
 Sonja can leave notice
-  Open side panel  notice
-  Input text  xpath=//div[@id='notice-panel']//textarea[@data-test-id='application-authority-notice']  Hakmuss on tosi kiirreeliene!
-
+  Fill test id  application-authority-notice  ${notice}
+  Wait save
+  
 Sonja can set application urgency to urgent
-  Open side panel  notice
   Select From List by id  application-authority-urgency  urgent
-  # wait for debounce
-  Sleep  1
+  Wait save
+  Check status  urgent
+  Check notice  ylämaa  urgent  ${notice}
+  Close side panel  notice
   Logout
 
 Ronja can see urgent application
@@ -47,6 +53,8 @@ Ronja can see urgent application
 Ronja can click notice icon -> application page is opened with notice panel open
   Click element  xpath=//td[@data-test-col-name='urgent']/div
   Wait until  Element should be visible  notice-panel
+  Check status  urgent
+  Check notice  ylämaa  urgent  ${notice}
   Logout
 
 Sonja can set application urgency to pending
@@ -54,12 +62,37 @@ Sonja can set application urgency to pending
   Open application  ${appname}  ${propertyId}
   Open side panel  notice
   Select From List by id  application-authority-urgency  pending
-  # wait for debounce
-  Sleep  1
+  Wait save
   Logout
 
 Ronja can see pending application
   Ronja logs in
   Request should be visible  ${appname}
   Wait until  Element should be visible  //div[contains(@class, 'pending')]
+
+Ronja opens application and sees green panel with pending icon
+  Open application  ${appname}  ${propertyId}
+  Check status  pending  true
+  Open side panel  notice
+  Check status  pending
   Logout
+
+
+*** Keywords ***
+
+Check status
+  [Arguments]  ${urgency}  ${new}=false
+  Run Keyword If  '${urgency}' == "normal"  Wait until  Element should be visible  jquery=button#open-notice-side-panel i.lupicon-document-list
+  Run Keyword If  '${urgency}' == "urgent"  Wait until  Element should be visible  jquery=button#open-notice-side-panel i.lupicon-warning
+  Run Keyword If  '${urgency}' == "pending"  Wait until  Element should be visible  jquery=button#open-notice-side-panel i.lupicon-circle-dash
+  Wait until  Javascript?  Boolean( $("button#open-notice-side-panel.positive").length) === ${new}
+  
+Check notice
+  [Arguments]  ${tag}  ${urgency}  ${note}
+  Wait Until  Element text should be  jquery=li.tag span.tag-label  ${tag}  
+  Wait Until  List Selection Should Be  application-authority-urgency  ${urgency}
+  Textarea value should be  application-authority-notice  ${note}
+  
+Wait save
+  Positive indicator icon should be visible
+  Positive indicator icon should not be visible  

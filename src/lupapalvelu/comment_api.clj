@@ -9,6 +9,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.states :as states]
@@ -39,6 +40,7 @@
               (and
                 (not= (:type target) "verdict") ; target might be comment target or attachment target
                 (user/authority? user)))
+   :recipients-fn notifications/comment-recipients-fn
    :model-fn create-model})
 
 (notifications/defemail :application-targeted-comment
@@ -78,20 +80,21 @@
 (defquery comments
   {:parameters [id]
    :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles auth/comment-user-authz-roles
    :org-authz-roles auth/commenter-org-authz-roles
    :states states/all-states}
-  [{application :application}]
-  (ok (select-keys application [:id :comments])))
+  [{{app-id :id :as application} :application}]
+  (ok {:id app-id :comments (comment/enrich-comments application)}))
 
 (defcommand add-comment
   {:parameters [id text target roles]
    :optional-parameters [to mark-answered openApplication]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     commenting-states
-   :user-authz-roles auth/all-authz-writer-roles
+   :user-authz-roles auth/comment-user-authz-roles
    :org-authz-roles auth/commenter-org-authz-roles
    :pre-checks [applicant-cant-set-to
+                foreman/allow-foreman-only-in-foreman-app
                 application/validate-authority-in-drafts]
    :input-validators [validate-comment-target
                       (partial action/map-parameters [:target])
@@ -113,4 +116,4 @@
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (application/user-role user application) mark-answered user to-user created ensured-visibility)
         (when (and openApplication (= (:state application) "draft"))
-          (application/state-transition-update :open created user))))))
+          (application/state-transition-update :open created application user))))))

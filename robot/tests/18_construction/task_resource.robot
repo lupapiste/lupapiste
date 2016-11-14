@@ -44,7 +44,7 @@ Edit YA katselmus
 Open review
   [Arguments]  ${index}
   Wait until  Click element  jquery=tr[data-test-index=${index}] td[data-test-column=requirement] a
-  Wait test id visible  review-done
+  Element should be visible by test id  review-done
 
 Return from review
   Scroll and click test id  back-to-application-from-task
@@ -97,7 +97,7 @@ Review frozen
   Review checkboxes disabled
   Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
   Element should be disabled  jquery=[data-test-id="katselmus.tila"]
-  Test id readonly  katselmus.pitoPvm
+  Test id disabled  'katselmus.pitoPvm'
   Test id readonly  katselmus.pitaja
   Test id readonly  katselmus.lasnaolijat
   Test id readonly  katselmus.poikkeamat

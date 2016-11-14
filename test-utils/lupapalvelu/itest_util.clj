@@ -11,11 +11,12 @@
             [midje.sweet :refer :all]
             [midje.util.exceptions :refer :all]
             [slingshot.slingshot :refer [try+]]
-            [sade.strings :as ss]
             [sade.core :refer [fail! unauthorized not-accessible now]]
-            [sade.http :as http]
-            [sade.env :as env]
             [sade.dummy-email-server]
+            [sade.env :as env]
+            [sade.http :as http]
+            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
@@ -145,19 +146,20 @@
 (def http-post (partial http http/post))
 
 (defn raw [apikey action & args]
-  (http-get
-    (str (server-address) "/api/raw/" (name action))
-    {:headers {"authorization" (str "apikey=" apikey)}
-     :query-params (apply hash-map args)
-     :throw-exceptions false
-     :follow-redirects false}))
+  (let [params (apply hash-map args)
+        options (util/assoc-when {:oauth-token apikey
+                                  :query-params (dissoc params :as)
+                                  :throw-exceptions false
+                                  :follow-redirects false}
+                                 :as (:as params))]
+    (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
 (defn raw-query [apikey query-name & args]
   (decode-response
     (http-get
       (str (server-address) "/api/query/" (name query-name))
-      {:headers {"authorization" (str "apikey=" apikey)
-                 "accepts" "application/json;charset=utf-8"}
+      {:headers {"accepts" "application/json;charset=utf-8"}
+       :oauth-token apikey
        :query-params (apply hash-map args)
        :follow-redirects false
        :throw-exceptions false})))
@@ -180,8 +182,8 @@
 
             cookie-store (:cookie-store args)
             args (dissoc args :cookie-store)]
-        {:headers {"authorization" (str "apikey=" apikey)
-                   "content-type" "application/json;charset=utf-8"}
+        {:headers {"content-type" "application/json;charset=utf-8"}
+         :oauth-token apikey
          :body (json/encode args)
          :follow-redirects false
          :cookie-store cookie-store
@@ -589,8 +591,8 @@
 (defn sign-attachment [apikey id attachmentId password]
   (let [uri (str (server-address) "/api/command/sign-attachments")
         resp (http-post uri
-               {:headers {"authorization" (str "apikey=" apikey)
-                          "content-type" "application/json;charset=utf-8"}
+               {:headers {"content-type" "application/json;charset=utf-8"}
+                :oauth-token apikey
                 :body (json/encode {:id id
                                     :attachmentIds [attachmentId]
                                     :password password})
@@ -599,36 +601,54 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
+(defn- parse-attachment-id-from-location [location]
+  (->> (ss/split (ss/suffix location "#")  #"&") ; currently only one parameter, but future proof for more
+       (map #(ss/split % #"="))
+       (reduce (fn [acc [k v]] (assoc acc (keyword k) v)) {})
+       :attachmentId))
+
+(defn upload-attachment
+  "Returns attachment ID"
+  [apikey application-id {attachment-id :id attachment-type :type operation-id :op-id} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-gif-attachment.gif", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
-                               {:headers {"authorization" (str "apikey=" apikey)}
+                               {:oauth-token apikey
                                 :multipart (remove nil?
                                              [{:name "applicationId"  :content application-id}
                                               {:name "text"           :content text}
                                               {:name "Content/type"   :content "image/gif"}
                                               {:name "attachmentType" :content (str
-                                                                                 (:type-group attachment-type) "."
-                                                                                 (:type-id attachment-type))}
+                                                                                 (get attachment-type :type-group "muut") "."
+                                                                                 (get attachment-type :type-id "muu"))}
+                                              {:name "operationId"    :content (or operation-id "")}
                                               (when attachment-id {:name "attachmentId"   :content attachment-id})
-                                              {:name "upload"         :content uploadfile}])})]
+                                              {:name "upload"         :content uploadfile}])})
+        location (get-in resp [:headers "location"])]
     (if expect-to-succeed
-      (facts "Upload succesfully"
-             (fact "Status code" (:status resp) => 302)
-             (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
-      (facts "Upload should fail"
-             (fact "Status code" (:status resp) => 302)
-             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
+      (and
+        (facts "Upload succesfully"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
+        ; Return the attachment id, can be new or existing attachment
+        (parse-attachment-id-from-location location))
+      (and
+        (facts "Upload should fail"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => #"/lp-static/html/upload-[\d\.]+\.html?.*errorMessage=.+"))
+        ; Return the original id
+        attachment-id))))
 
-(defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
+(defn upload-attachment-to-target
+  "Returns attachment ID"
+  [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
   (let [filename    "dev-resources/test-attachment.txt"
         uploadfile  (io/file filename)
         application (query-application apikey application-id)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http-post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
+                      {:oauth-token apikey
                        :multipart (remove nil?
                                     [{:name "applicationId"  :content application-id}
                                      {:name "Content/type"   :content "text/plain"}
@@ -636,21 +656,26 @@
                                      (when attachment-id {:name "attachmentId"   :content attachment-id})
                                      {:name "upload"         :content uploadfile}
                                      {:name "targetId"       :content target-id}
-                                     {:name "targetType"     :content target-type}])})]
+                                     {:name "targetType"     :content target-type}])})
+        location (get-in resp [:headers "location"])]
     (if expect-to-succeed
-      (facts "upload to target succesfully"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => (contains "/lp-static/html/upload-success.html")))
-      (facts "upload to target should fail"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/lp-static/html/upload-1.127.html") => 0)))))
+      (do
+        (facts "upload to target succesfully"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => (contains "/lp-static/html/upload-success.html#")))
+        (parse-attachment-id-from-location location))
+      (do
+        (facts "upload to target should fail"
+          (fact "Status code" (:status resp) => 302)
+          (fact "location"    location => #"/lp-static/html/upload-[\d\.]+\.html?.*errorMessage=.+"))
+        attachment-id))))
 
 (defn upload-user-attachment [apikey attachment-type expect-to-succeed & [filename]]
   (let [filename    (or filename "dev-resources/test-attachment.txt")
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/user-attachment")
         resp        (http-post uri
-                               {:headers {"authorization" (str "apikey=" apikey)}
+                               {:oauth-token apikey
                                 :multipart [{:name "attachmentType"  :content attachment-type}
                                             {:name "files[]"         :content uploadfile}]})
         body        (:body (decode-response resp))]
@@ -684,6 +709,17 @@
       (when-not aloitusoikeus?
         (sign-attachment apikey id (:id first-attachment) password)))))
 
+(defn generate-construction-time-attachment [{id :id :as application} authority-apikey password]
+  (let [attachment-type {:type-group "muut" :type-id "muu"}
+        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type])
+        attachment-id (-> resp :attachmentIds first)]
+    (fact "attachment created"
+      resp => ok?)
+    (upload-attachment authority-apikey id {:id attachment-id :type attachment-type} true)
+    (sign-attachment authority-apikey id attachment-id password)
+    (fact "set attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id id :attachmentId attachment-id :value true))) => ok?)
+
 ;; File upload
 
 (defn upload-file
@@ -694,7 +730,7 @@
     (:body
       (decode-response
         (http-post uri
-                   {:headers {"authorization" (str "apikey=" apikey)}
+                   {:oauth-token apikey
                     :multipart [{:name "files[]" :content uploadfile}]
                     :throw-exceptions false})))))
 
@@ -762,7 +798,7 @@
     decode-response
     :body))
 
-(defn vetuma-stamp! []
+(defn vetuma-stamp! [] ; Used by neighbor_itest
   (-> {:userid "123"
        :firstname "Pekka"
        :lastname "Banaani"}
@@ -808,7 +844,7 @@
         uploadfile  (io/file filename)
         uri         (str (server-address) "/api/raw/organization-area")]
     (http-post uri
-               {:headers {"authorization" (str "apikey=" apikey)}
+               {:oauth-token apikey
                 :multipart [{:name "files[]" :content uploadfile}]
                 :throw-exceptions false})))
 
@@ -827,3 +863,29 @@
                 (map? v)        (->xml v)
                 (sequential? v) (apply concat (map ->xml v))
                 :default        [(str v)])}))
+
+;;
+;; Assignments
+;;
+
+(defn create-assignment [from to application-id target desc]
+  (command from :create-assignment
+           :id            application-id
+           :recipientId   to
+           :target        target
+           :description   desc))
+(defn update-assignment [who id assignment-id recipient description]
+  (command who :update-assignment
+           :id id
+           :assignmentId assignment-id
+           :recipientId recipient
+           :description description))
+
+(defn complete-assignment [user assignment-id]
+  (command user :complete-assignment :assignmentId assignment-id))
+
+(defn get-user-assignments [apikey]
+  (let [resp (query apikey :assignments)]
+    (fact "assignments query ok"
+      resp => ok?)
+    (:assignments resp)))

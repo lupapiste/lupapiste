@@ -15,11 +15,62 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
+  self.unseenNotice = self.sidePanelService.unseenNotice;
+  self.showInfoPanel = ko.observable( false );
+  // Info panel can exist before services (e.g., logout page).
+  self.showStar = _.get( lupapisteApp, "services.infoService.showStar" );
+
+  var panelFlags = [self.showConversationPanel,
+                    self.showNoticePanel,
+                    self.showInfoPanel];
+
+  function flagOff( obs ) {
+    return obs( false );
+  }
+
+  function track( event ) {
+    hub.send( "track-click", {category: "side-panel",
+                              label: "side-panel",
+                              event: event});
+  }
+
+  self.showConversationPanel.subscribe( function() {
+    if( self.showNoticePanel()) {
+      track( "openConversation");
+    }
+  });
+
+  self.showNoticePanel.subscribe( function() {
+    if( self.showNoticePanel()) {
+      hub.send( "SidePanelService::NoticeSeen");
+      track( "openNotice");
+    }
+  });
+
+  self.showInfoPanel.subscribe( function( flag ) {
+    if( flag ) {
+      hub.send( "infoService::fetch-links", {markSeen: true});
+      track( "openInfo");
+    } else {
+      hub.send( "infoService::fetch-links", {reset: true});
+    }
+  });
+
+  self.noticeIcon = self.disposedPureComputed( function() {
+    return _.get( {urgent: "lupicon-warning",
+                   pending: "lupicon-circle-dash"},
+                  self.sidePanelService.urgency(),
+                  "lupicon-document-list");
+  });
+
+  function closeOtherPanels( flag ) {
+    _.each( _.without( panelFlags, flag ), flagOff );
+  }
 
   self.showHelp = ko.observable(false);
 
   self.sidePanelOpen = ko.pureComputed(function() {
-    return self.showConversationPanel() || self.showNoticePanel();
+    return _.some( panelFlags, ko.unwrap );
   });
 
   self.unseenComments = ko.pureComputed(function() {
@@ -37,7 +88,7 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
-    self.showNoticePanel(false);
+    closeOtherPanels( self.showConversationPanel );
 
     if (self.showConversationPanel()) {
       self.sendEvent("SidePanelService", "UnseenCommentsSeen");
@@ -46,13 +97,15 @@ LUPAPISTE.SidePanelModel = function(params) {
 
   self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
-    self.showConversationPanel(false);
+    closeOtherPanels( self.showNoticePanel );
   };
 
   self.closeSidePanel = function() {
-    self.showNoticePanel(false);
-    self.showConversationPanel(false);
+    hub.send( "side-panel-closing");
+    _.each( panelFlags, flagOff );
   };
+
+  self.addEventListener("contextService", "leave", self.closeSidePanel);
 
   var pages = ["applications", "application", "attachment", "statement", "neighbors", "verdict"];
 
@@ -61,9 +114,27 @@ LUPAPISTE.SidePanelModel = function(params) {
     self.enableSidePanel(self.application && _.includes(pages, ko.unwrap(self.currentPage)));
   });
 
-  self.addEventListener("side-panel", "show-conversation", function() {
-    if (!self.showConversationPanel()) {
-      self.toggleConversationPanel();
-    }
+  self.addEventListener("side-panel", "show-conversation", function( opts ) {
+    _.delay( function() {
+      if (!self.showConversationPanel()) {
+        self.toggleConversationPanel();
+      }
+    }, _.get( opts, "delay", 1 ));
+
   });
+
+  self.toggleInfoPanel = function() {
+    self.showInfoPanel( !self.showInfoPanel());
+    closeOtherPanels( self.showInfoPanel );
+  };
+
+  self.closeOnEsc = function() {
+    var obj = {canClose: ko.observable( true )};
+    hub.send( "side-panel-esc-pressed", obj );
+    if( obj.canClose() ) {
+      self.closeSidePanel();
+    }
+  };
+
+
 };

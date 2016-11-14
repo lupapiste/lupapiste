@@ -8,6 +8,7 @@ LUPAPISTE.AccordionService = function() {
 
   self.appModel = lupapisteApp.models.application;
   self.authModel = lupapisteApp.models.applicationAuthModel;
+  self.authorties = null;
   self.indicator = ko.observable({});
   ko.computed(function() {
     var resultType = self.indicator().type;

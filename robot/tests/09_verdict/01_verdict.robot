@@ -30,8 +30,17 @@ Sonja fetches verdict from municipality KRYSP service
   Fetch verdict
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
-  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  No such test id  verdict-requirements-0
+  Wait test id visible  verdict-requirements-1
+
+Attachments are visible
+  Wait until  Element should be visible  jquery=tr.statement-row td a
+
+Application summary tab is visible
+  Element should be visible  jquery=a[data-test-id=application-open-applicationSummary-tab]
+
+Application info tab is hidden
+  Page should not contain element  jquery=a[data-test-id=application-open-info-tab]
 
 Check task counts
   Open tab  tasks
@@ -45,6 +54,8 @@ Sonja creates verdict with adds comment
   Title Should Be  ${appname} - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
+
+Sonja adds attachment to verdict
   Add attachment  verdict  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}
   Wait test id visible  targetted-attachments-table
 

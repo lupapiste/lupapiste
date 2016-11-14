@@ -37,12 +37,22 @@
 
           <div class="auth-actions stacked inner-margins">
               <button data-bind="click: approveApplication,
-                                 visible: $root.authorization.ok('approve-application'),
-                                 enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
+                                 visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'), 
+                                 attr: {'title': loc('tooltip.approveApplication')}"
                       data-test-id="approve-application-summaryTab"
                       class="positive">
                   <i class="lupicon-circle-arrow-right"></i>
                   <span data-bind="ltext: 'application.approveApplication'"></span>
+              </button>
+              <button data-bind="click: approveExtension,
+                                 visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
+                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'), 
+                                 attr: {'title': loc('tooltip.approveApplication')}"
+                      data-test-id="approve-extension-summaryTab"
+                      class="positive">
+                  <i class="lupicon-circle-check"></i>
+                  <span data-bind="ltext: 'application.extension.approve'"></span>
               </button>
 
               <button data-bind="click: toAsianhallinta,
@@ -109,9 +119,12 @@
                     <div class="like-btn">
                         <i class="lupicon-circle-attention"></i>
                         <span class="required-field-error-element-name"
-                              data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                              data-bind="attachmentType: $data">
+                        </span>
                     </div>
-                    <a data-bind="click: $root.application.moveToMissingRequiredAttachment, ltext: 'view'" href="#"></a>
+                    <a data-bind="ltext: 'view',
+                                  testId: 'missing-' + util.getIn( $data.type, ['type-group']) + '-' + util.getIn( $data.type, ['type-id']),
+                                  attr: {href: lupapisteApp.services.ramService.attachmentUrl( $data.id)}"></a>
                 </div>
               <!-- /ko -->
             <!-- /ko -->

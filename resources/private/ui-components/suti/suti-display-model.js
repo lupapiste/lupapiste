@@ -46,14 +46,20 @@ LUPAPISTE.SutiDisplayModel = function() {
 
   self.sutiAdded = sutiComputed( "added");
 
-  self.disposedComputed( function() {
+  self.fetchApplication = function() {
     var app = lupapisteApp.models.application;
-    if( app.id() && app.state()) {
+    if( app.id() && app.state() && !app.infoRequest()) {
       self.sutiTitle( loc( "suti.display-title",
                            util.prop.toHumanFormat( app.propertyId())));
       service.fetchApplicationData( app, self.waiting, true );
     }
-  });
+  };
+
+  // Initial load
+  self.fetchApplication();
+
+  // Handle application changes via url manipulation
+  self.addHubListener("contextService::enter", self.fetchApplication);
 
   self.sutiLink = function() {
     window.open( self.suti().www, "_blank");

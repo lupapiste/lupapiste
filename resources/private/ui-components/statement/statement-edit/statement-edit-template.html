@@ -5,7 +5,7 @@
     <script type="text/x-jquery-tmpl" id="statement-edit-template">
 
     <div class="headerarea" data-test-id="header-statement-edit">
-      <div>
+      <div class="bottom-marginM">
         <h1>
           <span>
             <span data-bind="ltext: 'statement.tab.' + tab"></span>:
@@ -21,12 +21,10 @@
         </h1>
         <span data-bind="visible: isDraft" class="statement-state-indicator">
           <i class="lupicon-circle-attention"></i>
-          <span data-bind="ltext: 'luonnos'">Luonnos</span>
+          <span data-bind="ltext: 'luonnos'"></span>
         </span>
       </div>
-      <p id="statement-cover-note">
-        <span data-bind="text: coverNote">Saate</span>
-      </p>
+      <p class="wrapped_text" id="statement-cover-note" data-bind="text: coverNote"></p>
     </div>
 
     <div class="statement-info">
@@ -36,7 +34,7 @@
       <form data-bind="if: showStatement">
         <div class="form-entry">
           <label for="statement-type-select" class="form-label">
-            <span data-bind="ltext: 'statement.title'">Puoltotieto</span>
+            <span data-bind="ltext: 'statement.title'"></span>
             <img src="/lp-static/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="statement-type-select-loader" style="display: none;">
           </label>
           <select id="statement-type-select"
@@ -57,7 +55,7 @@
                         readonly: !enabled()"
              id="statement-text"
              rows="15"
-             class="grid-style-input">
+             class="grid-style-input really-high">
           </textarea>
         </div>
       </form>

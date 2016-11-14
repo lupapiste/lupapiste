@@ -123,7 +123,7 @@
 (defn find-companies
   "Returns all data off all companies"
   []
-  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :reference :document] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit :created :pop :ovt :netbill :reference :document] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (usr/get-users {:company.id company-id} {:lastName 1}))
@@ -277,17 +277,18 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role submit]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (usr/create-new-user nil {:email       (:email user)
-                            :username    (:email user)
-                            :firstName   (:firstName user)
-                            :lastName    (:lastName user)
-                            :language    (:language user)
-                            :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
-                            :personId    (:personId user)
-                            :password    password
-                            :role        :applicant
-                            :architect   true
-                            :enabled     true}
+  (usr/create-new-user nil (util/assoc-when
+                             {:email       (:email user)
+                              :username    (:email user)
+                              :firstName   (:firstName user)
+                              :lastName    (:lastName user)
+                              :company     {:id (:id company) :role role :submit (if (nil? submit) true submit)}
+                              :personId    (:personId user)
+                              :password    password
+                              :role        :applicant
+                              :architect   true
+                              :enabled     true}
+                             :language    (:language user))
     :send-email false)
   (ok))
 
@@ -385,7 +386,7 @@
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
                        {$push {:auth auth}, $set  {:modified (now)}}
-                       true)]
+                       :return-count? true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
                                                  :caller     caller

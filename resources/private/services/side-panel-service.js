@@ -7,16 +7,53 @@ LUPAPISTE.SidePanelService = function() {
   self.authorization = lupapisteApp.models.applicationAuthModel;
 
   // Notice
-  self.urgency = ko.pureComputed(function() {
-    return ko.unwrap(self.application.urgency);
+  // Observables will have objects with id and value.
+  var noticeLatest = {urgency: ko.observable({}),
+                      authorityNotice: ko.observable({})};
+
+
+  function latestNotice( field ) {
+    return ko.computed({
+      read: function() {
+        var latest = noticeLatest[field]();
+        return latest.id !== self.application.id()
+          ? ko.mapping.toJS(self.application[field])
+          : latest.value;
+      },
+      write: function( value ) {
+        noticeLatest[field]( {id: self.application.id(),
+                              value: value});
+      }
+    });
+  }
+
+  self.urgency = latestNotice( "urgency");
+  self.authorityNotice = latestNotice( "authorityNotice");
+
+  self.tags = ko.pureComputed( function() {
+    return ko.toJS( self.application.tags );
   });
 
-  self.authorityNotice = ko.pureComputed(function() {
-    return ko.unwrap(self.application.authorityNotice);
+  var noticeSeenAppId = ko.observable();
+
+  self.unseenNotice = ko.pureComputed( function() {
+    return noticeSeenAppId() !== self.application.id()
+      && ko.unwrap( self.application.unseenAuthorityNotice);
   });
 
-  self.tags = ko.pureComputed(function() {
-    return ko.toJS(self.application.tags);
+  hub.subscribe("SidePanelService::NoticeSeen", function() {
+    noticeSeenAppId(pageutil.hashApplicationId());
+    if( self.unseenNotice() ) {
+      ajax.command( "mark-seen", {id: self.application.id(),
+                                  type: "authority-notices"})
+        .call();
+    }
+  });
+
+  hub.subscribe( "application-loaded", function() {
+    noticeLatest.urgency({} );
+    noticeLatest.authorityNotice( {} );
+    noticeSeenAppId("");
   });
 
   var changeNoticeInfo = _.debounce(function(command, data) {
@@ -33,10 +70,12 @@ LUPAPISTE.SidePanelService = function() {
 
   hub.subscribe("SidePanelService::UrgencyChanged", function(event) {
     changeNoticeInfo("change-urgency", _.pick(event, "urgency"));
+    self.urgency( event.urgency );
   });
 
   hub.subscribe("SidePanelService::AuthorityNoticeChanged", function(event) {
     changeNoticeInfo("add-authority-notice", _.pick(event, "authorityNotice"));
+    self.authorityNotice( event.authorityNotice );
   });
 
   hub.subscribe("SidePanelService::TagsChanged", function(event) {
@@ -44,7 +83,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   // Conversation
-  self.comments = ko.observableArray([]);
+  var allComments = lupapisteApp.services.commentService.comments;
 
   self.showAllComments = ko.observable(true);
   self.mainConversation = ko.observable(true);
@@ -60,7 +99,7 @@ LUPAPISTE.SidePanelService = function() {
   });
 
   self.comments = ko.pureComputed(function() {
-    return _(ko.mapping.toJS(self.application.comments))
+    return _(allComments())
       .filter(
          function(comment) {
            return self.showAllComments()
@@ -149,7 +188,7 @@ LUPAPISTE.SidePanelService = function() {
                                  size: "small",
                                  componentParams: {ltext: "comment-request-mark-answered.ok"}});
       }
-      repository.load(ko.unwrap(self.application.id));
+      repository.load(ko.unwrap(self.application.id)); // TODO: use comments query instead ?
     })
     .call();
   });

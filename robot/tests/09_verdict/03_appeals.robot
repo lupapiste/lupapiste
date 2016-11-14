@@ -24,8 +24,8 @@ Sonja fetches verdict from municipality KRYSP service
   Fetch verdict
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.autopaikkojaEnintaan']  10
   Element text should be  xpath=//div[@data-test-id='given-verdict-id-1-content']//span[@data-bind='text: lupamaaraykset.kokonaisala']  110
-  Page Should Contain Element  //div[@data-test-id="given-verdict-id-0-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
-  Page Should Not Contain Element  //div[@data-test-id="given-verdict-id-1-content"]//div[@data-bind="ltext: 'verdict.lupamaaraukset.missing'"]
+  No such test id  verdict-requirements-0
+  Wait test id visible  verdict-requirements-1
 
 There are no appeals yet
   Element should not be visible  jquery=table.appeals-table
@@ -184,6 +184,8 @@ Sonja logs in and deletes the first verdict.
 There is only one appeal in the Attachments tab
   Open tab  attachments
   Xpath should match X times  //tr[@data-test-type='muutoksenhaku.valitus']  1
+  Xpath should match X times  //tr[@data-test-type='muutoksenhaku.oikaisuvaatimus']  0
+  Xpath should match X times  //tr[@data-test-type='paatoksenteko.paatos']  2
   Open tab  verdict
 
 Fetching new verdicts will nuke appeals
@@ -273,3 +275,8 @@ Appeals row file check
   [Arguments]  ${postfix}  ${row}  ${filename}  ${index}=0
   Set Row Selector  ${postfix}  ${row}
   Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
+
+No frontend errors
+  Logout
+  There are no frontend errors
+

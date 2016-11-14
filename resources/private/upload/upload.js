@@ -23,8 +23,8 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentId(options.attachmentId);
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
-  LUPAPISTE.Upload.selectableGroups([{groupType: options.group, id: options.operationId}]);
-  LUPAPISTE.Upload.operationId(options.operationId);
+  LUPAPISTE.Upload.selectableGroups([{id: options.operationId || options.group}]);
+  LUPAPISTE.Upload.operationId(options.operationId || options.group);
   LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
@@ -37,7 +37,7 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   "use strict";
   if (applicationId) {
     ajax
-      .query("attachment-types",{id: applicationId})
+      .query("attachment-types", {id: applicationId})
       .success(function(d) {
         LUPAPISTE.Upload.attachmentTypeGroups(_.map(attachmentUtils.sortAttachmentTypes(d.attachmentTypes), function(v) {
           return {group: v[0], types: _.map(v[1], function(t) {return {name: t};})};

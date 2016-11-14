@@ -1,7 +1,9 @@
 LUPAPISTE.EmptyApplicationModel = function() {
   "use strict";
   return {startedBy: {firstName: "", lastName: ""},
-          closedBy: {firstName: "", lastName: ""}};
+          closedBy: {firstName: "", lastName: ""},
+          warrantyStart: null,
+          warrantyEnd: null};
 };
 
 LUPAPISTE.ApplicationModel = function() {
@@ -37,9 +39,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.closed = ko.observable();
   self.closedBy = fullNameInit();
   self.attachments = ko.observable([]);
-  self.hasAttachment = ko.computed(function() {
-    return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
-  });
+  self.warrantyStart = ko.observable();
+  self.warrantyEnd = ko.observable();
+
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
@@ -83,6 +85,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
   self.unseenComments = ko.observable();
+  self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
 
   // Application metadata fields
@@ -101,9 +104,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.asianhallintaEnabled = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
   });
-  self.organizationLinks = ko.pureComputed(function() {
-    return self.organizationMeta() ? self.organizationMeta().links() : "";
-  });
+
   self.organizationName = ko.pureComputed(function() {
     return self.organizationMeta() ? self.organizationMeta().name() : "";
   });
@@ -125,7 +126,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.comments = ko.observable([]);
 
   self.summaryAvailable = ko.pureComputed(function() {
-    return self.inPostVerdictState() || self.state() === "canceled";
+    return lupapisteApp.models.applicationAuthModel.ok("application-summary-tab-visible");
   });
 
   self.openTask = function( taskId ) {
@@ -167,11 +168,20 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.primaryOperationName = ko.pureComputed(function() {
-    var op = ko.unwrap(self.primaryOperation());
-    if (op) {
-      return "operations." + ko.unwrap(op.name);
+    var opName = util.getIn(self.primaryOperation, ["name"]);
+    return !_.isEmpty(opName) ? "operations." + opName : "";
+  });
+
+  hub.subscribe("op-description-changed", function(e) {
+    var opid = e["op-id"];
+    var desc = e["op-desc"];
+
+    if (e.appId === self.id()) {
+      var operations = _.map(self.allOperations(), function(op) {
+        return op.id() === opid ? op.description(desc) : op;
+      });
+      self.allOperations(operations);
     }
-    return "";
   });
 
   self.foremanTasks = ko.observable();
@@ -253,9 +263,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Required attachments
 
-  self.missingRequiredAttachments = ko.observable([]);
+  self.missingRequiredAttachments = ko.pureComputed( function() {
+    return _.get( lupapisteApp, "services.attachmentsService.missingRequiredAttachments", _.noop)();
+  });
+
   self.hasMissingRequiredAttachments = ko.pureComputed(function() {
-    return self.missingRequiredAttachments() && self.missingRequiredAttachments().length > 0;
+    return !_.isEmpty( self.missingRequiredAttachments());
   });
 
   self.missingSomeInfo = ko.pureComputed(function() {
@@ -321,6 +334,7 @@ LUPAPISTE.ApplicationModel = function() {
               ajax.command("submit-application", {id: self.id()})
               .success( self.reload)
               .onError("error.cannot-submit-application", cannotSubmitResponse)
+              .onError("error.command-illegal-state", self.lightReload)
               .fuse(self.stateChanged)
               .processing(self.processing)
               .call();
@@ -342,6 +356,7 @@ LUPAPISTE.ApplicationModel = function() {
           .call();
         self.reload();
       })
+      .onError("error.command-illegal-state", self.lightReload)
       .fuse(self.stateChanged)
       .processing(self.processing)
       .call();
@@ -379,6 +394,7 @@ LUPAPISTE.ApplicationModel = function() {
             hub.send("external-api::integration-sent", permit);
           }
         })
+        .onError("error.command-illegal-state", self.lightReload)
         .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
         .fuse(self.stateChanged)
         .processing(self.processing)
@@ -430,6 +446,15 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
+  self.approveExtension = function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.extension.approve"),
+      loc("application.extension.approve-confirmation"),
+      {title: loc("ok"), fn: self.approveApplication},
+      {title: loc("cancel")}
+    );
+  };
+
   self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
@@ -448,27 +473,6 @@ LUPAPISTE.ApplicationModel = function() {
       component: "neighbors-owners-dialog",
       componentParams: {applicationId: self.id()} });
     hub.send("track-click", {category:"Application", label:"", event:"findOwners"});
-    return false;
-  };
-
-  self.removeAuth = function(model) {
-    var username = model.username();
-    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("areyousure"),
-      loc("areyousure.message"),
-      {title: loc("yes"),
-       fn:  function() {
-         ajax.command("remove-auth", { id: self.id(), username: username})
-           .success(self.reload)
-           .processing(self.processing)
-           .call();
-          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
-         return false;
-      }},
-      {title: loc("no")}
-    );
-    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
     return false;
   };
 
@@ -521,6 +525,7 @@ LUPAPISTE.ApplicationModel = function() {
           ajax
             .command("cancel-inforequest", {id: self.id()})
             .success(function() {pageutil.openPage("applications");})
+            .onError("error.command-illegal-state", self.lightReload)
             .fuse(self.stateChanged)
             .processing(self.processing)
             .call();
@@ -558,6 +563,7 @@ LUPAPISTE.ApplicationModel = function() {
                 self.lightReload();
               }
             })
+            .onError("error.command-illegal-state", self.lightReload)
             .fuse(self.stateChanged)
             .processing(self.processing)
             .call();
@@ -575,6 +581,7 @@ LUPAPISTE.ApplicationModel = function() {
                           .success(function() {
                             repository.load(self.id());
                           })
+                          .onError("error.command-illegal-state", self.lightReload)
                           .fuse(self.stateChanged)
                           .processing(self.processing);
 
@@ -720,29 +727,9 @@ LUPAPISTE.ApplicationModel = function() {
     self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
 
-  self.moveToMissingRequiredAttachment = function(fieldInfo) {
-    var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
-    self.targetTab({tab: "attachments", id: targetId});
-  };
-
-  function extractMissingAttachments(attachments) {
-    var missingAttachments = _.filter(attachments, function(a) {
-      var required = a.required ? a.required() : false;
-      var notNeeded = a.notNeeded ? a.notNeeded() : false;
-      var noVersions = _.isEmpty(ko.unwrap(a.versions));
-      return required && !notNeeded && noVersions;
-    });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
-    missingAttachments = _.map(_.keys(missingAttachments), function(k) {
-      return [k, missingAttachments[k]];
-    });
-    return missingAttachments;
-  }
-
   self.updateMissingApplicationInfo = function(errors) {
     self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.fieldWarnings(util.extractWarnErrors(errors));
-    self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
     fetchApplicationSubmittable();
   };
 
@@ -756,6 +743,7 @@ LUPAPISTE.ApplicationModel = function() {
         .query("application-submittable", {id: self.id.peek()})
         .success(function() { self.submitErrors([]); })
         .onError("error.cannot-submit-application", cannotSubmitResponse)
+        .onError("error.command-illegal-state", self.lightReload)
         .call();
     }
   }
@@ -812,4 +800,19 @@ LUPAPISTE.ApplicationModel = function() {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::open-application", permit);
     }};
+
+  // Saved from the old LUPAPISTE.AttachmentsTabModel, used in info request
+  self.deleteSingleAttachment = function(a) {
+    var versions = util.getIn(a, ["versions"]);
+    var doDelete = function() {
+      lupapisteApp.services.attachmentsService.removeAttachment(util.getIn(a, ["id"]));
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentFromListing"});
+      return false;
+    };
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: _.isEmpty(versions) ? "attachment.delete.message.no-versions" : "attachment.delete.message",
+                                               yesFn: doDelete}});
+  };
 };

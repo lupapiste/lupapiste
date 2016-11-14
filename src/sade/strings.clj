@@ -60,6 +60,8 @@
   (when s (let [normalized (Normalizer/normalize s Normalizer$Form/NFD)]
     (clojure.string/replace normalized #"\p{InCombiningDiacriticalMarks}+" ""))))
 
+(def ascii-pattern #"^[\p{ASCII}]+$")
+
 (def non-printables #"[\p{Cntrl}]")
 
 (defn strip-non-printables [^String s] (when s (s/replace s non-printables "")))
@@ -100,6 +102,9 @@
 (defn numeric?
   "http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringUtils.html#isNumeric(java.lang.CharSequence)"
   [s] (and (string? s) (StringUtils/isNumeric s)))
+
+(defn ascii? [s]
+  (not (nil? (re-matches ascii-pattern s))))
 
 (defn substring [^String s  ^Integer start ^Integer end]
   (StringUtils/substring s start end))
@@ -156,3 +161,22 @@
 (defn to-camel-case
   [string]
   (s/replace string #"-(\w)" #(upper-case (second %1))))
+
+(defn =trim-i
+  "Compares trimmed lower-cased versions of strings."
+  [& xs]
+  (apply = (map (comp trim lower-case) xs)))
+
+(defn fuzzy-re
+  "Takes search term and turns it into 'fuzzy' regular expression
+  string (not pattern!) that matches any string that contains the
+  substrings in the correct order. The search term is split both for
+  regular whitespace and Unicode no-break space. The original string
+  parts are escaped for (inadvertent) regex syntax.
+  Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
+  [term]
+  (let [whitespace "[\\s\u00a0]+"
+        fuzzy      (->> (split term (re-pattern whitespace))
+                        (map #(java.util.regex.Pattern/quote %))
+                        (join (str ".*" whitespace ".*")))]
+    (str "^.*" fuzzy ".*$")))

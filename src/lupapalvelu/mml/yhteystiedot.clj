@@ -49,7 +49,7 @@
   ([property-id] (get-yhteystiedot property-id false))
   ([property-id raw?]
   (let [uri (str/replace (get-yhteystiedot-url-template) "${kohdetunnus}" property-id)
-        options {:http-error :error.ktj-down, :connection-error :error.ktj-down}
+        options {:http-error :error.integration.ktj-down, :connection-error :error.integration.ktj-down}
         username (env/value :mml :yhteystiedot :username)
         password (env/value :mml :yhteystiedot :password)]
     (cr/get-xml uri options [username password] raw?))))

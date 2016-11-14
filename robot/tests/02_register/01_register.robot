@@ -3,7 +3,7 @@
 Documentation   Mikko registers
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ../common_keywords/vetuma_helpers.robot
+Resource        ../common_keywords/ident_helpers.robot
 
 *** Test Cases ***
 
@@ -12,23 +12,24 @@ Setup random email
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${email}  ${secs}@example.com
 
-Cancelling vetuma return back to register page
+Cancelling identification causes return back to register page
   [Tags]  integration  ie8
   Go to register page
   Register button is visible
-  Cancel via vetuma
+  Click by test id  vetuma-init
+  Click by test id  cancel-button
   Wait until page contains element  register-cancel
 
-VTJ-data should be populated from Osuuspankki
+VTJ-data for Teemu should be populated from identification
   [Tags]  integration  ie8
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via Osuuspankki via Vetuma  vetuma-init
+  Authenticate via dummy page  vetuma-init
   Wait until  Submit is disabled
-  Textfield should contain  xpath=//input[@data-test-id='register-street']  Sepänkatu 11 A 5
-  Textfield should contain  xpath=//input[@data-test-id='register-zip']  70100
-  Textfield should contain  xpath=//input[@data-test-id='register-city']  KUOPIO
+  Textfield should contain  xpath=//input[@data-test-id='register-street']  Testikatu 23
+  Textfield should contain  xpath=//input[@data-test-id='register-zip']  90909
+  Textfield should contain  xpath=//input[@data-test-id='register-city']  Testikylä
 
 Filling register form2
   [Tags]  integration  ie8
@@ -39,7 +40,7 @@ Can not login before activation
   Go to login page
   Login fails  ${email}  vetuma69
 
-Vetuma-guy activates his account
+Teemu activates his account
   [Tags]  integration  ie8
   Activate account  ${email}
   [Teardown]  Logout
@@ -72,7 +73,7 @@ Fill registration
   Go to login page
   Go to register page
   Register button is visible
-  Authenticate via Nordea via Vetuma
+  Authenticate via dummy page  vetuma-init
   Wait until page contains element  xpath=//input[@data-test-id='register-personid']
   Submit is disabled
 
@@ -123,7 +124,7 @@ Activate account
   Wait Until  Page Should Contain  ${mail}
   Page Should Contain  /app/security/activate
   Click link  xpath=//a
-  User should be logged in  Nordea Demo
+  User should be logged in  Teemu Testaaja
   Confirm notification dialog
   Applications page should be open
   Number of visible applications  0

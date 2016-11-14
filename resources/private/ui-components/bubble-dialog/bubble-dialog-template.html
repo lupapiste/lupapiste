@@ -1,42 +1,37 @@
-<!DOCTYPE html>
-<html>
-  <body>
-    <section class="page container">
-      <script type="text/x-jquery-tmpl" id="bubble-dialog-template">
-        <div class="bubble-dialog" data-bind="visible: bubbleVisible">
-          <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
-          <div class="error"
-               data-bind="visible: error,
-                          ltext: error,
-                          attr: {'data-test-id': prefix + 'bubble-dialog-error'}"></div>
-          <div class="left-buttons">
-            <button class="positive"
-                    data-bind="click: ok,
-                               enable: okEnabled,
-                               css: {waiting: waiting},
-                               attr: {'data-test-id': prefix + 'bubble-dialog-ok'}">
-              <i data-bind="css: buttonIcon"></i>
-              <i class="wait spin lupicon-refresh"></i>
-              <span data-bind="ltext: buttonText"></span>
-            </button>
-            <button class="negative"
-                    data-bind="visible: removeVisible,
-                               click: remove,
-                               enable: removeEnabled,
-                               css: {waiting: waitingRemove}">
-              <i class="lupicon-remove"></i>
-              <i class="wait spin lupicon-refresh"></i>
-              <span data-bind="ltext: 'remove'"></span>
-            </button>
-            <button class="secondary"
-                    data-bind="click: cancel,
-                               attr: {'data-test-id': prefix + 'bubble-dialog-cancel'}">
-              <i class="lupicon-remove"></i>
-              <span data-bind="ltext: 'cancel'"></span>
-            </button>
-          </div>
-        </div>
-      </script>
-    </section>
-  </body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl" id="bubble-dialog-template">
+  <div class="bubble-dialog" data-bind="visible: bubbleVisible">
+    <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
+    <div class="error"
+         data-bind="visible: error,
+                    ltext: error,
+                    testId: prefix + 'bubble-dialog-error'"></div>
+    <div class="left-buttons">
+      <button class="positive"
+              data-bind="visible: okVisible,
+                         click: ok,
+                         enable: okEnabled,
+                         css: {waiting: waiting},
+                         testId: prefix + 'bubble-dialog-ok'">
+        <i data-bind="css: buttonIcon"></i>
+        <i class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: buttonText"></span>
+      </button>
+      <button class="negative"
+              data-bind="visible: removeVisible,
+                         click: remove,
+                         enable: removeEnabled,
+                         css: {waiting: waitingRemove},
+                         testId: prefix + 'bubble-dialog-remove'">
+        <i class="lupicon-remove"></i>
+        <i class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: removeText"></span>
+      </button>
+      <button class="secondary"
+              data-bind="click: cancel,
+                         testId: prefix + 'bubble-dialog-cancel'">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: cancelText"></span>
+      </button>
+    </div>
+  </div>
+</script>

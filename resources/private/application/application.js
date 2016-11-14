@@ -14,6 +14,7 @@
       {commandName         : "inform-construction-started",
        checkIntegrationAvailability: false,
        dateParameter       : "startedTimestampStr",
+       extraParameters     : {lang: loc.getCurrentLanguage()},
        dateSelectorLabel   : "constructionStarted.startedDate",
        dialogHeader        : "constructionStarted.dialog.header",
        dialogHelpParagraph : "constructionStarted.dialog.helpParagraph",
@@ -52,7 +53,6 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -60,12 +60,6 @@
   var hasConstructionTimeDocs = ko.observable();
 
   var accordian = function(data, event) { accordion.toggle(event); };
-
-  var AuthorityInfo = function(id, firstName, lastName) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-  };
 
   function updateWindowTitle(newTitle) {
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
@@ -129,13 +123,24 @@
     }
   });
 
-  function initAuthoritiesSelectList(data) {
-    var authorityInfos = [];
-    _.each(data || [], function(authority) {
-      authorityInfos.push(new AuthorityInfo(authority.id, authority.firstName, authority.lastName));
-    });
-    authorities(authorityInfos);
+  function refreshAuthoritiesSelectList(appId) {
+    if (authorizationModel.ok("assign-application")) {
+      ajax.query("application-authorities", {id: appId})
+        .success(function(res) {
+          var auths = res.authorities || [];
+          authorities(auths);
+        })
+        .pending(applicationModel.pending)
+        .call();
+    } else {
+      authorities([]);
+    }
+
   }
+
+  hub.subscribe("application-model-updated", function(event) {
+    refreshAuthoritiesSelectList(event.applicationId);
+  });
 
   function initAvailableTosFunctions(organizationId) {
     tosFunctions([]);
@@ -149,6 +154,62 @@
     }
   }
 
+  function refreshAuthorizationModel() {
+    if (currentId) {
+      authorizationModel.refresh({id: currentId});
+    } else {
+      authorizationModel.setData({});
+    }
+  }
+
+  function resetApplication() {
+    var app = _.merge(LUPAPISTE.EmptyApplicationModel(), {});
+
+    // Plain data
+    applicationModel._js = app;
+    // Update observables
+    var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
+    ko.mapping.fromJS(app, mappingOptions, applicationModel);
+  }
+
+  function initWarrantyDates(app) {
+    if (app.warrantyEnd) {
+      app.warrantyEnd = new Date(app.warrantyEnd);
+    }
+
+    if (app.warrantyStart) {
+      app.warrantyStart = new Date(app.warrantyStart);
+    }
+  }
+
+  function subscribeWarrantyDates(app, applicationModel) {
+    applicationModel.warrantyEnd.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-end-date",
+            {id: app.id, endDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+
+    applicationModel.warrantyStart.subscribe(function (value) {
+      if (!isInitializing && value != null) {
+        var ms = new Date(moment(value)).getTime();
+        ajax
+          .command("change-warranty-start-date",
+            {id: app.id, startDate: ms})
+          .success ( function() {
+            hub.send("indicator-icon", {style: "positive"});
+          })
+          .call();
+      }
+    });
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -159,6 +220,8 @@
       // Plain data
       applicationModel._js = app;
 
+      initWarrantyDates(app);
+
       // Update observables
       var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
       ko.mapping.fromJS(app, mappingOptions, applicationModel);
@@ -168,7 +231,7 @@
       inviteModel.setApplicationId(app.id);
 
       // Verdict details
-      verdictModel.refresh(app, applicationDetails.authorities);
+      verdictModel.refresh(app);
 
       // Map
       mapModel.refresh(app);
@@ -180,11 +243,6 @@
 
       verdictAttachmentPrintsOrderModel.refresh();
       verdictAttachmentPrintsOrderHistoryModel.refresh();
-
-      attachmentsTab.refresh();
-
-      // authorities
-      initAuthoritiesSelectList(applicationDetails.authorities);
 
       // permit subtypes
       applicationModel.permitSubtypes(applicationDetails.permitSubtypes);
@@ -200,7 +258,7 @@
       // Documents
       var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
       var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
-      var nonpartyDocs = _.filter(nonConstructionTimeDocs, util.isNotPartyDoc);
+      var nonpartyDocs = _.reject(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
@@ -212,6 +270,7 @@
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
+        lupapisteApp.services.accordionService.authorities = authorities;
       }
 
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
@@ -223,15 +282,14 @@
         docgen.displayDocuments("partiesDocgen",
             app,
             sortedPartyDocs,
-            authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+            {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
               app,
               applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
-                  authorizationModel,
-                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -241,8 +299,7 @@
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
               applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
-                  authorizationModel,
-                  {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
@@ -252,10 +309,9 @@
           docgen.displayDocuments("constructionTimeDocgen",
               app,
               constructionTimeDocs,
-              authorizationModel,
               {dataTestSpecifiers: devMode,
-            accordionCollapsed: isAuthority,
-            updateCommand: "update-construction-time-doc"});
+               accordionCollapsed: isAuthority,
+               updateCommand: "update-construction-time-doc"});
         } else {
           docgen.clear("constructionTimeDocgen");
         }
@@ -278,17 +334,24 @@
 
       pendingCalendarNotifications = _.map(pendingCalendarNotifications,
         function(n) {
-          n.acknowledged = "none";
-          return ko.mapping.fromJS(n);
+          n.acknowledged = ko.observable("none");
+          return n;
         });
 
       applicationModel.calendarNotificationsPending(
         _.transform(
-          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime()).startOf("day").valueOf(); }),
+          _.groupBy(pendingCalendarNotifications, function(n) { return moment(n.startTime).startOf("day").valueOf(); }),
           function (result, value, key) {
-            return result.push({ day: _.parseInt(key), notifications: value });
+            return result.push({ day: _.parseInt(key),
+                                 notifications: _.transform(value, function(acc, n) {
+                                                  n.participantsText = _.map(n.participants, function (p) { return util.partyFullName(p); }).join(", ");
+                                                  acc.push(n);
+                                                }, [])});
+
           }, []));
       applicationModel.calendarNotificationIndicator(pendingCalendarNotifications.length);
+
+      subscribeWarrantyDates(app, applicationModel);
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -354,13 +417,6 @@
     } else {
       hub.send("track-click", {category:"Applications", label: kind, event:"openApplication"});
       pageutil.showAjaxWait();
-      if (newId !== currentId) { // close sidepanel if it's open
-        var sidePanel = $("#side-panel div.content-wrapper > div").filter(":visible");
-        if (!_.isEmpty(sidePanel)) {
-          var target = sidePanel.attr("id").split("-")[0];
-          $("#open-" + target + "-side-panel").click();
-        }
-      }
       currentId = newId;
 
       repository.load(currentId, applicationModel.pending, function(application) {
@@ -369,11 +425,10 @@
 
         var fallbackTab = function(application) {
           if (application.inPostVerdictState) {
-            var name = application.primaryOperation.name;
-            if (name) {
-              return name.match(/tyonjohtaja/) ? "applicationSummary" : "tasks";
-            } else {
+            if (authorizationModel.ok("tasks-tab-visible")) {
               return "tasks";
+            } else {
+              return "applicationSummary";
             }
           } else {
             return "info";
@@ -386,12 +441,21 @@
 
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
+  hub.onPageUnload( "application", function() {
+    if( currentId && !_.includes( _.get( window, "location.hash"),
+                                  currentId)) {
+      currentId = null;
+      resetApplication();
+    }
+  });
 
   hub.subscribe("application-loaded", function(e) {
     showApplication(e.applicationDetails, e.lightLoad);
     updateWindowTitle(e.applicationDetails.application.title);
   });
 
+  // User details can affect what she can do to the application
+  hub.subscribe("reload-current-user", refreshAuthorizationModel);
 
   function NeighborStatusModel() {
     var self = this;
@@ -486,6 +550,29 @@
     }
   };
 
+  function CalendarConfigModel() {
+    var self = this;
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+    self.reservationTypes = ko.observableArray([]);
+    self.defaultLocation = ko.observable();
+    self.authorities = ko.observableArray([]);
+    self.initialized = ko.observable(false);
+
+    self.disposedSubscribe(applicationModel.id, function(id) {
+      if (!_.isEmpty(id) && authorizationModel.ok("calendars-enabled")) {
+        self.sendEvent("calendarService", "fetchApplicationCalendarConfig", {applicationId: id});
+      }
+    });
+
+    self.addEventListener("calendarService", "applicationCalendarConfigFetched", function(event) {
+      self.initialized(event.authorities.length > 0);
+      self.reservationTypes(event.reservationTypes);
+      self.defaultLocation(event.defaultLocation);
+      self.authorities(event.authorities);
+    });
+  }
+
+  var calendarConfigModel = new CalendarConfigModel();
 
   $(function() {
     var bindings = {
@@ -513,10 +600,10 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions,
-      sidePanelService: lupapisteApp.services.sidePanelService
+      sidePanelService: lupapisteApp.services.sidePanelService,
+      calendarConfig: calendarConfigModel
     };
 
     $("#application").applyBindings(bindings);
@@ -532,7 +619,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    attachmentsTab.attachmentTemplatesModel.init();
   });
 
 })();

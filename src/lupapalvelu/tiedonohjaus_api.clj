@@ -154,10 +154,11 @@
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
+   :categories #{:attachments}
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal
+   :states states/all-with-acknowledged-but-not-draft-or-terminal
    :pre-checks [aa/attachment-not-readOnly]}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
@@ -201,5 +202,6 @@
 
 (defquery tos-operations-enabled
   {:user-roles #{:authority}
+   :categories #{:attachments}
    :states states/all-application-states}
   (ok))

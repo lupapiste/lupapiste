@@ -97,14 +97,8 @@ $app-gray-darkest: $gray187;
       margin: $marginM;
     }
     .application-map-actions {
-      position: absolute;
-      z-index: 1000;
-      left: 0;
-      top: 256px;
-      //bottom: 0;
-      text-align: center;
+      margin-top: $marginS;
       display:block;
-      background: $lp-green;
       .map-search-button {
         color: white;
         padding: 0 $marginL;
@@ -492,6 +486,9 @@ $app-gray-darkest: $gray187;
     margin-top: $marginM;
     margin-bottom: $marginM;
   }
+  h2 {
+    margin-top: 1.5em;
+  }
 }
 
 #construction-time-documents {
@@ -601,6 +598,10 @@ $app-gray-darkest: $gray187;
   .command {
    margin-right: $marginS;
   }
+}
+
+.content--neighbors-owners {
+  min-height: 20em;
 }
 
 #dialog-verdict-attachment-prints-order, #dialog-verdict-attachment-prints-order-history {
@@ -724,9 +725,6 @@ $app-gray-darkest: $gray187;
 .parties-list {
   width: 100%;
   margin-bottom: $marginS;
-  button {
-    margin: $marginM 0;
-  }
   .party {
     display: table-row;
     .person {
@@ -734,10 +732,6 @@ $app-gray-darkest: $gray187;
       padding-right: $marginM;
     }
     .invite-state {
-      display: table-cell;
-      padding-right: $marginM;
-    }
-    .invite-action {
       display: table-cell;
       padding-right: $marginM;
     }
@@ -943,4 +937,11 @@ h2 > i.is-right {
 
 div.review-tasks {
   margin-top: 20px;
+}
+
+
+.assignment-creator {
+  margin: {
+    bottom: $marginM;
+  }
 }

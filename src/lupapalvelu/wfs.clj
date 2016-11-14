@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error errorf]]
             [ring.util.codec :as codec]
             [net.cgrand.enlive-html :as enlive]
             [sade.http :as http]
@@ -174,7 +174,7 @@
   (let [attributes (if (map? (first attrs) )
                      (first attrs)
                      (apply hash-map (partition 2 attrs)))]
-    {:tag (str "ogc:" filter-name)
+    {:tag (keyword (str "ogc:" (name filter-name)))
      :attrs attributes
      :content [(property-name prop-name)
                {:tag :ogc:Literal :content [value]}]}))
@@ -185,6 +185,11 @@
 
 (defn property-is-equal [prop-name value]
   (property-filter "PropertyIsEqualTo" prop-name value))
+
+(defn property-in [prop-name values]
+  (if (> (count values) 1)
+    (apply ogc-or (map (partial property-is-equal prop-name) values))
+    (property-is-equal prop-name (first values))))
 
 (defn property-is-less [prop-name value]
   (property-filter "PropertyIsLessThan" prop-name value))
@@ -333,20 +338,20 @@
          task (future* (exec-http http-fn url request))
          [status data error-body] (deref task timeout [:timeout])
          error-text (-> error-body  (ss/replace #"[\r\n]+" " ") (ss/limit 400 "..."))]
-     (case status
-       :timeout (error "error.integration - wfs timeout while requesting" url)
-       :error   (case data
-                  400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
-                  (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
-       :ok      (let [xml (if (= url nearestfeature)
-                            (parse-features-as-latin1 data)
-                            (->features data sxml/startparse-sax-no-doctype))
-                      member-list (xml-> xml :gml:featureMember)]
-                  ; Differences in WFS implementations:
-                  ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
-                  (if (seq member-list)
-                    member-list
-                    (xml-> xml :gml:featureMembers)))))))
+      (case status
+        :timeout (error "error.integration - wfs timeout while requesting" url)
+        :error   (case data
+                   400 (errorf "error.integration -  wfs status 400 Bad Request '%s', url=%s, response body=%s" (ss/limit (str q) 220 "...") url error-text)
+                   (errorf "error.integration - wfs status %s: url=%s, response body=%s" data url error-text))
+        :ok      (let [xml (if (= url nearestfeature)
+                             (parse-features-as-latin1 data)
+                             (->features data sxml/startparse-sax-no-doctype))
+                       member-list (xml-> xml :gml:featureMember)]
+                   ; Differences in WFS implementations:
+                   ; sometimes gml:featureMember elements are retured (NLS), sometimes gml:featureMembers
+                   (if (seq member-list)
+                     member-list
+                     (xml-> xml :gml:featureMembers)))))))
 
 (defn post
   ([url q] (exec :post url q))
@@ -421,20 +426,30 @@
                              :MAXFEATURES "1"
                              :BUFFER "500"}))
 
-(defn address-by-point-from-municipality [x y {:keys [url credentials]}]
+(defn address-by-point-from-municipality [x y {:keys [url credentials no-bbox-srs]}]
   (let [x_d (util/->double x)
         y_d (util/->double y)
-        radius 50
-        bbox (ss/join "," [(- x_d radius) (- y_d 50) (+ x_d 50) (+ y_d 50) "EPSG:3067"])]
-    (exec :get url
-      credentials
-      {:REQUEST "GetFeature"
-       :SERVICE "WFS"
-       :VERSION "1.1.0"
-       :TYPENAME "mkos:Osoite"
-       :SRSNAME "EPSG:3067"
-       :BBOX   bbox
-       :MAXFEATURES "20"})))
+        radii [25 50 100 250 500 1000]]
+    (some identity
+      ; Searching by point is not directly supported.
+      ; Try searching with increasing radius.
+      (for [radius radii
+            :let [corners [(- x_d radius) (- y_d radius) (+ x_d radius) (+ y_d radius)]
+                  ; Queries to some bockends must have the SRS defined at the end of BBOX,
+                  ; but some bockends return NO RESULTS if it is defened!
+                  bbox (ss/join "," (if no-bbox-srs corners (conj corners "EPSG:3067")))
+                  results (exec :get url credentials
+                            {:REQUEST "GetFeature"
+                             :SERVICE "WFS"
+                             :VERSION "1.1.0"
+                             :TYPENAME "mkos:Osoite"
+                             :SRSNAME "EPSG:3067"
+                             :BBOX bbox
+                             :MAXFEATURES "50"})]]
+        (if (seq results)
+          results
+          (warnf "No results for x/y %s/%s within radius of %d. %s"
+            x y radius (if (= radius (last radii)) "Giving up!" "Increasing radius...")))))))
 
 (defn property-id-by-point [x y]
   (post ktjkii
@@ -613,7 +628,7 @@
   ([url service]
     (query-get-capabilities url service nil nil true))
   ([url service username password throw-exceptions?]
-    {:pre [(not (ss/blank? url))]}
+    {:pre [(ss/not-blank? url)]}
     (let [credentials (when-not (ss/blank? username) {:basic-auth [username password]})
          options     (merge {:socket-timeout 30000, :conn-timeout 30000 ; 30 secs should be enough for GetCapabilities
                              :query-params {:request "GetCapabilities", :service service} ;; , :version "1.1.0"
@@ -638,7 +653,7 @@
     (let [resp (query-get-capabilities url "WFS" username password false)]
       (or
         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-        (warn "Response not OK or did not contain XML. Response was: " (:status resp) (:body resp))))))
+        (warn "GetCapabilities Response not OK or did not contain XML. Response was: " (:status resp) (:body resp) ", url: " url)))))
 
 (defn get-our-capabilities []
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
@@ -655,7 +670,7 @@
   (if (env/feature? :disable-ktj-on-create)
     (infof "ktj-client is disabled - not getting rekisteritiedot for %s" rekisteriyksikon-tunnus)
     (let [url (str (get-rekisteriyksikontietojaFeatureAddress) "SERVICE=WFS&REQUEST=GetFeature&VERSION=1.1.0&NAMESPACE=xmlns%28ktjkiiwfs%3Dhttp%3A%2F%2Fxml.nls.fi%2Fktjkiiwfs%2F2010%2F02%29&TYPENAME=ktjkiiwfs%3ARekisteriyksikonTietoja&PROPERTYNAME=ktjkiiwfs%3Akiinteistotunnus%2Cktjkiiwfs%3Aolotila%2Cktjkiiwfs%3Arekisteriyksikkolaji%2Cktjkiiwfs%3Arekisterointipvm%2Cktjkiiwfs%3Animi%2Cktjkiiwfs%3Amaapintaala%2Cktjkiiwfs%3Avesipintaala&FEATUREID=FI.KTJkii-RekisteriyksikonTietoja-" (codec/url-encode rekisteriyksikon-tunnus) "&SRSNAME=EPSG%3A3067&MAXFEATURES=100&RESULTTYPE=results")
-          options {:http-error :error.ktj-down, :connection-error :error.ktj-down}
+          options {:http-error :error.integration.ktj-down, :connection-error :error.integration.ktj-down}
           ktj-xml (reader/get-xml url options (get auth ktjkii) false)
           features (-> ktj-xml reader/strip-xml-namespaces sxml/xml->edn)]
       (get-in features [:FeatureCollection :featureMember :RekisteriyksikonTietoja]))))

@@ -9,7 +9,8 @@
             [sade.util :as util]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.building :as building]))
+            [lupapalvelu.building :as building]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn building-xml
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
@@ -28,8 +29,9 @@
     (when (v/rakennustunnus? building-id)
       building-id)))
 
+(defn- ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
+
 (defn- ->building-ids [id-container xml-no-ns]
-  (defn ->list "a as list or nil. a -> [a], [b] -> [b]" [a] (when a (-> a list flatten)))
   (let [national-id    (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
         local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))
@@ -56,6 +58,21 @@
         (map (partial ->building-ids :rakennustunnus) (select xml-no-ns [:Rakennus]))
         (map (partial ->building-ids :tunnus) (select xml-no-ns [:Rakennelma]))))))
 
+
+(defn building-info-list
+  "Gets buildings info either from cache selection or fetches via WFS."
+  [url credentials propertyId]
+  (if-let [{buildings :buildings} (mongo/select-one :buildingCache {:propertyId propertyId})]
+    buildings
+    (let [kryspxml  (building-xml url credentials propertyId)
+          buildings (->buildings-summary kryspxml)]
+      (when (not-empty buildings)
+        (try
+          (mongo/insert :buildingCache
+                        (mongo/with-mongo-meta {:propertyId propertyId :buildings buildings})
+                        com.mongodb.WriteConcern/UNACKNOWLEDGED)
+          (catch com.mongodb.DuplicateKeyException _)))
+      buildings)))
 
 (def ...notfound... nil)
 (def ...notimplemented... nil)
@@ -205,14 +222,7 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn- buildings-summary-for-application
-  "Returns application building updates from xml (if buildings exist)."
-  [xml application]
-  (let [summary (->buildings-summary xml)]
-    (when (seq summary)
-      (building/building-updates summary application))))
-
-(permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
+(defmethod permit/read-verdict-extras-xml :R [application xml] (->> (->buildings-summary xml) (building/building-updates application)))
 
 (defn- parse-buildings
   "Convenience function for debugging KRYSP messages.

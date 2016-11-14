@@ -8,10 +8,10 @@
         <div class="editor-header">
           <div data-bind="ltext: 'attachment.tosMetadata'"></div>
           <div class="edit-button-container" data-bind="if: modificationAllowed">
-            <div class="edit-button" data-bind="click: edit, if: !editable()">
+            <div class="edit-button" data-bind="click: edit, if: !editable(), testId: 'edit-metadata'">
               <i class="lupicon-pen edit"></i>
             </div>
-            <div class="edit-button" data-bind="click: cancelEdit, if: editable">
+            <div class="edit-button" data-bind="click: cancelEdit, if: editable, testId: 'cancel-metadata-edit'">
               <i class="lupicon-circle-remove edit"></i>
             </div>
           </div>
@@ -24,7 +24,7 @@
           </div>
 
           <div data-bind="if: editable" class="editor-buttons">
-            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
+            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0, testId:'save-metadata'"></button>
           </div>
         </div>
       </div>
@@ -42,14 +42,16 @@
                            optionsText: loc,
                            value: $parent.values()[type],
                            valueAllowUnset: true,
-                           disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type)"></select>
+                           disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type),
+                           testId: type"></select>
       </div>
       <div data-bind="if: $data.inputType && !$data.calculated" class="text-input-container">
         <label data-bind="ltext: type"></label><br>
         <span data-bind="if: inputType === 'checkbox'">
           <input type="checkbox" class="form-input" data-bind="visible: $parent.editable, checked: $parent.values()[type],
                                                                css: {invalid: $parent.invalidFields().indexOf(type) >= 0},
-                                                               disable: $parent.disableAll || $parent.disabledFields &&  _.includes($parent.disabledFields(), type)">
+                                                               disable: $parent.disableAll || $parent.disabledFields &&  _.includes($parent.disabledFields(), type),
+                                                               testId: type">
           <span data-bind="visible: !$parent.editable() && $parent.values()[type](), ltext: 'yes'"></span>
           <span data-bind="visible: !$parent.editable() && !$parent.values()[type](), ltext: 'no'"></span>
         </span>
@@ -57,7 +59,8 @@
           <input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
                                                textInput: $parent.values()[type],
                                                css: {invalid: $parent.invalidFields().indexOf(type) >= 0},
-                                               disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type)">
+                                               disable: $parent.disableAll || $parent.disabledFields && _.includes($parent.disabledFields(), type),
+                                               testId: type">
           <span data-bind="visible: !$parent.editable(), text: $parent.values()[type]"></span>
         </span>
         <span data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></span>

@@ -1,0 +1,24 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="create-assignment-template">
+  <!-- ko if: _.keys(targets()).length > 0 -->
+  <div class="assignment-creator">
+    <div class="stacked--inline">
+      <button class="primary"
+              data-bind="toggleClick: editorVisible,
+                         testId: 'create-assignment-editor-button'">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.assignment.create'"></span>
+      </button>
+      <div class="bubble-dialog-arrow" data-bind="visible: editorVisible"></div>
+    </div>
+    <!-- ko if: editorVisible -->
+    <assignment-editor data-test-id="create-assignment-editor"
+                       params="visible: editorVisible,
+                               authorities: $root.authorities,
+                               targets: lupapisteApp.services.assignmentService.targets,
+                               applicationId: applicationId,
+                               targetGroup: initialTarget,
+                               editMode: false"></assignment-editor>
+    <!-- /ko -->
+  </div>
+  <!-- /ko -->
+</script>

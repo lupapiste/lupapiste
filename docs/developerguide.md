@@ -203,6 +203,8 @@ Kehitys tehdään develop-haaraan git flow -mallin mukaisesti. Tuotannossa on ma
 
 ### Frontend end-to-end testit
 
+Katso [browser-testing.md](browser-testing.md).
+
  - `local.sh` / `local.bat` ajaa Robot Frameworkilla paikalliset testit.
    Näissä oletetaan, että  palvelin on käynnissä oletusportissa.
  - `local-integration.sh` / `local-integration.bat`
@@ -610,18 +612,21 @@ Ks. [database.md](database.md)
 
 ## Uuden hakemustyypin lisääminen
 
-1. Luo uusi hakemustyyppi _permit.clj_ tiedostossa _defpermit_ makrolla.
-2. Määritä hakemustyypissä käytettävät liitteet _attachment.clj_ tiedostossa. Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
-3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) _operations.clj_ tiedostoon.
+1. Luo uusi hakemustyyppi `lupapalvelu.permit/defpermit` -makrolla.
+2. Määritä hakemustyypissä käytettävät liitteet (ks. `lupapalvelu.attachment.types/attachment-types-by-permit-type`). Varsinainen liitteiden määritys tehdään [lupapiste-commons](https://github.com/lupapiste/commons) projektiin (*attachment_types.cljc*).
+3. Lisää hakemustyypille tarvittavat toimenpiteet ja luo hakemustyypin toimenpidepuu (operation tree) `lupapalvelu.operations` -nimiavaruuteen.
 4. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteestä ulospäin)
-  1. Tee mapping halutusta XML formaatista (kts. esimerkiksi _src/lupapalvelu/xml/_ hakemistosta 'mapping.clj' päätteiset tiedostot). Rekisteröi KRYSP mapper funktio, joka luo XML tiedoston ja kirjoittaa sen levylle. Esimerkki funktion KRYSP mapper rekisteröinnistä **KT** lupatyypille (*rakennuslupa_mapping.clj*): `(permit/register-function permit/KT :app-krysp-mapper save-application-as-krysp)`.
-  2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä *vesihuolto_canonical.clj*). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
-  3. Katso mallia KRYSP putkesta, joka alkaa *integrations_api.clj* tiedoston **approve-application** commandista. Tarkempi kuvaus TODO.
+  1. Tee mapping halutusta XML formaatista. Mapping-funktio tulee luoda XML tiedosto ja kirjoittaa se levylle. Toteuta hakemustyypille multimetodi `lupapalvelu.permit/application-krysp-mapper`, joka kutsuu mapping-funktiota. Esimerkkejä: `lupapalvelu.xml.krysp.*_mapping`.
+  2. Toteuta funktiot muunnokseen hakemus->kanoninenXML (esimerkkiä `lupapalvelu.document.vesihuolto_canonical` -nimiavaruudesta). Kanonisesta mallista luodaan mappingin perusteella XML esitys.
+  3. Katso mallia KRYSP putkesta, joka alkaa `lupapalvelu.integrations_api` -nimiavaruuden **approve-application** commandista. Tarkempi kuvaus TODO.
 5. Jos hakemustyyppiin tulee KRYSP integraatio (Lupapisteeseen luku)
-  1. Rekisteröi päätösten validointi- ja lukufunktio, esimerkkejä varten katso _reader.clj_. Siellä luotu esimerkiksi lupatyypille YA päätösten lukija `(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)` ja validaattori `(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)`
-  2. Katso mallia päätösten lukemisesta *verdict_api.clj* tiedoston *do-check-for-verdict* funktiosta, joka hakee annetulle hakemukselle päätöksen kunnan taustajärjestelmästä.
+  1. Toteuta hakemustyypille multimetodit (esimerkkejä: `lupapalvelu.xml.krysp.reader`):
+     * sanoman nouto: `lupapalvelu.permit/fetch-xml-from-krysp`
+     * päätösten luku: `lupapalvelu.permit/read-verdict-xml`
+     * päätösten validointi: `lupapalvelu.permit/validate-verdict-xml`
+  2. Katso mallia päätösten lukemisesta `lupapalvelu.verdict/do-check-for-verdict` -funktiosta, joka hakee annetulle hakemukselle päätöksen kunnan taustajärjestelmästä.
 5. Jos hakemustyyppiin tulee asianhallinta integraatio
-  1. Määritä _lupapalvelu.xml.validator_ (validator.clj) nimiavaruuteen skeema validaattori(t) (_schema-validator_) uudelle lupatyypille.
+  1. Määritä `lupapalvelu.xml.validator` -nimiavaruuteen skeema validaattori(t) (_schema-validator_) uudelle lupatyypille.
   2. Tarkista että halutuilla toimenpiteillä on asianhallinta konfiguraatiossa arvo 'true' (_operations.clj_)
 
 
@@ -644,6 +649,6 @@ Tarkastuslista:
  - Tilan nimi ja lokalisaatio on viety DW:n lataustiedostoon
  - Tyylit lisätty resources/private/common-html/sass/views/_application.scss
    tiedostoon ja tiedosto käännetty compassilla
+ - Tila lisätty haluttuun kohtaan järjestystä TOJ:n editorissa (lupapiste-toj.components.editor/state-presentation-order-map)
 
 ## UI komponentit (ui_components.clj, auto-skannatut tiedostot ui-components hakemistossa)
-

@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.data-schema
   (:require [sade.strings :as ss]
+            [sade.util :refer [fn->] :as util]
             [sade.schemas :as ssc]
             [schema.core :as sc]
             [lupapalvelu.document.schemas :as doc-schemas]))
@@ -8,28 +9,41 @@
 
 (defmulti coerce-subtype :subtype)
 
+(defn- coerce-group-schema [{force-values ::force-values :as elem-schema}]
+  (->> (:body elem-schema)
+       (map (fn-> (util/assoc-when ::force-values force-values) coerce-type))
+       (into {})))
+
 (defn coerce-doc [doc-schema]
   {:id          ssc/ObjectIdStr
    :schema-info (sc/eq (:info doc-schema))
    :created     ssc/Timestamp
-   :data        (into {} (map coerce-type (:body doc-schema)))})
+   :data        (coerce-group-schema doc-schema)})
 
 (defn doc-data-schema
-  ([doc-name]         (doc-data-schema doc-name nil))
-  ([doc-name version] (coerce-doc (doc-schemas/get-schema (cond-> {:name doc-name}
-                                                  version (assoc :version version))))))
+  ([doc-name]                      (doc-data-schema doc-name nil))
+  ([doc-name force-values]         (doc-data-schema doc-name force-values nil))
+  ([doc-name force-values version] (-> (cond-> {:name doc-name}
+                                         version (assoc :version version))
+                                       doc-schemas/get-schema
+                                       (util/assoc-when ::force-values force-values)
+                                       coerce-doc)))
 
-(defn- data-leaf [{required :required :as elem-schema} value-schema]
-  (let [elem-key (cond-> (keyword (:name elem-schema))
-                   (not required) sc/optional-key)]
-    {elem-key (sc/if (comp nil? :value)
-                {:value    (sc/eq nil)}
-                {:value    value-schema
-                 :modified ssc/Timestamp})}))
+(defn- data-leaf [{required :required force-values ::force-values :as elem-schema} value-schema]
+  (if force-values ;; force-values forces all values to match value-schema
+    {(keyword (:name elem-schema)) {:value    value-schema
+                                    :modified ssc/Timestamp}}
+    (let [elem-key (cond-> (keyword (:name elem-schema))
+                     (not required) sc/optional-key)]
+      {elem-key
+       (sc/if (comp nil? :value)
+         {:value    (sc/eq nil)}
+         {:value    value-schema
+          :modified ssc/Timestamp})})))
 
 (defn- data-group [{repeating :repeating :as elem-schema}]
   (let [elem-key (keyword (:name elem-schema))
-        elem-val (into {} (map coerce-type (:body elem-schema)))]
+        elem-val (coerce-group-schema elem-schema)]
     (if repeating
       {elem-key {ssc/Nat elem-val}}
       {elem-key elem-val})))
@@ -77,6 +91,9 @@
 (defmethod coerce-subtype nil [elem-schema]
   (data-leaf elem-schema sc/Str))
 
+(defmethod coerce-subtype :recent-year [elem-schema]
+  (data-leaf elem-schema (ssc/min-max-valued-integer-string 1950 2015)))
+
 (defmethod coerce-type :string [elem-schema]
   (coerce-subtype elem-schema))
 
@@ -118,6 +135,9 @@
 
 (defmethod coerce-type :newBuildingSelector [elem-schema]
   (data-leaf elem-schema (sc/if ss/numeric? ssc/NatString (sc/eq "ei tiedossa"))))
+
+(defmethod coerce-type :linkPermitSelector [elem-schema]
+  (data-leaf elem-schema sc/Str))
 
 (defmethod coerce-type :radioGroup [elem-schema]
   (data-leaf elem-schema (apply sc/enum (map :name (:body elem-schema)))))

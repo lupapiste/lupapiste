@@ -18,10 +18,11 @@
             [sade.core :refer [now] :as core]
             [sade.common-reader :as cr]
             [sade.env :as env]
+            [sade.files :as files]
             [sade.util :as util]
             [sade.email]
             [sade.dummy-email-server :as dummy-email])
-  (:import (java.io File ByteArrayOutputStream)))
+  (:import (java.io ByteArrayOutputStream)))
 
 
 (def db-name (str "test_xml_asianhallinta_verdict-itest_" (now)))
@@ -70,9 +71,16 @@
     file))
 
 (defn- build-zip! [fpaths]
-  (let [temp-file (File/createTempFile "test" ".zip")]
+  (let [temp-file (files/temp-file "ah-verdict-itest" ".zip")]
     (zip-files! temp-file fpaths)
     temp-file))
+
+(defmacro with-zip-file [fpaths & body]
+  `(let [temp-file# (build-zip! ~fpaths)
+         ~'zip-file (.getPath temp-file#)]
+     (try
+       ~@body
+       (finally (io/delete-file temp-file#)))))
 
 (defn- create-local-ah-app []
   (create-and-submit-local-application
@@ -112,9 +120,9 @@
     [(app/make-application-id anything) => "LP-297-2015-00001"]
     (fact "Successful batchrun"
       (mongo/with-db db-name
-        (let [zip (fs/copy
-                   (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
-                   (fs/file (str local-target-folder "/verdict1.zip")))
+        (let [temp-file (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path])
+              zip (fs/copy temp-file (fs/file (str local-target-folder "/verdict1.zip")))
+              _   (io/delete-file temp-file)
               app (create-local-ah-app)
               app-id (:id app)]
           (generate-documents app pena true)
@@ -135,9 +143,9 @@
     [(app/make-application-id anything) => "LP-297-2015-00002"]
     (fact "Batchrun with unsuccessful verdict save (no xml inside zip)"
       (mongo/with-db db-name
-        (let [zip (fs/copy
-                   (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
-                   (fs/file (str local-target-folder "/verdict2.zip")))
+        (let [temp-file (build-zip! [example-ah-attachment-path example-ah-attachment2-path])
+              zip (fs/copy temp-file (fs/file (str local-target-folder "/verdict2.zip")))
+              _ (io/delete-file temp-file)
               app (create-local-ah-app)
               app-id (:id app)]
 
@@ -172,80 +180,80 @@
 (facts "Processing asianhallinta verdicts"
   (mongo/with-db db-name
     (fixture/apply-fixture "minimal")
-    (let [zip-file    (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]))
-          application (create-local-ah-app)
-          AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
+    (with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
+      (let [application (create-local-ah-app)
+            AsianPaatos (:AsianPaatos parsed-example-ah-xml)]
 
-      (fact "If application in wrong state, return error"
-        (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
+        (fact "If application in wrong state, return error"
+          (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta.wrong-state"))
 
-                                        ; generate docs, set application to 'sent' state by moving it to asianhallinta
-      (generate-documents application pena true)
-      (local-command velho :application-to-asianhallinta :id (:id application) :lang "fi")
-
-
-      (facts "Well-formed, return ok"
-        (dummy-email/reset-sent-messages)
-
-        (fact* "Creates verdict based on xml"
-          (:verdicts application) => empty?
-          (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => ok?
-          (let [application (query-application local-query pena (:id application))
-                verdicts (:verdicts application) =not=> empty?
-                new-verdict (last verdicts)
-                paatos (first (:paatokset new-verdict))
-                poytakirja (first (:poytakirjat paatos))]
-
-            (fact "application state is verdictGiven"
-
-              (keyword (:state application)) => :verdictGiven
-
-              (let [email (last (dummy-email/messages :reset true))]
-                (:to email) => (contains (email-for-key pena))
-                (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
-                email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
-
-              (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
-              (:paatostunnus paatos) => (:PaatoksenTunnus AsianPaatos)
-              (:anto (:paivamaarat paatos)) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
-
-              (:paatoksentekija poytakirja) => (:PaatoksenTekija AsianPaatos)
-              (:pykala poytakirja) => (:Pykala AsianPaatos)
-              (:paatospvm poytakirja) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
-              (:paatoskoodi poytakirja) => (:PaatosKoodi AsianPaatos))))
-
-        (fact* "Pushes verdict if there exists previous verdicts"
-          (fixture/apply-fixture "minimal")                 ; must empty applications because the app-is is hard coded in the xml :(
+        ; generate docs, set application to 'sent' state by moving it to asianhallinta
+        (generate-documents application pena true)
+        (local-command velho :application-to-asianhallinta :id (:id application) :lang "fi")
 
 
-          (let [app (create-local-ah-app)
-                app-id (:id app)]
-            (add-new-verdict app-id)
+        (facts "Well-formed, return ok"
+          (dummy-email/reset-sent-messages)
 
-            (let [application (query-application local-query velho app-id)
-                  orig-verdicts (:verdicts application) =not=> empty?
-                  orig-verdict-count (count orig-verdicts)]
-              (generate-documents application pena true)
-              (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
+          (fact* "Creates verdict based on xml"
+            (:verdicts application) => empty?
+            (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => ok?
+            (let [application (query-application local-query pena (:id application))
+                  verdicts (:verdicts application) =not=> empty?
+                  new-verdict (last verdicts)
+                  paatos (first (:paatokset new-verdict))
+                  poytakirja (first (:poytakirjat paatos))]
 
-              (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user)
+              (fact "application state is verdictGiven"
 
-              (let [application (query-application local-query velho app-id)
-                    new-verdict (last (:verdicts application))]
-                (count (:verdicts application)) => (+ orig-verdict-count 1)
-                (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
-
-                (fact "application state is verdictGiven" (keyword (:state application)) => :verdictGiven)
+                (keyword (:state application)) => :verdictGiven
 
                 (let [email (last (dummy-email/messages :reset true))]
                   (:to email) => (contains (email-for-key pena))
                   (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
-                  email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant")))))))))
+                  email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))
+
+                (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
+                (:paatostunnus paatos) => (:PaatoksenTunnus AsianPaatos)
+                (:anto (:paivamaarat paatos)) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+
+                (:paatoksentekija poytakirja) => (:PaatoksenTekija AsianPaatos)
+                (:pykala poytakirja) => (:Pykala AsianPaatos)
+                (:paatospvm poytakirja) => (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+                (:paatoskoodi poytakirja) => (:PaatosKoodi AsianPaatos))))
+
+          (fact* "Pushes verdict if there exists previous verdicts"
+            (fixture/apply-fixture "minimal")                 ; must empty applications because the app-is is hard coded in the xml :(
+
+
+            (let [app (create-local-ah-app)
+                  app-id (:id app)]
+              (add-new-verdict app-id)
+
+              (let [application (query-application local-query velho app-id)
+                    orig-verdicts (:verdicts application) =not=> empty?
+                    orig-verdict-count (count orig-verdicts)]
+                (generate-documents application pena true)
+                (local-command velho :application-to-asianhallinta :id app-id :lang "fi")
+
+                (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user)
+
+                (let [application (query-application local-query velho app-id)
+                      new-verdict (last (:verdicts application))]
+                  (count (:verdicts application)) => (+ orig-verdict-count 1)
+                  (:kuntalupatunnus new-verdict) => (:AsianTunnus AsianPaatos)
+
+                  (fact "application state is verdictGiven" (keyword (:state application)) => :verdictGiven)
+
+                  (let [email (last (dummy-email/messages :reset true))]
+                    (:to email) => (contains (email-for-key pena))
+                    (:subject email) => "Lupapiste: Suusaarenkierto 44 - p\u00e4\u00e4t\u00f6s"
+                    email => (partial contains-application-link-with-tab? (:id application) "verdict" "applicant"))))))))))
   (against-background
     (app/make-application-id anything) => "LP-297-2015-00001"))
 
 (facts "unit tests"
-  (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path]))]
+  (with-zip-file [example-ah-xml-path example-ah-attachment-path]
     (fact* "Can unzip passed zipfile"
            (let [tmp-dir    (fs/temp-dir "ah-unzip-test")
                  unzip-path (unzip-file zip-file tmp-dir) =not=> (throws Exception)
@@ -294,15 +302,15 @@
 
   (fact "If xml message missing from zip"
     (mongo/with-db db-name
-      (let [zip-file (.getPath (build-zip! [example-ah-attachment-path]))] ; xml is missing
+      (with-zip-file [example-ah-attachment-path] ; xml is missing
         (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-wrong-number-of-xmls"))))
 
   (fact "If attachment files missing from zip"
     (mongo/with-db db-name
-      (let [zip-file (.getPath (build-zip! [example-ah-xml-path]))] ;attachment is missing
+      (with-zip-file [example-ah-xml-path] ;attachment is missing
         (ahk/process-ah-verdict zip-file "dev_ah_kuopio" system-user) => (partial expected-failure? "error.integration.asianhallinta-missing-attachment"))))
 
   (fact "If xml message references an application that the ftp user cannot access"
     (mongo/with-db db-name
-      (let [zip-file (.getPath (build-zip! [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]))]
+      (with-zip-file [example-ah-xml-path example-ah-attachment-path example-ah-attachment2-path]
         (ahk/process-ah-verdict zip-file "sipoo" system-user) => (partial expected-failure? "error.integration.asianhallinta.unauthorized")))))

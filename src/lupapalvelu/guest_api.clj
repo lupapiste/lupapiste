@@ -6,10 +6,11 @@
   Guests are invited by the applicant (or similar role)."
   (:require [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.guest :as guest]
-            [lupapalvelu.authorization :as auth]))
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]))
 
 (defquery resolve-guest-authority-candidate
   {:parameters [email]
@@ -52,14 +53,16 @@
   guestAuthority) access. Guest 'authorization' does not need to be
   explicitly acknowledged by the invitee."
    :user-roles          #{:applicant :authority}
+   :user-authz-roles    (conj auth/default-authz-writer-roles :foreman)
    :parameters          [:id :email :role]
    :optional-parameters [:text]
-   :pre-checks          [guest/no-duplicate-guests
+   :pre-checks          [foreman/allow-foreman-only-in-foreman-app
+                         guest/no-duplicate-guests
                          guest/known-guest-authority]
    :input-validators    [(partial action/non-blank-parameters [:email])
                          action/email-validator
                          guest/valid-guest-role]
-   :states              states/all-application-states
+   :states              (states/all-application-states-but [:canceled])
    :notified            true}
   [command]
   (guest/invite-guest command))
@@ -79,9 +82,10 @@
   command in authorization_api is not feasible, since the rights are
   different for guests."
    :user-roles       #{:applicant :authority}
-   :user-authz-roles #{:guest :guestAuthority :writer :owner}
+   :user-authz-roles #{:guest :guestAuthority :writer :owner :foreman}
    :parameters       [:id :username :unsubscribe]
    :input-validators [(partial action/non-blank-parameters [:username])]
+   :pre-checks       [foreman/allow-foreman-only-in-foreman-app]
    :states           states/all-application-states}
   [command]
   (guest/toggle-guest-subscription command))
@@ -89,9 +93,11 @@
 (defcommand delete-guest-application
   {:description "Cancels the guest access from application."
    :user-roles #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :parameters [:id :username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :pre-checks [guest/auth-modification-check]
+   :pre-checks [guest/auth-modification-check
+                foreman/allow-foreman-only-in-foreman-app]
    :states states/all-application-states}
   [command]
   (guest/delete-guest-application command))

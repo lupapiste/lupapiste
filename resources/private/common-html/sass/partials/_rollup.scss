@@ -1,3 +1,8 @@
+/* .rollup { */
+/*   width: 100%; */
+/*   display: block; */
+/* } */
+
 .rollup--closed > .rollup__open {
   display: none;
 }
@@ -8,12 +13,12 @@
 
 button.rollup-button {
   width: 100%;
-  display: table-cell;
+  display: block;
 }
 
 .rollup-status {
   width: 100%;
-  display: table-cell;
+  display: block;
 }
 
 .rollup-status__text {

@@ -1,0 +1,111 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="calendar-notification-list-template">
+  <!-- ko ifnot: _.isEmpty(items()) -->
+  <div class="calendar-notification-list">
+    <div data-bind="foreach: items">
+      <div class="calendar-pending-action">
+        <h3 data-bind="weekdayAndDate: day"></h3>
+        <div data-bind="foreach: notifications">
+          <div class="calendar-pending-action-item">
+            <div class="times">
+              <div class="startTime" data-bind="timeString: startTime"></div><br />
+              <div class="endTime" data-bind="timeString: endTime"></div>
+            </div>
+            <div class="titlebar">
+              <!-- ko if: $component.linkToApplication -->
+              <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>:
+              <span data-bind="text: participantsText"></span>
+              <br /><a data-bind="attr: {href: pageutil.buildPageHash('application', application.id, 'calendar')},
+                                  text: [loc(application.primaryOperation.name+'._group_label'), loc('municipality.'+application.municipality), application.address].join(', ') + ' (' + application.id + ')'"></a>
+              <!-- /ko -->
+              <!-- ko ifnot: $component.linkToApplication -->
+              <span data-bind="text: reservationType.name"></span> / <span data-bind="text: location"></span>
+              <br /><span data-bind="ltext: 'application.calendar.reservation.participants'"></span>: <span data-bind="text: participantsText"></span>
+              <!-- /ko -->
+            </div>
+
+            <!-- ko if: $component.actionRequired -->
+              <div class="titlebar"
+                   data-bind="css: { 'buttons-box': acknowledged() === 'none',
+                                     'undo-link': acknowledged() !== 'none' }">
+                <!-- ko if: acknowledged() === 'none' -->
+                  <!-- ko if: (reservationStatus === 'ACCEPTED' || reservationStatus === 'DECLINED' || reservationStatus === 'CANCELED') -->
+                  <button class="positive" data-bind="click: $component.markSeen.bind($data),
+                                                      testId: 'mark-seen-reservation-btn-' + $index()">
+                    <i class="lupicon-check" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.ok'"></span>
+                  </button>
+                  <!-- /ko -->
+
+                  <!-- ko if: reservationStatus === 'PENDING' -->
+                  <button class="positive" data-bind="click: $component.acceptReservation.bind($data),
+                                                      testId: 'accept-reservation-btn-' + $index()">
+                    <i class="lupicon-check" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.accept'"></span>
+                  </button>
+                  <button class="negative" data-bind="click: $component.declineReservation.bind($data),
+                                                      testId: 'decline-reservation-btn-' + $index()">
+                    <i class="lupicon-remove" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.decline'"></span>
+                  </button>
+                  <!-- /ko -->
+
+                  <!-- ko if: reservationStatus === 'ACCEPTED' -->
+                  <button class="negative" data-bind="click: $component.cancelReservation.bind($data),
+                                                      testId: 'cancel-reservation-btn-' + $index()">
+                    <i class="lupicon-remove" style="display: inline;"></i>
+                    <i class="wait spin lupicon-refresh"></i>
+                    <span data-bind="ltext: 'button.cancel'"></span>
+                  </button>
+                  <!--/ko-->
+
+                <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'seen' -->
+                  <span data-bind="ltext: 'button.ok', testId: 'reservation-seen-ack-' + $index()"></span>
+                <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'accepted' -->
+                  <span data-bind="ltext: 'calendar.accepted', testId: 'reservation-accepted-ack-' + $index()"></span>
+                <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'declined' -->
+                  <span data-bind="ltext: 'calendar.declined', testId: 'reservation-declined-ack-' + $index()"></span>
+                <!-- /ko -->
+
+                <!-- ko if: acknowledged() === 'canceled' -->
+                  <span data-bind="ltext: 'calendar.canceled', testId: 'reservation-canceled-ack-' + $index()"></span>
+                <!-- /ko -->
+              </div>
+
+
+              <!-- ko if: reservationStatus === 'PENDING' -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.invited'"></div>
+              <!-- /ko -->
+              <!-- ko if: reservationStatus === 'ACCEPTED' && from === lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-accepted'"></div>
+              <!-- /ko -->
+              <!-- ko if: reservationStatus === 'DECLINED' && from === lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-declined'"></div>
+              <!-- /ko -->
+              <!-- ko if: reservationStatus === 'ACCEPTED' && from !== lupapisteApp.models.currentUser.id() -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-reserved'"></div>
+              <!-- /ko -->
+              <!-- ko if: reservationStatus === 'CANCELED' -->
+              <div class="titlebar status" data-bind="ltext: 'application.calendar.notification.applicant-canceled'"></div>
+              <!-- /ko -->
+
+            <!-- /ko -->
+
+          </div>
+          <div style="border: 1px solid #ccc; border-top: 0px; width: 100%; padding: 6px; background-color: #eeeeee">
+            <div style="display: inline-block;"><span data-bind="text: comment"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>

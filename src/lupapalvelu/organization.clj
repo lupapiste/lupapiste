@@ -17,7 +17,7 @@
             [hiccup.core :as hiccup]
             [clj-rss.core :as rss]
             [schema.core :as sc]
-            [sade.core :refer [fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -26,12 +26,12 @@
             [sade.xml :as sxml]
             [sade.schemas :as ssc]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.geojson :as geo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.wfs :as wfs]
-            [lupapalvelu.geojson :as geo]
             [me.raynes.fs :as fs]
             [clojure.walk :refer [keywordize-keys]]))
 
@@ -54,8 +54,11 @@
    :name sc/Str})
 
 (sc/defschema Link
-  {:url  ssc/OptionalHttpUrl
-   :name {:fi sc/Str, :sv sc/Str}})
+  {:url  {:fi ssc/OptionalHttpUrl :en ssc/OptionalHttpUrl :sv ssc/OptionalHttpUrl}
+   ;:url  (i18n/localization-schema ssc/OptionalHttpUrl) TODO uncomment when feature.english is used in production
+   ;:name (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
+   :name {:fi sc/Str :en sc/Str :sv sc/Str}
+   (sc/optional-key :modified) ssc/Timestamp})
 
 (sc/defschema Server
   {(sc/optional-key :url)       ssc/OptionalHttpUrl
@@ -65,7 +68,8 @@
 
 (sc/defschema Organization
   {:id sc/Str
-   :name {:fi sc/Str, :sv sc/Str}
+   ;:name  (i18n/localization-schema sc/Str) TODO uncomment when feature.english is used in production
+   :name {:fi sc/Str :en sc/Str :sv sc/Str}
    :scope [{:permitType sc/Str
             :municipality sc/Str
             :new-application-enabled sc/Bool
@@ -79,6 +83,7 @@
 
    (sc/optional-key :allowedAutologinIPs) sc/Any
    (sc/optional-key :app-required-fields-filling-obligatory) sc/Bool
+   (sc/optional-key :assignments-enabled) sc/Bool
    (sc/optional-key :areas) sc/Any
    (sc/optional-key :areas-wgs84) sc/Any
    (sc/optional-key :calendars-enabled) sc/Bool
@@ -111,7 +116,9 @@
                                                (sc/optional-key :vendor-backend-url-for-lp-id)      ssc/OptionalHttpUrl}
    (sc/optional-key :use-attachment-links-integration) sc/Bool
    (sc/optional-key :section) {(sc/optional-key :enabled)    sc/Bool
-                               (sc/optional-key :operations) [sc/Str]}})
+                               (sc/optional-key :operations) [sc/Str]}
+   (sc/optional-key :3d-map) {(sc/optional-key :enabled) sc/Bool
+                              (sc/optional-key :server)  Server}})
 
 (def permanent-archive-authority-roles [:tos-editor :tos-publisher :archivist])
 (def authority-roles
@@ -179,13 +186,10 @@
   [password crypto-iv]
   (crypt/decrypt-aes-string password (env/value :backing-system :crypto-key) crypto-iv))
 
-(defn get-krysp-wfs
+(defn resolve-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
-  ([{:keys [organization permitType] :as application}]
-    (get-krysp-wfs {:_id organization} permitType))
-  ([query permit-type]
-   (let [organization (mongo/select-one :organizations query [:krysp])
-         krysp-config (get-in organization [:krysp (keyword permit-type)])
+  ([organization permit-type]
+   (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
          crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (:crypto-iv krysp-config)
          password     (when-let [password (and crypto-iv (:password krysp-config))]
@@ -195,10 +199,20 @@
        (->> (when username {:credentials [username password]})
             (merge (select-keys krysp-config [:url :version])))))))
 
-(defn municipality-address-endpoint [municipality]
-  (when (and (not (ss/blank? municipality)) (re-matches #"\d{3}" municipality) )
-    (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" ".+"}} :osoitteet)))
+(defn get-krysp-wfs
+  "Returns a map containing :url and :version information for municipality's KRYSP WFS"
+  ([{:keys [organization permitType] :as application}]
+    (get-krysp-wfs {:_id organization} permitType))
+  ([query permit-type]
+   (-> (mongo/select-one :organizations query [:krysp])
+       (resolve-krysp-wfs permit-type))))
 
+(defn municipality-address-endpoint [^String municipality]
+  {:pre [(or (string? municipality) (nil? municipality))]}
+  (when (and (ss/not-blank? municipality) (re-matches #"\d{3}" municipality) )
+    (let [no-bbox-srs (env/value :municipality-wfs (keyword municipality) :no-bbox-srs)]
+      (some-> (get-krysp-wfs {:scope.municipality municipality, :krysp.osoitteet.url {"$regex" "\\S+"}} :osoitteet)
+              (util/assoc-when :no-bbox-srs (boolean no-bbox-srs))))))
 
 (defn set-krysp-endpoint
   [id url username password endpoint-type version]
@@ -209,7 +223,7 @@
                   (map (fn [[k v]] [(str "krysp." endpoint-type "." (name k)) v]))
                   (into {})
                   (hash-map $set))]
-    (if (and (not (ss/blank? url)) (= "osoitteet" endpoint-type))
+    (if (and (ss/not-blank? url) (= "osoitteet" endpoint-type))
       (let [capabilities-xml (wfs/get-capabilities-xml url username password)
             osoite-feature-type (some->> (wfs/feature-types capabilities-xml)
                                          (map (comp :FeatureType sxml/xml->edn))
@@ -294,6 +308,9 @@
 (defn some-organization-has-calendars-enabled? [organization-ids]
   (pos? (mongo/count :organizations {:_id {$in organization-ids} :calendars-enabled true})))
 
+(defn organizations-with-calendars-enabled []
+  (map :id (mongo/select :organizations {:calendars-enabled true} {:id 1})))
+
 ;;
 ;; Backend server addresses
 ;;
@@ -354,6 +371,9 @@
 
 (def update-organization-suti-server (partial update-organization-server :suti.server))
 
+;; 3D Map. See also 3d-map and 3d-map-api namespaces.
+
+(def update-organization-3d-map-server (partial update-organization-server :3d-map.server))
 
 ;;
 ;; Construction waste feeds
@@ -419,7 +439,7 @@
 
 (defmethod waste-ads :rss [org-id _ lang]
   (let [ads         (waste-ads org-id)
-        columns     (map :name schemas/availableMaterialsRow)
+        columns     (map :name waste-schemas/availableMaterialsRow)
         loc         (fn [prefix term] (if (ss/blank? term)
                                         term
                                         (i18n/with-lang lang (i18n/loc (str prefix term)))))
@@ -597,3 +617,34 @@
     (when (not= (boolean already) (boolean flag))
       (update-organization (:id organization)
                            {(if flag $push $pull) {(util/kw-path group :operations) operation-id}}))))
+
+(defn add-organization-link [organization name url created]
+  (update-organization organization
+                       {$push {:links {:name     name
+                                       :url      url
+                                       :modified created}}}))
+
+(defn update-organization-link [organization index name url created]
+  (update-organization organization
+                       {$set {(str "links." index) {:name     name
+                                                    :url      url
+                                                    :modified created}}}))
+
+(defn- combine-keys [prefix [k v]]
+  [(keyword (str (name prefix) "." (name k))) v])
+
+(defn- mongofy
+  "Transform eg. {:outer {:inner :value}} into {:outer.inner :value}"
+  [m]
+  (into {}
+        (mapcat (fn [[k v]]
+                  (if (and (keyword? k)
+                           (map? v))
+                    (map (partial combine-keys k) (mongofy v))
+                    [[k v]]))
+                m)))
+
+(defn remove-organization-link [organization name url]
+  (update-organization organization
+                       {$pull {:links (mongofy {:name name
+                                                :url  url})}}))

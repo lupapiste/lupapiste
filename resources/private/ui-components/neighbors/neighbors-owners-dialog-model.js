@@ -14,6 +14,7 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   self.status = ko.observable(self.statusInit);
   self.ownersGroups = ko.observable([]);
   self.propertyIds = ko.observable(null);
+  self.emptyPropertyIds = ko.observableArray();
 
   self.isSubmitEnabled = ko.pureComputed(function() {
     return !self.readonly && self.status() === self.statusSelectOwners
@@ -71,7 +72,11 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
   };
 
   self.searchOwnersByPropertyIds = function(propertyIds) {
-    self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext, propertyIds, self.ownersFound, self.ownersNotFound));
+    self.emptyPropertyIds([]);
+    self.searchRequests.push(locationSearch.ownersByPropertyIds(self.requestContext,
+                                                                propertyIds,
+                                                                _.partialRight(self.ownersFound, propertyIds),
+                                                                _.partial(self.ownersNotFound, propertyIds )));
     return self;
   };
 
@@ -81,10 +86,10 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
     return self;
   };
 
-  self.ownersFound = function(data) {
+  self.ownersFound = function(data, allPropertyIds ) {
     var ownersWithObservables = _.map(data.owners, convertOwner);
-    var gropupedOwners = _.groupBy(ownersWithObservables, "propertyId");
-    var groupsWithSelectAll = _.mapValues(gropupedOwners, function(n) {
+    var groupedOwners = _.groupBy(ownersWithObservables, "propertyId");
+    var groupsWithSelectAll = _.mapValues(groupedOwners, function(n) {
       var ownersGroup = ko.computed({
         read: function() {
           return _.some(n, function(owner) {
@@ -97,17 +102,30 @@ LUPAPISTE.NeighborsOwnersDialogModel = function(params) {
           });
         }
       });
+      self.emptyPropertyIds(_.difference( allPropertyIds, _.keys( groupedOwners ) ));
       return {owners: n, ownersGroup: ownersGroup};
     });
     return self.ownersGroups(_.values(groupsWithSelectAll)).status(self.statusSelectOwners);
   };
 
+
+
   self.propertyIfNotFound = function() {
     return self.status(self.statusPropertyIdSearchFailed);
   };
 
-  self.ownersNotFound = function() {
+  self.ownersNotFound = function( allPropertyIds ) {
+    self.emptyPropertyIds( allPropertyIds );
     return self.status(self.statusOwnersSearchFailed);
+  };
+
+  self.showManualAdd = function() {
+    // The same dialog is shown also in non-neighbour
+    // scenarios. Readonly flag denotes non-neighbor use case.
+    return (_.isEmpty( self.ownersGroups() )
+            || _.some(self.emptyPropertyIds()))
+      && !self.isSearching()
+      && !self.readonly;
   };
 
   self.addSelectedOwners = function() {

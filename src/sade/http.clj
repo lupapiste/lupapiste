@@ -70,3 +70,20 @@
         cred (and auth (ss/base64-decode (last (re-find #"^Basic (.*)$" auth))))]
     (when cred
       (ss/split (str cred) #":" 2))))
+
+(defn parse-bearer
+  "Returns Authorization: Bearer token from request.
+   See https://tools.ietf.org/html/rfc6750#page-5"
+  [request]
+  (when-let [auth (get-in request [:headers "authorization"])]
+
+    ; From RFC 6750:
+    ;   The syntax for Bearer credentials is as follows:
+    ;     b64token    = 1*( ALPHA / DIGIT /
+    ;                       "-" / "." / "_" / "~" / "+" / "/" ) *"="
+    ;     credentials = "Bearer" 1*SP b64token
+
+    ; The token is not base64-encoded, it just happens that the allowed
+    ; characters are the same.
+
+    (last (re-find #"^Bearer ([a-zA-Z0-9\-._~+/]+[=]*)$" auth))))

@@ -7,7 +7,7 @@
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
-            [sade.util :as util]
+            [sade.util :refer [fn->>] :as util]
             [sade.core :refer :all]
             [monger.core :as m]
             [monger.collection :as mc]
@@ -19,8 +19,8 @@
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
-           [com.mongodb WriteConcern MongoClientOptions$Builder]
-           [com.mongodb.gridfs GridFSInputFile]))
+           [com.mongodb DB WriteConcern MapReduceCommand$OutputType MapReduceOutput]
+           [com.mongodb.gridfs GridFS GridFSDBFile GridFSInputFile]))
 
 
 (def operators (set (map name (keys (ns-publics 'monger.operators)))))
@@ -48,7 +48,7 @@
       (with-db db-name
         (handler request)))))
 
-(defn ^{:perfmon-exclude true} get-db []
+(defn ^{:perfmon-exclude true} ^DB get-db []
   {:pre [@connection]}
   (locking dbs
     (or (get @dbs *db-name*)
@@ -56,7 +56,7 @@
           (swap! dbs assoc *db-name* db)
           db))))
 
-(defn ^{:perfmon-exclude true} get-gfs []
+(defn ^{:perfmon-exclude true} ^GridFS get-gfs []
   (m/get-gridfs @connection (.getName (get-db))))
 
 (defn ^{:perfmon-exclude true} with-_id [m]
@@ -101,14 +101,27 @@
   "Returns a map of mongodb array update paths to be used as a value for $set or $unset operation.
    E.g., (generate-array-updates :attachments [true nil nil true nil] true? \"k\" \"v\")
          => {\"attachments.0.k\" \"v\", \"attachments.3.k\" \"v\"}"
-  [array-name array pred k v]
-  (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
+  [array-name array pred & kvs]
+  (reduce (fn [m i] (->> (apply hash-map kvs)
+                         (util/map-keys (fn->> name (str (name array-name) \. i \.)))
+                         (merge m)))
+          {} (util/positions pred array)))
 
 (defn ^{:perfmon-exclude true} remove-null-chars
   "Removes illegal null characters from input.
    Nulls cause 'BSON cstring' exceptions."
   [m]
   (walk/postwalk (fn [v] (if (string? v) (s/replace v "\0" "") v)) m))
+
+;;
+;; Simple cache support
+;;
+
+(defn ^{:perfmon-exclude true} with-mongo-meta [m]
+  (assoc m :created (java.util.Date.)))
+
+(defn ^{:perfmon-exclude true} without-mongo-meta [m]
+  (dissoc m :id :_id :created))
 
 ;;
 ;; Database Api
@@ -223,6 +236,26 @@
                  (query/find (remove-null-chars query))
                  (query/sort order-by))))
 
+(defn- ^{:perfmon-exclude true} wrap-js-function [s & args]
+  (if (s/starts-with? s "function")
+    s
+    (str "function(" (s/join \, (map name args)) "){" s "}")))
+
+(defn map-reduce
+  "Returns map-reduce results inline.
+   Mapper-js and reducer-js are JavaScript functions or their bodies as Strings.
+   Both should return the same keys:
+   - reducer is not called if there is only one result
+   - Mapped results are reduced in chucks and reducer is called multible times
+     as more data is processed. This means that reducer 'values' paramerter
+     might not contain all the data at once, if there are multiple chucks."
+  [collection query mapper-js reducer-js]
+  {:pre [(keyword? collection) (map? query) (string? mapper-js) (string? reducer-js)]}
+  (let [mapper-js-fn  (wrap-js-function mapper-js)
+        reducer-js-fn (wrap-js-function reducer-js :key :values)
+        output (mc/map-reduce (get-db) collection mapper-js-fn reducer-js-fn nil MapReduceCommand$OutputType/INLINE query)]
+    (map with-id (from-db-object ^DBObject (.results ^MapReduceOutput output) true))))
+
 (defn any?
   "check if any"
   ([collection query]
@@ -255,19 +288,15 @@
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
   (let [meta (remove-null-chars (if (map? (first metadata))
                                   (first metadata)
-                                  (apply hash-map metadata)))
-        store-content (fn [input-stream]
-                        (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
-                                        (set-file-id file-id)
-                                        (gfs/filename filename)
-                                        (gfs/content-type content-type)
-                                        (gfs/metadata (assoc meta :uploaded (now)))))]
-    (if (instance? java.io.InputStream content)
-      (store-content content) ; Closing the stream should be handled by the caller
-      (with-open [input-stream (io/input-stream content)]
-        (store-content input-stream)))))
+                                  (apply hash-map metadata)))]
+    (with-open [input-stream (io/input-stream content)]
+      (gfs/store-file (gfs/make-input-file (get-gfs) input-stream)
+        (set-file-id file-id)
+        (gfs/filename filename)
+        (gfs/content-type content-type)
+        (gfs/metadata (assoc meta :uploaded (now)))))))
 
-(defn- gridfs-file-as-map [attachment]
+(defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)
@@ -428,7 +457,10 @@
   (ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
   (ensure-index :propertyCache {:created 1} {:expireAfterSeconds (* 60 60 24)}) ; 24 h
   (ensure-index :propertyCache (array-map :kiinttunnus 1 :x 1 :y 1) {:unique true, :name "kiinttunnus_x_y"})
-  (ensure-index :ssoKeys {:ip 1} {:unique true}))
+  (ensure-index :buildingCache {:created 1} {:expireAfterSeconds (* 60 60 12)}) ; 12 h
+  (ensure-index :buildingCache {:propertyId 1} {:unique true})
+  (ensure-index :ssoKeys {:ip 1} {:unique true})
+  (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

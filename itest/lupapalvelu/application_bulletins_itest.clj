@@ -1,14 +1,15 @@
 (ns lupapalvelu.application-bulletins-itest
-    (:require [midje.sweet :refer :all]
-              [lupapalvelu.itest-util :refer :all]
-              [lupapalvelu.application-bulletins-itest-util :refer :all]
-              [lupapalvelu.vetuma-itest-util :as vetuma-util]
-              [lupapalvelu.factlet :refer :all]
-              [lupapalvelu.mongo :as mongo]
-              [sade.util :as util]
-              [sade.core :refer [now]]
-              [clojure.java.io :as io]
-              [cheshire.core :as json] [sade.util :as util]))
+  (:require [midje.sweet :refer :all]
+            [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.application-bulletins-itest-util :refer :all]
+            [lupapalvelu.vetuma-itest-util :as vetuma-util]
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [sade.util :as util]
+            [sade.strings :as ss]
+            [sade.core :refer [now]]
+            [clojure.java.io :as io]
+            [cheshire.core :as json]))
 
 (apply-remote-minimal)
 
@@ -163,6 +164,8 @@
                                                        :propertyId sipoo-property-id
                                                        :x 406898.625 :y 6684125.375
                                                        :address "Hitantine 108")
+              _ (upload-attachment pena (:id oulu-app) {:type {:type-id "muu" :type-group "muut"}
+                                                        :op-id (-> oulu-app :primaryOperation :id)} true)
               _ (command olli :approve-application :id (:id oulu-app) :lang "fi") => ok?
               _ (command sonja :approve-application :id (:id sipoo-app) :lang "fi") => ok?
               _ (command olli :move-to-proclaimed
@@ -191,12 +194,17 @@
                                         :primaryOperation :propertyId :state :stateSeq :canComment
                                         :verdicts :tasks
                                         :proclamationText :proclamationEndsAt :proclamationStartsAt] :in-any-order)
+              (fact "attachments only contain specified keys and nothing else"
+                (map keys (:attachments bulletin)) => (has every? (just [:id :type :latestVersion :contents :target]))
+                (map (comp keys :latestVersion) (:attachments bulletin)) => (has every? (just [:filename :contentType :fileId :size])))
               (fact "bulletin state is 'proclaimed'"
                 (:bulletinState bulletin) => "proclaimed")
               (fact "each documents has schema definition"
                 (:documents bulletin) => (partial every? :schema))
               (fact "no party documents"
                 (:documents bulletin) => (partial every? #(not= (-> % :schema-info :type keyword) :party)))
+              (fact "no document metadata in bulletins"
+                (:documents bulletin) => (partial not-any? :meta))
               (fact "_applicantIndex"
                 (:_applicantIndex bulletin) => (just ["Panaani Pena"]))))
 
@@ -212,10 +220,36 @@
               (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
                 (count data) => 2))
 
+            (fact "Free text search - search term too long"
+              (datatables pena :application-bulletins :page 1 :searchText (ss/join (repeat 200 "hitan")) :municipality nil :state nil :sort nil) => fail?)
             (fact "Free text"
               (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "hitan" :municipality nil :state nil :sort nil)]
                 (count data) => 1
                 (:id (first data)) => (:id sipoo-app))))
+
+          (facts "verdict given bulletin"
+            (let [{vid :verdict-id} (give-verdict olli (:id oulu-app) :verdictId "12330-2016")
+                  ts-now (now)
+                  _ (upload-attachment-to-target olli (:id oulu-app) nil true vid "verdict")
+                  resp (command olli :move-to-verdict-given
+                                     :id (:id oulu-app)
+                                     :verdictGivenAt ts-now
+                                     :appealPeriodStartsAt ts-now
+                                     :appealPeriodEndsAt (+ 1 ts-now)
+                                     :verdictGivenText "foo")
+                  bulletin (query-bulletin pena (:id oulu-app))]
+              (fact "move-to-verdict-given ok"
+                resp => ok?)
+              (fact "bulletin state is 'verdictGiven'"
+                (:bulletinState bulletin) => "verdictGiven")
+              (fact "bulletin contains an attachment that is linked to the verdict"
+                (:attachments bulletin) => (has some (contains {:target {:type "verdict" :id vid}})))
+              (fact "State filter in search still works"
+                (:states (query pena :application-bulletin-states)) => (just ["proclaimed" "verdictGiven"])
+                (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "proclaimed" :sort nil)]
+                  (count data) => 1)
+                (let [{data :data} (datatables pena :application-bulletins :page 1 :searchText "" :municipality nil :state "verdictGiven" :sort nil)]
+                  (count data) => 1))))
 
           (facts "Paging"
             (dotimes [_ 20]

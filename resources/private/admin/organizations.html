@@ -4,9 +4,29 @@
     <section class="page" id="organizations">
       <div class="container">
 
-        <h2>Organizations</h2>
+        <h2>Organisaatiot</h2>
 
-        <table data-test-id="organizations-table">
+        <label for="organisation-search">Haku</label>
+        <form data-bind="submit: organizationsModel.search"
+              class="organizations-search">
+          <input type="text" class="textinput textinput--big"
+                 data-bind="value: organizationsModel.searchTerm"
+                 data-test-id="organization-search-term">
+          <button class="function" type="submit"
+                  data-test-id="organization-search">
+            <i class="lupicon-search"></i>
+            <span>Hae</span>
+          </button>
+          <button class="function"
+                  data-bind="click: organizationsModel.showAll"
+                  data-test-id="organization-show-all">
+            <i class="lupicon-document-list"></i>
+            <span>N&auml;yt&auml; kaikki</span></button>
+        </form>
+        <p data-bind="text: organizationsModel.countText()"
+           data-test-id="organization-result-count"></p>
+        <!-- ko if: _.some( organizationsModel.organizations()) -->
+        <table data-test-id="organizations-table"
           <thead>
             <tr>
               <th data-bind="ltext: 'organization.id'"></th>
@@ -56,7 +76,10 @@
             <!-- /ko -->
           </tbody>
         </table>
+<!-- /ko -->
 
+
+        <p><a href="/api/raw/admin-attachment-report-csv">Lataa liitetiedostoraportti</a></p>
       </div>
 
       <div id="dialog-login-as" class="window autosized" data-bind="with: loginAsModel">

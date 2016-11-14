@@ -49,7 +49,7 @@
         <span data-bind="ltext: 'document.operation-identifiers'"></span>
       </button>
       <button class="secondary is-right"
-          data-bind="visible: remove.fun,
+          data-bind="visible: showRemove,
                      attr: {'data-test-class': remove.testClass},
                      click: remove.fun">
         <i class="lupicon-remove"></i>
@@ -90,6 +90,11 @@
       <!-- /ko -->
     </div>
     <!-- /ko -->
-
+    <!-- ko if: auth.ok("assignments-for-application") && documentAssignments().length > 0 -->
+    <accordion-assignments params="documentAssignments: documentAssignments,
+                                   schemaName: info.name,
+                                   applicationId: docModel.appId,
+                                   authorities: accordionService.authorities"></accordion-assignments>
+    <!-- /ko -->
   </div>
 </script>

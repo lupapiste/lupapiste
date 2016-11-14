@@ -1,21 +1,20 @@
 LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   "use strict";
   var self = this,
-    calendarService = lupapisteApp.services.calendarService,
-    config = calendarService.params();
+    config = LUPAPISTE.config.calendars;
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   self.client = params.client;
+  self.applicationId = ko.observable();
   self.authority = params.authority;
-  self.reservationTypeId = params.reservationTypeId;
-  self.reservationTypes = params.reservationTypes;
+  self.reservationType = params.reservationType;
+  self.applicationModel = params.applicationModel;
 
   self.slot = ko.observable();
-  self.location = ko.observable();
+  self.location = ko.observable("");
   self.comment = ko.observable("");
   self.participants = ko.observableArray([]);
-  self.reservationType = ko.observable();
   self.endHour = ko.observable();
 
   self.weekdayCss = ko.observable();
@@ -24,20 +23,22 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.error = ko.observable(false);
   self.bubbleVisible = ko.observable(false);
 
+
   self.okEnabled = self.disposedComputed(function() {
     return true;
   });
 
   self.send = function() {
+    self.sendEvent("calendarView", "updateOperationCalled");
     self.sendEvent("calendarService", "reserveCalendarSlot",
-      { clientId: _.get(self.client(), "id"),
-        authorityId: _.get(self.authority(), "id"),
+      { clientId: _.get(ko.unwrap(self.client), "id"),
+        authorityId: _.get(ko.unwrap(self.authority), "id"),
         slot: self.slot,
-        reservationTypeId: self.reservationTypeId,
+        reservationTypeId: _.get(ko.unwrap(self.reservationType), "id"),
         comment: self.comment,
         location: self.location,
-        applicationId: lupapisteApp.models.application.id,
-        weekObservable: params.weekdays});
+        applicationId: self.applicationId(),
+        weekObservable: params.weekdays });
     self.bubbleVisible(false);
   };
 
@@ -45,11 +46,13 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.authorityDisplayText = function() {
     var authority = self.authority();
+    var model = ko.unwrap(self.applicationModel);
+    var orgName = ko.unwrap(model.organizationName);
     if (authority) {
-      var text = authority.firstName + " " + authority.lastName;
-      if (!_.isEmpty(lupapisteApp.models.application.organizationName())) {
+      var text = util.partyFullName(authority);
+      if (!_.isEmpty(orgName)) {
         text += ", ";
-        text += lupapisteApp.models.application.organizationName();
+        text += orgName;
       }
       return text;
     }
@@ -58,7 +61,7 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
   self.clientDisplayText = function() {
     var client = self.client();
     if (client) {
-      var text = client.firstName + " " + client.lastName;
+      var text = util.partyFullName(client);
       if (!_.isEmpty(client.partyType)) {
         _.forEach(client.partyType, function (t) { text += ", " + loc("schemas."+t); });
       }
@@ -68,10 +71,17 @@ LUPAPISTE.ReservationSlotReserveBubbleModel = function(params) {
 
   self.addEventListener("calendarView", "availableSlotClicked", function(event) {
 
-    self.slot(event.slot);
-    self.reservationType(_.find(self.reservationTypes(), function(reservationType) { return reservationType.id === self.reservationTypeId(); }));
 
+    self.slot(event.slot);
     self.location(params.defaultLocation());
+
+    var appModel = ko.unwrap(self.applicationModel);
+    if (appModel) {
+      self.applicationId(ko.unwrap(appModel.id));
+    }
+
+
+    self.comment("");
 
     var hour = moment(event.slot.startTime).hour();
     var minutes = moment(event.slot.startTime).minute();

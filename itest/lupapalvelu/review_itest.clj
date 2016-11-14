@@ -1,7 +1,8 @@
 (ns lupapalvelu.review-itest
   (:require [midje.sweet :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.itest-util :refer :all]))
+            [lupapalvelu.itest-util :refer :all]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 
@@ -10,7 +11,7 @@
                                    :taskName taskname :schemaName "task-katselmus"
                                    :taskSubtype "muu tarkastus")]
     (fact "Upload review attachment"
-          (upload-attachment-to-target sonja application-id nil true task-id "task") => true)
+          (upload-attachment-to-target sonja application-id nil true task-id "task") => truthy)
     task-id))
 
 (defn task-deleted-check
@@ -48,6 +49,14 @@
                                    (not= root-id (:id %))
                                    (:id %)) tasks)
                verdict-id (-> root :source :id)]
+           (fact "RAM is not allowed for review minutes"
+                 (let [minutes (->> (query-application sonja application-id)
+                                    :attachments
+                                    (util/find-first (util/fn-> :type :type-id (util/=as-kw :katselmuksen_tai_tarkastuksen_poytakirja))))]
+                   minutes => truthy
+                   (command sonja :approve-attachment :id application-id :attachmentId (:id minutes) :fileId (-> minutes :latestVersion :fileId))
+                   (command sonja :create-ram-attachment :id application-id :attachmentId (:id minutes))
+                   => (partial expected-failure? :error.ram-not-allowed)))
 
            (fact "Delete verdict"
                  (command sonja :delete-verdict :id application-id :verdictId (-> root :source :id)) => ok?)

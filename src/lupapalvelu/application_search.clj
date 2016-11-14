@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [sade.core :refer :all]
+            [sade.env :as env]
             [sade.property :as p]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -14,60 +15,20 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.operations :as operations]
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
             [lupapalvelu.organization :as organization]))
 
-;; Operations
-
-(defn- normalize-operation-name [i18n-text]
-  (when-let [lc (ss/lower-case i18n-text)]
-    (-> lc
-      (s/replace #"\p{Punct}" "")
-      (s/replace #"\s{2,}"    " "))))
-
-(def operation-index
-  (reduce
-    (fn [ops k]
-      (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
-            normalized (map normalize-operation-name localizations)]
-        (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
-    []
-    (keys operations/operations)))
-
-(defn- operation-names [filter-search]
-  (let [normalized (normalize-operation-name filter-search)]
-    (map :op
-      (filter
-        (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
-        operation-index))))
-
 ;;
 ;; Query construction
 ;;
 
-(defn- fuzzy-re
-  "Takes search term and turns it into 'fuzzy' regular expression
-  string (not pattern!) that matches any string that contains the
-  substrings in the correct order. The search term is split both for
-  regular whitespace and Unicode no-break space. The original string
-  parts are escaped for (inadvertent) regex syntax.
-  Sample matching: 'ear onk' will match 'year of the monkey' after fuzzying"
-  [term]
-  (let [whitespace "[\\s\u00a0]+"
-        fuzzy      (->> (ss/split term (re-pattern whitespace))
-                        (map #(java.util.regex.Pattern/quote %))
-                        (ss/join (str ".*" whitespace ".*")))]
-    (str "^.*" fuzzy ".*$")))
-
-
 (defn- make-free-text-query [filter-search]
   (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id]
-        fuzzy       (fuzzy-re filter-search)
+        fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
-        ops         (operation-names filter-search)]
+        ops         (app-utils/operation-names filter-search)]
     (if (seq ops)
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}}
                                         {:secondaryOperations.name {$in ops}}])
@@ -80,16 +41,6 @@
     (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     (re-matches v/rakennustunnus-pattern filter-search) {:buildings.nationalId filter-search}
     :else (make-free-text-query filter-search)))
-
-(defn- make-area-query [areas user]
-  {:pre [(sequential? areas)]}
-  (let [orgs (user/organization-ids-by-roles user #{:authority :commenter :reader})
-        orgs-with-areas (mongo/select :organizations {:_id {$in orgs} :areas-wgs84.features.id {$in areas}} [:areas-wgs84])
-        features (flatten (map (comp :features :areas-wgs84) orgs-with-areas))
-        selected-areas (set areas)
-        filtered-features (filter (comp selected-areas :id) features)]
-    (when (seq filtered-features)
-      {$or (map (fn [feature] {:location-wgs84 {$geoWithin {"$geometry" (:geometry feature)}}}) filtered-features)})))
 
 (def applicant-application-states
   {:state {$in ["open" "submitted" "sent" "complementNeeded" "draft"]}})
@@ -107,8 +58,8 @@
 (defn- archival-query [user]
   (let [from-ts (->> (user/organization-ids-by-roles user #{:archivist})
                      (organization/earliest-archive-enabled-ts))
-        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven"]}} {:archived.application nil}]}
-                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven"]}} {:archived.completed nil}]}]}]
+        base-query {$or [{$and [{:state {$in ["verdictGiven" "constructionStarted" "appealed" "inUse" "foremanVerdictGiven" "acknowledged"]}} {:archived.application nil}]}
+                         {$and [{:state {$in ["closed" "extinct" "foremanVerdictGiven" "acknowledged"]}} {:archived.completed nil}]}]}]
     (if from-ts
       {$and [base-query
              {:submitted {$gte from-ts}}]}
@@ -162,7 +113,7 @@
         {:primaryOperation.name {$nin (cond-> ["tyonjohtajan-nimeaminen-v2"]
                                               (= applicationType "readyForArchival") (conj "aiemmalla-luvalla-hakeminen"))}})
       (when-not (empty? areas)
-        (make-area-query areas user))])})
+        (app-utils/make-area-query areas user))])})
 
 ;;
 ;; Fields
@@ -192,12 +143,9 @@
     (concat frontend-fields indicator-fields)))
 
 
-(defn- enrich-row [{:keys [permitSubtype infoRequest] :as app}]
+(defn- enrich-row [app]
   (-> app
-      (assoc :kind (cond
-                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
-                     infoRequest "applications.inforequest"
-                     :else       "applications.application"))
+      app-utils/with-application-kind
       app-utils/location->object))
 
 (def- sort-field-mapping {"applicant" :applicant
@@ -232,7 +180,10 @@
       (errorf "Application search query=%s, sort=%s failed: %s" query sort e)
       (fail! :error.unknown))))
 
-(defn applications-for-user [user params]
+
+(defn applications-for-user [user {:keys [searchText] :as params}]
+  (when (> (count searchText) (env/value :search-text-max-length))
+    (fail! :error.search-text-is-too-long))
   (let [user-query  (domain/basic-application-query-for user)
         user-total  (mongo/count :applications user-query)
         query       (make-query user-query params user)
@@ -263,6 +214,3 @@
      :operation (i18n/localize :fi "operations" op-name)
      :operationName {:fi (i18n/localize :fi "operations" op-name)
                      :sv (i18n/localize :sv "operations" op-name)}}))
-
-
-

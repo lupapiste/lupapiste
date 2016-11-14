@@ -1,6 +1,5 @@
 (ns lupapalvelu.building
   (:require [monger.operators :refer :all]
-            [lupapalvelu.action :refer [update-application]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]
@@ -47,7 +46,7 @@
                                 "data.valtakunnallinenNumero.value"
                                 buildingId))
 
-(defn operation-building-updates [operation-buildings application]
+(defn- operation-building-updates [operation-buildings application]
   (remove
     util/empty-or-nil?
     (map
@@ -57,8 +56,9 @@
 
 (defn building-updates
   "Returns both updates: buildings array of all buildings, and document specific buildingId updates.
-   Return value is a map of updates. Example: {:buildings [{:nationalId '123'}] :documents.1.data.valtakunnallinenNumero.value '123'}"
-  [buildings application]
-  (let [operation-buildings        (filter :operationId buildings)
-        op-documents-array-updates (operation-building-updates operation-buildings application)]
-    (apply merge (conj op-documents-array-updates {:buildings buildings}))))
+   Return value is a map of updates. Example: {$set {:buildings [{:nationalId '123'}] :documents.1.data.valtakunnallinenNumero.value '123'}}"
+  [application buildings]
+  (when (seq buildings)
+    (let [operation-buildings        (filter :operationId buildings)
+          op-documents-array-updates (operation-building-updates operation-buildings application)]
+      {$set (apply merge (conj op-documents-array-updates {:buildings buildings}))})))

@@ -8,12 +8,11 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.action :as action]
             [lupapalvelu.application-api :as app]
             [lupapalvelu.application :as a]
-            [lupapalvelu.actions-api :as ca]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.document.tools :as tools]))
-
-(testable-privates lupapalvelu.actions-api foreach-action)
 
 (apply-remote-minimal)
 
@@ -226,8 +225,9 @@
         state => "submitted"
         canceled => nil
         (fact "new submitted history entry is added"
-          (-> history last :state) => "submitted"
-          (> submitted intial-submitted) => true)
+          (-> history last :state) => "submitted")
+        (fact "timestamp is not updated"
+          (= submitted intial-submitted)) => true
         (fact "old canceled history entry is preserved"
           (-> history butlast last :state) => "canceled")))))
 
@@ -257,7 +257,12 @@
       (command ronja :approve-application :id application-id :lang "fi") => unauthorized?)
 
     (fact "Approver with approver role is authorized"
-      (command sonja :approve-application :id application-id :lang "fi") => ok?)))
+          (command sonja :approve-application :id application-id :lang "fi") => ok?)
+    (facts "Application state is sent with matching history"
+           (let [{:keys [state history]} (query-application sonja application-id)]
+             (fact "State is closed" state => "sent")
+             (fact "History is correct"
+                   (map :state history) => ["draft" "open" "submitted" "sent"])))))
 
 (facts "link to backend system"
   (let [application    (create-and-submit-application mikko :municipality sonja-muni)
@@ -522,13 +527,16 @@
                          :set-company-to-document :set-user-to-document :set-current-user-to-document
                          :approve-application :submit-application :create-foreman-application
                          :change-application-state :change-application-state-targets}]
-    app => map?
-    (doseq [command (foreach-action {} user {} app)
-            :let [action (keyword (:action command))
-                  result (a/validate-authority-in-drafts command)]]
-      (fact {:midje/description (name action)}
-        (when (denied-actions action)
-          result => (some-fn nil? unauthorized?))))))
+    (fact "meta"
+      app => map?
+      user => map?)
+
+    (doseq [command (action/foreach-action {:web {} :user user :application {} :data app})
+          :let [action (keyword (:action command))
+                result (a/validate-authority-in-drafts command)]]
+    (fact {:midje/description (name action)}
+     (when (denied-actions action)
+       result => (some-fn nil? unauthorized?))))))
 
 (fact "Primary operation can be changed"
   (let [id (create-app-id pena)]
@@ -616,3 +624,20 @@
                         (contains? applications luukas-canceled) => false)
                   (fact "Created draft is listed"
                         (contains? applications luukas-draft) => true)))))
+
+(facts "all operations in operation tree"
+  (fact "get everything"
+    (:operations (query pena :all-operations-in :path ""))
+    => (just (->> (flatten op/operation-tree)
+                  (filter keyword?)
+                  (map name)
+                  set)
+             :in-any-order :gaps-ok))
+
+  (fact "YA operations - sijoitusluvat - muu sijoituslupa"
+    (:operations (query pena :all-operations-in :path "yleisten-alueiden-luvat.sijoituslupa.muu-sijoituslupa"))
+    => ["ya-sijoituslupa-muu-sijoituslupa"])
+
+  (fact "R operation - rakennelman rakentaminen"
+    (:operations (query pena :all-operations-in :path "Rakentaminen ja purkaminen.Rakennelman rakentaminen"))
+    => (just #{"auto-katos" "masto-tms" "mainoslaite" "aita" "maalampo" "jatevesi"} :in-any-order :gaps-ok)))

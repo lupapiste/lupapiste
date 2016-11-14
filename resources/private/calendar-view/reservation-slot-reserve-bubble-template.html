@@ -32,6 +32,9 @@
               <span data-bind="ltext: 'application.calendar.reservation.location'"></span>:
             </div>
             <div class="col-3">
+              <!-- ko if: lupapisteApp.models.currentUser.isApplicant -->
+              <span data-bind="text: $parent.location" style="width: 100%"/>
+              <!-- /ko -->
               <!-- ko ifnot: lupapisteApp.models.currentUser.isApplicant -->
               <input type="text" data-bind="textInput: $parent.location" style="width: 100%"/>
               <!-- /ko -->
@@ -66,7 +69,7 @@
               <span data-bind="ltext: 'application.calendar.reservation.additional.information'"></span>:
             </div>
             <div class="col-3">
-              <textarea data-bind="textInput: $parent.comment"/>
+              <textarea data-bind="textInput: $parent.comment" data-test-id="reservation-comment-textarea" />
             </div>
           </div>
 

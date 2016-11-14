@@ -11,7 +11,9 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.verdict :as verdict]))
+            [lupapalvelu.xml.krysp.verdict :as verdict]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 ;;
 ;; application mongo querys
@@ -30,6 +32,17 @@
       (do
         (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
         {:_id nil})))) ; should not yield any results
+
+(defn applications-with-writer-authz-query-for [user]
+  {:auth {$elemMatch {:id (:id user) :role {$in [:owner :writer :foreman]}}}})
+
+(defn applications-containing-future-reservations-for [user]
+  {:reservations {$elemMatch {$and [{$or [{:from {"$eq" (:id user)}}
+                                          {:to {"$eq" (:id user)}}]}
+                                    {:endTime {$gte (tc/to-long (t/now))}}]}}})
+
+(defn applications-containing-reservations-requiring-action-query-for [user]
+  {:reservations {$elemMatch {:action-required-by {"$eq" (:id user)}}}})
 
 (defn application-query-for [user]
   (merge
@@ -95,10 +108,17 @@
 (defn- statement-summary [statement]
   (select-keys statement [:id :person :requested :given :state]))
 
+(defn- can-read-comments? [app user]
+  (or (auth/user-authz? auth/comment-user-authz-roles app user)
+      (auth/has-organization-authz-roles? auth/commenter-org-authz-roles app user)
+      (auth/has-auth? app (get-in user [:company :id]))))
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (-> application
-        (update-in [:comments] (partial filter (fn [comment] ((set (:roles comment)) (name (:role user))))))
+        (update-in [:comments] (partial filter (fn [comment] (and
+                                                               (can-read-comments? application user)
+                                                               ((set (:roles comment)) (name (:role user)))))))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:statements] (partial map #(if (authorized-to-statement? user %) % (statement-summary %))))
         (update-in [:attachments] (partial remove (partial statement-attachment-hidden-for-user? application user)))
@@ -114,6 +134,12 @@
   (let [ids (flatten (vals (select-keys reservation [:from :to])))]
     (assoc reservation :participants (map user/get-user-by-id (remove nil? ids)))))
 
+(defn- enrich-application [application]
+  (some-> application
+          (update :documents (partial map schemas/with-current-schema-info))
+          (update :tasks (partial map schemas/with-current-schema-info))
+          (update :reservations (partial map with-participants-info))))
+
 (defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
@@ -122,9 +148,7 @@
                           (application-query-for user))]
 
     (some-> (mongo/select-one :applications {$and [query-id-part query-user-part]})
-            (update :documents (partial map schemas/with-current-schema-info))
-            (update :tasks (partial map schemas/with-current-schema-info))
-            (update :reservations (partial map with-participants-info))
+            (enrich-application)
             (filter-application-content-for user))))
 
 (defn get-application-no-access-checking
@@ -133,10 +157,19 @@
    (get-application-no-access-checking query-or-id {}))
   ([query-or-id projection]
    (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
-     (some-> (mongo/select-one :applications query projection)
-             (update :documents (partial map schemas/with-current-schema-info))
-             (update :tasks (partial map schemas/with-current-schema-info))
-             (update :reservations (partial map with-participants-info))))))
+     (->> (mongo/select-one :applications query projection)
+          enrich-application))))
+
+(defn get-multiple-applications-no-access-checking
+  ([query-or-ids]
+   {:pre [(coll? query-or-ids)]}
+   (get-multiple-applications-no-access-checking query-or-ids {}))
+  ([query-or-ids projection]
+   (let [query (if (map? query-or-ids) query-or-ids {:_id {$in query-or-ids}})]
+     (->> (if (seq projection)
+            (mongo/select :applications query projection)
+            (mongo/select :applications query))
+          (map enrich-application)))))
 
 ;;
 ;; authorization
@@ -329,6 +362,7 @@
    :history                  [] ; state transition audit log
    :infoRequest              false
    :location                 {}
+   :location-wgs84           {}
    :modified                 nil ; timestamp
    :municipality             ""
    :neighbors                []
@@ -362,7 +396,9 @@
    :appealVerdicts           []
    :archived                 {:application nil
                               :completed   nil}
-   :reservations             []})
+   :reservations             []
+   :warrantyStart            nil ; timestamp
+   :warrantyEnd              nil})
 
 (def operation-skeleton
   {:name ""

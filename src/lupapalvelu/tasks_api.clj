@@ -95,8 +95,7 @@
    :states     valid-states
    :pre-checks [(task-state-assertion (tasks/all-states-but :sent))]}
   [{:keys [application created] :as command}]
-  (doseq [{:keys [id]} (tasks/task-attachments application taskId)]
-    (attachment/delete-attachment! application id))
+  (attachment/delete-attachments! application (map :id (tasks/task-attachments application taskId)))
   (update-application command
     {$pull {:tasks {:id taskId}}
      $set  {:modified  created}}))
@@ -196,6 +195,7 @@
         command (assoc command :application application)
 
         sent-file-ids (mapping-to-krysp/save-review-as-krysp application @organization task user lang)
+        sent-to-krysp? (not (nil? sent-file-ids))
         review-attachments (if-not sent-file-ids
                              (->> (:attachments application)
                                   (filter #(= {:type "task" :id taskId} (:target %)) )
@@ -221,6 +221,8 @@
                             (util/strip-empty-maps {:rakennus (tasks/rakennus-data-from-buildings {} (:buildings application))}))
             data (merge rakennus-data {:katselmuksenLaji laji})
             new-task (tasks/new-task schema-name (:taskname task) data meta source)]
+        (infof "sent %s review task %s to KRYSP (%s) - creating new review task (katselmukenLaji: %s)"
+               tila taskId sent-to-krysp? laji)
         (update-application command {$push {:tasks new-task}}))
 
       ; Mark the state of the original task to final
@@ -231,11 +233,12 @@
             updates (filter (partial doc-persistence/update-key-in-schema? (:body schema)) task-updates)]
         (when (and (not= (:id root-task) taskId)
                    (get-in root-task [:data :vaadittuLupaehtona :value]))
+          (infof "sent task %s to KRYSP (%s)  - updated lupaehto task as final (%s)" taskId sent-to-krysp? tila)
           (doc-persistence/persist-model-updates application "tasks" root-task updates created)))
 
       :nop)
 
-    (ok :integrationAvailable (not (nil? sent-file-ids)))))
+    (ok :integrationAvailable sent-to-krysp?)))
 
 (defquery is-end-review
   {:description "Pseudo query that fails if the task is neither

@@ -10,12 +10,13 @@ LUPAPISTE.StatementsTableModel = function(params) {
 
   self.statementIdsWithAttachments = ko.pureComputed(function() {
     var statementIdsWithAttachments = [];
-    _.forEach(lupapisteApp.models.application.attachments(), function(attachment) {
-      var target = ko.mapping.toJS(attachment.target);
-      if (target && target.type === "statement") {
-        statementIdsWithAttachments.push(target.id);
-      }
-    });
+    _.forEach(lupapisteApp.services.attachmentsService.attachments(),
+              function(attachment) {
+                var targetType = util.getIn(attachment, ["target", "type"]);
+                if (targetType === "statement") {
+                  statementIdsWithAttachments.push(util.getIn(attachment, ["target", "id"]));
+                }
+              });
     return _.uniq(statementIdsWithAttachments);
   });
 
@@ -42,8 +43,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   };
 
   self.isStatementOverDue = function(statement) {
-    var nowTimeInMs = new Date().getTime();
-    return (statement.dueDate && self.isGiven(statement) ) ? (nowTimeInMs > statement.dueDate()) : false;
+    return (statement.dueDate && !self.isGiven(statement) ) ? moment().isAfter(statement.dueDate(), "day") : false;
   };
 
   self.repliesEnabled = ko.pureComputed(function() {

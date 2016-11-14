@@ -108,7 +108,7 @@
       :whitelist {:roles [:authority] :otherwise :disabled}
       :auth {:enabled [:is-end-review]}}
      {:name "huomautukset" :type :group
-      :body [{:name "kuvaus" :type :text :max-len 4000 :css []
+      :body [{:name "kuvaus" :type :text :max-len 20000 :css []
               :whitelist {:roles [:authority] :otherwise :disabled} }
              {:name "maaraAika" :type :date :whitelist {:roles [:authority] :otherwise :disabled}}
              {:name "toteaja" :type :string :whitelist {:roles [:authority] :otherwise :disabled}}
@@ -143,6 +143,7 @@
            :order 1
            :section-help "authority-fills"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
@@ -163,6 +164,7 @@
            :section-help "authority-fills"
            :i18name "task-katselmus"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "vaadittuLupaehtona"]
            ["katselmus/tila" "katselmus/pitoPvm" "katselmus/pitaja"]
@@ -183,6 +185,7 @@
            :section-help "authority-fills"
            :i18name "task-katselmus"
            :i18nprefix "task-katselmus.katselmuksenLaji"
+           :user-authz-roles #{}
            } ; Had :i18npath ["katselmuksenLaji"]
     :rows [["katselmuksenLaji" "katselmus/pitoPvm" "katselmus/pitaja" "vaadittuLupaehtona"]
            {:h2 "task-katselmus.huomautukset"}
@@ -201,7 +204,7 @@
     :rows [["maarays::3"] ["kuvaus::3"]]
     :template "form-grid-docgen-group-template"
     :body [{:name "maarays" :type :text :inputType :paragraph :max-len 20000 :readonly true}
-           {:name "kuvaus"  :type :text :max-len 4000 }
+           {:name "kuvaus"  :type :text :max-len 20000 }
            {:name "vaaditutErityissuunnitelmat" :type :text :hidden true}]}])
 
 
@@ -290,7 +293,7 @@
         katselmus-data {:tila (get katselmus :osittainen)
                         :pitaja (get katselmus :pitaja)
                         :pitoPvm (util/to-local-date (get katselmus :pitoPvm))
-                        :lasnaolijat (get katselmus :lasnaOlijat "")
+                        :lasnaolijat (get katselmus :lasnaolijat "")
                         :huomautukset {:kuvaus (or (-> first-huomautus :huomautus :kuvaus)
                                                    "")}
                         :poikkeamat (get katselmus :poikkeamat "")

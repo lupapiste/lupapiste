@@ -17,8 +17,8 @@
 (defn- proxy-request [apikey proxy-name & args]
   (:body (http-post
            (str (server-address) "/proxy/" (name proxy-name))
-           {:headers {"authorization" (str "apikey=" apikey)
-                      "content-type" "application/json;charset=utf-8"}
+           {:headers {"content-type" "application/json;charset=utf-8"}
+            :oauth-token apikey
             :socket-timeout 10000
             :conn-timeout 10000
             :body (json/encode (apply hash-map args))
@@ -42,6 +42,12 @@
                           :name         {:fi "Tampere" :sv "Tammerfors"}
                           :municipality "837"}])
     (fact (-> r first :location keys) => (just #{:x :y})))
+
+  (facts "empty query, empty response"
+    (let [{:keys [suggestions data]} (-> (get-addresses-proxy {:params {}}) :body (json/decode true))]
+      suggestions => empty?
+      data => empty?))
+
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere" :lang "fi"}})
         r (json/decode (:body response) true)]
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
@@ -319,8 +325,7 @@
                                               :number "80",
                                               :name {:fi "Turku" :sv "\u00c5bo"}
                                               :municipality "853"
-                                              ; FIXME at the moment fallbacks to NSL, which returns different coordinates
-                                              ;:location {:x 237551.371, :y 6709441.9}
+                                              :location {:x 237551.371, :y 6709441.9}
                                               }))))
 
   (fact "address-by-point-proxy"
@@ -360,3 +365,14 @@
 
   (fact "Jalasjarvi, as of 2016 part of Kurikka and shoud return Kurikka's code"
     (municipality-by-point 281160 6936532.8125001) => "301"))
+
+(facts "Get address from Salo"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.salo.fi/teklaogcweb/wfs.ashx"})
+
+  (fact "address-by-point-proxy"
+    (let [response (address-by-point-proxy {:params {:lang "fi" :x "279444.75" :y "6703424.390625"}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Nikkil\u00e4ntie")
+      (fact (:number body) => "33")
+      (fact (:fi (:name body)) => "Salo")
+      )))

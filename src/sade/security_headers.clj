@@ -5,13 +5,12 @@
             [sade.util :as util])
   (:import java.util.UUID))
 
-; Allow Google fonts and scripts fom ajax.aspnetcdn.com to be loaded
 (def content-security-policy
   (str "default-src 'self' https://*.lupapiste.fi; "
-       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com; "
+       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://ajax.aspnetcdn.com https://www.googletagmanager.com https://tagmanager.google.com;"
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-       "img-src 'self' data: https://*.lupapiste.fi; "
-       "font-src 'self' https://fonts.gstatic.com; "
+       "img-src 'self' data: https://*.lupapiste.fi https://www.facebook.com;"
+       "font-src 'self' data: https://fonts.gstatic.com;"
        "frame-ancestors 'self' ; form-action 'self' ; "
        "reflected-xss block; referrer no-referrer; "
        "report-uri /api/csp-report;"))

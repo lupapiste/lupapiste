@@ -6,7 +6,6 @@ Resource        ../../common_resource.robot
 Resource        ./27_common.robot
 Variables        ../21_stamping/variables.py
 
-
 *** Test Cases ***
 
 Create bulletin with attachment

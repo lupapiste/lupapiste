@@ -38,28 +38,11 @@
 
 (def default-application-state-graph common-states/default-application-state-graph)
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tj-ilmoitus-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted  [:acknowledged :canceled]
-     ; must be for tj-hakemus-state-graph compatibility:
-     ; if foreman application is in complementNeeded state it can be converted
-     ; to use this state graph
-     :complementNeeded [:acknowledged :canceled]
-     :acknowledged [:complementNeeded]}))
+(def ^{:doc "See default-application-state-graph"}
+  tj-ilmoitus-state-graph common-states/tj-ilmoitus-state-graph)
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tj-hakemus-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted    [:sent :canceled]
-     :sent         [:foremanVerdictGiven :complementNeeded :canceled]
-     :complementNeeded [:sent :canceled]
-     :foremanVerdictGiven [:canceled :appealed]
-     :appealed [:foremanVerdictGiven :canceled]}))
+(def ^{:doc "See default-application-state-graph"}
+  tj-hakemus-state-graph common-states/tj-hakemus-state-graph)
 
 ; TODO draft versions this forward
 
@@ -74,18 +57,8 @@
      :final        [] ; Lain voimainen
      }))
 
-(def
-  ^{:doc "See default-application-state-graph"}
-  tonttijako-application-state-graph
-  (merge
-    (select-keys default-application-state-graph [:draft :open :canceled])
-    {:submitted [:hearing :canceled]
-     :hearing [:proposal :canceled]
-     :proposal [:proposalApproved :canceled]
-     :proposalApproved [:final :appealed :canceled]
-     :appealed [:final :canceled] ; Oikaisuvaatimus
-     :final    [] ; Lain voimainen
-     }))
+(def ^{:doc "See default-application-state-graph"}
+  tonttijako-application-state-graph common-states/tonttijako-application-state-graph)
 
 (def
   ^{:doc "See default-application-state-graph"}
@@ -132,7 +105,7 @@
       :else (into (conj results start)
               (apply union (map #(all-next-states graph % (conj results start)) transitions))))))
 
-(def verdict-given-states #{:verdictGiven :foremanVerdictGiven})
+(def verdict-given-states #{:verdictGiven :foremanVerdictGiven :acknowledged})
 
 (def post-verdict-states
  (let [graphs (filter (comp (partial some verdict-given-states) keys) all-graphs)]
@@ -143,8 +116,14 @@
      pre-verdict-states)))
 
 (def post-submitted-states
- (let [graphs (filter :submitted all-graphs)]
-   (disj (apply union (map #(all-next-states % :submitted) graphs)) :canceled :submitted)))
+  "Submitted state and all states after. Cancelled omitted."
+  (let [graphs (filter :submitted all-graphs)]
+    (disj (apply union (map #(all-next-states % :submitted) graphs)) :canceled)))
+
+(def post-sent-states
+  "Sent state and all states after. Cancelled omitted."
+  (let [graphs (filter :sent all-graphs)]
+    (disj (apply union (map #(all-next-states % :sent) graphs)) :canceled)))
 
 (def all-states (->> all-graphs (map keys) (apply concat) set))
 (def all-inforequest-states (-> default-inforequest-state-graph keys set (disj :canceled)))
@@ -188,6 +167,8 @@
 (defn all-inforequest-states-but [& drop-states]
   (difference all-inforequest-states (drop-state-set drop-states)))
 
+(def all-with-acknowledged-but-not-draft-or-terminal
+  (conj all-but-draft-or-terminal :acknowledged))
 
 (comment
   (require ['rhizome.viz :as 'viz])

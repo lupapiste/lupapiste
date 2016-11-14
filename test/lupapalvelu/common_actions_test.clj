@@ -10,7 +10,6 @@
             [lupapalvelu.server]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
-(testable-privates lupapalvelu.actions-api foreach-action)
 
 (facts "Allowed actions for statementGiver"
   (let [allowed-actions #{:give-statement
@@ -62,10 +61,22 @@
                           :ram-linked-attachments
                           :latest-attachment-version
                           :suti-application-data
-                          :suti-application-products}
+                          :suti-application-products
+                          :info-links
+                          :info-link-delete
+                          :info-link-reorder
+                          :info-link-upsert
+                          :organization-links
+                          :mark-seen-organization-links
+                          :redirect-to-3d-map
+                          :ya-extensions
+                          :tasks-tab-visible
+                          :application-info-tab-visible
+                          :application-summary-tab-visible
+                          :application-verdict-tab-visible}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
-    (doseq [command (foreach-action {} user application {})
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   result (user-is-not-allowed-to-access? command application)]]
       (fact {:midje/description (name action)}
@@ -80,7 +91,8 @@
        (let [allowed-actions #{:invite-guest :delete-guest-application
                                :toggle-guest-subscription :application-guests :decline-invitation
                                :suti-update-id :suti-update-added :set-attachment-contents
-                               :cancel-application}]
+                               :cancel-application :info-links :organization-links
+                               :redirect-to-3d-map}]
     (doseq [[action data] (get-actions)
             :when (and
                     (= :command (keyword (:type data)))
@@ -102,14 +114,18 @@
                            :application :validate-doc :fetch-validation-errors :document
                            :get-organization-tags :get-organization-areas :get-possible-statement-statuses
                            :reduced-foreman-history :foreman-history :foreman-applications :enable-foreman-search
-                           :get-building-info-from-wfs :tasks-tab-visible
-                           :pdfa-casefile :suti-application-data :suti-application-products
-                           :ram-linked-attachments :attachment-groups
+                           :get-building-info-from-wfs :mark-seen :info-links :organization-links
+                           :mark-seen-organization-links :pdfa-casefile :suti-application-data :suti-application-products
+                           :redirect-to-3d-map :ya-extensions
+                           :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
                            :pdf-export
-                           :application-guests :latest-attachment-version :submitted-application-pdf-export}]
-    (doseq [command (foreach-action {} user application {})
+                           :application-guests :latest-attachment-version :submitted-application-pdf-export
+                           ; tab visibility
+                           :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible
+                           :application-verdict-tab-visible}]
+    (doseq [command (foreach-action {:web {} :user user :application application :data {}})
             :let [action (keyword (:action command))
                   {user-roles :user-roles} (get-meta action)]]
       (when (and user-roles (not (user-roles :anonymous)))

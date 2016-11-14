@@ -78,7 +78,14 @@ var ajax = (function($) {
             notify.error(loc("error.service-lockdown"));
             break;
           default:
-            error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
+            var maxLength = 200;
+            var responseText = /<html/i.test(jqXHR.responseText) ?
+                _.filter($.parseHTML(jqXHR.responseText).map(function(e) {
+                  var text = $.trim(e.innerText || e.textContent || "");
+                  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+                }))
+                : jqXHR.responseText;
+            error("Ajax: FAIL", self.request.url, jqXHR.status + " " + errorThrown, responseText);
             break;
         }
       }

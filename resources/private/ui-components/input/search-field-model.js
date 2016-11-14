@@ -4,6 +4,8 @@ LUPAPISTE.SearchFieldModel = function(params) {
 
   var value = params.value || ko.observable();
 
+  self.maxlength = params.maxlength;
+
   self.isSelected = ko.observable();
 
   self.throttledValue = ko.observable();

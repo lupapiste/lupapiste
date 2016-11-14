@@ -8,4 +8,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --exclude integration --exclude fail --RunEmptySuite --variable BROWSER:chrome --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:http://lupatest.solita.fi $target
+pybot -d target --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite --variable BROWSER:chrome --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:http://lupatest.solita.fi $target

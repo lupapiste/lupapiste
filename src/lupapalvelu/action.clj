@@ -1,7 +1,6 @@
 (ns lupapalvelu.action
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
-            [clojure.string :as s]
             [slingshot.slingshot :refer [try+]]
             [monger.operators :refer [$set $push $pull]]
             [schema.core :as sc]
@@ -62,6 +61,13 @@
     (when-not (ss/blank? url)
       (validate-url url))))
 
+(defn validate-optional-https-url [param command]
+  (let [url (ss/trim (get-in command [:data param]))]
+    (when-not (ss/blank? url)
+      (or (validate-url url)
+          (when-not (ss/starts-with-i url "https://")
+            (fail :error.only-https-allowed))))))
+
 ;; Notificator
 
 (defn notify
@@ -84,7 +90,7 @@
       extra-error-data)))
 
 (defn non-blank-parameters [params command]
-  (filter-params-of-command params command #(or (not (string? %)) (s/blank? %)) :error.missing-parameters))
+  (filter-params-of-command params command #(or (not (string? %)) (ss/blank? %)) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
@@ -93,7 +99,7 @@
   (or
     (vector-parameters params command)
     (filter-params-of-command params command
-      (partial some #(or (not (string? %)) (s/blank? %)))
+      (partial some #(or (not (string? %)) (ss/blank? %)))
       :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-at-least-n-non-blank-items [n params command]
@@ -117,14 +123,25 @@
     (when-not (every? pred (get-in command [:data param]))
       (fail :error.unknown-type :parameters param))))
 
+(defn optional-parameter-of [param pred command]
+  (let [val (get-in command [:data param])]
+    (when-not (or (nil? val) (pred val))
+      (fail :error.unknown-type :parameters param))))
+
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
 (defn number-parameters [params command]
   (filter-params-of-command params command (complement number?) :error.illegal-number))
 
+(defn positive-number-parameters [params command]
+  (filter-params-of-command params command (complement pos?) :error.illegal-number))
+
 (defn string-parameters [params command]
   (filter-params-of-command params command (complement string?) "error.illegal-value:not-a-string"))
+
+(defn ascii-parameters [params command]
+  (filter-params-of-command params command (complement ss/ascii?) "error.illegal-value:not-ascii-string"))
 
 (defn select-parameters
   "Parameters are valid if each of them belong to the value-set"
@@ -133,7 +150,7 @@
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (v/kiinteistotunnus? (get-in command [:data %]))) params))]
-    (trace "invalid property id parameters:" (s/join ", " invalid))
+    (trace "invalid property id parameters:" (ss/join ", " invalid))
     (fail :error.invalid-property-id)))
 
 (defn map-parameters [params command]
@@ -147,14 +164,17 @@
       :error.map-parameters-with-required-keys
       {:required-keys required-keys})))
 
+(defn parameters-matching-schema [params schema command]
+  (filter-params-of-command params command
+                            (partial sc/check schema)
+                            "error.illegal-value:schema-validation"))
+
 (defn update-application
   "Get current application from command (or fail) and run changes into it.
    Optionally returns the number of updated applications."
   ([command changes]
-    (update-application command {} changes false))
-  ([command mongo-query changes]
-    (update-application command mongo-query changes false))
-  ([command mongo-query changes return-count?]
+    (update-application command {} changes))
+  ([command mongo-query changes & {:keys [return-count?]}]
 
     (when-let [new-state (get-in changes [$set :state])]
       (assert
@@ -217,8 +237,11 @@
 
 (defn missing-command [command]
   (when-not (meta-data command)
-    (errorf "command '%s' not found" (log/sanitize 50 (:action command)))
-    (fail :error.invalid-command)))
+    (let [{:keys [action web]} command
+          {:keys [user-agent client-ip]} web]
+      (errorf "action '%s' not found. User agent '%s' from %s"
+             (log/sanitize 50 action) (log/sanitize 100 action) client-ip)
+      (fail :error.invalid-command))))
 
 (defn missing-feature [command]
   (when-let [feature (:feature (meta-data command))]
@@ -253,7 +276,7 @@
 
 (defn missing-parameters [command]
   (when-let [missing (seq (missing-fields command (meta-data command)))]
-    (info "missing parameters:" (s/join ", " missing))
+    (info "missing parameters:" (ss/join ", " missing))
     (fail :error.missing-parameters :parameters (vec missing))))
 
 (defn input-validators-fail [command]
@@ -263,7 +286,7 @@
 
 (defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (when-not (.contains valid-states (keyword state))
+    (when-not (valid-states (keyword state))
       (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command]
@@ -279,7 +302,8 @@
     (reduce strip-field command [:password :newPassword :oldPassword])))
 
 (defn get-meta [name]
-  ((keyword name) (get-actions)))
+  ; Using wrapper function to enable mock actions it test
+  (get (get-actions) (keyword name)))
 
 (defn executed
   ([command] (executed (:action command) command))
@@ -371,7 +395,8 @@
       (let [application (get-application command)
             ^{:doc "Organization as delay"} organization (when application
                                                            (delay (org/get-organization (:organization application))))
-            command (assoc command :application application :organization organization)]
+            user-organizations (lazy-seq (usr/get-organizations (:user command)))
+            command (assoc command :application application :organization organization :user-organizations user-organizations)]
         (or
           (not-authorized-to-application command)
           (pre-checks-fail command)
@@ -425,8 +450,6 @@
   {:pre [(set? reference-set)]}
   (sc/pred (fn [x] (and (set? x) (every? reference-set x)))))
 
-(def categories [:attachments])
-
 (def ActionMetaData
   {
    ; Set of user role keywords. Use :user-roles #{:anonymous} to grant access to anyone.
@@ -435,8 +458,8 @@
    ; If a parameter is missing from request, an error will be raised.
    (sc/optional-key :parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
    (sc/optional-key :optional-parameters)  [(sc/cond-pre sc/Keyword sc/Symbol)]
-   ;; Array of categories for use of allowed-actions-for-cateory
-   (sc/optional-key :categories)   [(apply sc/enum categories)]
+   ; Set of categories for use of allowed-actions-for-cateory
+   (sc/optional-key :categories)   #{sc/Keyword}
    ; Set of application context role keywords.
    (sc/optional-key :user-authz-roles)  (subset-of auth/all-authz-roles)
    ; Set of application organization context role keywords
@@ -546,3 +569,37 @@
 (defmacro defquery   [& args] `(defaction ~(meta &form) :query ~@args))
 (defmacro defraw     [& args] `(defaction ~(meta &form) :raw ~@args))
 (defmacro defexport  [& args] `(defaction ~(meta &form) :export ~@args))
+
+(defn foreach-action [{:keys [user data] :as command}]
+  (map
+    #(when-let [{type :type categories :categories} (get-meta %)]
+       (merge command (action % :type type :data data :user user) {:categories categories}))
+   (remove nil? (keys @actions))))
+
+(defn- validated [command]
+  {(:action command) (validate command)})
+
+(def validate-actions
+  (if (env/dev-mode?)
+    (util/fn->> (map validated) (into {}))
+    (util/fn->> (map validated) (filter (comp :ok first vals)) (into {}))))
+
+(defn filter-actions-by-category [category actions]
+  {:pre [(keyword? category)]}
+  (filter #(some-> % :categories category) actions))
+
+(defmulti allowed-actions-for-category (util/fn-> :data :category keyword))
+
+(defmethod allowed-actions-for-category :default
+  [_]
+  nil)
+
+(defn allowed-actions-for-collection
+  [collection-key command-builder {:keys [application] :as command}]
+  (let [coll (get application collection-key)]
+    (->> (map (partial command-builder application) coll)
+         (map (partial assoc command :data))
+         (map foreach-action)
+         (map (partial filter-actions-by-category collection-key))
+         (map validate-actions)
+         (zipmap (map :id coll)))))

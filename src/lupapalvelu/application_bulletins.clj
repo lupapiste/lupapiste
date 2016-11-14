@@ -53,6 +53,9 @@
    :modified :municipality :organization :permitType
    :primaryOperation :propertyId :state :verdicts :tasks])
 
+(def attachment-snapshot-fields
+  [:id :type :latestVersion :auth :metadata :contents :target])
+
 (def remove-party-docs-fn
   (partial remove (fn-> :schema-info :type keyword (= :party))))
 
@@ -65,9 +68,14 @@
                        app-snapshot
                        [:documents]
                        remove-party-docs-fn)
+        app-snapshot (update-in
+                       app-snapshot
+                       [:documents]
+                       (partial map #(dissoc % :meta)))
         attachments (->> (:attachments application)
                          (filter #(and (:latestVersion %) (metadata/public-attachment? %)))
-                         (map #(dissoc % :versions)))
+                         (map #(select-keys % attachment-snapshot-fields))
+                         (map #(update % :latestVersion (fn [v] (select-keys v [:filename :contentType :fileId :size])))))
         app-snapshot (assoc app-snapshot
                        :id (mongo/create-id)
                        :attachments attachments

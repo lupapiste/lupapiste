@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.schema-validation
-  (:require [schema.core :refer [defschema] :as sc]))
+  (:require [schema.core :refer [defschema] :as sc]
+            [lupapalvelu.authorization :as auth]))
 
 (def opt sc/optional-key)
 
@@ -15,6 +16,10 @@
   {(opt :disabled) [sc/Keyword]  ;;Disabled if any listed action is allowed.
    (opt :enabled)  [sc/Keyword]  ;; Disabled if any listed action is not allowed.
    })
+
+(defschema single-value (sc/conditional string? sc/Str
+                                        number? sc/Num
+                                        :else   (sc/enum true false nil)))
 
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
@@ -44,7 +49,12 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   })
+   (opt :pre-values)  [single-value] ;; Used inside pre-selector element to toggle element visibility
+   (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
+                       :values [single-value]}
+   (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
+                       :values [single-value]}
+})
 
 (defschema Text
   "Text area element. Represented as text-area html element"
@@ -75,7 +85,7 @@
   "Integer string type"
   (merge GenString
          {:subtype            (sc/eq :number)
-          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle :db)
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :tonnia :hehtaaria :y :kuukautta :tuntiaviikko :kpl :hengelle :db)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
@@ -83,7 +93,7 @@
   "Numeric string type"
   (merge GenString
          {:subtype            (sc/eq :decimal)
-          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :hehtaaria :y :kuukautta :tuntiaviikko)
+          (opt :unit)         (sc/enum :m :m2 :m3 :km :k-m3 :tonnia :hehtaaria :y :kuukautta :tuntiaviikko)
           (opt :min)          sc/Int
           (opt :max)          sc/Int}))
 
@@ -185,6 +195,13 @@
                   #(not (contains? % :subtype))    PlainString
                   :else                            {:subtype (sc/eq nil)})) ; For better error messages
 
+(defschema Path [sc/Str])
+
+(defschema LinkPermitSelector
+  (merge GenInput
+         {:type                 (sc/eq :linkPermitSelector)
+          :operationsPath        Path}))
+
 (def special-types [:hetu
                     :foremanHistory
                     :fillMyInfoButton
@@ -207,14 +224,19 @@
                   (type-pred :select)     Select
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
+                  (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
+
+(declare Group)
 
 (defschema Table
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :table)
-   :body                       [Input]      ;;
+   ;; TODO: each body item could be either Input or Group, but the
+   ;; most obvious definitions do not compile.
+   :body                       [(sc/if (type-pred :group) (sc/recursive #'Group) Input)]      ;;
    (opt :i18nkey)              sc/Str       ;; Absolute localization key
    (opt :group-help)           sc/Str       ;;
    (opt :uicomponent)          sc/Keyword   ;; Component name for special components
@@ -222,7 +244,12 @@
    (opt :repeating)            sc/Bool      ;; Should be  always repeating -> default true
    (opt :repeating-init-empty) sc/Bool      ;;
    (opt :copybutton)           sc/Bool      ;;
-   (opt :validator)            sc/Keyword}) ;;
+   (opt :validator)            sc/Keyword
+   (opt :css)                  [sc/Keyword]
+   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}})
 
 (defschema Group
   "Group type that groups any doc elements."
@@ -245,7 +272,20 @@
    (opt :validator)            sc/Keyword   ;; Specific validator key for element (see model/validate-element)
    (opt :whitelist)            {:roles [sc/Keyword] :otherwise (sc/enum :disabled :hidden)}
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
-   (opt :listen)               [sc/Keyword]}) ;; Events to listen
+   (opt :listen)               [sc/Keyword] ;; Events to listen
+   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+                                :values [single-value]}
+   (opt :template)             sc/Str       ;; Component template to use
+   ;; Row item format: "<path><cols><css>"
+   ;; <path>  path1/path2/...
+   ;; <cols>  ::n  where n is 1-4 (default 1)
+   ;; <css>   [class1 class2 ...]
+   ;; <cols> and <css> are optional, either or both can be omitted.
+   (opt :rows)                 [(sc/if map?
+                                  {sc/Keyword sc/Str}
+                                  [sc/Str])]})
 
 (defschema Element
   "Any doc element."
@@ -267,6 +307,7 @@
           (opt :removable)                   sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
+          (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
           (opt :construction-time)           sc/Bool    ;; Is a construction time doc
           (opt :exclude-from-pdf)            sc/Bool    ;;

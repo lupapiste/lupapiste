@@ -17,6 +17,10 @@
     (fact "Pena is not architect"
       (command pena :copy-user-attachments-to-application :id application-id) => unauthorized?)
     (command pena :update-user :firstName "Pena" :lastName "Panaani" :architect true) => ok?
+
+    (fact "Pena is has no attachments"
+      (command pena :copy-user-attachments-to-application :id application-id) => (partial expected-failure? :error.no-user-attachments))
+
     (upload-user-attachment pena "osapuolet.cv" true)
 
     (fact "Pena can copy-user-attachments to application"
@@ -60,4 +64,31 @@
         (let [{:keys [attachments]} (query-application pena application-id)
               tutkintotodistus-attachments (filter #(= (:type %) tutkintotodistus-type) attachments)]
           (count attachments) => 7
-          (count tutkintotodistus-attachments) => 2)))))
+          (count tutkintotodistus-attachments) => 2))
+
+      (fact "Not needed attachments are filled as 'needed'"
+        (let [{:keys [attachments]} (query-application pena application-id)
+              cv-attachment (first (filter #(= (:type %) cv-type) attachments))]
+          (count attachments) => 7
+          (doseq [v (:versions cv-attachment)]
+            (command pena
+                     :delete-attachment-version
+                     :id application-id
+                     :attachmentId (:id cv-attachment)
+                     :fileId (:fileId v)
+                     :originalFileId (:fileId v)) => ok?)
+          (count (filter #(= (:type %) cv-type)
+                         (:attachments (query-application pena application-id)))) => 1
+          (get (first (filter #(= (:type %) cv-type)
+                              (:attachments (query-application pena application-id))))
+               :versions) => empty?
+
+          (command pena :set-attachment-not-needed :id application-id :attachmentId (:id cv-attachment) :notNeeded true) => ok?
+          (command pena :copy-user-attachments-to-application :id application-id) => ok?
+          (let [{:keys [attachments]} (query-application pena application-id)
+                cv-attachments (filter #(= (:type %) cv-type) attachments)]
+            (fact "new attachment is added"
+              (count attachments) => 7
+              (count cv-attachments) => 1)
+            (fact "CV is needed now"
+              (:notNeeded (first cv-attachments)) => false)))))))

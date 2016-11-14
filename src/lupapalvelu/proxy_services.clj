@@ -4,7 +4,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.organization :as org]
             [lupapalvelu.user :as user]
-            [taoensso.timbre :as timbre :refer [debug debugf info warn error fatal]]
+            [taoensso.timbre :as timbre :refer [debug debugf info warn error errorf]]
             [monger.operators :refer [$exists]]
             [noir.response :as resp]
             [sade.coordinate :as coord]
@@ -34,29 +34,31 @@
     (resp/status 503 "Service temporarily unavailable")))
 
 (defn get-addresses-proxy [{{:keys [query lang]} :params}]
-  (let [[street number city] (parse-address query)
-        nls-query (future (find-address/get-addresses street number city))
-        muni-codes (find-address/municipality-codes city)
-        muni-code  (first muni-codes)
-        endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
-    (if endpoint
-      (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
+  (if (ss/not-blank? query)
+    (let [[street number city] (parse-address query)
+          nls-query (future (find-address/get-addresses street number city))
+          muni-codes (find-address/municipality-codes city)
+          muni-code  (first muni-codes)
+          endpoint (when (= 1 (count muni-codes)) (org/municipality-address-endpoint muni-code))]
+      (if endpoint
+        (if-let [address-from-muni (->> (find-address/get-addresses-from-municipality street number endpoint)
                                         (map (partial wfs/krysp-to-address-details (or lang "fi")))
                                         seq)]
-        (do
-          (future-cancel nls-query)
-          (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
-                      :data (map (fn [m]
-                                   (-> m
-                                     (assoc :location (select-keys m [:x :y])
-                                            :name {:fi (i18n/localize :fi :municipality muni-code)
-                                                   :sv (i18n/localize :sv :municipality muni-code)})
-                                     (dissoc :x :y)))
-                              address-from-muni)}))
-        (do
-          (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
-          (respond-nls-address-suggestions @nls-query)))
-      (respond-nls-address-suggestions @nls-query))))
+          (do
+            (future-cancel nls-query)
+            (resp/json {:suggestions (map (fn [{:keys [street number]}] (str street \space number ", " (i18n/localize lang :municipality muni-code))) address-from-muni)
+                        :data (map (fn [m]
+                                     (-> m
+                                       (assoc :location (select-keys m [:x :y])
+                                              :name {:fi (i18n/localize :fi :municipality muni-code)
+                                                     :sv (i18n/localize :sv :municipality muni-code)})
+                                       (dissoc :x :y)))
+                                address-from-muni)}))
+          (do
+            (debug "Fallback to NSL address data - no address found from " (i18n/localize :fi :municipality muni-code))
+            (respond-nls-address-suggestions @nls-query)))
+        (respond-nls-address-suggestions @nls-query)))
+   (resp/json {:suggestions [], :data []})))
 
 (defn find-addresses-proxy [{{:keys [term lang]} :params}]
     (if (and (string? term) (string? lang) (not (ss/blank? term)))
@@ -127,7 +129,7 @@
             (future-cancel nls-address-query)
             (resp/json address-from-muni))
           (do
-            (debugf "Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
+            (errorf "error.integration - Fallback to NSL address data - no addresses found from %s by x/y %s/%s" (i18n/localize :fi :municipality municipality) x y)
             (respond-nls-address @nls-address-query x y lang municipality)))
         (respond-nls-address @nls-address-query x y lang municipality)))
     (resp/status 400 "Bad Request")))

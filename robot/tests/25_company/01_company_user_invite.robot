@@ -10,6 +10,11 @@ Default Tags    company
 Company admin logs in
   Login  kaino@solita.fi  kaino123
   User should be logged in  Kaino Solita
+
+Kaino sees the help text if there are no applications
+  Wait until  Element should be visible  //section[@id='applications']//*[@data-test-id='applications-no-application']
+
+Kaino goes to company page
   Open company user listing
 
 Check Kaino's status

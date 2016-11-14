@@ -1,8 +1,11 @@
 (ns lupapalvelu.document.schemas
   (:require [clojure.set :as set]
             [sade.util :as util]
+            [lupapalvelu.authorization :as auth]
+            [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -52,6 +55,7 @@
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
                  :removable-only-by-authority
+                 :user-authz-roles
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
@@ -87,7 +91,8 @@
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [(long schema-version) (name schema-name)])))
 
-
+(defn get-in-schemas [schema-name path]
+  (reduce #(util/find-by-key :name (name %2) (:body %1)) (get-schema {:name schema-name}) path))
 
 (defn get-latest-schema-version []
   (->> @registered-schemas keys (sort >) first))
@@ -96,20 +101,12 @@
   (let [current-info (-> document :schema-info get-schema :info (select-keys immutable-keys))]
     (update document :schema-info merge current-info)))
 
+
+(def select-one-of-key "_selected")
+
 ;;
 ;; helpers
 ;;
-
-(defn body
-  "Shallow merges stuff into vector"
-  [& rest]
-  (reduce
-    (fn [a x]
-      (let [v (if (sequential? x)
-                x
-                (vector x))]
-        (concat a v)))
-    [] rest))
 
 (defn repeatable
   "Created repeatable element."
@@ -121,6 +118,20 @@
 
 (defn approvable-top-level-groups [v]
   (map #(if (= (:type %) :group) (assoc % :approvable true) %) v))
+
+(defn resolve-accordion-field-values
+  "Returns collection of document values from paths defined by schema's :accordion-fields"
+  [document]
+  (when-let [fields (get-in document [:schema-info :accordion-fields])]
+    (let [doc-data (:data document)
+          selected-value (when (= (ffirst fields) select-one-of-key)
+                          (get-in doc-data [(keyword select-one-of-key) :value]))
+          interesting-fields (if selected-value
+                               (filter #(= (first %) selected-value) fields)
+                               fields)]
+      (->> interesting-fields
+           (map (fn [path] (get-in doc-data (conj (mapv keyword path) :value))))
+           (remove util/empty-or-nil?)))))
 
 ;;
 ;; schema sniplets
@@ -158,8 +169,6 @@
               :sortBy :displayname
               :body (map (fn [n]{:name n :i18nkey (str "country." n)}) country-list)})
 
-(def select-one-of-key "_selected")
-
 (def turvakielto "turvakieltoKytkin")
 
 (def ei-tiedossa {:name "ei tiedossa" :i18nkey "ei-tiedossa"})
@@ -187,9 +196,9 @@
 
 (def tunnus {:name "tunnus" :type :string :required true :hidden true :max-len 6 :identifier true})
 
-(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :size :xl :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long" :hidden true}
                            {:name national-building-id :type :string  :subtype :rakennustunnus :hidden true}
                            {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
@@ -199,7 +208,7 @@
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
                                 {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
-(def postinumero {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero" :transform :trim})
+(def postinumero {:name "postinumero" :type :string :size :s :required true :dummy-test :postal-code :i18nkey "osoite.postinumero"})
 
 (def simple-osoite [{:name "osoite"
                      :type :group
@@ -372,95 +381,9 @@
 
 
 (def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus" :required true
-                      :body [{:name "arkkitehti"}
-                             {:name "arkkitehtiylioppilas"}
-                             {:name "diplomi-insin\u00f6\u00f6ri"}
-                             {:name "insin\u00f6\u00f6ri"}
-                             {:name "IV-asentaja"}
-                             {:name "kirvesmies"}
-                             {:name "LV-asentaja"}
-                             {:name "LVI-asentaja"}
-                             {:name "LVI-insin\u00f6\u00f6ri"}
-                             {:name "LVI-teknikko"}
-                             {:name "LVI-ty\u00f6teknikko"}
-                             {:name "maisema-arkkitehti"}
-                             {:name "rakennusammattity\u00f6mies"}
-                             {:name "rakennusarkkitehti"}
-                             {:name "rakennusinsin\u00f6\u00f6ri"}
-                             {:name "rakennusmestari"}
-                             {:name "rakennuspiirt\u00e4j\u00e4"}
-                             {:name "rakennusteknikko"}
-                             {:name "rakennusty\u00f6teknikko"}
-                             {:name "sisustusarkkitehti"}
-                             {:name "talonrakennusinsin\u00f6\u00f6ri"}
-                             {:name "talonrakennusteknikko"}
-                             {:name "tekniikan kandidaatti"}
-                             {:name "teknikko"}]})
+                      :body (wrapped user-enums/koulutusvalinta :name)})
 
-(def fise-kelpoisuus-lajit
-  [{:name "tavanomainen p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa p\u00e4\u00e4suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa p\u00e4\u00e4suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen rakennussuunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen rakennussuunnittelu (korjausrakentaminen)"}
-   {:name "vaativa rakennussuunnittelu (uudisrakentaminen)"}
-   {:name "vaativa rakennussuunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa rakennussuunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa rakennussuunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen betonirakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen betonirakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen puurakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen puurakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa puurakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa puurakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa puurakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa puurakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa ter\u00e4srakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa ter\u00e4srakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen pohjarakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen pohjarakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen ilmanvaihtosuunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen ilmanvaihtosuunnittelu (korjausrakentaminen)"}
-   {:name "vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"}
-   {:name "vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
-   {:name "vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
-   {:name "vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen akustiikkasuunnittelu (uudisrakentaminen)"}
-   {:name "tavanomainen akustiikkasuunnittelu (korjausrakentaminen)"}
-   {:name "vaativa akustiikkasuunnittelu (uudisrakentaminen)"}
-   {:name "vaativa akustiikkasuunnittelu (korjausrakentaminen)"}
-   {:name "poikkeuksellisen vaativa akustiikkasuunnittelu (uudisrakentaminen)"}
-   {:name "poikkeuksellisen vaativa akustiikkasuunnittelu (korjausrakentaminen)"}
-   {:name "tavanomainen kosteusvaurion korjaussuunnittelu"}
-   {:name "vaativa kosteusvaurion korjaussuunnittelu"}
-   {:name "poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu"}])
+(def fise-kelpoisuus-lajit (wrapped user-enums/fise-kelpoisuus-lajit :name))
 
 (def patevyysluokka {:name "patevyysluokka" :type :select :sortBy nil :required true
                      :body [{:name "AA"}
@@ -717,118 +640,6 @@
                       :copybutton true
                       :body huoneistoRow})
 
-(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
-                  :body [{:name "betoni"}
-                         {:name "kipsi"}
-                         {:name "puu"}
-                         {:name "metalli"}
-                         {:name "lasi"}
-                         {:name "muovi"}
-                         {:name "paperi"}
-                         {:name "maa"}]})
-
-(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
-                            :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
-                                   {:name "aerosolipullot"}
-                                   {:name "painekyllastetty-puu"}
-                                   {:name "elohopealamput-ja-paristot"}
-                                   {:name "jateoljyt-ja-muut-oljyiset-jatteet"}
-                                   {:name "asbesti"}
-                                   {:name "kivihiilipiki-eli-kreosootti"}
-                                   {:name "raskasmetallipitoiset-maalijatteet"}
-                                   {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
-                                   {:name "sahko-ja-elektroniikkaromu"}]})
-
-(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
-                  :body [{:name "kg"}
-                         {:name "tonni"}
-                         {:name "m2"}
-                         {:name "m3"}]})
-
-(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-input :inputType :string :min 0 :max 9999999 :size :s})
-
-(def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
-                                 jateyksikko
-                                 (assoc rakennusjatemaara :name "painoT")])
-
-(def rakennusjateselvitysUusiRow [(assoc rakennusjatemaara :name "toteutunutMaara")
-                                  jateyksikko
-                                  (assoc rakennusjatemaara :name "painoT")
-                                  {:name "jatteenToimituspaikka" :type :string :max-len 50}])
-
-(def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
-                              (assoc rakennusjatemaara :name "toteutunutMaara")
-                              (assoc jateyksikko :readonly true)
-                              (assoc rakennusjatemaara :name "painoT")
-                              {:name "jatteenToimituspaikka" :type :string :max-len 50}])
-
-(def availableMaterialsRow [{:name "aines" :type :string}
-                            rakennusjatemaara
-                            jateyksikko
-                            {:name "saatavilla" :type :date}
-                            {:name "kuvaus" :type :string}])
-
-(def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
-                               :i18nkey "rakennusJaPurkujate"
-                               :type :table
-                               :uicomponent :docgenTable
-                               :repeating true
-                               :approvable false
-                               :body (body jatetyyppi rakennusjatesuunnitelmaRow)}
-                              {:name "vaarallisetAineet"
-                               :i18nkey "vaarallisetAineet"
-                               :type :table
-                               :uicomponent :docgenTable
-                               :repeating true
-                               :approvable false
-                               :body (body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])
-
-(def rakennusjateselvitys [{:name "rakennusJaPurkujate"
-                            :i18nkey "rakennusJaPurkujate"
-                            :type :group
-                            :uicomponent :constructionWasteReport
-                            :approvable false
-                            :body [{:name "suunniteltuJate"
-                                    :type :table
-                                    :repeating true
-                                    :repeating-init-empty true
-                                    :body (body (assoc jatetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate"
-                                    :type :table
-                                    :repeating true
-                                    :body (body jatetyyppi rakennusjateselvitysUusiRow)}]}
-                           {:name "vaarallisetAineet"
-                            :i18nkey "vaarallisetAineet"
-                            :type :group
-                            :uicomponent :constructionWasteReport
-                            :approvable false
-                            :body [{:name "suunniteltuJate"
-                                    :type :table
-                                    :repeating true
-                                    :repeating-init-empty true
-                                    :body (body (assoc vaarallinenainetyyppi :readonly true) rakennusjateselvitysRow)}
-                                   {:name "suunnittelematonJate"
-                                    :type :table
-                                    :repeating true
-                                    :body (body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
-                           {:name "contact"
-                            :i18nkey "available-materials.contact"
-                            :type :group
-                            :group-help "contact.help"
-                            :body [{:name "name" :type :string}
-                                   {:name "phone" :type :string :subtype :tel}
-                                   {:name "email" :type :string :subtype :email}]}
-                           {:name "availableMaterials"
-                            :i18nkey "available-materials"
-                            :type :table
-                            :uicomponent :docgenTable
-                            :approvable false
-                            :repeating true
-                            :body (body availableMaterialsRow)}])
-
-
-
-
 ;; Usage type definitions have moved to lupapiste-commons.usage-types
 
 (def kaytto {:name "kaytto"
@@ -844,7 +655,7 @@
             :type :group
             :body [{:name "tilavuus" :type :string :size :s :unit :m3 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
-                   {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :number :min 1 :max 9999999}
+                   {:name "rakennusoikeudellinenKerrosala" :type :string :size :s :unit :m2 :subtype :decimal :min 1 :max 9999999}
                    {:name "kokonaisala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}
                    {:name "kerrosluku" :type :string :size :s :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size :s :unit :m2 :subtype :number :min 0 :max 9999999}]})
@@ -1660,6 +1471,7 @@
            :repeating false
            :approvable true
            :type :party
+           :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
            :after-update 'lupapalvelu.application-meta-fields/foreman-index-update
            :accordion-fields foreman-accordion-paths}
     :body tyonjohtaja-v2}
@@ -1669,8 +1481,10 @@
            :repeating true
            :order 6
            :removable true
+           :removable-only-by-authority true
            :approvable true
            :subtype :maksaja
+           :section-help "schemas.maksaja.section.help"
            :accordion-fields hakija-accordion-paths
            :type :party}
     :body maksaja}
@@ -1723,12 +1537,17 @@
    {:info {:name "rakennusjatesuunnitelma"
            :order 200
            :section-help "rakennusjate.help"}
-    :body (body rakennusjatesuunnitelma)}
+    :body (body waste-schemas/rakennusjatesuunnitelma)}
    {:info {:name "rakennusjateselvitys"
            :order 201
            :construction-time true
            :section-help "rakennusjate.help"}
-    :body (body rakennusjateselvitys)}
+    :body (body waste-schemas/rakennusjateselvitys)}
+
+   {:info {:name "laajennettuRakennusjateselvitys"
+           :order 200
+           :section-help "rakennusjate.help"}
+    :body (body waste-schemas/laajennettu-rakennusjateselvitys)}
 
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false

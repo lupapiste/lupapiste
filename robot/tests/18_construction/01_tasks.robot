@@ -11,12 +11,24 @@ Variables      ../06_attachments/variables.py
 Mikko prepares the application
   Mikko logs in
   ${secs} =  Get Time  epoch
+  Set Suite Variable  ${secs}
   Set Suite Variable  ${appname}  Taskitesti-${secs}
   Set Suite Variable  ${propertyId}  753-416-18-1
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Submit application
+
+Mikko prepares YA application and fills it to pass KRYSP validation later in test
   Set Suite Variable  ${appname-ya}  Taskitesti-YA-${secs}
   Create application the fast way  ${appname-ya}  ${propertyId}  ya-katulupa-vesi-ja-viemarityot
+  Tab should be visible  info
+  # Alkupvm + loppupvm
+  Fill tyoaika fields
+  # Osapuolet
+  Invite company to application  Solita Oy
+  Select from list by value  jquery=select[name=company-select]:first  solita
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:first  Solita Oy
+  Select from list by value  jquery=select[name=company-select]:last  solita
+  Wait until  Value should be  jquery=input[data-docgen-path='yritys.yritysnimi']:last  Solita Oy
   Submit application
   Logout
 
@@ -52,7 +64,7 @@ Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
   Task count is  task-lupamaarays  3
   Task state count is  task-lupamaarays  requires_user_action  3
-  
+
 Valaistussuunnitelma requires action
   Open task  Valaistussuunnitelma
   Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
@@ -86,7 +98,7 @@ Add attachment to Aloituskokous
 
 Aloituskokous form is still editable (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//input
-  Xpath Should Match X Times  //section[@id="task"]//input[@readonly]  0
+  Test id enabled  'katselmus.pitoPvm'
   Edit R katselmus  osittainen  1.5.2016  Sonja Sibbo  Hello world!
 
 Return to listing
@@ -268,7 +280,7 @@ Deleting R verdict does not delete its done reviews
   Scroll to  h2 span[data-test-id=given-verdict-id-1] ~ i
   Click element  jquery=h2 span[data-test-id=given-verdict-id-1] ~ i
   Confirm  dynamic-yes-no-confirm-dialog
-  Open tab  tasks
+  Wait until  Open tab  tasks
   Javascript?  $("[data-test-type=task-katselmus]").length === 5
   Review row check  0  Aloituskokous  1.5.2016  Sonja Sibbo  Lopullinen  Kyllä
   Review row check  1  Aloituskokous  20.5.2016  Sonja Igen  Osittainen  ${EMPTY}

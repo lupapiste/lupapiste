@@ -10,13 +10,18 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.i18n :as i18n]
             [monger.operators :refer :all]
             [sade.core :as sade]
             [sade.schemas :as ssc]
-            [sade.schema-generators :as ssg]
-            [lupapalvelu.itest-util :as util]))
+            [sade.schema-generators :as ssg]))
 
 (apply-remote-minimal)
+
+(defn- language-map [langs suffix]
+  (into {} (map (juxt identity
+                      #(str (name %) " " suffix))
+                langs)))
 
 (facts
   (let [uri "http://127.0.0.1:8000/dev/krysp"]
@@ -92,7 +97,7 @@
 
       (fact "oulu user sees other users in oulu & naantali"
         (map :username oulu-sees) =>
-        (contains ["olli" "rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi"] :in-any-order)))))
+        (contains ["olli" "olli-ya" "rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi"] :in-any-order)))))
 
 (fact* "Organization details query works"
  (let [resp  (query pena "organization-details" :municipality "753" :operation "kerrostalo-rivitalo" :lang "fi") => ok?]
@@ -323,7 +328,7 @@
     (command sonja :save-organization-tags :tags [{:id nil :label "illegal"}] =not=> ok?)
     (command pena :save-organization-tags :tags [{:id nil :label "makeja"}] =not=> ok?))
   (fact "tags get ids when saved"
-    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just {:fi string? :sv string?})
+    (:tags (query sipoo :get-organization-tags)) => (just {:753-R (just {:name (just (i18n/localization-schema string?))
                                                                          :tags (just [(just {:id string? :label "makeja"})
                                                                                       (just {:id string? :label "nigireja"})])})}))
 
@@ -358,15 +363,15 @@
 
 (facts "Organization areas zip file upload"
   (fact "only authorityAdmin can upload"
-    (:body (util/upload-area pena)) => "unauthorized"
-    (:body (util/upload-area sonja)) => "unauthorized")
+    (:body (upload-area pena)) => "unauthorized"
+    (:body (upload-area sonja)) => "unauthorized")
 
   (fact "text file is not ok (zip required)"
-        (-> (decode-response (util/upload-area sipoo "dev-resources/test-attachment.txt"))
+        (-> (decode-response (upload-area sipoo "dev-resources/test-attachment.txt"))
             :body
             :text) => "error.illegal-shapefile")
 
-  (let [resp (util/upload-area sipoo)
+  (let [resp (upload-area sipoo)
         body (:body (decode-response resp))]
 
     (fact "zip file with correct shape file can be uploaded by auth admin"
@@ -426,6 +431,7 @@
                       (fact "One of which is not a base layer"
                             (not= (:base k1) (:base k2)) => true)))
              (facts "Layer objects"
+                    (defn loc-data [s] (zipmap [:fi :sv :en] (repeat s)))
                     (fact "Every layer object has an unique id"
                           (->> objects (map :id) set count) => 5)
                     (fact "Ids are correctly formatted"
@@ -435,10 +441,10 @@
                                                       id))
                                          (and (not base) (not (number? id))))) objects))
                     (fact "Bar layer is correct "
-                          (let [subtitles {:fi "" :sv "" :en ""}
+                          (let [subtitles (loc-data "")
                                 bar-index (->> layers (map-indexed #(assoc %2 :index %1)) (some #(if (= (:id %) "bar-id") (:index %))))]
 
-                            (nth objects bar-index) => {:name        {:fi "bar" :sv "bar" :en "bar"}
+                            (nth objects bar-index) => {:name        (loc-data "bar")
                                                         :subtitle    subtitles
                                                         :id          (str "Lupapiste-" bar-index)
                                                         :baseLayerId (str "Lupapiste-" bar-index)
@@ -820,20 +826,27 @@
     (command admin :update-organization-name :org-id "753-R" :name {:fi ""}) => (partial expected-failure? :error.empty-organization-name))
 
   (facts "organization name is changed only for languages that are specified in command data"
+    (let [change-all-map (language-map i18n/supported-langs "modified")]
+      (fact "all languages"
+        (command admin :update-organization-name :org-id "753-R" :name change-all-map) => ok?
+        (get-in (query sipoo :organization-by-user) [:organization :name]) => change-all-map)
 
-    (fact "fi + sv + en"
-      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified" :sv "sv modified" :en "en modified"}) => ok?
-      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified" :sv "sv modified" :en "en modified"})
-
-    (fact "fi + sv"
-      (command admin :update-organization-name :org-id "753-R" :name {:fi "fi modified again" :sv "sv modified again"}) => ok?
-      (get-in (query sipoo :organization-by-user) [:organization :name]) => {:fi "fi modified again" :sv "sv modified again" :en "en modified"})))
+      (fact "all but one language"
+        (let [unchanged (first i18n/supported-langs)
+              changed (rest i18n/supported-langs)
+              change-map (language-map changed "modified again")
+              expected-response (merge (select-keys change-all-map [unchanged])
+                                       change-map)]
+          (command admin :update-organization-name :org-id "753-R" :name change-map) => ok?
+          (get-in (query sipoo :organization-by-user) [:organization :name]) => expected-response)))))
 
 
 (facts organization-names-by-user
+  (let [organization-name-map (select-keys {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}
+                                           i18n/supported-langs)]
+    (command admin :update-organization-name :org-id "753-R"
+             :name organization-name-map) => ok?
 
-  (command admin :update-organization-name :org-id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}) => ok?
-
-  (fact "query returns organization names for all languages"
-    (query sipoo :organization-name-by-user) => {:ok true :id "753-R" :name {:fi "Sipoo" :sv "Sibbo" :en "Sipoo"}})
-  )
+    (fact "query returns organization names for all languages"
+      (query sipoo :organization-name-by-user) => {:ok true :id "753-R"
+                                                   :name organization-name-map})))

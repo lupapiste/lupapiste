@@ -2,6 +2,7 @@
 <html>
   <body>
     <section class="page container" id="move-attachments-to-case-management-select">
+      <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'move-attachments-to-case-management-select' -->
       <div class="nav-back-container">
         <a class="btn left-align secondary"
            data-bind="click: cancelSelecting"
@@ -10,15 +11,16 @@
             <span data-bind="ltext: 'application.return'"></span>
         </a>
       </div>
-      <div class="attachment-multiselect-content" data-bind="if: selectingMode">
+      <div class="attachment-multiselect-content" data-bind="if: selectingMode && filteredAttachments">
         <div id="attachments-multiselect-component-container"
              data-bind="component: {name: 'attachments-multiselect',
-                                    params: {attachments: filteredAttachments,
+                                    params: {attachments: filteredAttachments(),
                                              titleLoc: 'application.attachmentsMoveToCaseManagement',
                                              okLoc: 'application.attachmentsMoveToCaseManagement',
                                              saveFn: moveAttachmets,
                                              authKey: 'attachments-to-asianhallinta'}}"></div>
       </div>
+      <!-- /ko -->
     </section>
   </body>
 </html>

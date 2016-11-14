@@ -31,6 +31,14 @@ Teppo decides to cancel application, could undo cancelllation
   Cancel current application
   Open canceled application  cancel-app  753-416-25-22
   Wait test id visible  application-undo-cancellation-btn
+
+Application info tab is visible
+  Element should be visible  jquery=a[data-test-id=application-open-info-tab]
+
+Application summary tab is hidden
+  Page should not contain element  jquery=a[data-test-id=application-open-applicationSummary-tab]
+
+Teppo logs out
   Logout
 
 Pena sees cancellation and can't undo it

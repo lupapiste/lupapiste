@@ -6,24 +6,29 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
+  <!-- ko if: authModel.ok("create-assignment") -->
+  <create-assignment data-test-id="create-assignment-component"
+                     params="authorities: $root.authorities,
+                             applicationId: applicationId,
+                             initialTarget: 'attachments',
+                             targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
+  <!-- /ko -->
   <div class="clear"></div>
-  <div data-bind="template: {name: 'attachments-operation-buttons-template',
-                             data: $data}"></div>
+  <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
 
   <suti-display></suti-display>
 
-  <!-- ko if: $data.hasUnfilteredAttachments() -->
-  <filters></filters>
+  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
+  <filters params="pageName: $data.pageName"></filters>
   <!-- /ko -->
 
-  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilteredAttachments() -->
+  <!-- ko if: $data.hasFilteredAttachments() -->
   <help-toggle params="html: legendHtml,
                        lbutton: 'attachment.legend.help'"></help-toggle>
 
-
-  <div data-bind="template: {name: 'attachments-accordions-template',
-                             data: $data}"></div>
-
+  <div data-bind="component: { name: 'attachments-accordions',
+                               params: { pageName: $data.pageName} }"></div>
+  <!-- /ko -->
   <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
     <div class="dialog-header">
       <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
@@ -33,7 +38,7 @@
       <div class="attachment-templates"></div>
     </div>
   </div>
-  <!-- /ko -->
+
   <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
   <div data-test-id="no-filtered-attachments-info">
     <i class="lupicon-circle-attention negative"></i>
@@ -46,6 +51,4 @@
     <span data-bind="ltext: 'attachment.listing.no-attachments'"></span>
   </div>
   <!-- /ko -->
-
-
 </script>

@@ -6,13 +6,24 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
-Mikko opens an application
-  Mikko logs in
+Init...
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
+  Set Suite Variable  ${paasuunnittelijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='paasuunnittelija']
+  Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
+  Set Suite Variable  ${asiamiesXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakijan-asiamies']
+
+Mikko opens an application
+  Mikko logs in
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
+
+Application info tab is visible
+  Element should be visible  jquery=a[data-test-id=application-open-info-tab]
+
+Application summary tab is hidden
+  Page should not contain element  jquery=a[data-test-id=application-open-applicationSummary-tab]
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784
@@ -106,18 +117,6 @@ Mikko goes to parties tab of an application
   Open tab  parties
   Open accordions  parties
 
-Mikko unsubscribes notifications
-  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']  1
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-  Click by test id  unsubscribeNotifications
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
-
-Mikko subscribes notifications
-  Click by test id  subscribeNotifications
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
-
 Mikko inputs bad postal code for hakija-r
   Input text with jQuery  div#application-parties-tab section[data-doc-type="hakija-r"] input[data-docgen-path="henkilo.osoite.postinumero"]  000
   Wait Until  Element should be visible  jquery=section[data-doc-type="hakija-r"] input.err[data-docgen-path="henkilo.osoite.postinumero"]
@@ -130,13 +129,9 @@ Mikko changes hakija-r country and postal code becomes valid
 Mikko can't delete paasuunnittelija, as it's only removable by authority
   Element should not be visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
 
-Mikko decides to delete maksaja
-  Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
-  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  0
+# LPK-LPK-1997
+Mikko can't delete maksaja, as it's only removable by authority
+  Element should not be visible  xpath=//section[@data-doc-type='maksaja']//button[@data-test-class='delete-schemas.maksaja']
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
@@ -146,8 +141,7 @@ Mikko adds party maksaja using dialog
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Open accordions  parties
-  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
@@ -158,7 +152,7 @@ Mikko adds party hakijan-asiamies using dialog
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
-  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
+  Wait until  Xpath Should Match X Times  ${asiamiesXpath}  1
 
 
 Mikko adds party hakija-r using button
@@ -202,6 +196,24 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
+  [Teardown]  Logout
+
+Authority deletes paasuunnittelija
+  Sonja logs in
+  Open application  ${newName}  ${propertyId}
+  Open tab  parties
+  Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
+  Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
+  Execute Javascript  $("button[data-test-class='delete-schemas.paasuunnittelija']").click();
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
+
+Authority deletes maksaja
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
+  Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
+  Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing
   There are no frontend errors

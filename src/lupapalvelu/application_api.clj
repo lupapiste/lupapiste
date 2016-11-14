@@ -14,7 +14,6 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
@@ -32,7 +31,8 @@
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]))
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
+            [lupapalvelu.organization :as organization]))
 
 ;; Notifications
 
@@ -53,16 +53,11 @@
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
    :org-authz-roles  auth/reader-org-authz-roles}
-  [{:keys [application user]}]
+  [{:keys [application user] :as command}]
   (if application
-    (let [app (assoc application :allowedAttachmentTypes (->> (att-type/get-attachment-types-for-application application)
-                                                              (att-type/->grouped-array)))]
-      (ok :application (app/post-process-app app user)
-          :authorities (if (usr/authority? user)
-                         (map #(select-keys % [:id :firstName :lastName]) (app/application-org-authz-users app "authority"))
-                         [])
-          :permitSubtypes (app/resolve-valid-subtypes app)))
-    (fail :error.not-found)))
+    (ok :application (app/post-process-app command)
+        :permitSubtypes (app/resolve-valid-subtypes application))
+    (fail :error.application-not-found)))
 
 (defquery application-authorities
   {:user-roles #{:authority}
@@ -108,6 +103,7 @@
    :input-validators [(fn [{{type :type} :data}] (when-not (app/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles  ;; For info-links
    :states           states/all-states
    :pre-checks       [app/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
@@ -159,11 +155,13 @@
   {:parameters       [id text lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :notified         true
    :on-success       (notify :application-state-change)
    :states           #{:draft :info :open :submitted}
    :pre-checks       [(partial sm/validate-state-transition :canceled)
-                      action/outside-authority-only]}
+                      action/outside-authority-only
+                      foreman/allow-foreman-only-in-foreman-app]}
   [command]
   (app/cancel-application command))
 
@@ -195,12 +193,8 @@
                             (when-not (= (:username user) (get-in canceled-entry [:user :username]))
                               (fail :error.undo-only-for-canceler)))))]
    :states           #{:canceled}}
-  [{:keys [application created user] :as command}]
-  (update-application command
-                      {:state :canceled}
-                      (merge
-                        (app/state-transition-update (app/get-previous-app-state application) created user)
-                        {$unset {:canceled 1}})))
+  [command]
+  (app/undo-cancellation command))
 
 
 (defcommand request-for-complement
@@ -211,7 +205,7 @@
    :on-success       (notify :application-state-change)
    :pre-checks       [(partial sm/validate-state-transition :complementNeeded)]}
   [{:keys [created user application] :as command}]
-  (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created user))))
+  (update-application command (util/deep-merge (app/state-transition-update :complementNeeded created application user))))
 
 (defcommand cleanup-krysp
   {:description      "Removes application KRYSP messages. The cleanup
@@ -225,10 +219,10 @@
 
 ;; Submit
 
-(defn- do-submit [command application created]
+(defn do-submit [{:keys [application created user] :as command} ]
   (let [history-entries (remove nil?
-                          [(when-not (:opened application) (app/history-entry :open created (:user command)))
-                           (app/history-entry :submitted created (:user command))])]
+                          [(when-not (:opened application) (app/history-entry :open created user))
+                           (app/history-entry :submitted created user)])]
     (update-application command
       {$set {:state     :submitted
              :modified  created
@@ -284,20 +278,21 @@
   {:parameters       [id]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           #{:draft :open}
    :notified         true
    :on-success       [(notify :application-state-change)
                       (notify :neighbor-hearing-requested)
                       (notify :organization-on-submit)]
    :pre-checks       [domain/validate-owner-or-write-access
+                      foreman/allow-foreman-only-in-foreman-app
                       app/validate-authority-in-drafts
                       (partial sm/validate-state-transition :submitted)]}
-  [{:keys [application organization created] :as command}]
+  [{:keys [application] :as command}]
   (let [command (assoc command :application (meta-fields/enrich-with-link-permit-data application))]
     (if-some [errors (seq (submit-validation-errors command))]
       (fail :error.cannot-submit-application :errors errors)
-      (do-submit command application created))))
-
+      (do-submit command))))
 
 (defcommand refresh-ktj
   {:parameters [:id]
@@ -411,8 +406,7 @@
         (notifications/notify! :inforequest-invite {:application created-application})))
     (try
       (autofill-rakennuspaikka created-application created)
-      (catch java.io.IOException e
-        (error "KTJ data was not updated:" (.getMessage e))))
+      (catch Exception e (warn "Could not get KTJ data for the new application")))
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [{application :application}]
@@ -445,6 +439,7 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :op-id])]
    :user-roles #{:applicant :authority}
    :states     states/pre-sent-application-states
@@ -456,6 +451,7 @@
 
 (defcommand change-primary-operation
   {:parameters [id secondaryOperationId]
+   :categories #{:documents} ; edited from document header
    :input-validators [(partial action/non-blank-parameters [:id :secondaryOperationId])]
    :user-roles #{:applicant :authority}
    :states states/pre-sent-application-states
@@ -478,10 +474,12 @@
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states     states/pre-sent-application-states
    :input-validators [(partial action/non-blank-parameters [:id :permitSubtype])]
    :pre-checks [app/validate-has-subtypes
                 app/pre-check-permit-subtype
+                foreman/allow-foreman-only-in-foreman-app
                 app/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (update-application command {$set {:permitSubtype permitSubtype, :modified created}})
@@ -512,23 +510,52 @@
                                  :title      (ss/trim address)
                                  :modified   created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
-           (catch Exception e (error e "KTJ data was not updated."))))
+           (catch Exception e (warn "KTJ data was not updated after location changed"))))
     (fail :error.property-in-other-muinicipality)))
 
 (defcommand change-application-state
   {:description      "Changes application state. The tranistions happen
   between post-verdict (excluding verdict given)states. In addition,
   the transition from appealed to a verdict given state is supported."
-   :parameters       [state]
+   :parameters       [id state]
    :input-validators [(partial action/non-blank-parameters [:state])]
    :user-roles       #{:authority}
    :states           states/post-verdict-states
    :pre-checks       [permit/valid-permit-types-for-state-change app/valid-new-state]
    :notified         true
    :on-success       (notify :application-state-change)}
-  [{:keys [user] :as command}]
-  (update-application command
-                      (app/state-transition-update (keyword state) (now) user)))
+  [{:keys [user application] :as command}]
+  (let [organization    (deref (:organization command))
+        application     (:application command)
+        krysp?          (organization/krysp-integration? organization (permit/permit-type application))
+        warranty?       (and (permit/is-ya-permit (permit/permit-type application)) (util/=as-kw state :closed) (not krysp?))]
+    (if warranty?
+      (update-application command (util/deep-merge
+                                    (app/state-transition-update (keyword state) (:created command) application user)
+                                    {$set (app/warranty-period (:created command))}))
+      (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
+
+(defcommand change-warranty-start-date
+  {:description      "Changes warranty start date"
+   :parameters       [id startDate]
+   :input-validators [(partial action/number-parameters [:startDate])
+                      (partial action/positive-number-parameters [:startDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+   [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyStart startDate}})
+  (ok))
+
+(defcommand change-warranty-end-date
+  {:description      "Changes warranty end date"
+   :parameters       [id endDate]
+   :input-validators [(partial action/number-parameters [:endDate])
+                      (partial action/positive-number-parameters [:endDate])]
+   :user-roles       #{:authority}
+   :states           states/post-verdict-states}
+  [{:keys [application] :as command}]
+  (update-application command {$set {:warrantyEnd endDate}})
+  (ok))
 
 (defquery change-application-state-targets
   {:description "List of possible target states for
@@ -602,6 +629,7 @@
 (defcommand add-link-permit
   {:parameters       ["id" linkPermitId]
    :user-roles       #{:applicant :authority}
+   :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :states           (states/all-application-states-but (conj states/terminal-states :sent)) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-linking
                       app/validate-authority-in-drafts]
@@ -624,6 +652,13 @@
     (ok)
     (fail :error.unknown)))
 
+(defquery all-operations-in
+  {:description "Return all operation names in operation tree for given paths."
+   :optional-parameters [path]
+   :user-roles          #{:authority :oirAuthority :applicant}
+   :input-validators    [(partial action/string-parameters [:path])]}
+  [command]
+  (ok :operations (op/operations-in (ss/split (not-empty path) #"\."))))
 
 ;;
 ;; Change permit
@@ -646,6 +681,7 @@
                               (select-keys application
                                 [:auth
                                  :propertyId, :location
+                                 :location-wgs84
                                  :schema-version
                                  :address, :title
                                  :foreman, :foremanRole
@@ -751,19 +787,18 @@
    :user-roles #{:applicant :authority}
    :states     states/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
-  [{:keys [user created application organization] :as command}]
-  (let [op (:primaryOperation application)]
-    (update-application command
-                        (util/deep-merge
-                          (app/state-transition-update :open created user)
-                          {$set  {:infoRequest            false
-                                  :openInfoRequest        false
-                                  :convertedToApplication created
-                                  :documents              (app/make-documents user created op application)
-                                  :modified               created}
-                           $push {:attachments {$each (app/make-attachments created op @organization (:state application) (:tosFunction application))}}}))
-    (try (autofill-rakennuspaikka application created)
-         (catch Exception e (error e "KTJ data was not updated")))))
+  [{user :user created :created {state :state op :primaryOperation tos-fn :tosFunction :as app} :application org :organization :as command}]
+  (update-application command
+                      (util/deep-merge
+                       (app/state-transition-update :open created app user)
+                       {$set  {:infoRequest            false
+                               :openInfoRequest        false
+                               :convertedToApplication created
+                               :documents              (app/make-documents user created op app)
+                               :modified               created}
+                        $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
+  (try (autofill-rakennuspaikka app created)
+       (catch Exception e (warn "KTJ data was not updated to inforequest when converted to application"))))
 
 (defn- validate-organization-backend-urls [{organization :organization}]
   (when-let [org (and organization @organization)]
@@ -799,7 +834,7 @@
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
-   :states     states/post-submitted-states
+   :states     states/post-sent-states
    :pre-checks [validate-organization-backend-urls
                 correct-urls-configured]}
   [{{:keys [verdicts]} :application organization :organization}]

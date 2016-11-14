@@ -78,12 +78,12 @@
    "LPATITLE_STATE"        (localized-text lang "application.export.state")
    "LPAVALUE_STATE"        (localized-text lang (:state application))})
 
-(defn- write-line [line data wrtr]
+(defn- write-line [line data ^java.io.Writer wrtr]
   (.write wrtr (str (reduce (fn [s [k v]] (if (s/includes? s (str ">" k "<")) (replace-text s k v) (replace-user-field s data))) line data) "\n")))
 
 (defn- get-table-name [line] (nth (re-find #"<table:table table:name=\"(.*?)\"" line) 1))
 
-(defn- write-table! [rdr wrtr table-rows fields]
+(defn- write-table! [^java.io.Reader rdr ^java.io.Writer wrtr table-rows fields]
   (doseq [line (take-while (fn [line] (not (s/includes? line "</table:table-header-rows>"))) (line-seq rdr))]
     (write-line line fields wrtr)
     (when-let [table-rows2 (get fields (get-table-name line))]
@@ -143,9 +143,9 @@
         (s/trim (str (:value first-name) " " (:value last-name)))))))
 
 (defn create-libre-doc [template file fields]
-  (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)]
-    (with-open [rdr (io/reader template)]
-      (doseq [line (line-seq rdr)]
-        (write-line line fields wrtr)
-        (when-let [table-rows (get fields (get-table-name line))]
-          (write-table! rdr wrtr table-rows fields))))))
+  (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)
+              rdr (io/reader template)]
+    (doseq [line (line-seq rdr)]
+      (write-line line fields wrtr)
+      (when-let [table-rows (get fields (get-table-name line))]
+        (write-table! rdr wrtr table-rows fields)))))

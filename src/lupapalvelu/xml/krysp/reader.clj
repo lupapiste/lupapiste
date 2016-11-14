@@ -4,18 +4,21 @@
             [clojure.set :refer [rename-keys]]
             [net.cgrand.enlive-html :as enlive]
             [sade.xml :refer :all]
-            [sade.util :as util]
+            [sade.util :refer [fn-> fn->>] :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def- fail]]
             [sade.property :as p]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.wfs :as wfs]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [lupapalvelu.xml.krysp.common-reader :as common]))
 
-(defn- post-body-for-ya-application [id id-path]
-  {:body (str "<wfs:GetFeature service=\"WFS\"
+(defn- post-body-for-ya-application [ids id-path]
+  (let [filter-content (->> (wfs/property-in id-path ids)
+                            (element-to-string))]
+    {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
         outputFormat=\"GML2\"
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
@@ -23,52 +26,47 @@
         xmlns:ogc=\"http://www.opengis.net/ogc\"
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
-          <ogc:Filter>
-            <ogc:PropertyIsEqualTo>
-                       <ogc:PropertyName>" id-path "</ogc:PropertyName>
-                       <ogc:Literal>" id "</ogc:Literal>
-            </ogc:PropertyIsEqualTo>
-          </ogc:Filter>
+          <ogc:Filter>"
+                filter-content
+         "</ogc:Filter>
          </wfs:Query>
-       </wfs:GetFeature>")})
+       </wfs:GetFeature>")}))
 
-(defn- application-xml [type-name id-path server credentials id raw?]
-  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-equals id-path id))]
+(defn- application-xml [type-name id-path server credentials ids raw?]
+  (let [url (common/wfs-krysp-url-with-service server type-name (common/property-in id-path ids))]
     (trace "Get application: " url)
     (cr/get-xml url {} credentials raw?)))
 
-(defn rakval-application-xml [server credentials id search-type raw?]
-  (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials id raw?))
+(defn rakval-application-xml [server credentials ids search-type raw?]
+  (application-xml common/rakval-case-type (common/get-tunnus-path permit/R search-type)    server credentials ids raw?))
 
-(defn poik-application-xml   [server credentials id search-type raw?]
-  (application-xml common/poik-case-type   (common/get-tunnus-path permit/P search-type)    server credentials id raw?))
+(defn poik-application-xml   [server credentials ids search-type raw?]
+  (application-xml common/poik-case-type   (common/get-tunnus-path permit/P search-type)    server credentials ids raw?))
 
-(defn yl-application-xml     [server credentials id search-type raw?]
-  (application-xml common/yl-case-type     (common/get-tunnus-path permit/YL search-type)   server credentials id raw?))
+(defn yl-application-xml     [server credentials ids search-type raw?]
+  (application-xml common/yl-case-type     (common/get-tunnus-path permit/YL search-type)   server credentials ids raw?))
 
-(defn mal-application-xml    [server credentials id search-type raw?]
-  (application-xml common/mal-case-type    (common/get-tunnus-path permit/MAL search-type)  server credentials id raw?))
+(defn mal-application-xml    [server credentials ids search-type raw?]
+  (application-xml common/mal-case-type    (common/get-tunnus-path permit/MAL search-type)  server credentials ids raw?))
 
-(defn vvvl-application-xml   [server credentials id search-type raw?]
-  (application-xml common/vvvl-case-type   (common/get-tunnus-path permit/VVVL search-type) server credentials id raw?))
+(defn vvvl-application-xml   [server credentials ids search-type raw?]
+  (application-xml common/vvvl-case-type   (common/get-tunnus-path permit/VVVL search-type) server credentials ids raw?))
 
-(defn ya-application-xml     [server credentials id search-type raw?]
-  (let [options (post-body-for-ya-application id (common/get-tunnus-path permit/YA search-type))]
+(defn ya-application-xml     [server credentials ids search-type raw?]
+  (let [options (post-body-for-ya-application ids (common/get-tunnus-path permit/YA search-type))]
     (trace "Get application: " server " with post body: " options )
     (cr/get-xml-with-post server options credentials raw?)))
 
-(defn kt-application-xml   [server credentials id search-type raw?]
-  (let [path "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus"]
-    (application-xml common/kt-types path server credentials id raw?)))
+(defn kt-application-xml   [server credentials ids search-type raw?]
+  (application-xml common/kt-types (common/get-tunnus-path permit/KT search-type) server credentials ids raw?))
 
-(permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
-(permit/register-function permit/P    :xml-from-krysp poik-application-xml)
-(permit/register-function permit/YA   :xml-from-krysp ya-application-xml)
-(permit/register-function permit/YL   :xml-from-krysp yl-application-xml)
-(permit/register-function permit/MAL  :xml-from-krysp mal-application-xml)
-(permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
-(permit/register-function permit/KT   :xml-from-krysp kt-application-xml)
-
+(defmethod permit/fetch-xml-from-krysp :R    [_ & args] (apply rakval-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :P    [_ & args] (apply poik-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :YA   [_ & args] (apply ya-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :YL   [_ & args] (apply yl-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :MAL  [_ & args] (apply mal-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :VVVL [_ & args] (apply vvvl-application-xml args))
+(defmethod permit/fetch-xml-from-krysp :KT   [_ & args] (apply kt-application-xml args))
 
 ;;
 ;; Mappings from KRYSP to Lupapiste domain
@@ -275,7 +273,7 @@
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
       (< timestamp-1-day-ago paatospvm)      (fail :info.paatos-future-date))))
 
-(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
+(defn ->tj-suunnittelija-verdicts [xml-without-ns {{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
     (map (fn [osapuolet-xml-without-ns]
@@ -290,7 +288,23 @@
               })))
   (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
-(defn- application-state [xml-without-ns]
+(def krysp-state->application-state
+  {"rakennusty\u00f6t aloitettu"                 :constructionStarted
+   "rakennusty\u00f6t keskeytetty"               :onHold
+   "p\u00e4\u00e4t\u00f6ksest\u00e4 valitettu, valitusprosessin tulosta ei ole" nil
+   "lupa rauennut"                               :extinct
+   "jatkoaika my\u00f6nnetty"                    nil
+   "osittainen loppukatselmus, yksi tai useampia luvan rakennuksista on k\u00e4ytt\u00f6\u00f6notettu" :inUse
+   "lupa vanhentunut"                            nil
+   "lopullinen loppukatselmus tehty"             :closed
+   "luvalla ei loppukatselmusehtoa, lupa valmis" :closed})
+
+(defmulti application-state
+  "Get application state from xml."
+  {:arglists '([xml-without-ns])}
+  :tag)
+
+(defn simple-application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
     (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
@@ -298,6 +312,19 @@
     last
     :hakemuksenTila
     ss/lower-case))
+
+(defmethod application-state :default [xml-without-ns] (simple-application-state xml-without-ns))
+
+(defn standard-application-state [xml-without-ns]
+  (->> (select xml-without-ns [:kasittelynTilatieto :Tilamuutos])
+       (map (fn-> cr/all-of (cr/convert-keys-to-timestamps [:pvm])))
+       (sort-by :pvm)
+       last
+       :tila
+       ss/lower-case))
+
+(defmethod application-state :Rakennusvalvonta [xml-without-ns] (standard-application-state xml-without-ns))
+(defmethod application-state :Popast [xml-without-ns] (standard-application-state xml-without-ns))
 
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
@@ -360,24 +387,23 @@
                     :poytakirjat poytakirjat}))))
            (select xml-no-ns [:paatostieto :Paatos])))))
 
+(defmethod permit/read-verdict-xml :R    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :P    [_ xml-without-ns] (->standard-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :YA   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :YL   [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :MAL  [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :VVVL [_ xml-without-ns] (->simple-verdicts xml-without-ns))
+(defmethod permit/read-verdict-xml :KT   [_ xml-without-ns] (->outlier-verdicts xml-without-ns))
 
-(permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
-(permit/register-function permit/P :verdict-krysp-reader ->standard-verdicts)
-(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
-(permit/register-function permit/KT :verdict-krysp-reader ->outlier-verdicts)
+(defmethod permit/read-tj-suunnittelija-verdict-xml :R [_ xml-without-ns & args] (apply ->tj-suunnittelija-verdicts xml-without-ns args))
 
-(permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
-
-(permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
-(permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
-(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/YL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/MAL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
-(permit/register-function permit/KT :verdict-krysp-validator outlier-verdicts-validator)
+(defmethod permit/validate-verdict-xml :R    [_ xml organization] (standard-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :P    [_ xml organization] (standard-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :YA   [_ xml organization] (simple-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :YL   [_ xml organization] (simple-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :MAL  [_ xml organization] (simple-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :VVVL [_ xml organization] (simple-verdicts-validator xml organization))
+(defmethod permit/validate-verdict-xml :KT   [_ xml organization] (outlier-verdicts-validator xml organization))
 
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
@@ -392,32 +418,29 @@
        (map ->kuntalupatunnus)
        (remove ss/blank?)))
 
-;; Reads the verdicts
-;; Arguments:
-;; xml: KRYSP with ns.
-;; fun: verdict-krysp-reader for permit.
-(defmulti ->verdicts (fn [_ fun] fun))
+(defmulti ->verdicts
+  "Reads the verdicts."
+  {:arglists '([xml permit-type reader & reader-args])}
+  (fn [xml permit-type & _] (keyword permit-type)))
 
 (defmethod ->verdicts :default
-  [xml ->function]
+  [xml permit-type reader & reader-args]
   (map
     (fn [asia]
       (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
-            verdicts      (->> asia
-                           (->function)
-                           (cr/cleanup)
-                           (filter seq))]
+            verdicts      (->> (apply reader permit-type asia reader-args)
+                               (cr/cleanup)
+                               (filter seq))]
         (util/assoc-when-pred verdict-model util/not-empty-or-nil? :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) common/case-elem-selector)))
 
 ;; Outliers (KT) do not have kuntalupatunnus
-(defmethod ->verdicts ->outlier-verdicts
-  [xml fun]
+(defmethod ->verdicts :KT
+  [xml _ reader]
   (for [elem (enlive/select (cr/strip-xml-namespaces xml)
                             common/outlier-elem-selector)]
     {:kuntalupatunnus "-"
-     :paatokset (->> elem fun cr/cleanup (filter seq))}))
-
+     :paatokset (->> (reader :KT elem) cr/cleanup (filter seq))}))
 
 ;; Coordinates
 

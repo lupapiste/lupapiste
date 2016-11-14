@@ -12,6 +12,13 @@
       </section>
 
       <section>
+        <h2 data-bind="ltext: 'auth-admin.assignments.title'"></h2>
+        <input type="checkbox" class="form-input" id="assignments-enabled" data-test-id="assignments-enabled"
+               data-bind="checked: organization.assignmentsEnabled, enable: lupapisteApp.models.globalAuthModel.ok('set-organization-assignments')" />
+        <label for="assignments-enabled" class="form-label" data-bind="ltext: 'auth-admin.assignments.enabled'"></label>
+      </section>
+
+      <section>
         <h2 data-bind="ltext: 'auth-admin.organization-name'"></h2>
         <!-- ko if: lupapisteApp.models.currentUser.loaded() -->
         <div data-bind="component: 'organization-name-editor'"></div>
@@ -59,17 +66,30 @@
         </table>
       </section>
 
-      <!-- ko if: $root.authorization.ok("set-organization-permanent-archive-start-date") -->
+      <!-- ko if: organization.permanentArchiveEnabled -->
       <section>
         <h2 data-bind="ltext: 'authorityAdmin.archive.heading'"></h2>
         <div class="permanent-archive-date-input">
           <label for="archiving-start-date" data-bind="ltext: 'authorityAdmin.archive.startDate'"></label>
-          <input data-bind="datepicker: organization.permanentArchiveInUseSince, valueUpdate: 'afterkeydown', attr: {placeholder: loc('choose')}"
+          <input data-bind="datepicker: organization.permanentArchiveInUseSince, 
+                            valueUpdate: 'afterkeydown',
+                            enable: $root.authorization.ok('set-organization-permanent-archive-start-date'),
+                            attr: {placeholder: loc('choose')}"
                  type="text"
                  id="archiving-start-date">
         </div>
       </section>
       <!-- /ko -->
+
+      <section>
+        <h2 data-bind="ltext: 'authorityAdmin.applicationsReport.title'"></h2>
+        <span data-bind="ltext: 'authorityAdmin.applicationsReport.caption'"></span>
+        <form action="/api/raw/open-applications-xlsx" method="get">
+          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+          <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+          <input type="submit" data-bind="attr: { value: loc('authorityAdmin.applicationsReport.buttonText')}"/>
+        </form>
+      </section>
 
     </div> <!-- container -->
   </section>

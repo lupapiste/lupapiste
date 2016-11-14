@@ -104,11 +104,15 @@ Sonja types in draft
   Reload Page
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
-Sonja adds and removes attachment to statement draft
+Sonja adds attachment to statement draft
   Wait test id visible  statement-attachments-no-attachments
   Scroll and click test id  add-statement-attachment
   Add attachment  statement  ${PDF_TESTFILE_PATH}  Important note
+
+Attachment comment appears
   Wait Until  Element should contain  jquery=table[data-test-id=statement-attachments-table] span  Important note
+
+Sonja removes attachment from statement draft
   Scroll to test id  add-statement-attachment
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
@@ -186,10 +190,12 @@ Veikko can delete his own statement but no others
   Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
-Veikko from Tampere can give statement
+Veikko from Tampere can give statement (and attach something to it as well)
   Open statement  veikko.viranomainen@tampere.fi
   Wait Until  element should be enabled  statement-text
   Input text  statement-text  uittotunnelin vieressa on tilaa.
+  Add attachment  statement  ${TXT_TESTFILE_PATH}  ${EMPTY}  ${EMPTY}  ennakkoluvat_ja_lausunnot.lausunto
+  Wait test id visible  statement-attachments-table
   Select From List By Value  statement-type-select  ehdollinen
   Wait until  Element Should Be Enabled  statement-submit
   Click Element  statement-submit

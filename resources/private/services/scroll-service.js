@@ -22,14 +22,28 @@ LUPAPISTE.ScrollService = function() {
     return _.get( window, "location.hash");
   }
 
+  function hashSupported( options ) {
+    return options.hash
+      && (!options.followed
+          || _.find( followed, function( re ) {
+            return re.test( options.hash );
+          }) );
+  }
   // Options [optional]:
   //  [override]: If true the current position wll override the
   //  possibly stored one (default false).
+  //  [followed]: if true the push only happens if hash is followed (default false).
+  //  [hash]: Page hash (default window.location.hash).
   self.push = function( options ) {
-    options = options || {};
-    var hash = getHash();
-    if( hash && ( !positions[hash] || options.override ) ) {
-      positions[hash] = {x: window.scrollX, y: window.scrollY };
+    options = _.defaults( options, {override: false,
+                                    followed: false,
+                                    hash: getHash()});
+
+    if( hashSupported( options)
+        && ( !positions[options.hash] || options.override ) ) {
+          // scrollX/Y not supported by IE.
+          positions[options.hash] = {x: window.scrollX || window.pageXOffset,
+                                     y: window.scrollY || window.pageYOffset};
     }
   };
 
@@ -49,22 +63,6 @@ LUPAPISTE.ScrollService = function() {
       }, options.delay || 1 );
     }
   };
-
-  // Service can follow the scroll positions for the matching hashes.
-  // If the current hash matches any of the followed regexps, the
-  // scroll position is pushed. The position checking is rate-limited
-  // with debounce.
-
-  function scrolled() {
-    var hash = getHash();
-    if( _.find( followed, function( re ) {
-      return re.test( hash );
-    })) {
-      self.push( {override: true});
-    }
-  }
-
-  window.onscroll = _.debounce( scrolled, 250 );
 
   self.follow = function( options ) {
     var hashRe = _.get( options, "hashRe");

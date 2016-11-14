@@ -3,6 +3,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.user :as user]
+            [lupapalvelu.open-inforequest]
             [sade.dummy-email-server :as dummy]))
 
 (testable-privates lupapalvelu.notifications get-email-subject get-application-link get-email-recipients-for-application)
@@ -39,18 +40,27 @@
 (fact "Every user gets an email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
                                                  {:id "b" :role "writer"}
-                                                 {:id "c" :role "unknown"}] :title "title" }
+                                                 {:id "c" :role "reader"}] :title "title" }
                                         nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"} {:email "c@foo.com"}]
   (provided
     (user/get-user-by-id "a") => {:email "a@foo.com"}
     (user/get-user-by-id "b") => {:email "b@foo.com"}
     (user/get-user-by-id "c") => {:email "c@foo.com"}))
 
-(fact "Every user except with role unknown get email"
+(fact "Every user except with role invalid get email"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
                                                  {:id "b" :role "writer"}
-                                                 {:id "c" :role "unknown"}] :title "title" }
-                                        nil ["unknown"]) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
+                                                 {:id "c" :role "invalid"}] :title "title" }
+                                        nil nil) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
+  (provided
+    (user/get-user-by-id "a") => {:email "a@foo.com"}
+    (user/get-user-by-id "b") => {:email "b@foo.com"}))
+
+(fact "Every user except with role reader get email"
+  (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
+                                                 {:id "b" :role "writer"}
+                                                 {:id "c" :role "reader"}] :title "title" }
+                                        nil [:reader]) => [ {:email "a@foo.com"} {:email "b@foo.com"}]
   (provided
     (user/get-user-by-id "a") => {:email "a@foo.com"}
     (user/get-user-by-id "b") => {:email "b@foo.com"}))
@@ -60,20 +70,20 @@
                                                  {:id "w1" :role "writer"}
                                                  {:id "w2" :role "writer"}
                                                  {:id "w3" :role "writer"}
-                                                 {:id "c" :role "unknown"}] :title "title" }
-                                        ["writer"] nil) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
+                                                 {:id "c" :role "reader"}] :title "title" }
+                                        [:writer] nil) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
     (user/get-user-by-id "w1") => {:email "w1@foo.com"}
     (user/get-user-by-id "w2") => {:email "w2@foo.com"}
     (user/get-user-by-id "w3") => {:email "w3@foo.com"}))
 
-(fact "Only writers get email (when excluded)"
+(fact "Only writers get email (owner exlusion overrides include))"
   (get-email-recipients-for-application { :auth [{:id "a" :role "owner"}
                                                  {:id "w1" :role "writer"}
                                                  {:id "w2" :role "writer"}
                                                  {:id "w3" :role "writer"}
-                                                 {:id "c" :role "unknown"}] :title "title" }
-                                        ["owner" "writer"] ["owner"]) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
+                                                 {:id "c" :role "reader"}] :title "title" }
+                                        [:owner :writer] [:owner]) => [ {:email "w1@foo.com"} {:email "w2@foo.com"} {:email "w3@foo.com"}]
   (provided
     (user/get-user-by-id "w1") => {:email "w1@foo.com"}
     (user/get-user-by-id "w2") => {:email "w2@foo.com"}
@@ -83,7 +93,7 @@
   (get-email-recipients-for-application
     {:auth [{:id "a" :role "owner" :unsubscribed false}
             {:id "b" :role "writer" :unsubscribed true}
-            {:id "c" :role "unknown"}] :title "title" }
+            {:id "c" :role "reader"}] :title "title" }
     nil nil) => [{:email "a@foo.com"} {:email "c@foo.com"}]
   (provided
     (user/get-user-by-id "a") => {:email "a@foo.com"}
@@ -100,4 +110,3 @@
 
 (fact "Unknown config"
   (notify! :foo {}) => (throws AssertionError))
-

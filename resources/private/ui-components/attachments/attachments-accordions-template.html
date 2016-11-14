@@ -1,24 +1,29 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-accordions-template">
   <div>
-    <!-- ko if: $data.groups() && !_.isEmpty($data.groups().accordions) -->
     <h2 data-bind="ltext: 'application.attachments'"
-        class="help-adjacent-title" />
-    <button class="ghost right" data-bind="click: $data.toggleAll">
+        class="attachments-title" />
+    <button class="ghost right bottom-marginM" data-bind="click: $data.toggleAll">
       <i class="lupicon-menu"></i>
       <span data-bind="ltext: 'accordions.toggle-all'"></span>
     </button>
+
     <div class="attachments-accordions"
-         data-bind="foreach: $data.groups().accordions">
-      <div data-bind="template: {name: 'attachments-listing-accordion-template',
-                      data: _.merge($data, {level: 0})}"></div>
+         data-bind="foreach: $data.groups ">
+      <div data-bind="component: { name: 'attachments-listing-accordion',
+                                   params: { pageName: $parent.pageName,
+                                             path: $data.path,
+                                             level: 0 } }"></div>
     </div>
-    <button data-bind="enable: $data.hasFile"
+    <!-- ko if: hasFile -->
+    <button data-bind="click: $data.downloadAll"
             class="secondary"
             data-test-id="download-all-attachments-button">
       <i class="lupicon-download"></i>
-      <span data-bind="ltext: 'download-all'"></span>
+      <span data-bind="text: $data.downloadAllText"></span>
     </button>
     <!-- /ko -->
   </div>
 </script>
+
+                       

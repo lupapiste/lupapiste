@@ -14,7 +14,9 @@
             [lupapiste-commons.i18n.core :as commons]
             [lupapiste-commons.i18n.resources :as commons-resources]))
 
-(def supported-langs [:fi :sv :en])
+(def supported-langs (if (env/feature? :english)
+                       [:fi :sv :en]
+                       [:fi :sv]))
 (def default-lang (first supported-langs))
 
 (defn- read-translations-txt [name-or-file]
@@ -58,9 +60,19 @@
 (defn get-localizations []
   (get-or-load-localizations))
 
-(def languages (-> (get-localizations) keys set))
+(def languages (-> supported-langs set))
 
 (def supported-language-schema (apply sc/enum (map name languages)))
+
+(defn localization-schema
+  "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
+  [value-type]
+  (into {} (map (juxt identity (constantly value-type))
+                supported-langs)))
+
+(defn with-default-localization [loc-map default]
+  (merge (localization-schema default)
+         loc-map))
 
 (defn valid-language
   "Input validator for lang parameter. Accepts also empty lang."
@@ -145,6 +157,44 @@
     {}
     lines))
 
+(defn ensure-no-duplicate-keys! [loc-maps]
+  (let [keys (mapcat (comp keys :translations) loc-maps)
+        sources-and-keys (map (comp (juxt (comp :source-name meta)
+                                          identity))
+                              keys)
+        keys (map second sources-and-keys)]
+
+    (when (not (apply distinct? keys))
+      (let [duplicates (map first
+                            (filter #(> (second %) 1)
+                                    (frequencies keys)))]
+        (throw (ex-info
+                "The same key appears in multiple sources"
+                {:duplicate-keys (->> sources-and-keys
+                                      (filter (comp (set duplicates)
+                                                    second))
+                                      (sort-by second))}))))))
+
+(defn- merge-localization-maps [loc-maps]
+  (ensure-no-duplicate-keys! loc-maps)
+  {:languages    (distinct (apply concat (map :languages loc-maps)))
+   :translations (apply merge-with conj (map :translations loc-maps))})
+
+(defn- txt-files->map [files]
+  (->> files
+       (map commons-resources/txt->map)
+       merge-localization-maps))
+
+(defn- default-i18n-files []
+  (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$"))
+
+(defn missing-translations [localization-map lang]
+  (update (commons-resources/missing-translations localization-map
+                                                  (keyword lang))
+          :translations
+          (util/fn->> (remove (comp ss/blank? :fi second))
+                      (sort-by first))))
+
 (defn missing-localizations-excel
   "Writes missing localizations of given language to excel file.
    If file is not provided, will create the file to user home dir."
@@ -152,21 +202,92 @@
    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
          filename (str (System/getProperty "user.home")
                        "/lupapiste_translations_"
-                       date-str
+                       date-str "_" (name lang)
                        ".xlsx")]
         (missing-localizations-excel (io/file filename) lang)))
   ([file lang]
-    (let [i18n-files   (util/get-files-by-regex (io/resource "i18n/") #".+\.txt$")
-          loc-maps     (map commons-resources/txt->map i18n-files)
-          langs        (distinct (apply concat (map :languages loc-maps)))
-          translations (apply merge-with conj (map :translations loc-maps))
-          loc-map      {:languages langs :translations translations}
-          missing      (commons-resources/missing-translations loc-map (keyword lang))
-          cleaned      (update missing :translations (util/fn->>
-                                                       (remove (comp ss/blank? :fi second))
-                                                       ;(map (fn [[k & rest]] (cons (ss/replace k #"!$" "") rest)))
-                                                       (sort-by first)))]
-    (commons-resources/write-excel cleaned file))))
+   (-> (default-i18n-files)
+       (txt-files->map)
+       (missing-translations lang)
+       (commons-resources/write-excel file))))
+
+(defn- contains-no-translations? [k-new v-new lang]
+  (when (= "" (get v-new lang ""))
+    (warn (str "No translations for key " k-new))
+    true))
+
+(defn- contains-unexpected-languages? [v-new lang]
+  (not= (set (keys v-new)) #{:fi lang}))
+
+; merge-with is not used because the translation maps from commons-resources are
+; actually ordered maps, where normal merge with vanilla Clojure map does not
+; play nice with key metadata.
+(defn merge-new-translations [source new lang]
+  {:languages    (distinct (apply concat (map :languages [source new])))
+   :translations (into {}
+                       (for [[k v] (:translations source)]
+                         (let [[k-new v-new] (find (:translations new) k)]
+                           (cond (nil? v-new) [k v]
+                                 (contains-unexpected-languages? v-new lang)
+                                 (throw (ex-info "new translation map contains unexpected language(s)"
+                                                 {:expected-language lang
+                                                  :translations      {k-new v-new}}))
+
+                                 (contains-no-translations? k-new v-new lang) [k v]
+
+                                 (nil? (:fi v))
+                                 (throw (ex-info "Finnish text not found in the source"
+                                                 {:source v
+                                                  :new    v-new}))
+
+
+                                 (not= (:fi v) (:fi v-new))
+                                 (throw (ex-info "Finnish text used for translation does not match the one found in current source"
+                                                 {:source {k v}
+                                                  :new    {k-new v-new}}))
+
+                                 :else [k (merge v v-new)]))))})
+
+(defn- sort-by-translation-entry [map-of-translations]
+  (into {}
+        (for [[k v] map-of-translations]
+          [k (sort-by first v)])))
+
+(defn group-translations-by-source [localization-map]
+  (->> localization-map
+       :translations
+       (group-by (comp :source-name meta first))
+       (sort-by-translation-entry)))
+
+(defn- read-translation-excel [path]
+  (let [file (io/file path)]
+    (with-open [in (io/input-stream file)]
+      (let [wb (xls/load-workbook in)
+            sheets (seq wb)]
+        (apply commons/merge-translations (map commons-resources/sheet->map sheets))))))
+
+(defn- merge-translation-from-excel [acc {:keys [languages] :as translation-map}]
+  (assert (= (count languages) 2)
+          (str "Actual languages" languages))
+  (let [lang (first (remove (partial = :fi) languages))]
+    (merge-new-translations acc
+                            translation-map
+                            lang)))
+
+(defn merge-translations-from-excels-into-source-files [translation-files-dir-path paths]
+  "Merges translation excel files into the current translation source files."
+  (let [translation-txt-files (util/get-files-by-regex translation-files-dir-path
+                                                       #".+\.txt$")
+        current-loc-map (-> translation-txt-files (txt-files->map))
+        translation-maps (map read-translation-excel paths)
+        new-loc-map (reduce merge-translation-from-excel
+                            current-loc-map
+                            translation-maps)]
+    (doseq [[filepath translations] (group-translations-by-source new-loc-map)]
+      (commons-resources/write-txt {:translations (for [[k v] translations]
+                                                    [k (sort v)])}
+                                   (io/file translation-files-dir-path
+                                            filepath)))))
 
 (defn merge-translations-from-excels
   "Merges translation excel files from paths to one translation txt file. Uses commons/merge-translations."
@@ -175,10 +296,6 @@
     (commons-resources/write-txt
       (apply
         commons/merge-translations
-        (for [path paths
-              :let [file (io/file path)]]
-          (with-open [in (io/input-stream file)]
-            (let [wb (xls/load-workbook in)
-                  sheets (seq wb)]
-              (apply commons/merge-translations (map commons-resources/sheet->map sheets))))))
+        (for [path paths]
+          (read-translation-excel path)))
       (io/file dir (str "merged_translations_" (now) ".txt")))))

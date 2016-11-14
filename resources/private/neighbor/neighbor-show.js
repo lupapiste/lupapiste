@@ -69,14 +69,14 @@
 
       self.application(a).map.updateSize().clear().center(x, y, 14).add({x: x, y: y});
 
-      var nonpartyDocs = _.filter(a.documents, util.isNotPartyDoc);
+      var nonpartyDocs = _.reject(a.documents, util.isPartyDoc);
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(a.documents, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
-      var options = {disabled: true, validate: false};
+      var options = {disabled: true, validate: false, authorizationModel: lupapisteApp.models.applicationAuthModel};
 
-      docgen.displayDocuments("neighborDocgen", a, sortedNonpartyDocs, lupapisteApp.models.applicationAuthModel, options);
-      docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, lupapisteApp.models.applicationAuthModel, options);
+      docgen.displayDocuments("neighborDocgen", a, sortedNonpartyDocs, options);
+      docgen.displayDocuments("neighborPartiesDocgen", a, sortedPartyDocs, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
@@ -109,12 +109,9 @@
     self.primaryOperation = ko.observable();
     self.secondaryOperations = ko.observableArray();
 
-    self.primaryOperationName = ko.computed(function() {
-      var op = ko.unwrap(self.primaryOperation());
-      if (op) {
-        return "operations." + ko.unwrap(op.name);
-      }
-      return "";
+    self.primaryOperationName = ko.pureComputed(function() {
+      var opName = util.getIn(self.primaryOperation, ["name"]);
+      return !_.isEmpty(opName) ? "operations." + opName : "";
     });
 
     self.send = function() {

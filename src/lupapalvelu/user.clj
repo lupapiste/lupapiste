@@ -6,14 +6,14 @@
             [camel-snake-kebab.core :as csk]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [schema.core :as sc]
+            [schema.core :refer [defschema] :as sc]
             [sade.core :refer [ok fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.validators :as v]
             [sade.schemas :as ssc]
-            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
@@ -32,7 +32,7 @@
    :username  "dummy@example.com"
    :enabled   false})
 
-(def SearchFilter
+(defschema SearchFilter
   {:id        sc/Str
    :title     sc/Str
    :sort     {:field (sc/enum "type" "location" "applicant" "submitted" "modified" "state" "handler" "foreman" "foremanRole" "id")
@@ -43,7 +43,10 @@
               (sc/optional-key :organizations) [sc/Str]
               (sc/optional-key :areas)         [sc/Str]}})
 
-(def User {:id                                    sc/Str
+(def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
+
+(defschema User
+          {:id                                    Id
            :firstName                             (ssc/max-length-string 255)
            :lastName                              (ssc/max-length-string 255)
            :role                                  (sc/enum "applicant"
@@ -66,10 +69,10 @@
            (sc/optional-key :zip)                 (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
            (sc/optional-key :phone)               (sc/maybe (ssc/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
-           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+           (sc/optional-key :degree)              (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
            (sc/optional-key :graduatingYear)      (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
            (sc/optional-key :fise)                (ssc/max-length-string 255)
-           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
+           (sc/optional-key :fiseKelpoisuus)      (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
            (sc/optional-key :companyName)         (ssc/max-length-string 255)
            (sc/optional-key :companyId)           (sc/if ss/blank? ssc/BlankStr ssc/FinnishY)
            (sc/optional-key :allowDirectMarketing) sc/Bool
@@ -91,18 +94,21 @@
                                                    (sc/optional-key :foremanFilterId) (sc/maybe sc/Str)}
            (sc/optional-key :applicationFilters)  [SearchFilter]
            (sc/optional-key :foremanFilters)      [SearchFilter]
-           (sc/optional-key :language)            i18n/supported-language-schema})
+           (sc/optional-key :language)            i18n/supported-language-schema
+           (sc/optional-key :seen-organization-links) {sc/Keyword ssc/Timestamp}
+           (sc/optional-key :firstLogin)          sc/Bool})
 
-(def RegisterUser {:email                            ssc/Email
+(defschema RegisterUser
+                  {:email                            ssc/Email
                    :street                           (sc/maybe (ssc/max-length-string 255))
                    :city                             (sc/maybe (ssc/max-length-string 255))
                    :zip                              (sc/if ss/blank? ssc/BlankStr ssc/Zipcode)
                    :phone                            (sc/maybe (ssc/max-length-string 255))
                    (sc/optional-key :architect)      sc/Bool
-                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" (map :name (:body schemas/koulutusvalinta))))
+                   (sc/optional-key :degree)         (sc/maybe (apply sc/enum "" "other" user-enums/koulutusvalinta))
                    (sc/optional-key :graduatingYear) (sc/if ss/blank? ssc/BlankStr (ssc/fixed-length-string 4))
                    (sc/optional-key :fise)           (ssc/max-length-string 255)
-                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" (map :name schemas/fise-kelpoisuus-lajit)))
+                   (sc/optional-key :fiseKelpoisuus) (sc/maybe (apply sc/enum "" user-enums/fise-kelpoisuus-lajit))
                    :allowDirectMarketing             sc/Bool
                    :rakentajafi                      sc/Bool
                    :stamp                            (sc/maybe (ssc/max-length-string 255))
@@ -121,7 +127,7 @@
 
 (def summary-keys [:id :username :firstName :lastName :role])
 
-(def SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
+(defschema SummaryUser (select-keys User (mapcat (juxt identity sc/optional-key) summary-keys)))
 
 (defn summary
   "Returns common information about the user or nil"
@@ -137,11 +143,19 @@
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
 
+(def session-summary-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+
+(defschema SessionSummaryUser
+  (-> (select-keys User (mapcat (juxt identity sc/optional-key) session-summary-keys))
+      (assoc (sc/optional-key :orgAuthz) {sc/Keyword #{sc/Keyword}}
+             (sc/optional-key :impersonating) sc/Bool
+             :expires ssc/Timestamp)))
+
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
   (some-> user
-    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+    (select-keys session-summary-keys)
     with-org-auth
     (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
@@ -180,6 +194,16 @@
   [{org-authz :orgAuthz :as user}]
   (->> org-authz keys (map name) set))
 
+(defn get-organizations
+  "Query organizations for user. Area data is omitted by default."
+  ([user]
+   (let [projection (-> (ssc/plain-keys org/Organization)
+                        (zipmap (repeat true))
+                        (dissoc :areas :areas-wgs84))]
+     (get-organizations user projection)))
+  ([user projection]
+   (org/get-organizations {:_id {$in (organization-ids user)}} projection)))
+
 (defn organization-ids-by-roles
   "Returns a set of organization IDs where user has given roles.
   Note: the user must have gone through with-org-auth (the orgAuthz
@@ -208,14 +232,17 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
-(defn batchrun-user [org-ids]
+(def batchrun-user-data
   {:id "-"
    :username "eraajo@lupapiste.fi"
    :enabled true
    :lastName "Er\u00e4ajo"
    :firstName "Lupapiste"
-   :role "authority"
-   :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)})
+   :role "authority"})
+
+(defn batchrun-user [org-ids]
+  (let [org-authz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)]
+    (assoc batchrun-user-data :orgAuthz org-authz)))
 
 ;;
 ;; ==============================================================================
@@ -370,6 +397,23 @@
     (get-user-by-email $)
     (and $ (not (dummy? $)))))
 
+;; note: new user registration messages need to send a message even though
+;; the user is not enabled, and some messages are intentionally sent directly
+;; to an email address without having an associated user id to check.
+;; Also when adding statement givers, user is disabled, but is sent a token link for password setting
+(defn email-recipient?
+  "If :id is present, check that the corresponding user is enabled or a dummy one.
+   If not enabled, returns true if password is empty (reset password, statement giver creation).
+   True otherwise."
+  [user]
+  (let [id (:id user)]
+    (boolean
+      (or (not id)
+          (when-let [user (find-user {:id id})]
+            (or (= (:role user) "dummy")
+                (or (:enabled user)
+                    (ss/blank? (get-in user [:private :password])))))))))
+
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
     (let [user (find-user {:username username})]
@@ -388,8 +432,6 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
-
-
 
 ;;
 ;; ==============================================================================
@@ -441,7 +483,10 @@
       (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey"))
+
+    ;; TODO validate against schema!
+    )
 
   true)
 
@@ -495,9 +540,11 @@
       (get-user-by-email email)
 
       (catch com.mongodb.DuplicateKeyException e
-        (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
+        (if-let [field (and (= 11000 (.getErrorCode e))
+                            (second (re-find #"E11000 duplicate key error (?:index|collection): lupapiste\.users (?:\.\$)|(?:index\:\s)([^\s._]+)"
+                                             (.getMessage e))))]
           (do
-            (warnf "Duplicate key detected when inserting new user: field=%s" field)
+            (warnf "Duplicate key detected when inserting new user %s: field=%s" email field)
             (fail! :error.duplicate-email))
           (do
             (warn e "Inserting new user failed")
@@ -565,6 +612,11 @@
     (when-not (= n 1) (fail! :error.user-not-found))
     apikey))
 
+(defn get-apikey
+  "User's apikey or nil."
+  [email]
+  (get-in (find-user {:email email}) [:private :apikey]))
+
 ;;
 ;; ==============================================================================
 ;; Change password:
@@ -619,22 +671,3 @@
   (mongo/remove-many :users
                      {:_id user-id
                       :role "dummy"}))
-
-;;
-;; ==============================================================================
-;; User manipulation
-;; ==============================================================================
-;;
-
-(defn update-user-language!
-  "Sets user's language if given and missing. Returns user that is
-  augmented with indicatorNote and language if the language has been set."
-  [{:keys [id language] :as user} ui-lang]
-  (if (and (not language)
-           (not (virtual-user? user))
-           (not (sc/check i18n/supported-language-schema ui-lang)) )
-    (do (mongo/update-by-id :users id {$set {:language ui-lang}})
-        (assoc user
-               :indicatorNote :user.language.note
-               :language ui-lang))
-    user))

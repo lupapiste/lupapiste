@@ -1,20 +1,13 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="textarea-field-template">
-      <div class="col--vertical">
-        <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
-        <textarea data-bind="textInput: value, attr: {placeholder: placeholder,
-                                                      id: id,
-                                                      name: id,
-                                                      'data-test-id': id,
-                                                      maxlength: maxlength},
-                             hasFocus: isSelected,
-                             css: {required: required && !value()},
-                             disable: disable"></textarea>
-      </div>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl" id="textarea-field-template">
+  <div class="col--vertical">
+    <label data-bind="text: label, attr: {'for': id}, css: {'required': required}, visible: label"></label>
+    <textarea data-bind="textInput: value, attr: {placeholder: placeholder,
+                                                  id: id,
+                                                  name: id,
+                                                  'data-test-id': id,
+                                                  maxlength: maxlength},
+                         hasFocus: isSelected,
+                         css: {required: required && !value()},
+                         disable: disable"></textarea>
+  </div>
+</script>

@@ -6,15 +6,16 @@
             [net.cgrand.enlive-html :as enlive]
             [swiss.arrows :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
             [sade.common-reader :as cr]
             [sade.core :refer :all]
-            [sade.http :as http]
-            [sade.strings :as ss]
-            [sade.util :refer [fn->>] :as util]
-            [sade.xml :as xml]
             [sade.env :as env]
-            [lupapalvelu.action :refer [update-application] :as action]
+            [sade.files :as files]
+            [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [fn-> fn->>] :as util]
+            [sade.xml :as xml]
+            [lupapalvelu.action :refer [update-application application->command] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
@@ -42,7 +43,8 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as org])
   (:import [java.net URL]
-           [java.io File]))
+           [java.io File]
+           [java.nio.charset StandardCharsets]))
 
 (notifications/defemail :application-verdict
                         {:subject-key    "verdict"
@@ -184,6 +186,19 @@
     "lupaehto" "lupaehto"
     "paatosote"))
 
+(defn- content-disposition-filename
+  "Extracts the filename from the Content-Disposition header of the
+  given respones. Decodes string according to the Server information."
+  [{headers :headers}]
+  (when-let [raw-filename (some->> (get headers "content-disposition")
+                                    (re-find #".*filename=\"?([^\"]+)")
+                                    last)]
+    (case (some-> (get headers "server") ss/trim ss/lower-case)
+      "microsoft-iis/7.5" (-> raw-filename
+                              (.getBytes StandardCharsets/ISO_8859_1)
+                              (String. StandardCharsets/UTF_8))
+      raw-filename)))
+
 (defn- get-poytakirja
   "At least outlier verdicts (KT) poytakirja can have multiple
   attachments. On the other hand, traditional (e.g., R) verdict
@@ -205,8 +220,7 @@
                    _ (debug "Download " url)
                    url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (http/get url :as :stream :throw-exceptions false)
-                   header-filename (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
-                                     (ss/replace content-disposition #"(attachment|inline);\s*filename=" ""))
+                   header-filename (content-disposition-filename resp)
                    filename        (mime/sanitize-filename (or header-filename url-filename))
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
@@ -215,11 +229,10 @@
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
-                   current-application (domain/get-application-as (:id application) user)
-                   temp-file       (File/createTempFile filename "-verdict-attachment.tmp")]]
+                   current-application (domain/get-application-as (:id application) user)]]
          ;; If the attachment-id, i.e., hash of the URL matches
          ;; any old attachment, a new version will be added
-         (try
+         (files/with-temp-file temp-file
            (if (= 200 (:status resp))
              (with-open [in (:body resp)]
                ; Copy content to a temp file to keep the content close at hand
@@ -236,9 +249,7 @@
                                               {:filename filename
                                                :size content-length
                                                :content temp-file}))
-             (error (str (:status resp) " - unable to download " url ": " resp)))
-           (finally
-             (io/delete-file temp-file :silently)))))
+             (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
     pk))
 
@@ -252,39 +263,37 @@
                          (map #(assoc % :id (mongo/create-id)))
                          (filter seq)))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml reader]
-  (->> (krysp-reader/->verdicts xml reader)
-    (map (partial verdict-attachments application user timestamp))
-    (filter seq)))
+(defn- get-verdicts-with-attachments [application user timestamp xml reader & reader-args]
+  (->> (apply krysp-reader/->verdicts xml (:permitType application) reader reader-args)
+       (map (partial verdict-attachments application user timestamp))
+       (filter seq)))
+
+(defn- get-task-updates [application created verdicts app-xml]
+  (when (not-any? (comp #{"verdict"} :type :source) (:tasks application))
+    {$set {:tasks (-> (assoc application
+                             :verdicts verdicts
+                             :buildings (building-reader/->buildings-summary app-xml))
+                      (tasks/verdicts->tasks created))}}))
 
 (defn find-verdicts-from-xml
   "Returns a monger update map"
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (permit/get-verdict-reader (:permitType application))
-        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
-      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-            tasks (tasks/verdicts->tasks (assoc application
-                                                :verdicts verdicts-with-attachments
-                                                :buildings  (building-reader/->buildings-summary app-xml)) created)]
-        (util/deep-merge
-          {$set (merge {:verdicts verdicts-with-attachments, :modified created}
-                  (when-not has-old-verdict-tasks {:tasks tasks})
-                  (when extras-reader (extras-reader app-xml application)))}
-          (when-not (states/post-verdict-states (keyword (:state application)))
-            (application/state-transition-update (sm/verdict-given-state application) created user)))))))
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-verdict-xml))]
+    (util/deep-merge
+     {$set {:verdicts verdicts-with-attachments, :modified created}}
+     (get-task-updates application created verdicts-with-attachments app-xml)
+     (permit/read-verdict-extras-xml application app-xml)
+     (when-not (states/post-verdict-states (keyword (:state application)))
+       (application/state-transition-update (sm/verdict-given-state application) created application user)))))
 
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [verdict-reader (partial
-                         (permit/get-tj-suunnittelija-verdict-reader (:permitType application))
-                         doc osapuoli-type target-kuntaRoolikoodi)]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
-      (util/deep-merge
-        (application/state-transition-update (sm/verdict-given-state application) created user)
-        {$set {:verdicts verdicts-with-attachments}}))))
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml permit/read-tj-suunnittelija-verdict-xml doc osapuoli-type target-kuntaRoolikoodi))]
+    (util/deep-merge
+     (application/state-transition-update (sm/verdict-given-state application) created application user)
+     {$set {:verdicts verdicts-with-attachments}})))
 
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"
@@ -308,7 +317,7 @@
             (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
             (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
       (let [application (meta-fields/enrich-with-link-permit-data application)
-            link-permit (application/get-link-permit-app application)
+            link-permit (first (application/get-link-permit-apps application))
             link-permit-xml (krysp-fetch/get-application-xml-by-application-id link-permit)
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
@@ -389,21 +398,12 @@
         (t/mark-app-and-attachments-final! (:id application) (:created command))))
     (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
-(defn- building-mongo-updates
-  "Get buildings from verdict XML and save to application. Updates also operation documents
-   with building data, if applicable."
-  [application buildings]
-  (when buildings
-    (->> (building/building-updates buildings application)
-         (hash-map $set))))
-
 (defn- backend-id-mongo-updates
   [{verdicts :verdicts} backend-ids]
   (some->> backend-ids
            (remove (set (map :kuntalupatunnus verdicts)))
            (map backend-id->verdict)
            (assoc-in {} [$push :verdicts $each])))
-
 
 (defn validate-section-requirement
   "Validator that fails if the organization requires section (pykala)
@@ -428,19 +428,17 @@
                          ;; LPK-1538 If fetching with application-id fails try to fetch application with first to find backend-id
                          (krysp-fetch/get-application-xml-by-backend-id application (some :kuntalupatunnus (:verdicts application))))]
     (let [app-xml          (normalize-special-verdict application app-xml)
-          validator-fn     (permit/get-verdict-validator (permit/permit-type application))
           organization     (if organization @organization (org/get-organization (:organization application)))
-          validation-error (or (validator-fn app-xml organization)
+          validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
                                (validate-section-requirement (:primaryOperation application)
                                                              app-xml
                                                              organization))]
       (if-not validation-error
         (save-verdicts-from-xml command app-xml)
-        (let [building-updates   (->> (seq (building-reader/->buildings-summary app-xml))
-                                      (building-mongo-updates application))
+        (let [extras-updates     (permit/read-verdict-extras-xml application app-xml)
               backend-id-updates (->> (seq (krysp-reader/->backend-ids app-xml))
                                       (backend-id-mongo-updates application))]
-          (some->> (util/deep-merge building-updates backend-id-updates) (update-application command))
+          (some->> (util/deep-merge extras-updates backend-id-updates) (update-application command))
           validation-error)))))
 
 (defn- verdict-task?
@@ -516,16 +514,23 @@
     (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s" (count existing) (count existing-without-empties-matching-updates) (count from-update) (count from-update-with-new-id))
     [existing-without-empties-matching-updates from-update-with-new-id]))
 
+(defn get-state-updates [user created {current-state :state :as application} app-xml]
+  (let [new-state (->> (krysp-reader/application-state app-xml)
+                       krysp-reader/krysp-state->application-state)]
+    (cond
+      (nil? new-state) nil
+      (sm/can-proceed? application new-state)  (application/state-transition-update new-state created application user)
+      (not= new-state (keyword current-state)) (errorf "Invalid state transition. Failed to update application %s state from '%s' to '%s'."
+                                                       (:id application) current-state (name new-state)))))
 
-(defn save-reviews-from-xml
+(defn read-reviews-from-xml
   "Saves reviews from app-xml to application. Returns (ok) with updated verdicts and tasks"
   ;; adapted from save-verdicts-from-xml. called from do-check-for-review
-  [{:keys [application] :as command} app-xml]
+  [user created application app-xml]
 
   (let [reviews (review-reader/xml->reviews app-xml)
         buildings-summary (building-reader/->buildings-summary app-xml)
-        building-updates (->> (seq buildings-summary)
-                              (building-mongo-updates (assoc application :buildings [])))
+        building-updates (building/building-updates (assoc application :buildings []) buildings-summary)
         source {:type "background"} ;; what should we put here? normally has :type verdict :id (verdict-id-from-application)
         review-to-task #(tasks/katselmus->task {:state :sent} source {:buildings buildings-summary} %)
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
@@ -537,7 +542,8 @@
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
         updated-tasks-with-updated-buildings (map update-buildings-with-context updated-tasks)
         validation-errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) updated-tasks-with-updated-buildings))
-        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}]
+        task-updates {$set {:tasks updated-tasks-with-updated-buildings}}
+        state-updates (get-state-updates user created application app-xml)]
     (doseq [task (filter #(and (tasks/task-is-review? %)
                                (-> % :data :rakennus)) updated-tasks-with-updated-buildings)]
       (if-not (= (count buildings-summary)
@@ -545,38 +551,23 @@
               (errorf "buildings count %s != task rakennus count %s for id %s"
                       (count buildings-summary)
                       (-> task :data :rakennus count) (:id application))))
-    (assert (map? application))
-    (assert (every? not-empty updated-tasks))
-    (assert (every? map? updated-tasks))
+    (assert (map? application) "application is map")
+    (assert (every? not-empty updated-tasks) "tasks not empty")
+    (assert (every? map? updated-tasks) "tasks are maps")
     (debugf "save-reviews-from-xml: post merge counts: %s review tasks from xml, %s pre-existing tasks in application, %s tasks after merge" (count review-tasks) (count (:tasks application)) (count updated-tasks))
     (assert (>= (count updated-tasks) (count (:tasks application))) "have fewer tasks after merge than before")
 
     ;; (assert (>= (count updated-tasks) (count review-tasks)) "have fewer post-merge tasks than xml had review tasks") ;; this is ok since id-less reviews from xml aren't used
     (assert (every? #(get-in % [:schema-info :name]) updated-tasks-with-updated-buildings))
     (if (some seq validation-errors)
-      (do
-        (errorf "save-reviews-from-xml: validation error: %s %s" (some seq validation-errors) (doall validation-errors))
-        (fail :error.invalid-task-type))
-      ;; else
-      (let [update-result (update-application command (util/deep-merge task-updates building-updates))
-            updated-application (lupapalvelu.domain/get-application-no-access-checking (:id application))
-            ]
-        (doseq [added-task added-tasks-with-updated-buildings]
-          (tasks/generate-task-pdfa
-           updated-application
-           added-task (:user command) (:lang command "fi")))
-        (ok)))))
+      (fail :error.invalid-task-type :validation-errors validation-errors)
+      (ok :review-count (count reviews)
+          :updated-tasks (map :id updated-tasks)
+          :updates (util/deep-merge task-updates building-updates state-updates)
+          :added-tasks-with-updated-buildings added-tasks-with-updated-buildings))))
 
-
-(defn do-check-for-reviews [{:keys [application] :as command}]
-  {:pre [(every? command [:application :user :created])]}
-  (when-let [
-             app-xml (or (krysp-fetch/get-application-xml-by-application-id application)
-                         (krysp-fetch/get-application-xml-by-backend-id (some :kuntalupatunnus (:verdicts application))))
-             ]
-    ;; (doseq [t (:tasks (:application command))]
-    ;;   (assert (get-in t [:schema-info :name]) (str  "early task missing schema-info name:" t)))
-    ;; (debug "do-check-verdict-w-review: application id:" (:id (:application command)) "- tasks count before reading review xml:" (count (:tasks (:application command))) )
-    (if (not-empty app-xml)
-      (save-reviews-from-xml command app-xml)
-      (info "empty review xml for" (:id application)))))
+(defn save-review-updates [user application updates added-tasks-with-updated-buildings]
+  (let [update-result (update-application (application->command application) updates)
+        updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
+    (doseq [added-task added-tasks-with-updated-buildings]
+      (tasks/generate-task-pdfa updated-application added-task user "fi"))))

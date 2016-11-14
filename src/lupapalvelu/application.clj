@@ -4,10 +4,11 @@
             [clj-time.local :refer [local-now]]
             [clojure.set :refer [difference]]
             [clojure.walk :refer [keywordize-keys]]
-            [monger.operators :refer [$set $push $in]]
+            [monger.operators :refer [$set $push $in $unset]]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.application-utils :refer [location->object]]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.company :as com]
@@ -103,11 +104,34 @@
       (fail :error.permit-has-no-such-subtype))))
 
 (defn submitted? [{:keys [state]}]
-  (boolean ((conj states/post-submitted-states :submitted) (keyword state))))
+  (boolean (states/post-submitted-states (keyword state))))
+
+(defn- contains-primary-operation? [application op-set]
+  {:pre [(set? op-set)]}
+  (contains? op-set (-> application :primaryOperation :name keyword)))
+
+(defn allow-primary-operations
+  "Prechecker (factory, no partial needed) that fails if the current
+  primary operation is not contained in the operation set (keywords)"
+  [operation-set]
+  (fn [{application :application}]
+    (when-not (contains-primary-operation? application operation-set)
+      (fail :error.unsupported-primary-operation))))
+
+(defn reject-primary-operations
+  "Prechecker (factory, no partial needed) that fails if the current
+  primary operation is contained in the operation set (keywords)"
+  [operation-set]
+  (fn [{application :application}]
+    (when (contains-primary-operation? application operation-set)
+      (fail :error.unsupported-primary-operation))))
 
 ;;
 ;; Helpers
 ;;
+
+(defn party-document? [doc]
+  (= :party (tools/doc-type doc)))
 
 (defn user-role
   "User role within the application."
@@ -126,9 +150,8 @@
               (and (= (:type schema-info) :party) (or (:repeating schema-info) (not repeating-only?)) )))
           schema-names))
 
-(defn party-document? [doc]
-  (let [schema-info (:info (schemas/get-schema (:schema-info doc)))]
-    (= (:type schema-info) :party)))
+(defn state-history-entries [history]
+  (filter :state history)) ; only history elements that regard state change
 
 (defn last-history-item
   [{history :history}]
@@ -137,7 +160,7 @@
 (defn get-previous-app-state
   "Returns second last history item's state as keyword. Recognizes only items with not nil :state."
   [{history :history}]
-  (->> (filter :state history)                              ; only history elements that regard state change
+  (->> (state-history-entries history)
        (sort-by :ts)
        butlast
        last
@@ -145,7 +168,7 @@
        keyword))
 
 ; Seen updates
-(def collections-to-be-seen #{"comments" "statements" "verdicts"})
+(def collections-to-be-seen #{"comments" "statements" "verdicts" "authority-notices" "info-links"})
 
 (defn mark-collection-seen-update [{id :id} timestamp collection]
   {:pre [(collections-to-be-seen collection) id timestamp]}
@@ -242,18 +265,26 @@
 (defn ->location [x y]
   [(util/->double x) (util/->double y)])
 
-(defn get-link-permit-app
-  "Return associated (first lupapistetunnus) link-permit application."
+(defn get-link-permit-apps
+  "Return associated link-permit application."
   [{:keys [linkPermitData]}]
-  (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
-    (domain/get-application-no-access-checking (:id link))))
+  (when-let [links (not-empty (filter (comp #{"lupapistetunnus"} :type) linkPermitData))]
+    (->> (map :id links)
+         (domain/get-multiple-applications-no-access-checking))))
 
 ;;
 ;; Application query post process
 ;;
 
+(defn- with-auth-models [{:keys [application] :as command}]
+  (let [document-authz (action/allowed-actions-for-category (assoc-in command [:data :category] "documents"))]
+    (update application :documents #(map (fn [doc] (assoc doc :allowedActions (get document-authz (:id doc)))) %))))
+
 (def merge-operation-skeleton (partial merge domain/operation-skeleton))
 
+(defn- with-allowed-attachment-types [application]
+  (assoc application :allowedAttachmentTypes (->> (att-type/get-attachment-types-for-application application)
+                                                  (att-type/->grouped-array))))
 (defn ensure-operations
   "Ensure operations have all properties set."
   [app]
@@ -269,8 +300,10 @@
         fields-with-defaults (merge operation-meta-fields-to-enrich enrichable-fields)]
     (update app :primaryOperation merge fields-with-defaults)))
 
-(defn post-process-app [app user]
-  (->> app
+
+(defn post-process-app [{:keys [user] :as command}]
+  (->> (with-auth-models command)
+       with-allowed-attachment-types
        ensure-operations
        enrich-primary-operation-with-metadata
        att/post-process-attachments
@@ -505,13 +538,19 @@
 
 (assert (= states/all-application-states (set (keys timestamp-key))))
 
+(def two-years-ms 63072000000)
+
+(defn warranty-period [timestamp]
+  {:warrantyStart timestamp,
+   :warrantyEnd (+ timestamp two-years-ms)})
+
 (defn state-transition-update
   "Returns a MongoDB update map for state transition"
-  [to-state timestamp user]
-  {$set (merge
-          {:state to-state, :modified timestamp}
-          (when-let [ts-key (timestamp-key to-state)] {ts-key timestamp}))
-   $push {:history (history-entry to-state timestamp user)}})
+  [to-state timestamp application user]
+  (let [ts-key (timestamp-key to-state)]
+    {$set (merge {:state to-state, :modified timestamp}
+                 (when (and ts-key (not (ts-key application))) {ts-key timestamp}))
+     $push {:history (history-entry to-state timestamp user)}}))
 
 (defn change-application-state-targets
   "Namesake query implementation."
@@ -539,30 +578,33 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
-(defn cancel-inforequest [{:keys [created user data] :as command}]
+(defn cancel-inforequest [{:keys [created user data application] :as command}]
   {:pre [(seq (:application command))]}
-  (action/update-application command (state-transition-update :canceled created user))
-  (remove-app-links (:id data))
+  (action/update-application command (state-transition-update :canceled created application user))
+  (remove-app-links (:id application))
+  (assignment/cancel-assignments (:id application))
   (ok))
 
 (defn cancel-application
-  [{:keys [created application user data] :as command}]
-  (let [{:keys [lang text]} data]
-   (action/update-application command
-                              (util/deep-merge
-                               (state-transition-update :canceled created user)
-                               (when (seq text)
-                                 (comment/comment-mongo-update
-                                  (:state application)
-                                  (str
-                                   (i18n/localize lang "application.canceled.text") ". "
-                                   (i18n/localize lang "application.canceled.reason") ": "
-                                   text)
-                                  {:type "application"}
-                                  (user :role)
-                                  false
-                                  user
-                                  nil
-                                  created)))))
-  (remove-app-links (:id application))
+  [{created :created {:keys [id state] :as application} :application {:keys [role] :as user} :user {:keys [lang text]} :data :as command}]
+  (let [comment-text (str (i18n/localize lang "application.canceled.text") ". "
+                          (i18n/localize lang "application.canceled.reason") ": "
+                          text)]
+    (->> (util/deep-merge
+          (state-transition-update :canceled created application user)
+          (when (seq text)
+            (comment/comment-mongo-update state comment-text {:type "application"} role false user nil created)))
+         (action/update-application command)))
+  (remove-app-links id)
+  (assignment/cancel-assignments id)
+  (ok))
+
+(defn undo-cancellation
+  [{:keys [application created user] :as command}]
+  (action/update-application command
+                             {:state :canceled}
+                             (merge
+                               (state-transition-update (get-previous-app-state application) created application user)
+                               {$unset {:canceled 1}}))
+  (assignment/activate-assignments (:id application))
   (ok))

@@ -1,13 +1,13 @@
 (ns lupapalvelu.attachment.conversion
   (:require [taoensso.timbre :refer [debug]]
-            [schema.core :as sc]
             [clojure.java.io :as io]
-            [lupapalvelu.attachment.file :as file]
+            [schema.core :as sc]
+            [sade.env :as env]
+            [sade.files :as files]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [sade.env :as env]
             [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper])
   (:import (java.io File InputStream))
   (:import (org.apache.commons.io FilenameUtils)))
@@ -52,41 +52,46 @@
 
 (defmethod convert-file :application/pdf [application {:keys [content filename]}]
   (if (pdf-conversion/pdf-a-required? (:organization application))
-    (let [temp (File/createTempFile "lupapiste-attach-file" ".pdf")]
+    (let [pdf-file (files/temp-file "lupapiste-attach-converted-pdf-file" ".pdf")] ; deleted via temp-file-input-stream, when input was not converted or in catch
       (try
-        (io/copy content temp)
-        (let [processing-result (pdf-conversion/convert-to-pdf-a temp {:application application :filename filename})]
+        (let [processing-result (pdf-conversion/convert-to-pdf-a content pdf-file {:application application :filename filename})
+              {:keys [output-file missing-fonts] auto-conversion :autoConversion :or {missing-fonts []}} processing-result
+              archivability-error (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)]
+          (when-not auto-conversion (io/delete-file pdf-file :silently))
           (cond
             (:already-valid-pdfa? processing-result) {:archivable true :archivabilityError nil}
-            (not (:pdfa? processing-result)) {:archivable false :missing-fonts (or (:missing-fonts processing-result) []) :archivabilityError (if pdf-conversion/pdf2pdf-enabled? :invalid-pdfa :not-validated)}
+            (not (:pdfa? processing-result)) {:archivable false :missing-fonts missing-fonts :archivabilityError archivability-error}
             (:pdfa? processing-result) {:archivable true
-                                        :filename (file/filename-for-pdfa filename)
+                                        :filename (files/filename-for-pdfa filename)
                                         :archivabilityError nil
-                                        :content (:output-file processing-result)
-                                        :autoConversion (:autoConversion processing-result)}))
-        (finally
-          (io/delete-file temp :silently))))
+                                        :content (when output-file (files/temp-file-input-stream output-file))
+                                        :autoConversion auto-conversion}))
+        (catch Throwable t
+          (io/delete-file pdf-file :silently)
+          (throw t))))
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :image/tiff [_ {:keys [content]}]
-  (let [valid? (tiff-validation/valid-tiff? content)]
-    {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)}))
+  (files/with-temp-file tmp-file
+    (io/copy content tmp-file)
+    (let [valid? (tiff-validation/valid-tiff? tmp-file)]
+      {:archivable valid? :archivabilityError (when-not valid? :invalid-tiff)})))
 
-(defmethod convert-file :image/jpeg [_ {:keys [content filename] :as filedata}]
-  (if (env/feature? :convert-all-attachments)
-    (let [tmp-file (File/createTempFile "lupapiste-attach-jpg-file" ".jpg")
-          pdf-file (File/createTempFile "lupapiste-attach-file" ".pdf")
-          pdf-title filename]
-      (try
-        (io/copy content tmp-file)
-        (pdf-wrapper/wrap! tmp-file pdf-file pdf-title)
-        {:archivable true
-         :archivabilityError nil
-         :autoConversion true
-         :content pdf-file
-         :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
-        (finally
-          (io/delete-file tmp-file :silently))))
+(defmethod convert-file :image/jpeg [application {:keys [content filename] :as filedata}]
+  (if (and (env/feature? :convert-all-attachments)
+           (pdf-conversion/pdf-a-required? (:organization application)))
+    (files/with-temp-file tmp-file
+      (let [pdf-file (files/temp-file "lupapiste-attach-wrapped-jpeg-file" ".pdf") ] ; deleted via temp-file-input-stream
+        (try
+          (io/copy content tmp-file)
+          (pdf-wrapper/wrap! tmp-file pdf-file filename)
+          {:archivable true
+           :archivabilityError nil
+           :autoConversion true
+           :content (files/temp-file-input-stream pdf-file)
+           :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
+          (catch Exception e
+            {:archivable false :archivabilityError :not-validated}))))
     {:archivable false :archivabilityError :not-validated}))
 
 (defmethod convert-file :default [_ {:keys [content filename] :as filedata}]

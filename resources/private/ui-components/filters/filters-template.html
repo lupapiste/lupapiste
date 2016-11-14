@@ -5,19 +5,21 @@
          data-bind="click: clickGroupState">
       <i data-bind="css: {'lupicon-checkbox-partial': groupState() === 'some',
                     'lupicon-checkbox-on': groupState() === 'all',
-                    'lupicon-checkbox-off': groupState() === 'none'}"></i>
-      <span data-bind="ltext: 'filter.show-all'"></span>
+                    'lupicon-checkbox-off': groupState() === 'none'}"
+         data-test-id="toggle-all-filters-checkbox"></i>
+      <span data-bind="ltext: 'filter.show-all'"
+            data-test-id="toggle-all-filters-label"></span>
     </div>
     <div class="filter-group__toggles"
          data-bind="foreach: filters"><div class="filter-wrapper">
         <input type="checkbox"
                data-bind="attr: {'id': $parent.id( $index() ),
                                  'data-test-id': tag + '-filter-checkbox'},
-                          checked: filter">
+                          checked: active">
         <label class="filter-label"
                data-bind="attr: {'for': $parent.id( $index() ),
                                  'data-test-id': tag + '-filter-label'},
-                          ltext: ltext"></label>
+                          ltext: 'filter.' + $data.tag"></label>
     </div></div>
   </div>
 </script

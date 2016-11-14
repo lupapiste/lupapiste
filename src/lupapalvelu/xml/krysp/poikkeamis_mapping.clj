@@ -157,4 +157,5 @@
       submitted-application
       lang)))
 
-(permit/register-function permit/P :app-krysp-mapper save-application-as-krysp)
+(defmethod permit/application-krysp-mapper :P [application lang submitted-application krysp-version output-dir begin-of-link]
+  (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))

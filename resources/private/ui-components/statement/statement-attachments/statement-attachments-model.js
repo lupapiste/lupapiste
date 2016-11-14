@@ -4,7 +4,6 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel(params));
 
-  var application = params.application;
   var applicationId = params.applicationId;
   var statementId = params.statementId;
   var authModel = params.authModel;
@@ -14,16 +13,23 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
   self.attachments = ko.observableArray([]);
 
   self.disposedComputed(function() {
+    var attachments = lupapisteApp.services.attachmentsService.attachments();
     self.attachments(
-      _(util.getIn(application, ["attachments"]))
+      _(attachments)
         .filter(function(attachment) {
-          return _.isEqual(attachment.target, {type: "statement", id: statementId()});
+          var targetType = util.getIn(attachment, ["target", "type"]);
+          var targetId = util.getIn(attachment, ["target", "id"]);
+          return targetType === "statement" && targetId === statementId();
         })
-        .map(function(attachment) {
-          var comments = _.filter(util.getIn(application, ["comments"]), function(comment) {
+        .map(function(a) {
+          var attachment = ko.mapping.toJS(a);
+          var comments = _.filter(lupapisteApp.services.commentService.comments(), function(comment) {
             return comment.target.id === attachment.id;
           });
-          return _.extend({comment: _.head(comments).text}, attachment);
+          // Comments are not loaded synchronously after with attachments after upload,
+          // so the comment might be missing
+          var text = _.isEmpty(comments) ? "" : _.head(comments).text;
+          return _.extend({comment: text}, attachment);
         })
         .value()
     );
@@ -38,23 +44,11 @@ LUPAPISTE.StatementAttachmentsModel = function(params) {
     return authModel.ok("statement-attachment-allowed");
   };
 
-  function deleteAttachmentFromServer(attachmentId) {
-    ajax
-      .command("delete-attachment", {id: applicationId(), attachmentId: attachmentId})
-      .success(function() {
-        repository.load(applicationId());
-        return false;
-      })
-      .call();
-    return false;
-  }
-
   self.deleteAttachment = function(attachmentId) {
-    var deleteAttachmentFromServerProxy = function() { deleteAttachmentFromServer(attachmentId); };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("attachment.delete.version.header"),
       loc("attachment.delete.version.message"),
-      {title: loc("yes"), fn: deleteAttachmentFromServerProxy},
+      {title: loc("yes"), fn: _.partial(lupapisteApp.services.attachmentsService.removeAttachment, attachmentId)},
       {title: loc("no")}
     );
   };

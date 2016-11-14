@@ -8,4 +8,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --exclude fail --exclude integration --RunEmptySuite --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown
+pybot -d target --exclude fail --exclude integration --exclude ajanvaraus --RunEmptySuite --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown

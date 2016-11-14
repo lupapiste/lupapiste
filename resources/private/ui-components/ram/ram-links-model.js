@@ -1,14 +1,14 @@
-LUPAPISTE.RamLinksModel = function( params) {
+LUPAPISTE.RamLinksModel = function( params ) {
   "use strict";
   var self = this;
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   self.attachment = params.attachment;
-  self.attachmentId = self.attachment.id();
+  self.attachmentId = self.attachment().id;
   self.service = lupapisteApp.services.ramService;
   self.links = ko.observableArray();
 
-  self.showLinks = self.disposedPureComputed( function() {
+  self.showLinks = self.disposedComputed( function() {
     // There is always at least one link (the current attachment).
     // A lone link is shown in the table only if it as a RAM attachment.
     var count = _.size( self.links());
@@ -16,14 +16,16 @@ LUPAPISTE.RamLinksModel = function( params) {
       && lupapisteApp.models.applicationAuthModel.ok( "ram-linked-attachments");
   });
 
-  self.disposedComputed( function() {
+  function updateLinks() {
     // We create dependency in order to make sure that the links table
     // updates if file is modified or deleted.
     // This also takes care of the initialization.
-    if( self.attachment.versions()) {
+    if( self.attachment().versions) {
       self.service.links( self.attachmentId, self.links );
     }
-  });
+  }
+  updateLinks();
+  self.disposedSubscribe(self.attachment, updateLinks);
 
   var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %><br><%- time %>");
 

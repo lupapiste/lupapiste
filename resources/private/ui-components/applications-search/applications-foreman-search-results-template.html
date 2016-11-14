@@ -4,6 +4,13 @@
   <section class="page container">
     <script type="text/x-jquery-tmpl" id="applications-foreman-search-results-template">
       <div class="tabs-content">
+        <!-- ko if: dataProvider.pending -->
+        <div class="btn search-results-waiting">
+          <i class="lupicon-refresh spin primary"></i>
+          <span data-bind="ltext: 'applications.loading'"></span>
+        </div>
+        <!-- /ko -->
+        <!-- ko ifnot: dataProvider.pending -->
         <table id="applications-list" class="application-foreman-search-result__table" data-bind="if: gotResults()">
           <thead>
             <tr data-bind="foreach: columns">
@@ -73,6 +80,7 @@
         </table>
         <!-- ko ifnot: gotResults -->
         <p data-bind="ltext: 'applications.search.no-results'"></p>
+        <!-- /ko -->
         <!-- /ko -->
       </div>
     </script>

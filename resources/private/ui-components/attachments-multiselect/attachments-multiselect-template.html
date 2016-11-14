@@ -32,7 +32,7 @@
           <button data-bind="click: start,
                              ltext: params.okLoc,
                              clickBubble: false,
-                             enable: $parent.authorization.ok(params.authKey)"
+                             enable: $parent.authorization && $parent.authorization.ok(params.authKey)"
             class="btn btn-primary"
             data-test-id="multiselect-action-button">
           </button>
@@ -72,25 +72,8 @@
             <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow,
                                                                              clickBubble: false,
                                                                              css: {selected: selected}">
-              <td class="attachmentState">
-
-                <span data-bind="attr: {'class': statusName + ' icon',
-                                        'data-test-state': state,
-                                        'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc(statusName + '.title')}"></span>
-                <span data-bind="visible: $data.signed,
-                                 attr: {'class': 'icon signed',
-                                        'title': loc('attachment.signed'),
-                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}"></span>
-                <span data-bind="visible: $data.isSent,
-                                 attr: {'class': 'icon transfered',
-                                        'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}"></span>
-                <span data-bind="visible: $data.forPrinting,
-                                 attr: {'class': 'icon verdict-attachment',
-                                        'title': loc('attachment.verdict-attachment'),
-                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
-
+              <td>
+                <state-icons params="attachment: $data"></state-icons>
               </td>
               <td class="attachment-type-group">
                   <span data-bind="if: type">
@@ -101,12 +84,7 @@
                   </span>
               </td>
               <td class="attachment-type-id">
-                  <span data-bind="if: type">
-                    <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-                  </span>
-                  <span data-bind="if: !type">
-                    <i data-bind="ltext: 'attachment.noName'"></i>
-                  </span>
+                  <attachment-type-id params="attachment: $data"></attachment-type-id>
                   <div class="attachment-content-desc" data-bind="if: $data.contents">
                     <span data-bind="text: $data.contents" data-test-id="attachment-contents"></span>
                   </div>

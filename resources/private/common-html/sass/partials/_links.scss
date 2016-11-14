@@ -23,3 +23,9 @@
 a {
   @include link;
 }
+
+@mixin link-text( $max-width) {
+  max-width: $max-width;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}

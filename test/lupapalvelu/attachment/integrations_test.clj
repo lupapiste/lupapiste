@@ -2,7 +2,8 @@
   (:require [schema.core :as sc]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.itest-util :refer [expected-failure?]]))
+            [lupapalvelu.itest-util :refer [expected-failure?]]
+            [lupapalvelu.integrations-api]))
 
 (testable-privates lupapalvelu.integrations-api has-unsent-attachments)
 

@@ -36,3 +36,31 @@
                                                                         :filename (:file-name file-obj)
                                                                         :contentType (:content-type file-obj)
                                                                         :fileId (:fileId file-obj)}))))))
+
+(facts "appeal attachments"
+  (let [attachments [{:id "foo"
+                      :target {:id "appeal1"
+                               :type "appeal"}}
+                     {:id "faa"
+                      :target {:id "test2"
+                               :type "verdict"}}
+                     {:id "fuu"
+                      :target nil}
+                     {:id "bar"
+                      :target {:id "appeal2"
+                               :type "appeal"}}
+                     {:id "baf"
+                      :target {:id "appeal2"
+                               :type "appealVerdict"}}
+                     {:id "bof"
+                      :target {:id "appeal2"
+                               :type "rectification"}}]]
+    (appeals-attachments {:attachments attachments} nil) => empty?
+    (appeals-attachments {:attachments attachments} []) => empty?
+    (appeals-attachments {:attachments attachments} "foo") => empty?
+    (appeals-attachments {:attachments attachments} ["foo" "faa"]) => empty?
+    (appeals-attachments {:attachments attachments} ["appeal1" "faa"]) => (just (nth attachments 0))
+    (appeals-attachments {:attachments attachments} ["appeal1" "appeal2" nil]) => (just (nth attachments 0)
+                                                                                        (nth attachments 3)
+                                                                                        (nth attachments 4)
+                                                                                        (nth attachments 5))))

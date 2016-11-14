@@ -131,10 +131,10 @@
     (when-let [arvo (:haetaan-kausilupaa mainostus-viitoitus-tapahtuma)]
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
-(defn- get-construction-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (util/to-xml-datetime (:started application))
-                                    :loppuHetki (util/to-xml-datetime (:closed application))}}
-   :valmistumisilmoitusPvm (util/to-xml-date (now))})
+(defn- get-construction-period-info [{:keys [started closed]}]
+  (cond-> {:kayttojaksotieto {:Kayttojakso {:alkuHetki (util/to-xml-datetime started)}}}
+      closed (assoc :valmistumisilmoitusPvm (util/to-xml-date (now)))
+      closed (assoc-in [:kayttojaksotieto :Kayttojakso :loppuHetki] (util/to-xml-datetime closed))))
 
 
 ;; Configs
@@ -148,7 +148,7 @@
 (def- configs-per-permit-name
   {:Kayttolupa                            default-config
    :Tyolupa                               (merge default-config
-                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true})
+                                            {:tyomaasta-vastaava true :johtoselvitysviitetieto true :sijoituslupa-link true})
    :Sijoituslupa                          (merge default-config
                                             {:tyoaika false :dummy-alku-and-loppu-pvm true})
    :ya-kayttolupa-nostotyot               kayttolupa-config-plus-tyomaastavastaava
@@ -161,16 +161,15 @@
    :ya-kayttolupa-mainostus-ja-viitoitus  {:mainostus-viitoitus-tapahtuma-pvm   true
                                            :mainostus-viitoitus-lisatiedot      true}})
 
-
 (defn- get-luvan-tunniste-tiedot [application]
-  (let [link-permits (map
-                       (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}})
-                       (:linkPermitData application))
-        base-id (lupatunnus application)
-        base-with-link (update-in base-id [:LupaTunnus :muuTunnustieto] #(into (vector %) link-permits))
-        kuntalupatunnus-link (some
-                               #(when (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)})
-                               (:linkPermitData application))]
+  (let [link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}})
+                          (:linkPermitData application))
+        base-id (lupatunnus application)]
+    (update-in base-id [:LupaTunnus :muuTunnustieto] #(into (vector %) link-permits))))
+
+(defn- add-kuntalupatunnus-link-in-luvan-tunniste-tiedot [base-with-link application]
+  (let [kuntalupatunnus-link (some #(when (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)})
+                                   (:linkPermitData application))]
     (if kuntalupatunnus-link
       (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
       base-with-link)))
@@ -235,30 +234,27 @@
      :kayttotarkoitus (ya-operation-type-to-usage-description operation-name-key)
      :johtoselvitysviitetieto johtoselvitysviitetieto}))
 
-
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
   (let [application (tools/unwrapped application)
         documents-by-type (documents-by-type-without-blanks application)
+        hankkeen-kuvaus-key (util/find-first documents-by-type [:yleiset-alueet-hankkeen-kuvaus-sijoituslupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kayttolupa
+                                                                :yleiset-alueet-hankkeen-kuvaus-kaivulupa])
         operation-name-key (-> application :primaryOperation :name keyword)
         permit-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         config (or (configs-per-permit-name operation-name-key) (configs-per-permit-name permit-name-key))
 
         [main-viit-tapahtuma-name main-viit-tapahtuma] (-> documents-by-type get-main-viit-tapahtuma-info seq first)
         hankkeen-kuvaus (when (:hankkeen-kuvaus config)
-                          (->
-                            (or
-                              (:yleiset-alueet-hankkeen-kuvaus-sijoituslupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kayttolupa documents-by-type)
-                              (:yleiset-alueet-hankkeen-kuvaus-kaivulupa documents-by-type))
-                            first :data))
+                          (-> (hankkeen-kuvaus-key documents-by-type) first :data))
         pinta-ala (when (:hankkeen-kuvaus config)
                     (:varattava-pinta-ala hankkeen-kuvaus))
         lupaAsianKuvaus (when (:hankkeen-kuvaus config)
                           (:kayttotarkoitus hankkeen-kuvaus))
-        sijoituslupaviitetieto (when (:hankkeen-kuvaus config)
-                                 (when-let [tunniste (-> hankkeen-kuvaus :sijoitusLuvanTunniste)]
+        sijoituslupaviitetieto (when (:sijoituslupa-link config)
+                                 (when-let [tunniste (link-permit-selector-value hankkeen-kuvaus (:linkPermitData application) [hankkeen-kuvaus-key :sijoitusLuvanTunniste])]
                                    {:Sijoituslupaviite {:vaadittuKytkin false
                                                         :tunniste tunniste}}))
         lupakohtainenLisatietotieto (filter #(seq (:LupakohtainenLisatieto %))
@@ -279,8 +275,8 @@
                             :sijoituslupaviitetieto sijoituslupaviitetieto}
                            (when (and main-viit-tapahtuma (= "mainostus-tapahtuma-valinta" (name main-viit-tapahtuma-name)))
                              {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
-                           (when (:closed application)
-                             (get-construction-ready-info application))))]
+                           (when (:started application)
+                             (get-construction-period-info application))))]
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
                      :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
 
@@ -306,7 +302,9 @@
                            {:lisaaikatieto lisaaikatieto}))]
 
     {:YleisetAlueet {:toimituksenTiedot (toimituksen-tiedot application lang)
-                     :yleinenAlueAsiatieto {permit-name-key canonical-body}}}))
+                     :yleinenAlueAsiatieto {permit-name-key
+                                            (-> canonical-body
+                                                (update :luvanTunnisteTiedot add-kuntalupatunnus-link-in-luvan-tunniste-tiedot application))}}}))
 
 
 (defn- get-ya-katselmus [katselmus]

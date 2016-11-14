@@ -4,12 +4,14 @@
             [clojure.set :refer [rename-keys]]
             [monger.operators :refer :all]
             [schema.core :refer [defschema] :as sc]
-            [sade.schemas :as ssc]
-            [sade.util :refer [=as-kw not=as-kw] :as util]
-            [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.files :as files]
             [sade.http :as http]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]
+            [sade.util :refer [=as-kw not=as-kw] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
+            [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
@@ -26,7 +28,7 @@
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapalvelu.file-upload :as file-upload])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File FilterInputStream InputStream]))
+           [java.io File InputStream]))
 
 ;;
 ;; Metadata
@@ -116,7 +118,8 @@
    (sc/optional-key :sent)               ssc/Timestamp      ;; sent to backing system
    :locked                               sc/Bool            ;;
    (sc/optional-key :readOnly)           sc/Bool            ;;
-   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created
+   :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
+   (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
    :state                                (apply sc/enum attachment-states) ;; attachment state
    (sc/optional-key :approved)           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
                                           :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
@@ -246,6 +249,14 @@
   (and (map?    (:attachment-type options-map))
        (number? (:created options-map))))
 
+(defn- resolve-group-name [{documents :documents} {op-id :id op-name :name :as group}]
+  (if (or (ss/blank? op-id) (ss/not-blank? op-name))
+    group
+    (->> (map (comp :op :schema-info) documents)
+         (util/find-by-id op-id)
+         :name
+         (util/assoc-when group :name))))
+
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
   [application {:keys [attachment-id attachment-type group created target locked required requested-by-authority contents read-only source]
@@ -258,7 +269,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     group
+                     (resolve-group-name application group)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
@@ -362,6 +373,7 @@
      {$set {:modified created
             :attachments.$.modified created
             :attachments.$.state  state
+            :attachments.$.notNeeded false                  ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
 
@@ -390,7 +402,7 @@
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application user attachment options)
                                 (build-version-updates user attachment version-model options))
-           update-result (update-application (application->command application) mongo-query mongo-updates true)]
+           update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
              (do (remove-old-files! attachment version-model)
@@ -457,14 +469,24 @@
   (let [file-ids (attachment-file-ids (get-attachment-info application attachment-id))]
     (boolean (some #{file-id} file-ids))))
 
-(defn delete-attachment!
-  "Delete attachement with all it's versions. does not delete comments. Non-atomic operation: first deletes files, then updates document."
-  [application attachment-id]
-  (info "1/3 deleting files of attachment" attachment-id)
-  (run! delete-attachment-file-and-preview! (attachment-file-ids (get-attachment-info application attachment-id)))
-  (info "2/3 deleted files of attachment" attachment-id)
-  (update-application (application->command application) {$pull {:attachments {:id attachment-id}}})
-  (info "3/3 deleted meta-data of attachment" attachment-id))
+(defn- get-file-ids-for-attachments-ids [application attachment-ids]
+  (reduce (fn [file-ids attachment-id]
+            (concat file-ids (attachment-file-ids (get-attachment-info application attachment-id))))
+          []
+          attachment-ids))
+
+(defn delete-attachments!
+  "Delete attachments with all it's versions. does not delete comments.
+   Deletes also assignments that are targets of attachments in question.
+   Non-atomic operation: first deletes files, then updates document."
+  [application attachment-ids]
+  (info "1/4 deleting assignments regarding attachments" attachment-ids)
+  (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+  (info "2/4 deleting files of attachments" attachment-ids)
+  (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+  (info "3/4 deleted files of attachments" attachment-ids)
+  (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
+  (info "4/4 deleted meta-data of attachments" attachment-ids))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
@@ -598,10 +620,12 @@
         (append-stream zip (str fileId "_" filename) in))
       (errorf "File '%s' not found in GridFS. Try manually: db.fs.files.find({_id: '%s'})" filename fileId))))
 
-(defn get-all-attachments!
-  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+(defn ^java.io.File get-all-attachments!
+  "Returns attachments as zip file.
+   If application and lang, application and submitted application PDF are included.
+   Callers responsibility is to delete the returned file when done with it!"
   [attachments & [application lang]]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; Must be deleted by caller!
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       ; Add all attachments:
@@ -618,7 +642,7 @@
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
-(defn- maybe-append-gridfs-file! 
+(defn- maybe-append-gridfs-file!
   "Download and add the attachment file if user can access the application"
   [zip user {:keys [filename fileId]}]
   (when fileId
@@ -626,25 +650,17 @@
       (with-open [in ((:content file))]
         (append-stream zip (str (:application file) "_" fileId "_" filename) in)))))
 
-(defn get-attachments-for-user! 
-  "Returns the latest corresponding attachment files readable by the user as a ZIP file"
+(defn ^java.io.InputStream get-attachments-for-user!
+  "Returns the latest corresponding attachment files readable by the user as an input stream of a self-destructing ZIP file"
   [user attachments]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+  (let [temp-file (files/temp-file "lupapiste.attachments." ".zip.tmp")] ; deleted via temp-file-input-stream
     (debugf "Created temporary zip file for %d attachments: %s" (count attachments) (.getAbsolutePath temp-file))
     (with-open [zip (ZipOutputStream. (io/output-stream temp-file))]
       (doseq [attachment attachments]
         (maybe-append-gridfs-file! zip user (-> attachment :versions last)))
       (.finish zip))
     (debugf "Size of the temporary zip file: %d" (.length temp-file))
-    temp-file))
-   
-(defn temp-file-input-stream [^File file]
-  (let [i (io/input-stream file)]
-    (proxy [FilterInputStream] [i]
-      (close []
-        (proxy-super close)
-        (when (= (io/delete-file file :could-not) :could-not)
-          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
+    (files/temp-file-input-stream temp-file)))
 
 (defn- post-process-attachment [attachment]
   (assoc attachment :isPublic (metadata/public-attachment? attachment)))
@@ -654,10 +670,10 @@
 
 (defn attachment-array-updates
   "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
-  [app-id pred k v]
-  {$set (as-> app-id $
-          (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
-          (mongo/generate-array-updates :attachments (:attachments $) pred k v))})
+  [app-id pred & kvs]
+  (as-> app-id $
+    (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
+    (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 (defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
@@ -666,3 +682,62 @@
                 :approved (->approval new-state user created file-id)}]
       (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
     (fail :error.attachment.id)))
+
+(defn convert-existing-to-pdfa! [application user attachment]
+  {:pre [(map? application) (:id application) (:attachments application)]}
+  (let [{:keys [archivable contentType]} (last (:versions attachment))]
+    (if (or archivable (not ((conj conversion/libre-conversion-file-types :image/jpeg :application/pdf) (keyword contentType))))
+      (fail :error.attachment.content-type)
+      ;; else
+      (let [{:keys [fileId filename user created stamped]} (last (:versions attachment))
+            file-content (mongo/download fileId)]
+        (if (nil? file-content)
+          (do
+            (error "PDF/A conversion: No mongo file for fileId" fileId)
+            (fail :error.attachment-not-found))
+          (files/with-temp-file temp-pdf
+            (with-open [content ((:content file-content))]
+              (io/copy content temp-pdf)
+              (upload-and-attach! {:application application :user user}
+                                  {:attachment-id (:id attachment)
+                                   :comment-text nil
+                                   :required false
+                                   :created created
+                                   :stamped stamped
+                                   :original-file-id fileId}
+                                  {:content temp-pdf :filename filename}))))))))
+
+(defn- manually-set-construction-time [{app-state :applicationState orig-app-state :originalApplicationState :as attachment}]
+  (boolean (and (states/post-verdict-states (keyword app-state))
+                (states/all-application-states (keyword orig-app-state)))))
+
+(defn validate-attachment-manually-set-construction-time [{{:keys [attachmentId]} :data application :application :as command}]
+  (when-not (manually-set-construction-time (get-attachment-info application attachmentId))
+    (fail :error.attachment-not-manually-set-construction-time)))
+
+(defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
+  (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (get-attachment-info app attachment-id))]
+    (->> (if value
+           {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or orig-app-state app-state) :applicationState :verdictGiven)}
+           {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState orig-app-state)
+            $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)})
+         (update-application command))))
+
+(defn enrich-attachment [attachment]
+  (assoc attachment
+         :tags (att-tags/attachment-tags attachment)
+         :manuallySetConstructionTime (manually-set-construction-time attachment)))
+
+(defn- attachment-assignment-info
+  "Return attachment info as assignment target"
+  [{{:keys [type-group type-id]} :type contents :contents id :id :as doc}]
+  (util/assoc-when-pred {:id id :type-key (ss/join "." ["attachmentType" type-group type-id])} ss/not-blank?
+                        :description contents))
+
+(defn- describe-assignment-targets [application]
+  (let [attachments (map enrich-attachment (:attachments application))]
+    (->> (att-tags/attachment-tag-groups (assoc application :attachments attachments))
+         (att-tags/sort-by-tags attachments)
+         (map attachment-assignment-info))))
+
+(assignment/register-assignment-target! :attachments describe-assignment-targets)

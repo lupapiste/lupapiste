@@ -26,10 +26,6 @@ th {
   padding-left: $marginM;
   padding-right: $marginM;
   vertical-align: middle;
-  // font-family: $font-heading;
-  // font-size: 0.85em;
-  // font-weight: 700;
-  // letter-spacing: 0.125em;
 }
 
 tr {
@@ -304,7 +300,7 @@ table.review-buildings-table {
 
 table.company-users-table {
   select {
-    width: initial;
+    width: 10em;
   }
   tr:hover, tr:active {
     background-color: transparent;
@@ -330,14 +326,18 @@ div.attachments-table-container {
     }
     td {
       vertical-align: top;
-    }
-    td.attachments-table__state-icons > i {
-      margin-left: 1px;
-      magint-right: 1px;
-    }
+    }    
     .attachments-table--widest {
       width: 80%;
     }
+  }
+}
+
+.attachment-state-icons {
+  white-space: nowrap;
+  i {
+    margin-left: 1px;
+    magint-right: 1px;
   }
 }
 
@@ -382,3 +382,13 @@ div.suti-admin-container .serversettings--wide {
   }
 }
 
+th.full-width-column {
+  width: 100%;
+}
+
+.form-table.form-table--waste {
+  @include no-row-hover;
+  .form-input {
+    height: initial;
+  }
+}

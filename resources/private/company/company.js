@@ -395,7 +395,7 @@
     };
 
     self.load = function() {
-      if (self.id()) {
+      if (self.id() && lupapisteApp.models.globalAuthModel.ok("company")) {
         ajax
           .query("company", {company: self.id(), users: true})
           .pending(self.pending)

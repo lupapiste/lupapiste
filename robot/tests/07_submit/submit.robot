@@ -85,10 +85,13 @@ Mikko logs back in and browses to the Attachments tab
 
 Mikko selects not needed for valtakirja attachment
   Click not needed  hakija.valtakirja
-  Positive indicator should be visible
 
-Mikko adds pdf attachment to the attachment template added by Sonja
-  Add attachment file  tr[data-test-type='muut.muu']  ${PDF_TESTFILE_PATH}
+Mikko follows missing attachment link
+  Open tab  requiredFieldSummary
+  Scroll and click test id  missing-muut-muu
+  
+Mikko adds pdf attachment to the template requested by Sonja
+  Add attachment version  ${PDF_TESTFILE_PATH}
   Scroll and click test id  back-to-application-from-attachment
   Wait Until  Tab should be visible  attachments
 
@@ -114,7 +117,7 @@ The filled-up warning field and party info plus the added attachment cause corre
   Open tab  requiredFieldSummary
   Wait for jQuery
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
-  # The reducution includes filled fields and the no longer obligatory requirement.
+  # The reduction includes filled fields and the no longer obligatory requirement.
   ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 9
   Wait Until  Xpath Should Match X Times  //*[contains(@class,'info-line')]  ${missingRequiredCountAfter}
   Xpath Should Match X Times  //div[@id='application-requiredFieldSummary-tab']//div[@data-test-id='test-application-warnings']//*[contains(@class,'info-line')]  2

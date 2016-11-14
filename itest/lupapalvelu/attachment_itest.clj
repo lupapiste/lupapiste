@@ -2,6 +2,7 @@
   (:require [lupapalvelu.factlet :refer [facts*]]
             [lupapalvelu.attachment :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.itest-util :refer :all]
             [sade.util :as util]
             [midje.sweet :refer :all]
@@ -92,7 +93,11 @@
               (raw nil "download-attachment" :attachment-id file-id) => http401?)
 
             (fact "download-attachment as pena should be possible"
-              (raw pena "download-attachment" :attachment-id file-id) => http200?))))
+                  (raw pena "download-attachment" :attachment-id file-id) => http200?))
+          (fact "operation info"
+                (upload-attachment pena application-id {:type {:type-id "muu" :type-group "muut"}
+                                                        :op-id (-> application :primaryOperation :id)} true)
+                (-> (query-application pena application-id) :attachments last :op :name) => "kerrostalo-rivitalo")))
 
       (fact "Pena submits the application"
         (command pena :submit-application :id application-id) => ok?
@@ -311,7 +316,7 @@
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
-      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true))
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy))
 
     (facts "Authority"
       (let [{attachments :attachments :as query-resp} (query sonja :attachments :id application-id)]
@@ -336,7 +341,7 @@
         {verdict-id :verdictId :as verdict-resp} (command sonja :new-verdict-draft :id application-id)]
     (facts "initialization"
       (fact "verdict" verdict-resp => ok?)
-      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => true)
+      (fact "verdict attachment" (upload-attachment-to-target sonja application-id nil true verdict-id "verdict") => truthy)
       (let [{attachments :attachments :as attachments-resp} (query sonja :attachments :id application-id)
             attachment-id (->> attachments (filter (comp #{"verdict"} :type :target)) first :id)]
         (fact "all attachments" attachments-resp => ok?)
@@ -349,7 +354,7 @@
 
         (facts "Applicant does not see the verdict attachment"
           (let [{attachment :attachment :as query-resp} (query pena :attachment :id application-id :attachmentId attachment-id)]
-            query-resp => (partial expected-failure? "error.not-found")))
+            query-resp => (partial expected-failure? "error.attachment-not-found")))
 
         (fact "Unauthorized"
           (let [query-resp (query mikko :attachment :id application-id :attachmentId attachment-id)]
@@ -442,9 +447,9 @@
           (fact "File is changed again" (:fileId v3) =not=> (:fileId v2))
           (fact "Original file is still the same" (:originalFileId v3) => (:originalFileId v1)))))))
 
-(when (or pdfa/pdf2pdf-enabled? dev-env?)
+(when pdfa/pdf2pdf-enabled?
   (facts* "Rotate PDF - PDF/A converted files"                 ; Jarvenpaa has archive enabled in minimal
-          (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+          (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
                 application-id (:id application)
                 type {:type-group "paapiirustus" :type-id "asemapiirros"}
                 resp (command raktark-jarvenpaa
@@ -478,51 +483,53 @@
                 (fact "version number is not changed" (:version v2) => (:version v1))
                 (fact "Auto conversion flag is preserved" (:autoConversion v2) => true))))))
 
-(facts "Convert attachment to PDF/A with Libre"
-  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
-        application-id (:id application)
-        attachment (first (:attachments application))]
+(if (libre/enabled?)
+  (facts "Convert attachment to PDF/A with Libre"
+   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
+         application-id (:id application)
+         attachment (first (:attachments application))]
 
-    (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
+     (upload-attachment sonja application-id attachment true :filename "dev-resources/test-attachment.txt")
 
-    (let [attachment (first (:attachments (query-application sonja application-id)))]
-      (fact "One version, but original file id points to original file"
-        (count (:versions attachment)) => 1
-        (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
+     (let [attachment (first (:attachments (query-application sonja application-id)))]
+       (fact "One version, but original file id points to original file"
+         (count (:versions attachment)) => 1
+         (get-in attachment [:latestVersion :fileId]) =not=> (get-in attachment [:latestVersion :originalFileId]))
 
-      (fact "Conversion flags"
-        (fact "Auto conversion to PDF/A should be done to txt -file"
-          (get-in attachment [:latestVersion :autoConversion]) => true
-          (get-in attachment [:latestVersion :archivable]) => true
-          (get-in attachment [:latestVersion :archivabilityError]) => nil
-          (get-in attachment [:latestVersion :contentType]) => "application/pdf"
-          (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
+       (fact "Conversion flags"
+         (fact "Auto conversion to PDF/A should be done to txt -file"
+           (get-in attachment [:latestVersion :autoConversion]) => true
+           (get-in attachment [:latestVersion :archivable]) => true
+           (get-in attachment [:latestVersion :archivabilityError]) => nil
+           (get-in attachment [:latestVersion :contentType]) => "application/pdf"
+           (get-in attachment [:latestVersion :filename]) => "test-attachment.pdf"))
 
 
-      (fact "Latest version should be 0.1 after conversion"
-        (get-in attachment [:latestVersion :version :major]) => 0
-        (get-in attachment [:latestVersion :version :minor]) => 1)
+       (fact "Latest version should be 0.1 after conversion"
+         (get-in attachment [:latestVersion :version :major]) => 0
+         (get-in attachment [:latestVersion :version :minor]) => 1)
 
-      (fact "Preview image is created"
-        (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
+       (fact "Preview image is created"
+         (raw sonja "preview-attachment" :attachment-id (get-in attachment [:latestVersion :fileId])) => http200?))
 
-    (fact "Invalid mime not converted with Libre"
-      (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
+     (fact "Invalid mime not converted with Libre"
+       (upload-attachment sonja application-id (second (:attachments application)) true :filename "dev-resources/test-gif-attachment.gif")
 
-      (let [attachment (second (:attachments (query-application sonja application-id)))]
-        (fact "One version, but original file id points to original file"
-          (count (:versions attachment)) => 1
-          (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
+       (let [attachment (second (:attachments (query-application sonja application-id)))]
+         (fact "One version, but original file id points to original file"
+           (count (:versions attachment)) => 1
+           (get-in attachment [:latestVersion :fileId]) => (get-in attachment [:latestVersion :originalFileId]))
 
-        (fact "Conversion flags for invalid-mime-type"
-          (get-in attachment [:latestVersion :autoConversion]) => falsey
-          (get-in attachment [:latestVersion :archivable]) => falsey
-          (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
-          (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+         (fact "Conversion flags for invalid-mime-type"
+           (get-in attachment [:latestVersion :autoConversion]) => falsey
+           (get-in attachment [:latestVersion :archivable]) => falsey
+           (get-in attachment [:latestVersion :archivabilityError]) => "invalid-mime-type"
+           (get-in attachment [:latestVersion :filename]) => "test-gif-attachment.gif")))))
+  (println "Skipped attachment-itest libreoffice tests!"))
 
-(when (or pdfa/pdf2pdf-enabled? dev-env?)
+(when pdfa/pdf2pdf-enabled?
   (facts "PDF -> PDF/A with pdf2pdf"                          ; Jarvenpaa has permanent-archive enabled, so PDFs are converted to PDF/A
-    (let [application (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+    (let [application (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
           application-id (:id application)
           type {:type-group "paapiirustus" :type-id "asemapiirros"}
           resp (command raktark-jarvenpaa
@@ -681,7 +688,7 @@
         (util/find-by-id aid1 attachments) => (contains {:metadata {:nakyvyys "julkinen"}})))
 
     (facts "Mikko uploads personal CV"
-      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+      (upload-attachment mikko application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => truthy
       (let [{attachments :attachments} (query-application mikko application-id)
             mikko-att (last attachments)]
         (fact "Mikko has auth"
@@ -709,7 +716,7 @@
 
     (fact "Veikko uploads only-authority attachment"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => true)
+                                                              :type-id "elyn_tai_kunnan_poikkeamapaatos"}} true) => truthy)
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att (last attachments)]
       (count attachments) => 6
@@ -726,13 +733,13 @@
 
     (fact "Veikko uploads attachment for parties"
       (upload-attachment veikko application-id {:id "" :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                  :type-id "naapurin_suostumus"}} true) => true)
+                                                                  :type-id "naapurin_suostumus"}} true) => truthy)
 
     (let [{attachments :attachments} (query-application veikko application-id)
           veikko-att-id (:id (last attachments))
           _ (command veikko :set-attachment-visibility :id application-id :attachmentId veikko-att-id :value "asiakas-ja-viranomainen") => ok?
           _ (upload-attachment pena application-id {:id veikko-att-id :type {:type-group "ennakkoluvat_ja_lausunnot"
-                                                                             :type-id "naapurin_suostumus"}} true) => true
+                                                                             :type-id "naapurin_suostumus"}} true) => truthy
           mikko-app (query-application mikko application-id)
           latest-attachment (last (:attachments mikko-app))]
       (fact "Mikko sees Veikko's/Pena's attachment"
@@ -754,7 +761,7 @@
       )))
 
 (facts "Uploading PDF should not create duplicate comments"
-  (let [application    (create-and-submit-application pena :propertyId jarvenpaa-property-id)
+  (let [application    (create-and-submit-application pena :operation "pientalo" :propertyId jarvenpaa-property-id)
         application-id (:id application)
         _ (upload-attachment pena application-id {:type {:type-group "osapuolet" :type-id "cv"}} true :filename "dev-resources/invalid-pdfa.pdf")
         {attachments :attachments comments :comments} (query-application pena application-id)
@@ -762,7 +769,7 @@
     (fact "is PDF"
       (-> pdf-attachment :latestVersion :contentType) => "application/pdf")
 
-    (when (or pdfa/pdf2pdf-enabled? dev-env?) ; test PDF/A when pdf2pdf converter is enabled
+    (when pdfa/pdf2pdf-enabled? ; test PDF/A when pdf2pdf converter is enabled
       (facts "Is archivable after PDF/A conversion"
         (count (:versions pdf-attachment)) => 1             ; only one version
         (get-in pdf-attachment [:latestVersion :fileId]) =not=> (get-in pdf-attachment [:latestVersion :originalFileId]) ; original file is known
@@ -786,7 +793,7 @@
       (-> (query-application pena application-id) :attachments first))
 
     (fact "Upload file to attachment"
-          (upload-attachment pena application-id base-attachment true) => true)
+          (upload-attachment pena application-id base-attachment true) => truthy)
 
     (fact "Assign application to Ronja"
       (command sonja :assign-application :id application-id :assigneeId ronja-id) => ok?)
@@ -823,7 +830,8 @@
           => (partial expected-failure? :error.ram-linked))
 
     (facts "Pena uploads new post-verdict attachment and corresponding RAM attachment"
-          (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+           (upload-attachment pena application-id {:id "" :type {:type-group "paapiirustus"
+                                                                 :type-id "pohjapiirustus"}} true) => truthy
           (let [base (latest-attachment)]
             (fact "RAM creation fails do to unapproved base attachment"
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
@@ -833,7 +841,8 @@
                   (command sonja :approve-attachment :id application-id
                            :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?
                   (command pena :create-ram-attachment :id application-id :attachmentId (:id base)) => ok?)
-            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "osapuolet" :type-id "cv"}} true) => true
+            (upload-attachment pena application-id {:id (:id (latest-attachment)) :type {:type-group "paapiirustus"
+                                                                                         :type-id "pohjapiirustus"}} true) => truthy
             (fact "Applicant cannot delete base attachment"
                   (command pena :delete-attachment :id application-id :attachmentId (:id base))
                   => (partial expected-failure? :error.ram-linked))
@@ -877,7 +886,7 @@
           (fact "Sonja cannot delete base attachment"
                 (command sonja :delete-attachment :id application-id :attachmentId (:id base)) => (partial expected-failure? :error.ram-linked))
           (fact "Fill and approve RAM and create one more link"
-                (upload-attachment pena application-id (latest-attachment) true) => true
+                (upload-attachment pena application-id (latest-attachment) true) => truthy
                 (let [middle (latest-attachment)]
                   (command sonja :approve-attachment :id application-id
                            :fileId (-> middle :latestVersion :fileId)) => ok?
@@ -893,4 +902,125 @@
                                  :attachmentId (:id middle)
                                  :fileId (-> middle :latestVersion :fileId)
                                  :originalFileId (-> middle :latestVersion :originalFileId))
-                        => (partial expected-failure? :error.ram-linked)))))))))
+                        => (partial expected-failure? :error.ram-linked)))))))
+    (facts "Pena uploads new post-verdict attachment that does not support RAMs"
+           (upload-attachment pena application-id {:id "" :type {:type-group "osapuolet"
+                                                                 :type-id "cv"}} true) => truthy
+          (let [base (latest-attachment)]
+            (fact "Approve"
+                  (command sonja :approve-attachment :id application-id
+                           :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
+            (fact "RAM creation fails"
+                  (command pena :create-ram-attachment :id application-id :attachmentId (:id base))
+                  => (partial expected-failure? :error.ram-not-allowed))))))
+
+(facts "Marking attachment manually as as construction time attachment"
+  (let [application (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachment (-> (query pena :attachments :id application-id) :attachments first)
+        attachment-id (:id attachment)]
+
+    (facts "attachment-manually-set-construction-time - not set"
+      (:manuallySetConstructionTime attachment) => false)
+    (fact "applicationState before update"
+      (:applicationState attachment) => "draft")
+    (fact "originalApplicationState before update"
+      (:originalApplicationState attachment) => nil)
+
+    (facts "set-attachment-as-construction-time"
+      (fact "applicant"
+        (command pena :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.unauthorized))
+      (fact "auhtority"
+        (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?))
+
+    (facts "attachment is updated"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
+        (fact "applicationState"
+          app-state => "verdictGiven")
+        (fact "originalApplicationState"
+          orig-app-state => "draft")))
+
+    (fact "reset attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => ok?)
+
+    (facts "reset does not change data"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => true)
+        (fact "applicationState"
+          app-state => "verdictGiven")
+        (fact "originalApplicationState"
+          orig-app-state => "draft")))
+
+    (fact "unset attachment as construction time"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value false) => ok?)
+
+    (facts "attachment is updated"
+      (let [{{app-state :applicationState orig-app-state :originalApplicationState msct :manuallySetConstructionTime} :attachment} (query pena :attachment :id application-id :attachmentId attachment-id)]
+        (fact "manually set construction time"
+          msct => false)
+        (fact "applicationState"
+          app-state => "draft")
+        (fact "originalApplicationState"
+          orig-app-state => nil)))
+
+    (fact "unset non construction time attachment"
+      (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value false) => (partial expected-failure? :error.attachment-not-manually-set-construction-time))
+
+    (facts "set construction time attachment which is added in post verdict"
+      (fact "Give verdict"
+        (command sonja :check-for-verdict :id application-id) => ok?)
+      (facts "add attachment"
+        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
+              post-verdict-attachment-id (-> resp :attachmentIds first)
+              attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
+          (fact "added"
+            resp => ok?)
+          (fact "attachemnt id"
+            post-verdict-attachment-id => string?)
+          (fact "applicationState"
+            (:applicationState attachment) => "verdictGiven")
+          (fact "originalApplicationState"
+            (:originalApplicationState attachment) => nil)
+
+          (fact "attachment manually set construction time"
+            (:manuallySetConstructionTime attachment) = false)
+
+          (fact "set-attachment-as-construction-time"
+            (command sonja :set-attachment-as-construction-time :id application-id :attachmentId (:id attachment) :value true) => (partial expected-failure? :error.command-illegal-state)))))))
+
+(facts "Not needed..."
+  (let [application (create-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        {attachments :attachments} (query-application pena application-id)
+        att1 (first attachments)]
+    (fact "Initially not needed can be toggled"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?)
+    (fact "If set notNeeded, upload not possible"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded true
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 false))
+    (fact "Upload possible when attachment is needed"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => ok?
+      (upload-attachment pena application-id att1 true))
+    (fact "Can't be set notNeeded when file is uploaded"
+      (command pena :set-attachment-not-needed :id application-id :notNeeded false
+               :attachmentId (:id att1)) => fail?)
+    (let [{attachments :attachments} (query-application pena application-id)
+          updated-attachment (first attachments)]
+      (command pena
+               :delete-attachment-version
+               :id application-id
+               :attachmentId (:id updated-attachment)
+               :fileId (get-in updated-attachment [:latestVersion :fileId])
+               :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
+      (fact "Not needed can be set after version deletion"
+        (command pena :set-attachment-not-needed :id application-id :notNeeded true
+                 :attachmentId (:id updated-attachment)) => ok?))
+    ))

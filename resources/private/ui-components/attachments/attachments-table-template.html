@@ -19,22 +19,20 @@
         </tr>
       </thead>
       <tbody data-bind="foreach: attachments">
-        <tr data-bind="attr: {'data-test-type': $data.type['type-group'] + '.' + $data.type['type-id'],
-                       'data-test-state': $data.state}">
-          <td data-bind="foreach: $parent.stateIcons( $data )"
-              class="attachments-table__state-icons">
-            <i data-bind="attr: {'class': $data.css,
-                                 'data-test-icon':  $data.icon + '-icon'}"></i>
+        <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
+                              'data-test-state': $data.state,
+                              'attachment-id': $data.id}">
+          <td>
+            <state-icons params="attachment: $data"></state-icons>
           </td>
           <!-- ko if: $parent.hasFile( $data ) -->
           <td>
             <a data-bind="attr: {'href': $parent.buildHash( $data )}"
                data-test-id="open-attachment">
-              <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-              <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+              <attachment-type-id params="attachment: $data"></attachment-type-id>
             </a>
             <br>
-            <span data-bind="text: $data.contents || ''"
+            <span data-bind="text: $data.contents() || ''"
                   data-test-id="attachment-contents"></span>
           </td>
           <td data-bind="viewWithDownload: latestVersion"
@@ -46,10 +44,9 @@
           <!-- /ko -->
           <!-- ko ifnot: $parent.hasFile( $data ) -->
           <td>
-            <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-            <span data-bind="visible: $data.ramLink, ltext: 'ram.postfix'" data-test-id="ram-indicator"></span>
+            <attachment-type-id params="attachment: $data"></attachment-type-id>
             <br>
-            <span data-bind="html: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+            <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data )">
             <a class="link-btn link-btn--link"
@@ -107,7 +104,17 @@
             </button>
           </td>
         </tr>
+        <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
+        <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
+          <td colspan="7">
+            <accordion-assignments params="documentAssignments: $component.assignments()[$data.id],
+                                           applicationId: $component.appModel.id,
+                                           authorities: $component.authorities"></accordion-assignments>
+          </td>
+        </tr>
+        <tr class="hidden-row"><td colspan="7"></td></tr>
+        <!-- /ko -->
       </tbody>
     </table>
   </div>
-</scripspan>
+</script>

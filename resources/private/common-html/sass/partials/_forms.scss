@@ -335,7 +335,7 @@ input.form-input.inline {
   }
   .form-label-checkbox{
     vertical-align: middle;
-    width: 262px;
+    width: auto !important;
     margin-right: 4px;
   }
   .form-label-group, .form-label-table {
@@ -634,10 +634,7 @@ input.form-input.inline {
 
 .accordion_content > .group-help-text {
   display: block;
-  margin: {
-    left: $marginS;
-    right: $marginS;
-  }
+  margin: $marginS;
 }
 
 .kiintun-and-maaraalatunnus {
@@ -1128,14 +1125,13 @@ $max-columns: 12;
 
   .select-arrow {
     position: absolute;
-    right: 1px;
+    right: 2px;
     bottom: 1px;
     color: $orange-dark;
     pointer-events:none;
 
     // show white box behind selector arrow to hide default select arrows on IE9
     background-color: #fff;
-    height: $grid-input-height - 2px;
     width: 30px;
     line-height: $grid-input-height - 2px;
     vertical-align: middle;
@@ -1465,8 +1461,16 @@ textarea.grid-style-input {
   padding: $marginS $marginM;
 }
 
+textarea.grid-style-input.really-high {
+  height: $grid-textarea-height * 2;
+}
+
 .no-wrap-whitespace {
   white-space: nowrap;
+}
+
+.wrapped_text {
+  white-space: pre-wrap;
 }
 
 .cell-span {
@@ -1477,7 +1481,7 @@ textarea.grid-style-input {
   @extend .btn-base;
   display: block;
 }
- 
+
 div.review-done {
   margin: $marginL;
 }
@@ -1528,4 +1532,30 @@ div.review-done {
   padding-left: $marginS;
 }
 
- 
+.building-select-container {
+  margin-left: $marginS;
+  .building-select-box {
+    position: relative;
+    width: 30em;
+  }
+}
+
+.link-permit-selector {
+  padding-left: $marginS;
+  label.form-label {
+    width: 100%;
+  }
+  .errorPanel {
+    top: -80px;
+    left: 200px;
+  }
+}
+
+.col-fixed .inline {
+  display: table-cell;
+  vertical-align: bottom;
+  height: 120px;
+  .form-input {
+    margin-bottom: 0;
+  }
+}

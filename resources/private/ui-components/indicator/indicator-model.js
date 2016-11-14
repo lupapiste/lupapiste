@@ -1,9 +1,10 @@
-// Bar indicator that is shown below the header.
+// Bar indicator that is shown below the header. Serves indicators as queue.
 // Indicator is triggered with hub.send( 'indicator', params),
 // where params are: [optional]
 // style: indicator style. Can be positive, negative or primary.
 // [message]: ltext or lhtml to be shown. Negative (form.err) and
 // positive (form.saved) have default ltexts.
+// [rawMessage]: alternative for message, which is not localized
 // [html]: If true then the message is interpreted as lhtml (default false)
 // [sticky]: Usually indicator fades out after timeout. If sticky is true
 // then the indicator is visible until closed by the user.
@@ -11,50 +12,54 @@ LUPAPISTE.IndicatorModel = function() {
   "use strict";
   var self = this;
 
-  self.showIndicator = ko.observable(false).extend({notify: "always"});
-  self.indicatorStyle = ko.observable("neutral");
-  self.indicatorMessage = ko.observable();
-  // keep indicator on screen
-  self.sticky = ko.observable(false);
+  self.indicators = ko.observableArray([]).extend({deferred: true});
+
+  self.showIndicator = ko.pureComputed(function() {
+    return self.indicators().length > 0;
+  });
 
   var timerId;
 
-  self.showCloseButton = ko.pureComputed(function() {
-    return self.indicatorStyle() === "negative" || self.sticky();
-  });
+  self.showCloseButton = function(item) {
+    return item.sticky;
+  };
 
-  self.iconStyle = ko.pureComputed(function() {
-    return _.get( {positive: "lupicon-circle-check",
-                   negative: "lupicon-circle-attention",
-                   primary: "lupicon-circle-info"},
-                  self.indicatorStyle());
-  });
-
-  self.showIndicator.subscribe(function(val) {
-    if (self.indicatorStyle() === "negative" && timerId) {
-      // stop timer if indicator was set negative during positive indicator hide was delayed
-      clearTimeout(timerId);
-      timerId = undefined;
-    } else if (val && self.indicatorStyle() !== "negative" && !self.sticky()) {
-      // automatically hide indicator if shown and not negative
+  self.currentIndicator = ko.pureComputed(function() {
+    var nonSticky = _.find(self.indicators(), function(m) { return !m.sticky; });
+    if (nonSticky) {
       timerId = _.delay(function() {
-        self.showIndicator(false);
-        timerId = undefined;
+        self.indicators.remove(nonSticky);
       }, 2000);
+      return nonSticky;
+    } else {
+      var sticky = _.find(self.indicators(), function(m) { return m.sticky; });
+      if (sticky) {
+        clearTimeout(timerId);
+        timerId = undefined;
+      }
+      return sticky;
     }
   });
 
-  self.closeIndicator = function() {
-    self.showIndicator(false);
+  function getIconStyle(style) {
+    return _.get( {positive: "lupicon-circle-check",
+                   negative: "lupicon-circle-attention",
+                   primary: "lupicon-circle-info"},
+                  style);
+  }
+
+  self.closeIndicator = function(currentIndicator) {
+    self.indicators.remove(currentIndicator);
   };
 
   hub.subscribe("indicator", function(e) {
     var defaultMessages = {negative: "form.err",
                            positive: "form.saved"};
-    var msg = loc( e.message  || defaultMessages[e.style] );
-    self.indicatorMessage( e.html ? msg : _.escape( msg ));
-    self.indicatorStyle(e.style);
-    self.sticky(!!e.sticky);
-    self.showIndicator(true);
+    var msg = e.rawMessage ? e.rawMessage : loc(e.message  || defaultMessages[e.style]);
+    var indicator = {style: e.style,
+                     sticky: !!e.sticky || e.style === "negative",
+                     iconStyle: getIconStyle(e.style),
+                     message:  e.html ? msg : _.escape( msg )};
+    self.indicators.push(indicator);
   });
 };

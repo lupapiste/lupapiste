@@ -1,5 +1,8 @@
 ;(function() {
   "use strict";
+  // Provide application comments for other services
+  lupapisteApp.services.commentService = new LUPAPISTE.CommentService();
+
   lupapisteApp.services.organizationTagsService = new LUPAPISTE.OrganizationTagsService();
   lupapisteApp.services.applicationFiltersService = new LUPAPISTE.ApplicationFiltersService();
   lupapisteApp.services.areaFilterService = new LUPAPISTE.AreaFilterService(lupapisteApp.services.applicationFiltersService);
@@ -18,4 +21,11 @@
   lupapisteApp.services.calendarService = new LUPAPISTE.CalendarService();
   lupapisteApp.services.attachmentsService = new LUPAPISTE.AttachmentsService();
   lupapisteApp.services.sutiService = new LUPAPISTE.SutiService();
+  lupapisteApp.services.infoService = new LUPAPISTE.InfoService();
+  lupapisteApp.services.contextService = new LUPAPISTE.ContextService();
+  lupapisteApp.services.buildingService = new LUPAPISTE.BuildingService();
+  lupapisteApp.services.assignmentService = new LUPAPISTE.AssignmentService(lupapisteApp.models.applicationAuthModel);
+  lupapisteApp.services.assignmentRecipientFilterService = new LUPAPISTE.AssignmentRecipientFilterService(lupapisteApp.services.applicationFiltersService);
+  lupapisteApp.services.assignmentTargetFilterService = new LUPAPISTE.AssignmentTargetFilterService();
+
 })();

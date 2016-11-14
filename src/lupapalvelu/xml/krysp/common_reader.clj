@@ -1,6 +1,8 @@
 (ns lupapalvelu.xml.krysp.common-reader
   (:require [ring.util.codec :as codec]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.wfs :as wfs]
+            [sade.common-reader :as scr]
             [sade.strings :as ss]
             [sade.xml :as sxml]))
 
@@ -50,22 +52,54 @@
                                 :Rasitetoimitus])]
                 (str "typeName=" (ss/join "," elems))))
 
-(defn get-tunnus-path
+(defmulti get-tunnus-xml-path
+  "Get path for reading xml without ns."
+  {:arglists '([permit-type search-type])}
+  (fn [permit-type & args]
+    (keyword permit-type)))
+
+(defmethod get-tunnus-xml-path :default
   [permit-type search-type]
-  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
-        tunnus-location (case search-type
-                          :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
-                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")]
-    (str prefix tunnus-location)))
+  (case search-type
+    :application-id  [:LupaTunnus :muuTunnustieto :MuuTunnus :tunnus]
+    :kuntalupatunnus [:LupaTunnus :kuntalupatunnus]))
+
+(defmethod get-tunnus-xml-path :KT
+  [permit-type search-type]
+  [:hakemustunnustieto :Hakemustunnus :tunnus])
+
+(defmulti get-tunnus-path
+  "Get url path for fetching xmls from krysp."
+  {:arglists '([permit-type search-type])}
+  (fn [permit-type & args]
+    (keyword permit-type)))
+
+(defmethod get-tunnus-path :default
+  [permit-type search-type]
+  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)]
+    (->> (map (partial str "yht") (get-tunnus-xml-path permit-type search-type))
+         (ss/join "/")
+         (str prefix))))
+
+(defmethod get-tunnus-path :KT
+  [permit-type search-type]
+  "kiito:toimitushakemustieto/kiito:Toimitushakemus/kiito:hakemustunnustieto/kiito:Hakemustunnus/yht:tunnus")
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
   [property value]
-  (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>"
-                         (sxml/escape-xml property)
-                         "</PropertyName><Literal>"
-                         (sxml/escape-xml value)
-                         "</Literal></PropertyIsEqualTo>")))
+  (->> (wfs/property-is-equal property value)
+       (scr/strip-xml-namespaces)
+       (sxml/element-to-string)
+       (codec/url-encode)))
+
+(defn property-in
+  "Returns WFS 1.1.0 compatible URL-encoded search parameter suitable for 'filter'"
+  [property values]
+  (->> (wfs/property-in property values)
+       (scr/strip-xml-namespaces)
+       (sxml/element-to-string)
+       (codec/url-encode)))
 
 (defn wfs-krysp-url [server object-type filter]
   (let [server (if (ss/contains? server "?")

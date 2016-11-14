@@ -33,7 +33,10 @@
         </tr>
         <tr>
           <th>{{titles.kuntalupatunnus}}</th>
-          <td>{{kuntalupatunnus}}</td>
+          <td>{{kuntalupatunnus}}
+              {{^kuntalupatunnus}}
+                -
+              {{/kuntalupatunnus}}</td>
         </tr>
         <tr>
           <th>{{titles.propertyId}}</th>

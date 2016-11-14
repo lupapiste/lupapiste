@@ -12,7 +12,13 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.strings :as str]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.application-search :as search]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-utils :as app-utils]
+            [clj-time.coerce :as tc]
+            [clj-time.core :as t]))
 
 ; -- API Call helpers
 
@@ -165,7 +171,7 @@
                                                      timestamp)
         reservation-push {$push {:reservations reservation}}
         state-change (case (keyword (:state application))
-                       :draft (application/state-transition-update :open timestamp user)
+                       :draft (application/state-transition-update :open timestamp application user)
                        nil)]
     (update-application
       (application->command application)
@@ -178,12 +184,14 @@
     {:reservations {$elemMatch {:id reservation-id}}}
     changes))
 
+(def state->comment-type {:ACCEPTED "reservation-accepted"
+                          :DECLINED "reservation-declined"
+                          :CANCELED "reservation-canceled"})
+
 (defn update-mongo-for-reservation-state-change
   [application {reservation-id :id :as reservation} new-state {user-id :id :as user} to-user timestamp]
-  {:pre [(or (= new-state :ACCEPTED) (= new-state :DECLINED))]}
-  (let [type (cond
-               :ACCEPTED "reservation-accepted"
-               :DECLINED "reservation-declined")
+  {:pre [(contains? state->comment-type new-state)]}
+  (let [type (new-state state->comment-type)
         comment-update (comment/comment-mongo-update (:state application)
                                                      (:comment reservation)
                                                      {:type type
@@ -198,7 +206,7 @@
       comment-update)
     (update-reservation application reservation-id {$set {:reservations.$.reservationStatus (name new-state)}})
     (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}})
-    (update-reservation application reservation-id {$push {:reservations.$.action-required-by to-user}})))
+    (update-reservation application reservation-id {$push {:reservations.$.action-required-by (:id to-user)}})))
 
 (defn accept-reservation
   [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
@@ -210,9 +218,47 @@
   (post-command (str "reservations/" reservation-id "/decline"))
   (update-mongo-for-reservation-state-change application reservation :DECLINED user (usr/get-user-by-id to-user-id) timestamp))
 
+(defn cancel-reservation
+  [application {reservation-id :id to-user-id :reservedBy :as reservation} user timestamp]
+  (post-command (str "reservations/" reservation-id "/cancel"))
+  (update-mongo-for-reservation-state-change application reservation :CANCELED user (usr/get-user-by-id to-user-id) timestamp))
+
 (defn mark-reservation-update-seen
   [application reservation-id user-id]
   (update-reservation application reservation-id {$pull {:reservations.$.action-required-by user-id}}))
+
+(defn- select-actions-required-for-user [user rs]
+  (filter #(util/contains-value? (:action-required-by %) (:id user)) rs))
+
+(defn- select-where-in-future [rs]
+  (filter #(>= (:endTime %) (tc/to-long (t/now))) rs))
+
+(defn- select-where-user-is-participant [user rs]
+  (filter #(or (= (:from %) (:id user))
+               (util/contains-value? (:to %) (:id user))) rs))
+
+(defn applications-with-calendar-actions-required
+  [user]
+  (let [query  (search/make-query
+                 (domain/applications-containing-reservations-requiring-action-query-for user) {} user)]
+    (->> (mongo/select :applications query)
+         (map (fn [app] (update app :reservations (partial select-actions-required-for-user user))))
+         app-utils/enrich-applications-with-organization-name
+         (map app-utils/with-application-kind)
+         (map #(select-keys % [:id :kind :municipality :organizationName
+                               :address :primaryOperation :reservations])))))
+
+(defn applications-with-appointments-for-user
+  [user]
+  (let [query (search/make-query
+                (domain/applications-containing-future-reservations-for user) {} user)]
+    (->> (mongo/select :applications query)
+         (map (fn [app] (update app :reservations (partial select-where-user-is-participant user))))
+         (map (fn [app] (update app :reservations select-where-in-future)))
+         app-utils/enrich-applications-with-organization-name
+         (map app-utils/with-application-kind)
+         (map #(select-keys % [:id :kind :municipality :organizationName
+                               :address :primaryOperation :reservations])))))
 
 ; -- Configuration
 
@@ -220,5 +266,3 @@
   (let [m (get (env/get-config) :calendar)]
     ; convert keys to camel-case-keywords
     (zipmap (map (comp keyword str/to-camel-case name) (keys m)) (vals m))))
-
-

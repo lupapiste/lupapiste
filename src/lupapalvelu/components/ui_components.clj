@@ -52,7 +52,10 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :gtm                   (env/value :gtm)
+                 :facebook              (env/value :facebook)
                  :frontpage             (env/value :frontpage)
+                 :searchTextMaxLength   (env/value :search-text-max-length)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
@@ -79,7 +82,7 @@
                  :features              (into {} (filter second (env/features)))
                  :inputMaxLength        model/default-max-len
                  :mimeTypePattern       (.toString mime/mime-type-pattern)
-                 :supportedLangs        i18n/languages
+                 :supportedLangs        i18n/supported-langs
                  :urgencyStates         ["normal" "urgent" "pending"]
                  :calendars             (cal/ui-params)
                  :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
@@ -130,7 +133,7 @@
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "register-lupapiste-components.js"]}
+   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -179,6 +182,7 @@
    :analytics    {:js ["analytics.js"]}
 
    :services {:js ["area-filter-service.js"
+                   "comment-service.js"
                    "tag-filter-service.js"
                    "operation-filter-service.js"
                    "organization-filter-service.js"
@@ -195,7 +199,13 @@
                    "ram-service.js"
                    "calendar-service.js"
                    "attachments-service.js"
-                   "suti-service.js"]}
+                   "suti-service.js"
+                   "info-service.js"
+                   "context-service.js"
+                   "building-service.js"
+                   "assignment-service.js"
+                   "assignment-recipient-filter-service.js"
+                   "assignment-target-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -260,14 +270,13 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
 
-   :attachment   {:depends [:common-html :repository :signing]
+   :attachment   {:depends [:services :common-html :repository :signing]
                   :js ["attachment-multi-select.js"
-                       "targeted-attachments-model.js"
+                       "attachment-model.js"
                        "attachment.js"
                        "move-attachment-to-backing-system.js"
                        "move-attachment-to-case-management.js"]
-                  :html ["targetted-attachments-template.html"
-                         "attachment.html"
+                  :html ["attachment.html"
                          "upload.html"
                          "move-attachment-to-backing-system.html"
                          "move-attachment-to-case-management.html"]}
@@ -283,24 +292,25 @@
                    :js ["calendar-view.js" "reservation-slot-edit-bubble-model.js"
                         "reservation-slot-create-bubble-model.js" "calendar-view-model.js"
                         "authority-calendar-model.js" "applicant-calendar-model.js"
-                        "reservation-slot-reserve-bubble-model.js"]
-                   :html ["reservation-slot-edit-bubble-template.html"
+                        "reservation-slot-reserve-bubble-model.js" "reserved-slot-bubble-model.js" "calendar-notification-list.js"
+                        "book-appointment-filter.js" "base-calendar-model.js"]
+                   :html ["reserved-slot-bubble-template.html" "reservation-slot-edit-bubble-template.html"
                           "reservation-slot-create-bubble-template.html" "calendar-view-template.html"
-
                           "authority-calendar-template.html" "applicant-calendar-template.html"
-                          "calendar-message-items-template.html"
-                          "reservation-slot-reserve-bubble-template.html"]}
+                          "calendar-notification-list-template.html"
+                          "reservation-slot-reserve-bubble-template.html"
+                          "book-appointment-filter-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker
                             :signing :invites :verdict-attachment-prints :calendar-view]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "add-party.js" "attachments-tab-model.js" "archival-summary.js" "case-file.js"
+                       "add-party.js" "archival-summary.js" "case-file.js"
                        "application.js"]
-                  :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html"
+                  :html ["add-link-permit.html"
                          "application.html" "inforequest.html" "add-operation.html" "change-location.html"
-                         "foreman-template.html" "archival-summary-template.html" "organization-links.html"
-                         "required-fields-summary-tab-template.html"
+                         "foreman-template.html" "archival-summary-template.html"
+                         "required-fields-summary-tab-template.html" "parties-tab-template.html"
                          "case-file-template.html" "application-actions-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
@@ -388,13 +398,17 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
+   :new-appointment {:depends [:calendar-view]
+                     :js ["new-appointment.js"]
+                     :html ["new-appointment.html"]}
+
    :applicant-app {:depends []
                    :js ["applicant.js"]}
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :header :debug
-                             :company :analytics :register-company :footer :ui-components]}
+                             :company :analytics :register-company :footer :new-appointment :ui-components]}
 
    :mycalendar   {:depends [:calendar-view]
                   :js ["mycalendar.js"]
@@ -424,7 +438,8 @@
 
    :admin-app {:depends []
                :js ["admin.js"]}
-   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer :ui-components]
+   :admin     {:depends [:admin-app :global-models :common-html :authenticated :admins :accordion :map :mypage :header :debug :footer
+                         :ui-components :authority-admin-components]
                :js ["admin-users.js" "organization.js" "organizations.js" "companies.js" "features.js" "actions.js" "sso-keys.js" "screenmessages-list.js" "notifications.js"
                     "create-scope-model.js" "logs.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -437,9 +452,10 @@
    :welcome-app {:depends []
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app  :global-models :ui-components :login :register :register-company :link-account :debug :header :screenmessages :password-reset :change-email :analytics :footer]
+   :welcome {:depends [:welcome-app  :analytics :global-models :ui-components :login :register :register-company
+                       :link-account :debug :header :screenmessages :password-reset :change-email :footer]
              :js ["company-user.js"]
-             :html ["index.html" "login.html" "company-user.html"]}
+             :html ["index.html" "login.html" "company-user.html" "gtm.html"]}
 
    :oskari  {:css ["oskari.css"]}
 

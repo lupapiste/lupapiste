@@ -18,6 +18,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
@@ -2327,7 +2328,7 @@
             (if (= (:id task) (:id (:source att)))
               (try
                 (println "   + poistetaan taskiin " (:id task) " linkattu liite " (:id att) " hakemukselta " (:_id failed))
-                (attachment/delete-attachment! failed (:id att))
+                (attachment/delete-attachments! failed (:id att))
                 (catch Exception e
                   (println "   + Virhe poistettaessa liitetta")))))
           (println " - poistetaan taski " (:id task) " hakemukselta " (:id failed))
@@ -2377,11 +2378,147 @@
                             change-rakennuspaikka-to-toiminnan-sijainti
                             {$and [{:versions.permitType "YL"} {:versions.documents {$elemMatch {"schema-info.name" "rakennuspaikka"}}}]}))
 
+(defmigration remove-suunnittelija-from-puun-kaataminen-applications
+  {:apply-when (pos? (mongo/count :applications {$and [{:primaryOperation.name "puun-kaataminen"}
+                                                       {:state {$in ["draft" "open"]}}
+                                                       {:documents.schema-info.name "suunnittelija"}]}))}
+  (mongo/update-n :applications
+                  {$and [{:primaryOperation.name "puun-kaataminen"}
+                         {:state {$in ["draft" "open"]}}
+                         {:documents.schema-info.name "suunnittelija"}]}
+                  {$pull {:documents {:schema-info.name "suunnittelija"}}}
+                  :multi true))
+
+(defmigration organization-name-english-defaults
+  {:apply-when (pos? (mongo/count  :organizations {:name.en nil}))}
+  (let [changed-organizations (mongo/count  :organizations {:name.en nil})]
+    (doseq [organization (mongo/select :organizations {:name.en nil})]
+      (mongo/update-by-id :organizations (:id organization)
+                          {$set {:name.en (-> organization :name :fi)}}))
+    changed-organizations))
+
+(defn- english-default-for-link-name [link]
+  (if (not (-> link :name :en))
+    (assoc-in link [:name :en] (-> link :name :fi))
+    link))
+
+(defmigration set-english-defaults-for-organization-link-names
+  {:apply-when (pos? (mongo/count :organizations
+                                  {$and
+                                   [{:links {$exists true}}
+                                    {:links {$elemMatch {:name.en nil}}}]}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {$and
+                                            [{:links {$exists true}}
+                                             {:links {$elemMatch {:name.en nil}}}]}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map english-default-for-link-name
+                                               (:links organization))}}))))
+
+(defn- missing-url-map [lang]
+  {(keyword (str "url." (name lang))) nil})
+
+(defn- default-urls-for-link [link]
+  (let [default-url (if (string? (:url link))
+                      (:url link)
+                      (-> link :url :fi))]
+    (assert (string? default-url) (str "was actually " default-url))
+    (assoc link :url
+           (merge-with (fn [a b]
+                         (or a b))
+                       (i18n/localization-schema default-url)
+                       (if (map? (:url link))
+                         (:url link)
+                         {})))))
+
+(defmigration set-language-defaults-for-organization-link-urls
+  {:apply-when (pos? (mongo/count :organizations
+                                  {:links {$elemMatch {$or (map missing-url-map
+                                                                i18n/supported-langs)}}}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {:links {$elemMatch {$or (map missing-url-map
+                                                                         i18n/supported-langs)}}}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map default-urls-for-link
+                                               (:links organization))}}))))
+
+(defn- english-default-for-link-url [link]
+  (if (not (-> link :url :en))
+    (assoc-in link [:url :en] (-> link :url :fi))
+    link))
+
+(defmigration set-english-defaults-for-organization-link-urls
+  {:apply-when (pos? (mongo/count :organizations
+                                  {$and
+                                   [{:links {$exists true}}
+                                    {:links {$elemMatch {:url.en nil}}}]}))}
+  (reduce + 0
+          (for [organization (mongo/select :organizations
+                                           {$and
+                                            [{:links {$exists true}}
+                                             {:links {$elemMatch {:url.en nil}}}]}
+                                           {:links 1})]
+            (mongo/update-n :organizations
+                            {:_id (:id organization)}
+                            {$set {:links (map english-default-for-link-url
+                                               (:links organization))}}))))
+
+(defn not-needed-to-false                                   ;; LP-6232
+  "If there are versions, it doesn't make sense to flag attachment as 'not needed'.
+   Sets notNeeded to false for attachment in such state."
+  [{:keys [notNeeded versions] :as attachment}]
+  (if (and notNeeded (seq versions))
+    (assoc attachment :notNeeded false)
+    attachment))
+
+(defmigration set-attachments-with-versions-to-needed          ;; LP-6232
+  {:apply-when (pos? (mongo/count :applications {:attachments
+                                                 {$elemMatch {$and [{:notNeeded true} ,
+                                                                     {:versions {$exists true,
+                                                                                 $not {$size 0}}}]}}}))}
+  (update-applications-array :attachments
+                             not-needed-to-false
+                             {:attachments
+                              {$elemMatch {$and [{:notNeeded true} ,
+                                                 {:versions {$exists true,
+                                                             $not {$size 0}}}]}}}))
+
+(defmigration set-attachments-with-versions-to-needed-v2          ;; LPK-2275
+  {:apply-when (pos? (mongo/count :applications {:attachments
+                                                 {$elemMatch {$and [{:notNeeded true} ,
+                                                                    {:versions {$exists true,
+                                                                                $not {$size 0}}}]}}}))}
+  (update-applications-array :attachments
+                             not-needed-to-false
+                             {:attachments
+                              {$elemMatch {$and [{:notNeeded true} ,
+                                                 {:versions {$exists true,
+                                                             $not {$size 0}}}]}}}))
+
+
+;; Create-change-permit command has not been copying location-wgs84 property.
+;; The copying has been fixed, but we need to run the old migration again.
+(defmigration add-wgs84-location-for-applications-again
+  {:apply-when (pos? (mongo/count :applications {:location-wgs84 {$exists false}}))}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+      (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
+        (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
+
 ;;
 ;; ****** NOTE! ******
-;;  When you are writing a new migration that goes through subcollections
-;;  in the collections "Applications" and "Submitted-applications"
-;;  do not manually write like this
-;;     (doseq [collection [:applications :submitted-applications] ...)
-;;  but use the "update-applications-array" function existing in this namespace.
+;;  1) When you are writing a new migration that goes through subcollections
+;;     in the collections "Applications" and "Submitted-applications"
+;;     do not manually write like this
+;;       (doseq [collection [:applications :submitted-applications] ...)
+;;     but use the "update-applications-array" function existing in this namespace.
+;;
+;;  2) Check if migration needs to be done for "bulletins" (julkipano) also. See update-bulletin-versions.
+;;
 ;; *******************

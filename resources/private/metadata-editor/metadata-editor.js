@@ -1,6 +1,8 @@
 (function() {
   "use strict";
 
+  var attachmentsService = lupapisteApp.services.attachmentsService;
+
   var constructEditableMetadata = function(actualMetadata, schema) {
     var newMap = {};
     _.forEach(schema, function (v) {
@@ -123,11 +125,14 @@
     return uneditableFields;
   };
 
-  var model = function(params) {
+  function MetadataEditorModel(params) {
     var self = this;
-    self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
-    self.applicationId = params.application.id;
-    self.metadata = params.metadata;
+
+    ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
+    self.attachmentId = ko.unwrap(params.attachmentId);
+    self.applicationId = ko.unwrap(params.application.id);
+    self.metadata = ko.isObservable(params.metadata) ? params.metadata : ko.observable(params.metadata);
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable();
     self.schema = ko.observableArray();
@@ -135,15 +140,23 @@
     self.disabledFields = ko.observableArray();
     var uneditableFields;
 
+    var authModel = attachmentsService.authModels()[self.attachmentId] || lupapisteApp.models.applicationAuthModel;
     var orgAuthz = ko.unwrap(lupapisteApp.models.currentUser.orgAuthz);
     var organization = ko.unwrap(params.application.organization);
     var roles = orgAuthz && organization ? ko.unwrap(orgAuthz[organization]) : [];
 
-    self.invalidFields = ko.pureComputed(function () {
+    var saveCommand = "store-tos-metadata-for-application";
+    if (params.caseFile) {
+      saveCommand = "store-tos-metadata-for-process";
+    } else if (self.attachmentId) {
+      saveCommand = "store-tos-metadata-for-attachment";
+    }
+
+    self.invalidFields = self.disposedPureComputed(function () {
       return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
     });
 
-    self.metadata.subscribe(function(newValue) {
+    self.disposedSubscribe(self.metadata, function(newValue) {
       // If metadata changes outside this component, we update the new values to the local copy
       if (!_.isEmpty(self.schema()) && !_.isEmpty(newValue)) {
         var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema(), roles);
@@ -170,22 +183,15 @@
       self.editable(false);
     };
 
-    self.modificationAllowed = ko.pureComputed(function() {
-      return !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
+    self.modificationAllowed = self.disposedPureComputed(function() {
+      return authModel.ok(saveCommand) && !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
     });
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap, uneditableFields);
-      var command;
-      if (params.caseFile) {
-        command = "store-tos-metadata-for-process";
-      } else if (self.attachmentId()) {
-        command = "store-tos-metadata-for-attachment";
-      } else {
-        command = "store-tos-metadata-for-application";
-      }
-      ajax.command(command)
-        .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
+
+      ajax.command(saveCommand)
+        .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
         .success(function(data) {
           self.metadata(ko.mapping.fromJS(data.metadata));
           self.editedMetadata(constructEditableMetadata(data.metadata, self.schema(), roles));
@@ -193,16 +199,17 @@
           if (util.getIn(data, ["metadata", "sailytysaika", "arkistointi"]) && ko.unwrap(data.metadata.sailytysaika.arkistointi) === "ikuisesti") {
             self.disabledFields.push("sailytysaika");
           }
-          if (_.isFunction(params.saveCallback)) {
-            params.saveCallback();
+          if (self.attachmentId) {
+            attachmentsService.queryOne(self.attachmentId);
           }
+
         })
         .call();
     };
-  };
+  }
 
   ko.components.register("metadata-editor", {
-    viewModel: model,
+    viewModel: MetadataEditorModel,
     template: {element: "metadata-editor-template"}
   });
 

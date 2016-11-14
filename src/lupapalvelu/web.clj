@@ -14,7 +14,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
-            [monger.operators :refer [$set]]
+            [monger.operators :refer [$set $push]]
             [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
             [sade.http :as http]
@@ -23,15 +23,18 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
+            [sade.xml :as xml]
+            [sade.common-reader :refer [strip-xml-namespaces]]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.application-search-api]
             [lupapalvelu.autologin :as autologin]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
-            [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
-            [lupapalvelu.user :as user]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.type :as att-type]
@@ -49,8 +52,13 @@
             [lupapalvelu.neighbors-api]
             [lupapalvelu.idf.idf-api :as idf-api]
             [net.cgrand.enlive-html :as enlive]
-            [lupapalvelu.calendars-api :as calendars])
-  (:import (java.io OutputStreamWriter BufferedWriter)))
+            [lupapalvelu.calendars-api :as calendars]
+            [lupapalvelu.ident.suomifi]
+            [lupapalvelu.ident.dummy]
+            [lupapalvelu.ya-extension :as yax]
+            [lupapalvelu.reports.reports-api])
+  (:import (java.io OutputStreamWriter BufferedWriter)
+           (java.nio.charset StandardCharsets)))
 
 ;;
 ;; Helpers
@@ -109,10 +117,10 @@
    :host       (host request)})
 
 (defn- logged-in? [request]
-  (not (nil? (:id (user/current-user request)))))
+  (not (nil? (:id (usr/current-user request)))))
 
 (defn- in-role? [role request]
-  (= role (keyword (:role (user/current-user request)))))
+  (= role (keyword (:role (usr/current-user request)))))
 
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
@@ -144,7 +152,7 @@
 ;;
 
 (defn enriched [m request]
-  (merge m {:user (user/current-user request)
+  (merge m {:user (usr/current-user request)
             :lang *lang*
             :session (:session request)
             :web  (web-stuff request)}))
@@ -308,11 +316,11 @@
   (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
 
 (defn- landing-page
-  ([]     (landing-page default-lang (user/current-user (request/ring-request))))
-  ([lang] (landing-page lang         (user/current-user (request/ring-request))) )
+  ([]     (landing-page default-lang (usr/current-user (request/ring-request))))
+  ([lang] (landing-page lang         (usr/current-user (request/ring-request))) )
   ([lang user]
    (let [lang (get user :language lang)]
-     (if-let [application-page (and (:id user) (user/applicationpage-for (:role user)))]
+     (if-let [application-page (and (:id user) (usr/applicationpage-for (:role user)))]
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
@@ -354,17 +362,17 @@
 ;;
 
 (defn- user-to-application-page [user lang]
-  (ssess/merge-to-session (request/ring-request) (landing-page lang user) {:user (user/session-summary user)}))
+  (ssess/merge-to-session (request/ring-request) (landing-page lang user) {:user (usr/session-summary user)}))
 
 (defn- logout! []
   (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
   {:session nil})
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (let [session-user (user/current-user (request/ring-request))]
+  (let [session-user (usr/current-user (request/ring-request))]
     (if (:impersonating session-user)
       ; Just stop impersonating
-      (user-to-application-page (user/get-user {:id (:id session-user), :enabled true}) lang)
+      (user-to-application-page (usr/get-user {:id (:id session-user), :enabled true}) lang)
       ; Actually kill the session
       (merge (logout!) (redirect-after-logout lang)))))
 
@@ -414,22 +422,16 @@
 ;; Apikey-authentication
 ;;
 
-(defn- parse [required-key header-value]
-  (when (and required-key header-value)
-    (if-let [[_ k v] (re-find #"(\w+)\s*[ :=]\s*(\w+)" header-value)]
-      (if (= k required-key) v))))
-
 (defn- get-apikey [request]
-  (let [authorization (get-in request [:headers "authorization"])]
-    (parse "apikey" authorization)))
+  (http/parse-bearer request))
 
 (defn- authentication [handler request]
   (let [api-key (get-apikey request)
-        api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+        api-key-auth (when-not (ss/blank? api-key) (usr/get-user-with-apikey api-key))
         session-user (get-in request [:session :user])
         expires (:expires session-user)
-        expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
-        updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
+        expired? (and expires (not (usr/virtual-user? session-user)) (< expires (now)))
+        updated-user (and expired? (usr/session-summary (usr/get-user {:id (:id session-user), :enabled true})))
         user (or api-key-auth updated-user session-user (autologin/autologin request) )]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
@@ -503,7 +505,7 @@
 (defjson "/api/alive" []
   (cond
     (control/lockdown?) (fail :error.service-lockdown)
-    (user/current-user (request/ring-request)) (ok)
+    (usr/current-user (request/ring-request)) (ok)
     :else (fail :error.unauthorized)))
 
 ;;
@@ -540,7 +542,7 @@
 (defn- csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
-     :userId        (:id (user/current-user request) "???")}
+     :userId        (:id (usr/current-user request) "???")}
     (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
@@ -663,20 +665,27 @@
         (resp/status 200 (str response))
         (resp/json response))))
 
-  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect] :as query-params}
+  (defpage "/dev/create" {:keys [infoRequest propertyId message redirect state] :as query-params}
     (let [request (request/ring-request)
           property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
-          response (execute-command "create-application" params request)]
+          {application-id :id :as response} (execute-command "create-application" params request)
+          user (usr/current-user request)]
       (if (core/ok? response)
-        (do
-          (when-let [opt-data (not-empty (select-keys query-params [:state]))]
-            (do
-              (mongo/update-by-id :applications (:id response) {$set opt-data})))
+        (let [command (-> (domain/get-application-no-access-checking application-id)
+                          action/application->command
+                          (assoc :user user, :created (now)))]
+          (cond
+            (= state "submitted")
+            (application/do-submit command)
+
+            (and (ss/not-blank? state) (not= state (get-in command [:application :state])))
+            (action/update-application command {$set {:state state}, $push {:history (app/history-entry state (:created command) user)}}))
+
           (if redirect
-            (resp/redirect (str "/app/fi/" (str (user/applicationpage-for (:role (user/current-user request)))
-                                                "#!/" (if infoRequest "inforequest" "application") "/" (:id response))))
-            (resp/status 200 (:id response))))
+            (resp/redirect (str "/app/fi/" (str (usr/applicationpage-for (:role user))
+                                                "#!/" (if infoRequest "inforequest" "application") "/" application-id)))
+            (resp/status 200 application-id)))
         (resp/status 400 (str response)))))
 
   (defn- create-app-and-publish-bulletin []
@@ -766,4 +775,51 @@
                                             {:name "Two" :expired true :expirydate "\\/Date(1467710527123)\\/"
                                              :downloaded "\\/Date(1467364927456)\\/"}
                                             {:name "Three" :expired false :expirydate nil :downloaded nil}]}))))
-  )
+
+  ;; Development (mockup) functionality of 3D map server, both backend and frontend
+  ;; Username / password: 3dmap / 3dmap
+  (defonce lupapisteKeys (atom {}))
+
+  (defpage [:post "/dev/3dmap"] []
+    (let [req-map (request/ring-request)
+          [username password] (http/decode-basic-auth req-map)]
+      (if (= username password "3dmap")
+        (let [keyId (mongo/create-id)]
+          (swap! lupapisteKeys assoc keyId (select-keys (:params req-map) [:applicationId :apikey]))
+          (resp/redirect (str "/dev/show-3dmap?lupapisteKey=" keyId) :see-other))
+        (resp/status 401 "Unauthorized"))))
+
+  (defpage [:get "/dev/show-3dmap"] {:keys [lupapisteKey]}
+    (let [{:keys [applicationId apikey]} (get @lupapisteKeys lupapisteKey)
+          banner " $$$$$$\\  $$$$$$$\\        $$\\      $$\\  $$$$$$\\  $$$$$$$\\        $$\\    $$\\ $$$$$$\\ $$$$$$$$\\ $$\\      $$\\ \n$$ ___$$\\ $$  __$$\\       $$$\\    $$$ |$$  __$$\\ $$  __$$\\       $$ |   $$ |\\_$$  _|$$  _____|$$ | $\\  $$ |\n\\_/   $$ |$$ |  $$ |      $$$$\\  $$$$ |$$ /  $$ |$$ |  $$ |      $$ |   $$ |  $$ |  $$ |      $$ |$$$\\ $$ |\n  $$$$$ / $$ |  $$ |      $$\\$$\\$$ $$ |$$$$$$$$ |$$$$$$$  |      \\$$\\  $$  |  $$ |  $$$$$\\    $$ $$ $$\\$$ |\n  \\___$$\\ $$ |  $$ |      $$ \\$$$  $$ |$$  __$$ |$$  ____/        \\$$\\$$  /   $$ |  $$  __|   $$$$  _$$$$ |\n$$\\   $$ |$$ |  $$ |      $$ |\\$  /$$ |$$ |  $$ |$$ |              \\$$$  /    $$ |  $$ |      $$$  / \\$$$ |\n\\$$$$$$  |$$$$$$$  |      $$ | \\_/ $$ |$$ |  $$ |$$ |               \\$  /   $$$$$$\\ $$$$$$$$\\ $$  /   \\$$ |\n \\______/ \\_______/       \\__|     \\__|\\__|  \\__|\\__|                \\_/    \\______|\\________|\\__/     \\__|\n"
+          address ((mongo/select-one :applications {:_id applicationId}) :address)
+          {:keys [firstName lastName]} (usr/get-user-with-apikey apikey)]
+      (hiccup.core/html [:html
+                         [:head [:title "3D Map View"]]
+                         [:body {:style "background-color: #008b00; color: white; padding: 4em"} [:pre banner]
+                          [:ul
+                           [:li (format "Application ID: %s (%s)" applicationId address)]
+                           [:li (format "User: %s %s" firstName lastName)]]]])))
+
+  ;; Reads and processes jatkoaika-ya.xml
+  ;; Since the the xml is static, this is useful only in robots.
+  (defpage "/dev/mock-ya-extension" []
+    (-> "krysp/dev/jatkoaika-ya.xml"
+        io/resource
+        slurp
+        xml/parse
+        strip-xml-namespaces
+        yax/update-application-extensions)
+    (resp/status 200 "YA extension KRYSP processed."))
+
+  (defpage [:get "/dev/filecho/:filename"] {filename :filename}
+    (->> filename
+         (format "This is file %s\n")
+         (resp/content-type "text/plain; charset=utf-8")
+         (resp/set-headers (assoc http/no-cache-headers
+                                  "Content-Disposition" (String. (.getBytes (format "attachment; filename=\"%s\""
+                                                                                    filename)
+                                                                            StandardCharsets/UTF_8)
+                                                                 StandardCharsets/ISO_8859_1)
+                                  "Server" "Microsoft-IIS/7.5"))
+         (resp/status 200))))

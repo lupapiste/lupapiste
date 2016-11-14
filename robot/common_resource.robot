@@ -25,6 +25,7 @@ ${CREATE URL}                   ${SERVER}/dev/create?redirect=true
 ${CREATE BULLETIN URL}          ${SERVER}/dev/publish-bulletin-quickly
 ${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
 ${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
+${FRONTEND LOG URL}             ${SERVER}/api/frontend-log
 ${SELENIUM}                     ${EMPTY}
 ${DB COOKIE}                    test_db_name
 ${DB PREFIX}                    test_
@@ -268,11 +269,12 @@ Applicant logs in
   Applications page should be open
 
 Authority logs in
-  [Arguments]  ${login}  ${password}  ${username}
+  [Arguments]  ${login}  ${password}  ${username}  ${showAll}=True
   User logs in  ${login}  ${password}  ${username}
   User nav menu is visible
   User role should be  authority
   Authority applications page should be open
+  Run Keyword If  ${showAll}  Show all applications
 
 Authority-admin logs in
   [Arguments]  ${login}  ${password}  ${username}
@@ -306,7 +308,12 @@ As ${name}
   Run Keyword  ${name} logs in
 
 Olli logs in
-  Authority logs in  olli  olli  Olli Ule\u00e5borg
+  [Arguments]  ${showAll}=True
+  Authority logs in  olli  olli  Olli Ule\u00e5borg  ${showAll}
+
+Olli-ya logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  olli-ya  olli  Olli-ya Ule\u00e5borg  ${showAll}
 
 Mikko logs in
   Applicant logs in  mikko@example.com  mikko123  Mikko Intonen
@@ -318,28 +325,42 @@ Sven logs in
   Applicant logs in  sven@example.com  sven  Sven Svensson
 
 Arto logs in
-  Authority logs in  arto  arto  Arto Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  arto  arto  Arto Viranomainen  ${showAll}
 
 Veikko logs in
-  Authority logs in  veikko  veikko  Veikko Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  veikko  veikko  Veikko Viranomainen  ${showAll}
 
 Luukas logs in
-  Authority logs in  luukas  luukas  Luukas Lukija
+  [Arguments]  ${showAll}=True
+  Authority logs in  luukas  luukas  Luukas Lukija  ${showAll}
 
 Velho logs in
-  Authority logs in  velho  velho  Velho Viranomainen
+  [Arguments]  ${showAll}=True
+  Authority logs in  velho  velho  Velho Viranomainen  ${showAll}
+
+Hannu logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  rakennustarkastaja@hel.fi  helsinki  Hannu Helsinki  ${showAll}
 
 Sonja logs in
-  Authority logs in  sonja  sonja  Sonja Sibbo
+  [Arguments]  ${showAll}=True
+  Authority logs in  sonja  sonja  Sonja Sibbo  ${showAll}
 
 Ronja logs in
-  Authority logs in  ronja  sonja  Ronja Sibbo
+  [Arguments]  ${showAll}=True
+  Authority logs in  ronja  sonja  Ronja Sibbo  ${showAll}
 
 Pekka logs in
-  Authority logs in  pekka  pekka  Pekka Borga
+  [Arguments]  ${showAll}=True
+  Authority logs in  pekka  pekka  Pekka Borga  ${showAll}
 
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
+
+Sipoo-ya logs in
+  Authority-admin logs in  sipoo-ya  sipoo  Simo YA-Suurvisiiri
 
 Oulu Ymp logs in
   Authority-admin logs in  ymp-admin@oulu.fi  oulu  Oulu Ymp Admin
@@ -358,7 +379,12 @@ SolitaAdmin logs in
   Wait until  Element should be visible  admin
 
 Jarvenpaa authority logs in
-  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
+  [Arguments]  ${showAll}=True
+  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää  ${showAll}
+
+Jussi logs in
+  [Arguments]  ${showAll}=True
+  Authority logs in  jussi  jussi  Jussi Viranomainen  ${showAll}
 
 
 #
@@ -377,6 +403,11 @@ Input text with jQuery
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
+
+Select From List by test id and index
+  [Arguments]  ${id}  ${index}
+  Wait until page contains element  xpath=//select[@data-test-id="${id}"]
+  Select From List By Index  xpath=//select[@data-test-id="${id}"]  ${index}
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -404,6 +435,10 @@ Select From Autocomplete
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
   Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+
+Autocomplete selection is
+  [Arguments]  ${container}  ${value}
+  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
@@ -438,13 +473,6 @@ Click by test id
   Wait For Condition  return ${selector}.length===1;  10
   Execute Javascript  ${selector}[0].click();
 
-Click enabled by test id
-  [Arguments]  ${id}
-  ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait Until  Element Should Be Visible  ${path}
-  Wait Until  Element Should Be Enabled  ${path}
-  Click by test id  ${id}
-
 Element should be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Be Visible  xpath=//*[@data-test-id="${id}"]
@@ -452,6 +480,12 @@ Element should be visible by test id
 Element should not be visible by test id
   [Arguments]  ${id}
   Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id="${id}"]
+
+Click enabled by test id
+  [Arguments]  ${id}
+  Element should be visible by test id  ${id}
+  Wait Until  Element Should Be Enabled  xpath=//*[@data-test-id='${id}']
+  Click by test id  ${id}
 
 # Workaround for HTML5 inputs
 Value should be
@@ -636,6 +670,7 @@ Add attachment
   Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
+  Run Keyword If  '${kind}' == 'statement'  Click enabled by test id  add-statement-attachment
 
   Wait until  Element should be visible  upload-dialog
 
@@ -680,8 +715,8 @@ Open attachment details
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Click not needed
-  [Arguments]  ${type}  ${nth}=1
-  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}']:nth-child(${nth}) label[data-test-id=not-needed-label]
+  [Arguments]  ${type}
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] label[data-test-id=not-needed-label]
   Wait until  Element should be visible  jquery=${selector}
   Scroll to  ${selector}
   Click element  jquery=${selector}
@@ -703,7 +738,7 @@ Assert file latest version
 
 Attachment file upload
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
+  Wait Until     Element should be visible  uploadFrame
   Select Frame   uploadFrame
   Wait until     Element should be visible  test-save-new-attachment
   Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
@@ -730,7 +765,7 @@ Add attachment file
   Wait Until     Element should be visible  jquery=${row}
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
-  
+
 
 Open attachments tab and unselect post verdict filter
   Open tab  attachments
@@ -750,6 +785,11 @@ Select operations path R
   Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
   Click tree item by text  "Uuden rakennuksen rakentaminen"
   Click tree item by text  "Asuinkerrostalon tai rivitalon rakentaminen"
+
+Select operations path R in Swedish
+  Click tree item by text  "Byggande, rivning eller åtgärd som inverkar på landskapet"
+  Click tree item by text  "Byggande av ny byggnad"
+  Click tree item by text  "Byggande av flervåningshus eller radhus"
 
 Select operations path YA kayttolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
@@ -914,6 +954,20 @@ Request should not be visible
   [Arguments]  ${address}
   Wait Until  Element should not be visible  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']
 
+Active search tab is
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  jquery=li.active[data-test-id=search-tab-${tab}]
+
+Open search tab
+  [Arguments]  ${tab}
+  Wait until  Element should be visible  xpath=//section[@id='applications']//li[@data-test-id='search-tab-${tab}']
+  Click by test id  search-tab-${tab}
+
+Show all applications
+  ${tab}=  Run Keyword and Return Status  Wait test id visible  search-tab-all
+  Run Keyword If  ${tab}  Scroll and click test id  search-tab-all
+
+
 #
 # Comments:
 #
@@ -1016,17 +1070,6 @@ Invite count is
 #
 # Authority admin
 #
-
-Create statement person
-  [Arguments]  ${email}  ${text}
-  Scroll to test id  create-statement-giver
-  Click enabled by test id  create-statement-giver
-  Wait until  Element should be visible  //label[@for='statement-giver-email']
-  Input text  statement-giver-email  ${email}
-  Input text  statement-giver-email2  ${email}
-  Input text  statement-giver-text  ${text}
-  Click enabled by test id  create-statement-giver-save
-
 
 Invite company to application
   [Arguments]  ${company}
@@ -1165,9 +1208,9 @@ Input verdict
   Execute JavaScript  $("#verdict-name").change();
 
 Submit empty verdict
-  [Arguments]  ${targetState}=verdictGiven
+  [Arguments]  ${targetState}=verdictGiven  ${targetStatus}=6
   Go to give new verdict
-  Input verdict  -  6  01.05.2018  01.06.2018  -
+  Input verdict  -  ${targetStatus}  01.05.2018  01.06.2018  -
   Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait for jQuery
@@ -1356,6 +1399,11 @@ Javascript?
   [Arguments]  ${expression}
   Wait Until  Javascript? helper  ${expression}
 
+# Alternative to Wait Test Id Visible. Does not scroll
+Test id visible
+  [Arguments]  ${id}
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
@@ -1389,17 +1437,81 @@ Test id select is
   [Arguments]  ${id}  ${value}
   List selection should be  jquery=select[data-test-id=${id}]  ${value}
 
+jQuery should match X times
+  [Arguments]  ${selector}  ${count}
+  Wait until  Javascript?  $("${selector}").length === ${count}
+
 
 # Frontend error log
 
+Print frontend error texts
+  [Arguments]  ${ROW_XPATH}  ${ERROR_LEVEL}
+  # Print 10 first rows if there are errors
+  :FOR  ${elem_idx}  IN RANGE  1  10
+  \  ${ELEM_COUNT}=  Get Matching Xpath Count  ${ROW_XPATH}[${elem_idx}]
+  \  Exit for loop if  ${ELEM_COUNT} == 0
+  \  ${VAL}=  Get Text  ${ROW_XPATH}[${elem_idx}]
+  \  Log To Console  ${ERROR_LEVEL}: ${VAL}
+
+Open frontend log
+  Go to  ${FRONTEND LOG URL}
+  Wait until  Element text should be  xpath=//h1  Frontend log
+
 There are no frontend errors
-  Go to login page
-  SolitaAdmin logs in
-  Wait until  Click element  xpath=//a[@data-test-id='fontend-logs']
-  Wait until  Element should be visible  xpath=//section[@id='logs']
-  # Allow log to load
-  Sleep  1
+  Open frontend log
+  Set test variable  ${FATAL_LOG_XPATH}  //div[@data-test-level='fatal']
+  Set test variable  ${ERROR_LOG_XPATH}  //div[@data-test-level='error']
+  ${FATAL_COUNT}=  Get Matching Xpath Count  ${FATAL_LOG_XPATH}
+  ${ERR_COUNT}=    Get Matching Xpath Count  ${ERROR_LOG_XPATH}
+  Print frontend error texts  ${FATAL_LOG_XPATH}  FATAL
+  Print frontend error texts  ${ERROR_LOG_XPATH}  ERROR
+  Go to  ${LOGIN URL}
+  Logout
+  # These test cases will fail if errors exist
+  Javascript?  ${FATAL_COUNT} === 0
+  Javascript?  ${ERR_COUNT} === 0
+
+#
+# YA
+#
+
+Fill tyoaika fields
+  [Arguments]  ${startDate}=01.05.2014  ${endDate}=02.05.2014
+  Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-pvm')]
+  Execute Javascript  $("input[id*='tyoaika-alkaa-pvm']").val("${startDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-pvm')]  ${startDate}
+
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
+  Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
+
+Fill in yritys info
+  [Arguments]  ${dataDocType}
+  ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
+  ${docSectionPath} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='${dataDocType}']
+  ${docjQuery}=  Set Variable  \#application-parties-tab section[data-doc-type="${dataDocType}"]
+  Element should be visible  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']
+
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.henkilotiedot.etunimi"]  John
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.henkilotiedot.sukunimi"]  Rambo
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yhteyshenkilo.yhteystiedot.puhelin"]  0401234567
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.yritysnimi"]  Rambol Oy
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.liikeJaYhteisoTunnus"]  1234567-1
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.katu"]  Katu
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.postinumero"]  98765
+  Input text with jQuery  ${docjQuery} input[data-docgen-path="yritys.osoite.postitoimipaikannimi"]  Sipoo
+  Focus  ${docSectionPath}
+  Wait until  Textfield Value Should Be  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']  Rambo
   Wait for jQuery
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='fatal-log']//tbody/tr  0
-  Xpath Should Match X Times  //section[@id='logs']//table[@data-test-id='error-log']//tbody/tr  0
-  [Teardown]  Logout
+
+
+Fill required fields for the parties
+  Wait until  Element should be visible  //section[@id='application']//div[@id='application-parties-tab']
+  Execute Javascript  $("input[value='yritys']").click();
+  # Maksaja's default is Henkilo, that is why we have to wait its type has changed to Yritys.
+  Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
+  Fill in yritys info  hakija-ya
+  Fill in yritys info  yleiset-alueet-maksaja

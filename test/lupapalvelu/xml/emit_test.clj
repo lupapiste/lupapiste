@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.emit-test
-  (:use lupapalvelu.xml.emit
-        midje.sweet
-        clojure.data.xml))
+  (:require [clojure.data.xml :as xml]
+            [midje.sweet :refer :all]
+            [lupapalvelu.xml.emit :refer :all]))
 
 (def simple-data {:test "Test"})
 (def simple-model  {:tag :test :ns "ns"})
@@ -57,12 +57,9 @@
 </main>
 ")
 
-(def result-with-childs (emit-str (parse-str result-with-childs-str)))
+(def result-with-childs (xml/emit-str (xml/parse-str result-with-childs-str)))
 
-(facts
-  (fact  (element-to-xml simple-data simple-model) => simple-result)
-  (fact "data-with-childs, sring comparison"
-    (emit-str (element-to-xml data-with-childs model-with-childs)) => result-with-childs)
-  )
+(fact  (element-to-xml simple-data simple-model) => simple-result)
 
-;(println (indent-str (element-to-xml data-with-childs model-with-childs)))
+(fact "data-with-childs, sring comparison"
+  (xml/emit-str (element-to-xml data-with-childs model-with-childs)) => result-with-childs)
