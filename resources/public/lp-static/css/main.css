@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1479140571578');
+@import url('main-blessed1.css?z=1479141269200');
 
 /* line 1043, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7 .col--vertical label {
@@ -2411,6 +2411,10 @@ th.full-width-column {
 /* line 391, ../../../private/common-html/sass/partials/_tables.scss */
 .form-table.form-table--waste .form-input, .form-table.form-table--waste .form-input--inline {
   height: initial;
+}
+/* line 394, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste th {
+  white-space: nowrap;
 }
 
 /*Tab styles*/
