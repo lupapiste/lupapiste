@@ -391,4 +391,7 @@ th.full-width-column {
   .form-input {
     height: initial;
   }
+  th {
+    white-space: nowrap;
+  }
 }

@@ -416,11 +416,17 @@ input.form-input.inline {
 .form-input-and-unit {
   display: block;
   margin-right: $marginM;
+  white-space: nowrap;
+  input {
+    width: initial !important;
+  }
 }
+
 .form-input-and-unit .form-input {
   display: inline-block;
   margin-right: $marginM;
 }
+
 .form-string-unit {
 }
 
@@ -1040,30 +1046,6 @@ $max-columns: 12;
   }
 }
 
-
-
-@mixin input-fields() {
-  padding: 0 $marginM;
-  box-sizing: border-box;
-  min-height: $grid-input-height;
-  height: $grid-input-height;
-  font-size: $grid-font-size;
-  color: $input-color;
-  border: 1px solid $input-border-color;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-  -moz-appearance:none;
-
-  &:focus {
-    color: $input-focus-color;
-    border-color: $input-focus-border-color;
-  }
-  &:disabled {
-    border-color: $input-disabled-border-color;
-    background-color: $input-disabled-background-color;
-  }
-}
-
 .form-grid {
   // overflow-y: hidden;
   width: 100%;
@@ -1558,4 +1540,20 @@ div.review-done {
   .form-input {
     margin-bottom: 0;
   }
+}
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: $btn-height;
+  line-height: $btn-height;
+}
+
+.calculation-error {
+  color: $red-darkest;
+  line-height: $btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
 }

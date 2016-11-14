@@ -258,7 +258,8 @@
                    :show-when {:path "aines" :values #{"muu"}}}]}
           {:name "hyodynnetaan" :type :string :subtype :number}
           {:name "poisajettavia" :type :string :subtype :number}
-          {:name "yhteensa" :type :string :subtype :number}
+          {:name "yhteensa" :type :calculation
+           :columns ["hyodynnetaan" "poisajettavia"]}
           {:name "sijoituspaikka" :type :string}]})
 
 (def kaivettava-maa {:name "kaivettavaMaa"
@@ -279,7 +280,8 @@
                               :body [(ainekset-table ["betoni" "asfalttijate" "betoniAsfalttiMaaAines" "stabiloituSavi" "kevytsoraVaahtolasimurske" "maatuhka"])
                                      {:name "kaivettavienMassojenSelvitys"
                                       :type :group
-                                      :body [{:name "selvitystapa" :type :select :body (map #(hash-map :name %) ["koekuopilla" "vanhoistaSuunnitelmista" "eiSelvitetty" "muu"])}
+                                      :body [{:name "selvitystapa" :type :select :css [:form-input :dropdown]
+                                              :body (map #(hash-map :name %) ["koekuopilla" "vanhoistaSuunnitelmista" "eiSelvitetty" "muu"])}
                                              {:name "muuSelvitystapa" :show-when {:path "selvitystapa" :values #{"muu"}} :type :string}]}]})
 
 (def orgaaninen-aines {:name "orgaaninenAines"
@@ -298,7 +300,8 @@
                          ["vieraslajit"]
                          ["selvitysVieraslajeista::4"]]
                   :template "form-grid-docgen-group-template"
-                  :body [{:name "vieraslajit" :type :select :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
+                  :body [{:name "vieraslajit" :type :select :css [:dropdown] :label false
+                          :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
 (def laajennettu-rakennusjateselvitys [toteutus

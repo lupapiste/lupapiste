@@ -1,6 +1,28 @@
 // Support for miscellaneous inputs and other stuff.
 // See also _forms.scss.
 
+@mixin input-fields() {
+  padding: 0 $marginM;
+  box-sizing: border-box;
+  min-height: $grid-input-height;
+  height: $grid-input-height;
+  font-size: $grid-font-size;
+  color: $input-color;
+  border: 1px solid $input-border-color;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance:none;
+
+  &:focus {
+    color: $input-focus-color;
+    border-color: $input-focus-border-color;
+  }
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background-color: $input-disabled-background-color;
+  }
+}
+
 @mixin hide-radio-check-input ($display: inherit) {
   input[type=checkbox], input[type=radio] {
     display: $display;
@@ -178,4 +200,36 @@ input[type=text].textinput {
   @include btn-height;
   line-height: 1;
   font-size: $font-size;
+}
+
+input.dateinput {
+  @include input-fields;
+  background-image: url("/lp-static/img/calendar-orange-dark.png");
+  background-position: right 4px center;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+  &:focus {
+    //border-color: $input-focus-border-color;
+    background-image: url("/lp-static/img/calendar-orange-light.png");
+  }
+  &:disabled {
+    //border-color: $input-disabled-border-color;
+    background-image: url("/lp-static/img/calendar-gray187.png");
+    color: $input-select-disabled-icon
+  }
+}
+
+.form-grid input.tip.dateinput,
+input.tip.dateinput {
+  background-image: url("/lp-static/img/calendar-orange.png");
+  border-color: $orange-dark;
+  &:focus {
+    border-color: $input-focus-border-color;
+    background-image: url("/lp-static/img/calendar-orange-light.png");
+  }
+  &:disabled {
+    border-color: $input-disabled-border-color;
+    background-image: url("/lp-static/img/calendar-gray187.png");
+    color: $input-select-disabled-icon
+  }
 }
