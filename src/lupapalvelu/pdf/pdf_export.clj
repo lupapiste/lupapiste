@@ -70,7 +70,7 @@
 
 (defn- table? [schema] (= (:type schema) :table))
 
-(defmulti filter-fields-by-group-subtype (fn [group-schema _ _]
+(defmulti filter-fields-by-group-subtype (fn [_ group-schema _]
                                            (:subtype group-schema)))
 
 (defmethod filter-fields-by-group-subtype :default [_ _ fields] fields)
