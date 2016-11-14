@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1479130172148');
+@import url('main-blessed1.css?z=1479140571578');
 
 /* line 1043, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7 .col--vertical label {
@@ -1077,6 +1077,24 @@ div.review-done {
 }
 /* line 1540, ../../../private/common-html/sass/partials/_forms.scss */
 .col-fixed .inline .form-input, .col-fixed .inline .form-input--inline {
+  margin-bottom: 0;
+}
+
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+/* line 1553, ../../../private/common-html/sass/partials/_forms.scss */
+.calculation-error {
+  color: #db2111;
+  line-height: 40px;
+  text-align: center;
+  display: inherit;
   margin-bottom: 0;
 }
 

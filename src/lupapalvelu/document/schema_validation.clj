@@ -229,25 +229,31 @@
 
 (declare Group)
 
+(defschema Calculation
+  "Calculated column for Table."
+  {:name    sc/Str
+   :type    (sc/eq :calculation)
+   :columns [sc/Str]})
+
 (defschema Table
   "Table element. Represented as html table. Not recursive group type."
-  {:name                       sc/Str       ;;
+  {:name                       sc/Str     ;;
    :type                       (sc/eq :table)
-   ;; TODO: each body item could be either Input or Group, but the
-   ;; most obvious definitions do not compile.
-   :body                       [(sc/if (type-pred :group) (sc/recursive #'Group) Input)]      ;;
-   (opt :i18nkey)              sc/Str       ;; Absolute localization key
-   (opt :group-help)           sc/Str       ;;
-   (opt :uicomponent)          sc/Keyword   ;; Component name for special components
-   (opt :approvable)           sc/Bool      ;;
-   (opt :repeating)            sc/Bool      ;; Should be  always repeating -> default true
-   (opt :repeating-init-empty) sc/Bool      ;;
-   (opt :copybutton)           sc/Bool      ;;
+   :body                       [(sc/conditional (type-pred :group)       (sc/recursive #'Group)
+                                                (type-pred :calculation) Calculation
+                                                :else                    Input)]
+   (opt :i18nkey)              sc/Str     ;; Absolute localization key
+   (opt :group-help)           sc/Str     ;;
+   (opt :uicomponent)          sc/Keyword ;; Component name for special components
+   (opt :approvable)           sc/Bool    ;;
+   (opt :repeating)            sc/Bool    ;; Should be  always repeating -> default true
+   (opt :repeating-init-empty) sc/Bool    ;;
+   (opt :copybutton)           sc/Bool    ;;
    (opt :validator)            sc/Keyword
    (opt :css)                  [sc/Keyword]
-   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+   (opt :hide-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
-   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
+   (opt :show-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}})
 
 (defschema Group
@@ -290,6 +296,7 @@
   "Any doc element."
   (sc/conditional (type-pred :table) Table
                   (type-pred :group) Group
+                  (type-pred :calculation) Calculation
                   :else              Input))
 
 (defschema Doc

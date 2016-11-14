@@ -1541,3 +1541,19 @@ div.review-done {
     margin-bottom: 0;
   }
 }
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: $btn-height;
+  line-height: $btn-height;
+}
+
+.calculation-error {
+  color: $red-darkest;
+  line-height: $btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
+}

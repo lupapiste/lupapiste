@@ -258,7 +258,8 @@
                    :show-when {:path "aines" :values #{"muu"}}}]}
           {:name "hyodynnetaan" :type :string :subtype :number}
           {:name "poisajettavia" :type :string :subtype :number}
-          {:name "yhteensa" :type :string :subtype :number}
+          {:name "yhteensa" :type :calculation
+           :columns ["hyodynnetaan" "poisajettavia"]}
           {:name "sijoituspaikka" :type :string}]})
 
 (def kaivettava-maa {:name "kaivettavaMaa"
