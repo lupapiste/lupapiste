@@ -42,7 +42,7 @@
 
 (def update-doc-states (union #{:draft :open :submitted :complementNeeded} document-post-verdict-states))
 
-(def approve-doc-states #{:open :submitted :complementNeeded})
+(def approve-doc-states (union #{:open :submitted :complementNeeded} document-post-verdict-states))
 
 (defn validate-is-construction-time-doc
   [{{doc-id :doc} :data app :application}]
@@ -221,6 +221,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
+   :pre-checks [(partial validate-post-verdict-update-doc :doc)]
    :states     approve-doc-states}
   [command]
   (ok :approval (approve command "approved")))

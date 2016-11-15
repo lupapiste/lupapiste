@@ -256,6 +256,12 @@
       (fact "suunnittelija can be updated"
         (command pena :update-doc :id application-id :doc (:doc suunnittelija-resp) :updates [["henkilotiedot.etunimi" "test"]]) => ok?))
 
+    (facts "approve-doc"
+      (fact "can't update applicant doc"
+        (command sonja :approve-doc :id application-id :doc (:id applicant-doc) :path nil :collection "documents") => fail?)
+      (fact "suunnittelija doc approval"
+        (command sonja :approve-doc :id application-id :doc (:doc suunnittelija-resp) :path nil :collection "documents") => ok?))
+
     (facts "remove-doc"
       (fact "can't remove applicant doc"
         (command pena :remove-doc :id application-id :docId (:id applicant-doc))) => fail?
