@@ -14,10 +14,7 @@ LUPAPISTE.DocgenCalculationModel = function( params ) {
 
   self.calculationResult = self.disposedPureComputed( function() {
     return _.sumBy( rowModels, function( model ) {
-      var data = _.trim( model()) || "0";
-      return /^\s*(-?\+?\s*\d+)?\s*$/.test( data )
-        ? parseFloat( data  )
-        : NaN;
+      return util.parseFloat( _.trim( model()) || "0" );
     } );
   });
 

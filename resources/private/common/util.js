@@ -386,6 +386,11 @@ var util = (function($) {
                              .isString( path ) ? _.split( path, ".") : path));
   }
 
+  function strictParseFloat( s ) {
+    s = _.trim( s );
+    return isNum( s ) ? parseFloat( s ) : NaN;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -427,7 +432,8 @@ var util = (function($) {
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
     partyFullName: partyFullName,
-    isEmpty: isEmpty
+    isEmpty: isEmpty,
+    parseFloat: strictParseFloat
   };
 
 })(jQuery);
