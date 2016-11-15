@@ -119,7 +119,7 @@
 "company.user.op.delete.invitation" "fi" "Peruuta kutsu"
 "company.user.op.delete.invitation" "sv" "Upphäv inbjudan"
 "company.user.op.delete.true.message" "en" "<p>Do you want to remove user <b>{0}</b> from company?</p> <p>The username closes in Lupapiste. The user can log in after the password has been reset and see the projects they have created. <br/> If the user's email address has been removed from use in your company, the user will no longer be able to access their account in.</p>"
-"company.user.op.delete.true.message" "fi" "<p>Haluatko poistaa käyttäjän <b>{0}</b> yrityksestä?</p>\n<p>Käyttäjätunnus sulkeutuu Lupapisteessä. Käyttäjä pääsee kirjautumaan sisään salasanan resetoinnin jälkeen, ja näkee edelleen luomansa hankkeet. <br/>Jos käyttäjän sähköpostiosoite on poistettu käytössä yrityksessäsi, käyttäjä ei enää pääse avaamaan tunnustaan.</p>"
+"company.user.op.delete.true.message" "fi" "<p>Haluatko poistaa käyttäjän <b>{0}</b> yrityksestä?</p>\n<p>Käyttäjätunnus sulkeutuu Lupapisteessä. Käyttäjä pääsee kirjautumaan sisään salasanan resetoinnin jälkeen, ja näkee edelleen luomansa hankkeet. <br/>Jos käyttäjän sähköpostiosoite on poistettu käytöstä yrityksessäsi, käyttäjä ei enää pääse avaamaan tunnustaan.</p>"
 "company.user.op.delete.true.message" "sv" "<p>Vill du stryka användare <b>{0}</b> ur företaget?</p>\n<p>Användarnamnet stängs i Lupapiste. Användaren kan logga in efter återställning av lösenordet och ser fortsättningsvis de projekt hen har skapat. <br/>Om ditt företag har tagit användarens e-postadress ur bruk kan användaren inte längre öppna sitt användarnamn.</p>"
 "company.user.op.delete.true.title" "en" "Removing a business user"
 "company.user.op.delete.true.title" "fi" "Yrityskäyttäjän poistaminen"
