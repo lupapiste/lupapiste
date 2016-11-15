@@ -1,6 +1,10 @@
 (ns lupapalvelu.document.waste-schemas
   (:require [lupapalvelu.document.tools :as tools]))
 
+(def basic-construction-waste-plan-name "rakennusjatesuunnitelma")
+(def basic-construction-waste-report-name "rakennusjateselvitys")
+(def extended-construction-waste-report-name "laajennettuRakennusjateselvitys")
+
 (def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
                          {:name "kipsi"}

@@ -1537,17 +1537,17 @@
             :type :checkbox
             :layout :full-width}]}
 
-   {:info {:name "rakennusjatesuunnitelma"
+   {:info {:name waste-schemas/basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"
            :order 200
            :section-help "rakennusjate.help"}
     :body (body waste-schemas/rakennusjatesuunnitelma)}
-   {:info {:name "rakennusjateselvitys"
+   {:info {:name waste-schemas/basic-construction-waste-report-name ; "rakennusjateselvitys"
            :order 201
            :construction-time true
            :section-help "rakennusjate.help"}
     :body (body waste-schemas/rakennusjateselvitys)}
 
-   {:info {:name "laajennettuRakennusjateselvitys"
+   {:info {:name waste-schemas/extended-construction-waste-report-name ; "laajennettuRakennusjateselvitys"
            :order 200
            :section-help "rakennusjate.help"}
     :body (body waste-schemas/laajennettu-rakennusjateselvitys)}

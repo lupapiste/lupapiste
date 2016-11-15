@@ -3,7 +3,8 @@
             [monger.operators :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.persistence :as persistence]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.waste-schemas :as waste-schemas]))
 
 ;;
 ;; Application state change updates
@@ -30,10 +31,10 @@
 
 (defn create-rakennusjateselvitys-from-rakennusjatesuunnitelma
   [{{schema-version :schema-version docs :documents :as application} :application created :created :as command}]
-  (when-let [suunnitelma-doc (domain/get-document-by-name application "rakennusjatesuunnitelma")]
+  (when-let [suunnitelma-doc (domain/get-document-by-name application waste-schemas/basic-construction-waste-plan-name)]
     (let [updates (rakennusjateselvitys-updates suunnitelma-doc)
-          schema  (schemas/get-schema schema-version "rakennusjateselvitys")]
-      (if-let [selvitys-doc (domain/get-document-by-name application "rakennusjateselvitys")]
+          schema  (schemas/get-schema schema-version waste-schemas/basic-construction-waste-report-name)]
+      (if-let [selvitys-doc (domain/get-document-by-name application waste-schemas/basic-construction-waste-report-name)]
         (let [removed-paths (rakennusjateselvitys-removed-paths suunnitelma-doc selvitys-doc)]
           (util/deep-merge
            (persistence/removing-updates-by-path :documents (:id selvitys-doc) removed-paths)

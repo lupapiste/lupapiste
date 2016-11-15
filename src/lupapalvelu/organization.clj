@@ -401,7 +401,7 @@
     {:organization (if (ss/blank? org-id)
                      {$exists true}
                      org-id)
-     :documents {$elemMatch {:schema-info.name "rakennusjateselvitys"
+     :documents {$elemMatch {:schema-info.name waste-schemas/basic-construction-waste-report-name
                              :data.availableMaterials {$exists true }
                              :data.contact {$nin ["" nil]}}}
      :state {$nin ["draft" "open" "canceled"]}}
@@ -410,7 +410,7 @@
      :documents.data.availableMaterials 1})
    ;; 2. Create materials, contact, modified map.
    (map (fn [{docs :documents}]
-          (some #(when (= (-> % :schema-info :name) "rakennusjateselvitys")
+          (some #(when (= (-> % :schema-info :name) waste-schemas/basic-construction-waste-report-name)
                    (let [data (select-keys (:data %) [:contact :availableMaterials])
                          {:keys [contact availableMaterials]} (tools/unwrapped data)]
                      {:contact contact
