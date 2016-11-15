@@ -262,6 +262,9 @@
     {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
+(defn permit-types [{scope :scope :as organization}]
+  (map (comp keyword :permitType) scope))
+
 (defn with-organization [id function]
   (if-let [organization (get-organization id)]
     (function organization)
@@ -387,6 +390,14 @@
 (defn valid-ip-addresses [ips]
   (when-let [error (sc/check [ssc/IpAddress] ips)]
     (fail :error.invalid-ip :desc (str error))))
+
+(defn permit-type-validator
+  "Returns validator for user-organizations permit types"
+  [& valid-permit-types]
+  (fn [{org :user-organizations}]
+    (when (->>  (mapcat permit-types org)
+                (not-any? (set (map keyword valid-permit-types))))
+      (fail :error.invalid-permit-type))))
 
 (defn-
   ^org.geotools.data.simple.SimpleFeatureCollection
