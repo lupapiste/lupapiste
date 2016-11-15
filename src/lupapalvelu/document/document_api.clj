@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
-            [clojure.set :refer [intersection]]
+            [clojure.set :refer [intersection union]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
@@ -40,7 +40,7 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(def update-doc-states #{:draft :open :submitted :complementNeeded :verdictGiven})
+(def update-doc-states (union #{:draft :open :submitted :complementNeeded} document-post-verdict-states))
 
 (def approve-doc-states #{:open :submitted :complementNeeded})
 
@@ -92,7 +92,7 @@
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complementNeeded :verdictGiven}
+   :states     (union #{:draft :answered :open :submitted :complementNeeded} document-post-verdict-states)
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts
                 post-verdict-doc-validator]}
@@ -110,7 +110,7 @@
    :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complementNeeded :verdictGiven}
+   :states     (union #{:draft :answered :open :submitted :complementNeeded} document-post-verdict-states)
    :pre-checks [application/validate-authority-in-drafts
                 validate-user-authz-by-doc-id
                 remove-doc-validator]}

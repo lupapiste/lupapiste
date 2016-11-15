@@ -21,6 +21,8 @@
 ;; Validators
 ;;
 
+(def document-post-verdict-states #{:verdictGiven})
+
 (def valid-post-verdict-subtypes #{:suunnittelija})
 
 (defn- valid-post-verdict-schema? [schema-info]
@@ -62,7 +64,7 @@
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
 (defn- deny-remove-of-non-post-verdict-document [document {state :state}]
-  (and (= (keyword state) :verdictGiven) (not (valid-post-verdict-document? document))))
+  (and (contains? document-post-verdict-states (keyword state)) (not (valid-post-verdict-document? document))))
 
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
@@ -77,13 +79,14 @@
   "Validates documents that can be added in post-verdict state"
   [{{:keys [state schema-version]} :application
     {schema-name :schemaName} :data}]
-  (when (and (= (keyword state) :verdictGiven) (ss/not-blank? schema-name))
+  (when (and (contains? document-post-verdict-states (keyword state))
+             (ss/not-blank? schema-name))
     (let [schema (schemas/get-schema schema-version schema-name)]
       (when-not (valid-post-verdict-schema? (:info schema))
         (fail :error.document.post-verdict-addition)))))
 
 (defn validate-post-verdict-update-doc [key {:keys [application data]}]
-  (when-let [doc (when (and application (= (keyword (:state application)) :verdictGiven))
+  (when-let [doc (when (and application (contains? document-post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
     (when-not (valid-post-verdict-document? doc)
       (fail :error.document.post-verdict-update))))
