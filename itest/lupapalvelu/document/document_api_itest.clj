@@ -235,3 +235,12 @@
               (:op attachment) => nil)
             (fact "attachment groupType is unset"
               (:groupType attachment) => nil)))))))
+
+(facts* "post-verdict create-doc"
+  (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
+        _ (give-verdict sonja application-id) => ok?]
+    (command pena :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? :error.document.post-verdict-addition)
+    (fact "only subtype 'suunnittelija' can be added after verdict"
+      (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?)
+    (fact "can't add another paasuunnittelija"
+      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))

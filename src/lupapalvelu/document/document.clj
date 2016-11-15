@@ -61,6 +61,15 @@
       (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied))))
 
+(defn post-verdict-doc-validator
+  "Validates documents that can be added in post-verdict state"
+  [{{:keys [state schema-version]} :application
+    {schema-name :schemaName} :data}]
+  (when (and (= (keyword state) :verdictGiven) (ss/not-blank? schema-name))
+    (let [schema (schemas/get-schema schema-version schema-name)]
+      (when-not (= :suunnittelija (keyword (get-in schema [:info :subtype])))
+        (fail :error.document.post-verdict-addition)))))
+
 ;;
 ;; KTJ-info updation
 ;;

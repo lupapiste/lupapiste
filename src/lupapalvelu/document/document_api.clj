@@ -92,9 +92,10 @@
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complementNeeded}
+   :states     #{:draft :answered :open :submitted :complementNeeded :verdictGiven}
    :pre-checks [create-doc-validator
-                application/validate-authority-in-drafts]}
+                application/validate-authority-in-drafts
+                post-verdict-doc-validator]}
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka

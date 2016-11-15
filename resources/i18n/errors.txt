@@ -793,3 +793,6 @@
 "error.assignments-not-enabled" "fi" "Tehtävät eivät ole käytössä organisaatiossa"
 "error.assignments-not-enabled" "sv" "Uppgifter-funktionalitet är inte användning av organisationen"
 "error.assignments-not-enabled" "en" "Assignments functionality not in use in the organization"
+"error.document.post-verdict-addition" "fi" "Dokumenttia ei voi lisätä päätöksen jälkeen"
+"error.document.post-verdict-addition" "sv" ""
+"error.document.post-verdict-addition" "en" ""
