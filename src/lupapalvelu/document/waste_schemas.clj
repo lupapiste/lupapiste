@@ -6,6 +6,8 @@
 (def basic-construction-waste-report-name "rakennusjateselvitys")
 (def extended-construction-waste-report-name "laajennettuRakennusjateselvitys")
 
+(def construction-waste-report-schemas #{basic-construction-waste-report-name extended-construction-waste-report-name})
+
 (defn construction-waste-plan-for-organization [{:keys [extended-construction-waste-report-enabled] :as org}]
   (if extended-construction-waste-report-enabled
     extended-construction-waste-report-name

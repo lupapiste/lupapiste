@@ -4,6 +4,7 @@
             [hiccup.core :as hiccup]
             [clj-rss.core :as rss]
             [sade.strings :as ss]
+            [sade.util :refer [fn->>]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapalvelu.i18n :as i18n]
@@ -23,6 +24,25 @@
 
 (def max-number-of-ads 100)
 
+(defn- construction-waste-report? [doc]
+  (-> doc :schema-info :name waste-schemas/construction-waste-report-schemas))
+
+(defn- get-materials-info [{data :data :as doc}]
+  (let [{contact :contact materials :availableMaterials} (-> (select-keys data [:contact :availableMaterials])
+                                                             tools/unwrapped)]
+    {:contact contact
+     ;; Material and amount information are mandatory. If the information
+     ;; is not present, the row is not included.
+     :materials (->> (tools/rows-to-list materials)
+                     (filter (fn->> ((juxt :aines :maara)) (not-any? ss/blank?))))
+     :modified (max-modified data)}))
+
+(defn- valid-materials-info? [{{:keys [name phone email]} :contact
+                               materials                  :materials}]
+  (and (ss/not-blank? name)
+       (or (ss/not-blank? phone) (ss/not-blank? email))
+       (not-empty materials)))
+
 (defmethod waste-ads :default [ org-id & _]
   (->>
    ;; 1. Every application that maybe has available materials.
@@ -31,7 +51,7 @@
     {:organization (if (ss/blank? org-id)
                      {$exists true}
                      org-id)
-     :documents {$elemMatch {:schema-info.name waste-schemas/basic-construction-waste-report-name
+     :documents {$elemMatch {:schema-info.name {$in waste-schemas/construction-waste-report-schemas}
                              :data.availableMaterials {$exists true }
                              :data.contact {$nin ["" nil]}}}
      :state {$nin ["draft" "open" "canceled"]}}
@@ -39,28 +59,10 @@
      :documents.data.contact 1
      :documents.data.availableMaterials 1})
    ;; 2. Create materials, contact, modified map.
-   (map (fn [{docs :documents}]
-          (some #(when (= (-> % :schema-info :name) waste-schemas/basic-construction-waste-report-name)
-                   (let [data (select-keys (:data %) [:contact :availableMaterials])
-                         {:keys [contact availableMaterials]} (tools/unwrapped data)]
-                     {:contact contact
-                      ;; Material and amount information are mandatory. If the information
-                      ;; is not present, the row is not included.
-                      :materials (->> availableMaterials
-                                      tools/rows-to-list
-                                      (filter (fn [m]
-                                                (->> (select-keys m [:aines :maara])
-                                                       vals
-                                                       (not-any? ss/blank?)))))
-                      :modified (max-modified data)}))
-                docs)))
+   (mapcat (fn->> :documents (filter construction-waste-report?) (map get-materials-info)))
    ;; 3. We only check the contact validity. Name and either phone or email
    ;;    must have been provided and (filtered) materials list cannot be empty.
-   (filter (fn [{{:keys [name phone email]} :contact
-                 materials                  :materials}]
-             (letfn [(good [s] (-> s ss/blank? false?))]
-               (and (good name) (or (good phone) (good email))
-                    (not-empty materials)))))
+   (filter valid-materials-info?)
    ;; 4. Sorted in the descending modification time order.
    (sort-by (comp - :modified))
    ;; 5. Cap the size of the final list
