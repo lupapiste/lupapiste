@@ -1,5 +1,17 @@
 (ns lupapalvelu.document.waste-schemas
-  (:require [lupapalvelu.document.tools :as tools]))
+  (:require [lupapalvelu.document.tools :refer [body] :as tools]
+            [lupapalvelu.document.schemas :refer [defschemas]]))
+
+(def basic-construction-waste-plan-name "rakennusjatesuunnitelma")
+(def basic-construction-waste-report-name "rakennusjateselvitys")
+(def extended-construction-waste-report-name "laajennettuRakennusjateselvitys")
+
+(def construction-waste-report-schemas #{basic-construction-waste-report-name extended-construction-waste-report-name})
+
+(defn construction-waste-plan-for-organization [{:keys [extended-construction-waste-report-enabled] :as org}]
+  (if extended-construction-waste-report-enabled
+    extended-construction-waste-report-name
+    basic-construction-waste-plan-name))
 
 (def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
@@ -313,3 +325,19 @@
                                        muut-kaivettavat-massat
                                        orgaaninen-aines
                                        vieraslajit])
+
+(defschemas 1
+  [{:info {:name basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"
+           :order 200
+           :section-help "rakennusjate.help"}
+    :body (body rakennusjatesuunnitelma)}
+   {:info {:name basic-construction-waste-report-name ; "rakennusjateselvitys"
+           :order 201
+           :construction-time true
+           :section-help "rakennusjate.help"}
+    :body (body rakennusjateselvitys)}
+
+   {:info {:name extended-construction-waste-report-name ; "laajennettuRakennusjateselvitys"
+           :order 200
+           :section-help "rakennusjate.help"}
+    :body (body laajennettu-rakennusjateselvitys)}])

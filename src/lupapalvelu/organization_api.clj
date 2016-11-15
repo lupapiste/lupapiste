@@ -31,6 +31,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.i18n :as i18n]))
 ;;
@@ -351,6 +352,15 @@
    :input-validators  [(partial boolean-parameters [:enabled])]}
   [{user :user}]
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
+  (ok))
+
+(defcommand set-organization-extended-construction-waste-report
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :pre-checks [(org/permit-type-validator :R)]
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:extended-construction-waste-report-enabled enabled}})
   (ok))
 
 (defcommand set-organization-validate-verdict-given-date
@@ -698,7 +708,7 @@
    :optional-parameters [org lang]
    :input-validators [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
-  ((memo/ttl org/waste-ads :ttl/threshold 900000)             ; 15 min
+  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)
     (-> fmt ss/lower-case keyword)
     (-> (or lang :fi) ss/lower-case keyword)))

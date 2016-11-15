@@ -337,7 +337,7 @@
           (assoc-in body path val)))
       {} schema-data)))
 
-(defn make-documents [user created op application & [manual-schema-datas]]
+(defn make-documents [user created org op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
   (let [op-info (op/operations (keyword (:name op)))
         op-schema-name (:schema op-info)
@@ -366,7 +366,9 @@
 
         location-schema (util/find-first #(= (keyword (:type %)) :location) existing-schemas-infos)
 
-        schemas (map #(schemas/get-schema schema-version %) (:required op-info))
+        schemas (->> ((apply juxt (:org-required op-info)) org)
+                     (concat (:required op-info))
+                     (map #(schemas/get-schema schema-version %)))
         new-docs (->> schemas
                       (remove (comp existing-schema-names :name :info))
                       (remove
@@ -440,7 +442,7 @@
                        :processMetadata     process-metadata})]
     (merge application (when-not info-request?
                          {:attachments attachments
-                          :documents   (make-documents user created op application manual-schema-datas)}))))
+                          :documents   (make-documents user created organization op application manual-schema-datas)}))))
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
