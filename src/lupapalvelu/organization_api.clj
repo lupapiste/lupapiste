@@ -31,6 +31,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.i18n :as i18n]))
 ;;
@@ -698,7 +699,7 @@
    :optional-parameters [org lang]
    :input-validators [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
-  ((memo/ttl org/waste-ads :ttl/threshold 900000)             ; 15 min
+  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)
     (-> fmt ss/lower-case keyword)
     (-> (or lang :fi) ss/lower-case keyword)))
