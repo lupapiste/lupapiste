@@ -394,8 +394,16 @@ th.full-width-column {
   th {
     white-space: nowrap;
   }
+  td.action-column {
+    text-align: center;
+    i {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+  }
   tfoot {
     height: initial;
+    font-size: 16px;
     tr {
       border: none;
     }

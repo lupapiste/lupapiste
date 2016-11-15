@@ -1,3 +1,9 @@
+// Table footer sums. The component is instantiated from docgen-table-template.
+// Params:
+// documentId: Document id
+// path: Path to the table
+// schema: Column schema
+// footer: The footer-sum definition for this column.
 LUPAPISTE.DocgenFooterSumModel = function( params ) {
   "use strict";
   var self = this;
@@ -10,15 +16,49 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
   var tablePath = params.path;
   var footer = params.footer;
 
-  function columnSum( column ) {
+  function columnData( column ) {
     return _(service.getInDocument( docId,  tablePath ).model())
       .map( function( v, i ) {
         return service.getInDocument( docId,
                                       _.concat( tablePath,
                                                 [i, column]))
-          .model() || "0";
+          .model();
       })
-      .sumBy( util.parseFloat );
+      .value();
+  }
+
+  function dataFloat( data ) {
+    return util.parseFloat( _.trim(data) || "0" );
+  }
+
+  function columnSum( column ) {
+    return _.sumBy( columnData( column ), dataFloat);
+  }
+
+  function finalUnit() {
+    var unit = null;
+    if( footer.unit ) {
+      // If even one is kg, then the final is kg.
+      unit = _.some( columnData( footer.unit),
+                     function( s ) {
+                       return s === "kg";
+                     }) ? "kg" : "tonnia";
+    }
+    return unit || footer.unitKey;
+  }
+
+  function columnSumWithUnits( column, unitColumn ) {
+    var units = columnData( unitColumn );
+    var master = finalUnit( unitColumn );
+    return _(columnData( column ))
+      .map(function( v, i ) {
+        // The unit must be defined for the value.
+        var num = units[i] ? dataFloat( v ) : NaN;
+        // The units can differ only if master is kg and column unit
+        // is not.
+        return master === units[i] ? num : 1000 * num;
+      } )
+      .sum();
   }
 
   function calculateAmount() {
@@ -27,18 +67,20 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
       result = _.sum( _.map( columnSchema.columns,
                              columnSum));
     } else {
-      result = columnSum( columnSchema.name );
+      result = footer.unit
+        ? columnSumWithUnits( columnSchema.name, footer.unit )
+        : columnSum( columnSchema.name );
     }
     return result;
   }
 
-  var unitKeys = { kg: "unit.kg", t: "unit.tonnia"};
+  var unitKeys = { kg: "unit.kg", t: "unit.tonnia", tonnia: "unit.tonnia"};
 
   self.calculationResult = self.disposedPureComputed( function() {
     var amount = calculateAmount();
-    var unit = _.get( unitKeys, footer.unitKey );
-    return loc.hasTerm( unit )
-      ? _.sprintf( "%s %s", amount, loc( unit ) )
+    var unit = finalUnit();
+    return  unit
+      ? _.sprintf( "%s %s", amount, loc( unitKeys[unit] ) )
       : amount;
   });
 
