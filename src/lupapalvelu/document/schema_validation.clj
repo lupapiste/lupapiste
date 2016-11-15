@@ -1,5 +1,7 @@
 (ns lupapalvelu.document.schema-validation
   (:require [schema.core :refer [defschema] :as sc]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.authorization :as auth]))
 
 (def opt sc/optional-key)
@@ -227,7 +229,7 @@
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
-(declare Group)
+(declare Element)
 
 (defschema Calculation
   "Calculated column for Table."
@@ -239,9 +241,7 @@
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str     ;;
    :type                       (sc/eq :table)
-   :body                       [(sc/conditional (type-pred :group)       (sc/recursive #'Group)
-                                                (type-pred :calculation) Calculation
-                                                :else                    Input)]
+   :body                       [(sc/recursive #'Element)] ;;
    (opt :i18nkey)              sc/Str     ;; Absolute localization key
    (opt :group-help)           sc/Str     ;;
    (opt :uicomponent)          sc/Keyword ;; Component name for special components
@@ -260,9 +260,7 @@
   "Group type that groups any doc elements."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :group)
-   :body                       [(sc/conditional (type-pred :group) (sc/recursive #'Group)
-                                                (type-pred :table) Table
-                                                :else              Input)]
+   :body                       [(sc/recursive #'Element)]
    (opt :subtype)              sc/Keyword
    (opt :i18nkey)              sc/Str       ;;
    (opt :group-help)           sc/Str       ;; Localization key for help text displayd right after group label
@@ -324,8 +322,45 @@
    (opt :template) sc/Str
    :body  [Element]})
 
+(defn get-in-schema [schema path]
+  (reduce #(util/find-by-key :name (name %2) (:body %1)) schema path))
+
+(defn- build-absolute-path [path target-path-string]
+  (let [target-path (-> (re-matches #"([^\[:]+)+(\[.+\])?(::\d+)?" target-path-string) second (ss/split #"/"))]
+    (if (ss/blank? (first target-path))
+      (vec (rest target-path))
+      (vec (concat path target-path)))))
+
+(defn validate-rows [{name :name rows :rows :as schema}]
+  (let [invalid-paths (->> (filter vector? rows)
+                           (apply concat)
+                           (map #(vector % (build-absolute-path [] %)))
+                           (util/map-values (partial get-in-schema schema))
+                           (filter (comp nil? val))
+                           keys)]
+    (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
+
+(defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
+  (when (and (key schema) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+                               (get-in-schema doc-schema)
+                               nil?))
+    {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))
+
+(defn validate-references [doc-schema]
+  (loop [schemas [(assoc doc-schema :path [])]  errors []]
+    (let [errors (concat errors
+                         (map validate-rows schemas)
+                         (map (partial validate-value-reference :hide-when doc-schema) schemas)
+                         (map (partial validate-value-reference :show-when doc-schema) schemas))
+          subschemas (mapcat (fn [{:keys [body path]}]
+                               (map #(assoc % :path (conj path (keyword (:name %)))) body))
+                             schemas)]
+      (if (not-empty subschemas)
+        (recur subschemas errors)
+        (not-empty (remove nil? errors))))))
+
 (defn validate-doc-schema [doc-schema]
-  (sc/check Doc doc-schema))
+  (util/assoc-when (sc/check Doc doc-schema) :reference-errors (validate-references doc-schema)))
 
 (defn validate-elem-schema [elem-schema]
   (sc/check Element elem-schema))
