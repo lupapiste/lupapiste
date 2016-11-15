@@ -132,7 +132,7 @@
                       (partial action/vector-parameters [:updates])]
    :pre-checks [validate-user-authz-by-doc
                 application/validate-authority-in-drafts
-                validate-post-verdict-update-doc]}
+                (partial validate-post-verdict-update-doc :doc)]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 

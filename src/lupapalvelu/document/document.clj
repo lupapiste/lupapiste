@@ -82,8 +82,9 @@
       (when-not (valid-post-verdict-schema? (:info schema))
         (fail :error.document.post-verdict-addition)))))
 
-(defn validate-post-verdict-update-doc [{:keys [application data]}]
-  (when-let [doc (when application (domain/get-document-by-id application (:docId data)))]
+(defn validate-post-verdict-update-doc [key {:keys [application data]}]
+  (when-let [doc (when (and application (= (keyword (:state application)) :verdictGiven))
+                   (domain/get-document-by-id application (get data key)))]
     (when-not (valid-post-verdict-document? doc)
       (fail :error.document.post-verdict-update))))
 

@@ -799,3 +799,6 @@
 "error.document.post-verdict-deletion" "fi" "Dokumenttia ei poistaa päätöksen jälkeen"
 "error.document.post-verdict-deletion" "sv" ""
 "error.document.post-verdict-deletion" "en" ""
+"error.document.post-verdict-update" "fi" "Dokumenttia ei voi muokata päätöksen jälkeen"
+"error.document.post-verdict-update" "sv" ""
+"error.document.post-verdict-update" "en" ""
