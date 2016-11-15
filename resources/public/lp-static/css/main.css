@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1479196765173');
+@import url('main-blessed1.css?z=1479217634490');
 
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7 .col--vertical, .form-grid .col-7 .col--horizontal {
@@ -2420,6 +2420,35 @@ th.full-width-column {
 /* line 394, ../../../private/common-html/sass/partials/_tables.scss */
 .form-table.form-table--waste th {
   white-space: nowrap;
+}
+/* line 397, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot {
+  height: initial;
+}
+/* line 399, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot tr {
+  border: none;
+}
+/* line 402, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot .footer-sum--total {
+  text-indent: 10px;
+  font-weight: bold;
+}
+/* line 406, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot .footer-sum--result {
+  color: #777777;
+}
+/* line 409, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot .footer-sum--error {
+  color: #df3215;
+}
+/* line 412, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot .td-left {
+  text-indent: 10px;
+}
+/* line 415, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table.form-table--waste tfoot .td-center {
+  text-align: center;
 }
 
 /*Tab styles*/

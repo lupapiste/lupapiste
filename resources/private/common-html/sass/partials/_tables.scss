@@ -394,4 +394,26 @@ th.full-width-column {
   th {
     white-space: nowrap;
   }
+  tfoot {
+    height: initial;
+    tr {
+      border: none;
+    }
+    .footer-sum--total {
+      text-indent: 10px;
+      font-weight: bold;
+    }
+    .footer-sum--result {
+      color: $gray119;
+    }
+    .footer-sum--error {
+      color: $red-dark;
+    }
+    .td-left {
+      text-indent: 10px;
+    }
+    .td-center {
+      text-align: center;
+    }
+  }
 }
