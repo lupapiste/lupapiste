@@ -240,7 +240,8 @@
   (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
         _ (give-verdict sonja application-id) => ok?
         suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")
-        documents (:documents (query-application sonja application-id))]
+        documents (:documents (query-application sonja application-id))
+        applicant-doc (domain/get-applicant-document documents)]
 
     (facts "create-doc"
       (command pena :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? :error.document.post-verdict-addition)
@@ -249,8 +250,14 @@
       (fact "can't add another paasuunnittelija"
         (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?))
 
+    (facts "update-doc"
+      (fact "can't update applicant doc"
+        (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.etunimi" "test"]])) => fail?
+      (fact "suunnittelija can be updated"
+        (command pena :update-doc :id application-id :doc (:doc suunnittelija-resp) :updates [["henkilotiedot.etunimi" "test"]]) => ok?))
+
     (facts "remove-doc"
       (fact "can't remove applicant doc"
-        (command pena :remove-doc :id application-id :docId (:id (domain/get-applicant-document documents)))) => fail?
+        (command pena :remove-doc :id application-id :docId (:id applicant-doc))) => fail?
       (fact "added suunnittelija doc can be removed"
         (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?))))

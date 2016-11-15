@@ -40,7 +40,7 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(def update-doc-states #{:draft :open :submitted :complementNeeded})
+(def update-doc-states #{:draft :open :submitted :complementNeeded :verdictGiven})
 
 (def approve-doc-states #{:open :submitted :complementNeeded})
 
@@ -131,7 +131,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
    :pre-checks [validate-user-authz-by-doc
-                application/validate-authority-in-drafts]}
+                application/validate-authority-in-drafts
+                validate-post-verdict-update-doc]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 

@@ -82,6 +82,11 @@
       (when-not (valid-post-verdict-schema? (:info schema))
         (fail :error.document.post-verdict-addition)))))
 
+(defn validate-post-verdict-update-doc [{:keys [application data]}]
+  (when-let [doc (when application (domain/get-document-by-id application (:docId data)))]
+    (when-not (valid-post-verdict-document? doc)
+      (fail :error.document.post-verdict-update))))
+
 ;;
 ;; KTJ-info updation
 ;;
