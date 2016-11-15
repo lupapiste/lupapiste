@@ -227,7 +227,7 @@
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
-(declare Group)
+(declare Element)
 
 (defschema Calculation
   "Calculated column for Table."
@@ -239,9 +239,7 @@
   "Table element. Represented as html table. Not recursive group type."
   {:name                       sc/Str     ;;
    :type                       (sc/eq :table)
-   :body                       [(sc/conditional (type-pred :group)       (sc/recursive #'Group)
-                                                (type-pred :calculation) Calculation
-                                                :else                    Input)]
+   :body                       [(sc/recursive #'Element)] ;;
    (opt :i18nkey)              sc/Str     ;; Absolute localization key
    (opt :group-help)           sc/Str     ;;
    (opt :uicomponent)          sc/Keyword ;; Component name for special components
@@ -260,9 +258,7 @@
   "Group type that groups any doc elements."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :group)
-   :body                       [(sc/conditional (type-pred :group) (sc/recursive #'Group)
-                                                (type-pred :table) Table
-                                                :else              Input)]
+   :body                       [(sc/recursive #'Element)]
    (opt :subtype)              sc/Keyword
    (opt :i18nkey)              sc/Str       ;;
    (opt :group-help)           sc/Str       ;; Localization key for help text displayd right after group label
