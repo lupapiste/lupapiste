@@ -796,3 +796,6 @@
 "error.document.post-verdict-addition" "fi" "Dokumenttia ei voi lisätä päätöksen jälkeen"
 "error.document.post-verdict-addition" "sv" ""
 "error.document.post-verdict-addition" "en" ""
+"error.document.post-verdict-deletion" "fi" "Dokumenttia ei poistaa päätöksen jälkeen"
+"error.document.post-verdict-deletion" "sv" ""
+"error.document.post-verdict-deletion" "en" ""

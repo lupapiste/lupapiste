@@ -21,6 +21,14 @@
 ;; Validators
 ;;
 
+(def valid-post-verdict-subtypes #{:suunnittelija})
+
+(defn- valid-post-verdict-schema? [schema-info]
+  (contains? valid-post-verdict-subtypes (keyword (:subtype schema-info))))
+
+(defn- valid-post-verdict-document? [document]
+  (valid-post-verdict-schema? (:schema-info document)))
+
 (defn user-can-be-set? [user-id application]
   (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
 
@@ -53,13 +61,17 @@
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
+(defn- deny-remove-of-non-post-verdict-document [document {state :state}]
+  (and (= (keyword state) :verdictGiven) (not (valid-post-verdict-document? document))))
+
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
       (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)
       (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
       (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
-      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied))))
+      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
+      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
 
 (defn post-verdict-doc-validator
   "Validates documents that can be added in post-verdict state"
@@ -67,7 +79,7 @@
     {schema-name :schemaName} :data}]
   (when (and (= (keyword state) :verdictGiven) (ss/not-blank? schema-name))
     (let [schema (schemas/get-schema schema-version schema-name)]
-      (when-not (= :suunnittelija (keyword (get-in schema [:info :subtype])))
+      (when-not (valid-post-verdict-schema? (:info schema))
         (fail :error.document.post-verdict-addition)))))
 
 ;;

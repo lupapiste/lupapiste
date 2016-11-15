@@ -236,11 +236,21 @@
             (fact "attachment groupType is unset"
               (:groupType attachment) => nil)))))))
 
-(facts* "post-verdict create-doc"
+(facts* "post-verdict document modifications"
   (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
-        _ (give-verdict sonja application-id) => ok?]
-    (command pena :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? :error.document.post-verdict-addition)
-    (fact "only subtype 'suunnittelija' can be added after verdict"
-      (command pena :create-doc :id application-id :schemaName "suunnittelija") => ok?)
-    (fact "can't add another paasuunnittelija"
-      (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?)))
+        _ (give-verdict sonja application-id) => ok?
+        suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")
+        documents (:documents (query-application sonja application-id))]
+
+    (facts "create-doc"
+      (command pena :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? :error.document.post-verdict-addition)
+      (fact "only subtype 'suunnittelija' can be added after verdict"
+        suunnittelija-resp => ok?)
+      (fact "can't add another paasuunnittelija"
+        (command pena :create-doc :id application-id :schemaName "paasuunnittelija") => fail?))
+
+    (facts "remove-doc"
+      (fact "can't remove applicant doc"
+        (command pena :remove-doc :id application-id :docId (:id (domain/get-applicant-document documents)))) => fail?
+      (fact "added suunnittelija doc can be removed"
+        (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?))))

@@ -110,7 +110,7 @@
    :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complementNeeded}
+   :states     #{:draft :answered :open :submitted :complementNeeded :verdictGiven}
    :pre-checks [application/validate-authority-in-drafts
                 validate-user-authz-by-doc-id
                 remove-doc-validator]}
