@@ -3,7 +3,7 @@
 Documentation   Authority admin creates users
 Suite Setup     Apply minimal fixture now
 Resource       ../../common_resource.robot
-Library  DebugLibrary
+
 
 *** Test Cases ***
 
@@ -35,7 +35,6 @@ Sonja logs in and sees nothing changed on existing application
   Element should not be visible  jquery=section.accordion span[data-test-id=laajennettuRakennusjateselvitys-accordion-title-text]
 
 Sonja creates another application, it contains extended construction waste report
-  debug
   Create application the fast way  Jätekatu  753-1-1-3  teollisuusrakennus
   Wait until  Element should be visible  jquery=section.accordion span[data-test-id=laajennettuRakennusjateselvitys-accordion-title-text]
   Element should not be visible  jquery=section.accordion span[data-test-id=rakennusjatesuunnitelma-accordion-title-text]
