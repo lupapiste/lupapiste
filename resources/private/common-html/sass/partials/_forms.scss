@@ -569,6 +569,9 @@ input.form-input.inline {
     .form-input .text {
       height: 25px;
     }
+    .form-input.warn {
+      border: 1px solid $red-dark;
+    }
   }
 
   .form-table .form-input.combobox, select {
@@ -576,7 +579,6 @@ input.form-input.inline {
   }
 
   .form-table .form-indicator {
-    right: auto;
     top: 0;
     height: 28px;
     width: 28px;
