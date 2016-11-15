@@ -299,7 +299,7 @@
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
               applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
-              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
