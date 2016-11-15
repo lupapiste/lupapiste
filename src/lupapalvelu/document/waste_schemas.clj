@@ -6,6 +6,11 @@
 (def basic-construction-waste-report-name "rakennusjateselvitys")
 (def extended-construction-waste-report-name "laajennettuRakennusjateselvitys")
 
+(defn construction-waste-plan-for-organization [{:keys [extended-construction-waste-report-enabled] :as org}]
+  (if extended-construction-waste-report-enabled
+    extended-construction-waste-report-name
+    basic-construction-waste-plan-name))
+
 (def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
                   :body [{:name "betoni"}
                          {:name "kipsi"}
