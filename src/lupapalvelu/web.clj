@@ -56,7 +56,8 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
-            [lupapalvelu.reports.reports-api])
+            [lupapalvelu.reports.reports-api]
+            [lupapalvelu.opendata.opendata-api])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
