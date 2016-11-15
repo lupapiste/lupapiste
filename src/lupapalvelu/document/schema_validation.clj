@@ -254,7 +254,19 @@
    (opt :hide-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
    (opt :show-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
-                                :values #{single-value}}})
+                                :values #{single-value}}
+   ;; Just column names -> no units
+   ;; Map item fields:
+   ;; :amount the column name for data
+   ;; :unit column for unit information
+   ;; :unitKey fixed unit (supported values are :t and :kg).
+   ;; :unit and :unitKey are mutually exclusive.
+   (opt :footer-sums)          [(sc/conditional
+                                 string? sc/Str
+                                 :unitKey {:amount sc/Str
+                                           :unitKey sc/Keyword}
+                                 :unit  {:amount sc/Str
+                                         :unit   sc/Str})]})
 
 (defschema Group
   "Group type that groups any doc elements."

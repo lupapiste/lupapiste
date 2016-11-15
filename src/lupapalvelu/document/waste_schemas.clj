@@ -208,6 +208,7 @@
                                     :css [:form-table :form-table--waste]
                                     :repeating true
                                     :approvable false
+                                    :footer-sums [{:amount "maara" :unit "yksikko"}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
                                            {:name "maara" :type :string :subtype :number :size :s}
@@ -219,6 +220,7 @@
                                     :css [:form-table :form-table--waste]
                                     :repeating true
                                     :approvable false
+                                    :footer-sums [{:amount "maara" :unitKey :t}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
                                            {:name "maara" :type :string :subtype :number}
@@ -272,7 +274,9 @@
           {:name "poisajettavia" :type :string :subtype :number}
           {:name "yhteensa" :type :calculation
            :columns ["hyodynnetaan" "poisajettavia"]}
-          {:name "sijoituspaikka" :type :string}]})
+          {:name "sijoituspaikka" :type :string}]
+   :footer-sums [{:amount"hyodynnetaan" :unitKey :t}
+                 {:amount "poisajettavia" :unitKey :t} "yhteensa"]})
 
 (def kaivettava-maa {:name "kaivettavaMaa"
                      :type :group

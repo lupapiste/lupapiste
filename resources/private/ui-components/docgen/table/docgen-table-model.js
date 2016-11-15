@@ -37,4 +37,24 @@ LUPAPISTE.DocgenTableModel = function(params) {
       label: !!schema.label
     });
   });
+
+  function findFooter( column ) {
+    return _.find( _.get( params, "schema.footer-sums"),
+                   function( item ) {
+                     return item === column
+                       || item.amount === column;
+                   });
+  }
+
+  self.footerSums = _(params.schema.body)
+    .drop( 1 )  // The first column is sum header
+    .map( function( schema ) {
+      var footer = findFooter( schema.name );
+      return footer
+        ? {schema: schema,
+           tdStyle: schema.type === "calculation" ? "td-center" : "td-left",
+           footer: footer}
+        : null;
+    })
+    .value();
 };
