@@ -24,6 +24,7 @@
 "buildingSelector._group_label" "en" "Building"
 "buildingSelector._group_label" "fi" "Rakennus"
 "buildingSelector._group_label" "sv" "Struktur"
+"calculation-error" "fi" "Virhe"
 "document.delete.table.subGroup.message" "en" "Are you sure you want to remove a line?"
 "document.delete.table.subGroup.message" "fi" "Oletko varma, että haluat poistaa rivin?"
 "document.delete.table.subGroup.message" "sv" "Är du säker på att du vill ta bort raden?"
@@ -4200,4 +4201,3 @@
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "en" "kWh/m²"
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "fi" "kWh/m2"
 "uusiRakennus.luokitus.energiatehokkuusluvunYksikko.kWh/m2" "sv" "kWh/m2"
-"calculation-error" "fi" "Virhe"
