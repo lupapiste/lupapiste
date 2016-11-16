@@ -128,12 +128,12 @@
 
 (mongocheck :applications (checks/not-null-property :schema-version) :schema-version)
 
-(defn timestamp-is-set [ts-key states]
+(defn some-timestamp-is-set [timestamps states]
   (fn [application]
-    (when (and (states (keyword (:state application))) (nil? (ts-key application)))
-      (format "Timestamp %s is null in state %s" (name ts-key) (:state application)))))
+    (when (and (states (keyword (:state application))) (not-any? #(get application %) timestamps))
+      (format "One of timestamps %s is null in state %s" timestamps (:state application)))))
 
-(mongocheck :applications (timestamp-is-set :opened (states/all-states-but [:draft :canceled])) :state :opened)
+(mongocheck :applications (some-timestamp-is-set #{:opened} (states/all-states-but [:draft :canceled])) :state :opened)
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
@@ -147,6 +147,6 @@
       "Submitted timestamp is null"))
   :submitted :state :primaryOperation :secondaryOperations)
 
-(mongocheck :applications (timestamp-is-set :sent #{:sent :complementNeeded}) :state :sent)
+(mongocheck :applications (some-timestamp-is-set #{:sent :acknowledged} #{:sent :complementNeeded}) :state :sent :acknowledged)
 
-(mongocheck :applications (timestamp-is-set :closed #{:closed}) :state :closed)
+(mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)

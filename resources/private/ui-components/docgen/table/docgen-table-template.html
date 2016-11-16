@@ -45,6 +45,20 @@
 
         </tr>
       </tbody>
+      <tfoot data-bind="if: _.some( footerSums )">
+        <td class="footer-sum--total"
+            data-bind="ltext: 'waste.total'"></td>
+        <!-- ko foreach: footerSums -->
+        <td data-bind="if: $data,
+                       attr: {'class': _.get( $data, 'tdStyle')}">
+          <span data-bind="component: {name: 'docgen-footer-sum',
+                           params: { documentId: $parent.documentId,
+                           path: $parent.path,
+                           schema: $data.schema,
+                           footer: $data.footer}}"></span>
+        </td>
+        <!-- /ko -->
+      </tfoot>
     </table>
   </div>
 
