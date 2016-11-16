@@ -210,14 +210,8 @@
     });
   }
 
-  function documentIsEditableByApplicationState(doc) {
-    var editableInStates = _.get(doc, ["schema-info", "editable-in-states"]);
-     if (editableInStates) {
-       return _.includes(editableInStates, applicationModel.state());
-     } else {
-       // By default documents are editable in pre-verdict state
-       return !applicationModel.inPostVerdictState();
-     }
+  function documentIsEditable(doc) {
+    return _(doc.allowedActions).map(function(v,k) { return v.ok && k; }).includes("update-doc");
   }
 
   function showApplication(applicationDetails, lightLoad) {
@@ -268,8 +262,8 @@
       // Documents
       var partyDocs = _(app.documents).filter(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
       var nonpartyDocs = _(app.documents).reject(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
-      var editableDocs = _.filter(nonpartyDocs, documentIsEditableByApplicationState);
-      var uneditableDocs = _.reject(nonpartyDocs, documentIsEditableByApplicationState);
+      var editableDocs = _.filter(nonpartyDocs, documentIsEditable);
+      var uneditableDocs = _.reject(nonpartyDocs, documentIsEditable);
 
       var editableDocErrors = _.map(editableDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(partyDocs, function(doc) { return doc.validationErrors; });
