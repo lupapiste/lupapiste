@@ -5,7 +5,8 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.xml :as xml]))
+            [sade.xml :as xml]
+            [sade.common-reader :as scr]))
 
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
@@ -108,3 +109,54 @@
     (:kiinttun building1) => "63820130310000"
     (:rakennusnro building1) => "123"
     (:valtakunnallinenNumero building1) => "1234567892"))
+
+(testable-privates lupapalvelu.xml.krysp.application-from-krysp
+                   get-lp-tunnus group-content-by)
+
+(defn group-xml [filename]
+  (->> filename xml/parse scr/strip-xml-namespaces
+       (group-content-by get-lp-tunnus lupapalvelu.permit/R) ))
+
+(facts "Buildings from review messages"
+       (fact "Simple review"
+             (let [simple-group (group-xml "resources/krysp/dev/r-verdict-review.xml")]
+               (keys simple-group) => ["LP-186-2014-90009"]
+               (->buildings-summary (get simple-group "LP-186-2014-90009"))
+               => [{:description  nil,
+                    :localShortId "001",
+                    :buildingId   "001",
+                    :index        "1",
+                    :created      "2014",
+                    :localId      nil,
+                    :usage        "011 yhden asunnon talot",
+                    :nationalId   nil,
+                    :area         "129",
+                    :propertyId   "18600303560006",
+                    :operationId  nil}]))
+       (fact "FeatureCollection review"
+             (let [fc-group (group-xml "resources/krysp/dev/feature-collection.xml")]
+               (keys fc-group) => (contains ["LP-020-2016-22222" "LP-020-2016-99999"] :in-any-order)
+                              (->buildings-summary (get fc-group "LP-020-2016-22222"))
+                              => [{:description  nil,
+                                   :localShortId "002",
+                                   :buildingId   "1987654324",
+                                   :index        "001",
+                                   :created      "2016",
+                                   :localId      nil,
+                                   :usage        "941 talousrakennukset",
+                                   :nationalId   "1987654324",
+                                   :area         "60",
+                                   :propertyId   "02054321",
+                                   :operationId  nil}]
+                              (->buildings-summary (get fc-group "LP-020-2016-99999"))
+                              => [{:description  nil,
+                                   :localShortId nil,
+                                   :buildingId   "1234567892",
+                                   :index        "001",
+                                   :created      "2016",
+                                   :localId      nil,
+                                   :usage        "811 navetat, sikalat, kanalat yms",
+                                   :nationalId   "1234567892",
+                                   :area         "2000",
+                                   :propertyId   "02012345",
+                                   :operationId  nil}])))
