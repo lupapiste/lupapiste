@@ -318,8 +318,7 @@
                                   app,
                                   editableDocs,
                                   {dataTestSpecifiers: devMode,
-                                   accordionCollapsed: isAuthority,
-                                   updateCommand: "update-construction-time-doc"});
+                                   accordionCollapsed: isAuthority});
         } else {
           docgen.clear("constructionTimeDocgen");
         }

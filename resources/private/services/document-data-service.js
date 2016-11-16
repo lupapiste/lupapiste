@@ -21,12 +21,10 @@ LUPAPISTE.DocumentDataService = function(params) {
       case "task":
         return {updateCommand: "update-task", removeCommand: "remove-document-data", collection: "tasks"};
       default:
-        return lupapisteApp.models.application.inPostVerdictState() ?
-          {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data", collection: "documents"} :
-          {updateCommand: "update-doc",                   removeCommand: "remove-document-data", collection: "documents"};
-
+        return {updateCommand: "update-doc",  removeCommand: "remove-document-data", collection: "documents"};
     }
   }
+
   function resolveCommandNames(doc, options) {
     var docDefaults = getDefaults(doc);
     return _.extend(docDefaults, _.pick(options, "updateCommand", "removeCommand"));
