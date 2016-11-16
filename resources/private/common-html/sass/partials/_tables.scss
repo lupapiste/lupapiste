@@ -386,7 +386,7 @@ th.full-width-column {
   width: 100%;
 }
 
-.form-table.form-table--waste {
+.form-table--waste {
   @include no-row-hover;
   .form-input {
     height: initial;
@@ -423,5 +423,10 @@ th.full-width-column {
     .td-center {
       text-align: center;
     }
+  }
+}
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
   }
 }
