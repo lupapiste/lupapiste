@@ -325,7 +325,7 @@
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
-          (opt :construction-time)           sc/Bool    ;; Is a construction time doc
+          (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary

@@ -59,7 +59,7 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :exclude-from-pdf
-                 :construction-time
+                 :editable-in-states
                  :accordion-fields})
 
 (def updateable-keys #{:removable})
