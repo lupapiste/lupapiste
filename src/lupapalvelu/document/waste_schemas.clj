@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.waste-schemas
   (:require [lupapalvelu.document.tools :refer [body] :as tools]
-            [lupapalvelu.document.schemas :refer [defschemas]]))
+            [lupapalvelu.document.schemas :refer [defschemas]]
+            [lupapalvelu.states :as states]))
 
 (def basic-construction-waste-plan-name "rakennusjatesuunnitelma")
 (def basic-construction-waste-report-name "rakennusjateselvitys")
@@ -333,11 +334,12 @@
     :body (body rakennusjatesuunnitelma)}
    {:info {:name basic-construction-waste-report-name ; "rakennusjateselvitys"
            :order 201
-           :construction-time true
+           :editable-in-states states/post-verdict-states
            :section-help "rakennusjate.help"}
     :body (body rakennusjateselvitys)}
 
    {:info {:name extended-construction-waste-report-name ; "laajennettuRakennusjateselvitys"
            :order 200
+           :editable-in-states (states/all-application-states-but states/terminal-states)
            :section-help "rakennusjate.help"}
     :body (body laajennettu-rakennusjateselvitys)}])

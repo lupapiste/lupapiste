@@ -21,7 +21,7 @@ LUPAPISTE.DocumentDataService = function(params) {
       case "task":
         return {updateCommand: "update-task", removeCommand: "remove-document-data", collection: "tasks"};
       default:
-        return doc.schema.info["construction-time"] ?
+        return lupapisteApp.models.application.inPostVerdictState() ?
           {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data", collection: "documents"} :
           {updateCommand: "update-doc",                   removeCommand: "remove-document-data", collection: "documents"};
 

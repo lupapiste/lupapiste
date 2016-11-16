@@ -44,13 +44,15 @@
 
 (def approve-doc-states #{:open :submitted :complementNeeded})
 
-(defn validate-is-construction-time-doc
-  [{{doc-id :doc} :data app :application}]
+(defn is-editable-by-state
+  "Pre-check to determine if documents are editable in abnormal states"
+  [{{doc-id :doc} :data {docs :documents state :state} :application}]
   (when doc-id
-    (when-not (some-> (domain/get-document-by-id (:documents app) doc-id)
+    (when-not (some-> (domain/get-document-by-id docs doc-id)
                       (model/get-document-schema)
-                      (get-in [:info :construction-time]))
-      (fail :error.document-not-construction-time-doc))))
+                      (get-in [:info :editable-in-states])
+                      (contains? (keyword state)))
+      (fail :error.document-not-editable-in-current-state))))
 
 (defn- validate-user-authz-by-key
   [doc-id-key {:keys [data application user]}]
@@ -143,7 +145,7 @@
                       (partial action/vector-parameters [:updates])]
    :pre-checks [validate-user-authz-by-doc
                 application/validate-authority-in-drafts
-                validate-is-construction-time-doc]}
+                is-editable-by-state]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -177,7 +179,7 @@
    :user-roles       #{:applicant :authority}
    :states           states/post-verdict-states
    :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [validate-is-construction-time-doc
+   :pre-checks       [is-editable-by-state
                       validate-user-authz-by-doc
                       application/validate-authority-in-drafts]}
   [command]
@@ -230,7 +232,7 @@
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
-   :pre-checks [validate-is-construction-time-doc]}
+   :pre-checks [is-editable-by-state]}
   [command]
   (ok :approval (approve command "approved")))
 
@@ -251,7 +253,7 @@
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
    :states     states/post-verdict-states
-   :pre-checks [validate-is-construction-time-doc]}
+   :pre-checks [is-editable-by-state]}
   [command]
   (ok :approval (approve command "rejected")))
 
