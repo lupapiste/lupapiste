@@ -153,6 +153,20 @@
         (ok))
       (fail :error.sending-unsent-attachments-failed))))
 
+(defcommand parties-as-krysp
+  {:description "Sends parties to backing system after verdict"
+   :parameters [id lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is permit/R)
+                (application-already-exported :exported-to-backing-system)]
+   :states     states/post-verdict-states}
+  [{:keys [application organization] :as command}]
+  (let [transfer-item (get-transfer-item :parties-to-backing-system command)
+        _             (mapping-to-krysp/save-parties-as-krysp application lang @organization)]
+    (update-application command {$push {:transfers transfer-item}})
+    (ok)))
+
 ;;
 ;; krysp enrichment
 ;;

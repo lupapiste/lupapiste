@@ -446,6 +446,17 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
+  self.partiesAsKrysp = function() {
+    ajax.command("parties-as-krysp", {id: self.id(), lang: loc.getCurrentLanguage()})
+        .success(function(resp) {
+          console.log(resp);
+        })
+        .onError("error.command-illegal-state", self.lightReload)
+        .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
+        .processing(self.processing)
+        .call();
+  };
+
   self.approveExtension = function() {
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.extension.approve"),

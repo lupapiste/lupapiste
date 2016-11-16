@@ -94,6 +94,18 @@
     (or (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)
         (fail! :error.unknown))))
 
+(defn save-parties-as-krysp
+  "Send application's parties to municipality backend."
+  [application lang organization]
+  (let [permit-type   (permit/permit-type application)
+        krysp-version (resolve-krysp-version organization permit-type)
+        output-dir    (resolve-output-directory organization permit-type)
+        filtered-app  (-> application
+                          (dissoc :attachments)            ; attachments not needed
+                          remove-non-approved-designers)]
+    (or (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)
+        (fail! :error.unknown))))
+
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application organization task user lang]
