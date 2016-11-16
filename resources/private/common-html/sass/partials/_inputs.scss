@@ -215,7 +215,10 @@ input.dateinput {
   &:disabled {
     //border-color: $input-disabled-border-color;
     background-image: url("/lp-static/img/calendar-gray187.png");
-    color: $input-select-disabled-icon
+    color: $input-select-disabled-icon;
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 34px;
   }
 }
 
