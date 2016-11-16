@@ -11,7 +11,8 @@
             [lupapalvelu.mongo :as mongo]
             [schema.core :as s]
             [sade.core :refer [fail!]]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [lupapalvelu.opendata.schemas :refer :all]))
 
 (defonce endpoints (atom []))
 
@@ -41,15 +42,6 @@
                http/no-cache-headers
                (resp/json response-data#)))
            (resp/status 400 "input-validation-error"))))))
-
-(sc/defschema Asiointitunnus
-  (rjs/field sc/Str {:description "Hakemuksen asiointitunnus esim. LP-2016-000-90001"}))
-
-(sc/defschema PublicApplicationData
-  {:asiointitunnus Asiointitunnus})
-
-(sc/defschema OrganizationId
-  (rjs/field sc/Str {:description "Organisaation tunnus"}))
 
 (defendpoint "/opendata/applications"
   {:summary "Palauttaa organisaation kaikki vireillä olevat hankkeet."
