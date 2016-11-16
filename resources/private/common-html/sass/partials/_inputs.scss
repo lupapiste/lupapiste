@@ -236,3 +236,7 @@ input.tip.dateinput {
     color: $input-select-disabled-icon
   }
 }
+
+.grid-style-input {
+  @include input-fields;
+}

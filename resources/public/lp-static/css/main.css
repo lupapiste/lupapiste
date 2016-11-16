@@ -1,5 +1,23 @@
-@import url('main-blessed1.css?z=1479302375165');
+@import url('main-blessed1.css?z=1479314280464');
 
+/* line 1187, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-6.col--full > * {
+  width: 100%;
+}
+/* line 1181, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-7 {
+  position: relative;
+  float: left;
+  width: 175%;
+  min-width: 175%;
+  max-width: 175%;
+  padding-left: 20px;
+}
+/* line 1035, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-7 label.required:after {
+  content: " *";
+  color: #df3215;
+}
 /* line 1040, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7 .col--vertical, .form-grid .col-7 .col--horizontal {
   width: 100%;
@@ -2406,59 +2424,64 @@ th.full-width-column {
 }
 
 /* line 9, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tr:hover {
+.form-table--waste tr:hover {
   background-color: white;
 }
 /* line 12, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tr:hover:nth-child(even) {
+.form-table--waste tr:hover:nth-child(even) {
   background: #f6f6f6;
 }
 /* line 391, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste .form-input, .form-table.form-table--waste .form-input--inline {
+.form-table--waste .form-input, .form-table--waste .form-input--inline {
   height: initial;
 }
 /* line 394, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste th {
+.form-table--waste th {
   white-space: nowrap;
 }
 /* line 397, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste td.action-column {
+.form-table--waste td.action-column {
   text-align: center;
 }
 /* line 399, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste td.action-column i {
+.form-table--waste td.action-column i {
   margin-bottom: 0;
   vertical-align: middle;
 }
 /* line 404, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot {
+.form-table--waste tfoot {
   height: initial;
   font-size: 16px;
 }
 /* line 407, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot tr {
+.form-table--waste tfoot tr {
   border: none;
 }
 /* line 410, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot .footer-sum--total {
+.form-table--waste tfoot .footer-sum--total {
   text-indent: 10px;
   font-weight: bold;
 }
 /* line 414, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot .footer-sum--result {
+.form-table--waste tfoot .footer-sum--result {
   color: #777777;
 }
 /* line 417, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot .footer-sum--error {
+.form-table--waste tfoot .footer-sum--error {
   color: #df3215;
 }
 /* line 420, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot .td-left {
+.form-table--waste tfoot .td-left {
   text-indent: 10px;
 }
 /* line 423, ../../../private/common-html/sass/partials/_tables.scss */
-.form-table.form-table--waste tfoot .td-center {
+.form-table--waste tfoot .td-center {
   text-align: center;
+}
+
+/* line 429, ../../../private/common-html/sass/partials/_tables.scss */
+.form-table--waste.waste-report-table th {
+  white-space: initial;
 }
 
 /*Tab styles*/

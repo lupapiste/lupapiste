@@ -14,17 +14,23 @@
     extended-construction-waste-report-name
     basic-construction-waste-plan-name))
 
-(def jatetyyppi {:name "jatetyyppi" :type :select :i18nkey "jatetyyppi"
-                  :body [{:name "betoni"}
-                         {:name "kipsi"}
-                         {:name "puu"}
-                         {:name "metalli"}
-                         {:name "lasi"}
-                         {:name "muovi"}
-                         {:name "paperi"}
-                         {:name "maa"}]})
+(def jatetyyppi {:name "jatetyyppi"
+                 :type :select
+                 :css [:dropdown]
+                 :i18nkey "jatetyyppi"
+                 :body [{:name "betoni"}
+                        {:name "kipsi"}
+                        {:name "puu"}
+                        {:name "metalli"}
+                        {:name "lasi"}
+                        {:name "muovi"}
+                        {:name "paperi"}
+                        {:name "maa"}]})
 
-(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi" :type :select :i18nkey "vaarallinenainetyyppi"
+(def vaarallinenainetyyppi {:name "vaarallinenainetyyppi"
+                            :type :select
+                            :css [:dropdown]
+                            :i18nkey "vaarallinenainetyyppi"
                             :body [{:name "maalit-lakat-liimat-ja-liuottimet"}
                                    {:name "aerosolipullot"}
                                    {:name "painekyllastetty-puu"}
@@ -36,13 +42,20 @@
                                    {:name "eristeiden-ja-tiivistemassojen-haitalliset-jatteet"}
                                    {:name "sahko-ja-elektroniikkaromu"}]})
 
-(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko" :type :select
+(def jateyksikko {:name "yksikko" :i18nkey "jateyksikko"
+                  :type :select
+                  :css [:dropdown]
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
                          {:name "m3"}]})
 
-(def rakennusjatemaara {:name "maara" :type :string :subtype :decimal :uicomponent :docgen-input :inputType :string :min 0 :max 9999999 :size :s})
+(def rakennusjatemaara {:name "maara"
+                        :type :string :subtype :decimal
+                        :uicomponent :docgen-input
+                        :inputType :string
+                        :css [:grid-style-input]
+                        :min 0 :max 9999999 :size :s})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
                                  jateyksikko
@@ -51,19 +64,31 @@
 (def rakennusjateselvitysUusiRow [(assoc rakennusjatemaara :name "toteutunutMaara")
                                   jateyksikko
                                   (assoc rakennusjatemaara :name "painoT")
-                                  {:name "jatteenToimituspaikka" :type :string :max-len 50}])
+                                  {:name "jatteenToimituspaikka"
+                                   :type :string
+                                   :css [:grid-style-input]
+                                   :max-len 50}])
 
 (def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
                               (assoc rakennusjatemaara :name "toteutunutMaara")
                               (assoc jateyksikko :readonly true)
                               (assoc rakennusjatemaara :name "painoT")
-                              {:name "jatteenToimituspaikka" :type :string :max-len 50}])
+                              {:name "jatteenToimituspaikka"
+                               :type :string
+                               :css [:grid-style-input]
+                               :max-len 50}])
 
-(def availableMaterialsRow [{:name "aines" :type :string}
+(def availableMaterialsRow [{:name "aines"
+                             :type :string
+                             :css [:grid-style-input]}
                            rakennusjatemaara
                            jateyksikko
-                           {:name "saatavilla" :type :date}
-                           {:name "kuvaus" :type :string}])
+                            {:name "saatavilla"
+                             :type :date
+                             }
+                            {:name "kuvaus"
+                             :type :string
+                             :css [:grid-style-input]}])
 
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
@@ -113,13 +138,14 @@
                             :i18nkey "available-materials.contact"
                             :type :group
                             :group-help "contact.help"
-                            :body [{:name "name" :type :string}
+                            :body [{:name "name" :type :string }
                                    {:name "phone" :type :string :subtype :tel}
                                    {:name "email" :type :string :subtype :email}]}
                            {:name "availableMaterials"
                             :i18nkey "available-materials"
                             :type :table
                             :uicomponent :docgenTable
+                            :css [:form-table :form-table--waste]
                             :approvable false
                             :repeating true
                             :body (tools/body availableMaterialsRow)}])
@@ -321,6 +347,27 @@
                           :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
+(def contact {:name "contact"
+              :i18nkey "available-materials.contact"
+              :type :group
+              :uicomponent :docgenGroup
+              :approvable false
+              :template "form-grid-docgen-group-template"
+              :rows [{:h3 "available-materials.contact"}
+                     {:p "contact.help"}
+                     ["name" "phone" "email"]
+                     ["availableMaterials::4"]]
+              :group-help "contact.help"
+              :body [{:name "name" :type :string}
+                     {:name "phone" :type :string :subtype :tel}
+                     {:name "email" :type :string :subtype :email}
+                     {:name "availableMaterials"
+                      :i18nkey "available-materials"
+                      :type :table
+                      :css [:form-table :form-table--waste]
+                      :repeating true
+                      :body (tools/body availableMaterialsRow)}]})
+
 (def laajennettu-rakennusjateselvitys [toteutus
                                        purkaminen
                                        vaaralliset-aineet
@@ -329,7 +376,8 @@
                                        kaivettava-maa
                                        muut-kaivettavat-massat
                                        orgaaninen-aines
-                                       vieraslajit])
+                                       vieraslajit
+                                       contact])
 
 (defschemas 1
   [{:info {:name basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"
