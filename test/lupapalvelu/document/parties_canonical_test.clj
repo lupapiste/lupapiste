@@ -14,20 +14,6 @@
            (ssg/generate paasuunnittelija-schema)
            (ssg/generate suunnittelija-schema)])
 
-(declare application)
-
-(facts "parties canonical"
-  (let [canonical          (parties-to-canonical application "fi")
-        krysp-element-keys (->> (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
-                                keys)]
-    canonical => map?
-    (fact "no toimenpide or rakennuspaikka information"
-      krysp-element-keys => (just [:osapuolettieto
-                                   :kasittelynTilatieto :luvanTunnisteTiedot
-                                   :kayttotapaus :asianTiedot
-                                   :lisatiedot :hankkeenVaativuus] :in-any-order))))
-
-
 (def application {:id "LP-753-2016-90006",
                   :applicant "Panaani Pena",
                   :propertyId "75341600550007",
@@ -254,3 +240,15 @@
                   :location-wgs84 [25.266 60.36938],
                   :location [404369.304 6693806.957]
                   :statements []})
+
+
+(facts "parties canonical"
+  (let [canonical          (parties-to-canonical application "fi")
+        krysp-element-keys (->> (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
+                                keys)]
+    canonical => map?
+    (fact "no toimenpide or rakennuspaikka information"
+      krysp-element-keys => (just [:osapuolettieto
+                                   :kasittelynTilatieto :luvanTunnisteTiedot
+                                   :kayttotapaus :asianTiedot
+                                   :lisatiedot :hankkeenVaativuus] :in-any-order))))
