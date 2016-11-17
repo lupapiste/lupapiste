@@ -257,7 +257,10 @@
    (opt :exclude-from-pdf)     sc/Bool    ;;
    (opt :copybutton)           sc/Bool    ;;
    (opt :validator)            sc/Keyword
+   ;; CSS classes apply either to the whole component (keywords) or
+   ;; individual columns {columnName class}
    (opt :css)                  [sc/Keyword]
+   (opt :columnCss)            {sc/Str [sc/Keyword]}
    (opt :hide-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
    (opt :show-when)            {:path   sc/Str ;; Toggle element visibility by values of another element

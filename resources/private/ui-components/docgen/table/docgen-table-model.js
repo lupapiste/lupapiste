@@ -17,13 +17,18 @@ LUPAPISTE.DocgenTableModel = function(params) {
   self.columnHeaders = _.map(params.schema.body, function(schema) {
     return {
       name: params.i18npath.concat(schema.name),
-      required: !!schema.required
+      required: Boolean(schema.required)
     };
   });
   self.columnHeaders.push({
     name: self.groupsRemovable(params.schema) ? "remove" : "",
     required: false
   });
+
+  self.columnCss = function( nameArray ) {
+    return util.arrayToObject( _.get( params.schema.columnCss,
+                                      _.last(nameArray) ));
+  };
 
   self.subSchemas = _.map(params.schema.body, function(schema) {
     var uicomponent = schema.uicomponent || "docgen-" + schema.type;

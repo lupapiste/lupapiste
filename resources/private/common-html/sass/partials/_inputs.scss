@@ -208,6 +208,7 @@ input.dateinput {
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
+  width: initial;
   &:focus {
     //border-color: $input-focus-border-color;
     background-image: url("/lp-static/img/calendar-orange-light.png");
@@ -237,6 +238,11 @@ input.tip.dateinput {
   }
 }
 
-.grid-style-input {
+input.grid-style-input {
   @include input-fields;
+}
+
+input.grid-style-input--wide {
+  @include input-fields;
+  width: 100%;
 }

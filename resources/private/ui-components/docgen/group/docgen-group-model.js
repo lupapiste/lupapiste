@@ -13,9 +13,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
                             }
                             if( row.row ) {
                               return {row: row.row,
-                                      rowCss: _.zipObject( row.css,
-                                                           _.map( row.css,
-                                                                  _.constant( true )))};
+                                      rowCss: util.arrayToObject( row.css )};
                             }
                             return row;
                           });

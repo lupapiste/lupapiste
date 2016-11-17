@@ -15,7 +15,7 @@
     <table data-bind="attr: {'class': _.last(path) + '-table'}">
       <thead>
         <tr data-bind="foreach: columnHeaders">
-          <th>
+          <th data-bind="css: $parent.columnCss(name)">
             <span data-bind="ltext: name"></span>
             <span data-bind="visible: required">*</span>
           </th>

@@ -387,8 +387,16 @@ var util = (function($) {
   }
 
   function strictParseFloat( s ) {
-    s = _.trim( s );
-    return isNum( s ) ? parseFloat( s ) : NaN;
+    s =  _.replace(_.trim( s ), ",", ".");
+    return _.every( _.split( s, ".", isNum ) ) ? parseFloat( s ) : NaN;
+  }
+
+  // Zips given array into object.
+  // Optional fun argument is the value function (default _.constant( true )):
+  function arrayToObject( arr, fun ) {
+    return _.zipObject( arr,
+                        _.map( arr,
+                               fun || _.constant( true )));
   }
 
   function identLogoutUrl() {
@@ -456,7 +464,8 @@ var util = (function($) {
     parseFloat: strictParseFloat,
     identLogoutUrl: identLogoutUrl,
     identLogoutRedirect: identLogoutRedirect,
-    identLogoutRedirectBulletins: identLogoutRedirectBulletins
+    identLogoutRedirectBulletins: identLogoutRedirectBulletins,
+    arrayToObject: arrayToObject
   };
 
 })(jQuery);

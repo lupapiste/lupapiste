@@ -44,7 +44,7 @@
 
 (def jateyksikko {:name "yksikko" :i18nkey "jateyksikko"
                   :type :select
-                  :css [:dropdown]
+                  :css [:dropdown :waste-unit-select]
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
@@ -54,7 +54,7 @@
                         :type :string :subtype :decimal
                         :uicomponent :docgen-input
                         :inputType :string
-                        :css [:grid-style-input]
+                        :css [:grid-style-input--wide]
                         :min 0 :max 9999999 :size :s})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
@@ -66,7 +66,7 @@
                                   (assoc rakennusjatemaara :name "painoT")
                                   {:name "jatteenToimituspaikka"
                                    :type :string
-                                   :css [:grid-style-input]
+                                   :css [:grid-style-input--wide]
                                    :max-len 50}])
 
 (def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
@@ -75,12 +75,13 @@
                               (assoc rakennusjatemaara :name "painoT")
                               {:name "jatteenToimituspaikka"
                                :type :string
-                               :css [:grid-style-input]
+                               :css [:grid-style-input--wide]
                                :max-len 50}])
 
+;; Contact and available-materials are used in the extended schemas, too.
 (def availableMaterialsRow [{:name "aines"
                              :type :string
-                             :css [:grid-style-input]}
+                             :css [:grid-style-input--wide]}
                            rakennusjatemaara
                            jateyksikko
                             {:name "saatavilla"
@@ -88,7 +89,7 @@
                              }
                             {:name "kuvaus"
                              :type :string
-                             :css [:grid-style-input]}])
+                             :css [:grid-style-input--wide]}])
 
 (def contact {:name "contact"
               :i18nkey "available-materials.contact"
@@ -112,6 +113,8 @@
                           :uicomponent :docgenTable
                           :exclude-from-pdf true
                           :css [:form-table :form-table--waste]
+                          :columnCss {"aines" [:column--50]
+                                      "kuvaus" [:column--50]}
                           :repeating true
                           :body (tools/body availableMaterialsRow)})
 
@@ -162,6 +165,10 @@
                                     :body (tools/body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
                            contact
                            available-materials])
+
+;; ---------------------------------------------------------
+;; Extended report schemas start here
+;; ---------------------------------------------------------
 
 (def toteutus {:name "toteutus"
                :type :group
@@ -259,24 +266,28 @@
                                                 :values #{true}}
                                     :type :table
                                     :css [:form-table :form-table--waste]
+                                    :columnCss {"jate" [:column--50]
+                                                "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unit "yksikko"}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
-                                           {:name "maara" :type :string :subtype :number :size :s}
+                                           {:name "maara" :type :string :subtype :decimal}
                                            {:name "yksikko" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
                                            {:name "sijoituspaikka" :type :string}]}
                                    {:name "muuJate"
                                     :type :table
                                     :css [:form-table :form-table--waste]
+                                    :columnCss {"jate" [:column--50]
+                                                "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unitKey :t}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
-                                           {:name "maara" :type :string :subtype :number}
+                                           {:name "maara" :type :string :subtype :decimal}
                                            {:name "sijoituspaikka" :type :string}]}]})
 
 (def pilaantuneet-maat {:name "pilaantuneetMaat"
@@ -318,6 +329,8 @@
    :type :table
    :repeating true
    :css [:form-table :form-table--waste]
+   :columnCss {"aines-group" [:column--50]
+               "sijoituspaikka" [:column--50]}
    :approvable false
    :body [{:name "aines-group"
            :type :group
@@ -331,8 +344,8 @@
                    :hide-when {:path "aines" :values #{"muu"}}}
                   {:name "muu" :type :string :label false
                    :show-when {:path "aines" :values #{"muu"}}}]}
-          {:name "hyodynnetaan" :type :string :subtype :number}
-          {:name "poisajettavia" :type :string :subtype :number}
+          {:name "hyodynnetaan" :type :string :subtype :decimal}
+          {:name "poisajettavia" :type :string :subtype :decimal}
           {:name "yhteensa" :type :calculation
            :columns ["hyodynnetaan" "poisajettavia"]}
           {:name "sijoituspaikka" :type :string}]

@@ -6805,6 +6805,7 @@ input.dateinput {
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
+  width: initial;
 }
 /* line 16, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:focus {
@@ -6816,11 +6817,11 @@ input.dateinput:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
-/* line 211, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 212, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:focus {
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 215, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 216, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:disabled {
   background-image: url("/lp-static/img/calendar-gray187.png");
   color: #bbbbbb;
@@ -6829,19 +6830,19 @@ input.dateinput:disabled {
   padding-right: 34px;
 }
 
-/* line 225, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 226, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput,
 input.tip.dateinput {
   background-image: url("/lp-static/img/calendar-orange.png");
   border-color: #f39129;
 }
-/* line 229, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 230, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:focus,
 input.tip.dateinput:focus {
   border-color: #fbc732;
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 233, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:disabled,
 input.tip.dateinput:disabled {
   border-color: #dddddd;
@@ -6849,8 +6850,8 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-/* line 240, ../../../private/common-html/sass/partials/_inputs.scss */
-.grid-style-input {
+/* line 241, ../../../private/common-html/sass/partials/_inputs.scss */
+input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
   min-height: 40px;
@@ -6863,12 +6864,37 @@ input.tip.dateinput:disabled {
   -moz-appearance: none;
 }
 /* line 16, ../../../private/common-html/sass/partials/_inputs.scss */
-.grid-style-input:focus {
+input.grid-style-input:focus {
   color: #333333;
   border-color: #fbc732;
 }
 /* line 20, ../../../private/common-html/sass/partials/_inputs.scss */
-.grid-style-input:disabled {
+input.grid-style-input:disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+}
+
+/* line 245, ../../../private/common-html/sass/partials/_inputs.scss */
+input.grid-style-input--wide {
+  padding: 0 12px;
+  box-sizing: border-box;
+  min-height: 40px;
+  height: 40px;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+  width: 100%;
+}
+/* line 16, ../../../private/common-html/sass/partials/_inputs.scss */
+input.grid-style-input--wide:focus {
+  color: #333333;
+  border-color: #fbc732;
+}
+/* line 20, ../../../private/common-html/sass/partials/_inputs.scss */
+input.grid-style-input--wide:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
@@ -8241,13 +8267,4 @@ div.alleYli-radioGroup {
 .form-grid .col-6 label.required:after {
   content: " *";
   color: #df3215;
-}
-/* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-6 .col--vertical, .form-grid .col-6 .col--horizontal {
-  width: 100%;
-  box-sizing: border-box;
-}
-/* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-6 .col--vertical label {
-  display: block;
 }

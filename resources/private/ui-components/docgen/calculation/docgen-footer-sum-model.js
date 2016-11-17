@@ -80,7 +80,7 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
   var unitKeys = { kg: "unit.kg", t: "unit.tonnia", tonnia: "unit.tonnia"};
 
   self.calculationResult = self.disposedPureComputed( function() {
-    var amount = calculateAmount();
+    var amount = _.round(calculateAmount(), 2);
     var unit = finalUnit();
     return  unit
       ? _.sprintf( "%s %s", amount, loc( unitKeys[unit] ) )
