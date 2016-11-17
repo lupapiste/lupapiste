@@ -33,7 +33,8 @@
       (dissoc :id :propertyId :address :municipality :location :primaryOperation :submitted :documents)))
 
 (defn applications-by-organization [organization]
-  (->> (mongo/select :applications {:organization organization
+  (->> (mongo/select :applications {:permitType   :R
+                                    :organization organization
                                     :state        :submitted
                                     :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
                 [:id :primaryOperation.name :propertyId :address :municipality
