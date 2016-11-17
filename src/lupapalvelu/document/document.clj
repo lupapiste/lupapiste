@@ -8,11 +8,12 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
@@ -21,7 +22,6 @@
 ;; Validators
 ;;
 
-(def document-post-verdict-states #{:verdictGiven})
 
 (def valid-post-verdict-subtypes #{:suunnittelija})
 
@@ -67,7 +67,7 @@
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
 (defn- deny-remove-of-non-post-verdict-document [document {state :state}]
-  (and (contains? document-post-verdict-states (keyword state)) (not (valid-post-verdict-document? document))))
+  (and (contains? states/post-verdict-states (keyword state)) (not (valid-post-verdict-document? document))))
 
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
@@ -82,7 +82,7 @@
   "Validates documents that can be added in post-verdict state"
   [{{:keys [state schema-version]} :application
     {schema-name :schemaName} :data}]
-  (when (and (contains? document-post-verdict-states (keyword state))
+  (when (and (contains? states/post-verdict-states (keyword state))
              (ss/not-blank? schema-name))
     (let [schema (schemas/get-schema schema-version schema-name)]
       (when-not (valid-post-verdict-schema? (:info schema))
@@ -90,7 +90,7 @@
 
 
 (defn validate-post-verdict-update-doc [key {:keys [application data]}]
-  (when-let [doc (when (and application (contains? document-post-verdict-states (keyword (:state application))))
+  (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
     (when-not (and (valid-post-verdict-document? doc) (not (approved? doc)))
       (fail :error.document.post-verdict-update))))

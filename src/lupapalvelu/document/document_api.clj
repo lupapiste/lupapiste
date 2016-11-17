@@ -40,10 +40,6 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(def update-doc-states #{:draft :open :submitted :complementNeeded})
-
-(def approve-doc-states #{:open :submitted :complementNeeded})
-
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
   [default-states {{doc-id :doc} :data {docs :documents state :state} :application}]
@@ -132,7 +128,7 @@
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [(partial editable-by-state? update-doc-states)
+   :pre-checks [(partial editable-by-state? states/update-doc-states)
                 validate-user-authz-by-doc
                 application/validate-authority-in-drafts
                 (partial validate-post-verdict-update-doc :doc)]}
@@ -198,7 +194,7 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :pre-checks [(partial editable-by-state? approve-doc-states)]
+   :pre-checks [(partial editable-by-state? states/approve-doc-states)]
    :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "approved")))
@@ -208,7 +204,7 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :pre-checks [(partial editable-by-state? approve-doc-states)]
+   :pre-checks [(partial editable-by-state? states/approve-doc-states)]
    :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "rejected")))
@@ -223,7 +219,7 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(partial editable-by-state? update-doc-states)
+   :pre-checks [(partial editable-by-state? states/update-doc-states)
                 user-can-be-set-validator
                 validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]}
@@ -236,7 +232,7 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(partial editable-by-state? update-doc-states)
+   :pre-checks [(partial editable-by-state? states/update-doc-states)
                 domain/validate-owner-or-write-access
                 validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]}
@@ -249,7 +245,7 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [(partial editable-by-state? update-doc-states)
+   :pre-checks [(partial editable-by-state? states/update-doc-states)
                 validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]}
   [{:keys [user created application] :as command}]

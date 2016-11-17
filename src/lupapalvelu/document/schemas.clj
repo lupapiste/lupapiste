@@ -5,6 +5,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -1438,7 +1439,6 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :editable-in-states #{:verdictGiven}
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
     :body paasuunnittelija}
@@ -1452,7 +1452,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :editable-in-states #{:verdictGiven}
+           :editable-in-states (conj states/update-doc-states :verdictGiven)
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
