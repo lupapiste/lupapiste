@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
-            [clojure.set :refer [intersection union]]
+            [clojure.set :refer [intersection union difference]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
@@ -91,7 +91,8 @@
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
-   :states     (union #{:draft :answered :open :submitted :complementNeeded} document-post-verdict-states)
+   :states     (union #{:draft :answered :open :submitted :complementNeeded}
+                      (difference states/post-verdict-states states/terminal-states))
    :pre-checks [create-doc-validator
                 application/validate-authority-in-drafts
                 post-verdict-doc-validator]}
