@@ -248,6 +248,7 @@
    (opt :approvable)           sc/Bool    ;;
    (opt :repeating)            sc/Bool    ;; Should be  always repeating -> default true
    (opt :repeating-init-empty) sc/Bool    ;;
+   (opt :exclude-from-pdf)     sc/Bool    ;;
    (opt :copybutton)           sc/Bool    ;;
    (opt :validator)            sc/Keyword
    (opt :css)                  [sc/Keyword]

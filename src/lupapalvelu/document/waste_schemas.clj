@@ -137,6 +137,7 @@
                            {:name "contact"
                             :i18nkey "available-materials.contact"
                             :type :group
+                            :exclude-from-pdf true
                             :group-help "contact.help"
                             :body [{:name "name" :type :string }
                                    {:name "phone" :type :string :subtype :tel}
@@ -144,6 +145,7 @@
                            {:name "availableMaterials"
                             :i18nkey "available-materials"
                             :type :table
+                            :exclude-from-pdf true
                             :uicomponent :docgenTable
                             :css [:form-table :form-table--waste]
                             :approvable false
@@ -352,6 +354,7 @@
               :type :group
               :uicomponent :docgenGroup
               :approvable false
+              :exclude-from-pdf true
               :template "form-grid-docgen-group-template"
               :rows [{:h3 "available-materials.contact"}
                      {:p "contact.help"}
