@@ -139,7 +139,7 @@
                             :type :group
                             :exclude-from-pdf true
                             :group-help "contact.help"
-                            :body [{:name "name" :type :string }
+                            :body [{:name "name" :type :string :css [:grid-style-input]}
                                    {:name "phone" :type :string :subtype :tel}
                                    {:name "email" :type :string :subtype :email}]}
                            {:name "availableMaterials"
@@ -358,18 +358,20 @@
               :template "form-grid-docgen-group-template"
               :rows [{:h3 "available-materials.contact"}
                      {:p "contact.help"}
-                     ["name" "phone" "email"]
-                     ["availableMaterials::4"]]
+                     ["name" "phone" "email"]]
               :group-help "contact.help"
               :body [{:name "name" :type :string}
                      {:name "phone" :type :string :subtype :tel}
                      {:name "email" :type :string :subtype :email}
-                     {:name "availableMaterials"
-                      :i18nkey "available-materials"
-                      :type :table
-                      :css [:form-table :form-table--waste]
-                      :repeating true
-                      :body (tools/body availableMaterialsRow)}]})
+                     ]})
+
+(def available-materials {:name "availableMaterials"
+                          :i18nkey "available-materials"
+                          :type :table
+                          :uicomponent :docgenTable
+                          :css [:form-table :form-table--waste]
+                          :repeating true
+                          :body (tools/body availableMaterialsRow)})
 
 (def laajennettu-rakennusjateselvitys [toteutus
                                        purkaminen
@@ -380,7 +382,8 @@
                                        muut-kaivettavat-massat
                                        orgaaninen-aines
                                        vieraslajit
-                                       contact])
+                                       contact
+                                       available-materials])
 
 (defschemas 1
   [{:info {:name basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"
