@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.document-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
-            [clojure.set :refer [intersection]]
+            [clojure.set :refer [intersection union]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
@@ -40,9 +40,9 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(def update-doc-states (union #{:draft :open :submitted :complementNeeded} document-post-verdict-states))
+(def update-doc-states #{:draft :open :submitted :complementNeeded})
 
-(def approve-doc-states (union #{:open :submitted :complementNeeded} document-post-verdict-states))
+(def approve-doc-states #{:open :submitted :complementNeeded})
 
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
@@ -134,8 +134,7 @@
                       (partial action/vector-parameters [:updates])]
    :pre-checks [(partial editable-by-state? update-doc-states)
                 validate-user-authz-by-doc
-                application/validate-authority-in-drafts
-                (partial validate-post-verdict-update-doc :doc)]}
+                application/validate-authority-in-drafts]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -223,10 +222,10 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [user-can-be-set-validator
+   :pre-checks [(partial editable-by-state? update-doc-states)
+                user-can-be-set-validator
                 validate-user-authz-by-document-id
-                application/validate-authority-in-drafts]
-   :states     update-doc-states}
+                application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (doc-persistence/do-set-user-to-document application documentId userId path created))
 
@@ -236,10 +235,10 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [domain/validate-owner-or-write-access
+   :pre-checks [(partial editable-by-state? update-doc-states)
+                domain/validate-owner-or-write-access
                 validate-user-authz-by-document-id
-                application/validate-authority-in-drafts]
-   :states     update-doc-states}
+                application/validate-authority-in-drafts]}
   [{:keys [created application user] :as command}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
 
@@ -248,9 +247,9 @@
    :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :states     update-doc-states
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
-   :pre-checks [validate-user-authz-by-document-id
+   :pre-checks [(partial editable-by-state? update-doc-states)
+                validate-user-authz-by-document-id
                 application/validate-authority-in-drafts]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]

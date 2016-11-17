@@ -1438,6 +1438,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
+           :editable-in-states #{:verdictGiven}
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
     :body paasuunnittelija}
@@ -1451,6 +1452,7 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
+           :editable-in-states #{:verdictGiven}
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
