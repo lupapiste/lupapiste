@@ -2,7 +2,10 @@
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.util :as util]
-            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]))
+            [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [warnf]]
+            [lupapalvelu.opendata.schemas :refer [HakemusTiedot]]))
 
 (defn- transform-operation [operation]
   (-> operation
@@ -32,6 +35,13 @@
       process-buildings
       (dissoc :id :propertyId :address :municipality :location :primaryOperation :submitted :documents)))
 
+(defn schema-verify [checker data]
+  (let [errors (checker data)]
+    (if errors
+      (do
+        (warnf "Skipping data item [ID=%s], the result does not conform to HakemusTiedot schema: %s" (:asiointitunnus data) errors))
+      data)))
+
 (defn applications-by-organization [organization]
   (->> (mongo/select :applications {:permitType   :R
                                     :organization organization
@@ -39,4 +49,6 @@
                                     :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
                 [:id :primaryOperation.name :propertyId :address :municipality
                  :submitted :location :documents])
-       (map process-application)))
+       (map process-application)
+       (map (partial schema-verify (sc/checker HakemusTiedot)))
+       (remove nil?)))
