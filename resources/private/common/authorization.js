@@ -55,18 +55,20 @@ var authorization = (function() {
   // authModels is an object where, field names are ids and values the
   // actual auth models.  For example, for documents category, the
   // field names are document ids and values document auth models.
-  function refreshModelsForCategory(authModels, applicationId, category) {
+  function refreshModelsForCategory(authModels, applicationId, category, callback) {
     ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
       .success(function(d) {
         _.forEach(authModels, function(authModel, id) {
           authModel.setData(d.actionsById[id] || {});
         });
+        if (_.isFunction(callback)) { callback(d.result); }
       })
       .error(function(e) {
         _.forEach(authModels, function(authModel) {
           authModel.setData({});
         });
         error(e);
+        if (_.isFunction(callback)) { callback(e.result); }
       })
       .call();
   }
