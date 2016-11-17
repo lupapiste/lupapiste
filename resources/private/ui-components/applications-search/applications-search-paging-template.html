@@ -7,16 +7,24 @@
            data-bind="ifnot: dataProvider.pending">
         <label data-bind="text: loc($data.resultsTextKey, start(), end(), count())"></label>
         <div>
-          <button class="btn secondary" data-bind="click: prev, enable: enablePrevButton">
+          <button class="btn secondary"
+                  data-test-id="paging-previous"
+                  data-bind="click: prev, enable: enablePrevButton">
             <i class="lupicon-chevron-left"></i>
             <span data-bind="ltext: 'previous'"></span>
           </button>
-          <button class="btn secondary" data-bind="click: next, enable: enableNextButton">
+          <button class="btn secondary"
+                  data-test-id="paging-next"
+                  data-bind="click: next, enable: enableNextButton">
             <span data-bind="ltext: 'next'"></span>
             <i class="lupicon-chevron-right"></i>
           </button>
           <!-- ko foreach: limits -->
-          <button class="btn secondary" data-bind="text: $data, css: {active: $component.limit() === $data}, click: $component.setLimit"></button>
+          <button class="btn secondary"
+                  data-bind="text: $data,
+                             css: {active: $component.limit() === $data},
+                             attr: {'data-test-id': 'limit-' + $data},
+                             click: $component.setLimit"></button>
           <!-- /ko -->
           <label data-bind="ltext: 'applications.lengthMenu'"></label>
         </div>
