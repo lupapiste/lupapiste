@@ -393,7 +393,6 @@ var util = (function($) {
   function identLogoutRedirect() {
     var url = identLogoutUrl();
     var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
-    console.log(suffix);
     if (url) {
       window.location = _.escape(url) + "?return=" + suffix;
     }
