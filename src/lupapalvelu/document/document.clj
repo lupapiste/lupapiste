@@ -92,7 +92,7 @@
 (defn validate-post-verdict-update-doc [key {:keys [application data]}]
   (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
-    (when-not (and (valid-post-verdict-document? doc) (not (approved? doc)))
+    (when (and (valid-post-verdict-document? doc) (approved? doc))
       (fail :error.document.post-verdict-update))))
 
 ;;
