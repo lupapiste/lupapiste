@@ -237,11 +237,16 @@
               (:groupType attachment) => nil)))))))
 
 (facts* "post-verdict document modifications"
-  (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
+  (let [application    (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+        application-id (:id application)
+        documents      (:documents application)
+        applicant-doc  (domain/get-applicant-document documents)
+        suunnittelija-doc (domain/get-document-by-name documents "suunnittelija")
+        _ (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.henkilotiedot.etunimi" "test1"]]) => ok?
+        _ (command pena :update-doc :id application-id :doc (:id suunnittelija-doc) :updates [["henkilotiedot.etunimi" "DeSigner"]]) => ok?
         _ (give-verdict sonja application-id) => ok?
         suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")
-        documents (:documents (query-application sonja application-id))
-        applicant-doc (domain/get-applicant-document documents)]
+        ]
 
     (facts "create-doc"
       (command pena :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? :error.document.post-verdict-addition)
@@ -252,7 +257,7 @@
 
     (facts "update-doc"
       (fact "can't update applicant doc"
-        (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.etunimi" "test"]])) => fail?
+        (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.henkilotiedot.etunimi" "test"]])  => fail?)
       (fact "suunnittelija can be updated"
         (command pena :update-doc :id application-id :doc (:doc suunnittelija-resp) :updates [["henkilotiedot.etunimi" "test"]]) => ok?))
 
