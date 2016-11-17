@@ -6851,6 +6851,14 @@ input.tip.dateinput:disabled {
 }
 
 /* line 241, ../../../private/common-html/sass/partials/_inputs.scss */
+input.dateinput.dateinput--small {
+  height: 26px;
+  min-height: initial;
+  font-size: 0.875em;
+  background-size: contain;
+}
+
+/* line 248, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -6874,7 +6882,7 @@ input.grid-style-input:disabled {
   background-color: #f6f6f6;
 }
 
-/* line 245, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 252, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input--wide {
   padding: 0 12px;
   box-sizing: border-box;
@@ -8262,9 +8270,4 @@ div.alleYli-radioGroup {
   min-width: 150%;
   max-width: 150%;
   padding-left: 20px;
-}
-/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col-6 label.required:after {
-  content: " *";
-  color: #df3215;
 }

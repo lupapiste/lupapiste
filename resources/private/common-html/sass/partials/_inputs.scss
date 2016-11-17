@@ -238,6 +238,13 @@ input.tip.dateinput {
   }
 }
 
+input.dateinput.dateinput--small {
+  height: 26px;
+  min-height: initial;
+  font-size: 0.875em;
+  background-size: contain;
+}
+
 input.grid-style-input {
   @include input-fields;
 }
