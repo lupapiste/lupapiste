@@ -243,6 +243,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
    :user-roles #{:authority}
+   :pre-checks [(partial validate-post-verdict-update-doc :doc)]
    :states     approve-doc-states}
   [command]
   (ok :approval (approve command "rejected")))
