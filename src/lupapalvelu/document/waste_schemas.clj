@@ -90,6 +90,32 @@
                              :type :string
                              :css [:grid-style-input]}])
 
+(def contact {:name "contact"
+              :i18nkey "available-materials.contact"
+              :type :group
+              :uicomponent :docgenGroup
+              :approvable false
+              :exclude-from-pdf true
+              :template "form-grid-docgen-group-template"
+              :rows [{:h3 "available-materials.contact"}
+                     {:p "contact.help"}
+                     ["name" "phone" "email"]]
+              :group-help "contact.help"
+              :body [{:name "name" :type :string}
+                     {:name "phone" :type :string :subtype :tel}
+                     {:name "email" :type :string :subtype :email}
+                     ]})
+
+(def available-materials {:name "availableMaterials"
+                          :i18nkey "available-materials"
+                          :type :table
+                          :uicomponent :docgenTable
+                          :exclude-from-pdf true
+                          :css [:form-table :form-table--waste]
+                          :repeating true
+                          :body (tools/body availableMaterialsRow)})
+
+
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
                                :type :table
@@ -134,23 +160,8 @@
                                     :type :table
                                     :repeating true
                                     :body (tools/body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
-                           {:name "contact"
-                            :i18nkey "available-materials.contact"
-                            :type :group
-                            :exclude-from-pdf true
-                            :group-help "contact.help"
-                            :body [{:name "name" :type :string :css [:grid-style-input]}
-                                   {:name "phone" :type :string :subtype :tel}
-                                   {:name "email" :type :string :subtype :email}]}
-                           {:name "availableMaterials"
-                            :i18nkey "available-materials"
-                            :type :table
-                            :exclude-from-pdf true
-                            :uicomponent :docgenTable
-                            :css [:form-table :form-table--waste]
-                            :approvable false
-                            :repeating true
-                            :body (tools/body availableMaterialsRow)}])
+                           contact
+                           available-materials])
 
 (def toteutus {:name "toteutus"
                :type :group
@@ -174,9 +185,9 @@
                          ["purettavaKerrosala" "rakennusvuosi"]
                          ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
                          ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
-                         ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa"]
+                         ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa::2"]
                          ["polynLeviamisenEsto::4"]
-                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty[col-fixed]" "ilmoitusHairitsevastaMelusta/pvm[col-fixed]" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin[col-fixed]" "ilmoitusHairitsevastaMelusta/syy[col-fixed]"]]
+                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty[col-fixed]" "ilmoitusHairitsevastaMelusta/pvm[col-fixed]" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin[col-fixed]" "ilmoitusHairitsevastaMelusta/syy[col-fixed]::2"]]
                  :template "form-grid-docgen-group-template"
                  :body [{:name "purettavaKerrosala" :type :string :subtype :decimal}
                         {:name "rakennusvuosi" :type :string :subtype :number}
@@ -190,7 +201,7 @@
                         {:name "tarkeallaPohjavesialueella" :type :checkbox :inputType :checkbox-wrapper}
                         {:name "mineraalisenPurkujatteenKasittely"
                          :type :group
-                         :body [{:name "kasittelytapa" :type :select :css [:dropdown]
+                         :body [{:name "kasittelytapa" :type :select :css [:form-input :dropdown]
                                  :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
                                 {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values #{"muu"}} :type :string}]}
                         {:name "polynLeviamisenEsto" :type :text :max-len 4000}
@@ -209,7 +220,7 @@
                          :approvable false
                          :rows [{:h3 "laajennettuRakennusjateselvitys.vaarallisetAineet"}
                                 ["eiVaarallisiaAineita"]
-                                ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy"]]
+                                ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy::2"]]
                          :template "form-grid-docgen-group-template"
                          :body [{:name "eiVaarallisiaAineita" :type :checkbox :inputType :checkbox-wrapper}
                                 {:name "kartoitusVaarallisistaAineista"
@@ -349,29 +360,6 @@
                           :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
-(def contact {:name "contact"
-              :i18nkey "available-materials.contact"
-              :type :group
-              :uicomponent :docgenGroup
-              :approvable false
-              :exclude-from-pdf true
-              :template "form-grid-docgen-group-template"
-              :rows [{:h3 "available-materials.contact"}
-                     {:p "contact.help"}
-                     ["name" "phone" "email"]]
-              :group-help "contact.help"
-              :body [{:name "name" :type :string}
-                     {:name "phone" :type :string :subtype :tel}
-                     {:name "email" :type :string :subtype :email}
-                     ]})
-
-(def available-materials {:name "availableMaterials"
-                          :i18nkey "available-materials"
-                          :type :table
-                          :uicomponent :docgenTable
-                          :css [:form-table :form-table--waste]
-                          :repeating true
-                          :body (tools/body availableMaterialsRow)})
 
 (def laajennettu-rakennusjateselvitys [toteutus
                                        purkaminen
