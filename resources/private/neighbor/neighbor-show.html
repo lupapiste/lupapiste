@@ -187,6 +187,10 @@
                 <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'" data-test-id="neighbor-response-done"></h1>
                 <p data-bind="visible: done, ltext: 'neighbor.show.response.done.desc'"> <p>
 
+                <!-- ko if: util.identLogoutUrl -->
+                <p data-bind="ltext: 'ident.logout.info-text'"></p>
+                <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect" />
+                <!-- /ko -->
 
               </form>
             </div>
