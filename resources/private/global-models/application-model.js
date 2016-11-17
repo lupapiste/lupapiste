@@ -448,9 +448,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.partiesAsKrysp = function() {
     ajax.command("parties-as-krysp", {id: self.id(), lang: loc.getCurrentLanguage()})
-        .success(function(resp) {
-          console.log(resp);
-        })
+        .success(self.lightReload)
         .onError("error.command-illegal-state", self.lightReload)
         .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
         .processing(self.processing)

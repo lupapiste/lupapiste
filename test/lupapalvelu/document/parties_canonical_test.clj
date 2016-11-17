@@ -185,7 +185,7 @@
                                                         :kayttoonottava {:value false, :modified 1479129355521}}}},
                                   :katselmus {:tila {:value "lopullinen", :modified 1479129366687},
                                               :pitoPvm {:value "14.11.2016", :modified 1479129368282},
-                                              :pitaja {:value "MINÄ", :modified 1479129370001},
+                                              :pitaja {:value "MIN\u00c4", :modified 1479129370001},
                                               :tiedoksianto {:value false},
                                               :huomautukset {:kuvaus {:value "", :modified 1479129387040},
                                                              :maaraAika {:value nil},
@@ -200,12 +200,12 @@
                                                             :autopaikkojaEnintaan 10,
                                                             :autopaikkojaUlkopuolella 3,
                                                             :autopaikkojaVahintaan 1,
-                                                            :vaaditutTyonjohtajat "Vastaava työnjohtaja, Vastaava IV-työnjohtaja, Työnjohtaja",
+                                                            :vaaditutTyonjohtajat "Vastaava ty\u00f6njohtaja, Vastaava IV-ty\u00f6njohtaja, Ty\u00f6njohtaja",
                                                             :autopaikkojaRakennettava 2,
                                                             :vaaditutKatselmukset [{:katselmuksenLaji "aloituskokous",
                                                                                     :tarkastuksenTaiKatselmuksenNimi "Aloituskokous"}
                                                                                    {:katselmuksenLaji "muu tarkastus",
-                                                                                    :tarkastuksenTaiKatselmuksenNimi "Käyttöönottotarkastus"}],
+                                                                                    :tarkastuksenTaiKatselmuksenNimi "K\u00e4ytt\u00f6\u00f6nottotarkastus"}],
                                                             :maaraykset [{:maaraysaika 1377648000000,
                                                                           :sisalto "Radontekninen suunnitelma",
                                                                           :toteutusHetki 1377734400000}
@@ -221,32 +221,32 @@
                                                          :anto 1378339200000,
                                                          :viimeinenValitus 1378425600000,
                                                          :julkipano 1378512000000},
-                                           :poytakirjat [{:paatoskoodi "myönnetty",
+                                           :poytakirjat [{:paatoskoodi "my\u00f6nnetty",
                                                           :paatospvm 1375315200000,
                                                           :pykala 1,
                                                           :paatoksentekija "viranomainen",
-                                                          :paatos "Päätös 1",
+                                                          :paatos "P\u00e4\u00e4t\u00f6s 1",
                                                           :status "1",
                                                           :urlHash "236d9b2cfff88098d4f8ad532820c9fb93393237"}
                                                          {:paatoskoodi "ehdollinen",
                                                           :paatospvm 1375401600000,
                                                           :pykala 2,
-                                                          :paatoksentekija "Mölli Keinonen",
-                                                          :paatos "Mieleni minun tekevi, aivoni ajattelevi lähteäni laulamahan, saa'ani sanelemahan, sukuvirttä suoltamahan, lajivirttä laulamahan. Sanat suussani sulavat, puhe'et putoelevat, kielelleni kerkiävät, hampahilleni hajoovat.
+                                                          :paatoksentekija "M\u00f6lli Keinonen",
+                                                          :paatos "Mieleni minun tekevi, aivoni ajattelevi l\u00e4hte\u00e4ni laulamahan, saa'ani sanelemahan, sukuvirtt\u00e4 suoltamahan, lajivirtt\u00e4 laulamahan. Sanat suussani sulavat, puhe'et putoelevat, kielelleni kerki\u00e4v\u00e4t, hampahilleni hajoovat.
 
-                                                  Veli kulta, veikkoseni, kaunis kasvinkumppalini! Lähe nyt kanssa laulamahan, saa kera sanelemahan yhtehen yhyttyämme, kahta'alta käytyämme! Harvoin yhtehen yhymme, saamme toinen toisihimme näillä raukoilla rajoilla, poloisilla Pohjan mailla.
+                                                  Veli kulta, veikkoseni, kaunis kasvinkumppalini! Lahe nyt kanssa laulamahan, saa kera sanelemahan yhtehen yhyttyamme, kahta'alta kaytyamme! Harvoin yhtehen yhymme, saamme toinen toisihimme nailla raukoilla rajoilla, poloisilla Pohjan mailla.
 
-                                                  Lyökämme käsi kätehen, sormet sormien lomahan, lauloaksemme hyviä, parahia pannaksemme, kuulla noien kultaisien, tietä mielitehtoisien, nuorisossa nousevassa, kansassa kasuavassa: noita saamia sanoja, virsiä virittämiä vyöltä vanhan Väinämöisen, alta ahjon Ilmarisen, päästä kalvan Kaukomielen, Joukahaisen jousen tiestä, Pohjan peltojen periltä, Kalevalan kankahilta.",
+                                                  Ly\u00f6k\u00e4mme k\u00e4si k\u00e4tehen, sormet sormien lomahan, lauloaksemme hyvi\u00e4, parahia pannaksemme, kuulla noien kultaisien, tiet\u00e4 mielitehtoisien, nuorisossa nousevassa, kansassa kasuavassa: noita saamia sanoja, virsi\u00e4 viritt\u00e4mi\u00e4 vy\u00f6lt\u00e4 vanhan V\u00e4in\u00e4m\u00f6isen, alta ahjon Ilmarisen, p\u00e4\u00e4st\u00e4 kalvan Kaukomielen, Joukahaisen jousen tiest\u00e4, Pohjan peltojen perilt\u00e4, Kalevalan kankahilta.",
                                                           :status "6",
                                                           :urlHash "b55ae9c30533428bd9965a84106fb163611c1a7d"}],
                                            :id "5829b90bf63a8034c04f1492"}
                                           {:lupamaaraykset {:vaaditutKatselmukset [{:katselmuksenLaji "loppukatselmus"}],
                                                             :maaraykset [{:sisalto "Valaistussuunnitelma"}]},
                                            :paivamaarat {:anto 1378339200000},
-                                           :poytakirjat [{:paatoskoodi "myönnetty",
+                                           :poytakirjat [{:paatoskoodi "my\u00f6nnetty",
                                                           :paatospvm 1377993600000,
                                                           :paatoksentekija "johtava viranomainen",
-                                                          :paatos "Päätös 2",
+                                                          :paatos "P\u00e4\u00e4t\u00f6s 2",
                                                           :status "1"}],
                                            :id "5829b90df63a8034c04f149d"}],
                               :id "5829b90bf63a8034c04f148f",
