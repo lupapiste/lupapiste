@@ -42,6 +42,18 @@
 
 (notifications/defemail :application-state-change state-change)
 
+
+(notifications/defemail :application-return-to-draft
+  {:subject-key "return-to-draft"
+   :template "application-return-to-draft.md"
+   :model-fn (fn [{application :application} _ recipient]
+               {:operation-fi (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
+                :operation-sv (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
+                :address (:address application)
+                :city-fi (i18n/localize :fi "municipality" (:municipality application))
+                :city-sv (i18n/localize :sv "municipality" (:municipality application))
+                :name (:firstName recipient)})})
+
 ;; Validators
 
 (defn operation-validator [{{operation :operation} :data}]
