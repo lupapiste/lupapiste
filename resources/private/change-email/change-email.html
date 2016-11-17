@@ -16,11 +16,12 @@
 
       <div data-bind="if: error">
         <p class="error-message" data-bind="ltext: error"></p>
-        <button data-bind="click: back" class="secondary" >
-          <i class="lupicon-chevron-left"></i>
-          <span data-bind="ltext: 'back'"></span>
-        </button>
       </div>
+
+      <!-- ko if: util.identLogoutUrl -->
+      <p data-bind="ltext: 'ident.logout.info-text'"></p>
+      <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect" />
+      <!-- /ko -->
 
     </div>
   </section>
