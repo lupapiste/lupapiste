@@ -260,7 +260,11 @@
       (fact "can't update applicant doc"
         (command sonja :approve-doc :id application-id :doc (:id applicant-doc) :path nil :collection "documents") => fail?)
       (fact "suunnittelija doc approval"
-        (command sonja :approve-doc :id application-id :doc (:doc suunnittelija-resp) :path nil :collection "documents") => ok?))
+        (command sonja :approve-doc :id application-id :doc (:doc suunnittelija-resp) :path nil :collection "documents") => ok?)
+      (fact "after approval, Pena can't edit"
+        (command pena :update-doc :id application-id
+                 :doc (:doc suunnittelija-resp)
+                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update)))
 
     (facts "reject-doc"
       (fact "can't update applicant doc"
