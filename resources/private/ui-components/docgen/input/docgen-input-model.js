@@ -64,7 +64,7 @@ LUPAPISTE.DocgenInputModel = function(params) {
                         "localized-string": "form-string",
                         "check-string": "check-string",
                         "paragraph" : "form-paragraph",
-                        "date": "form-input",
+                        "date": "form-input dateinput",
                         "checkbox-wrapper": "form-input"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }

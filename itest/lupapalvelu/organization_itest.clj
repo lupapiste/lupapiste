@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [clojure.set :refer [difference]]
             [lupapalvelu.organization :as local-org-api]
+            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.proxy-services :as proxy]
             [lupapalvelu.permit :as permit]
@@ -563,13 +564,13 @@
                                                                                        :modified 100}}}
                                                  }}]})
     (fact "Waste ads: one row"
-      (local-org-api/waste-ads "753-R") => '({:modified  2222,
+      (waste-ads/waste-ads "753-R") => '({:modified  2222,
                                               :materials ({:kuvaus     "Rouheaa",
                                                            :saatavilla "17.12.2015",
                                                            :yksikko    "kg", :maara "2", :aines "Sora"}),
                                               :contact   {:email "bob@reboot.tv", :phone "12345", :name "Bob"}}))
     (fact "No ads for 753-YA"
-      (local-org-api/waste-ads "753-YA") => '())
+      (waste-ads/waste-ads "753-YA") => '())
     (mongo/insert :applications
                   {:_id          "LP-NO-NAME"
                    :organization "753-R"
@@ -654,12 +655,12 @@
                                                                                        :modified 100}}}
                                                  }}]})
     (fact "Ads only include proper information"
-      (count (local-org-api/waste-ads "753-R")) => 1)
+      (count (waste-ads/waste-ads "753-R")) => 1)
     (mongo/insert :applications
                   {:_id          "LP-2"
                    :organization "753-R"
                    :documents    [
-                                  {:schema-info {:name "rakennusjateselvitys"}
+                                  {:schema-info {:name "laajennettuRakennusjateselvitys"}
                                    :data        {:contact            {:name  {:value    "Dot"
                                                                               :modified 1}
                                                                       :phone {:value    "12345"
@@ -695,7 +696,7 @@
                                                                           :kuvaus     {:value ""}}}
                                                  }}]})
     (fact "Two ads"
-      (local-org-api/waste-ads "753-R")
+      (waste-ads/waste-ads "753-R")
       => '({:modified 999999,
             :materials
                       ({:kuvaus "Rouheaa", :saatavilla "17.12.2015", :yksikko "tonni", :maara "100", :aines "Kivi"}
@@ -728,9 +729,9 @@
                                                                               :kuvaus     {:value    "Rouheaa"
                                                                                            :modified 100}}}
                                                      }}]}))
-      (count (local-org-api/waste-ads "753-R")) => 100
-      (count (local-org-api/waste-ads nil)) => 100
-      (count (local-org-api/waste-ads "")) => 100)
+      (count (waste-ads/waste-ads "753-R")) => 100
+      (count (waste-ads/waste-ads nil)) => 100
+      (count (waste-ads/waste-ads "")) => 100)
 
     (facts "Validators"
       (fact "Bad format: nil" (local-org-api/valid-feed-format {:data {:fmt nil}})

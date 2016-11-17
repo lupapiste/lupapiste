@@ -144,6 +144,8 @@
     (re-matches v/maara-alatunnus-pattern v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
 
+(defmethod validate-field :calculation [_ _ _] nil)
+
 (def illegal-key [:err "illegal-key"])
 
 (defmethod validate-field nil [_ _ _]

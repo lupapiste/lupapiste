@@ -19,6 +19,8 @@
                        [:fi :sv]))
 (def default-lang (first supported-langs))
 
+(def common-translations-filename "shared_translations.txt")
+
 (defn- read-translations-txt [name-or-file]
   (let [resource (if (instance? java.io.File name-or-file)
                    name-or-file
@@ -41,7 +43,7 @@
 
 (defn- load-translations []
   (apply merge-with conj
-         (read-translations-txt "shared_translations.txt")
+         (read-translations-txt common-translations-filename)
          (i18n-localizations)))
 
 (def- localizations (atom nil))
@@ -209,6 +211,17 @@
    (-> (default-i18n-files)
        (txt-files->map)
        (missing-translations lang)
+       (commons-resources/write-excel file))))
+
+(defn- all-localizations-excel
+  ([] (all-localizations-excel (default-i18n-files)))
+  ([source-files]
+    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
+          filename (str (System/getProperty "user.home") "/lupapiste_translations_all_" date-str ".xlsx")]
+      (all-localizations-excel source-files (io/file filename))))
+  ([source-files file]
+   (-> source-files
+       (txt-files->map)
        (commons-resources/write-excel file))))
 
 (defn- contains-no-translations? [k-new v-new lang]

@@ -469,3 +469,4 @@
 "waste.aines.turve" "en" ""
 "waste.aines.turve" "fi" "Turve (Tv)"
 "waste.aines.turve" "sv" ""
+"waste.total" "fi" "Yhteensä:"

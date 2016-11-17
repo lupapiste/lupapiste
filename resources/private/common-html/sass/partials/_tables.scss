@@ -386,9 +386,47 @@ th.full-width-column {
   width: 100%;
 }
 
-.form-table.form-table--waste {
+.form-table--waste {
   @include no-row-hover;
   .form-input {
     height: initial;
+  }
+  th {
+    white-space: nowrap;
+  }
+  td.action-column {
+    text-align: center;
+    i {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+  }
+  tfoot {
+    height: initial;
+    font-size: 16px;
+    tr {
+      border: none;
+    }
+    .footer-sum--total {
+      text-indent: 10px;
+      font-weight: bold;
+    }
+    .footer-sum--result {
+      color: $gray119;
+    }
+    .footer-sum--error {
+      color: $red-dark;
+    }
+    .td-left {
+      text-indent: 10px;
+    }
+    .td-center {
+      text-align: center;
+    }
+  }
+}
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
   }
 }
