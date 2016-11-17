@@ -31,6 +31,9 @@
 (defn- valid-post-verdict-document? [document]
   (valid-post-verdict-schema? (:schema-info document)))
 
+(defn approved? [document]
+  (= "approved" (get-in document [:meta :_approved :value])))
+
 (defn user-can-be-set? [user-id application]
   (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
 

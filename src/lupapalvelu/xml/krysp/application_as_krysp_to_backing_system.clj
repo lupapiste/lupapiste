@@ -10,6 +10,7 @@
             [sade.util :as util]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
@@ -66,10 +67,9 @@
     application))
 
 (defn- non-approved-designer? [document]
-  (let [subtype  (keyword (get-in document [:schema-info :subtype]))
-        approval (get-in document [:meta :_approved :value])]
+  (let [subtype  (keyword (get-in document [:schema-info :subtype]))]
     (and (= :suunnittelija subtype)
-         (or (not= "approved" approval)
+         (or (not (doc/approved? document))
            (pos? (model/modifications-since-approvals document))))))
 
 (defn- remove-non-approved-designers [application]
