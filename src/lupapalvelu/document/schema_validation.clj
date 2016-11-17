@@ -26,7 +26,7 @@
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
-   :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
+   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
                                :check-string :checkbox-wrapper
@@ -153,6 +153,11 @@
   (merge GenInput
          {:type       (sc/eq :date)}))
 
+(defschema TimeString
+  "Time string hh:mm:ss.s"
+  (merge GenInput
+         {:type       (sc/eq :time)}))
+
 (defschema Checkbox
   (merge GenInput
          {:type       (sc/eq :checkbox)}))
@@ -225,6 +230,7 @@
                   (type-pred :select)     Select
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
+                  (type-pred :time)       TimeString
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages

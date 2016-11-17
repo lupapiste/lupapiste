@@ -132,6 +132,10 @@
   "A schema for timestamp"
   (sc/pred (every-pred integer?) "Timestamp (long)"))
 
+(defschema TimeString
+  "A schema for timestring hh:mm:ss.d"
+  (sc/constrained sc/Str (partial re-matches util/time-pattern) "Time string hh:mm:ss.d"))
+
 (defschema Zipcode
   "A schema for Finnish zipcode"
   (sc/pred validators/finnish-zip? "Finnish zipcode"))

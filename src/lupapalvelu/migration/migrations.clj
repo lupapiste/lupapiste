@@ -2511,6 +2511,31 @@
       (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
         (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
 
+
+(defn coerce-time-string [time-string]
+  (if (ss/not-blank? time-string)
+    (->> (re-seq #"\d+" time-string)
+         ((fn [[h m s d]] [(or h "00") (or m "00") s d]))
+         (remove nil?)
+         (interleave ["" ":" ":" "."])
+         (apply str))
+    time-string))
+
+(defn coerce-kesto-row-time-strings [row]
+  (merge row
+         (->> (select-keys row [:arkiAlkuAika :arkiLoppuAika :lauantaiAlkuAika :lauantaiLoppuAika :sunnuntaiAlkuAika :sunnuntaiLoppuAika])
+              (util/map-values #(update % :value coerce-time-string)))))
+
+(defn coerce-ymp-ilm-kesto-time-strings [doc]
+  (if (= (get-in doc [:schema-info :name]) "ymp-ilm-kesto")
+    (update-in doc [:data :kesto] (partial util/map-values coerce-kesto-row-time-strings))
+    doc))
+
+(defmigration coerce-time-string-in-ymp-ilm-kesto-docs
+  (update-applications-array :documents
+                             coerce-ymp-ilm-kesto-time-strings
+                             {:documents.schema-info.name "ymp-ilm-kesto"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

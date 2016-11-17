@@ -8,12 +8,12 @@
 (def kesto (body {:name "kesto" :type :table :repeating true :uicomponent :docgenTable
                   :body [{:name "alku" :type :date}
                          {:name "loppu" :type :date}
-                         {:name "arkiAlkuAika" :type :string :size :s}
-                         {:name "arkiLoppuAika" :type :string :size :s}
-                         {:name "lauantaiAlkuAika" :type :string :size :s}
-                         {:name "lauantaiLoppuAika" :type :string :size :s}
-                         {:name "sunnuntaiAlkuAika" :type :string :size :s}
-                         {:name "sunnuntaiLoppuAika" :type :string :size :s}]}))
+                         {:name "arkiAlkuAika" :type :time :size :s}
+                         {:name "arkiLoppuAika" :type :time :size :s}
+                         {:name "lauantaiAlkuAika" :type :time :size :s}
+                         {:name "lauantaiLoppuAika" :type :time :size :s}
+                         {:name "sunnuntaiAlkuAika" :type :time :size :s}
+                         {:name "sunnuntaiLoppuAika" :type :time :size :s}]}))
 
 (def kesto-mini (body {:name "kesto" :type :group
                        :body [{:name "alku" :type :date}
