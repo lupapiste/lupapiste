@@ -44,7 +44,7 @@
 
 (def jateyksikko {:name "yksikko" :i18nkey "jateyksikko"
                   :type :select
-                  :css [:dropdown]
+                  :css [:dropdown :waste-unit-select]
                   :body [{:name "kg"}
                          {:name "tonni"}
                          {:name "m2"}
@@ -54,7 +54,7 @@
                         :type :string :subtype :decimal
                         :uicomponent :docgen-input
                         :inputType :string
-                        :css [:grid-style-input]
+                        :css [:grid-style-input--wide]
                         :min 0 :max 9999999 :size :s})
 
 (def rakennusjatesuunnitelmaRow [(assoc rakennusjatemaara :name "suunniteltuMaara")
@@ -66,7 +66,7 @@
                                   (assoc rakennusjatemaara :name "painoT")
                                   {:name "jatteenToimituspaikka"
                                    :type :string
-                                   :css [:grid-style-input]
+                                   :css [:grid-style-input--wide]
                                    :max-len 50}])
 
 (def rakennusjateselvitysRow [(assoc rakennusjatemaara :name "suunniteltuMaara" :readonly true)
@@ -75,12 +75,13 @@
                               (assoc rakennusjatemaara :name "painoT")
                               {:name "jatteenToimituspaikka"
                                :type :string
-                               :css [:grid-style-input]
+                               :css [:grid-style-input--wide]
                                :max-len 50}])
 
+;; Contact and available-materials are used in the extended schemas, too.
 (def availableMaterialsRow [{:name "aines"
                              :type :string
-                             :css [:grid-style-input]}
+                             :css [:grid-style-input--wide]}
                            rakennusjatemaara
                            jateyksikko
                             {:name "saatavilla"
@@ -88,7 +89,35 @@
                              }
                             {:name "kuvaus"
                              :type :string
-                             :css [:grid-style-input]}])
+                             :css [:grid-style-input--wide]}])
+
+(def contact {:name "contact"
+              :i18nkey "available-materials.contact"
+              :type :group
+              :uicomponent :docgenGroup
+              :approvable false
+              :exclude-from-pdf true
+              :template "form-grid-docgen-group-template"
+              :rows [{:h3 "available-materials.contact"}
+                     {:p "contact.help"}
+                     ["name" "phone" "email"]]
+              :group-help "contact.help"
+              :body [{:name "name" :type :string}
+                     {:name "phone" :type :string :subtype :tel}
+                     {:name "email" :type :string :subtype :email}
+                     ]})
+
+(def available-materials {:name "availableMaterials"
+                          :i18nkey "available-materials"
+                          :type :table
+                          :uicomponent :docgenTable
+                          :exclude-from-pdf true
+                          :css [:form-table :form-table--waste]
+                          :columnCss {"aines" [:column--50]
+                                      "kuvaus" [:column--50]}
+                          :repeating true
+                          :body (tools/body availableMaterialsRow)})
+
 
 (def rakennusjatesuunnitelma [{:name "rakennusJaPurkujate"
                                :i18nkey "rakennusJaPurkujate"
@@ -134,23 +163,12 @@
                                     :type :table
                                     :repeating true
                                     :body (tools/body vaarallinenainetyyppi rakennusjateselvitysUusiRow)}]}
-                           {:name "contact"
-                            :i18nkey "available-materials.contact"
-                            :type :group
-                            :exclude-from-pdf true
-                            :group-help "contact.help"
-                            :body [{:name "name" :type :string }
-                                   {:name "phone" :type :string :subtype :tel}
-                                   {:name "email" :type :string :subtype :email}]}
-                           {:name "availableMaterials"
-                            :i18nkey "available-materials"
-                            :type :table
-                            :exclude-from-pdf true
-                            :uicomponent :docgenTable
-                            :css [:form-table :form-table--waste]
-                            :approvable false
-                            :repeating true
-                            :body (tools/body availableMaterialsRow)}])
+                           contact
+                           available-materials])
+
+;; ---------------------------------------------------------
+;; Extended report schemas start here
+;; ---------------------------------------------------------
 
 (def toteutus {:name "toteutus"
                :type :group
@@ -172,11 +190,20 @@
                  :approvable false
                  :rows  [{:h3 "laajennettuRakennusjateselvitys.purkaminen"}
                          ["purettavaKerrosala" "rakennusvuosi"]
-                         ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
-                         ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
-                         ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa"]
+                         {:row ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide"
+                                "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
+                          :css [:label-x-2]}
+                         {:row ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
+                          :css [:label-x-2]}
+                         {:row ["mineraalisenPurkujatteenKasittely/kasittelytapa"
+                                "mineraalisenPurkujatteenKasittely/muuKasittelytapa::2"]
+                          :css [:label-x-2]}
                          ["polynLeviamisenEsto::4"]
-                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty[col-fixed]" "ilmoitusHairitsevastaMelusta/pvm[col-fixed]" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin[col-fixed]" "ilmoitusHairitsevastaMelusta/syy[col-fixed]"]]
+                         {:row ["ilmoitusHairitsevastaMelusta/ilmoitusTehty"
+                                "ilmoitusHairitsevastaMelusta/pvm"
+                                "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin"
+                                "ilmoitusHairitsevastaMelusta/syy::2"]
+                          :css [:label-x-3]}]
                  :template "form-grid-docgen-group-template"
                  :body [{:name "purettavaKerrosala" :type :string :subtype :decimal}
                         {:name "rakennusvuosi" :type :string :subtype :number}
@@ -190,7 +217,7 @@
                         {:name "tarkeallaPohjavesialueella" :type :checkbox :inputType :checkbox-wrapper}
                         {:name "mineraalisenPurkujatteenKasittely"
                          :type :group
-                         :body [{:name "kasittelytapa" :type :select :css [:dropdown]
+                         :body [{:name "kasittelytapa" :type :select :css [:form-input :dropdown]
                                  :body (map #(hash-map :name %) ["murskaus" "pulverointi" "muu"])}
                                 {:name "muuKasittelytapa" :show-when {:path "kasittelytapa" :values #{"muu"}} :type :string}]}
                         {:name "polynLeviamisenEsto" :type :text :max-len 4000}
@@ -209,7 +236,11 @@
                          :approvable false
                          :rows [{:h3 "laajennettuRakennusjateselvitys.vaarallisetAineet"}
                                 ["eiVaarallisiaAineita"]
-                                ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy"]]
+                                {:row ["kartoitusVaarallisistaAineista/ilmoitusTehty"
+                                       "kartoitusVaarallisistaAineista/pvm"
+                                       "kartoitusVaarallisistaAineista/lisattyLiitteisiin"
+                                       "kartoitusVaarallisistaAineista/syy::2"]
+                                 :css [:label-x-2]}]
                          :template "form-grid-docgen-group-template"
                          :body [{:name "eiVaarallisiaAineita" :type :checkbox :inputType :checkbox-wrapper}
                                 {:name "kartoitusVaarallisistaAineista"
@@ -235,24 +266,28 @@
                                                 :values #{true}}
                                     :type :table
                                     :css [:form-table :form-table--waste]
+                                    :columnCss {"jate" [:column--50]
+                                                "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unit "yksikko"}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["kreosiittiJate" "pcbJate" "asbestiJate" "kyllastettyPuu"])}
-                                           {:name "maara" :type :string :subtype :number :size :s}
+                                           {:name "maara" :type :string :subtype :decimal}
                                            {:name "yksikko" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name % :i18nkey (str "unit." %)) ["kg" "tonnia"])}
                                            {:name "sijoituspaikka" :type :string}]}
                                    {:name "muuJate"
                                     :type :table
                                     :css [:form-table :form-table--waste]
+                                    :columnCss {"jate" [:column--50]
+                                                "sijoituspaikka" [:column--50]}
                                     :repeating true
                                     :approvable false
                                     :footer-sums [{:amount "maara" :unitKey :t}]
                                     :body [{:name "jate" :type :select :css [:dropdown]
                                             :body (map #(hash-map :name %) ["betoni" "tiilet" "pinnoittamatonPuu" "pinnoitettuPuu" "sekajate"])}
-                                           {:name "maara" :type :string :subtype :number}
+                                           {:name "maara" :type :string :subtype :decimal}
                                            {:name "sijoituspaikka" :type :string}]}]})
 
 (def pilaantuneet-maat {:name "pilaantuneetMaat"
@@ -260,9 +295,17 @@
                         :uicomponent :docgenGroup
                         :approvable false
                         :rows [{:h3 "laajennettuRakennusjateselvitys.pilaantuneetMaat"}
-                               ["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
-                               ["ilmoitusPuhdistuksesta/ilmoitusTehty::2" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
-                               ["poistettavatAinekset" "sijoituspaikka::3"]]
+                               {:row ["tutkimusPilaantuneistaMaista/tutkimusTehty"
+                                      "tutkimusPilaantuneistaMaista/pvm"
+                                      "tutkimusPilaantuneistaMaista/lisattyLiitteisiin"
+                                      "tutkimusPilaantuneistaMaista/syy::2"]
+                                :css [:label-x-2]}
+                               {:row ["ilmoitusPuhdistuksesta/ilmoitusTehty::2"
+                                      "ilmoitusPuhdistuksesta/pvm"
+                                      "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
+                                :css [:row-tight]}
+                               {:row ["poistettavatAinekset" "sijoituspaikka::3"]
+                                :css [:label-x-2]}]
                         :template "form-grid-docgen-group-template"
                         :body [{:name "tutkimusPilaantuneistaMaista"
                                 :type :group
@@ -286,6 +329,8 @@
    :type :table
    :repeating true
    :css [:form-table :form-table--waste]
+   :columnCss {"aines-group" [:column--50]
+               "sijoituspaikka" [:column--50]}
    :approvable false
    :body [{:name "aines-group"
            :type :group
@@ -299,8 +344,8 @@
                    :hide-when {:path "aines" :values #{"muu"}}}
                   {:name "muu" :type :string :label false
                    :show-when {:path "aines" :values #{"muu"}}}]}
-          {:name "hyodynnetaan" :type :string :subtype :number}
-          {:name "poisajettavia" :type :string :subtype :number}
+          {:name "hyodynnetaan" :type :string :subtype :decimal}
+          {:name "poisajettavia" :type :string :subtype :decimal}
           {:name "yhteensa" :type :calculation
            :columns ["hyodynnetaan" "poisajettavia"]}
           {:name "sijoituspaikka" :type :string}]
@@ -320,7 +365,7 @@
                               :uicomponent :docgenGroup
                               :approvable false
                               :rows [["ainekset::4"]
-                                     ["kaivettavienMassojenSelvitys/selvitystapa" "kaivettavienMassojenSelvitys/muuSelvitystapa"]]
+                                     ["kaivettavienMassojenSelvitys/selvitystapa::2" "kaivettavienMassojenSelvitys/muuSelvitystapa::2"]]
                               :template "form-grid-docgen-group-template"
                               :body [(ainekset-table ["betoni" "asfalttijate" "betoniAsfalttiMaaAines" "stabiloituSavi" "kevytsoraVaahtolasimurske" "maatuhka"])
                                      {:name "kaivettavienMassojenSelvitys"
@@ -349,27 +394,6 @@
                           :body (map #(hash-map :name %) ["on" "ei" "eiTiedossa"])}
                          {:name "selvitysVieraslajeista" :type :text :max-len 4000}]})
 
-(def contact {:name "contact"
-              :i18nkey "available-materials.contact"
-              :type :group
-              :uicomponent :docgenGroup
-              :approvable false
-              :exclude-from-pdf true
-              :template "form-grid-docgen-group-template"
-              :rows [{:h3 "available-materials.contact"}
-                     {:p "contact.help"}
-                     ["name" "phone" "email"]
-                     ["availableMaterials::4"]]
-              :group-help "contact.help"
-              :body [{:name "name" :type :string}
-                     {:name "phone" :type :string :subtype :tel}
-                     {:name "email" :type :string :subtype :email}
-                     {:name "availableMaterials"
-                      :i18nkey "available-materials"
-                      :type :table
-                      :css [:form-table :form-table--waste]
-                      :repeating true
-                      :body (tools/body availableMaterialsRow)}]})
 
 (def laajennettu-rakennusjateselvitys [toteutus
                                        purkaminen
@@ -380,7 +404,8 @@
                                        muut-kaivettavat-massat
                                        orgaaninen-aines
                                        vieraslajit
-                                       contact])
+                                       contact
+                                       available-materials])
 
 (defschemas 1
   [{:info {:name basic-construction-waste-plan-name ; "rakennusjatesuunnitelma"

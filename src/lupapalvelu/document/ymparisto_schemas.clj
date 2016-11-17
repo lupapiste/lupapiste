@@ -5,9 +5,11 @@
 #_(def sijainti (body simple-osoite
                  {:name "karttapiirto" :type :text :max-len 4000}))
 
+(def small-date-css [:dateinput :dateinput--small])
+
 (def kesto (body {:name "kesto" :type :table :repeating true :uicomponent :docgenTable
-                  :body [{:name "alku" :type :date}
-                         {:name "loppu" :type :date}
+                  :body [{:name "alku" :type :date :css small-date-css}
+                         {:name "loppu" :type :date :css small-date-css}
                          {:name "arkiAlkuAika" :type :time :size :s}
                          {:name "arkiLoppuAika" :type :time :size :s}
                          {:name "lauantaiAlkuAika" :type :time :size :s}
@@ -16,8 +18,8 @@
                          {:name "sunnuntaiLoppuAika" :type :time :size :s}]}))
 
 (def kesto-mini (body {:name "kesto" :type :group
-                       :body [{:name "alku" :type :date}
-                              {:name "loppu" :type :date}]}))
+                       :body [{:name "alku" :type :date :css small-date-css}
+                              {:name "loppu" :type :date :css small-date-css}]}))
 
 (def maatila (body {:name "omistaja"
                     :type :group
@@ -37,8 +39,8 @@
                          {:name "lupapaatostiedot" :type :string :size :l}
                          {:name "voimassaoloaika"
                           :type :group
-                          :body [{:name "alku" :type :date}
-                                 {:name "loppu" :type :date}]}))
+                          :body [{:name "alku" :type :date :css small-date-css}
+                                 {:name "loppu" :type :date :css small-date-css}]}))
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
@@ -157,7 +159,7 @@
             :body [{:name "lammistysmuodon-vaihtaminen"}
                    {:name "oljylammistyslaitteiston-uusiminen"}]}
            {:name "muu-syy" :type :string}
-           {:name "kaytosta-poistamisen-ajankohta" :type :date :required true}
+           {:name "kaytosta-poistamisen-ajankohta" :type :date :css small-date-css :required true}
            {:name "kaytosta-poiston-jalkeen" :type :group :layout :horizontal
             :body [{:name "tyhjennetty" :type :checkbox}
                    {:name "puhdistettu" :type :checkbox}
@@ -387,8 +389,8 @@
                                                         :body [{:name "etaisyysTalouskaivoon" :type :string :unit :m :size :m}
                                                                {:name "etaisyysValtaojaan" :type :string :unit :m :size :m}
                                                                {:name "etaisyysVesistoon" :type :string :unit :m :size :m}]}
-                                                       {:name "patterinLevitysaika" :type :group :body [{:name "alku" :type :date}
-                                                                                                        {:name "loppu" :type :date}]}]}]}))
+                                                       {:name "patterinLevitysaika" :type :group :body [{:name "alku" :type :date :css small-date-css}
+                                                                                                        {:name "loppu" :type :date :css small-date-css}]}]}]}))
 
 (defschemas
   1
