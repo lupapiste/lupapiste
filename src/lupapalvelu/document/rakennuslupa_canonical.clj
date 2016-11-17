@@ -287,18 +287,6 @@
                     canonical)]
     canonical))
 
-
-(defn strip-canonical-for-parties
-  "Dissoc application related data from canonical"
-  [canonical]
-  (update-in canonical
-             [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
-             dissoc :rakennuspaikkatieto :toimenpidetieto :lausuntotieto))
-
-(defn parties-to-canonical [application lang]
-  (->> (application-to-canonical application lang)
-       strip-canonical-for-parties))
-
 (defn katselmusnimi-to-type [nimi tyyppi]
   (if (= :tarkastus tyyppi)
     "muu tarkastus"

@@ -559,7 +559,7 @@
         canonical)
       (common-map-enums krysp-version)))
 
-(defn- rakennuslupa-element-to-xml [canonical krysp-version]
+(defn rakennuslupa-element-to-xml [canonical krysp-version]
   (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defn save-application-as-krysp
@@ -594,9 +594,3 @@
 
 (defmethod permit/application-krysp-mapper :R [application lang submitted-application krysp-version output-dir begin-of-link]
   (save-application-as-krysp application lang submitted-application krysp-version output-dir begin-of-link))
-
-
-(defmethod permit/parties-krysp-mapper :R [application lang krysp-version output-dir]
-  (let [canonical (canonical/parties-to-canonical application lang)
-        xml       (rakennuslupa-element-to-xml canonical krysp-version)]
-    (writer/write-to-disk application nil xml krysp-version output-dir)))
