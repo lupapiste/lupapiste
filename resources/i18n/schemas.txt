@@ -3202,7 +3202,7 @@
 "rakennusjateselvitys.availableMaterials.maara" "fi" "Määrä"
 "rakennusjateselvitys.availableMaterials.maara" "sv" "Mängd"
 "rakennusjateselvitys.availableMaterials.saatavilla" "en" "Available lines"
-"rakennusjateselvitys.availableMaterials.saatavilla" "fi" "Tillgänglig"
+"rakennusjateselvitys.availableMaterials.saatavilla" "fi" "Saatavilla"
 "rakennusjateselvitys.availableMaterials.saatavilla" "sv" "Tillgänglig"
 "rakennusjateselvitys.contact._group_label" "fi" ""
 "rakennusjateselvitys.contact._group_label" "sv" ""
