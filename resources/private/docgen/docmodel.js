@@ -1684,4 +1684,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   if (!doc.validationErrors) {
     validate();
   }
+
+  self.redraw = function() {
+    var accordionState = AccordionState.get(doc.id);
+    authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents", function() {
+      _.set(options, "accordionCollapsed", !accordionState);
+      var previous = self.element.prev();
+      var next = self.element.next();
+      self.element.remove();
+      self.element = buildSection();
+      if (_.isEmpty(previous)) {
+        next.before(self.element);
+      } else {
+        previous.after(self.element);
+      }
+    });
+  };
+
 };
