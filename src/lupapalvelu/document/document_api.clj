@@ -18,11 +18,12 @@
 
 ;; Action category: documents & tasks
 
-(defn- build-document-params [{application-id :id} {document-id :id}]
+(defn- build-document-params [{application-id :id} {document-id :id info :schema-info}]
   {:id  application-id
    :doc document-id
    :docId document-id
    :documentId document-id
+   :schemaName (:name info)
    :collection "documents"})
 
 (defn- build-task-params [{application-id :id} {document-id :id}]
