@@ -30,12 +30,13 @@
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="form-grid-docgen-group-template">
 <div class="form-grid" data-bind="foreach: rowSchemas">
-  <div class="row">
+  <div class="row"
+       data-bind="css: $data.rowCss">
     <!-- ko if: $data.ltext -->
     <div data-bind="ltext: $data.ltext, css: $data.css"></div>
     <!-- /ko -->
     <!-- ko ifnot: $data.tag -->
-    <div data-bind="foreach: $data">
+    <div data-bind="foreach: $data.row">
       <div class="col--vertical" data-bind="css: $data.colClass,
                                             component: { name: $data.uicomponent,
                                                          params: { schema: $data,

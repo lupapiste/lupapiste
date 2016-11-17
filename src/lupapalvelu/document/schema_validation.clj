@@ -300,14 +300,16 @@
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
    (opt :template)             sc/Str       ;; Component template to use
-   ;; Row item format: "<path><cols><css>"
+   ;; Row text item format: "<path><cols><css>"
    ;; <path>  path1/path2/...
    ;; <cols>  ::n  where n is 1-4 (default 1)
    ;; <css>   [class1 class2 ...]
    ;; <cols> and <css> are optional, either or both can be omitted.
-   (opt :rows)                 [(sc/if map?
-                                  {sc/Keyword sc/Str}
-                                  [sc/Str])]})
+   (opt :rows)                 [(sc/conditional
+                                 :row {:css [sc/Keyword]
+                                       :row [sc/Str]}
+                                 map?  {sc/Keyword sc/Str}
+                                 :else [sc/Str])]})
 
 (defschema Element
   "Any doc element."
@@ -351,7 +353,7 @@
       (vec (concat path target-path)))))
 
 (defn validate-rows [{name :name rows :rows :as schema}]
-  (let [invalid-paths (->> (filter vector? rows)
+  (let [invalid-paths (->> (map #(if (vector? %) % (:row %)) rows)
                            (apply concat)
                            (map #(vector % (build-absolute-path [] %)))
                            (util/map-values (partial get-in-schema schema))

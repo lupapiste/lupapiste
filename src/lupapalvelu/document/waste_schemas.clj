@@ -183,11 +183,20 @@
                  :approvable false
                  :rows  [{:h3 "laajennettuRakennusjateselvitys.purkaminen"}
                          ["purettavaKerrosala" "rakennusvuosi"]
-                         ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide" "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
-                         ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
-                         ["mineraalisenPurkujatteenKasittely/kasittelytapa" "mineraalisenPurkujatteenKasittely/muuKasittelytapa::2"]
+                         {:row ["oljysailioidenLukumaara" "sailioilleSuunnitellutToimenpiteet/toimenpide"
+                                "sailioilleSuunnitellutToimenpiteet/muuToimenpide"]
+                          :css [:label-x-2]}
+                         {:row ["etaisyysPohjavesialueesta" "tarkeallaPohjavesialueella::2"]
+                          :css [:label-x-2]}
+                         {:row ["mineraalisenPurkujatteenKasittely/kasittelytapa"
+                                "mineraalisenPurkujatteenKasittely/muuKasittelytapa::2"]
+                          :css [:label-x-2]}
                          ["polynLeviamisenEsto::4"]
-                         ["ilmoitusHairitsevastaMelusta/ilmoitusTehty[col-fixed]" "ilmoitusHairitsevastaMelusta/pvm[col-fixed]" "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin[col-fixed]" "ilmoitusHairitsevastaMelusta/syy[col-fixed]::2"]]
+                         {:row ["ilmoitusHairitsevastaMelusta/ilmoitusTehty"
+                                "ilmoitusHairitsevastaMelusta/pvm"
+                                "ilmoitusHairitsevastaMelusta/lisattyLiitteisiin"
+                                "ilmoitusHairitsevastaMelusta/syy::2"]
+                          :css [:label-x-3]}]
                  :template "form-grid-docgen-group-template"
                  :body [{:name "purettavaKerrosala" :type :string :subtype :decimal}
                         {:name "rakennusvuosi" :type :string :subtype :number}
@@ -220,7 +229,11 @@
                          :approvable false
                          :rows [{:h3 "laajennettuRakennusjateselvitys.vaarallisetAineet"}
                                 ["eiVaarallisiaAineita"]
-                                ["kartoitusVaarallisistaAineista/ilmoitusTehty" "kartoitusVaarallisistaAineista/pvm" "kartoitusVaarallisistaAineista/lisattyLiitteisiin" "kartoitusVaarallisistaAineista/syy::2"]]
+                                {:row ["kartoitusVaarallisistaAineista/ilmoitusTehty"
+                                       "kartoitusVaarallisistaAineista/pvm"
+                                       "kartoitusVaarallisistaAineista/lisattyLiitteisiin"
+                                       "kartoitusVaarallisistaAineista/syy::2"]
+                                 :css [:label-x-2]}]
                          :template "form-grid-docgen-group-template"
                          :body [{:name "eiVaarallisiaAineita" :type :checkbox :inputType :checkbox-wrapper}
                                 {:name "kartoitusVaarallisistaAineista"
@@ -271,9 +284,17 @@
                         :uicomponent :docgenGroup
                         :approvable false
                         :rows [{:h3 "laajennettuRakennusjateselvitys.pilaantuneetMaat"}
-                               ["tutkimusPilaantuneistaMaista/tutkimusTehty" "tutkimusPilaantuneistaMaista/pvm" "tutkimusPilaantuneistaMaista/lisattyLiitteisiin" "tutkimusPilaantuneistaMaista/syy"]
-                               ["ilmoitusPuhdistuksesta/ilmoitusTehty::2" "ilmoitusPuhdistuksesta/pvm" "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
-                               ["poistettavatAinekset" "sijoituspaikka::3"]]
+                               {:row ["tutkimusPilaantuneistaMaista/tutkimusTehty"
+                                      "tutkimusPilaantuneistaMaista/pvm"
+                                      "tutkimusPilaantuneistaMaista/lisattyLiitteisiin"
+                                      "tutkimusPilaantuneistaMaista/syy::2"]
+                                :css [:label-x-2]}
+                               {:row ["ilmoitusPuhdistuksesta/ilmoitusTehty::2"
+                                      "ilmoitusPuhdistuksesta/pvm"
+                                      "ilmoitusPuhdistuksesta/lisattyLiitteisiin"]
+                                :css [:row-tight]}
+                               {:row ["poistettavatAinekset" "sijoituspaikka::3"]
+                                :css [:label-x-2]}]
                         :template "form-grid-docgen-group-template"
                         :body [{:name "tutkimusPilaantuneistaMaista"
                                 :type :group
@@ -331,7 +352,7 @@
                               :uicomponent :docgenGroup
                               :approvable false
                               :rows [["ainekset::4"]
-                                     ["kaivettavienMassojenSelvitys/selvitystapa" "kaivettavienMassojenSelvitys/muuSelvitystapa"]]
+                                     ["kaivettavienMassojenSelvitys/selvitystapa::2" "kaivettavienMassojenSelvitys/muuSelvitystapa::2"]]
                               :template "form-grid-docgen-group-template"
                               :body [(ainekset-table ["betoni" "asfalttijate" "betoniAsfalttiMaaAines" "stabiloituSavi" "kevytsoraVaahtolasimurske" "maatuhka"])
                                      {:name "kaivettavienMassojenSelvitys"

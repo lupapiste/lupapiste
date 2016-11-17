@@ -388,11 +388,17 @@ th.full-width-column {
 
 .form-table--waste {
   @include no-row-hover;
+  table {
+    width: 100%;
+  }
   .form-input {
     height: initial;
   }
   th {
     white-space: nowrap;
+    @media (max-width: 890px ) {
+      white-space: initial;
+    }
   }
   td.action-column {
     text-align: center;
@@ -425,6 +431,9 @@ th.full-width-column {
     }
   }
 }
+
+
+
 .form-table--waste.waste-report-table {
   th {
     white-space: initial;
