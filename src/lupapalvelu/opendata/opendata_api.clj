@@ -1,18 +1,15 @@
 (ns lupapalvelu.opendata.opendata-api
   (:require [ring.swagger.swagger2 :as rs]
-            [ring.swagger.json-schema :as rjs]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [schema.core :as sc]
             [ring.swagger.ui :as ui]
             [noir.server :as server]
             [sade.http :as http]
-            [sade.schemas :as ssc]
-            [lupapalvelu.mongo :as mongo]
-            [schema.core :as s]
             [sade.core :refer [fail!]]
             [sade.util :as util]
-            [lupapalvelu.opendata.schemas :refer :all]))
+            [lupapalvelu.opendata.schemas :refer :all]
+            [lupapalvelu.opendata.applications-data :as applications-data]))
 
 (defonce endpoints (atom []))
 
@@ -32,7 +29,7 @@
        (swap! endpoints conj {:method (keyword m#)
                               :path   p#
                               :meta   ~meta-data})
-       (defpage ~path {:keys ~letkeys :as request#}
+       (defpage ~path {:keys ~letkeys :as request#}   ; TODO defpage täältä ulos jos mahdollista
          ; Input schema validation
          (if (valid-inputs?# request#)
            (let [response-data# (do ~@content)]
@@ -43,12 +40,11 @@
                (resp/json response-data#)))
            (resp/status 400 "input-validation-error"))))))
 
-(defendpoint "/opendata/applications"
+(defendpoint "/opendata/hankkeet"
   {:summary "Palauttaa organisaation kaikki vireillä olevat hankkeet."
    :parameters [:organization OrganizationId]
-   :returns [PublicApplicationData]}
-  (map #(util/map-keys {:id :asiointitunnus} %)
-       (mongo/select :applications {:organization organization} [:id])))
+   :returns JulkinenHakemusData}
+  (take 10 (applications-data/applications-by-organization organization)))
 
 (defn paths []
   (let [paths (map
