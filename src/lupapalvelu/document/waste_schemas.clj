@@ -393,5 +393,5 @@
    {:info {:name extended-construction-waste-report-name ; "laajennettuRakennusjateselvitys"
            :order 200
            :editable-in-states (states/all-application-states-but states/terminal-states)
-           :section-help "rakennusjate.help"}
+           :section-help "rakennusjateLaajennettu.help"}
     :body (body laajennettu-rakennusjateselvitys)}])
