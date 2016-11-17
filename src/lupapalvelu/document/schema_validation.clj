@@ -322,6 +322,7 @@
           (opt :approvable)                  sc/Bool    ;;
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable)                   sc/Bool    ;;
+          (opt :redraw-on-approval)          sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}

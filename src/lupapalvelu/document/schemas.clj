@@ -59,6 +59,7 @@
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
+                 :redraw-on-approval
                  :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields})
@@ -1436,6 +1437,7 @@
            :removable  true
            :removable-only-by-authority true
            :approvable true
+           :redraw-on-approval true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
@@ -1449,6 +1451,7 @@
            :order 5
            :removable true
            :approvable true
+           :redraw-on-approval true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija

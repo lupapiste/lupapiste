@@ -1701,4 +1701,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
   };
 
+  self.approvalHubSubscribe(function() {
+    if (self.schema.info["redraw-on-approval"]) { // document level approval
+      self.redraw();
+    }
+  }, true);
 };
