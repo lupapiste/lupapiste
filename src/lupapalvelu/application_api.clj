@@ -547,6 +547,15 @@
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
 
+(defcommand return-to-draft
+  {:description "Returns the application to draft state."
+   :user-roles #{:authority}
+   :states #{:submitted}
+   :pre-checks [(partial sm/validate-state-transition :draft)]
+   :on-success (notify :application-return-to-draft)}
+  [{:keys [user application] :as command}]
+  (update-application command (app/state-transition-update :draft (:created command) application user)))
+
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"
    :parameters       [id startDate]
