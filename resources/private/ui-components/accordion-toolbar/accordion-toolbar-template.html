@@ -55,6 +55,14 @@
         <i class="lupicon-remove"></i>
         <span data-bind="ltext: 'remove'"></span>
       </button>
+      <!-- ko if: canBeDisabled -->
+      <button class="secondary is-right"
+              data-bind="attr: {'data-test-id': 'toggle-document-status'},
+                         toggleClick: disabledStatus">
+        <i class="lupicon-remove"></i>
+        <span data-bind="text: disabledStatus() ? 'Aktivoi' : 'Passivoi'"></span>
+      </button>
+      <!-- /ko -->
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': rejectTestId},
                          visible: showReject,

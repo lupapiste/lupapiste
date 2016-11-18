@@ -12,12 +12,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.model = doc.data;
   self.meta = doc.meta;
   self.docId = doc.id;
+  self.docDisabled = doc.disabled;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
-  self.isDisabled = options && options.disabled;
+  self.isDisabled = (options && options.disabled) || self.docDisabled;
   self.events = [];
 
   self.subscriptions = [];
@@ -1659,7 +1660,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     elements.className = "accordion-fields";
     appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
-    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+    if (!self.authorizationModel.ok(getUpdateCommand()) || self.isDisabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
       $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
       // TODO a better way would be to hide each individual button based on authorizationModel.ok
@@ -1692,6 +1693,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var newDoc = data.document;
         self.model = newDoc.data;
         self.meta = newDoc.meta;
+        self.docDisabled = newDoc.disabled;
 
         window.Stickyfill.remove($(".sticky", self.element));
         var accordionState = AccordionState.get(doc.id);

@@ -120,8 +120,20 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.reject  = _.partial( self.approvalModel.changeStatus, false );
   self.approve = _.partial( self.approvalModel.changeStatus, true );
 
+
+  self.disabledStatus = ko.observable(!!self.docModel.docDisabled);
+  self.canBeDisabled = self.disposedPureComputed(function () {
+    return self.auth.ok("set-doc-status");
+  });
+  self.disposedSubscribe(self.disabledStatus, function(v) {
+    var value = v ? "disabled" : "enabled";
+    ajax.command("set-doc-status", {id: self.docModel.appId, docId: self.docModel.docId, value: value})
+      .success(util.showSavedIndicatorIcon)
+      .call();
+  });
+
   self.showToolbar = ko.pureComputed(function() {
-    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation();
+    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation() || self.canBeDisabled();
   });
 
   self.closeEditors = function( data, event ) {

@@ -327,3 +327,13 @@
       (when-not company (fail! :error.company-not-found))
       (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
+
+;;
+;; Disabling or de-activating
+;;
+
+(defn set-disabled-status [command doc-id value]
+  (update-application command
+                      {:documents {$elemMatch {:id doc-id}}}
+                      {$set {:modified (:created command)
+                             :documents.$.disabled (= "disabled" value)}}))

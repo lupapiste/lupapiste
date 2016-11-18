@@ -108,6 +108,18 @@
     (when (and (valid-post-verdict-document? doc application) (approved? doc))
       (fail :error.document.post-verdict-update))))
 
+(defn doc-disabled-validator
+  [key {:keys [application data]}]
+  (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+    (when (:disabled doc)
+      (fail :error.document.change-status))))
+
+(defn doc-status-change-validator
+  [{application :application {doc-id :docId } :data}]
+  (when-let [doc (and doc-id (domain/get-document-by-id application doc-id))]
+    (when-not (valid-post-verdict-document? doc application)
+      (fail :error.document.change-status))))
+
 ;;
 ;; KTJ-info updation
 ;;

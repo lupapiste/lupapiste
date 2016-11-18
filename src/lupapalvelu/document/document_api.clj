@@ -114,11 +114,30 @@
    :pre-checks [(partial editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
                 application/validate-authority-in-drafts
                 validate-user-authz-by-doc-id
+                (partial doc-disabled-validator :docId)
                 remove-doc-validator]}
   [{:keys [application created] :as command}]
   (if-let [document (domain/get-document-by-id application docId)]
     (do
       (doc-persistence/remove! command docId "documents")
+      (assignment/remove-assignments-by-target id docId)
+      (ok))
+    (fail :error.document-not-found)))
+
+(defcommand set-doc-status
+  {:description "Set document status to disabled: true or disabled: false"
+   :parameters [id docId value]
+   :categories  #{:documents}
+   :input-validators [(partial action/non-blank-parameters [:id :docId])
+                      (partial action/select-parameters [:value] #{"enabled" "disabled"})]
+   :user-roles #{:applicant :authority}
+   :states     states/post-verdict-states
+   :pre-checks [validate-user-authz-by-doc-id
+                doc-status-change-validator]}
+  [command]
+  (if (domain/get-document-by-id (:application command) docId)
+    (do
+      (doc-persistence/set-disabled-status command docId value)
       (assignment/remove-assignments-by-target id docId)
       (ok))
     (fail :error.document-not-found)))
@@ -133,6 +152,7 @@
    :pre-checks [(partial editable-by-state? states/update-doc-states)
                 validate-user-authz-by-doc
                 application/validate-authority-in-drafts
+                (partial doc-disabled-validator :doc)
                 (partial validate-post-verdict-update-doc :doc)]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
@@ -157,7 +177,8 @@
    :input-validators [doc-persistence/validate-collection]
    :pre-checks       [(partial editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
                       validate-user-authz-by-doc
-                      application/validate-authority-in-drafts]}
+                      application/validate-authority-in-drafts
+                      (partial doc-disabled-validator :doc)]}
   [command]
   (doc-persistence/remove-document-data command doc [path] collection))
 
@@ -196,7 +217,8 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :pre-checks [(partial editable-by-state? states/approve-doc-states)]
+   :pre-checks [(partial editable-by-state? states/approve-doc-states)
+                (partial doc-disabled-validator :doc)]
    :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "approved")))
@@ -206,7 +228,8 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :pre-checks [(partial editable-by-state? states/approve-doc-states)]
+   :pre-checks [(partial editable-by-state? states/approve-doc-states)
+                (partial doc-disabled-validator :doc)]
    :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "rejected")))
@@ -224,7 +247,8 @@
    :pre-checks [(partial editable-by-state? states/update-doc-states)
                 user-can-be-set-validator
                 validate-user-authz-by-document-id
-                application/validate-authority-in-drafts]}
+                application/validate-authority-in-drafts
+                (partial doc-disabled-validator :documentId)]}
   [{:keys [created application] :as command}]
   (doc-persistence/do-set-user-to-document application documentId userId path created))
 
@@ -237,7 +261,8 @@
    :pre-checks [(partial editable-by-state? states/update-doc-states)
                 domain/validate-owner-or-write-access
                 validate-user-authz-by-document-id
-                application/validate-authority-in-drafts]}
+                application/validate-authority-in-drafts
+                (partial doc-disabled-validator :documentId)]}
   [{:keys [created application user] :as command}]
   (doc-persistence/do-set-user-to-document application documentId (:id user) path created))
 
@@ -249,7 +274,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :documentId])]
    :pre-checks [(partial editable-by-state? states/update-doc-states)
                 validate-user-authz-by-document-id
-                application/validate-authority-in-drafts]}
+                application/validate-authority-in-drafts
+                (partial doc-disabled-validator :documentId)]}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (doc-persistence/do-set-company-to-document application document companyId path (user/get-user-by-id (:id user)) created)
