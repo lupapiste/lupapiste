@@ -281,4 +281,6 @@
       (fact "can't remove applicant doc"
         (command pena :remove-doc :id application-id :docId (:id applicant-doc))) => fail?
       (fact "added suunnittelija doc can be removed"
-        (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?))))
+        (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?)
+      (fact "pre-verdit suunnittelija doc can NOT be removed"
+        (command pena :remove-doc :id application-id :docId (:id suunnittelija-doc)) => (partial expected-failure? :error.document.post-verdict-deletion)))))

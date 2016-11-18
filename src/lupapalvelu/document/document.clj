@@ -1,10 +1,11 @@
 (ns lupapalvelu.document.document
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
@@ -28,8 +29,20 @@
 (defn- valid-post-verdict-schema? [schema-info]
   (contains? valid-post-verdict-subtypes (keyword (:subtype schema-info))))
 
-(defn- valid-post-verdict-document? [document]
-  (valid-post-verdict-schema? (:schema-info document)))
+(defn- created-after-verdict? [document application]
+  (if (contains? states/post-verdict-states (keyword (:state application)))
+    (let [verdict-history-item (->> (app/state-history-entries (:history application))
+                                    (filter #(= (:state %) "verdictGiven"))
+                                    (sort-by :ts)
+                                    last)]
+      (when-not verdict-history-item
+        (error "Application in post-verdict, but doesnt have verdictGiven state in history"))
+      (> (:created document) (:ts verdict-history-item)))
+    false))
+
+(defn- valid-post-verdict-document? [document application]
+  (and (valid-post-verdict-schema? (:schema-info document))
+       (created-after-verdict? document application)))
 
 (defn approved? [document]
   (= "approved" (get-in document [:meta :_approved :value])))
@@ -66,8 +79,8 @@
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
-(defn- deny-remove-of-non-post-verdict-document [document {state :state}]
-  (and (contains? states/post-verdict-states (keyword state)) (not (valid-post-verdict-document? document))))
+(defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
+  (and (contains? states/post-verdict-states (keyword state)) (not (valid-post-verdict-document? document application))))
 
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
@@ -92,7 +105,7 @@
 (defn validate-post-verdict-update-doc [key {:keys [application data]}]
   (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
-    (when (and (valid-post-verdict-document? doc) (approved? doc))
+    (when (and (valid-post-verdict-document? doc application) (approved? doc))
       (fail :error.document.post-verdict-update))))
 
 ;;
