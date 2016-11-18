@@ -1687,38 +1687,42 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   self.redraw = function() {
     window.Stickyfill.remove($(".sticky", self.element));
-    authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents", function() {
-      var accordionState = AccordionState.get(doc.id);
-      _.set(options, "accordionCollapsed", !accordionState);
+    var accordionState = AccordionState.get(doc.id);
+    _.set(options, "accordionCollapsed", !accordionState);
 
-      var previous = self.element.prev();
-      var next = self.element.next();
-      var h = self.element.outerHeight();
-      var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
-      self.element.before(placeholder);
+    var previous = self.element.prev();
+    var next = self.element.next();
+    var h = self.element.outerHeight();
+    var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
+    self.element.before(placeholder);
 
-      self.element.remove();
-      self.element = buildSection();
+    self.element.remove();
+    self.element = buildSection();
 
-      if (_.isEmpty(previous)) {
-        next.before(self.element);
-        _.delay(function() {
-          placeholder.remove();
-        },200);
-      } else {
-        previous.after(self.element);
-        _.delay(function() {
-          placeholder.remove();
-        },200);
-      }
+    if (_.isEmpty(previous)) {
+      next.before(self.element);
+      _.delay(function() {
+        placeholder.remove();
+      },200);
+    } else {
+      previous.after(self.element);
+      _.delay(function() {
+        placeholder.remove();
+      },200);
+    }
 
-      $(".sticky", self.element).Stickyfill();
-    });
+    $(".sticky", self.element).Stickyfill();
+
   };
 
   self.approvalHubSubscribe(function() {
-    if (self.schema.info["redraw-on-approval"]) { // document level approval
+    authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents");
+  }, true);
+
+  self.subscriptions.push(hub.subscribe({eventType: "category-auth-model-changed", targetId: doc.id}, function() {
+    if (self.schema.info["redraw-on-approval"] && application.inPostVerdictState) {
       self.redraw();
     }
-  }, true);
+  }));
+
 };
