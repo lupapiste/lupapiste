@@ -42,13 +42,27 @@
         (warnf "Skipping data item [ID=%s], the result does not conform to HakemusTiedot schema: %s" (:asiointitunnus data) errors))
       data)))
 
+(def required-fields-from-db
+  [:id :primaryOperation.name :propertyId :address :municipality
+   :submitted :location :documents])
+
+(defn- query-applications [organization]
+  (mongo/select :applications {:permitType   :R
+                               :organization organization
+                               :state        :submitted
+                               :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
+                required-fields-from-db))
+
+(defn schema-check-app [application]
+  (when (and (= (:permitType application) "R")
+             (= (keyword (:state application)) :submitted)
+             (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
+    (let [app (select-keys application required-fields-from-db)]
+      ((sc/checker HakemusTiedot) (process-application app)))))
+
 (defn applications-by-organization [organization]
-  (->> (mongo/select :applications {:permitType   :R
-                                    :organization organization
-                                    :state        :submitted
-                                    :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
-                [:id :primaryOperation.name :propertyId :address :municipality
-                 :submitted :location :documents])
+  (->> organization
+       query-applications
        (map process-application)
        (map (partial schema-verify (sc/checker HakemusTiedot)))
        (remove nil?)))

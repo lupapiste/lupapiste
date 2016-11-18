@@ -8,7 +8,8 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [sade.strings :as ss]
-            [sade.schemas :as ssc])
+            [sade.schemas :as ssc]
+            [lupapalvelu.opendata.applications-data :as open-application-data])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
@@ -150,3 +151,5 @@
 (mongocheck :applications (some-timestamp-is-set #{:sent :acknowledged} #{:sent :complementNeeded}) :state :sent :acknowledged)
 
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
+
+(mongocheck :applications open-application-data/schema-check-app :documents :state :primaryOperation)
