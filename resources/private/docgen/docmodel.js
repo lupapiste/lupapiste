@@ -1686,18 +1686,33 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   self.redraw = function() {
-    var accordionState = AccordionState.get(doc.id);
+    window.Stickyfill.remove($(".sticky", self.element));
     authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents", function() {
+      var accordionState = AccordionState.get(doc.id);
       _.set(options, "accordionCollapsed", !accordionState);
+
       var previous = self.element.prev();
       var next = self.element.next();
+      var h = self.element.outerHeight();
+      var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
+      self.element.before(placeholder);
+
       self.element.remove();
       self.element = buildSection();
+
       if (_.isEmpty(previous)) {
         next.before(self.element);
+        _.delay(function() {
+          placeholder.remove();
+        },200);
       } else {
         previous.after(self.element);
+        _.delay(function() {
+          placeholder.remove();
+        },200);
       }
+
+      $(".sticky", self.element).Stickyfill();
     });
   };
 
