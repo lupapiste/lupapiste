@@ -1686,33 +1686,41 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   self.redraw = function() {
-    window.Stickyfill.remove($(".sticky", self.element));
-    var accordionState = AccordionState.get(doc.id);
-    _.set(options, "accordionCollapsed", !accordionState);
+    // Refresh document data from backend
+    ajax.query("document", {id: application.id, doc: doc.id, collection: self.getCollection()})
+      .success(function(data) {
+        var newDoc = data.document;
+        self.model = newDoc.data;
+        self.meta = newDoc.meta;
 
-    var previous = self.element.prev();
-    var next = self.element.next();
-    var h = self.element.outerHeight();
-    var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
-    self.element.before(placeholder);
+        window.Stickyfill.remove($(".sticky", self.element));
+        var accordionState = AccordionState.get(doc.id);
+        _.set(options, "accordionCollapsed", !accordionState);
 
-    self.element.remove();
-    self.element = buildSection();
+        var previous = self.element.prev();
+        var next = self.element.next();
+        var h = self.element.outerHeight();
+        var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
+        self.element.before(placeholder);
 
-    if (_.isEmpty(previous)) {
-      next.before(self.element);
-      _.delay(function() {
-        placeholder.remove();
-      },200);
-    } else {
-      previous.after(self.element);
-      _.delay(function() {
-        placeholder.remove();
-      },200);
-    }
+        self.element.remove();
+        self.element = buildSection();
 
-    $(".sticky", self.element).Stickyfill();
+        if (_.isEmpty(previous)) {
+          next.before(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        } else {
+          previous.after(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        }
 
+        $(".sticky", self.element).Stickyfill();
+      })
+    .call();
   };
 
   self.approvalHubSubscribe(function() {
