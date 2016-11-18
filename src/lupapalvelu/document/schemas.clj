@@ -5,7 +5,6 @@
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -60,7 +59,7 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :exclude-from-pdf
-                 :construction-time
+                 :editable-in-states
                  :accordion-fields})
 
 (def updateable-keys #{:removable})
@@ -1536,21 +1535,6 @@
     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
             :type :checkbox
             :layout :full-width}]}
-
-   {:info {:name "rakennusjatesuunnitelma"
-           :order 200
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/rakennusjatesuunnitelma)}
-   {:info {:name "rakennusjateselvitys"
-           :order 201
-           :construction-time true
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/rakennusjateselvitys)}
-
-   {:info {:name "laajennettuRakennusjateselvitys"
-           :order 200
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/laajennettu-rakennusjateselvitys)}
 
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false

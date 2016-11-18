@@ -62,12 +62,17 @@
 
   (defpage [:post "/dev/saml-login"] []
     (let [request     (request/ring-request)
-         form-params (util/map-keys keyword (:form-params request))
-         session     (:session request)
-         trid        (:stamp form-params)
-         ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])]
+          form-params (util/map-keys keyword (:form-params request))
+          session     (:session request)
+          trid        (:stamp form-params)
+          ident       (select-keys form-params [:firstName :givenName :lastName :userid :street :zip :city :stamp])]
      (if (:cancel form-params)
        (let [data (mongo/select-one :vetuma {:sessionid (:id session) :trid trid})]
          (response/redirect (get-in data [:paths :cancel])))
        (let [data (mongo/update-one-and-return :vetuma {:sessionid (:id session) :trid trid} {$set {:user ident}})]
-         (response/redirect (get-in data [:paths :success])))))))
+         (response/redirect (get-in data [:paths :success]))))))
+
+  (defpage [:get "/dev/saml-logout"] {:keys [return]}
+    (if-let [session (lupapalvelu.ident.session/get-session (session-id))]
+      (lupapalvelu.ident.session/delete-user session))
+    (response/redirect return)))

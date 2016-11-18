@@ -44,6 +44,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.allOperations = [];
   self.appRequiredFieldsFillingObligatory = ko.observable(false);
   self.assignmentsEnabled = ko.observable(false);
+  self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
@@ -72,6 +73,16 @@ LUPAPISTE.OrganizationModel = function () {
     var assignmentsEnabled = self.assignmentsEnabled();
     if (self.initialized) {
       ajax.command("set-organization-assignments", {enabled: assignmentsEnabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  ko.computed(function() {
+    var extendedConstructionWasteReportEnabled = self.extendedConstructionWasteReportEnabled();
+    if (self.initialized) {
+      ajax.command("set-organization-extended-construction-waste-report", {enabled: extendedConstructionWasteReportEnabled})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -188,6 +199,8 @@ LUPAPISTE.OrganizationModel = function () {
     self.appRequiredFieldsFillingObligatory(organization["app-required-fields-filling-obligatory"] || false);
 
     self.assignmentsEnabled(organization["assignments-enabled"] || false);
+
+    self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
 
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 

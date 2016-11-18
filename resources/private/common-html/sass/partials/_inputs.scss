@@ -208,6 +208,7 @@ input.dateinput {
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
+  width: initial;
   &:focus {
     //border-color: $input-focus-border-color;
     background-image: url("/lp-static/img/calendar-orange-light.png");
@@ -215,7 +216,10 @@ input.dateinput {
   &:disabled {
     //border-color: $input-disabled-border-color;
     background-image: url("/lp-static/img/calendar-gray187.png");
-    color: $input-select-disabled-icon
+    color: $input-select-disabled-icon;
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    padding-right: 34px;
   }
 }
 
@@ -232,4 +236,20 @@ input.tip.dateinput {
     background-image: url("/lp-static/img/calendar-gray187.png");
     color: $input-select-disabled-icon
   }
+}
+
+input.dateinput.dateinput--small {
+  height: 26px;
+  min-height: initial;
+  font-size: 0.875em;
+  background-size: contain;
+}
+
+input.grid-style-input {
+  @include input-fields;
+}
+
+input.grid-style-input--wide {
+  @include input-fields;
+  width: 100%;
 }

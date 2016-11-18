@@ -386,6 +386,39 @@ var util = (function($) {
                              .isString( path ) ? _.split( path, ".") : path));
   }
 
+  function strictParseFloat( s ) {
+    s =  _.replace(_.trim( s ), ",", ".");
+    return _.every( _.split( s, ".", isNum ) ) ? parseFloat( s ) : NaN;
+  }
+
+  // Zips given array into object.
+  // Optional fun argument is the value function (default _.constant( true )):
+  function arrayToObject( arr, fun ) {
+    return _.zipObject( arr,
+                        _.map( arr,
+                               fun || _.constant( true )));
+  }
+
+  function identLogoutUrl() {
+    return util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
+  }
+
+  function identLogoutRedirect() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
+  function identLogoutRedirectBulletins() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -427,7 +460,12 @@ var util = (function($) {
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
     partyFullName: partyFullName,
-    isEmpty: isEmpty
+    isEmpty: isEmpty,
+    parseFloat: strictParseFloat,
+    identLogoutUrl: identLogoutUrl,
+    identLogoutRedirect: identLogoutRedirect,
+    identLogoutRedirectBulletins: identLogoutRedirectBulletins,
+    arrayToObject: arrayToObject
   };
 
 })(jQuery);

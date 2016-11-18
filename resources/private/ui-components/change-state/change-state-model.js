@@ -35,7 +35,7 @@ LUPAPISTE.ChangeStateModel = function( params) {
                     {state: newState,
                      id: params.id})
       .success ( function() {
-        repository.load( params.id, null, null, true );
+        repository.load( params.id, null, null, false );
       })
       .call();
     }

@@ -26,7 +26,7 @@
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
-   :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
+   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
                                :check-string :checkbox-wrapper
@@ -153,6 +153,11 @@
   (merge GenInput
          {:type       (sc/eq :date)}))
 
+(defschema TimeString
+  "Time string hh:mm:ss.s"
+  (merge GenInput
+         {:type       (sc/eq :time)}))
+
 (defschema Checkbox
   (merge GenInput
          {:type       (sc/eq :checkbox)}))
@@ -225,6 +230,7 @@
                   (type-pred :select)     Select
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
+                  (type-pred :time)       TimeString
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
@@ -248,13 +254,29 @@
    (opt :approvable)           sc/Bool    ;;
    (opt :repeating)            sc/Bool    ;; Should be  always repeating -> default true
    (opt :repeating-init-empty) sc/Bool    ;;
+   (opt :exclude-from-pdf)     sc/Bool    ;;
    (opt :copybutton)           sc/Bool    ;;
    (opt :validator)            sc/Keyword
+   ;; CSS classes apply either to the whole component (keywords) or
+   ;; individual columns {columnName class}
    (opt :css)                  [sc/Keyword]
+   (opt :columnCss)            {sc/Str [sc/Keyword]}
    (opt :hide-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
    (opt :show-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
-                                :values #{single-value}}})
+                                :values #{single-value}}
+   ;; Just column names -> no units
+   ;; Map item fields:
+   ;; :amount the column name for data
+   ;; :unit column for unit information
+   ;; :unitKey fixed unit (supported values are :t and :kg).
+   ;; :unit and :unitKey are mutually exclusive.
+   (opt :footer-sums)          [(sc/conditional
+                                 string? sc/Str
+                                 :unitKey {:amount sc/Str
+                                           :unitKey sc/Keyword}
+                                 :unit  {:amount sc/Str
+                                         :unit   sc/Str})]})
 
 (defschema Group
   "Group type that groups any doc elements."
@@ -281,14 +303,16 @@
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
                                 :values #{single-value}}
    (opt :template)             sc/Str       ;; Component template to use
-   ;; Row item format: "<path><cols><css>"
+   ;; Row text item format: "<path><cols><css>"
    ;; <path>  path1/path2/...
    ;; <cols>  ::n  where n is 1-4 (default 1)
    ;; <css>   [class1 class2 ...]
    ;; <cols> and <css> are optional, either or both can be omitted.
-   (opt :rows)                 [(sc/if map?
-                                  {sc/Keyword sc/Str}
-                                  [sc/Str])]})
+   (opt :rows)                 [(sc/conditional
+                                 :row {:css [sc/Keyword]
+                                       :row [sc/Str]}
+                                 map?  {sc/Keyword sc/Str}
+                                 :else [sc/Str])]})
 
 (defschema Element
   "Any doc element."
@@ -313,7 +337,7 @@
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
-          (opt :construction-time)           sc/Bool    ;; Is a construction time doc
+          (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
@@ -332,7 +356,7 @@
       (vec (concat path target-path)))))
 
 (defn validate-rows [{name :name rows :rows :as schema}]
-  (let [invalid-paths (->> (filter vector? rows)
+  (let [invalid-paths (->> (map #(if (vector? %) % (:row %)) rows)
                            (apply concat)
                            (map #(vector % (build-absolute-path [] %)))
                            (util/map-values (partial get-in-schema schema))

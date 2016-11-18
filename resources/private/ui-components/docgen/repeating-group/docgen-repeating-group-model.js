@@ -41,7 +41,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
       self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
     };
     var message = "document.delete." + params.schema.type + ".subGroup.message";
-    hub.send("show-dialog", {ltitle: "document.delete.header",
+    hub.send("show-dialog", {ltitle: "remove",
                              size: "medium",
                              component: "yes-no-dialog",
                              componentParams: {ltext: message,

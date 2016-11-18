@@ -429,7 +429,7 @@
     organization :organization
     created :created :as command}]
   (let [op (app/make-op operation created)
-        new-docs (app/make-documents nil created op application)
+        new-docs (app/make-documents nil created @organization op application)
         existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
         new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types existing-attachment-types)]
     (update-application command {$push {:secondaryOperations  op
@@ -794,7 +794,7 @@
                        {$set  {:infoRequest            false
                                :openInfoRequest        false
                                :convertedToApplication created
-                               :documents              (app/make-documents user created op app)
+                               :documents              (app/make-documents user created @org op app)
                                :modified               created}
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (autofill-rakennuspaikka app created)

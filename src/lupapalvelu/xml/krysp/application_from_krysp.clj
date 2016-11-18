@@ -19,8 +19,11 @@
        first))
 
 (defn- group-content-by [content-fn permit-type xml-without-ns]
-  (let [toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])]
-    (->> (:content xml-without-ns)
+  (let [toimituksen-tiedot (sxml/select1 xml-without-ns [:toimituksenTiedot])
+        content (if (= (:tag xml-without-ns) :FeatureCollection)
+                  (-> xml-without-ns :content first :content)
+                  (:content xml-without-ns))]
+    (->> content
          (remove (comp #{:toimituksenTiedot} :tag))
          (group-by (partial content-fn permit-type))
          (util/map-values (fn->> (cons toimituksen-tiedot)

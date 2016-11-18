@@ -6,7 +6,9 @@
 
 (facts "compose-resource js without Exceptions"
   (against-background
-   (env/feature? :no-minification) => false)
+   (env/feature? :no-minification) => false
+   (env/feature? :dummy-ident) => true
+   (env/feature? :suomifi-ident) => false)
 
   (fact "common"
     (compose-resource :js :common) => truthy)

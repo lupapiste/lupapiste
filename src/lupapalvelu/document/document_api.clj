@@ -44,13 +44,16 @@
 
 (def approve-doc-states #{:open :submitted :complementNeeded})
 
-(defn validate-is-construction-time-doc
-  [{{doc-id :doc} :data app :application}]
+(defn editable-by-state?
+  "Pre-check to determine if documents are editable in abnormal states"
+  [default-states {{doc-id :doc} :data {docs :documents state :state} :application}]
   (when doc-id
-    (when-not (some-> (domain/get-document-by-id (:documents app) doc-id)
-                      (model/get-document-schema)
-                      (get-in [:info :construction-time]))
-      (fail :error.document-not-construction-time-doc))))
+    (when-not (-> (domain/get-document-by-id docs doc-id)
+                  (model/get-document-schema)
+                  (get-in [:info :editable-in-states])
+                  (or default-states)
+                  (contains? (keyword state)))
+      (fail :error.document-not-editable-in-current-state))))
 
 (defn- validate-user-authz-by-key
   [doc-id-key {:keys [data application user]}]
@@ -109,8 +112,8 @@
    :categories  #{:documents}
    :input-validators [(partial action/non-blank-parameters [:id :docId])]
    :user-roles #{:applicant :authority}
-   :states     #{:draft :answered :open :submitted :complementNeeded}
-   :pre-checks [application/validate-authority-in-drafts
+   :pre-checks [(partial editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
+                application/validate-authority-in-drafts
                 validate-user-authz-by-doc-id
                 remove-doc-validator]}
   [{:keys [application created] :as command}]
@@ -126,24 +129,11 @@
    :categories #{:documents}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :states     update-doc-states
    :input-validators [(partial action/non-blank-parameters [:id :doc])
                       (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz-by-doc
+   :pre-checks [(partial editable-by-state? update-doc-states)
+                validate-user-authz-by-doc
                 application/validate-authority-in-drafts]}
-  [command]
-  (doc-persistence/update! command doc updates "documents"))
-
-(defcommand update-construction-time-doc
-  {:parameters [id doc updates]
-   :categories #{:documents}
-   :user-roles #{:applicant :authority}
-   :states     states/post-verdict-states
-   :input-validators [(partial action/non-blank-parameters [:id :doc])
-                      (partial action/vector-parameters [:updates])]
-   :pre-checks [validate-user-authz-by-doc
-                application/validate-authority-in-drafts
-                validate-is-construction-time-doc]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 
@@ -164,20 +154,8 @@
    :categories       #{:documents :tasks}
    :user-roles       #{:applicant :authority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :states           #{:draft :answered :open :submitted :complementNeeded}
    :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [validate-user-authz-by-doc
-                      application/validate-authority-in-drafts]}
-  [command]
-  (doc-persistence/remove-document-data command doc [path] collection))
-
-(defcommand remove-construction-time-document-data
-  {:parameters       [id doc path collection]
-   :categories       #{:documents :tasks}
-   :user-roles       #{:applicant :authority}
-   :states           states/post-verdict-states
-   :input-validators [doc-persistence/validate-collection]
-   :pre-checks       [validate-is-construction-time-doc
+   :pre-checks       [(partial editable-by-state? #{:draft :answered :open :submitted :complementNeeded})
                       validate-user-authz-by-doc
                       application/validate-authority-in-drafts]}
   [command]
@@ -218,19 +196,8 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :user-roles #{:authority}
-   :states     approve-doc-states}
-  [command]
-  (ok :approval (approve command "approved")))
-
-(defcommand approve-construction-time-doc
-  {:parameters [:id :doc :path :collection]
-   :categories       #{:documents :tasks}
-   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
-                      doc-persistence/validate-collection]
-   :user-roles #{:authority}
-   :states     states/post-verdict-states
-   :pre-checks [validate-is-construction-time-doc]}
+   :pre-checks [(partial editable-by-state? approve-doc-states)]
+   :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "approved")))
 
@@ -239,19 +206,8 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :user-roles #{:authority}
-   :states     approve-doc-states}
-  [command]
-  (ok :approval (approve command "rejected")))
-
-(defcommand reject-construction-time-doc
-  {:parameters [:id :doc :path :collection]
-   :categories       #{:documents :tasks}
-   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
-                      doc-persistence/validate-collection]
-   :user-roles #{:authority}
-   :states     states/post-verdict-states
-   :pre-checks [validate-is-construction-time-doc]}
+   :pre-checks [(partial editable-by-state? approve-doc-states)]
+   :user-roles #{:authority}}
   [command]
   (ok :approval (approve command "rejected")))
 
