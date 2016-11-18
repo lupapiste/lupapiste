@@ -65,7 +65,7 @@
   kt-application-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled]) ; is open needed?
-    {:submitted [:survey :canceled]
+    {:submitted [:survey :draft :canceled]
      :survey [:sessionProposal :canceled] ; Maastotyot
      :sessionProposal [:sessionHeld :canceled] ; Kokouskutsu
      :sessionHeld [:registered :canceled] ; Kokous pidetty
