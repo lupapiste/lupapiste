@@ -105,7 +105,7 @@ LUPAPISTE.DocgenGroupModel = function(params) {
                   })
                   .filter()
                   .value(),
-                  rowCss: row.rowCss}
+                  rowCss: row.rowCss};
         } else {
           var headerTag = _.head(_.keys(row));
           var ltext = row[headerTag];
