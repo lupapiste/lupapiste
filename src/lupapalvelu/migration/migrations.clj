@@ -2536,6 +2536,19 @@
                              coerce-ymp-ilm-kesto-time-strings
                              {:documents.schema-info.name "ymp-ilm-kesto"}))
 
+(defmigration remove-osoitenumero2-and-concat-its-contents-to-osoitenumero
+  {:apply-when (pos? (mongo/count :applications {:documents.data.osoite.osoitenumero2 {$exists true}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (-> doc
+          (assoc-in  [:data :osoite :osoitenumero :value] (ss/join "\u2013" (remove nil? [(get-in doc [:data :osoite :osoitenumero :value])
+                                                                                          (get-in doc [:data :osoite :osoitenumero2 :value])])))
+          (dissoc-in [:data :osoite :osoitenumero2])))
+    {:documents.data.osoite.osoitenumero2 {$exists true}}))
+
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

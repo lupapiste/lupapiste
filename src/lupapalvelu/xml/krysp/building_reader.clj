@@ -174,8 +174,7 @@
 
             :osoite {:kunta                         (get-text rakennus :osoite :kunta)
                      :lahiosoite                    (get-text rakennus :osoite :osoitenimi :teksti)
-                     :osoitenumero                  (get-text rakennus :osoite :osoitenumero)
-                     :osoitenumero2                 (get-text rakennus :osoite :osoitenumero2)
+                     :osoitenumero                  (ss/join "\u2013" (remove empty? [(get-text rakennus :osoite :osoitenumero) (get-text rakennus :osoite :osoitenumero2)])) ;SFS4175 stardardin mukainen valiviiva
                      :jakokirjain                   (get-text rakennus :osoite :jakokirjain)
                      :jakokirjain2                  (get-text rakennus :osoite :jakokirjain2)
                      :porras                        (get-text rakennus :osoite :porras)
