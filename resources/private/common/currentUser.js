@@ -77,10 +77,10 @@ LUPAPISTE.CurrentUser = function() {
   // isAuthority and isApplicant computeds.
   var hash = ko.observable();
 
-  window.onhashchange = function() {
+  $(window).on( "hashchange", function() {
     // Null-safe regarding location
     hash( _.get( window, "location.hash" ));
-  };
+  } );
 
   function isOutsideAuthority() {
     var app = lupapisteApp.models.application;
@@ -100,6 +100,11 @@ LUPAPISTE.CurrentUser = function() {
   self.isApplicant = ko.pureComputed(function() {
     return self.role() === "applicant" || isOutsideAuthority();
   });
+
+  // Role in the context of the current application.
+  self.applicationRole = _.cond( [[self.isAuthority, _.constant( "authority")],
+                                  [self.isApplicant, _.constant( "applicant")],
+                                  [_.stubTrue, self.role ]]);
 
   self.isCompanyUser = ko.pureComputed(function() {
     return !_.isEmpty(ko.unwrap(self.company.id()));

@@ -497,7 +497,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function isSubSchemaWhitelisted(schema) {
-    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.includes(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.role());
+    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.includes(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.applicationRole());
   }
 
   function buildText(subSchema, model, path) {
@@ -1226,7 +1226,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function build(subSchema, model, path) {
     // Do not create hidden whitelisted elements
     var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
-    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.role());
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.applicationRole());
     var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
 
     if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {

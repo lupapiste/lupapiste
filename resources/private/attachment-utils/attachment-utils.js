@@ -60,9 +60,9 @@ var attachmentUtils = (function() {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       a.required = a.required || false;
-      a.authorized = (a.required || a.requestedByAuthority) ? lupapisteApp.models.currentUser.role() === "authority" : true;
+      a.authorized = (a.required || a.requestedByAuthority) ? lupapisteApp.models.currentUser.isAuthority() : true;
       a.notNeeded = ko.observable(a.notNeeded || false);
-      a.notNeededFieldDisabled = ko.observable(a.requestedByAuthority ? lupapisteApp.models.currentUser.role() !== "authority" : false);
+      a.notNeededFieldDisabled = ko.observable(a.requestedByAuthority ? lupapisteApp.models.currentUser.isAuthority() : false);
       return a;
     });
     if ( _.isFunction(sorterFn) ) {
