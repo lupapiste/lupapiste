@@ -59,7 +59,7 @@
       <!-- ko if: canBeDisabled -->
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': 'toggle-document-status'},
-                         toggleClick: disabledStatus">
+                         click: changeDocStatus">
         <i data-bind="css: {'lupicon-remove': !disabledStatus(), 'lupicon-check': disabledStatus}"></i>
         <span data-bind="ltext: disabledStatus() ? 'document.status.toggle.enable' : 'document.status.toggle.disable'"></span>
       </button>

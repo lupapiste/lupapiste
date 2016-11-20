@@ -129,19 +129,36 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.canBeDisabled = self.disposedPureComputed(function () {
     return self.auth.ok("set-doc-status");
   });
-  self.disposedSubscribe(self.disabledStatus, function(v) {
-    var value = v ? "disabled" : "enabled";
-    ajax.command("set-doc-status", {id: self.docModel.appId, docId: self.docModel.docId, value: value})
-      .success(function(resp) {
-        util.showSavedIndicatorIcon(resp);
-        // refreshing authorization makes docmodel be redrawn
-        authorization.refreshModelsForCategory(_.set({}, self.docModel.docId, self.auth), self.docModel.appId, "documents");
-        // Refresh assignments for document
-        hub.send("assignmentService::targetsQuery", {applicationId: self.docModel.appId});
-        hub.send("assignmentService::applicationAssignments", {applicationId: self.docModel.appId});
-      })
-      .call();
-  });
+  self.changeDocStatus = function() {
+    var currentValue = self.disabledStatus();
+    var ajaxValue = !currentValue ? "disabled" : "enabled";
+    var documentName = loc(self.titleLoc) + (self.accordionText() ? " - " + self.accordionText() : "");
+
+    var setStatus = function() {
+      ajax.command("set-doc-status", {id: self.docModel.appId, docId: self.docModel.docId, value: ajaxValue})
+        .success(function(resp) {
+          self.disabledStatus(!currentValue);
+          util.showSavedIndicatorIcon(resp);
+          // refreshing authorization makes docmodel be redrawn
+          authorization.refreshModelsForCategory(_.set({}, self.docModel.docId, self.auth), self.docModel.appId, "documents");
+          // Refresh assignments for document
+          hub.send("assignmentService::targetsQuery", {applicationId: self.docModel.appId});
+          hub.send("assignmentService::applicationAssignments", {applicationId: self.docModel.appId});
+        })
+        .call();
+    };
+    if (ajaxValue === "disabled") {
+      hub.send("show-dialog", {ltitle: "areyousure",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: loc("document.party.disabled.areyousure", documentName),
+                                                 yesFn: setStatus,
+                                                 lyesTitle: "document.party.disabled.areyousure.confirmation",
+                                                 lnoTitle: "cancel"}});
+    } else {
+      setStatus();
+    }
+  };
 
   self.showToolbar = ko.pureComputed(function() {
     return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation() || self.canBeDisabled();
