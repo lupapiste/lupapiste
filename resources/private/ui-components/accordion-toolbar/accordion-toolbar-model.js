@@ -128,7 +128,11 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.disposedSubscribe(self.disabledStatus, function(v) {
     var value = v ? "disabled" : "enabled";
     ajax.command("set-doc-status", {id: self.docModel.appId, docId: self.docModel.docId, value: value})
-      .success(util.showSavedIndicatorIcon)
+      .success(function(resp) {
+        util.showSavedIndicatorIcon(resp);
+        // refreshing authorization makes docmodel be redrawn
+        authorization.refreshModelsForCategory(_.set({}, self.docModel.docId, self.auth), self.docModel.appId, "documents");
+      })
       .call();
   });
 
