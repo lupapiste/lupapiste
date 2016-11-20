@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1479314280464');
+@import url('main-blessed1.css?z=1479655521314');
 
 /* line 1187, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-6.col--full > * {
@@ -9853,7 +9853,7 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 .bulletin-comment .bulletin-comment__name:disabled, .bulletin-comment .bulletin-comment__name.disabled, .bulletin-comment .bulletin-comment__name.waiting {
   cursor: default !important;
-  color: white !important;
+  color: #999999 !important;
   background-color: none !important;
 }
 /* line 20, ../../../private/common-html/sass/partials/_bulletin-comments.scss */

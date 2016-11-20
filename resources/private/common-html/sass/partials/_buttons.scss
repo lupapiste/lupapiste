@@ -220,7 +220,7 @@ i.btn-small {
 
 @mixin styled-input ($bg, $hover-bg, $active-bg,
                      $text: white, $hover-text: white, $active-text: white,
-                     $disabled-text: white, $disabled-bg: $gray221 ) {
+                     $disabled-text: $gray153, $disabled-bg: $gray221 ) {
   color: $text;
   background-color: $bg;
 

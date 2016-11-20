@@ -3,6 +3,7 @@
     <button class="secondary"
             data-bind="css: {positive: isApproved,
                              rejected: isSummaryRejected,
+                             disabled: disabledStatus,
                              toggled: isOpen},
                        click: toggleAccordion">
       <i class="lupicon-chevron-down"></i>
@@ -59,8 +60,8 @@
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': 'toggle-document-status'},
                          toggleClick: disabledStatus">
-        <i class="lupicon-remove"></i>
-        <span data-bind="text: disabledStatus() ? 'Aktivoi' : 'Passivoi'"></span>
+        <i data-bind="css: {'lupicon-remove': !disabledStatus(), 'lupicon-check': disabledStatus}"></i>
+        <span data-bind="ltext: disabledStatus() ? 'document.status.toggle.enable' : 'document.status.toggle.disable'"></span>
       </button>
       <!-- /ko -->
       <button class="secondary is-right"
