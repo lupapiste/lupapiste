@@ -132,6 +132,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
         util.showSavedIndicatorIcon(resp);
         // refreshing authorization makes docmodel be redrawn
         authorization.refreshModelsForCategory(_.set({}, self.docModel.docId, self.auth), self.docModel.appId, "documents");
+        // Refresh assignments for document
+        hub.send("assignmentService::targetsQuery", {applicationId: self.docModel.appId});
+        hub.send("assignmentService::applicationAssignments", {applicationId: self.docModel.appId});
       })
       .call();
   });
