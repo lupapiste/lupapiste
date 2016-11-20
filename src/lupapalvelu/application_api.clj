@@ -43,16 +43,21 @@
 (notifications/defemail :application-state-change state-change)
 
 
+(defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
+                              _
+                              recipient]
+  {:operation-fi (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
+   :operation-sv (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
+   :address (:address application)
+   :city-fi (i18n/localize :fi "municipality" (:municipality application))
+   :city-sv (i18n/localize :sv "municipality" (:municipality application))
+   :name (:firstName recipient)
+   :text text})
+
 (notifications/defemail :application-return-to-draft
   {:subject-key "return-to-draft"
    :template "application-return-to-draft.md"
-   :model-fn (fn [{application :application} _ recipient]
-               {:operation-fi (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
-                :operation-sv (i18n/localize :fi "operations" (-> application :primaryOperation :name name))
-                :address (:address application)
-                :city-fi (i18n/localize :fi "municipality" (:municipality application))
-                :city-sv (i18n/localize :sv "municipality" (:municipality application))
-                :name (:firstName recipient)})})
+   :model-fn return-to-draft-model})
 
 ;; Validators
 
@@ -549,6 +554,8 @@
 
 (defcommand return-to-draft
   {:description "Returns the application to draft state."
+   :parameters       [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :states #{:submitted}
    :pre-checks [(partial sm/validate-state-transition :draft)]

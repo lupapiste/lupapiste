@@ -574,25 +574,30 @@
           (-> (query sonja :change-application-state-targets :id application-id) :states set (contains? "verdictGiven")) => true
           (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))
 
+(defn- return-to-draft [authority application-id]
+  (command authority :return-to-draft :id application-id :text "comment-text" :lang :fi))
+
 (facts "Returning application to draft state after submission"
   (fact "Only applications in 'submitted' state can be returned to draft"
     (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
-      (command sonja :return-to-draft :id application-id) => (partial expected-failure? :error.command-illegal-state)
+      (return-to-draft sonja application-id) => (partial expected-failure? :error.command-illegal-state)
       (command pena :submit-application :id application-id)
-      (command sonja :return-to-draft :id application-id) => ok?
+      (return-to-draft sonja application-id) => ok?
       (command pena :submit-application :id application-id) => ok?
       (command sonja :check-for-verdict :id application-id)
-      (command sonja :return-to-draft :id application-id) => (partial expected-failure? :error.command-illegal-state)))
+      (return-to-draft sonja application-id) => (partial expected-failure? :error.command-illegal-state)))
   (fact "The applicant is notified of the return to draft"
     (last-email) ; Inbox zero
     (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
       (command pena :submit-application :id application-id)
-      (command sonja :return-to-draft :id application-id)
-      (last-email) => (comp (contains (email-for-key pena)) :to)))
+      (return-to-draft sonja application-id)
+      (let [email (last-email)]
+        email => (comp (contains (email-for-key pena)) :to)
+        email => (comp (contains "comment-text") :html :body))))
   (fact "The return to draft can be seen in application history"
     (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
       (command pena :submit-application :id application-id)
-      (command sonja :return-to-draft :id application-id)
+      (return-to-draft sonja application-id)
       (let [application (query-application pena application-id)]
         (:state application) => "draft"
         (-> application :history last :state) => "draft"))))
