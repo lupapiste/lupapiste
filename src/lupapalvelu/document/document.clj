@@ -188,6 +188,7 @@
 
 (defn- describe-parties-assignment-targets [application]
   (->> (domain/get-documents-by-type application :party)
+       (remove :disabled)
        (sort-by tools/document-ordering-fn)
        (map (partial document-assignment-info nil))))
 
@@ -195,6 +196,7 @@
   (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))
         operations (cons primaryOperation secondaryOperations)]
     (->> (remove (comp party-doc-ids :id) documents)
+         (remove :disabled)
          (sort-by tools/document-ordering-fn)
          (map (partial document-assignment-info operations)))))
 
