@@ -138,7 +138,7 @@
   (if (domain/get-document-by-id (:application command) docId)
     (do
       (doc-persistence/set-disabled-status command docId value)
-      (assignment/remove-assignments-by-target id docId)
+      (assignment/set-assignment-status id docId (if (= value "disabled") "canceled" "active"))
       (ok))
     (fail :error.document-not-found)))
 
