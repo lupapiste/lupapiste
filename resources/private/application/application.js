@@ -290,7 +290,7 @@
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
                                   app,
-                                  applicationModel.summaryAvailable() ? [] : editableDocs,
+                                  applicationModel.summaryAvailable() ? [] : nonpartyDocs,
                                   {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationDocgen");

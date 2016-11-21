@@ -121,6 +121,26 @@ Review active
   Test id editable  katselmus.huomautukset.toteamisHetki
   Wait test id visible  add-targetted-attachment
 
+Review disabled for applicant
+  Wait until  Xpath should match X times  //table[contains(@class, 'review-buildings')]/tbody//tr  3
+  Test id disabled  review-done
+  Element should not be visible  jquery=table.review-buildings-table tbody select:enabled
+  Review checkboxes disabled
+  Element should not be visible  jquery=table.review-buildings-table tbody input:enabled
+  Element should be disabled  jquery=[data-test-id="katselmus.tila"]
+  Test id disabled  'katselmus.pitoPvm'
+  Test id disabled  'katselmus.pitaja'
+  Test id disabled  'katselmus.lasnaolijat'
+  Test id disabled  'katselmus.poikkeamat'
+  Test id disabled  'katselmus.huomautukset.kuvaus'
+  Test id disabled  'katselmus.huomautukset.maaraAika'
+  Test id disabled  'katselmus.huomautukset.toteaja'
+  Test id disabled  'katselmus.huomautukset.toteamisHetki'
+  Wait test id visible  add-targetted-attachment
+  No such test id  review-done
+  No such test id  delete-task
+  
+
 Finalize review
   Click by test id  review-done
   Confirm  dynamic-ok-confirm-dialog

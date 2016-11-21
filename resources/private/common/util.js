@@ -387,8 +387,36 @@ var util = (function($) {
   }
 
   function strictParseFloat( s ) {
-    s = _.trim( s );
-    return isNum( s ) ? parseFloat( s ) : NaN;
+    s =  _.replace(_.trim( s ), ",", ".");
+    return _.every( _.split( s, ".", isNum ) ) ? parseFloat( s ) : NaN;
+  }
+
+  // Zips given array into object.
+  // Optional fun argument is the value function (default _.constant( true )):
+  function arrayToObject( arr, fun ) {
+    return _.zipObject( arr,
+                        _.map( arr,
+                               fun || _.constant( true )));
+  }
+
+  function identLogoutUrl() {
+    return util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
+  }
+
+  function identLogoutRedirect() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
+  function identLogoutRedirectBulletins() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
   }
 
   return {
@@ -433,7 +461,11 @@ var util = (function($) {
     getPreviousState: getPreviousState,
     partyFullName: partyFullName,
     isEmpty: isEmpty,
-    parseFloat: strictParseFloat
+    parseFloat: strictParseFloat,
+    identLogoutUrl: identLogoutUrl,
+    identLogoutRedirect: identLogoutRedirect,
+    identLogoutRedirectBulletins: identLogoutRedirectBulletins,
+    arrayToObject: arrayToObject
   };
 
 })(jQuery);

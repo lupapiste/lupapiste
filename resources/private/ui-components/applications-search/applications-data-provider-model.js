@@ -135,8 +135,8 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
   };
 
   function cacheMiss() {
-    return !_.isEqual(_.omitBy( searchFields(), _.isEmpty ),
-                      _.omitBy( fieldsCache, _.isEmpty ));
+    return !_.isEqual(_.omitBy( searchFields(), _.isNil ),
+                      _.omitBy( fieldsCache, _.isNil ));
   }
 
   function fetchSearchResults( clearCache ) {

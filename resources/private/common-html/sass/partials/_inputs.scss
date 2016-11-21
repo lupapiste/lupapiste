@@ -208,12 +208,11 @@ input.dateinput {
   background-position: right 4px center;
   background-repeat: no-repeat;
   padding-right: 34px;
+  width: initial;
   &:focus {
-    //border-color: $input-focus-border-color;
     background-image: url("/lp-static/img/calendar-orange-light.png");
   }
   &:disabled {
-    //border-color: $input-disabled-border-color;
     background-image: url("/lp-static/img/calendar-gray187.png");
     color: $input-select-disabled-icon;
     background-repeat: no-repeat;
@@ -237,6 +236,37 @@ input.tip.dateinput {
   }
 }
 
-.grid-style-input {
+input.dateinput.dateinput--small {
+  height: 26px;
+  background-image: url("/lp-static/img/calendar-12-orange-dark.png");
+  min-height: initial;
+  font-size: 0.875em;
+  &:focus {
+    background-image: url("/lp-static/img/calendar-12-orange-light.png");
+  }
+  &:disabled {
+    background-image: url("/lp-static/img/calendar-12-gray187.png");
+  }
+}
+
+.form-grid input.tip.dateinput.dateinput--small,
+input.tip.dateinput.dateinput--small {
+  background-image: url("/lp-static/img/calendar-12-orange.png");
+  &:focus {
+    background-image: url("/lp-static/img/calendar-12-orange-light.png");
+  }
+  &:disabled {
+    background-image: url("/lp-static/img/calendar-12-gray187.png");
+  }
+}
+
+
+
+input.grid-style-input {
   @include input-fields;
+}
+
+input.grid-style-input--wide {
+  @include input-fields;
+  width: 100%;
 }
