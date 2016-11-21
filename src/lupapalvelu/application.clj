@@ -366,7 +366,7 @@
 
         location-schema (util/find-first #(= (keyword (:type %)) :location) existing-schemas-infos)
 
-        schemas (->> ((apply juxt (:org-required op-info)) org)
+        schemas (->> (when (not-empty (:org-required op-info)) ((apply juxt (:org-required op-info)) org))
                      (concat (:required op-info))
                      (map #(schemas/get-schema schema-version %)))
         new-docs (->> schemas

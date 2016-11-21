@@ -26,6 +26,12 @@ Enable extended construction waste report for orgainzation
   Select checkbox  extended-construction-waste-report-enabled
   Wait until  Positive indicator should be visible
   Checkbox should be selected  extended-construction-waste-report-enabled
+
+Checkbox remains checked after refresh
+  Reload page
+  Wait until  Checkbox should be selected  extended-construction-waste-report-enabled
+
+Authority admin logs out
   Logout
 
 Sonja logs in and sees nothing changed on existing application

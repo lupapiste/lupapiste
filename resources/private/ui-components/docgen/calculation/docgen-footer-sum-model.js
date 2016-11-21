@@ -52,8 +52,11 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
     var master = finalUnit( unitColumn );
     return _(columnData( column ))
       .map(function( v, i ) {
-        // The unit must be defined for the value.
-        var num = units[i] ? dataFloat( v ) : NaN;
+        var num = dataFloat( v );
+        // If the value is non-zero, a unit must be defined.
+        if( !units[i] && num ) {
+          num = NaN;
+        }
         // The units can differ only if master is kg and column unit
         // is not.
         return master === units[i] ? num : 1000 * num;
@@ -77,7 +80,7 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
   var unitKeys = { kg: "unit.kg", t: "unit.tonnia", tonnia: "unit.tonnia"};
 
   self.calculationResult = self.disposedPureComputed( function() {
-    var amount = calculateAmount();
+    var amount = _.round(calculateAmount(), 2);
     var unit = finalUnit();
     return  unit
       ? _.sprintf( "%s %s", amount, loc( unitKeys[unit] ) )

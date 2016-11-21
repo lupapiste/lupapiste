@@ -1009,7 +1009,7 @@
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
                     <!-- /ko -->
-                    <!-- ko if: $root.hasConstructionTimeDocs -->
+                    <!-- ko if: $root.hasEditableDocs -->
                     <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
                       <p data-bind="lhtml: 'required.field.desc'"></p>
                       <div class="application_section">

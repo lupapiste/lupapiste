@@ -414,20 +414,22 @@ input.form-input.inline {
 }
 
 .form-input-and-unit {
-  display: block;
+  display: table;
   margin-right: $marginM;
   white-space: nowrap;
   input {
-    width: initial !important;
+    display: table-cell
   }
 }
 
 .form-input-and-unit .form-input {
-  display: inline-block;
   margin-right: $marginM;
 }
 
 .form-string-unit {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 2px;
 }
 
 .form-input.tiny {
@@ -1535,14 +1537,40 @@ div.review-done {
   }
 }
 
-.col-fixed .inline {
-  display: table-cell;
-  vertical-align: bottom;
-  height: 120px;
+@mixin row-label-x ($n, $row-margin: 10px) {
+  margin: {
+    top: $row-margin;
+    bottom: $row-margin;
+  }
+  .inline {
+    display: inherit;
+  }
+  .form-label {
+    display: table-cell;
+    vertical-align: bottom;
+    height: $n * 24 + 1px;
+    padding-bottom: 1px;
+  }
   .form-input {
-    margin-bottom: 0;
+    margin: 0;
   }
 }
+
+.row.label-x-2 {
+  @include row-label-x( 2 );
+}
+
+.row.label-x-3 {
+  @include row-label-x( 3, 5 );
+}
+
+.row.row--tight {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
 
 .calculation-result {
   font-size: 16px;

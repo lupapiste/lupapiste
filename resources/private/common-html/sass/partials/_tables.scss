@@ -386,13 +386,24 @@ th.full-width-column {
   width: 100%;
 }
 
-.form-table.form-table--waste {
+@for $i from 1 through 10 {
+  th.column--#{$i}0 {width: 10% * $i; }
+}
+
+
+.form-table--waste {
   @include no-row-hover;
+  table {
+    width: 100%;
+  }
   .form-input {
     height: initial;
   }
   th {
     white-space: nowrap;
+    @media (max-width: 890px ) {
+      white-space: initial;
+    }
   }
   td.action-column {
     text-align: center;
@@ -413,6 +424,7 @@ th.full-width-column {
     }
     .footer-sum--result {
       color: $gray119;
+      white-space: nowrap;
     }
     .footer-sum--error {
       color: $red-dark;
@@ -424,4 +436,17 @@ th.full-width-column {
       text-align: center;
     }
   }
+}
+
+
+
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
+  }
+}
+
+select.waste-unit-select {
+  font-size: 16px;
+  width: 5em;
 }

@@ -200,6 +200,8 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentsEnabled(organization["assignments-enabled"] || false);
 
+    self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
+
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
