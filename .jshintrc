@@ -77,7 +77,8 @@
     "vetuma": true,
     "warn": true,
     "Waypoint":false,
-    "lupapisteWindow" :true
+    "lupapisteWindow" :true,
+    "sprintf": false
   },
   "exported": [
     "accordion","AccordionState","ajax","attachment",

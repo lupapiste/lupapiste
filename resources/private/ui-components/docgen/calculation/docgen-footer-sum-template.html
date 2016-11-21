@@ -2,7 +2,8 @@
         id="docgen-footer-sum-template">
   <!-- ko ifnot: showError  -->
   <span class="footer-sum--result"
-        data-bind="text: calculationResult"></span>
+        data-bind="text: calculationResult,
+                   testId: testId"></span>
   <!-- /ko -->
   <!-- ko if: showError  -->
   <i class="footer-sum--error lupicon-warning"></i>
