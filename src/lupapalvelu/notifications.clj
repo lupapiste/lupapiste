@@ -138,13 +138,13 @@
   {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
+;; roles which do not receive email notifications
 (def non-notified-roles
   #{"rest-api" "trusted-etl"})
 
-; template types which are always sent regardless of user state
-(def always-sent? 
-  (let [special-cases (set [:invite-company-user :reset-password])]
-    (fn [template-name] (get special-cases template-name))))
+;; email template ids, which are sent regardless of current user state
+(def always-sent-templates
+  #{:invite-company-user :reset-password})
 
 (defn invalid-recipient? [for-template]
    "Notifications are not sent to certain roles, users who do not 
@@ -152,7 +152,7 @@
     receive only specific message types defined above."
   (fn [rec]
      (or (ss/blank? (:email rec))
-        (if (always-sent? for-template)
+        (if (contains? always-sent-templates for-template)
           false
           (not (u/email-recipient? rec)))
         (contains? non-notified-roles (:role rec)))))
