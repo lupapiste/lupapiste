@@ -592,6 +592,7 @@
       (command pena :submit-application :id application-id)
       (return-to-draft sonja application-id)
       (let [email (last-email)]
+        email => (comp (contains "hankkeen Asuinkerrostalon tai rivitalon rakentaminen osoitteessa") :html :body)
         email => (comp (contains (email-for-key pena)) :to)
         email => (comp (contains "comment-text") :html :body))))
   (fact "The return to draft can be seen in application history"
