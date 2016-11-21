@@ -4,12 +4,14 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.application :as app]
-            [lupapalvelu.server] ; ensure all namespaces are loaded
+            [lupapalvelu.server]                            ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [lupapalvelu.opendata.applications-data :as open-application-data])
+            [lupapalvelu.opendata.applications-data :as open-application-data]
+            [lupapalvelu.opendata.schemas :refer [HakemusTiedot]]
+            [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
@@ -152,4 +154,12 @@
 
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
 
-(mongocheck :applications open-application-data/schema-check-app :documents :state :primaryOperation)
+(defn opendata-schema-check-app [application]
+  (when (and (= (:permitType application) "R")
+             (= (keyword (:state application)) :submitted)
+             (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
+    (let [app (select-keys application open-application-data/required-fields-from-db)]
+      ((sc/checker HakemusTiedot) (open-application-data/process-application app)))))
+
+
+(mongocheck :applications opendata-schema-check-app :documents :state :primaryOperation)

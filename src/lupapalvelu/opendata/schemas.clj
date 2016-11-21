@@ -17,7 +17,7 @@
           (sc/one sc/Num "lat")] "Rakennuspaikan sijainti (ETRS-TM35FIN), pituus- ja leveysasteet"))
 
 (sc/defschema Kuntakoodi
-  (field sc/Str "Kuntakoodi"))
+  (field (sc/either sc/Num #"\d{3}") "Kuntakoodi esim. 091 (Helsinki)"))
 
 (sc/defschema DateString
   (field (sc/constrained sc/Str (partial re-matches #"\d{4}-\d{2}-\d{2}"))

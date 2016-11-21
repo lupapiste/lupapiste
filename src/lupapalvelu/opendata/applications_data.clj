@@ -25,15 +25,19 @@
       (assoc :toimenpiteet (get-toimenpiteet application))))
 
 (defn process-application [application]
-  (-> application
-      (merge {:asiointitunnus    (:id application)
-              :kiinteistoTunnus  (:propertyId application)
-              :osoite            (:address application)
-              :kuntakoodi        (:municipality application)
-              :sijaintiETRS      (:location application)})
-      (assoc :saapumisPvm        (util/to-xml-date (:submitted application)))
-      process-buildings
-      (dissoc :id :propertyId :address :municipality :location :primaryOperation :submitted :documents)))
+  (if (empty? (:documents application))
+    (do
+      (warnf "Skipping data item [ID=%s], documents array empty" (:id application))
+      nil)
+    (-> application
+        (merge {:asiointitunnus    (:id application)
+                :kiinteistoTunnus  (:propertyId application)
+                :osoite            (:address application)
+                :kuntakoodi        (:municipality application)
+                :sijaintiETRS      (:location application)})
+        (assoc :saapumisPvm        (util/to-xml-date (:submitted application)))
+        process-buildings
+        (dissoc :id :propertyId :address :municipality :location :primaryOperation :submitted :documents))))
 
 (defn schema-verify [checker data]
   (let [errors (checker data)]
@@ -53,16 +57,14 @@
                                :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
                 required-fields-from-db))
 
-(defn schema-check-app [application]
-  (when (and (= (:permitType application) "R")
-             (= (keyword (:state application)) :submitted)
-             (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
-    (let [app (select-keys application required-fields-from-db)]
-      ((sc/checker HakemusTiedot) (process-application app)))))
+(defn- process-applications [coll]
+  (->> coll
+       (map process-application)
+       (remove nil?)
+       (map (partial schema-verify (sc/checker HakemusTiedot)))
+       (remove nil?)))
 
 (defn applications-by-organization [organization]
   (->> organization
        query-applications
-       (map process-application)
-       (map (partial schema-verify (sc/checker HakemusTiedot)))
-       (remove nil?)))
+       process-applications))
