@@ -11,7 +11,8 @@
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
             [clj-time.format :as fmt]
-            [net.cgrand.enlive-html :as enlive]))
+            [net.cgrand.enlive-html :as enlive]
+            [sade.util :as util]))
 
 (apply-remote-minimal)
 

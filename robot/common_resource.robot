@@ -1480,13 +1480,13 @@ Fill tyoaika fields
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-alkaa-pvm']").val("${startDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-pvm')]  ${startDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-ms')]
+  Execute Javascript  $("input[id*='tyoaika-alkaa-ms']").val("${startDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-ms')]  ${startDate}
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-ms')]
+  Execute Javascript  $("input[id*='tyoaika-paattyy-ms']").val("${endDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-ms')]  ${endDate}
 
 Fill in yritys info
   [Arguments]  ${dataDocType}

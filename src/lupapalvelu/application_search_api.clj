@@ -24,7 +24,8 @@
               (select-keys
                 data
                 [:tags :organizations :applicationType :handlers
-                 :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
+                 :limit :searchText :skip :sort :operations :areas :areas-wgs84
+                 :event]))))
 
 (defquery applications-search-default
   {:description "The initial applications search. Returns data and used search."

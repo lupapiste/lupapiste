@@ -18,14 +18,19 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.states :as states]
             [lupapalvelu.geojson :as geo]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [clj-time.coerce :as c]
+            [clj-time.format :as f]))
 
 ;;
 ;; Query construction
 ;;
 
+(def max-date 253402214400000)
+
 (defn- make-free-text-query [filter-search]
-  (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id]
+  (let [search-keys [:address :verdicts.kuntalupatunnus :_applicantIndex :foreman :_id :documents.data.yritys.yritysnimi.value
+                     :documents.data.henkilo.henkilotiedot.sukunimi.value]
         fuzzy       (ss/fuzzy-re filter-search)
         or-query    {$or (map #(hash-map % {$regex fuzzy $options "i"}) search-keys)}
         ops         (app-utils/operation-names filter-search)]
@@ -65,7 +70,11 @@
              {:submitted {$gte from-ts}}]}
       base-query)))
 
-(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter]} user]
+(defn- event-search [event]
+  (and (not (empty? event))
+       (not (empty? (:eventType event)))))
+
+(defn make-query [query {:keys [searchText applicationType handlers tags organizations operations areas modifiedAfter event]} user]
   {$and
    (filter seq
      [query
@@ -106,6 +115,21 @@
         {:tags {$in tags}})
       (when-not (empty? organizations)
         {:organization {$in organizations}})
+      (when (event-search event)
+        (println "start")
+        (case (first (:eventType event))
+          "warranty-period-end"                 {$and [{:warrantyEnd {"$gte" (or (:start event) 0)
+                                                                     "$lt" (or (:end event) max-date)}}]}
+          "license-period-start"                {$and [{:documents.data.tyoaika-alkaa-ms.value {"$gte" (or (:start event) 0)
+                                                                                              "$lt" (or (:end event) max-date)}}]}
+          "license-period-end"                  {$and [{:documents.data.tyoaika-paattyy-ms.value {"$gte" (or (:start event) 0)
+                                                                                                "$lt" (or (:end event) max-date)}}]}
+          "license-started-not-ready"           {$and [{:documents.data.tyoaika-alkaa-ms.value {"$lt" (now)}},
+                                                       {:state {$ne "closed"}}]}
+          "license-ended-not-ready"             {$and [{:documents.data.tyoaika-paattyy-ms.value {"$lt" (now)}},
+                                                       {:state {$ne "closed"}}]}
+          "announced-to-ready-state-not-ready"  {$and [{:closed {"$lt" (now)}},
+                                                       {:state {$ne "closed"}}]}))
       (cond
         (seq operations) {:primaryOperation.name {$in operations}}
         (and (user/authority? user) (not= applicationType "unlimited"))

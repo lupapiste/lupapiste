@@ -211,7 +211,8 @@
                    "building-service.js"
                    "assignment-service.js"
                    "assignment-recipient-filter-service.js"
-                   "assignment-target-filter-service.js"]}
+                   "assignment-target-filter-service.js"
+                   "event-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

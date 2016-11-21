@@ -51,6 +51,21 @@
             </div>
           </div>
 
+          <!-- ko if: lupapisteApp.models.currentUser.belongsYAOrg() -->
+          <div class="row">
+            <div class="col-2" data-test-id="event-filter-item">
+              <label data-bind="ltext: 'applications.filter.event'" />
+              <div data-test-id="event-filter-component" data-bind="component: {name: 'autocomplete-event', params: {lPlaceholder: 'application.filter.search.placeholder.event-filter'}}"></div>
+            </div>
+            <div class="col-2" data-test-id="event-filter-dates">
+              <label data-bind="ltext: 'applications.filter.event.dates'" /><br/>
+              <input type="text" data-bind="datepicker: dataProvider.searchStartDate" class="form-input" data-test-id="event-search-start-date">
+              &nbsp;&#8211;&nbsp;
+              <input type="text" data-bind="datepicker: dataProvider.searchEndDate" class="form-input" data-test-id="event-search-end-date">
+            </div>
+          </div>
+          <!-- /ko -->
+
           <div class="row">
             <div class="col-2">
               <label data-bind="ltext: 'applications.filter.areas'" />
