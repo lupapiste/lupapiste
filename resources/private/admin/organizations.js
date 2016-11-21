@@ -54,9 +54,9 @@
     self.countText = function() {
       var count = _.size( self.organizations());
       return _.trim( self.searchTerm()) || _.some( self.organizations())
-        ? _.sprintf( "%d organisaatio%s.",
-                     count,
-                     count !== 1 ? "ta" : "")
+        ? sprintf( "%d organisaatio%s.",
+                   count,
+                   count !== 1 ? "ta" : "")
       : "";
     };
     self.showAll = function() {

@@ -13,7 +13,7 @@ LUPAPISTE.IntegrationMessageMonitorModel = function(params) {
         var files = _.map(["krysp","ah"], function(t) {
           return _.map(resp[t][group], function(f) {
             if (group !== "waiting") {
-              f.href = _.sprintf("/api/raw/integration-message?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
+              f.href = sprintf("/api/raw/integration-message?id=%s&transferType=%s&fileType=%s&filename=%s", params.id, t, group, f.name);
             }
             return f;
           });
