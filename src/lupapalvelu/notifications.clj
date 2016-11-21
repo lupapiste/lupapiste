@@ -61,7 +61,7 @@
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
    More specific set recipients can be defined by user roles."
-  [{:keys [auth statements]} included-roles excluded-roles]
+  [{:keys [auth]} included-roles excluded-roles]
   {:post [every? map? %]}
   (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
                                         (set excluded-roles))]
@@ -142,7 +142,7 @@
   #{"rest-api" "trusted-etl"})
 
 (defn invalid-recipient? [rec]
-  "Notifications are not sent to certain roles, users who do not 
+  "Notifications are not sent to certain roles, users who do not
    have a valid email address, or registered but removed users."
   (or (ss/blank? (:email rec))
       (not (u/email-recipient? rec))
