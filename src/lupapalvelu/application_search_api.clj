@@ -143,3 +143,12 @@
         apps (search/search query fields sort skip limit)]
     (ok :applications (->> (filter :primaryOperation apps)
                            (map search/public-fields)))))
+
+(defquery event-search
+  {:description "Query for event search availability"
+   :parameters []
+   :user-roles #{:authority}
+   :pre-checks [(fn [command]
+                  (when-not (some #(= (:permitType %) "YA") (mapcat :scope (:user-organizations command)))
+                    unauthorized))]}
+   [_])

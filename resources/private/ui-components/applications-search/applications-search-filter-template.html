@@ -51,7 +51,7 @@
             </div>
           </div>
 
-          <!-- ko if: lupapisteApp.models.currentUser.belongsYAOrg() -->
+          <!-- ko if: lupapisteApp.models.globalAuthModel.ok("event-search") -->
           <div class="row">
             <div class="col-2" data-test-id="event-filter-item">
               <label data-bind="ltext: 'applications.filter.event'" />

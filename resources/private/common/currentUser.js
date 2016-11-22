@@ -123,17 +123,6 @@ LUPAPISTE.CurrentUser = function() {
     return !_.isEmpty(getNotificationFields(self.notification));
   });
 
-  self.belongsYAOrg = ko.pureComputed(function() {
-    var organizations = _.keys(lupapisteApp.models.currentUser.orgAuthz());
-    var yaOrg = false;
-    _.map(organizations, function(org) {
-      if (_.includes(org, "YA")) {
-        yaOrg = true;
-      }
-    });
-    return yaOrg;
-  });
-
   function getNotificationFields(notification) {
     if(notification.titleI18nkey() && notification.messageI18nkey()) {
       return {

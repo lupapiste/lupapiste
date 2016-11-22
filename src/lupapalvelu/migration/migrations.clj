@@ -2551,47 +2551,43 @@
   (if (and (= "tyoaika" (get-in document [:schema-info :name]))
            (valid-date-string (get-in document [:data :tyoaika-alkaa-pvm :value]))
            (nil? (get-in document [:data :tyoaika-alkaa-ms :value])))
-    (do
-      (assoc-in document [:data :tyoaika-alkaa-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-alkaa-pvm :value]))))
+      (assoc-in document [:data :tyoaika-alkaa-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-alkaa-pvm :value])))
     document))
 
 (defn- add-end-timestamp [document]
   (if (and (= "tyoaika" (get-in document [:schema-info :name]))
            (valid-date-string (get-in document [:data :tyoaika-paattyy-pvm :value]))
            (nil? (get-in document [:data :tyoaika-paattyy-ms :value])))
-    (do
-      (assoc-in document [:data :tyoaika-paattyy-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-paattyy-pvm :value]))))
+      (assoc-in document [:data :tyoaika-paattyy-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-paattyy-pvm :value])))
     document))
 
-(defmigration add-ms-timestamp-for-work-started
+(defmigration add-ms-timestamp-for-work-started-and-ended
   {:apply-when (pos? (mongo/count :applications
                                   {:documents
-                                  {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                  {$elemMatch {$or
+                                               [{$and [{:schema-info.name "tyoaika"},
                                                      {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
                                                      {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
-                                                     {:data.tyoaika-alkaa-ms.value {$exists false}}]}}}))}
+                                                     {:data.tyoaika-alkaa-ms.value {$exists false}}]}
+                                               {$and [{:schema-info.name "tyoaika"},
+                                                      {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                                      {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                                      {:data.tyoaika-paattyy-ms.value {$exists false}}]}]}}}))}
+
   (update-applications-array :documents
                              add-start-timestamp
                              {:documents
                               {$elemMatch {$and [{:schema-info.name "tyoaika"},
                                                  {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
                                                  {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
-                                                 {:data.tyoaika-alkaa-ms.value {$exists false}}]}}}))
-
-(defmigration add-ms-timestamp-for-work-ended
-  {:apply-when (pos? (mongo/count :applications
-                                  {:documents
-                                  {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                                     {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
-                                                     {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
-                                                     {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))}
+                                                 {:data.tyoaika-alkaa-ms.value {$exists false}}]}}})
   (update-applications-array :documents
-                             add-end-timestamp
-                             {:documents
-                             {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                                {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
-                                                {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
-                                                {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
+                           add-end-timestamp
+                           {:documents
+                            {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                               {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                               {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                               {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
