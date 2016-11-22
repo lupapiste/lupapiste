@@ -100,6 +100,13 @@
     (when (:disabled doc)
       (fail :error.document.disabled))))
 
+(defn validate-disableable-schema
+  "Checks if document can be disabled"
+  [key {:keys [application data]}]
+  (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+    (when-not (get-in doc [:schema-info :disableable])
+      (fail :error.document.not-disableable))))
+
 
 ;;
 ;; KTJ-info updation

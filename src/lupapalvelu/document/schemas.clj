@@ -54,6 +54,7 @@
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
+                 :disableable
                  :removable-only-by-authority
                  :user-authz-roles
                  :group-help :section-help
@@ -1451,6 +1452,7 @@
            :order 5
            :removable true
            :approvable true
+           :disableable true
            :redraw-on-approval true
            :accordion-fields designer-accordion-paths
            :type :party

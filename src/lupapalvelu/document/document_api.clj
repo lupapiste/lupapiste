@@ -143,6 +143,7 @@
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
    :pre-checks [(partial editable-by-state? :docId nil)            ; edition defined solely by document schema
+                (partial validate-disableable-schema :doc)
                 validate-user-authz-by-doc-id]}
   [command]
   (if (domain/get-document-by-id (:application command) docId)
