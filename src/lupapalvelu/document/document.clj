@@ -73,6 +73,9 @@
 (defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
   (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
 
+(defn- deny-remove-of-approved-post-verdict-document [document application]
+  (and (created-after-verdict? document application) (approved? document)))
+
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
@@ -80,7 +83,8 @@
       (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
       (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
-      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
+      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
+      (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
 
 
 (defn validate-post-verdict-party-doc
