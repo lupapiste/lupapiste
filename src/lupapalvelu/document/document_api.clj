@@ -51,8 +51,8 @@
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
   [data-key default-states {data :data {docs :documents state :state} :application}]
-  (when-let [doc (domain/get-document-by-id docs (get data (keyword data-key)))]
-    (when-not (-> doc
+  (when-let [doc-id (get data (keyword data-key))]
+    (when-not (-> (domain/get-document-by-id docs doc-id)
                   (model/get-document-schema)
                   (state-valid-by-schema? :editable-in-states default-states state))
       (fail :error.document-not-editable-in-current-state))))
@@ -164,7 +164,7 @@
                 validate-user-authz-by-doc
                 application/validate-authority-in-drafts
                 (partial doc-disabled-validator :doc)
-                (partial validate-post-verdict-update-doc :doc)]}
+                (partial validate-post-verdict-party-doc :doc)]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 

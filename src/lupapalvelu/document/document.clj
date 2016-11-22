@@ -83,15 +83,13 @@
       (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
 
 
-(defn validate-post-verdict-update-doc
+(defn validate-post-verdict-party-doc
   "Only non-approved documents that are added after verdict can be edited in post-verdict-states"
   [key {:keys [application data]}]
   (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
-    (if-not (created-after-verdict? doc application)
-      (fail :error.document.post-verdict-update)
-      (when (approved? doc)
-        (fail :error.document.post-verdict-update)))))
+    (when (and (get-in doc [:schema-info :post-verdict-party]) (approved? doc))
+      (fail :error.document.post-verdict-update))))
 
 (defn doc-disabled-validator
   "Deny action if document is marked as disabled"

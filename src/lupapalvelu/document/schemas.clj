@@ -61,6 +61,7 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :redraw-on-approval
+                 :post-verdict-party
                  :addable-in-states
                  :exclude-from-pdf
                  :editable-in-states
@@ -1454,6 +1455,7 @@
            :approvable true
            :disableable true
            :redraw-on-approval true
+           :post-verdict-party true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
