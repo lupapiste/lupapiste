@@ -25,17 +25,15 @@
 
 (defn- combine-schema-field-and-value
   "Gets the field name and field value from a datum field and schema"
-  [{field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data locstring]
-  (let [locstring (str locstring "." field-name)
+  [{field-name :name field-type :type, :keys [i18nkey body] :as field-schema} data i18npath]
+  (let [locstring (ss/join "." (conj i18npath field-name))
         localized-field-name (cond
                                (not-nil? i18nkey) (loc i18nkey)
                                (= :select field-type) (loc locstring "_group_label")
                                :else (loc locstring))
 
-        field-name-key (keyword field-name)
-
         ; extract, cast and localize field-value according to type
-        field-value (-> data field-name-key :value)
+        field-value (get-in data [(keyword field-name) :value])
 
         subschema (util/find-first #(= field-value (:name %)) body)
 
@@ -49,8 +47,8 @@
 
 (defn- collect-fields
   "Map over the fields in a schema, pulling the data and fieldname from both"
-  [field-schemas data locstring]
-  (map #(combine-schema-field-and-value % data locstring) field-schemas))
+  [field-schemas doc path i18npath]
+  (map #(combine-schema-field-and-value % (get-in doc path) i18npath) field-schemas))
 
 ; Helpers for filtering schemas
 ; (at least :personSelector and :radioGroup do not belong to either printable groups or fields
@@ -62,109 +60,98 @@
 
 (declare collect-groups)
 
-(defn- removable-groups [schema doc-data]
-  (let [subschemas (:body schema)
-        schema-names (map :name subschemas)
-        selected-key schemas/select-one-of-key]
-    (when (some #(= selected-key %) schema-names)
-      (let [select-schema (first (filter #(= (:name %) selected-key) subschemas))
-            select-options (map :name (:body select-schema))
-            default-selection (:default select-schema)
-            selected-val (get-in doc-data [(keyword selected-key) :value] default-selection)]
-        (remove #(= selected-val %) select-options)))))
+(defn- removable-groups [doc schema path]
+  (let [select-schema (util/find-first schemas/select-one-of-schema? (:body schema))
+        selection (get-in doc (conj path (keyword schemas/select-one-of-key) :value) (:default select-schema))]
+    (->> (:body select-schema)
+         (map :name)
+         (remove #{selection})
+         set)))
 
 (defn- table? [schema] (= (:type schema) :table))
 
-(defn- index-sorted-values [doc]
-  (map second (sort-by #(util/->int (first %)) doc)))
-
-(defmulti filter-fields-by-group-subtype (fn [_ group-schema & _]
+(defmulti filter-fields-by-group-subtype (fn [_ group-schema _]
                                            (:subtype group-schema)))
 
-(defmethod filter-fields-by-group-subtype :default [fields & _] fields)
+(defmethod filter-fields-by-group-subtype :default [_ _ fields] fields)
 
 (defmethod filter-fields-by-group-subtype :foreman-tasks
-  [fields _ doc]
+  [doc _ fields]
   ;; Only include those foreman tasks that correspond to the the selected role.
   (let [code (->> schemas/kuntaroolikoodi-tyonjohtaja-v2 first :body
                   (util/find-first #(= (:name %) (-> doc :kuntaRoolikoodi :value)))
                   :code)]
     (filter #(contains? (set (:codes %)) code) fields)))
 
+(defn- get-value-by-path
+  "Get element value by target-path string. target-path can be absolute (/path/to/element) or ralative (sibling/element).
+  If target path is given as relative, parent-path is used to resoleve absolute path."
+  [doc parent-path target-path]
+  (let [absolute-path (->> (ss/split target-path #"/")
+                           ((fn [path] (if (ss/blank? (first path)) (rest path) (concat parent-path path))))
+                           (mapv keyword))]
+    (get-in doc (conj absolute-path :value))))
+
+(defn- hide-by-hide-when [doc parent-path {hide-when :hide-when :as schema}]
+  (and hide-when ((:values hide-when) (get-value-by-path doc parent-path (:path hide-when)))))
+
+(defn- show-by-show-when [doc parent-path {show-when :show-when :as schema}]
+  (or (not show-when) ((:values show-when) (get-value-by-path doc parent-path (:path show-when)))))
+
+(defn- filter-subschemas-by-data [doc group-schema path subschemas]
+  (->> (remove (comp (removable-groups doc group-schema path) :name) subschemas)
+       (remove (partial hide-by-hide-when doc path))
+       (filter (partial show-by-show-when doc path))))
+
+(defn- get-subschemas
+  "Returns group subschemas as hash-map. Index of a repeating group is conjoined in [:path :to :group].
+  {[:path :to :group :0] {:fields [field-type-schemas] :groups [group-type-schemas]}}."
+  [doc group-schema path]
+  (let [paths      (if (:repeating group-schema)
+                     (->> (get-in doc path) keys (sort-by util/->int) (map (partial conj path)))
+                     [path])
+        subschemas (->> (:body group-schema)
+                        (remove :exclude-from-pdf)
+                        (remove :hidden)
+                        (remove schemas/select-one-of-schema?)
+                        (remove #(util/=as-kw :calculation (:type %)))
+                        (filter-fields-by-group-subtype doc group-schema))
+        fields     (filter is-field-type subschemas)
+        groups     (filter is-printable-group-type subschemas)]
+    (->> (map #(hash-map :fields (filter-subschemas-by-data doc group-schema % fields)
+                         :groups (filter-subschemas-by-data doc group-schema % groups)) paths)
+         (zipmap paths))))
+
 (defn- collect-single-group
   "Build a map from the data of a single group. Groups can be in document root or inside other groups"
-  [group-schema group-doc locstring doc]
-  (let [subgroups (->> (:body group-schema)
-                       (filter is-printable-group-type)
-                       (remove :exclude-from-pdf)
-                       (remove :hidden))
-        group-schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body group-schema)) ; remove _selected radioGroup
-        fields (->> (filter is-field-type group-schema-body)
-                    (remove :exclude-from-pdf))
-        fields (filter-fields-by-group-subtype fields group-schema doc)
-        group-title (:name group-schema)
-        i18name (:i18name group-schema)
-        locstring (cond
-                    (not-nil? i18name) i18name
-                    :else (str locstring "." group-title))
-        i18nkey (:i18nkey group-schema)
-        group-title (cond
-                      (not-nil? i18nkey) i18nkey
-                      :else (str locstring "._group_label"))
-        repeating? (:repeating group-schema)
-        group-doc (if repeating?
-                    (index-sorted-values group-doc)
-                    [group-doc])
+  [doc group-schema path i18npath]
+  (let [subschemas (get-subschemas doc group-schema path)]
 
-        group-collect-fn (fn [doc]                          ; if the group contains a radio button selection, it's schema needs adjustments based on the selection
-                           (let [unselected-groups (set (removable-groups group-schema doc))
-                                 subgroups (remove #(unselected-groups (:name %)) subgroups)]
-                             (collect-groups subgroups doc locstring)))
-        group-type (:type group-schema)]
-    ; a group consists of a title, maybe fields in the body of the doc and maybe groups containing more fields/groups
-    (array-map
-      :title (loc group-title)
-      :fields (if (table? group-schema)
-                (map #(collect-fields fields % locstring) group-doc)
-                (mapcat #(collect-fields fields % locstring) group-doc))
-      :groups (mapcat group-collect-fn group-doc)
-      :type group-type)))
-
-(defn- group-data [group-schema doc]
-  ((keyword (:name group-schema)) doc))
+    (array-map :title  (loc (or (:i18nkey group-schema)
+                                (:i18name group-schema)
+                                (conj i18npath "_group_label")))
+               :fields (cond->> (map (fn [[path {schemas :fields}]] (collect-fields schemas doc path i18npath)) subschemas)
+                         (not (table? group-schema)) (apply concat))
+               :groups (mapcat (fn [[path {schemas :groups}]] (collect-groups schemas doc path i18npath)) subschemas)
+               :type   (:type group-schema))))
 
 (defn- collect-groups
   "Iterate over data groups in document, building a data map of each group"
-  [group-schemas doc locstring]
-  (map #(collect-single-group % (group-data % doc) locstring doc) group-schemas))
+  [group-schemas doc path i18npath]
+  (map (fn [{name :name :as schema}] (collect-single-group doc schema (conj path (keyword name)) (conj i18npath name))) group-schemas))
 
 (defn- collect-single-document
   "Build a map of the data of a single document. Entry point for recursive traversal of document data."
   [{:keys [data schema-info] :as doc}]
   (let [schema (schemas/get-schema (:schema-info doc))
         op     (:op schema-info)
-        unselected-groups (removable-groups schema data)
-        schema-name (-> schema :info :name)
-        schema-body (remove #(= schemas/select-one-of-key (:name %)) (:body schema)) ; don't print _selected radioGroups
-        group-schemas (->> schema-body
-                           (filter is-printable-group-type)
-                           (remove :exclude-from-pdf)
-                           (remove :hidden)
-                           (remove #(some #{(:name %)} unselected-groups)))
-        field-schemas (->> (filter is-field-type schema-body)
-                           (remove :exclude-from-pdf))
-        doc-title (if (ss/not-blank? (:name op)) (str "operations." (:name op)) schema-name)
-        doc-desc  (:description op)
-        i18name (-> schema :info :i18name)
-        locstring (if-not (ss/blank? i18name)
-                    i18name
-                    schema-name)]
-    ; document is (almost) like just another group
-    (array-map
-      :title doc-title
-      :title-desc doc-desc
-      :fields (collect-fields field-schemas data locstring)
-      :groups (collect-groups group-schemas data locstring))))
+        subschemas (-> (get-subschemas data schema []) first val) ; root data is never repeating
+        doc-name (or (-> schema :info :i18name not-empty) (-> schema :info :name))]
+
+    (array-map :title (if (ss/not-blank? (:name op)) (str "operations." (:name op)) (-> schema :info :name))
+               :title-desc (:description op)
+               :fields (collect-fields (:fields subschemas) data [] [doc-name])
+               :groups (collect-groups (:groups subschemas) data [] [doc-name]))))
 
 (defn- doc-order-comparator [x y]
   (cond

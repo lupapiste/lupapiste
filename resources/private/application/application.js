@@ -57,7 +57,7 @@
 
   var authorities = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
-  var hasConstructionTimeDocs = ko.observable();
+  var hasEditableDocs = ko.observable();
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -210,6 +210,10 @@
     });
   }
 
+  function documentIsEditable(doc) {
+    return _(doc.allowedActions).map(function(v,k) { return v.ok && k; }).includes("update-doc");
+  }
+
   function showApplication(applicationDetails, lightLoad) {
     isInitializing = true;
 
@@ -256,40 +260,38 @@
       }
 
       // Documents
-      var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
-      var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
-      var nonpartyDocs = _.reject(nonConstructionTimeDocs, util.isPartyDoc);
-      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
-      var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
-      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
+      var partyDocs = _(app.documents).filter(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
+      var nonpartyDocs = _(app.documents).reject(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
+      var editableDocs = _.filter(nonpartyDocs, documentIsEditable);
+      var uneditableDocs = _.reject(nonpartyDocs, documentIsEditable);
 
-      var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
-      var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+      var editableDocErrors = _.map(editableDocs, function(doc) { return doc.validationErrors; });
+      var partyDocErrors = _.map(partyDocs, function(doc) { return doc.validationErrors; });
 
-      hasConstructionTimeDocs(!!constructionTimeDocs.length);
+      hasEditableDocs(!_.isEmpty(editableDocs));
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
         lupapisteApp.services.accordionService.authorities = authorities;
       }
 
-      applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
+      applicationModel.updateMissingApplicationInfo(editableDocErrors.concat(partyDocErrors));
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
         // Parties are always visible
         docgen.displayDocuments("partiesDocgen",
-            app,
-            sortedPartyDocs,
-            {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                app,
+                                partyDocs,
+                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
-              app,
-              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
-              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                  app,
+                                  applicationModel.summaryAvailable() ? [] : nonpartyDocs,
+                                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -298,20 +300,19 @@
         if (applicationModel.summaryAvailable()) {
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
-              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
+              applicationModel.summaryAvailable() ? uneditableDocs : [],
               {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
 
         // show or clear construction time documents
-        if (hasConstructionTimeDocs()) {
+        if (applicationModel.inPostVerdictState() && hasEditableDocs()) {
           docgen.displayDocuments("constructionTimeDocgen",
-              app,
-              constructionTimeDocs,
-              {dataTestSpecifiers: devMode,
-               accordionCollapsed: isAuthority,
-               updateCommand: "update-construction-time-doc"});
+                                  app,
+                                  editableDocs,
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: isAuthority});
         } else {
           docgen.clear("constructionTimeDocgen");
         }
@@ -324,6 +325,7 @@
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
+
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
@@ -581,7 +583,7 @@
       // observables
       application: applicationModel,
       authorities: authorities,
-      hasConstructionTimeDocs: hasConstructionTimeDocs,
+      hasEditableDocs: hasEditableDocs,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,

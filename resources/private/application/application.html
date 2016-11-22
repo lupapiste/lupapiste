@@ -667,11 +667,13 @@
                                                       <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                                                           <li data-bind="if: $data.katselmuksenLaji">
                                                               <!-- ko if: loc.hasTerm('task-katselmus.katselmuksenLaji.' + $data.katselmuksenLaji) -->
+                                                            <span data-bind="if: !$data.tarkastuksenTaiKatselmuksenNimi">
                                                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
+                                                            </span>
                                                               <!-- /ko -->
-                                                              <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
-                                                                  (<span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>)
-                                                              </span>
+                                                            <span data-bind="if: $data.tarkastuksenTaiKatselmuksenNimi">
+                                                              <span data-bind="text: $data.tarkastuksenTaiKatselmuksenNimi"></span>
+                                                            </span>
                                                           </li>
                                                       </ul>
                                                   </div>
@@ -1007,7 +1009,7 @@
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
                     <!-- /ko -->
-                    <!-- ko if: $root.hasConstructionTimeDocs -->
+                    <!-- ko if: $root.hasEditableDocs -->
                     <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
                       <p data-bind="lhtml: 'required.field.desc'"></p>
                       <div class="application_section">

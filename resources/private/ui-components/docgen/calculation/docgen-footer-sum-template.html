@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="docgen-footer-sum-template">
+  <!-- ko ifnot: showError  -->
+  <span class="footer-sum--result"
+        data-bind="text: calculationResult,
+                   testId: testId"></span>
+  <!-- /ko -->
+  <!-- ko if: showError  -->
+  <i class="footer-sum--error lupicon-warning"></i>
+  <!-- /ko -->
+</script>

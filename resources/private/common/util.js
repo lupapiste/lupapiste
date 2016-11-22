@@ -2,7 +2,7 @@ var util = (function($) {
   "use strict";
 
   function zeropad(len, val) {
-    return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
+    return sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
 
   function zp(e) { return zeropad.apply(null, e); }
@@ -55,14 +55,14 @@ var util = (function($) {
     if (propertyIdHumanFormat.test(id)) { return id; }
     var p = propertyIdDbFormat.exec(id);
     if (!p) { return id; }
-    return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
+    return _.join( _.map(p.slice(1), function(v) { return parseInt(v, 10); }), "-");
   }
 
   function propertyIdToDbFormat(id) {
     if (!id) { return null; }
     if (propertyIdDbFormat.test(id)) { return id; }
     if (!propertyIdHumanFormat.test(id)) { throw "Invalid property ID: " + id; }
-    return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
+    return _.join( _.map(_.zip([3, 3, 4, 4], id.split("-")), zp), "");
   }
 
 
@@ -386,6 +386,39 @@ var util = (function($) {
                              .isString( path ) ? _.split( path, ".") : path));
   }
 
+  function strictParseFloat( s ) {
+    s =  _.replace(_.trim( s ), ",", ".");
+    return _.every( _.split( s, ".", isNum ) ) ? parseFloat( s ) : NaN;
+  }
+
+  // Zips given array into object.
+  // Optional fun argument is the value function (default _.constant( true )):
+  function arrayToObject( arr, fun ) {
+    return _.zipObject( arr,
+                        _.map( arr,
+                               fun || _.constant( true )));
+  }
+
+  function identLogoutUrl() {
+    return util.getIn(LUPAPISTE.config, ["identMethods", "logoutUrl"]);
+  }
+
+  function identLogoutRedirect() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/welcome";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
+  function identLogoutRedirectBulletins() {
+    var url = identLogoutUrl();
+    var suffix = "/app/" + loc.getCurrentLanguage() + "/bulletins";
+    if (url) {
+      window.location = _.escape(url) + "?return=" + suffix;
+    }
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -427,7 +460,12 @@ var util = (function($) {
     verdictsWithTasks: verdictsWithTasks,
     getPreviousState: getPreviousState,
     partyFullName: partyFullName,
-    isEmpty: isEmpty
+    isEmpty: isEmpty,
+    parseFloat: strictParseFloat,
+    identLogoutUrl: identLogoutUrl,
+    identLogoutRedirect: identLogoutRedirect,
+    identLogoutRedirectBulletins: identLogoutRedirectBulletins,
+    arrayToObject: arrayToObject
   };
 
 })(jQuery);

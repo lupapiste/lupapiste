@@ -19,6 +19,7 @@ jQuery(document).ready(function() {
     {name: "docgen-select", synchronous: true},
     {name: "docgen-button", synchronous: true},
     {name: "docgen-date", synchronous: true},
+    {name: "docgen-time", template: "docgen-input-template", synchronous: true},
     {name: "docgen-review-buildings", synchronous: true},
     {name: "docgen-building-select", synchronous: true},
     {name: "construction-waste-report", synchronous: true},
@@ -152,7 +153,9 @@ jQuery(document).ready(function() {
     {name: "accordion-assignments"},
     {name: "assignment-editor"},
     {name: "attachment-type-id"},
-    {name: "state-icons"}
+    {name: "state-icons"},
+    {name: "docgen-calculation"},
+    {name: "docgen-footer-sum"}
 ];
 
   ko.registerLupapisteComponents(components);

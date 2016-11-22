@@ -39,7 +39,7 @@ LUPAPISTE.ContextService = function() {
 
   // We check for the context switch both when hash or application
   // changes. The latter is needed when application view is reloaded.
-  window.onhashchange = checkContext;
+  $(window).on("hashchange", checkContext);
   hub.subscribe( "application-model-updated", checkContext );
 
   self.applicationId = function() {

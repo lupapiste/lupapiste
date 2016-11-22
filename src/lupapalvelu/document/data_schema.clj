@@ -110,6 +110,9 @@
 (defmethod coerce-type :date [elem-schema]
   (data-leaf elem-schema (ssc/date-string "dd.MM.yyyy")))
 
+(defmethod coerce-type :time [elem-schema]
+  (data-leaf elem-schema ssc/TimeString))
+
 (defmethod coerce-type :maaraalaTunnus [elem-schema]
   (data-leaf elem-schema ssc/Maaraalatunnus))
 
@@ -117,6 +120,9 @@
   {:value (sc/eq nil)})
 
 (defmethod coerce-type :fillMyInfoButton [elem-schema]
+  {:value (sc/eq nil)})
+
+(defmethod coerce-type :calculation [elem-schema]
   {:value (sc/eq nil)})
 
 (defmethod coerce-type :personSelector [elem-schema]

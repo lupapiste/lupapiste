@@ -117,4 +117,9 @@
                (ram-not-linked {:data {:attachmentId (:id att3)}
                                 :application {:attachments [att1 att2 att3]}})=> nil?
                (ram-not-linked {:data {}
-                                :application {:attachments [att1 att2 att3]}}) => nil?)))
+                                :application {:attachments [att1 att2 att3]}}) => nil?)
+         (fact "attachment-type-allows-ram"
+               (letfn [(params [type-group] {:data {:attachmentId (:id att1)}
+                                             :application {:attachments [(assoc-in att1 [:type :type-group] type-group)]}})]
+                 (attachment-type-allows-ram (params "selvitykset")) => (ram-fail :error.ram-not-allowed)
+                 (attachment-type-allows-ram (params "paapiirustus")) => nil?))))

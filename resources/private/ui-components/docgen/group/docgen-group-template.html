@@ -30,13 +30,14 @@
 
 <script class="ko-template" type="text/x-jquery-tmpl" id="form-grid-docgen-group-template">
 <div class="form-grid" data-bind="foreach: rowSchemas">
-  <div class="row">
+  <div class="row"
+       data-bind="css: $data.rowCss">
     <!-- ko if: $data.ltext -->
     <div data-bind="ltext: $data.ltext, css: $data.css"></div>
     <!-- /ko -->
     <!-- ko ifnot: $data.tag -->
-    <div data-bind="foreach: $data">
-      <div class="col--vertical" data-bind="css: $component.getColClass($data),
+    <div data-bind="foreach: $data.row">
+      <div class="col--vertical" data-bind="css: $data.colClass,
                                             component: { name: $data.uicomponent,
                                                          params: { schema: $data,
                                                                    path: $data.path,
@@ -54,3 +55,19 @@
 </div>
 </script>
 
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="simple-docgen-group-template">
+    <div data-bind="foreach: subSchemas">
+      <!-- ko ifnot: $data.hidden -->
+        <span data-bind="component: { name: uicomponent,
+                         params: { schema: $data,
+                         path: path,
+                         i18npath: i18npath,
+                         applicationId: applicationId,
+                         documentId: documentId,
+                         authModel: $component.authModel,
+                         service: $component.service }}">
+        </span>
+      <!-- /ko -->
+    </div>
+</script>

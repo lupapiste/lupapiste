@@ -43,4 +43,5 @@ Create attachment assignment
 
 Open assignments search
   Go to page  applications
+  Wait until  Element should be visible  searchTypeAssignments
   Select Radio Button  searchType  searchTypeAssignments

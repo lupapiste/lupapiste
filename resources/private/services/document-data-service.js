@@ -21,12 +21,10 @@ LUPAPISTE.DocumentDataService = function(params) {
       case "task":
         return {updateCommand: "update-task", removeCommand: "remove-document-data", collection: "tasks"};
       default:
-        return doc.schema.info["construction-time"] ?
-          {updateCommand: "update-construction-time-doc", removeCommand: "remove-construction-time-document-data", collection: "documents"} :
-          {updateCommand: "update-doc",                   removeCommand: "remove-document-data", collection: "documents"};
-
+        return {updateCommand: "update-doc",  removeCommand: "remove-document-data", collection: "documents"};
     }
   }
+
   function resolveCommandNames(doc, options) {
     var docDefaults = getDefaults(doc);
     return _.extend(docDefaults, _.pick(options, "updateCommand", "removeCommand"));
@@ -158,7 +156,7 @@ LUPAPISTE.DocumentDataService = function(params) {
   self.isWhitelisted = function( schema ) {
     return !(util.getIn(schema, ["whitelist", "otherwise"]) === "disabled"
             && !_.includes(util.getIn(schema, ["whitelist", "roles"]),
-                           lupapisteApp.models.currentUser.role()));
+                           lupapisteApp.models.currentUser.applicationRole()));
   };
 
   //

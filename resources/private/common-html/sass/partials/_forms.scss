@@ -414,14 +414,22 @@ input.form-input.inline {
 }
 
 .form-input-and-unit {
-  display: block;
+  display: table;
   margin-right: $marginM;
+  white-space: nowrap;
+  input {
+    display: table-cell
+  }
 }
+
 .form-input-and-unit .form-input {
-  display: inline-block;
   margin-right: $marginM;
 }
+
 .form-string-unit {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 2px;
 }
 
 .form-input.tiny {
@@ -563,6 +571,9 @@ input.form-input.inline {
     .form-input .text {
       height: 25px;
     }
+    .form-input.warn {
+      border: 1px solid $red-dark;
+    }
   }
 
   .form-table .form-input.combobox, select {
@@ -570,7 +581,6 @@ input.form-input.inline {
   }
 
   .form-table .form-indicator {
-    right: auto;
     top: 0;
     height: 28px;
     width: 28px;
@@ -1037,30 +1047,6 @@ $max-columns: 12;
     label {
       display: block;
     }
-  }
-}
-
-
-
-@mixin input-fields() {
-  padding: 0 $marginM;
-  box-sizing: border-box;
-  min-height: $grid-input-height;
-  height: $grid-input-height;
-  font-size: $grid-font-size;
-  color: $input-color;
-  border: 1px solid $input-border-color;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-  -moz-appearance:none;
-
-  &:focus {
-    color: $input-focus-color;
-    border-color: $input-focus-border-color;
-  }
-  &:disabled {
-    border-color: $input-disabled-border-color;
-    background-color: $input-disabled-background-color;
   }
 }
 
@@ -1549,4 +1535,55 @@ div.review-done {
     top: -80px;
     left: 200px;
   }
+}
+
+@mixin row-label-x ($n, $row-margin: 10px) {
+  margin: {
+    top: $row-margin;
+    bottom: $row-margin;
+  }
+  .inline {
+    display: inherit;
+  }
+  .form-label {
+    display: table-cell;
+    vertical-align: bottom;
+    height: $n * 24 + 1px;
+    padding-bottom: 1px;
+  }
+  .form-input {
+    margin: 0;
+  }
+}
+
+.row.label-x-2 {
+  @include row-label-x( 2 );
+}
+
+.row.label-x-3 {
+  @include row-label-x( 3, 5 );
+}
+
+.row.row--tight {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: $btn-height;
+  line-height: $btn-height;
+}
+
+.calculation-error {
+  color: $red-darkest;
+  line-height: $btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
 }

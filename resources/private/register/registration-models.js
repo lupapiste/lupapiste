@@ -86,12 +86,14 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
                                componentParams: {ltext: "register.confirm-cancel",
                                                  yesFn: function() {
                                                    self.reset();
-                                                   pageutil.openPage("welcome");
+                                                   self.canceled(true);
+                                                   pageutil.openPage("register3");
                                                  }}});
     };
 
     ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
     self.pending = ko.observable(false);
+    self.canceled = ko.observable(false);
 
     self.street.extend({required: true, maxLength: LUPAPISTE.config.inputMaxLength});
     self.city.extend({required: true, maxLength: LUPAPISTE.config.inputMaxLength});

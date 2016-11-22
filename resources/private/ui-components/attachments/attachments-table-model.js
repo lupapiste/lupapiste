@@ -13,8 +13,6 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
 
   self.attachments = attachments;
 
-  self.stateIcons = service.stateIcons;
-
   var idPrefix = _.uniqueId("at-input-");
 
   self.inputId = function(index) { return idPrefix + index; };

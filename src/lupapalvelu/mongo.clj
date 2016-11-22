@@ -19,7 +19,7 @@
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
-           [com.mongodb DB WriteConcern MongoClientOptions$Builder]
+           [com.mongodb DB WriteConcern MapReduceCommand$OutputType MapReduceOutput]
            [com.mongodb.gridfs GridFS GridFSDBFile GridFSInputFile]))
 
 
@@ -117,10 +117,10 @@
 ;; Simple cache support
 ;;
 
-(defn with-mongo-meta [m]
+(defn ^{:perfmon-exclude true} with-mongo-meta [m]
   (assoc m :created (java.util.Date.)))
 
-(defn without-mongo-meta [m]
+(defn ^{:perfmon-exclude true} without-mongo-meta [m]
   (dissoc m :id :_id :created))
 
 ;;
@@ -236,6 +236,26 @@
                  (query/find (remove-null-chars query))
                  (query/sort order-by))))
 
+(defn- ^{:perfmon-exclude true} wrap-js-function [s & args]
+  (if (s/starts-with? s "function")
+    s
+    (str "function(" (s/join \, (map name args)) "){" s "}")))
+
+(defn map-reduce
+  "Returns map-reduce results inline.
+   Mapper-js and reducer-js are JavaScript functions or their bodies as Strings.
+   Both should return the same keys:
+   - reducer is not called if there is only one result
+   - Mapped results are reduced in chucks and reducer is called multible times
+     as more data is processed. This means that reducer 'values' paramerter
+     might not contain all the data at once, if there are multiple chucks."
+  [collection query mapper-js reducer-js]
+  {:pre [(keyword? collection) (map? query) (string? mapper-js) (string? reducer-js)]}
+  (let [mapper-js-fn  (wrap-js-function mapper-js)
+        reducer-js-fn (wrap-js-function reducer-js :key :values)
+        output (mc/map-reduce (get-db) collection mapper-js-fn reducer-js-fn nil MapReduceCommand$OutputType/INLINE query)]
+    (map with-id (from-db-object ^DBObject (.results ^MapReduceOutput output) true))))
+
 (defn any?
   "check if any"
   ([collection query]
@@ -276,7 +296,7 @@
         (gfs/content-type content-type)
         (gfs/metadata (assoc meta :uploaded (now)))))))
 
-(defn- gridfs-file-as-map [^GridFSDBFile attachment]
+(defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
      :content-type (.getContentType attachment)

@@ -38,15 +38,23 @@ var authorization = (function() {
       self.data(data);
     };
 
+    self.clone = function() {
+      return new AuthorizationModel( self.data() );
+    };
+
     return {
       ok: self.ok,
       clear: self.clear,
       refreshWithCallback: self.refreshWithCallback,
       refresh: self.refresh,
-      setData: self.setData
+      setData: self.setData,
+      clone: self.clone
     };
   }
 
+  // authModels is an object where, field names are ids and values the
+  // actual auth models.  For example, for documents category, the
+  // field names are document ids and values document auth models.
   function refreshModelsForCategory(authModels, applicationId, category) {
     ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
       .success(function(d) {
