@@ -18,7 +18,7 @@
         <p class="error-message" data-bind="ltext: error"></p>
       </div>
 
-      <!-- ko if: util.identLogoutUrl -->
+      <!-- ko if: util.identLogoutUrl() -->
       <p data-bind="ltext: 'ident.logout.info-text'"></p>
       <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect" />
       <!-- /ko -->
