@@ -96,6 +96,24 @@
 (sc/defschema ToimenpideTiedot
   (field [Toimenpide] "Hakemuksen toimenpiteiden tiedot"))
 
+(sc/defschema GMLPoint      {:Point {:pos [sc/Str]}})
+(sc/defschema GMLPolygon    {:Polygon {:exterior {:LinearRing {:pos [sc/Str]}}}})
+(sc/defschema GMLLineString {:LineString {:pos [sc/Str]}})
+
+(sc/defschema YAKarttakuvio
+  (field (util/map-keys sc/optional-key
+                        {:piste  GMLPoint
+                         :viiva  GMLLineString
+                         :alue   GMLPolygon
+                         :nimi   sc/Str
+                         :kuvaus sc/Str
+                         :korkeusTaiSyvyys sc/Str
+                         :pintaAla sc/Str}) ""))
+
+(sc/defschema YleisenAlueenKayttolupa
+  (field {:kayttotarkoitus sc/Str
+          :sijainnit       [YAKarttakuvio]} "Yleisen alueen käyttölupahakemuksen tiedot"))
+
 (sc/defschema HakemusTiedot
   {:asiointitunnus Asiointitunnus
    :kiinteistoTunnus Kiinteistotunnus
@@ -103,7 +121,8 @@
    :sijaintiETRS SijaintiETRS
    :kuntakoodi Kuntakoodi
    :saapumisPvm DateString
-   :toimenpiteet ToimenpideTiedot})
+   (sc/optional-key :toimenpiteet) ToimenpideTiedot
+   (sc/optional-key :yleisenAlueenKayttolupa) YleisenAlueenKayttolupa})
 
 (sc/defschema JulkinenHakemusData
               (field [HakemusTiedot] "Hakemusten tiedot"))

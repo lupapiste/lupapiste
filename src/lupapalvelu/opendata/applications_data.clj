@@ -2,6 +2,8 @@
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.util :as util]
+            [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-usage-description
+                                                           drawings-as-krysp]]
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [warnf]]
@@ -20,24 +22,26 @@
        (map :Toimenpide)
        (map transform-operation)))
 
-(defn process-buildings [application]
-  (-> application
-      (assoc :toimenpiteet (get-toimenpiteet application))))
+(defn- get-ya [application]
+  {:kayttotarkoitus (ya-operation-type-to-usage-description (-> application :primaryOperation :name keyword))
+   :sijainnit       (map :Sijainti (drawings-as-krysp (:drawings application)))})
 
 (defn process-application [application]
   (if (empty? (:documents application))
     (do
       (warnf "Skipping data item [ID=%s], documents array empty" (:id application))
       nil)
-    (-> application
-        (merge {:asiointitunnus    (:id application)
-                :kiinteistoTunnus  (:propertyId application)
-                :osoite            (:address application)
-                :kuntakoodi        (:municipality application)
-                :sijaintiETRS      (:location application)})
-        (assoc :saapumisPvm        (util/to-xml-date (:submitted application)))
-        process-buildings
-        (dissoc :id :propertyId :address :municipality :location :primaryOperation :submitted :documents))))
+    (util/strip-nils
+      {:asiointitunnus          (:id application)
+       :kiinteistoTunnus        (:propertyId application)
+       :osoite                  (:address application)
+       :kuntakoodi              (:municipality application)
+       :sijaintiETRS            (:location application)
+       :saapumisPvm             (util/to-xml-date (:submitted application))
+       :toimenpiteet            (when (= "R" (:permitType application))
+                                  (get-toimenpiteet application))
+       :yleisenAlueenKayttolupa (when (= "YA" (:permitType application))
+                                  (get-ya application))})))
 
 (defn schema-verify [checker data]
   (let [errors (checker data)]
@@ -48,13 +52,14 @@
 
 (def required-fields-from-db
   [:id :primaryOperation.name :propertyId :address :municipality
-   :submitted :location :documents])
+   :submitted :location :documents :permitType :drawings])
 
 (defn- query-applications [organization]
-  (mongo/select :applications {:permitType   :R
+  (mongo/select :applications {:permitType   {$in [:R :YA]}
                                :organization organization
                                :state        :submitted
-                               :primaryOperation.name {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
+                               :primaryOperation.name
+                                             {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
                 required-fields-from-db))
 
 (defn- process-applications [coll]
