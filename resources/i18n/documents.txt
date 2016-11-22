@@ -14,7 +14,7 @@
 "document.status.toggle.enable" "fi" "Palauta aktiiviseksi"
 "document.status.toggle.enable" "sv" ""
 "document.status.toggle.disable" "en" ""
-"document.status.toggle.disable" "fi" "Passivoi"
+"document.status.toggle.disable" "fi" "Merkitse poistuneeksi"
 "document.status.toggle.disable" "sv" ""
 "document.disabled" "en" ""
 "document.disabled" "fi" "Ei käytössä"
