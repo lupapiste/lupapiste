@@ -24,7 +24,7 @@
 ;;
 
 
-(defn- created-after-verdict? [document application]
+(defn created-after-verdict? [document application]
   (if (contains? states/post-verdict-states (keyword (:state application)))
     (let [verdict-history-item (->> (app/state-history-entries (:history application))
                                     (filter #(= (:state %) "verdictGiven"))

@@ -1,7 +1,6 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.java.io :as io]
-            [me.raynes.fs :as fs]
             [swiss.arrows :refer :all]
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
@@ -12,6 +11,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -75,6 +75,9 @@
 (defn- remove-non-approved-designers [application]
   (update application :documents #(remove non-approved-designer? %)))
 
+(defn- remove-pre-verdict-designers [application]
+  (update application :documents (fn [docs] (filter #(doc/created-after-verdict? % application) docs))))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application organization & {:keys [current-state]}]
@@ -102,7 +105,8 @@
         output-dir    (resolve-output-directory organization permit-type)
         filtered-app  (-> application
                           (dissoc :attachments)            ; attachments not needed
-                          remove-non-approved-designers)]
+                          remove-non-approved-designers
+                          remove-pre-verdict-designers)]
     (or (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)
         (fail! :error.unknown))))
 
