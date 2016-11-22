@@ -248,7 +248,7 @@
         suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")
         disabled-fn (partial expected-failure? :error.document.disabled)]
 
-    (facts "disabling document - can set status for only 'whitelisted' documents"
+    (facts "disabling document - can set status for only documents with 'disableable'"
       (fact "hakija fail"
         (command pena :set-doc-status :id application-id :docId (:id applicant-doc) :value "disabled") => fail?
         (command sonja :set-doc-status :id application-id :docId (:id applicant-doc) :value "disabled") => fail?)
@@ -299,13 +299,17 @@
                  :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update)
         (command sonja :update-doc :id application-id
                  :doc (:doc suunnittelija-resp)
-                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update)))
+                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update))
+      (fact "can't delete if approved"
+        (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => (partial expected-failure? :error.document.post-verdict-deletion)))
 
     (facts "reject-doc"
       (fact "can't update applicant doc"
         (command sonja :reject-doc :id application-id :doc (:id applicant-doc) :path nil :collection "documents") => fail?)
       (fact "new suunnittelija doc approval"
-        (command sonja :reject-doc :id application-id :doc (:doc suunnittelija-resp) :path nil :collection "documents") => ok?)
+        (command sonja :reject-doc :id application-id :doc (:doc suunnittelija-resp) :path nil :collection "documents") => ok?
+        (fact "Pena can edit again"
+          (command pena :update-doc :id application-id :doc (:doc suunnittelija-resp) :updates [["henkilotiedot.etunimi" "Herkko"]]) => ok?))
       (fact "pre-verdict suunnittelija doc approval"
         (command sonja :reject-doc :id application-id :doc (:id pre-verdict-suunnittelija) :path nil :collection "documents") => ok?))
 
@@ -313,6 +317,7 @@
       (fact "can't remove applicant doc"
         (command pena :remove-doc :id application-id :docId (:id applicant-doc))) => fail?
       (fact "added suunnittelija doc can be removed"
+        ; Here document is also 'rejected'
         (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => ok?)
       (fact "pre-verdit suunnittelija doc can NOT be removed"
         (command pena :remove-doc :id application-id :docId (:id pre-verdict-suunnittelija)) => (partial expected-failure? :error.document.post-verdict-deletion)))))
