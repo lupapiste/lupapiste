@@ -388,7 +388,7 @@ var util = (function($) {
 
   function strictParseFloat( s ) {
     s =  _.replace(_.trim( s ), ",", ".");
-    return _.every( _.split( s, ".", isNum ) ) ? parseFloat( s ) : NaN;
+    return _.every( _.split( s, "."), isNum  ) ? parseFloat( s ) : NaN;
   }
 
   // Zips given array into object.
