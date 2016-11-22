@@ -78,7 +78,8 @@
     "warn": true,
     "Waypoint":false,
     "lupapisteWindow" :true,
-    "sprintf": false
+    "sprintf": false,
+    "s": false
   },
   "exported": [
     "accordion","AccordionState","ajax","attachment",
