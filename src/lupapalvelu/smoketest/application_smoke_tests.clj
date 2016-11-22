@@ -155,7 +155,7 @@
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
 
 (defn opendata-schema-check-app [application]
-  (when (and (= (:permitType application) "R")
+  (when (and (#{"R" "YA"} (:permitType application))
              (= (keyword (:state application)) :submitted)
              (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
     (let [app (select-keys application open-application-data/required-fields-from-db)]
