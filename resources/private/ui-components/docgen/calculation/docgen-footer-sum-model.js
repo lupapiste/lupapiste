@@ -21,10 +21,10 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
 
   function columnData( column ) {
     return _(service.getInDocument( docId,  tablePath ).model())
-      .map( function( v, i ) {
+      .map( function( v ) {
         return service.getInDocument( docId,
                                       _.concat( tablePath,
-                                                [i, column]))
+                                                [v.index, column]))
           .model();
       })
       .value();
