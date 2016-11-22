@@ -24,11 +24,6 @@
 ;;
 
 
-(def valid-post-verdict-subtypes #{:suunnittelija})
-
-(defn- valid-post-verdict-schema? [schema-info]
-  (contains? valid-post-verdict-subtypes (keyword (:subtype schema-info))))
-
 (defn- created-after-verdict? [document application]
   (if (contains? states/post-verdict-states (keyword (:state application)))
     (let [verdict-history-item (->> (app/state-history-entries (:history application))
@@ -39,10 +34,6 @@
         (error "Application in post-verdict, but doesnt have verdictGiven state in history"))
       (> (:created document) (:ts verdict-history-item)))
     false))
-
-(defn- valid-post-verdict-document? [document application]
-  (and (valid-post-verdict-schema? (:schema-info document))
-       (created-after-verdict? document application)))
 
 (defn approved? [document]
   (= "approved" (get-in document [:meta :_approved :value])))
@@ -80,7 +71,7 @@
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
 (defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
-  (and (contains? states/post-verdict-states (keyword state)) (not (valid-post-verdict-document? document application))))
+  (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
 
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]

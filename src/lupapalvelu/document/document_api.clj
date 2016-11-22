@@ -3,6 +3,7 @@
             [clojure.set :refer [intersection union difference]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized unauthorized! now]]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.assignment :as assignment]
@@ -11,8 +12,9 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.document :refer :all]
-            [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.persistence :as doc-persistence]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
 
 
@@ -41,16 +43,26 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
+(defn- state-valid-by-schema? [schema schema-states-key default-states state]
+  (-> (get-in schema [:info (keyword schema-states-key)])
+      (or default-states)
+      (contains? (keyword state))))
+
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
   [default-states {{doc-id :doc} :data {docs :documents state :state} :application}]
   (when doc-id
     (when-not (-> (domain/get-document-by-id docs doc-id)
                   (model/get-document-schema)
-                  (get-in [:info :editable-in-states])
-                  (or default-states)
-                  (contains? (keyword state)))
+                  (state-valid-by-schema? :editable-in-states default-states state))
       (fail :error.document-not-editable-in-current-state))))
+
+(defn addable-by-state?
+  [default-states {{schema-name :schemaName} :data {state :state schema-version :schema-version} :application}]
+  (when (ss/not-blank? schema-name)
+    (when-not (-> (schemas/get-schema schema-version schema-name)
+                  (state-valid-by-schema? :addable-in-states default-states state))
+      (fail :error.document.post-verdict-addition))))
 
 (defn- validate-user-authz-by-key
   [doc-id-key {:keys [data application user]}]
@@ -92,11 +104,9 @@
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
-   :states     (union #{:draft :answered :open :submitted :complementNeeded}
-                      (difference states/post-verdict-states states/terminal-states))
-   :pre-checks [create-doc-validator
-                application/validate-authority-in-drafts
-                post-verdict-doc-validator]}
+   :pre-checks [(partial addable-by-state? #{:draft :answered :open :submitted :complementNeeded})
+                create-doc-validator
+                application/validate-authority-in-drafts]}
   [{{schema-name :schemaName} :data :as command}]
   (let [document (doc-persistence/do-create-doc! command schema-name updates)]
     (when fetchRakennuspaikka

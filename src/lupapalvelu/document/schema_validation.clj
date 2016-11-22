@@ -338,6 +338,7 @@
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
+          (opt :addable-in-states)           #{sc/Keyword} ;; States where document can be added
           (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update

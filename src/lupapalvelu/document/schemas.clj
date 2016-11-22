@@ -60,6 +60,7 @@
                  :after-update
                  :repeating :no-repeat-button :order
                  :redraw-on-approval
+                 :addable-in-states
                  :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields})
@@ -1437,7 +1438,6 @@
            :removable  true
            :removable-only-by-authority true
            :approvable true
-           :redraw-on-approval true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
@@ -1455,7 +1455,9 @@
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
-           :editable-in-states (conj states/update-doc-states :verdictGiven)
+           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
+                                         (set/difference states/post-verdict-states states/terminal-states))
+           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
