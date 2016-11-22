@@ -142,8 +142,8 @@
                       (partial action/select-parameters [:value] #{"enabled" "disabled"})]
    :user-roles #{:applicant :authority}
    :states     states/post-verdict-states
-   :pre-checks [validate-user-authz-by-doc-id
-                doc-status-change-validator]}
+   :pre-checks [(partial editable-by-state? nil)            ; edition defined solely by document schema
+                validate-user-authz-by-doc-id]}
   [command]
   (if (domain/get-document-by-id (:application command) docId)
     (do

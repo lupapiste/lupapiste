@@ -82,34 +82,24 @@
       (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
       (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
 
-(defn post-verdict-doc-validator
-  "Validates documents that can be added in post-verdict state"
-  [{{:keys [state schema-version]} :application
-    {schema-name :schemaName} :data}]
-  (when (and (contains? states/post-verdict-states (keyword state))
-             (ss/not-blank? schema-name))
-    (let [schema (schemas/get-schema schema-version schema-name)]
-      (when-not (valid-post-verdict-schema? (:info schema))
-        (fail :error.document.post-verdict-addition)))))
 
-
-(defn validate-post-verdict-update-doc [key {:keys [application data]}]
+(defn validate-post-verdict-update-doc
+  "Only non-approved documents that are added after verdict can be edited in post-verdict-states"
+  [key {:keys [application data]}]
   (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
-    (when (and (valid-post-verdict-document? doc application) (approved? doc))
-      (fail :error.document.post-verdict-update))))
+    (if-not (created-after-verdict? doc application)
+      (fail :error.document.post-verdict-update)
+      (when (approved? doc)
+        (fail :error.document.post-verdict-update)))))
 
 (defn doc-disabled-validator
+  "Deny action if document is marked as disabled"
   [key {:keys [application data]}]
   (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
     (when (:disabled doc)
-      (fail :error.document.change-status))))
+      (fail :error.document.disabled))))
 
-(defn doc-status-change-validator
-  [{application :application {doc-id :docId } :data}]
-  (when-let [doc (and doc-id (domain/get-document-by-id application doc-id))]
-    (when-not (valid-post-verdict-document? doc application)
-      (fail :error.document.change-status))))
 
 ;;
 ;; KTJ-info updation
