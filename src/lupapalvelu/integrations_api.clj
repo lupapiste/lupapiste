@@ -164,10 +164,11 @@
                 (application-already-exported :exported-to-backing-system)]
    :states     states/post-verdict-states}
   [{:keys [application organization] :as command}]
-  (let [transfer-item (get-transfer-item :parties-to-backing-system command)
-        _             (mapping-to-krysp/save-parties-as-krysp application lang @organization)]
+  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp application lang @organization)
+        transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
+                                                                                 :data sent-document-ids})]
     (update-application command {$push {:transfers transfer-item}})
-    (ok)))
+    (ok :sentDocuments sent-document-ids)))
 
 ;;
 ;; krysp enrichment
