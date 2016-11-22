@@ -583,8 +583,15 @@
    :states #{:submitted}
    :pre-checks [(partial sm/validate-state-transition :draft)]
    :on-success (notify :application-return-to-draft)}
-  [{:keys [user application] :as command}]
-  (update-application command (app/state-transition-update :draft (:created command) application user)))
+  [{{:keys [role] :as user}         :user
+    {:keys [state] :as application} :application
+    created                         :created
+    :as command}]
+  (->> (util/deep-merge
+        (app/state-transition-update :draft created application user)
+        (when (seq text)
+          (comment/comment-mongo-update state text {:type "application"} role false user nil created)))
+       (update-application command)))
 
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"

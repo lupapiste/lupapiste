@@ -604,14 +604,17 @@
         emails => (partial every? (comp (partial re-find #"comment-text") :html :body))
         emails => (partial some (comp (partial re-find (re-pattern (email-for-key pena))) :to))
         emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to)))))
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+    (command pena :submit-application :id application-id)
+    (return-to-draft sonja application-id)
 
-  (fact "The return to draft can be seen in application history"
-    (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
-      (command pena :submit-application :id application-id)
-      (return-to-draft sonja application-id)
-      (let [application (query-application pena application-id)]
+    (let [application (query-application pena application-id)]
+      (fact "The return to draft can be seen in application history"
         (:state application) => "draft"
-        (-> application :history last :state) => "draft"))))
+        (-> application :history last :state) => "draft")
+
+      (fact "The authority's comments are also stored in application comments"
+        (-> application :comments last :text) => "comment-text"))))
 
 (facts "Authority can create application in other organisation"
        (let [application-id (create-app-id luukas
