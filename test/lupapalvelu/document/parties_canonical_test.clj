@@ -4,10 +4,10 @@
             [lupapalvelu.document.parties-canonical :refer :all]
             [sade.schema-generators :as ssg]))
 
-(def paasuunnittelija-schema      (dds/doc-data-schema "paasuunnittelija"))
+(def paasuunnittelija-schema      (dds/doc-data-schema "paasuunnittelija" true))
 (def hankkeen-kuvaus-data-schema  (dds/doc-data-schema "hankkeen-kuvaus"))
 (def hakija-r-data-schema         (dds/doc-data-schema "hakija-r"))
-(def suunnittelija-schema         (dds/doc-data-schema "rakennusjatesuunnitelma"))
+(def suunnittelija-schema         (dds/doc-data-schema "suunnittelija" true))
 
 (def docs [(ssg/generate hankkeen-kuvaus-data-schema)
            (ssg/generate hakija-r-data-schema)
@@ -244,11 +244,17 @@
 
 (facts "parties canonical"
   (let [canonical          (parties-to-canonical application "fi")
-        krysp-element-keys (->> (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
-                                keys)]
+        asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
+        krysp-element-keys (keys asia)]
     canonical => map?
     (fact "no toimenpide or rakennuspaikka information"
       krysp-element-keys => (just [:osapuolettieto
                                    :kasittelynTilatieto :luvanTunnisteTiedot
                                    :kayttotapaus :asianTiedot
-                                   :lisatiedot :hankkeenVaativuus] :in-any-order))))
+                                   :lisatiedot :hankkeenVaativuus] :in-any-order))
+    (fact "kayttotapaus"
+      (get asia :kayttotapaus) => "Uuden suunnittelijan nime\u00e4minen")
+
+    (fact "only suunnittelijatiedot"
+      (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :suunnittelijatieto)
+      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => 2)))

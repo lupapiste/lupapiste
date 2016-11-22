@@ -156,7 +156,7 @@
       (fail :error.sending-unsent-attachments-failed))))
 
 (defcommand parties-as-krysp
-  {:description "Sends parties to backing system after verdict"
+  {:description "Sends new designers to backing system after verdict"
    :parameters [id lang]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
