@@ -63,9 +63,23 @@
    :name (:firstName recipient)
    :text text})
 
+(defn return-to-draft-recipients
+  "the notification is sent to applicants in auth array and application owners"
+  [{{:keys [auth documents] :as application} :application}]
+  (let [applicant-in-auth? (->> auth (remove :invite) (remove :unsubscribed) (map :id) set)
+        applicant-ids (->> (filter (comp #{:hakija} keyword :subtype :schema-info) documents)
+                           (map (comp :value :userId :henkilo :data))
+                           (filter applicant-in-auth?))
+        owner-ids (->> (filter (comp #{:owner} keyword :role) auth)
+                       (remove :invite)
+                       (remove :unsubscribed)
+                       (map :id))]
+    (map (comp usr/non-private usr/get-user-by-id)
+         (distinct (remove nil? (concat applicant-ids owner-ids))))))
+
 (notifications/defemail :application-return-to-draft
   {:subject-key "return-to-draft"
-   :template "application-return-to-draft.md"
+   :recipients-fn return-to-draft-recipients
    :model-fn return-to-draft-model})
 
 ;; Validators
