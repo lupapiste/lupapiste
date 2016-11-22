@@ -539,11 +539,34 @@
 ;; Cross-site request forgery protection
 ;;
 
+
+(defn verbose-csrf-block [req]
+   (let [ip (http/client-ip req)
+         nothing "(not there)"
+         referer (get-in req [:headers "referer"])
+         cookie-csrf (get-in req [:cookies "anti-csrf-token" :value])
+         ring-session-full (or (get-in req [:cookies "ring-session" :value]) nothing)
+         ring-session (clojure.string/replace ring-session-full #"^(...).*(...)$" "$1...$2")
+         header-csrf (get-in req [:headers "x-anti-forgery-token"])
+         req-with (or (get-in req [:headers "x-requested-with"]) nothing)
+         user-agent (or (get-in req [:headers "user-agent"]) nothing)
+         uri (:uri req)
+         user (:username (:user req))
+         session-id (:id (:session req))]
+      (str "CSRF attempt blocked. " ip 
+           " requested '" uri 
+           "' for user '" user 
+           "' having cookie csrf '" cookie-csrf "' vs header csrf '" header-csrf 
+           "'. Ring session '" ring-session 
+              "', session id '" session-id 
+              "', user agent '" user-agent 
+              "', requested with '" req-with "'.")))
+
 (defn- csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (usr/current-user request) "???")}
-    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
+    (warnf (verbose-csrf-block request))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf

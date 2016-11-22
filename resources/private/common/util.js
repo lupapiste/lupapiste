@@ -2,7 +2,7 @@ var util = (function($) {
   "use strict";
 
   function zeropad(len, val) {
-    return _.sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
+    return sprintf("%0" + len + "d", _.isString(val) ? parseInt(val, 10) : val);
   }
 
   function zp(e) { return zeropad.apply(null, e); }
@@ -55,14 +55,14 @@ var util = (function($) {
     if (propertyIdHumanFormat.test(id)) { return id; }
     var p = propertyIdDbFormat.exec(id);
     if (!p) { return id; }
-    return _.partial(_.join, "-").apply(null, _.map(p.slice(1), function(v) { return parseInt(v, 10); }));
+    return _.join( _.map(p.slice(1), function(v) { return parseInt(v, 10); }), "-");
   }
 
   function propertyIdToDbFormat(id) {
     if (!id) { return null; }
     if (propertyIdDbFormat.test(id)) { return id; }
     if (!propertyIdHumanFormat.test(id)) { throw "Invalid property ID: " + id; }
-    return _.partial(_.join, "").apply(null, _.map(_.zip([3, 3, 4, 4], id.split("-")), zp));
+    return _.join( _.map(_.zip([3, 3, 4, 4], id.split("-")), zp), "");
   }
 
 

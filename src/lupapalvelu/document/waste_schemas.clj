@@ -131,6 +131,7 @@
                                :i18nkey "vaarallisetAineet"
                                :type :table
                                :uicomponent :docgenTable
+                               :css [:form-table :form-table--waste]
                                :repeating true
                                :approvable false
                                :body (tools/body vaarallinenainetyyppi rakennusjatesuunnitelmaRow)}])

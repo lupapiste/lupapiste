@@ -138,15 +138,24 @@
   {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
+;; roles which do not receive email notifications
 (def non-notified-roles
   #{"rest-api" "trusted-etl"})
 
-(defn invalid-recipient? [rec]
-  "Notifications are not sent to certain roles, users who do not
-   have a valid email address, or registered but removed users."
-  (or (ss/blank? (:email rec))
-      (not (usr/email-recipient? rec))
-      (contains? non-notified-roles (:role rec))))
+ ; email template ids, which are sent regardless of current user state
+(def always-sent-templates
+  #{:invite-company-user :reset-password})
+
+(defn invalid-recipient? [for-template]
+   "Notifications are not sent to certain roles, users who do not
+    have a valid email address, and registered but removed users
+    receive only specific message types defined above."
+  (fn [rec]
+     (or (ss/blank? (:email rec))
+        (if (contains? always-sent-templates for-template)
+          false
+          (not (usr/email-recipient? rec)))
+        (contains? non-notified-roles (:role rec)))))
 
 (defn notify! [template-name command & [result]]
   {:pre [template-name (map? command) (template-name @mail-config)]}
@@ -157,7 +166,7 @@
             command        (assoc command :application application)
             command        (assoc command :result result)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-            recipients     (remove invalid-recipient? (recipients-fn command))
+            recipients     (remove (invalid-recipient? template-name) (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))
             calendar-fn    (get conf :calendar-fn)]

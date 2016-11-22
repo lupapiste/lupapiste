@@ -85,6 +85,24 @@ Delete Duff3
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Page should not contain  dummy3@example.com
 
+Invite Duff3 again
+  Invite existing user  dummy3@example.com  Duff3  Dummy3
+
+Duff3 user gets invite email again
+  Open last email
+  Wait Until  Page Should Contain  dummy3@example.com
+  Page Should Contain  /app/fi/welcome#!/invite-company-user/ok/
+  Click link  xpath=//a[contains(@href,'invite-company-user')]
+
+Delete Duff3 again
+  Go to login page
+  Login  kaino@solita.fi  kaino123
+  User should be logged in  Kaino Solita
+  Open company user listing
+  Click by test id  company-user-delete-0
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait until  Page should not contain  dummy3@example.com
+
 Add new user
   Click enabled by test id  company-add-user
   Wait until  Element should be visible  dialog-company-new-user
