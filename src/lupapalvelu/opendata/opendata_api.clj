@@ -40,7 +40,7 @@
                (resp/json response-data#)))
            (resp/status 400 "input-validation-error"))))))
 
-(defendpoint "/opendata/hankkeet"
+(defendpoint "/api/opendata/hankkeet"
   {:summary "Palauttaa organisaation kaikki vireillä olevat hankkeet."
    :parameters [:organization OrganizationId]
    :returns JulkinenHakemusData}
@@ -56,9 +56,9 @@
                 @endpoints)]
     (rs/swagger-json {:paths (into {} paths)})))
 
-(defpage "/opendata/swagger.json" []
+(defpage "/api/opendata/swagger.json" []
   (resp/status 200 (resp/json (paths))))
 
 (server/add-middleware
   (fn [handler]
-    (ui/wrap-swagger-ui handler "/opendata" :swagger-docs "/opendata/swagger.json")))
+    (ui/wrap-swagger-ui handler "/api-docs/opendata" :swagger-docs "/api/opendata/swagger.json")))
