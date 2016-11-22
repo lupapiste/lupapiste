@@ -41,13 +41,13 @@
 ;; Application approval
 ;;
 
-(defn get-transfer-item [type {:keys [created user]} & [attachments]]
+(defn get-transfer-item [type {:keys [created user]} & [data-map]]
   (let [transfer {:type type
                   :user (select-keys user [:id :role :firstName :lastName])
                   :timestamp created}]
-    (if (empty? attachments)
+    (if-not (and (map? data-map) (seq (:data data-map)))
       transfer
-      (assoc transfer :attachments (map :id attachments)))))
+      (assoc transfer (:data-key data-map) (:data data-map)))))
 
 (defn- do-approve [application organization created id current-state lang do-rest-fn]
   (if (org/krysp-integration? organization (permit/permit-type application))
@@ -147,7 +147,9 @@
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang @organization)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
-            transfer      (get-transfer-item :exported-to-backing-system command attachments-wo-sent-timestamp)]
+            attachments-data {:data-key :attachments
+                              :data (map :id attachments-wo-sent-timestamp)}
+            transfer      (get-transfer-item :exported-to-backing-system command attachments-data)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))
@@ -322,7 +324,9 @@
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
                                         all-attachments)
-        transfer (get-transfer-item :exported-to-asianhallinta command attachments-wo-sent-timestamp)]
+        attachments-transfer-data {:data-key :attachments
+                                   :data (map :id attachments-wo-sent-timestamp)}
+        transfer (get-transfer-item :exported-to-asianhallinta command attachments-transfer-data)]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [application (meta-fields/enrich-with-link-permit-data application)
             application (update-kuntalupatunnus application)
