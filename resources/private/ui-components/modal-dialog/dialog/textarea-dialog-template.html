@@ -7,7 +7,8 @@
         <label data-bind="text: textarea.label"></label>
         <textarea class="form-input textarea grid-style-input high"
                   data-bind="textInput: textarea.observable,
-                             attr: {rows: textarea.rows}"></textarea>
+                             attr: {rows: textarea.rows}"
+                  data-test-id="modal-dialog-textarea"></textarea>
 
         <p data-bind="html: text" class="dialog-desc"></p>
       </div>
