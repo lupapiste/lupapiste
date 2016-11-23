@@ -338,6 +338,17 @@
   [command]
   (attachment/set-attachment-state! command fileId :requires_user_action))
 
+(defcommand reject-attachment-note
+  {:description "Like reject-doc-note but for attachments."
+   :parameters  [id fileId note]
+   :categories  #{:attachments}
+   :input-validators [(partial action/non-blank-parameters [:fileId])]
+   :user-roles #{:authority}
+   :states      (states/all-states-but (conj states/terminal-states :answered :sent))
+   :pre-checks  [has-versions, app/validate-authority-in-drafts]}
+  [command]
+  (attachment/set-attachment-reject-note! command fileId note))
+
 ;;
 ;; Create
 ;;

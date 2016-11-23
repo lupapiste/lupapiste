@@ -124,7 +124,8 @@
    (sc/optional-key :approved)           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
                                           :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
                                           :timestamp ssc/Timestamp
-                                          :fileId ssc/ObjectIdStr }
+                                          :fileId ssc/ObjectIdStr
+                                          (sc/optional-key :note) sc/Str}
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
@@ -347,11 +348,12 @@
         :missing-fonts missing-fonts
         :autoConversion autoConversion))))
 
-(defn- ->approval [state user timestamp file-id]
+(defn- ->approval [state user timestamp file-id & [note]]
   {:value (if (= :ok state) :approved :rejected)
    :user (select-keys user [:id :firstName :lastName])
    :timestamp timestamp
-   :fileId file-id})
+   :fileId file-id
+   :note note})
 
 (defn- build-version-updates [user attachment version-model {:keys [created target state stamped replaceable-original-file-id]
                                                              :or   {state :requires_authority_action} :as options}]
@@ -677,10 +679,16 @@
 
 (defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
-  (if-let [attachment-id (:id (get-attachment-info-by-file-id application file-id))]
+  (if-let [{attachment-id :id {note :note} :approved} (get-attachment-info-by-file-id application file-id)]
     (let [data {:state new-state,
-                :approved (->approval new-state user created file-id)}]
+                :approved (->approval new-state user created file-id note)}]
       (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
+    (fail :error.attachment.id)))
+
+(defn set-attachment-reject-note! [{:keys [created user application] :as command} file-id note]
+  {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id)]}
+  (if-let [{attachment-id :id} (get-attachment-info-by-file-id application file-id)]
+    (update-attachment-data! command attachment-id {:approved.note note} created :set-app-modified? true :set-attachment-modified? false)
     (fail :error.attachment.id)))
 
 (defn convert-existing-to-pdfa! [application user attachment]

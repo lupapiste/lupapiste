@@ -310,6 +310,15 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
   };
 
+  self.rejectAttachmentNote = function(attachmentId, note, hubParams) {
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId,
+                          "reject-attachment-note",
+                          {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
+                           note: note},
+                          hubParams);
+  };
+
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
     _.forEach(filterSets, function(filterSet) { filterSet.forceVisibility(attachmentId); });
     self.updateAttachment(attachmentId, "set-attachment-not-needed", {"notNeeded": Boolean(flag)}, hubParams);
