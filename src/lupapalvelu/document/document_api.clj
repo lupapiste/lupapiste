@@ -211,6 +211,20 @@
   [command]
   (ok :approval (approve command "rejected")))
 
+(defcommand reject-doc-note
+  {:description "Explanatory note regarding the reject reason. Adding
+  note updates application modified timestamp but not the approval
+  timestamp"
+   :parameters       [:id :doc :path :collection note]
+   :categories       #{:documents :tasks}
+   :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
+                      doc-persistence/validate-collection]
+   :pre-checks       [(partial editable-by-state? approve-doc-states)]
+   :user-roles       #{:authority}}
+  [command]
+  (set-rejection-note command note)
+  (ok))
+
 ;;
 ;; Set party to document
 ;;

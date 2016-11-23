@@ -97,22 +97,29 @@
 
 (defn- ->approval-mongo-model
   "Creates a mongo update map of approval data.
-   To be used within model/with-timestamp."
+   To be used within model/with-timestamp. Does not overwrite the rejection note."
   [path approval]
-  (let [mongo-path (if (ss/blank? path) "documents.$.meta._approved" (str "documents.$.meta." path "._approved"))]
-    {$set {mongo-path approval
-           :modified (model/current-timestamp)}}))
+  (let [mongo-path (if (ss/blank? path) "documents.$.meta._approved" (str "documents.$.meta." path "._approved"))
+        approval-pairs (map (fn [[k v]]
+                              [(format "%s.%s" mongo-path (name k)) v])
+                            approval)]
+    {$set (into {:modified (model/current-timestamp)} approval-pairs)}))
 
-(defn approve [{{:keys [id doc path collection]} :data user :user created :created :as command} status]
+(defn- update-approval [{{:keys [id doc path collection]} :data user :user created :created :as command} approval-data]
   (or
    (validate-approvability command)
    (model/with-timestamp created
-     (let [approval (model/->approved status user)]
-       (update-application
-        command
-        {collection {$elemMatch {:id doc}}}
-        (->approval-mongo-model path approval))
-       approval))))
+     (update-application
+      command
+      {collection {$elemMatch {:id doc}}}
+      (->approval-mongo-model path approval-data))
+     approval-data)))
+
+(defn approve [{:keys [user created] :as command} status]
+  (update-approval command (model/with-timestamp created (model/->approved status user))))
+
+(defn set-rejection-note [command note]
+  (update-approval command {:note note}))
 
 
 ;;
