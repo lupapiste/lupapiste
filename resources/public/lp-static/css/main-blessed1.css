@@ -7985,22 +7985,27 @@ div.sticky {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 764, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 812, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note, .reject-note-editor {
+=======
+/* line 811, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note, .reject-note-editor, .accordion-reject-note-editor, .toolbar-reject-note-editor {
+>>>>>>> Accordion and toolbar reject notes.
   margin-left: 34px;
   font-size: 16px;
   margin-top: -10px;
 }
 
-/* line 818, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 817, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note {
   padding-right: 1em;
   color: #bbbbbb;
 }
 
-/* line 825, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 824, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor {
   display: block;
   position: relative;
@@ -8053,12 +8058,153 @@ div.sticky {
   box-shadow: none;
 }
 
+<<<<<<< HEAD
 /* line 833, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 829, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note {
+  margin-left: 44px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+/* line 835, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note {
+  color: #999999;
+}
+
+/* line 840, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 0;
+  margin-left: 45px;
+}
+/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor:after, .accordion-reject-note-editor:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+.accordion-reject-note-editor input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 846, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note {
+  margin-left: 44px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+/* line 852, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note {
+  color: #999999;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+/* line 859, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 50%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 10px;
+  min-height: 40px;
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
+/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor:after, .toolbar-reject-note-editor:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+.toolbar-reject-note-editor input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 869, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: 1px solid #dddddd;
   float: left;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 767, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
@@ -8072,19 +8218,31 @@ div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-ap
 }
 /* line 840, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 872, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
+  padding-left: 10px;
+}
+/* line 876, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span {
   color: #999999;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 846, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 882, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 781, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line {
@@ -8098,16 +8256,27 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
 }
 /* line 852, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 886, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+}
+/* line 888, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano {
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 790, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 859, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 895, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
   color: #999999;
 }
@@ -8116,19 +8285,27 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /*   display: none; */
 /* } */
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 802, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 871, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 907, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .is-middle {
   vertical-align: middle;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 806, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 876, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 912, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .description-bubble {
   display: block;
   position: relative;
@@ -8202,10 +8379,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 856, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 880, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 916, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .container-bubble {
   display: block;
   position: relative;
@@ -8219,10 +8400,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   margin-top: 15px;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 867, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 891, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 927, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .container-bubble:after, .container-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -8234,10 +8419,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   pointer-events: none;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 878, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 902, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 938, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .container-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
@@ -8245,10 +8434,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   margin-left: -10px;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 884, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 908, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 944, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .container-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
@@ -8257,19 +8450,27 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 892, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 916, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 952, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .description-bubble.is-closed {
   display: none;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 896, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 920, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 956, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -8285,10 +8486,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   text-align: left;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 909, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 933, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 969, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-help:after {
   content: " ";
   width: 0;
@@ -8302,10 +8507,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-top: 14px solid #4f4f4f;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 921, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 945, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 981, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8319,10 +8528,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 933, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 957, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 993, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
@@ -8330,10 +8543,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   width: 55%;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 938, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 962, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 998, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -8348,10 +8565,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-right: 14px solid #4f4f4f;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 951, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 975, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1011, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8365,6 +8586,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 964, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col {
   width: 100%;
@@ -8376,39 +8598,55 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /* line 971, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 988, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1024, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .three-col {
   width: 100%;
 }
-/* line 991, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .form-input, .three-col .form-input--inline {
   width: 17.25em;
 }
+<<<<<<< HEAD
 /* line 995, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1031, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 976, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1000, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1036, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 981, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1005, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1041, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 988, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history h2 {
@@ -8433,36 +8671,47 @@ foreman-history th.fourth {
 /* line 1003, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1012, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1048, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 1015, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1051, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 1018, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1054, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 1021, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1057, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 1024, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1060, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
+<<<<<<< HEAD
 /* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1063, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 foreman-history th.fifth {
   width: 45%;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1008, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1068, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .indicator-wrapper {
   position: relative;
   display: inline-block;
@@ -8470,20 +8719,28 @@ foreman-history th.fifth {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1038, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1074, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1053, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1077, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1113, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
@@ -8491,6 +8748,7 @@ div.alleYli-radioGroup {
   padding-left: 20px;
   padding-right: 20px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid:last-child {
@@ -8503,19 +8761,27 @@ div.alleYli-radioGroup {
 /* line 1070, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1085, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1121, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid:last-child {
   border-bottom: none;
 }
-/* line 1089, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1125, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid h2 {
   margin: 12px 0;
 }
+<<<<<<< HEAD
 /* line 1094, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1130, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1075, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin {
@@ -8536,23 +8802,30 @@ div.alleYli-radioGroup {
 /* line 1090, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1099, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1135, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid .col--no-margin {
   padding: 0 !important;
 }
-/* line 1101, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1137, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin .checkbox-wrapper {
   border: none;
 }
-/* line 1106, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1142, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select::-ms-expand {
   display: none;
 }
-/* line 1110, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1146, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid button::-moz-focus-inner {
   border: 0;
 }
+<<<<<<< HEAD
 /* line 1114, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1150, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
   padding: 0 12px;
   box-sizing: border-box;
@@ -8577,6 +8850,7 @@ div.alleYli-radioGroup {
   background-color: #f6f6f6;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid span.form-string {
   display: block;
@@ -8589,10 +8863,18 @@ div.alleYli-radioGroup {
 }
 /* line 1125, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1157, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid span.form-string {
+  display: block;
+}
+/* line 1161, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid textarea {
   height: 160px;
   padding: 6px 12px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1108, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
@@ -8606,6 +8888,13 @@ div.alleYli-radioGroup {
 }
 /* line 1136, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1168, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid select.required, .form-grid input.required {
+  border-color: #f39129;
+}
+/* line 1172, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid .select-arrow {
   position: absolute;
   right: 2px;
@@ -8618,32 +8907,45 @@ div.alleYli-radioGroup {
   vertical-align: middle;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1126, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1150, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1186, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid .select-arrow.disabled {
   background-color: #f6f6f6;
   color: #bbbbbb;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1131, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1155, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1191, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid input[type=text]:disabled, .form-grid textarea:disabled, .form-grid select:disabled, .form-grid .checkbox-wrapper.disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1136, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1160, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
+=======
+/* line 1196, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid input[type=text].err, .form-grid input[type=password].err {
   border: 1px solid #df3215;
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1141, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .submit-button {
@@ -8676,32 +8978,36 @@ div.alleYli-radioGroup {
 /* line 1168, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1165, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Accordion and toolbar reject notes.
 .form-grid .submit-button {
   display: table-row;
 }
-/* line 1167, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item {
   display: table-cell;
 }
-/* line 1169, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1205, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .submit-button .submit-button__item:first-child {
   width: 100%;
 }
-/* line 1175, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1211, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .submit-button .submittable input {
   border-color: #2ca92c;
 }
-/* line 1181, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1217, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .search-field {
   position: relative;
 }
-/* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1219, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .search-field input {
   padding-right: 40px !important;
 }
-/* line 1188, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1224, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .search-field.active i {
   color: #fbc732;
+<<<<<<< HEAD
 }
 /* line 1192, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
@@ -8907,4 +9213,6 @@ div.alleYli-radioGroup {
   width: 100%;
   box-sizing: border-box;
 >>>>>>> Group approval reject note.
+=======
+>>>>>>> Accordion and toolbar reject notes.
 }

@@ -41,14 +41,20 @@
           <span class="is-details"
                 data-bind="text: details"></span>
         </div>
-      </span>
+        <div data-bind="component: {name: 'reject-note',
+                        params: {docModel: docModel, 
+                        noteCss: {'accordion-reject-note': !hasOperation(),
+                        'toolbar-reject-note': hasOperation()},
+                        editorCss: {'accordion-reject-note-editor': !hasOperation(),
+'toolbar-reject-note-editor': hasOperation()}}}"></div>
+      </span>      
       <button class="secondary is-left"
               data-bind="attr: {'data-test-id': testId('toggle-identifiers') },
                          visible: hasOperation,
                          toggleClick: showIdentifierEditors">
         <i class="lupicon-pen"></i>
         <span data-bind="ltext: 'document.operation-identifiers'"></span>
-      </button>
+      </button>      
       <button class="secondary is-right"
           data-bind="visible: showRemove,
                      attr: {'data-test-class': remove.testClass},
