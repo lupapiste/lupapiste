@@ -1,6 +1,8 @@
-// Parameters
+// Parameters [optional]
 // docModel: DocModel instance
-// Path: Group path within document
+// [path]: Group path within document (default [])
+// [noteCss]: Note top-level CSS definitions (default reject-note class)
+// [editorCss]: Note top-level CSS definitions (default reject-note-editor class)
 LUPAPISTE.RejectNoteModel = function( params ) {
   "use strict";
   var self = this;
@@ -8,7 +10,10 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   var docModel = params.docModel;
-  var meta = docModel.getMeta( params.path );
+  var path = params.path;
+  var meta = docModel.getMeta( path );
+  self.noteCss = params.noteCss || {"reject-note": true};
+  self.editorCss = params.editorCss || {"reject-note-editor": true};
 
   self.showNote = self.disposedPureComputed( function() {
     return !self.showEditor()
@@ -36,7 +41,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     switch( event.keyCode ) {
     case 13: // Enter
       self.note( self.editorNote());
-      docModel.updateRejectNote( params.path, self.note() );
+      docModel.updateRejectNote( path, self.note() );
       self.showEditor( false );
       break;
     case 27: // Esc
@@ -46,10 +51,10 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     return true;
   };
 
-  // Editor is shown after the group has been rejected
+  //Editor is shown after the group has been rejected
   self.addHubListener( "approval-status-" + docModel.docId,
                          function( event ) {
-                           if( _.isEqual( event.path, params.path )) {
+                           if( _.isEqual( event.path, path )) {
                              self.showEditor( _.get( event, "approval.value") === "rejected" );
                            }
                          });

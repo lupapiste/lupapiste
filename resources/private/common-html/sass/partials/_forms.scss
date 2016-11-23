@@ -808,7 +808,6 @@ div.sticky {
   }
 }
 
-
 %reject-note {
   margin-left: 34px;
   font-size: 16px;
@@ -827,6 +826,43 @@ div.sticky {
   @include description-bubble-mixin( 50%, 0);
 }
 
+%accordion-reject-note {
+  margin-left: 44px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+.accordion-reject-note {
+  @extend %accordion-reject-note;
+  color: $gray153;
+}
+
+.accordion-reject-note-editor {
+  @extend %reject-note;
+  @include description-bubble-mixin( 100%, 0);
+  margin-left: 45px;
+}
+
+%toolbar-reject-note {
+  margin-left: 44px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+.toolbar-reject-note {
+  @extend %toolbar-reject-note;
+  color: $gray153;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+.toolbar-reject-note-editor {
+  @extend %reject-note;
+  @include description-bubble-mixin( 50%, 10px);
+  min-height: 40px;
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
 
 // Top-level form-approval-status
 
