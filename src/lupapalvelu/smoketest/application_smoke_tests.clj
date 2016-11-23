@@ -9,8 +9,8 @@
             [lupapalvelu.authorization :as auth]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [lupapalvelu.opendata.applications-data :as open-application-data]
-            [lupapalvelu.opendata.schemas :refer [HakemusTiedot]]
+            [lupapalvelu.rest.applications-data :as open-application-data]
+            [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
 

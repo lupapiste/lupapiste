@@ -1,4 +1,4 @@
-(ns lupapalvelu.opendata.applications-data
+(ns lupapalvelu.rest.applications-data
   (:require [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [sade.util :as util]
@@ -7,7 +7,7 @@
             [lupapalvelu.document.rakennuslupa-canonical :refer [application-to-canonical-operations]]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [warnf]]
-            [lupapalvelu.opendata.schemas :refer [HakemusTiedot]]))
+            [lupapalvelu.rest.schemas :refer [HakemusTiedot]]))
 
 (defn- transform-operation [operation]
   (-> operation
@@ -69,7 +69,7 @@
        (map (partial schema-verify (sc/checker HakemusTiedot)))
        (remove nil?)))
 
-(defn applications-by-organization [organization]
+(defn applications-by-organization [organization user]
   (->> organization
        query-applications
        process-applications))

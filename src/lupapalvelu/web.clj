@@ -25,6 +25,7 @@
             [sade.session :as ssess]
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
+            [lupapalvelu.api-common :refer :all]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -57,7 +58,7 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.reports.reports-api]
-            [lupapalvelu.opendata.opendata-api])
+            [lupapalvelu.rest.rest-api])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -103,20 +104,6 @@
 (defn from-json [request]
   (:json request))
 
-(defn from-query [request]
-  (keywordize-keys (:query-params request)))
-
-(defn host [request]
-  (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
-
-(defn user-agent [request]
-  (str (get-in request [:headers "user-agent"])))
-
-(defn- web-stuff [request]
-  {:user-agent (user-agent request)
-   :client-ip  (http/client-ip request)
-   :host       (host request)})
-
 (defn- logged-in? [request]
   (not (nil? (:id (usr/current-user request)))))
 
@@ -152,27 +139,9 @@
 ;; Commands
 ;;
 
-(defn enriched [m request]
-  (merge m {:user (usr/current-user request)
-            :lang *lang*
-            :session (:session request)
-            :web  (web-stuff request)}))
-
-(defn execute [action]
-  (with-logging-context
-    {:applicationId (get-in action [:data :id])
-     :userId        (get-in action [:user :id])}
-    (action/execute action)))
-
-(defn execute-command [name params request]
-  (execute (enriched (action/make-command name params) request)))
-
 (defjson [:post "/api/command/:name"] {name :name}
   (let [request (request/ring-request)]
     (execute-command name (from-json request) request)))
-
-(defn execute-query [name params request]
-  (execute (enriched (action/make-query name params) request)))
 
 (defjson "/api/query/:name" {name :name}
   (let [request (request/ring-request)]
@@ -181,31 +150,6 @@
 (defjson [:post "/api/datatables/:name"] {name :name}
   (let [request (request/ring-request)]
     (execute-query name (:params request) request)))
-
-(defn basic-authentication
-  "Returns a user map or nil if authentication fails"
-  [request]
-  (let [[u p] (http/decode-basic-auth request)]
-    (when (and u p)
-      (:user (execute-command "login" {:username u :password p} request)))))
-
-(def basic-401
-  (assoc-in (resp/status 401 "Unauthorized") [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\""))
-
-(defn execute-export [name params request]
-  (execute (enriched (action/make-export name params) request)))
-
-(defpage [:get "/rest/:name"] {name :name}
-  (let [request (request/ring-request)
-        user    (basic-authentication request)]
-    (if user
-      (let [response (execute (assoc (action/make-raw name (from-query request)) :user user))]
-        (if (action/response? response)
-          response
-          (if (:ok response)
-            (resp/status 200 (resp/json response))
-            (resp/status 404 (resp/json response)))))
-      basic-401)))
 
 (defn json-data-as-stream [data]
   (ring-io/piped-input-stream
