@@ -9,7 +9,7 @@
             [lupapalvelu.authorization :as auth]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
-            [lupapalvelu.rest.applications-data :as open-application-data]
+            [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
@@ -154,12 +154,11 @@
 
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
 
-(defn opendata-schema-check-app [application]
+(defn submitted-rest-interface-schema-check-app [application]
   (when (and (#{"R" "YA"} (:permitType application))
              (= (keyword (:state application)) :submitted)
              (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
-    (let [app (select-keys application open-application-data/required-fields-from-db)]
-      ((sc/checker HakemusTiedot) (open-application-data/process-application app)))))
+    (let [app (select-keys application rest-application-data/required-fields-from-db)]
+      ((sc/checker HakemusTiedot) (rest-application-data/process-application app)))))
 
-
-(mongocheck :applications opendata-schema-check-app :documents :state :primaryOperation)
+(mongocheck :applications submitted-rest-interface-schema-check-app :documents :state :primaryOperation :drawings)
