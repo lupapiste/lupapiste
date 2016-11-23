@@ -85,23 +85,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // Note: approval arguments are functions.
   //       In practise, they are observables.
 
-  // Updates approval status in the backend.
-  // path: approval path
-  // flag: true is approved, false rejected.
-  // cb: callback function to be called on success.
-  self.updateApproval = function( path, flag, cb ) {
-    var verb = flag ? "approve" : "reject";
-    ajax.command( verb + "-doc",
-                {id: self.appId,
-                 doc: self.docId,
-                 path: path.join("."),
-                 collection: self.getCollection()})
-    .success( function( result ) {
+  function approvalCommand( cmd, path, cb, extraParams ) {
+    cb = cb || _.noop;
+    ajax.command( cmd,
+                  _.merge( {id: self.appId,
+                            doc: self.docId,
+                            path: path.join("."),
+                            collection: self.getCollection()},
+                           extraParams ))
+      .success( function( result ) {
       cb( result.approval );
       self.approvalHubSend( result.approval, path );
       window.Stickyfill.rebuild();
     })
     .call();
+  }
+
+  // Updates approval status in the backend.
+  // path: approval path
+  // flag: true is approved, false rejected.
+  // cb: callback function to be called on success.
+  self.updateApproval = function( path, flag, cb ) {
+    approvalCommand( sprintf( "%s-doc", flag ? "approve" : "reject"),
+                     path,
+                     cb );
+  };
+
+  self.updateRejectNote = function( path, note, cb ) {
+    approvalCommand( "reject-doc-note", path, cb, {note: note});
   };
 
   // Returns the latest modification time of the model or
