@@ -1,6 +1,6 @@
 // Parameters [optional]
 // docModel: DocModel instance
-// [path]: Group path within document (default [])
+// [path]: Group path within document
 // [noteCss]: Note top-level CSS definitions (default reject-note class)
 // [editorCss]: Note top-level CSS definitions (default reject-note-editor class)
 LUPAPISTE.RejectNoteModel = function( params ) {
@@ -41,7 +41,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     switch( event.keyCode ) {
     case 13: // Enter
       self.note( self.editorNote());
-      docModel.updateRejectNote( path, self.note() );
+      docModel.updateRejectNote( path || [], self.note() );
       self.showEditor( false );
       break;
     case 27: // Esc
@@ -52,10 +52,22 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   };
 
   //Editor is shown after the group has been rejected
-  self.addHubListener( "approval-status-" + docModel.docId,
+  // There are different events for documents (no path) and groups.
+
+  // Group
+  if( path ) {
+    self.addHubListener( "approval-status-" + docModel.docId,
                          function( event ) {
                            if( _.isEqual( event.path, path )) {
                              self.showEditor( _.get( event, "approval.value") === "rejected" );
                            }
                          });
+  } else {
+    // Document
+    self.addHubListener( "document-approval-" + docModel.docId,
+                         function( event ) {
+                           self.showEditor( !event.approved );
+                         });
+  }
+
 };
