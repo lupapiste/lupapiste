@@ -762,6 +762,16 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+  self.returnToDraft = function() {
+    ajax.command("return-to-draft", {id: self.id(), lang: loc.getCurrentLanguage(), text: "text from front"})
+      .success(function() {
+        self.reload();
+      })
+      .error(function(e) { self.reload(); })
+      .processing(self.processing)
+      .call();
+  };
+
   self.showAcceptInvitationDialog = function() {
     if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
