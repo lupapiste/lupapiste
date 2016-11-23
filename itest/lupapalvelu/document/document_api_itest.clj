@@ -245,8 +245,7 @@
         _ (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.henkilotiedot.etunimi" "test1"]]) => ok?
         _ (command pena :update-doc :id application-id :doc (:id pre-verdict-suunnittelija) :updates [["henkilotiedot.etunimi" "DeSigner"]]) => ok?
         _ (give-verdict sonja application-id) => ok?
-        suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")
-        disabled-fn (partial expected-failure? :error.document.disabled)]
+        suunnittelija-resp (command pena :create-doc :id application-id :schemaName "suunnittelija")]
 
     (facts "disabling document - can set status for only documents with 'disableable'"
       (fact "hakija fail"
@@ -299,7 +298,9 @@
     (facts "update-doc"
       (fact "can't update applicant doc"
         (command pena :update-doc :id application-id :doc (:id applicant-doc) :updates [["henkilo.henkilotiedot.etunimi" "test"]])  => fail?)
-      (fact "suunnittelija can be updated"
+      (fact "can't update pre-verdict designer doc"
+        (command pena :update-doc :id application-id :doc (:id pre-verdict-suunnittelija) :updates [["henkilo.henkilotiedot.etunimi" "test"]])  => fail?)
+      (fact "new suunnittelija can be updated"
         (command pena :update-doc :id application-id :doc (:doc suunnittelija-resp) :updates [["henkilotiedot.etunimi" "test"]]) => ok?))
 
     (facts "approve-doc"

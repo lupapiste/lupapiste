@@ -87,13 +87,24 @@
       (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
 
 
-(defn validate-post-verdict-party-doc
-  "Only non-approved documents that are added after verdict can be edited in post-verdict-states"
+(defn validate-post-verdict-not-approved
+  "In post verdict states, validates that given document is approved.
+   Approval 'locks' documents in post-verdict state."
   [key {:keys [application data]}]
-  (when-let [doc (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+  (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
                    (domain/get-document-by-id application (get data key)))]
-    (when (and (get-in doc [:schema-info :post-verdict-party]) (approved? doc))
-      (fail :error.document.post-verdict-update))))
+    (when (approved? document)
+      (fail :error.document.approved))))
+
+(defn validate-created-after-verdict
+  "In post-verdict state, validates that document is post-verdict-party and it's not created-after-verdict.
+   This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
+   they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
+  [key {:keys [application data]}]
+  (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+                        (domain/get-document-by-id application (get data key)))]
+    (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
+      (fail :error.document.pre-verdict-document))))
 
 (defn doc-disabled-validator
   "Deny action if document is marked as disabled"
@@ -103,7 +114,7 @@
       (fail :error.document.disabled))))
 
 (defn validate-disableable-schema
-  "Checks if document can be disabled"
+  "Checks if document can be disabled from document's schema"
   [key {:keys [application data]}]
   (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
     (when-not (get-in doc [:schema-info :disableable])

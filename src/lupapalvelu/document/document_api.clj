@@ -165,7 +165,8 @@
                 validate-user-authz-by-doc
                 application/validate-authority-in-drafts
                 (partial doc-disabled-validator :doc)
-                (partial validate-post-verdict-party-doc :doc)]}
+                (partial validate-created-after-verdict :doc)
+                (partial validate-post-verdict-not-approved :doc)]}
   [command]
   (doc-persistence/update! command doc updates "documents"))
 

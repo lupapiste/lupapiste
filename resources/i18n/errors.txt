@@ -814,4 +814,10 @@
 "error.document-not-approved" "en" ""
 "error.document-not-approved" "fi" "Dokumenttia ei ole vielä hyväksytty viranomaisen toimesta"
 "error.document-not-approved" "sv" ""
+"error.document.approved" "en" ""
+"error.document.approved" "fi" "Dokumenttia on hyväksytty ja siten lukittu viranomaisen toimesta"
+"error.document.approved" "sv" ""
+"error.document.pre-verdict-document" "en" ""
+"error.document.pre-verdict-document" "fi" "Ennen päätöstä lisättyä dokumenttia ei voi muuttaa"
+"error.document.pre-verdict-document" "sv" ""
 
