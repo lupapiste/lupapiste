@@ -313,10 +313,10 @@
       (fact "after approval, Pena nor Sonja can't edit"
         (command pena :update-doc :id application-id
                  :doc (:doc suunnittelija-resp)
-                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update)
+                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.approved)
         (command sonja :update-doc :id application-id
                  :doc (:doc suunnittelija-resp)
-                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.post-verdict-update))
+                 :updates [["henkilotiedot.etunimi" "Herkko"]]) => (partial expected-failure? :error.document.approved))
       (fact "can't delete if approved"
         (command pena :remove-doc :id application-id :docId (:doc suunnittelija-resp)) => (partial expected-failure? :error.document.post-verdict-deletion)))
 

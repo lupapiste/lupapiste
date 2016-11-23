@@ -120,9 +120,11 @@
     (when-not (get-in doc [:schema-info :disableable])
       (fail :error.document.not-disableable))))
 
-(defn validate-document-is-approved [{:keys [application data]}]
+(defn validate-document-is-pre-verdict-or-approved
+  "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
+  [{:keys [application data]}]
   (when-let [document (when application (domain/get-document-by-id application (:docId data)))]
-    (when-not (approved? document)
+    (when-not (or (not (created-after-verdict? document application)) (approved? document))
       (fail :error.document-not-approved))))
 
 
