@@ -6,7 +6,7 @@
 
 (def paasuunnittelija-schema      (dds/doc-data-schema "paasuunnittelija" true))
 (def hankkeen-kuvaus-data-schema  (dds/doc-data-schema "hankkeen-kuvaus"))
-(def hakija-r-data-schema         (dds/doc-data-schema "hakija-r"))
+(def hakija-r-data-schema         (dds/doc-data-schema "hakija-r" true))
 (def suunnittelija-schema         (dds/doc-data-schema "suunnittelija" true))
 
 (def docs [(ssg/generate hankkeen-kuvaus-data-schema)
