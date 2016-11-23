@@ -2,6 +2,8 @@
   (:require [lupapalvelu.itest-util :refer :all]
             [midje.sweet :refer :all]))
 
+(apply-remote-minimal)
+
 (defn- approve-attachment [application-id {:keys [id latestVersion]}]
   (fact {:midje/description (str "approve " application-id \/ id)}
     (command veikko :approve-attachment :id application-id :attachmentId id  :fileId (:fileId latestVersion)) => ok?
@@ -22,6 +24,13 @@
       (:user approved) => {:id veikko-id, :firstName "Veikko", :lastName "Viranomainen"}
       (:timestamp approved) => pos?)))
 
+(defn- reject-attachment-note [application-id {:keys [id latestVersion]} note]
+  (fact {:midje/description (str "reject-note" application-id "/" id ":" note)}
+        (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId (:fileId latestVersion) :note note) => ok?
+        (let [{:keys [approved] :as att} (get-attachment-by-id veikko application-id id)]
+          att => (in-state? "requires_user_action")
+          (:note approved) => note)))
+
 (facts "attachment approval"
   (let [{application-id :id attachments :attachments} (create-and-open-application  pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
 
@@ -39,6 +48,9 @@
 
       (fact "Veikko can reject attachment"
         (reject-attachment application-id (first attachments)))
+
+      (fact "Veikko sets reject note"
+            (reject-attachment-note application-id (first attachments) "Bu hao!"))
 
       (fact "Pena submits the application"
         (command pena :submit-application :id application-id) => ok?
