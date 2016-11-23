@@ -69,7 +69,7 @@
        (map (partial schema-verify (sc/checker HakemusTiedot)))
        (remove nil?)))
 
-(defn applications-by-organization [organization user]
+(defn applications-by-organization [organization]
   (->> organization
        query-applications
        process-applications))

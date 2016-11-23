@@ -138,6 +138,7 @@
 
 (sc/defschema JatetytHakemuksetResponse
   (field {:ok sc/Bool
+          (sc/optional-key :text) sc/Keyword
           :data [HakemusTiedot]} "Vireill\u00e4 olevat hankkeet -rajapinnan vastauksen tyyppi"))
 
 (sc/defschema OrganizationId

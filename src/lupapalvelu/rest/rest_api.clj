@@ -35,17 +35,18 @@
                               :meta   ~meta-data})
        (defpage ~path {:keys ~letkeys :as request#}
          (if-let [~'user (basic-authentication (request/ring-request))]
-           ; Input schema validation
-           (if (valid-inputs?# request#)
-             (let [
-                   response-data# (do ~@content)]
-               ; Response data schema validation
-               (if (action/response? response-data#)
-                 response-data#
-                 (do
-                   (sc/validate retval-schema# response-data#)
-                   (resp/status 200 (resp/json response-data#)))))
-             (resp/status 404 {:ok "false" :text :error.input-validation-error}))
+           (if (usr/rest-user? ~'user)
+             ; Input schema validation
+             (if (valid-inputs?# request#)
+               (let [response-data# (do ~@content)]
+                 ; Response data schema validation
+                 (if (action/response? response-data#)
+                   response-data#
+                   (do
+                     (sc/validate retval-schema# response-data#)
+                     (resp/status 200 (resp/json response-data#)))))
+               (resp/status 404 {:ok "false" :text :error.input-validation-error}))
+             (resp/status 401 "Unauthorized"))
            basic-401)))))
 
 (defendpoint "/rest/jatetyt-hakemukset"
@@ -53,8 +54,9 @@
    :description      "Palauttaa kaikki organisaatiolle osoitetut hakemukset, jotka ovat Lupapisteess\u00e4 tilassa Hakemus j\u00e4tetty. Toimenpiteet-taulukko sis\u00e4lt\u00e4\u00e4 hakemuksen tarkemmat tiedot (Rakennusvalvonta: toimenpiteet rakennuksittain, Yleisten alueiden k\u00e4ytt\u00f6luvat: toimenpiteen kuvaus sek\u00e4 karttakuviot) KRYSP-skeemaa noudattelevassa muodossa."
    :parameters       [:organization OrganizationId]
    :returns          JatetytHakemuksetResponse}
-  {:ok true
-   :data (applications-data/applications-by-organization organization user)})
+  (if (usr/user-is-authority-in-organization? user organization)
+    {:ok true :data (applications-data/applications-by-organization organization)}
+    {:ok false :data [] :text :error.unauthorized}))
 
 (defendpoint "/rest/get-lp-id-from-previous-permit"
   {:summary     "Luo Lupapiste-hakemuksen taustaj\u00e4rjestelm\u00e4n hakemuksesta tai palauttaa olemassa olevan hakemuksen tunnuksen."
