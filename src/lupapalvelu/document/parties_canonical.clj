@@ -28,4 +28,5 @@
 (defmethod permit/parties-krysp-mapper :R [application lang krysp-version output-dir]
   (let [canonical (parties-to-canonical application lang)
         xml       (rl-mapping/rakennuslupa-element-to-xml canonical krysp-version)]
-    (writer/write-to-disk application nil xml krysp-version output-dir)))
+    (writer/write-to-disk application nil xml krysp-version output-dir)
+    true))

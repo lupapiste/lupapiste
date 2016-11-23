@@ -78,6 +78,9 @@
 (defn- remove-pre-verdict-designers [application]
   (update application :documents (fn [docs] (filter #(doc/created-after-verdict? % application) docs))))
 
+(defn- remove-disabled-documents [application]
+  (update application :documents (fn [docs] (remove :disabled docs))))
+
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application lang submitted-application organization & {:keys [current-state]}]
@@ -106,7 +109,8 @@
         filtered-app  (-> application
                           (dissoc :attachments)            ; attachments not needed
                           remove-non-approved-designers
-                          remove-pre-verdict-designers)
+                          remove-pre-verdict-designers
+                          remove-disabled-documents)
         write-result (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)]
     (if write-result
       (map :id (domain/get-documents-by-subtype (:documents filtered-app) :suunnittelija))
