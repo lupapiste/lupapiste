@@ -37,6 +37,7 @@ jQuery(document).ready(function() {
     {name: "company-invite-dialog"},
     {name: "submit-button-group"},
     {name: "yes-no-dialog"},
+    {name: "textarea-dialog"},
     {name: "yes-no-button-group"},
     {name: "company-registration-init"},
     {name: "invoice-operator-selector"},
