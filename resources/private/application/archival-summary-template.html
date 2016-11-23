@@ -107,9 +107,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row" data-bind="testId: $data.attachmentType(), attr: {'data-test-group': $parent.groupName}">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: $data.archivable() && $data.state() !== 'arkistoitu', checked: $data.sendToArchive, testId: 'send-to-archive'">
+           <input type="checkbox" data-bind="visible: $data.archivable() && !$data.archived(), checked: $data.sendToArchive, testId: 'send-to-archive'">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !$data.archivable(), attr: {title: loc($data.archivabilityError())}"></i>
-           <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: $data.toggleAdditionalControls">
