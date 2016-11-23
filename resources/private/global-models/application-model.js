@@ -762,14 +762,35 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
-  self.returnToDraft = function() {
-    ajax.command("return-to-draft", {id: self.id(), lang: loc.getCurrentLanguage(), text: "text from front"})
+
+  function returnToDraftAjax() {
+    ajax.command("return-to-draft", {id: self.id(), lang: loc.getCurrentLanguage(), text: self.returnToDraftText()})
       .success(function() {
+        self.returnToDraftText("");
         self.reload();
       })
       .error(function(e) { self.reload(); })
       .processing(self.processing)
       .call();
+    return false;
+  }
+
+  self.returnToDraftText = ko.observable("");
+  self.returnToDraft = function() {
+    //if (!self.stateChanged()) {
+    hub.send("track-click", {category:"Application", label:"", event:"returnApplicationToDraft"});
+    hub.send("show-dialog", {ltitle: "areyousure",
+                             size: "large",
+                             component: "textarea-dialog",
+                             componentParams: {text: loc("application.returnToDraft.areyousure"),
+                                               yesFn: returnToDraftAjax,
+                                               lyesTitle: "application.returnToDraft.areyousure.confirmation",
+                                               lnoTitle: "cancel",
+                                               textarea: {llabel: "application.returnToDraft.reason",
+                                                          rows: 10,
+                                                          observable: self.returnToDraftText}}});
+    //}
+
   };
 
   self.showAcceptInvitationDialog = function() {
