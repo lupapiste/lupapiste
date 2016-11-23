@@ -758,6 +758,75 @@ div.sticky {
   }
 }
 
+@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px) {
+  //display: none;
+  display: block;
+  //overflow-y: visible;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: $width;
+  border-radius: 2px;
+  border: 1px solid $orange-light;
+  padding: $marginS $marginS $marginS $marginS;
+  margin-top: $margin-top;
+  &:after, &:before {
+             bottom: 100%;
+             left: 5%;
+             border: solid transparent;
+             content: " ";
+             height: 0;
+             width: 0;
+             position: absolute;
+             pointer-events: none;
+           }
+
+  &:after {
+    border-color: rgba(255, 255, 255, 0);
+    border-bottom-color: #fff;
+    border-width: 10px;
+    margin-left: -10px;
+  }
+  &:before {
+    border-color: transparentize( $orange-light, 1 );
+    border-bottom-color: $orange-light;
+    border-width: 11px;
+    margin-left: -11px;
+  }
+  input {
+    box-sizing: border-box;
+    border: none;
+    font-size: 16px;
+    width: 100%;
+    box-shadow: none;
+    color: $gray51;
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+
+
+%reject-note {
+  margin-left: 34px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+.reject-note {
+  @extend %reject-note;
+  padding-right: 1em;
+  color: $gray187;
+
+}
+
+.reject-note-editor {
+  @extend %reject-note;
+  @include description-bubble-mixin( 50%, 0);
+}
+
 
 // Top-level form-approval-status
 
@@ -803,54 +872,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
   vertical-align: middle;
 }
 
-.description-bubble {
-  //display: none;
-  display: block;
-  //overflow-y: visible;
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  background-color: white;
-  width: 100%;
-  border-radius: 2px;
-  border: 1px solid $orange-light;
-  padding: $marginS $marginS $marginS $marginS;
-  margin-top: 15px;
-  &:after, &:before {
-             bottom: 100%;
-             left: 5%;
-             border: solid transparent;
-             content: " ";
-             height: 0;
-             width: 0;
-             position: absolute;
-             pointer-events: none;
-           }
 
-  &:after {
-    border-color: rgba(255, 255, 255, 0);
-    border-bottom-color: #fff;
-    border-width: 10px;
-    margin-left: -10px;
-  }
-  &:before {
-    border-color: transparentize( $orange-light, 1 );
-    border-bottom-color: $orange-light;
-    border-width: 11px;
-    margin-left: -11px;
-  }
-  input {
-    box-sizing: border-box;
-    border: none;
-    font-size: 16px;
-    width: 100%;
-    box-shadow: none;
-    color: $gray51;
-    &:focus {
-      border: none;
-      box-shadow: none;
-    }
-  }
+.description-bubble {
+  @include description-bubble-mixin;
 }
 
 .container-bubble {

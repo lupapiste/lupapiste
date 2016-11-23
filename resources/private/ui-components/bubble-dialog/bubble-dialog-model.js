@@ -3,6 +3,7 @@
 // visible: Observable flag for bubble visibility
 // okFun: Callback function to be called when OK button is pressed.
 // [initFun]: Callback function to be called when bubble opens (default _.noop).
+// [css]: CSS definition for the top-level div (default {"bubble-dialog": true}).
 // [buttonIcon]: Icon for OK button (default no icon)
 // [buttonText]: Ltext for OK button (default 'ok')
 // [okVisible]: Is OK button visible (default true).
@@ -30,6 +31,7 @@ LUPAPISTE.BubbleDialogModel = function( params ) {
   var BUBBLE = "bubble-dialog";
 
   self.bubbleVisible = params.visible;
+  self.css = params.css || {"bubble-dialog": true};
   self.removeVisible = params.removeVisible || false;
   self.removeText = params.removeText || "remove";
   self.okVisible = _.isUndefined( params.okVisible )

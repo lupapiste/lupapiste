@@ -158,7 +158,8 @@ jQuery(document).ready(function() {
     {name: "attachment-type-id"},
     {name: "state-icons"},
     {name: "docgen-calculation"},
-    {name: "docgen-footer-sum"}
+    {name: "docgen-footer-sum"},
+    {name: "reject-note"}
 ];
 
   ko.registerLupapisteComponents(components);

@@ -2592,7 +2592,11 @@ button.primary:active, button.primary.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.primary:disabled, button.primary.disabled, button.primary.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2620,7 +2624,11 @@ div.btn.primary:active, .dataTables_paginate div.primary.paginate_disabled_previ
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.primary:disabled, .dataTables_paginate div.primary.paginate_disabled_previous:disabled, .dataTables_paginate div.primary.paginate_disabled_next:disabled, div.btn.primary.disabled, .dataTables_paginate div.primary.disabled.paginate_disabled_previous, .dataTables_paginate div.primary.disabled.paginate_disabled_next, div.btn.primary.waiting, .dataTables_paginate div.primary.waiting.paginate_disabled_previous, .dataTables_paginate div.primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2648,7 +2656,11 @@ a.btn.primary:active, .dataTables_paginate a.primary.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.primary:disabled, .dataTables_paginate a.primary.paginate_disabled_previous:disabled, .dataTables_paginate a.primary.paginate_disabled_next:disabled, a.btn.primary.disabled, .dataTables_paginate a.primary.disabled.paginate_disabled_previous, .dataTables_paginate a.primary.disabled.paginate_disabled_next, a.btn.primary.waiting, .dataTables_paginate a.primary.waiting.paginate_disabled_previous, .dataTables_paginate a.primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2676,7 +2688,11 @@ i.btn.primary:active, .dataTables_paginate i.primary.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.primary:disabled, .dataTables_paginate i.primary.paginate_disabled_previous:disabled, .dataTables_paginate i.primary.paginate_disabled_next:disabled, i.btn.primary.disabled, .dataTables_paginate i.primary.disabled.paginate_disabled_previous, .dataTables_paginate i.primary.disabled.paginate_disabled_next, i.btn.primary.waiting, .dataTables_paginate i.primary.waiting.paginate_disabled_previous, .dataTables_paginate i.primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2704,7 +2720,11 @@ span.btn.primary:active, .dataTables_paginate span.primary.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.primary:disabled, .dataTables_paginate span.primary.paginate_disabled_previous:disabled, .dataTables_paginate span.primary.paginate_disabled_next:disabled, span.btn.primary.disabled, .dataTables_paginate span.primary.disabled.paginate_disabled_previous, .dataTables_paginate span.primary.disabled.paginate_disabled_next, span.btn.primary.waiting, .dataTables_paginate span.primary.waiting.paginate_disabled_previous, .dataTables_paginate span.primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2732,7 +2752,11 @@ label.btn.primary:active, .dataTables_paginate label.primary.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.primary:disabled, .dataTables_paginate label.primary.paginate_disabled_previous:disabled, .dataTables_paginate label.primary.paginate_disabled_next:disabled, label.btn.primary.disabled, .dataTables_paginate label.primary.disabled.paginate_disabled_previous, .dataTables_paginate label.primary.disabled.paginate_disabled_next, label.btn.primary.waiting, .dataTables_paginate label.primary.waiting.paginate_disabled_previous, .dataTables_paginate label.primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2760,7 +2784,11 @@ button.secondary:active, .dataTables_paginate button.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.secondary:disabled, .dataTables_paginate button.paginate_disabled_previous:disabled, .dataTables_paginate button.paginate_disabled_next:disabled, button.secondary.disabled, .dataTables_paginate button.disabled.paginate_disabled_previous, .dataTables_paginate button.disabled.paginate_disabled_next, button.secondary.waiting, .dataTables_paginate button.waiting.paginate_disabled_previous, .dataTables_paginate button.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2788,7 +2816,11 @@ div.btn.secondary:active, .dataTables_paginate div.paginate_disabled_previous:ac
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.secondary:disabled, .dataTables_paginate div.paginate_disabled_previous:disabled, .dataTables_paginate div.paginate_disabled_next:disabled, div.btn.secondary.disabled, .dataTables_paginate div.disabled.paginate_disabled_previous, .dataTables_paginate div.disabled.paginate_disabled_next, div.btn.secondary.waiting, .dataTables_paginate div.waiting.paginate_disabled_previous, .dataTables_paginate div.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2816,7 +2848,11 @@ a.btn.secondary:active, .dataTables_paginate a.paginate_disabled_previous:active
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.secondary:disabled, .dataTables_paginate a.paginate_disabled_previous:disabled, .dataTables_paginate a.paginate_disabled_next:disabled, a.btn.secondary.disabled, .dataTables_paginate a.disabled.paginate_disabled_previous, .dataTables_paginate a.disabled.paginate_disabled_next, a.btn.secondary.waiting, .dataTables_paginate a.waiting.paginate_disabled_previous, .dataTables_paginate a.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2844,7 +2880,11 @@ i.btn.secondary:active, .dataTables_paginate i.paginate_disabled_previous:active
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.secondary:disabled, .dataTables_paginate i.paginate_disabled_previous:disabled, .dataTables_paginate i.paginate_disabled_next:disabled, i.btn.secondary.disabled, .dataTables_paginate i.disabled.paginate_disabled_previous, .dataTables_paginate i.disabled.paginate_disabled_next, i.btn.secondary.waiting, .dataTables_paginate i.waiting.paginate_disabled_previous, .dataTables_paginate i.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2872,7 +2912,11 @@ span.btn.secondary:active, .dataTables_paginate span.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.secondary:disabled, .dataTables_paginate span.paginate_disabled_previous:disabled, .dataTables_paginate span.paginate_disabled_next:disabled, span.btn.secondary.disabled, .dataTables_paginate span.disabled.paginate_disabled_previous, .dataTables_paginate span.disabled.paginate_disabled_next, span.btn.secondary.waiting, .dataTables_paginate span.waiting.paginate_disabled_previous, .dataTables_paginate span.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2900,7 +2944,11 @@ label.btn.secondary:active, .dataTables_paginate label.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.secondary:disabled, .dataTables_paginate label.paginate_disabled_previous:disabled, .dataTables_paginate label.paginate_disabled_next:disabled, label.btn.secondary.disabled, .dataTables_paginate label.disabled.paginate_disabled_previous, .dataTables_paginate label.disabled.paginate_disabled_next, label.btn.secondary.waiting, .dataTables_paginate label.waiting.paginate_disabled_previous, .dataTables_paginate label.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2928,7 +2976,11 @@ button.tertiary:active, button.tertiary.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.tertiary:disabled, button.tertiary.disabled, button.tertiary.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2956,7 +3008,11 @@ div.btn.tertiary:active, .dataTables_paginate div.tertiary.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.tertiary:disabled, .dataTables_paginate div.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate div.tertiary.paginate_disabled_next:disabled, div.btn.tertiary.disabled, .dataTables_paginate div.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate div.tertiary.disabled.paginate_disabled_next, div.btn.tertiary.waiting, .dataTables_paginate div.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate div.tertiary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -2984,7 +3040,11 @@ a.btn.tertiary:active, .dataTables_paginate a.tertiary.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.tertiary:disabled, .dataTables_paginate a.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate a.tertiary.paginate_disabled_next:disabled, a.btn.tertiary.disabled, .dataTables_paginate a.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate a.tertiary.disabled.paginate_disabled_next, a.btn.tertiary.waiting, .dataTables_paginate a.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate a.tertiary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3012,7 +3072,11 @@ i.btn.tertiary:active, .dataTables_paginate i.tertiary.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.tertiary:disabled, .dataTables_paginate i.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate i.tertiary.paginate_disabled_next:disabled, i.btn.tertiary.disabled, .dataTables_paginate i.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate i.tertiary.disabled.paginate_disabled_next, i.btn.tertiary.waiting, .dataTables_paginate i.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate i.tertiary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3040,7 +3104,11 @@ span.btn.tertiary:active, .dataTables_paginate span.tertiary.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.tertiary:disabled, .dataTables_paginate span.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate span.tertiary.paginate_disabled_next:disabled, span.btn.tertiary.disabled, .dataTables_paginate span.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate span.tertiary.disabled.paginate_disabled_next, span.btn.tertiary.waiting, .dataTables_paginate span.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate span.tertiary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3068,7 +3136,11 @@ label.btn.tertiary:active, .dataTables_paginate label.tertiary.paginate_disabled
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.tertiary:disabled, .dataTables_paginate label.tertiary.paginate_disabled_previous:disabled, .dataTables_paginate label.tertiary.paginate_disabled_next:disabled, label.btn.tertiary.disabled, .dataTables_paginate label.tertiary.disabled.paginate_disabled_previous, .dataTables_paginate label.tertiary.disabled.paginate_disabled_next, label.btn.tertiary.waiting, .dataTables_paginate label.tertiary.waiting.paginate_disabled_previous, .dataTables_paginate label.tertiary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3096,7 +3168,11 @@ button.positive:active, button.positive.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.positive:disabled, button.positive.disabled, button.positive.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3124,7 +3200,11 @@ div.btn.positive:active, .dataTables_paginate div.positive.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.positive:disabled, .dataTables_paginate div.positive.paginate_disabled_previous:disabled, .dataTables_paginate div.positive.paginate_disabled_next:disabled, div.btn.positive.disabled, .dataTables_paginate div.positive.disabled.paginate_disabled_previous, .dataTables_paginate div.positive.disabled.paginate_disabled_next, div.btn.positive.waiting, .dataTables_paginate div.positive.waiting.paginate_disabled_previous, .dataTables_paginate div.positive.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3152,7 +3232,11 @@ a.btn.positive:active, .dataTables_paginate a.positive.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.positive:disabled, .dataTables_paginate a.positive.paginate_disabled_previous:disabled, .dataTables_paginate a.positive.paginate_disabled_next:disabled, a.btn.positive.disabled, .dataTables_paginate a.positive.disabled.paginate_disabled_previous, .dataTables_paginate a.positive.disabled.paginate_disabled_next, a.btn.positive.waiting, .dataTables_paginate a.positive.waiting.paginate_disabled_previous, .dataTables_paginate a.positive.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3180,7 +3264,11 @@ i.btn.positive:active, .dataTables_paginate i.positive.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.positive:disabled, .dataTables_paginate i.positive.paginate_disabled_previous:disabled, .dataTables_paginate i.positive.paginate_disabled_next:disabled, i.btn.positive.disabled, .dataTables_paginate i.positive.disabled.paginate_disabled_previous, .dataTables_paginate i.positive.disabled.paginate_disabled_next, i.btn.positive.waiting, .dataTables_paginate i.positive.waiting.paginate_disabled_previous, .dataTables_paginate i.positive.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3208,7 +3296,11 @@ span.btn.positive:active, .dataTables_paginate span.positive.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.positive:disabled, .dataTables_paginate span.positive.paginate_disabled_previous:disabled, .dataTables_paginate span.positive.paginate_disabled_next:disabled, span.btn.positive.disabled, .dataTables_paginate span.positive.disabled.paginate_disabled_previous, .dataTables_paginate span.positive.disabled.paginate_disabled_next, span.btn.positive.waiting, .dataTables_paginate span.positive.waiting.paginate_disabled_previous, .dataTables_paginate span.positive.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3236,7 +3328,11 @@ label.btn.positive:active, .dataTables_paginate label.positive.paginate_disabled
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.positive:disabled, .dataTables_paginate label.positive.paginate_disabled_previous:disabled, .dataTables_paginate label.positive.paginate_disabled_next:disabled, label.btn.positive.disabled, .dataTables_paginate label.positive.disabled.paginate_disabled_previous, .dataTables_paginate label.positive.disabled.paginate_disabled_next, label.btn.positive.waiting, .dataTables_paginate label.positive.waiting.paginate_disabled_previous, .dataTables_paginate label.positive.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3264,7 +3360,11 @@ button.approve:active, button.approve.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.approve:disabled, button.approve.disabled, button.approve.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3292,7 +3392,11 @@ div.btn.approve:active, .dataTables_paginate div.approve.paginate_disabled_previ
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.approve:disabled, .dataTables_paginate div.approve.paginate_disabled_previous:disabled, .dataTables_paginate div.approve.paginate_disabled_next:disabled, div.btn.approve.disabled, .dataTables_paginate div.approve.disabled.paginate_disabled_previous, .dataTables_paginate div.approve.disabled.paginate_disabled_next, div.btn.approve.waiting, .dataTables_paginate div.approve.waiting.paginate_disabled_previous, .dataTables_paginate div.approve.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3320,7 +3424,11 @@ a.btn.approve:active, .dataTables_paginate a.approve.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.approve:disabled, .dataTables_paginate a.approve.paginate_disabled_previous:disabled, .dataTables_paginate a.approve.paginate_disabled_next:disabled, a.btn.approve.disabled, .dataTables_paginate a.approve.disabled.paginate_disabled_previous, .dataTables_paginate a.approve.disabled.paginate_disabled_next, a.btn.approve.waiting, .dataTables_paginate a.approve.waiting.paginate_disabled_previous, .dataTables_paginate a.approve.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3348,7 +3456,11 @@ i.btn.approve:active, .dataTables_paginate i.approve.paginate_disabled_previous:
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.approve:disabled, .dataTables_paginate i.approve.paginate_disabled_previous:disabled, .dataTables_paginate i.approve.paginate_disabled_next:disabled, i.btn.approve.disabled, .dataTables_paginate i.approve.disabled.paginate_disabled_previous, .dataTables_paginate i.approve.disabled.paginate_disabled_next, i.btn.approve.waiting, .dataTables_paginate i.approve.waiting.paginate_disabled_previous, .dataTables_paginate i.approve.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3376,7 +3488,11 @@ span.btn.approve:active, .dataTables_paginate span.approve.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.approve:disabled, .dataTables_paginate span.approve.paginate_disabled_previous:disabled, .dataTables_paginate span.approve.paginate_disabled_next:disabled, span.btn.approve.disabled, .dataTables_paginate span.approve.disabled.paginate_disabled_previous, .dataTables_paginate span.approve.disabled.paginate_disabled_next, span.btn.approve.waiting, .dataTables_paginate span.approve.waiting.paginate_disabled_previous, .dataTables_paginate span.approve.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3404,7 +3520,11 @@ label.btn.approve:active, .dataTables_paginate label.approve.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.approve:disabled, .dataTables_paginate label.approve.paginate_disabled_previous:disabled, .dataTables_paginate label.approve.paginate_disabled_next:disabled, label.btn.approve.disabled, .dataTables_paginate label.approve.disabled.paginate_disabled_previous, .dataTables_paginate label.approve.disabled.paginate_disabled_next, label.btn.approve.waiting, .dataTables_paginate label.approve.waiting.paginate_disabled_previous, .dataTables_paginate label.approve.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3432,7 +3552,11 @@ button.btn-primary:active, button.btn-primary.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.btn-primary:disabled, button.btn-primary.disabled, button.btn-primary.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3460,7 +3584,11 @@ div.btn.btn-primary:active, .dataTables_paginate div.btn-primary.paginate_disabl
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.btn-primary:disabled, .dataTables_paginate div.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate div.btn-primary.paginate_disabled_next:disabled, div.btn.btn-primary.disabled, .dataTables_paginate div.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate div.btn-primary.disabled.paginate_disabled_next, div.btn.btn-primary.waiting, .dataTables_paginate div.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate div.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3488,7 +3616,11 @@ a.btn.btn-primary:active, .dataTables_paginate a.btn-primary.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.btn-primary:disabled, .dataTables_paginate a.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate a.btn-primary.paginate_disabled_next:disabled, a.btn.btn-primary.disabled, .dataTables_paginate a.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate a.btn-primary.disabled.paginate_disabled_next, a.btn.btn-primary.waiting, .dataTables_paginate a.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate a.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3516,7 +3648,11 @@ i.btn.btn-primary:active, .dataTables_paginate i.btn-primary.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.btn-primary:disabled, .dataTables_paginate i.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate i.btn-primary.paginate_disabled_next:disabled, i.btn.btn-primary.disabled, .dataTables_paginate i.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate i.btn-primary.disabled.paginate_disabled_next, i.btn.btn-primary.waiting, .dataTables_paginate i.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate i.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3544,7 +3680,11 @@ span.btn.btn-primary:active, .dataTables_paginate span.btn-primary.paginate_disa
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.btn-primary:disabled, .dataTables_paginate span.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate span.btn-primary.paginate_disabled_next:disabled, span.btn.btn-primary.disabled, .dataTables_paginate span.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate span.btn-primary.disabled.paginate_disabled_next, span.btn.btn-primary.waiting, .dataTables_paginate span.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate span.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3572,7 +3712,11 @@ label.btn.btn-primary:active, .dataTables_paginate label.btn-primary.paginate_di
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.btn-primary:disabled, .dataTables_paginate label.btn-primary.paginate_disabled_previous:disabled, .dataTables_paginate label.btn-primary.paginate_disabled_next:disabled, label.btn.btn-primary.disabled, .dataTables_paginate label.btn-primary.disabled.paginate_disabled_previous, .dataTables_paginate label.btn-primary.disabled.paginate_disabled_next, label.btn.btn-primary.waiting, .dataTables_paginate label.btn-primary.waiting.paginate_disabled_previous, .dataTables_paginate label.btn-primary.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3600,7 +3744,11 @@ button.negative:active, button.negative.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.negative:disabled, button.negative.disabled, button.negative.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3628,7 +3776,11 @@ div.btn.negative:active, .dataTables_paginate div.negative.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.negative:disabled, .dataTables_paginate div.negative.paginate_disabled_previous:disabled, .dataTables_paginate div.negative.paginate_disabled_next:disabled, div.btn.negative.disabled, .dataTables_paginate div.negative.disabled.paginate_disabled_previous, .dataTables_paginate div.negative.disabled.paginate_disabled_next, div.btn.negative.waiting, .dataTables_paginate div.negative.waiting.paginate_disabled_previous, .dataTables_paginate div.negative.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3656,7 +3808,11 @@ a.btn.negative:active, .dataTables_paginate a.negative.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.negative:disabled, .dataTables_paginate a.negative.paginate_disabled_previous:disabled, .dataTables_paginate a.negative.paginate_disabled_next:disabled, a.btn.negative.disabled, .dataTables_paginate a.negative.disabled.paginate_disabled_previous, .dataTables_paginate a.negative.disabled.paginate_disabled_next, a.btn.negative.waiting, .dataTables_paginate a.negative.waiting.paginate_disabled_previous, .dataTables_paginate a.negative.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3684,7 +3840,11 @@ i.btn.negative:active, .dataTables_paginate i.negative.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.negative:disabled, .dataTables_paginate i.negative.paginate_disabled_previous:disabled, .dataTables_paginate i.negative.paginate_disabled_next:disabled, i.btn.negative.disabled, .dataTables_paginate i.negative.disabled.paginate_disabled_previous, .dataTables_paginate i.negative.disabled.paginate_disabled_next, i.btn.negative.waiting, .dataTables_paginate i.negative.waiting.paginate_disabled_previous, .dataTables_paginate i.negative.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3712,7 +3872,11 @@ span.btn.negative:active, .dataTables_paginate span.negative.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.negative:disabled, .dataTables_paginate span.negative.paginate_disabled_previous:disabled, .dataTables_paginate span.negative.paginate_disabled_next:disabled, span.btn.negative.disabled, .dataTables_paginate span.negative.disabled.paginate_disabled_previous, .dataTables_paginate span.negative.disabled.paginate_disabled_next, span.btn.negative.waiting, .dataTables_paginate span.negative.waiting.paginate_disabled_previous, .dataTables_paginate span.negative.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3740,7 +3904,11 @@ label.btn.negative:active, .dataTables_paginate label.negative.paginate_disabled
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.negative:disabled, .dataTables_paginate label.negative.paginate_disabled_previous:disabled, .dataTables_paginate label.negative.paginate_disabled_next:disabled, label.btn.negative.disabled, .dataTables_paginate label.negative.disabled.paginate_disabled_previous, .dataTables_paginate label.negative.disabled.paginate_disabled_next, label.btn.negative.waiting, .dataTables_paginate label.negative.waiting.paginate_disabled_previous, .dataTables_paginate label.negative.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3768,7 +3936,11 @@ button.reject:active, button.reject.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.reject:disabled, button.reject.disabled, button.reject.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3796,7 +3968,11 @@ div.btn.reject:active, .dataTables_paginate div.reject.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.reject:disabled, .dataTables_paginate div.reject.paginate_disabled_previous:disabled, .dataTables_paginate div.reject.paginate_disabled_next:disabled, div.btn.reject.disabled, .dataTables_paginate div.reject.disabled.paginate_disabled_previous, .dataTables_paginate div.reject.disabled.paginate_disabled_next, div.btn.reject.waiting, .dataTables_paginate div.reject.waiting.paginate_disabled_previous, .dataTables_paginate div.reject.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3824,7 +4000,11 @@ a.btn.reject:active, .dataTables_paginate a.reject.paginate_disabled_previous:ac
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.reject:disabled, .dataTables_paginate a.reject.paginate_disabled_previous:disabled, .dataTables_paginate a.reject.paginate_disabled_next:disabled, a.btn.reject.disabled, .dataTables_paginate a.reject.disabled.paginate_disabled_previous, .dataTables_paginate a.reject.disabled.paginate_disabled_next, a.btn.reject.waiting, .dataTables_paginate a.reject.waiting.paginate_disabled_previous, .dataTables_paginate a.reject.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3852,7 +4032,11 @@ i.btn.reject:active, .dataTables_paginate i.reject.paginate_disabled_previous:ac
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.reject:disabled, .dataTables_paginate i.reject.paginate_disabled_previous:disabled, .dataTables_paginate i.reject.paginate_disabled_next:disabled, i.btn.reject.disabled, .dataTables_paginate i.reject.disabled.paginate_disabled_previous, .dataTables_paginate i.reject.disabled.paginate_disabled_next, i.btn.reject.waiting, .dataTables_paginate i.reject.waiting.paginate_disabled_previous, .dataTables_paginate i.reject.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3880,7 +4064,11 @@ span.btn.reject:active, .dataTables_paginate span.reject.paginate_disabled_previ
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.reject:disabled, .dataTables_paginate span.reject.paginate_disabled_previous:disabled, .dataTables_paginate span.reject.paginate_disabled_next:disabled, span.btn.reject.disabled, .dataTables_paginate span.reject.disabled.paginate_disabled_previous, .dataTables_paginate span.reject.disabled.paginate_disabled_next, span.btn.reject.waiting, .dataTables_paginate span.reject.waiting.paginate_disabled_previous, .dataTables_paginate span.reject.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3908,7 +4096,11 @@ label.btn.reject:active, .dataTables_paginate label.reject.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.reject:disabled, .dataTables_paginate label.reject.paginate_disabled_previous:disabled, .dataTables_paginate label.reject.paginate_disabled_next:disabled, label.btn.reject.disabled, .dataTables_paginate label.reject.disabled.paginate_disabled_previous, .dataTables_paginate label.reject.disabled.paginate_disabled_next, label.btn.reject.waiting, .dataTables_paginate label.reject.waiting.paginate_disabled_previous, .dataTables_paginate label.reject.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3936,7 +4128,11 @@ button.authority:active, button.authority.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.authority:disabled, button.authority.disabled, button.authority.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3964,7 +4160,11 @@ div.btn.authority:active, .dataTables_paginate div.authority.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.authority:disabled, .dataTables_paginate div.authority.paginate_disabled_previous:disabled, .dataTables_paginate div.authority.paginate_disabled_next:disabled, div.btn.authority.disabled, .dataTables_paginate div.authority.disabled.paginate_disabled_previous, .dataTables_paginate div.authority.disabled.paginate_disabled_next, div.btn.authority.waiting, .dataTables_paginate div.authority.waiting.paginate_disabled_previous, .dataTables_paginate div.authority.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -3992,7 +4192,11 @@ a.btn.authority:active, .dataTables_paginate a.authority.paginate_disabled_previ
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.authority:disabled, .dataTables_paginate a.authority.paginate_disabled_previous:disabled, .dataTables_paginate a.authority.paginate_disabled_next:disabled, a.btn.authority.disabled, .dataTables_paginate a.authority.disabled.paginate_disabled_previous, .dataTables_paginate a.authority.disabled.paginate_disabled_next, a.btn.authority.waiting, .dataTables_paginate a.authority.waiting.paginate_disabled_previous, .dataTables_paginate a.authority.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4020,7 +4224,11 @@ i.btn.authority:active, .dataTables_paginate i.authority.paginate_disabled_previ
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.authority:disabled, .dataTables_paginate i.authority.paginate_disabled_previous:disabled, .dataTables_paginate i.authority.paginate_disabled_next:disabled, i.btn.authority.disabled, .dataTables_paginate i.authority.disabled.paginate_disabled_previous, .dataTables_paginate i.authority.disabled.paginate_disabled_next, i.btn.authority.waiting, .dataTables_paginate i.authority.waiting.paginate_disabled_previous, .dataTables_paginate i.authority.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4048,7 +4256,11 @@ span.btn.authority:active, .dataTables_paginate span.authority.paginate_disabled
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.authority:disabled, .dataTables_paginate span.authority.paginate_disabled_previous:disabled, .dataTables_paginate span.authority.paginate_disabled_next:disabled, span.btn.authority.disabled, .dataTables_paginate span.authority.disabled.paginate_disabled_previous, .dataTables_paginate span.authority.disabled.paginate_disabled_next, span.btn.authority.waiting, .dataTables_paginate span.authority.waiting.paginate_disabled_previous, .dataTables_paginate span.authority.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4076,7 +4288,11 @@ label.btn.authority:active, .dataTables_paginate label.authority.paginate_disabl
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.authority:disabled, .dataTables_paginate label.authority.paginate_disabled_previous:disabled, .dataTables_paginate label.authority.paginate_disabled_next:disabled, label.btn.authority.disabled, .dataTables_paginate label.authority.disabled.paginate_disabled_previous, .dataTables_paginate label.authority.disabled.paginate_disabled_next, label.btn.authority.waiting, .dataTables_paginate label.authority.waiting.paginate_disabled_previous, .dataTables_paginate label.authority.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4104,7 +4320,11 @@ button.bulletin:active, button.bulletin.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.bulletin:disabled, button.bulletin.disabled, button.bulletin.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4132,7 +4352,11 @@ div.btn.bulletin:active, .dataTables_paginate div.bulletin.paginate_disabled_pre
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.bulletin:disabled, .dataTables_paginate div.bulletin.paginate_disabled_previous:disabled, .dataTables_paginate div.bulletin.paginate_disabled_next:disabled, div.btn.bulletin.disabled, .dataTables_paginate div.bulletin.disabled.paginate_disabled_previous, .dataTables_paginate div.bulletin.disabled.paginate_disabled_next, div.btn.bulletin.waiting, .dataTables_paginate div.bulletin.waiting.paginate_disabled_previous, .dataTables_paginate div.bulletin.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4160,7 +4384,11 @@ a.btn.bulletin:active, .dataTables_paginate a.bulletin.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.bulletin:disabled, .dataTables_paginate a.bulletin.paginate_disabled_previous:disabled, .dataTables_paginate a.bulletin.paginate_disabled_next:disabled, a.btn.bulletin.disabled, .dataTables_paginate a.bulletin.disabled.paginate_disabled_previous, .dataTables_paginate a.bulletin.disabled.paginate_disabled_next, a.btn.bulletin.waiting, .dataTables_paginate a.bulletin.waiting.paginate_disabled_previous, .dataTables_paginate a.bulletin.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4188,7 +4416,11 @@ i.btn.bulletin:active, .dataTables_paginate i.bulletin.paginate_disabled_previou
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.bulletin:disabled, .dataTables_paginate i.bulletin.paginate_disabled_previous:disabled, .dataTables_paginate i.bulletin.paginate_disabled_next:disabled, i.btn.bulletin.disabled, .dataTables_paginate i.bulletin.disabled.paginate_disabled_previous, .dataTables_paginate i.bulletin.disabled.paginate_disabled_next, i.btn.bulletin.waiting, .dataTables_paginate i.bulletin.waiting.paginate_disabled_previous, .dataTables_paginate i.bulletin.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4216,7 +4448,11 @@ span.btn.bulletin:active, .dataTables_paginate span.bulletin.paginate_disabled_p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.bulletin:disabled, .dataTables_paginate span.bulletin.paginate_disabled_previous:disabled, .dataTables_paginate span.bulletin.paginate_disabled_next:disabled, span.btn.bulletin.disabled, .dataTables_paginate span.bulletin.disabled.paginate_disabled_previous, .dataTables_paginate span.bulletin.disabled.paginate_disabled_next, span.btn.bulletin.waiting, .dataTables_paginate span.bulletin.waiting.paginate_disabled_previous, .dataTables_paginate span.bulletin.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4244,7 +4480,11 @@ label.btn.bulletin:active, .dataTables_paginate label.bulletin.paginate_disabled
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.bulletin:disabled, .dataTables_paginate label.bulletin.paginate_disabled_previous:disabled, .dataTables_paginate label.bulletin.paginate_disabled_next:disabled, label.btn.bulletin.disabled, .dataTables_paginate label.bulletin.disabled.paginate_disabled_previous, .dataTables_paginate label.bulletin.disabled.paginate_disabled_next, label.btn.bulletin.waiting, .dataTables_paginate label.bulletin.waiting.paginate_disabled_previous, .dataTables_paginate label.bulletin.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4272,7 +4512,11 @@ button.bulletin-inverse:active, button.bulletin-inverse.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 button.bulletin-inverse:disabled, button.bulletin-inverse.disabled, button.bulletin-inverse.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4300,7 +4544,11 @@ div.btn.bulletin-inverse:active, .dataTables_paginate div.bulletin-inverse.pagin
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 div.btn.bulletin-inverse:disabled, .dataTables_paginate div.bulletin-inverse.paginate_disabled_previous:disabled, .dataTables_paginate div.bulletin-inverse.paginate_disabled_next:disabled, div.btn.bulletin-inverse.disabled, .dataTables_paginate div.bulletin-inverse.disabled.paginate_disabled_previous, .dataTables_paginate div.bulletin-inverse.disabled.paginate_disabled_next, div.btn.bulletin-inverse.waiting, .dataTables_paginate div.bulletin-inverse.waiting.paginate_disabled_previous, .dataTables_paginate div.bulletin-inverse.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4328,7 +4576,11 @@ a.btn.bulletin-inverse:active, .dataTables_paginate a.bulletin-inverse.paginate_
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.btn.bulletin-inverse:disabled, .dataTables_paginate a.bulletin-inverse.paginate_disabled_previous:disabled, .dataTables_paginate a.bulletin-inverse.paginate_disabled_next:disabled, a.btn.bulletin-inverse.disabled, .dataTables_paginate a.bulletin-inverse.disabled.paginate_disabled_previous, .dataTables_paginate a.bulletin-inverse.disabled.paginate_disabled_next, a.btn.bulletin-inverse.waiting, .dataTables_paginate a.bulletin-inverse.waiting.paginate_disabled_previous, .dataTables_paginate a.bulletin-inverse.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4356,7 +4608,11 @@ i.btn.bulletin-inverse:active, .dataTables_paginate i.bulletin-inverse.paginate_
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 i.btn.bulletin-inverse:disabled, .dataTables_paginate i.bulletin-inverse.paginate_disabled_previous:disabled, .dataTables_paginate i.bulletin-inverse.paginate_disabled_next:disabled, i.btn.bulletin-inverse.disabled, .dataTables_paginate i.bulletin-inverse.disabled.paginate_disabled_previous, .dataTables_paginate i.bulletin-inverse.disabled.paginate_disabled_next, i.btn.bulletin-inverse.waiting, .dataTables_paginate i.bulletin-inverse.waiting.paginate_disabled_previous, .dataTables_paginate i.bulletin-inverse.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4384,7 +4640,11 @@ span.btn.bulletin-inverse:active, .dataTables_paginate span.bulletin-inverse.pag
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 span.btn.bulletin-inverse:disabled, .dataTables_paginate span.bulletin-inverse.paginate_disabled_previous:disabled, .dataTables_paginate span.bulletin-inverse.paginate_disabled_next:disabled, span.btn.bulletin-inverse.disabled, .dataTables_paginate span.bulletin-inverse.disabled.paginate_disabled_previous, .dataTables_paginate span.bulletin-inverse.disabled.paginate_disabled_next, span.btn.bulletin-inverse.waiting, .dataTables_paginate span.bulletin-inverse.waiting.paginate_disabled_previous, .dataTables_paginate span.bulletin-inverse.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -4412,7 +4672,11 @@ label.btn.bulletin-inverse:active, .dataTables_paginate label.bulletin-inverse.p
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 label.btn.bulletin-inverse:disabled, .dataTables_paginate label.bulletin-inverse.paginate_disabled_previous:disabled, .dataTables_paginate label.bulletin-inverse.paginate_disabled_next:disabled, label.btn.bulletin-inverse.disabled, .dataTables_paginate label.bulletin-inverse.disabled.paginate_disabled_previous, .dataTables_paginate label.bulletin-inverse.disabled.paginate_disabled_next, label.btn.bulletin-inverse.waiting, .dataTables_paginate label.bulletin-inverse.waiting.paginate_disabled_previous, .dataTables_paginate label.bulletin-inverse.waiting.paginate_disabled_next {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: #dddddd !important;
 }
 
@@ -5764,7 +6028,11 @@ a.link-btn:active, a.link-btn.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn:disabled, a.link-btn.disabled, a.link-btn.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: none !important;
 }
 
@@ -5798,7 +6066,11 @@ a.link-btn-julkipano:active, a.link-btn-julkipano.active {
 /* line 240, ../../../private/common-html/sass/partials/_buttons.scss */
 a.link-btn-julkipano:disabled, a.link-btn-julkipano.disabled, a.link-btn-julkipano.waiting {
   cursor: default !important;
+<<<<<<< HEAD
   color: #999999 !important;
+=======
+  color: white !important;
+>>>>>>> Group approval reject note.
   background-color: none !important;
 }
 
@@ -7712,36 +7984,130 @@ div.sticky {
   padding-right: 10px;
 }
 
+<<<<<<< HEAD
 /* line 764, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 812, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note, .reject-note-editor {
+  margin-left: 34px;
+  font-size: 16px;
+  margin-top: -10px;
+}
+
+/* line 818, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note {
+  padding-right: 1em;
+  color: #bbbbbb;
+}
+
+/* line 825, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 50%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 0;
+}
+/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor:after, .reject-note-editor:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note-editor input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 833, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: 1px solid #dddddd;
   float: left;
 }
+<<<<<<< HEAD
 /* line 767, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
   padding-left: 10px;
 }
 /* line 771, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 836, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
+  padding-left: 10px;
+}
+/* line 840, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span {
   color: #999999;
 }
 
+<<<<<<< HEAD
 /* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 846, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
+<<<<<<< HEAD
 /* line 781, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line {
   width: 100%;
 }
 /* line 783, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 850, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+}
+/* line 852, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano {
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
+<<<<<<< HEAD
 /* line 790, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 859, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
   color: #999999;
 }
@@ -7749,12 +8115,20 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
 /* button.rejected ~ .group-buttons .is-top.rejected { */
 /*   display: none; */
 /* } */
+<<<<<<< HEAD
 /* line 802, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 871, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .is-middle {
   vertical-align: middle;
 }
 
+<<<<<<< HEAD
 /* line 806, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 876, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble {
   display: block;
   position: relative;
@@ -7767,7 +8141,11 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
+<<<<<<< HEAD
 /* line 819, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble:after, .description-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -7778,21 +8156,33 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   position: absolute;
   pointer-events: none;
 }
+<<<<<<< HEAD
 /* line 830, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
+<<<<<<< HEAD
 /* line 836, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
+<<<<<<< HEAD
 /* line 842, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble input {
   box-sizing: border-box;
   border: none;
@@ -7801,13 +8191,21 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: none;
   color: #333333;
 }
+<<<<<<< HEAD
 /* line 849, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble input:focus {
   border: none;
   box-shadow: none;
 }
 
+<<<<<<< HEAD
 /* line 856, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 880, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .container-bubble {
   display: block;
   position: relative;
@@ -7820,7 +8218,11 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
+<<<<<<< HEAD
 /* line 867, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 891, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .container-bubble:after, .container-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -7831,14 +8233,22 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   position: absolute;
   pointer-events: none;
 }
+<<<<<<< HEAD
 /* line 878, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 902, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .container-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
+<<<<<<< HEAD
 /* line 884, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 908, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .container-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
@@ -7846,12 +8256,20 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   margin-left: -11px;
 }
 
+<<<<<<< HEAD
 /* line 892, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 916, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .description-bubble.is-closed {
   display: none;
 }
 
+<<<<<<< HEAD
 /* line 896, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 920, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -7866,7 +8284,11 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: 2px 2px 3px #4f4f4f;
   text-align: left;
 }
+<<<<<<< HEAD
 /* line 909, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 933, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-help:after {
   content: " ";
   width: 0;
@@ -7879,7 +8301,11 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
+<<<<<<< HEAD
 /* line 921, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 945, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -7892,14 +8318,22 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
+<<<<<<< HEAD
 /* line 933, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 957, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
+<<<<<<< HEAD
 /* line 938, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 962, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -7913,7 +8347,11 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
+<<<<<<< HEAD
 /* line 951, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 975, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -7926,6 +8364,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
+<<<<<<< HEAD
 /* line 964, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col {
   width: 100%;
@@ -7935,22 +8374,42 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   width: 17.25em;
 }
 /* line 971, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 988, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col {
+  width: 100%;
+}
+/* line 991, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col .form-input, .three-col .form-input--inline {
+  width: 17.25em;
+}
+/* line 995, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 /* line 976, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1000, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 /* line 981, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1005, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
+<<<<<<< HEAD
 /* line 988, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
@@ -7972,24 +8431,59 @@ foreman-history th.fourth {
   width: 20%;
 }
 /* line 1003, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1012, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history h2 {
+  background-color: #f6f6f6 !important;
+}
+/* line 1015, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.first {
+  width: 10%;
+}
+/* line 1018, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.second {
+  width: 15%;
+}
+/* line 1021, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.third {
+  width: 10%;
+}
+/* line 1024, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.fourth {
+  width: 20%;
+}
+/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 foreman-history th.fifth {
   width: 45%;
 }
 
+<<<<<<< HEAD
 /* line 1008, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
+<<<<<<< HEAD
 /* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1038, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
 }
 
+<<<<<<< HEAD
 /* line 1053, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1077, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
@@ -7997,6 +8491,7 @@ div.alleYli-radioGroup {
   padding-left: 20px;
   padding-right: 20px;
 }
+<<<<<<< HEAD
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid:last-child {
   border-bottom: none;
@@ -8006,10 +8501,22 @@ div.alleYli-radioGroup {
   margin: 12px 0;
 }
 /* line 1070, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1085, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid:last-child {
+  border-bottom: none;
+}
+/* line 1089, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid h2 {
+  margin: 12px 0;
+}
+/* line 1094, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
+<<<<<<< HEAD
 /* line 1075, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin {
   padding: 0 !important;
@@ -8027,6 +8534,25 @@ div.alleYli-radioGroup {
   border: 0;
 }
 /* line 1090, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1099, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col--no-margin {
+  padding: 0 !important;
+}
+/* line 1101, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col--no-margin .checkbox-wrapper {
+  border: none;
+}
+/* line 1106, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid select::-ms-expand {
+  display: none;
+}
+/* line 1110, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid button::-moz-focus-inner {
+  border: 0;
+}
+/* line 1114, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
   padding: 0 12px;
   box-sizing: border-box;
@@ -8050,20 +8576,36 @@ div.alleYli-radioGroup {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
+<<<<<<< HEAD
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid span.form-string {
   display: block;
 }
 /* line 1101, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1121, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid span.form-string {
+  display: block;
+}
+/* line 1125, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid textarea {
   height: 160px;
   padding: 6px 12px;
 }
+<<<<<<< HEAD
 /* line 1108, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
   border-color: #f39129;
 }
 /* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1132, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid select.required, .form-grid input.required {
+  border-color: #f39129;
+}
+/* line 1136, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .select-arrow {
   position: absolute;
   right: 2px;
@@ -8075,21 +8617,34 @@ div.alleYli-radioGroup {
   line-height: 38px;
   vertical-align: middle;
 }
+<<<<<<< HEAD
 /* line 1126, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1150, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .select-arrow.disabled {
   background-color: #f6f6f6;
   color: #bbbbbb;
 }
+<<<<<<< HEAD
 /* line 1131, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1155, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid input[type=text]:disabled, .form-grid textarea:disabled, .form-grid select:disabled, .form-grid .checkbox-wrapper.disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
+<<<<<<< HEAD
 /* line 1136, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1160, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid input[type=text].err, .form-grid input[type=password].err {
   border: 1px solid #df3215;
   color: #df3215;
 }
+<<<<<<< HEAD
 /* line 1141, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .submit-button {
   display: table-row;
@@ -8119,19 +8674,58 @@ div.alleYli-radioGroup {
   color: #fbc732;
 }
 /* line 1168, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1165, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button {
+  display: table-row;
+}
+/* line 1167, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submit-button__item {
+  display: table-cell;
+}
+/* line 1169, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submit-button__item:first-child {
+  width: 100%;
+}
+/* line 1175, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submittable input {
+  border-color: #2ca92c;
+}
+/* line 1181, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field {
+  position: relative;
+}
+/* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field input {
+  padding-right: 40px !important;
+}
+/* line 1188, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field.active i {
+  color: #fbc732;
+}
+/* line 1192, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .search-field i {
   color: #f39129;
   position: absolute;
   top: 8px;
   right: 8px;
 }
+<<<<<<< HEAD
 /* line 1176, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid button.input-button {
   position: absolute;
   bottom: 0;
   right: 0;
 }
+<<<<<<< HEAD
 /* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-1 {
   position: relative;
   float: left;
@@ -8140,16 +8734,25 @@ div.alleYli-radioGroup {
   max-width: 25%;
   padding-left: 20px;
 }
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-1 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1066, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-1 .col--vertical, .form-grid .col-1 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 .col--vertical label {
   display: block;
@@ -8163,6 +8766,21 @@ div.alleYli-radioGroup {
   width: 100%;
 }
 /* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1071, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-1 .col--vertical label {
+  display: block;
+}
+/* line 1209, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-1:first-child {
+  padding-left: 0;
+}
+/* line 1213, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-1.col--full > * {
+  width: 100%;
+}
+/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-2 {
   position: relative;
   float: left;
@@ -8171,16 +8789,25 @@ div.alleYli-radioGroup {
   max-width: 50%;
   padding-left: 20px;
 }
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-2 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1066, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-2 .col--vertical, .form-grid .col-2 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 .col--vertical label {
   display: block;
@@ -8194,6 +8821,21 @@ div.alleYli-radioGroup {
   width: 100%;
 }
 /* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1071, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-2 .col--vertical label {
+  display: block;
+}
+/* line 1209, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-2:first-child {
+  padding-left: 0;
+}
+/* line 1213, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-2.col--full > * {
+  width: 100%;
+}
+/* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-3 {
   position: relative;
   float: left;
@@ -8202,11 +8844,16 @@ div.alleYli-radioGroup {
   max-width: 75%;
   padding-left: 20px;
 }
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Group approval reject note.
 .form-grid .col-3 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
   width: 100%;
@@ -8254,4 +8901,10 @@ div.alleYli-radioGroup {
 /* line 1189, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4.col--full > * {
   width: 100%;
+=======
+/* line 1066, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
+  width: 100%;
+  box-sizing: border-box;
+>>>>>>> Group approval reject note.
 }
