@@ -9,7 +9,8 @@
   <div data-bind="event: {keydown: closeEditor},
                   css: editorCss">
     <input type="text"
-           data-bind="textInput: editorNote">
+           data-bind="textInput: editorNote,
+                      hasFocus: showEditor">
   </div>
   <!-- /ko -->
 </script>
