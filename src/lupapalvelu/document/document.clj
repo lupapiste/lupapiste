@@ -109,6 +109,11 @@
     (when-not (get-in doc [:schema-info :disableable])
       (fail :error.document.not-disableable))))
 
+(defn validate-document-is-approved [{:keys [application data]}]
+  (when-let [document (when application (domain/get-document-by-id application (:docId data)))]
+    (when-not (approved? document)
+      (fail :error.document-not-approved))))
+
 
 ;;
 ;; KTJ-info updation

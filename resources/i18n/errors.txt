@@ -808,6 +808,10 @@
 "error.illegal-value:not-in-set" "en" ""
 "error.illegal-value:not-in-set" "fi" "Arvo ei ole sallittujen joukossa"
 "error.illegal-value:not-in-set" "sv" ""
+"error.document.not-disableable" "en" ""
 "error.document.not-disableable" "fi" "Dokumenttia ei voi merkata poistuneksi"
 "error.document.not-disableable" "sv" ""
-"error.document.not-disableable" "en" ""
+"error.document-not-approved" "en" ""
+"error.document-not-approved" "fi" "Dokumenttia ei ole vielä hyväksytty viranomaisen toimesta"
+"error.document-not-approved" "sv" ""
+
