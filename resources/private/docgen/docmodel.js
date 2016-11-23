@@ -605,7 +605,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function parseMsToDateString(ms) {
-    var options = { year: 'numeric', month: '2-digit', day: '2-digit' }
+    var options = { year: "numeric", month: "2-digit", day: "2-digit" };
     var lang = loc.getCurrentLanguage();
     return new Date(Number(ms)).toLocaleString(lang, options);
   }
