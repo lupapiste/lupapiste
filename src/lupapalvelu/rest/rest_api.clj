@@ -12,7 +12,8 @@
             [lupapalvelu.api-common :refer :all]
             [noir.request :as request]
             [lupapalvelu.action :as action]
-            [ring.swagger.json-schema :as rjs]))
+            [ring.swagger.json-schema :as rjs]
+            [lupapalvelu.user :as usr]))
 
 (defonce endpoints (atom []))
 
@@ -79,7 +80,11 @@
     (rs/swagger-json {:paths (into {} paths)})))
 
 (defpage "/rest/swagger.json" []
-  (resp/status 200 (resp/json (paths))))
+  (if-let [user (basic-authentication (request/ring-request))]
+    (if (usr/rest-user? user)
+      (resp/status 200 (resp/json (paths)))
+      (resp/status 401 "Unauthorized"))
+    basic-401))
 
 (server/add-middleware
   (fn [handler]
