@@ -22,7 +22,7 @@ Authority admin goes to the application page
 Sees assignments are enabled
   Checkbox should not be selected  extended-construction-waste-report-enabled
 
-Enable extended construction waste report for orgainzation
+Enable extended construction waste report for organization
   Select checkbox  extended-construction-waste-report-enabled
   Wait until  Positive indicator should be visible
   Checkbox should be selected  extended-construction-waste-report-enabled
