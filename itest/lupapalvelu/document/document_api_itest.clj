@@ -127,22 +127,29 @@
     party-document-names => ["hakija-r" "hakijan-asiamies" "maksaja" "suunnittelija"]))
 
 (facts* "approve and reject document"
-  (let [application    (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
-        application-id (:id application)
-        hakija         (domain/get-applicant-document (:documents application))
-        uusi-rakennus  (domain/get-document-by-name application "uusiRakennus")]
+        (let [application    (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+              application-id (:id application)
+              hakija         (domain/get-applicant-document (:documents application))
+              uusi-rakennus  (domain/get-document-by-name application "uusiRakennus")]
 
-    (doseq [[cmd status] [[:approve-doc "approved"] [:reject-doc "rejected"]]]
+          (doseq [[cmd status] [[:reject-doc "rejected"] [:approve-doc "approved"]]]
       (command pena  cmd :id application-id :doc (:id hakija) :path nil :collection "documents") => unauthorized?
       (command sonja cmd :id application-id :doc (:id hakija) :path nil :collection "documents") => ok?
       (command sonja cmd :id application-id :doc (:id uusi-rakennus) :path nil :collection "documents") => ok?
-      (let [approved-app           (query-application pena application-id)
-            modified               (:modified approved-app)
-            approved-uusi-rakennus (domain/get-document-by-name approved-app "uusiRakennus")]
-        modified => truthy
-        (get-in approved-uusi-rakennus [:meta :_approved :value]) => status
-        (get-in approved-uusi-rakennus [:meta :_approved :timestamp]) => modified
-        (get-in approved-uusi-rakennus [:meta :_approved :user :id]) => sonja-id))))
+      (let [{old-modified :modified} (query-application pena application-id)]
+        old-modified => truthy
+        (when (= cmd :reject-doc)
+          (command sonja :reject-doc-note :id application-id :doc (:id uusi-rakennus)
+                   :path nil :collection "documents" :note (format "%s: Bu hao!" (name cmd))) => ok?)
+        (let [approved-app          (query-application pena application-id)
+              modified               (:modified approved-app)
+              approved-uusi-rakennus (domain/get-document-by-name approved-app "uusiRakennus")]
+         modified => truthy
+         (>= modified old-modified) => true
+         (get-in approved-uusi-rakennus [:meta :_approved :value]) => status
+         (get-in approved-uusi-rakennus [:meta :_approved :timestamp]) => old-modified
+         (get-in approved-uusi-rakennus [:meta :_approved :user :id]) => sonja-id
+         (get-in approved-uusi-rakennus [:meta :_approved :note]) => "reject-doc: Bu hao!")))))
 
 (facts "remove document"
   (let [application-id (:id (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id))
