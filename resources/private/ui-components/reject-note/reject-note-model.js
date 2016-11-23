@@ -67,6 +67,9 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     self.addHubListener( "document-approval-" + docModel.docId,
                          function( event ) {
                            self.showEditor( !event.approved );
+                           if( self.showEditor() ) {
+                             window.Stickyfill.rebuild();
+                           }
                          });
   }
 
