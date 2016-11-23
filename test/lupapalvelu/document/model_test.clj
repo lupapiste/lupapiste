@@ -91,6 +91,10 @@
   (validate-field {} {:type :hetu} "210281-9987") => [:err "illegal-hetu"]
   (validate-field {} {:type :hetu} "300281-998V") => [:err "illegal-hetu"])
 
+(facts "msDate validation"
+  (validate-field {} {:type :msDate} 1479464714612) => nil?
+  (validate-field {} {:type :msDate} "abcde") => [:err "illegal-value:msDate-NotValidDate"])
+
 ;;
 ;; validate
 ;;

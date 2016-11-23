@@ -193,12 +193,16 @@
                    (util/to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
                      (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-alkaa-pvm :tapahtuma-aika-alkaa-pvm))
-                     (util/to-xml-date-from-string (:tyoaika-alkaa-pvm tyoaika-doc))))
+                     (if (:tyoaika documents-by-type)
+                       (util/to-xml-date (:tyoaika-alkaa-ms tyoaika-doc))
+                       (util/to-xml-date-from-string (:tyoaika-alkaa-pvm tyoaika-doc)))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
                     (util/to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
                       (util/to-xml-date-from-string (util/some-key main-viit-tapahtuma :mainostus-paattyy-pvm :tapahtuma-aika-paattyy-pvm))
-                      (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc))))]
+                      (if (:tyoaika documents-by-type)
+                        (util/to-xml-date (:tyoaika-paattyy-ms tyoaika-doc))
+                        (util/to-xml-date-from-string (:tyoaika-paattyy-pvm tyoaika-doc)))))]
     [alku-pvm loppu-pvm]))
 
 (defn- get-canonical-body [application operation-name-key config documents-by-type]

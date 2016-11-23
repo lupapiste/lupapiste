@@ -238,8 +238,7 @@
                                 (fn [doc]
                                   (when (= "tyoaika" (-> doc :schema-info :name)) doc))
                                 (:documents app))
-                  work-time-expires-str (-> tyoaika-doc :data :tyoaika-paattyy-pvm :value)
-                  work-time-expires-timestamp (util/to-millis-from-local-date-string work-time-expires-str)]
+                  work-time-expires-timestamp (-> tyoaika-doc :data :tyoaika-paattyy-ms :value)]
             :when (and
                     work-time-expires-timestamp
                     (> work-time-expires-timestamp (now))
@@ -247,7 +246,7 @@
       (logging/with-logging-context {:applicationId (:id app)}
         (notifications/notify! :reminder-ya-work-time-is-expiring {:application app
                                                                    :user (get-app-owner app)
-                                                                   :data {:work-time-expires-date work-time-expires-str}})
+                                                                   :data {:work-time-expires-date (util/to-local-date work-time-expires-timestamp)}})
         (update-application (application->command app)
           {$set {:work-time-expiring-reminder-sent (now)}})))))
 

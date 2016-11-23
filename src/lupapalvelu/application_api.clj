@@ -731,7 +731,7 @@
     (if (:started app)
       (util/to-local-date (:started app))
       (or
-        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-ms :value (util/to-local-date))
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 

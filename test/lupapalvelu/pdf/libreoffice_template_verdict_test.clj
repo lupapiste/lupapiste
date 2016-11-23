@@ -93,7 +93,9 @@
                                                                                                             :sukunimi {:value "Mallikas"}}}}}}
                                                  {:schema-info {:name :tyoaika}
                                                   :data        {:tyoaika-alkaa-pvm   {:value "01.12.2016"}
-                                                                :tyoaika-paattyy-pvm {:value "02.12.2016"}}}
+                                                                :tyoaika-paattyy-pvm {:value "02.12.2016"}
+                                                                :tyoaika-alkaa-ms   {:value 1480550400000}
+                                                                :tyoaika-paattyy-ms {:value 1480636800000}}}
 
                                                  {:schema-info {:subtype "hakija"}
                                                   :data        {:_selected {:value "yritys"}

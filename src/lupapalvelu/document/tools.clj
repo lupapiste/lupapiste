@@ -49,6 +49,7 @@
       :text             "text"
       :checkbox         true
       :date             "2.5.1974"
+      :msDate           136700000000
       :time             "16:10"
       :select           (-> body first :name)
       :radioGroup       (-> body first :name)

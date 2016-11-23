@@ -158,6 +158,10 @@
   (merge GenInput
          {:type       (sc/eq :time)}))
 
+(defschema MsDate
+  (merge GenInput
+         {:type       (sc/eq :msDate)}))
+
 (defschema Checkbox
   (merge GenInput
          {:type       (sc/eq :checkbox)}))
@@ -231,6 +235,7 @@
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
                   (type-pred :time)       TimeString
+                  (type-pred :msDate)     MsDate
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages

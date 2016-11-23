@@ -87,6 +87,11 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
+(defmethod validate-field :msDate [_ _ v]
+  (if (not (nil? v))
+    (if (not (util/->long v))
+      [:err "illegal-value:msDate-NotValidDate"])))
+
 (defmethod validate-field :time [_ _ v]
   (when-not (ss/blank? v)
     (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
