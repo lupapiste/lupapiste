@@ -21,6 +21,10 @@
       response => http401?))
   (fact "Sipoo Backend can access"
     (sipoo-r-api-call) => http200?)
+  (fact "Sipoo Backend can not access other municipalities"
+    (decode-response
+      (api-call {:query-params {:organization "091-R"}
+                 :basic-auth   ["sipoo-r-backend" "sipoo"]})) =not=> ok?)
   (let [{r-app-id1 :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         {r-app-id2 :id} (create-app pena :propertyId sipoo-property-id :operation "kerrostalo-rivitalo")
         _ (command pena :submit-application :id r-app-id1)]
