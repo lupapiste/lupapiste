@@ -67,7 +67,9 @@
   {:summary     "Luo Lupapiste-hakemuksen taustaj\u00e4rjestelm\u00e4n hakemuksesta tai palauttaa olemassa olevan hakemuksen tunnuksen."
    :description ""
    :parameters  [:kuntalupatunnus (rjs/field sc/Str {:description "Taustaj\u00e4rjestelm\u00e4ss\u00e4 olevan hakemuksen kuntalupatunnus"})]
-   :returns     sc/Any}
+   :returns     {:ok sc/Bool
+                 :text sc/Keyword
+                 (sc/optional-key :id) sc/Int}}
    (let [response (execute (assoc (action/make-raw "get-lp-id-from-previous-permit" {:kuntalupatunnus kuntalupatunnus}) :user user))]
      (if (action/response? response)
        response
