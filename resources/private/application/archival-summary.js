@@ -102,6 +102,7 @@
     self.archivabilityError = ko.observable();
 
     self.sendToArchive = ko.observable(false);
+    self.archived = ko.observable(false);
 
     self.convertableToPdfA = self.disposedPureComputed(function() {
       return self.authModel.ok("convert-to-pdfa");
@@ -143,6 +144,10 @@
       self.state = self.disposedPureComputed(_.partial( getState, application, "processMetadata" ));
     } else {
       self.state = self.disposedPureComputed(_.partial( getState, doc ));
+    }
+
+    if (self.state() === "arkistoitu") {
+      self.archived(true);
     }
 
     self.reset = function(doc) {
@@ -305,6 +310,7 @@
             metadata.tila = ko.observable(newState);
           }
           if (newState === "arkistoitu") {
+            doc.archived(true);
             doc.sendToArchive(false);
           }
           if (newState !== "arkistoidaan") {

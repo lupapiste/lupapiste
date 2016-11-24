@@ -29,7 +29,8 @@
             [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
-            [sade.coordinate :as coord]))
+            [sade.coordinate :as coord])
+  (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -2511,7 +2512,6 @@
       (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
         (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
 
-
 (defn coerce-time-string [time-string]
   (if (ss/not-blank? time-string)
     (->> (re-seq #"\d+" time-string)
@@ -2536,6 +2536,58 @@
                              coerce-ymp-ilm-kesto-time-strings
                              {:documents.schema-info.name "ymp-ilm-kesto"}))
 
+(def ddMMyyyy-formatter (clj-time.format/formatter "dd.MM.yyyy"))
+
+(defn- date-string-to-ms [date]
+  (clj-time.coerce/to-long (clj-time.format/parse ddMMyyyy-formatter date)))
+
+(defn- valid-date-string [date]
+  (try
+    (instance? DateTime (clj-time.format/parse ddMMyyyy-formatter date))
+    (catch Exception e
+      false)))
+
+(defn- add-start-timestamp [document]
+  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
+           (valid-date-string (get-in document [:data :tyoaika-alkaa-pvm :value]))
+           (nil? (get-in document [:data :tyoaika-alkaa-ms :value])))
+      (assoc-in document [:data :tyoaika-alkaa-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-alkaa-pvm :value])))
+    document))
+
+(defn- add-end-timestamp [document]
+  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
+           (valid-date-string (get-in document [:data :tyoaika-paattyy-pvm :value]))
+           (nil? (get-in document [:data :tyoaika-paattyy-ms :value])))
+      (assoc-in document [:data :tyoaika-paattyy-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-paattyy-pvm :value])))
+    document))
+
+(defmigration add-ms-timestamp-for-work-started-and-ended
+  {:apply-when (pos? (mongo/count :applications
+                                  {:documents
+                                  {$elemMatch {$or
+                                               [{$and [{:schema-info.name "tyoaika"},
+                                                     {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
+                                                     {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
+                                                     {:data.tyoaika-alkaa-ms.value {$exists false}}]}
+                                               {$and [{:schema-info.name "tyoaika"},
+                                                      {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                                      {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                                      {:data.tyoaika-paattyy-ms.value {$exists false}}]}]}}}))}
+
+  (update-applications-array :documents
+                             add-start-timestamp
+                             {:documents
+                              {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                                 {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
+                                                 {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
+                                                 {:data.tyoaika-alkaa-ms.value {$exists false}}]}}})
+  (update-applications-array :documents
+                           add-end-timestamp
+                           {:documents
+                            {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                               {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                               {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                               {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

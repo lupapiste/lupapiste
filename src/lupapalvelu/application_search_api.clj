@@ -24,7 +24,8 @@
               (select-keys
                 data
                 [:tags :organizations :applicationType :handlers
-                 :limit :searchText :skip :sort :operations :areas :areas-wgs84]))))
+                 :limit :searchText :skip :sort :operations :areas :areas-wgs84
+                 :event]))))
 
 (defquery applications-search-default
   {:description "The initial applications search. Returns data and used search."
@@ -142,3 +143,12 @@
         apps (search/search query fields sort skip limit)]
     (ok :applications (->> (filter :primaryOperation apps)
                            (map search/public-fields)))))
+
+(defquery event-search
+  {:description "Query for event search availability"
+   :parameters []
+   :user-roles #{:authority}
+   :pre-checks [(fn [command]
+                  (when-not (some #(= (:permitType %) "YA") (mapcat :scope (:user-organizations command)))
+                    unauthorized))]}
+   [_])

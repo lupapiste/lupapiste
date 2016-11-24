@@ -596,6 +596,67 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function parseDateStringToMs(dateString) {
+    var day = dateString.slice(0, 2);
+    var month = dateString.slice(3,5)      ;
+    var year = dateString.slice(6, 10);
+    var date = new Date(year, month-1, day);
+    return date.getTime();
+  }
+
+  function parseMsToDateString(ms) {
+    var options = { year: "numeric", month: "2-digit", day: "2-digit" };
+    var lang = loc.getCurrentLanguage();
+    return new Date(Number(ms)).toLocaleString(lang, options);
+  }
+
+  function buildMsDate(subSchema, model, path) {
+    var lang = loc.getCurrentLanguage();
+    var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
+    var value = parseMsToDateString(getModelValue(model, subSchema.name));
+
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
+
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
+    }
+
+    var className = "form-input text form-date";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
+    }
+    // date
+    var input = $("<input>", {
+      id: pathStrToID(myPath),
+      name: self.docId + "." + myPath,
+      type: "text",
+      "class": className,
+      value: value
+    });
+
+    var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
+
+    sourceValueChanged(input.get(0), value, sourceValue, source);
+
+    if (isInputReadOnly(doc, subSchema, model)) {
+      input.attr("readonly", true);
+    } else {
+      input.datepicker($.datepicker.regional[lang]).change(function(e) {
+        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
+        var ms = parseDateStringToMs(input.val());
+        e.target.value =  ms;
+        saveValue(e, ms);
+        e.target.value = parseMsToDateString(e.target.value);
+      });
+    }
+    input.appendTo(span);
+
+    return span;
+  }
+
   function buildTime(subSchema, model, path) {
     // Set implisit options into a clone
     var timeSchema = _.clone(subSchema);
@@ -1202,6 +1263,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     radioGroup: buildRadioGroup,
     date: buildDate,
     time: buildTime,
+    msDate: buildMsDate,
     // element: buildElement,
     buildingSelector: buildDocgenBuildingSelect,
     newBuildingSelector: buildNewBuildingSelector,
@@ -1583,6 +1645,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       label.appendChild(loader);
     }
 
+    saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  function saveValue(e, value, callback) {
+    var event = getEvent(e);
+    var target = event.target;
+    var indicator = docutils.createIndicator(target);
+
+    var path = target.name;
+    var loader = docutils.loaderImg();
+
+    var label = document.getElementById(pathStrToLabelID(path));
+    if (label) {
+      label.appendChild(loader);
+    }
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 

@@ -145,6 +145,28 @@
 (facts "Building ID search"
   (make-text-query "123456001M") => {:buildings.nationalId "123456001M"})
 
+(fact "Should make event quyery with correct event type"
+      (make-query {} {:event {:eventType ["warranty-period-end"], :start 123, :end 134}} {})
+       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+                  {"$and" [{:warrantyEnd {"$gte" 123, "$lt" 134}}]}]})
+
+(fact "Shouldnt make event query when event type is empty"
+      (make-query {} {:event {:eventType [], :start 123, :end 134}} {})
+       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}]})
+
+(facts "Event queries are correct"
+       (make-query {} {:event {:eventType ["warranty-period-end"], :start 123, :end 134}} {})
+       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+                   {"$and" [{:warrantyEnd {"$gte" 123, "$lt" 134}}]}]}
+
+       (make-query {} {:event {:eventType ["license-period-start"], :start 123, :end 134}} {})
+       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+                   {"$and" [{:documents.data.tyoaika-alkaa-ms.value {"$gte" 123, "$lt" 134}}]}]}
+
+       (make-query {} {:event {:eventType ["license-period-end"], :start 123, :end 134}} {})
+       => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
+                   {"$and" [{:documents.data.tyoaika-paattyy-ms.value {"$gte" 123, "$lt" 134}}]}]})
+
 (fact "public-fields"
   (let [fields (public-fields {:primaryOperation {:name "kerrostalo-rivitalo"}})]
     (-> fields :operationName keys set) => i18n/languages

@@ -113,6 +113,9 @@
 (defmethod coerce-type :time [elem-schema]
   (data-leaf elem-schema ssc/TimeString))
 
+(defmethod coerce-type :msDate [elem-schema]
+  (data-leaf elem-schema sc/Num))
+
 (defmethod coerce-type :maaraalaTunnus [elem-schema]
   (data-leaf elem-schema ssc/Maaraalatunnus))
 
