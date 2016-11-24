@@ -66,11 +66,16 @@
 
 (def supported-language-schema (apply sc/enum (map name languages)))
 
+(defn supported-langs-map
+  "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
+  [f]
+  (into {} (map (juxt identity f)
+                supported-langs)))
+
 (defn localization-schema
   "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
   [value-type]
-  (into {} (map (juxt identity (constantly value-type))
-                supported-langs)))
+  (supported-langs-map (constantly value-type)))
 
 (defn with-default-localization [loc-map default]
   (merge (localization-schema default)

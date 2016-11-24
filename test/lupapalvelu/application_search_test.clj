@@ -5,7 +5,8 @@
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]
              [lupapalvelu.application-utils :refer [operation-names make-area-query]]
-             [lupapalvelu.geojson :as geo]))
+             [lupapalvelu.geojson :as geo]
+             [lupapalvelu.i18n :as i18n]))
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
@@ -165,3 +166,8 @@
        (make-query {} {:event {:eventType ["license-period-end"], :start 123, :end 134}} {})
        => {"$and" [{"$and" [{:state {"$ne" "canceled"}} {"$or" [{:state {"$ne" "draft"}} {:organization {"$nin" ()}}]}]}
                    {"$and" [{:documents.data.tyoaika-paattyy-ms.value {"$gte" 123, "$lt" 134}}]}]})
+
+(fact "public-fields"
+  (let [fields (public-fields {:primaryOperation {:name "kerrostalo-rivitalo"}})]
+    (-> fields :operationName keys set) => i18n/languages
+    (-> fields :operationName :fi) => (:operation fields)))
