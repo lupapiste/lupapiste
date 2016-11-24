@@ -3,6 +3,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [monger.operators :refer :all]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.i18n :as i18n]
@@ -17,8 +18,8 @@
     {:link-fi      (link-fn "fi")
      :link-sv      (link-fn "sv")
      :address      (:title app)
-     :operation-fi (i18n/localize "fi" "operations" (get-in app [:primaryOperation :name]))
-     :operation-sv (i18n/localize "sv" "operations" (get-in app [:primaryOperation :name]))
+     :operation-fi (app-utils/operation-description app :fi)
+     :operation-sv (app-utils/operation-description app :sv)
      :created-date created-date}))
 
 (def- new-ram-email-conf

@@ -12,6 +12,7 @@
             [sade.property :as prop]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
@@ -42,21 +43,11 @@
 
 (notifications/defemail :application-state-change state-change)
 
-(defn- operation-description
-  "obtain the name of application's primary operation, taking into
-  account that some legacy applications may not have a primary
-  operation"
-  [application lang]
-  (let [primary-operation (-> application :primaryOperation :name name)]
-    (if primary-operation
-      (str (i18n/localize lang "operations" primary-operation) " ")
-      "")))
-
 (defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
                               _
                               recipient]
-  {:operation-fi (operation-description application :fi)
-   :operation-sv (operation-description application :sv)
+  {:operation-fi (app-utils/operation-description application :fi)
+   :operation-sv (app-utils/operation-description application :sv)
    :address (:address application)
    :city-fi (i18n/localize :fi "municipality" (:municipality application))
    :city-sv (i18n/localize :sv "municipality" (:municipality application))
@@ -359,7 +350,7 @@
     {:id        (:id app)
      :title     (:title app)
      :location  {:x (first location) :y (second location)}
-     :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
+     :operation (app-utils/operation-description app lang)
      :authName  (-> app
                     (auth/get-auths-by-role :owner)
                     first

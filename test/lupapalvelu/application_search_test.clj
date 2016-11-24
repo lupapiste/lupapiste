@@ -5,7 +5,8 @@
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]
              [lupapalvelu.application-utils :refer [operation-names make-area-query]]
-             [lupapalvelu.geojson :as geo]))
+             [lupapalvelu.geojson :as geo]
+             [lupapalvelu.i18n :as i18n]))
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos" "kiinteistonmuodostus"]
@@ -144,3 +145,7 @@
 (facts "Building ID search"
   (make-text-query "123456001M") => {:buildings.nationalId "123456001M"})
 
+(fact "public-fields"
+  (let [fields (public-fields {:primaryOperation {:name "kerrostalo-rivitalo"}})]
+    (-> fields :operationName keys set) => i18n/languages
+    (-> fields :operationName :fi) => (:operation fields)))

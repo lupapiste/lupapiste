@@ -207,10 +207,8 @@
 ;; Public API
 ;;
 
-(defn public-fields [{:keys [municipality submitted primaryOperation]}]
-  (let [op-name (:name primaryOperation)]
-    {:municipality municipality
-     :timestamp submitted
-     :operation (i18n/localize :fi "operations" op-name)
-     :operationName {:fi (i18n/localize :fi "operations" op-name)
-                     :sv (i18n/localize :sv "operations" op-name)}}))
+(defn public-fields [{:keys [municipality submitted] :as application}]
+  {:municipality municipality
+   :timestamp submitted
+   :operation (app-utils/operation-description application :fi)
+   :operationName (i18n/supported-langs-map (partial app-utils/operation-description application))})
