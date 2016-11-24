@@ -58,10 +58,10 @@
   "the notification is sent to applicants in auth array and application owners"
   [{{:keys [auth documents] :as application} :application}]
   (let [applicant-in-auth? (->> auth (remove :invite) (remove :unsubscribed) (map :id) set)
-        applicant-ids (->> (filter (comp #{:hakija} keyword :subtype :schema-info) documents)
+        applicant-ids (->> (domain/get-applicant-documents documents)
                            (map (comp :value :userId :henkilo :data))
                            (filter applicant-in-auth?))
-        owner-ids (->> (filter (comp #{:owner} keyword :role) auth)
+        owner-ids (->> (auth/get-auths-by-role application :owner)
                        (remove :invite)
                        (remove :unsubscribed)
                        (map :id))]
