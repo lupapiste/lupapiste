@@ -251,22 +251,48 @@
                                                                                                   :henkilotiedot :sisaltaa}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
-  (fact "metadata cannot be set to a read-only attachment"
-    (let [command {:application {:organization    "753-R"
-                                 :id              "ABC123"
-                                 :state           "submitted"
-                                 :attachments [{:id "5234" :readOnly true}]}
-                   :created     1000
-                   :user        {:orgAuthz      {:753-R #{:authority :archivist}}
-                                 :organizations ["753-R"]
-                                 :role          :authority}
-                   :action      "store-tos-metadata-for-attachment"
-                   :data        {:metadata {"julkisuusluokka" "julkinen"}
-                                 :id       "ABC123"
-                                 :attachmentId "5234"}}]
-      (execute command) => {:ok false
-                            :text "error.unauthorized"
-                            :desc "Attachment is read only."}))
+  (fact "metadata can be updated to a read-only attachment"
+        (let [command {:application {:id 1
+                                     :organization "753-R"
+                                     :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
+                                                                      "henkilotiedot"   "sisaltaa"
+                                                                      "sailytysaika"    {"arkistointi" "ei"
+                                                                                         "perustelu"   "foo"}
+                                                                      "myyntipalvelu"   false
+                                                                      "nakyvyys"        "julkinen"}
+                                                     :readOnly true}]}
+                       :created     1000
+                       :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+          (update-application-child-metadata!
+            command
+            :attachments
+            1
+            {"julkisuusluokka" "julkinen"
+             "henkilotiedot"   "ei-sisalla"
+             "sailytysaika"    {"arkistointi" "ikuisesti"
+                                "perustelu"   "foo"}
+             "myyntipalvelu"   false
+             "nakyvyys"        "julkinen"
+             "kieli"           "fi"}) => {:ok true
+                                          :metadata {:julkisuusluokka :julkinen
+                                                     :henkilotiedot   :ei-sisalla
+                                                     :sailytysaika    {:arkistointi :ikuisesti
+                                                                       :perustelu   "foo"}
+                                                     :myyntipalvelu   false
+                                                     :nakyvyys        :julkinen
+                                                     :tila            :luonnos
+                                                     :kieli           :fi}}
+          (provided
+            (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
+                                                                                                                 :henkilotiedot   :ei-sisalla
+                                                                                                                 :sailytysaika    {:arkistointi :ikuisesti
+                                                                                                                                   :perustelu   "foo"}
+                                                                                                                 :myyntipalvelu   false
+                                                                                                                 :nakyvyys        :julkinen
+                                                                                                                 :tila            :luonnos
+                                                                                                                 :kieli           :fi}
+                                                                                                :readOnly true}]}}) => nil
+            (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
   (fact "a valid function code can be set to application and it is stored in history array"
     (let [fc "10 03 00 01"
