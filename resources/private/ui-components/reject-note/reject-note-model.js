@@ -13,6 +13,8 @@ LUPAPISTE.RejectNoteModel = function( params ) {
 
   self.noteCss = params.noteCss || {"reject-note": true};
   self.editorCss = params.editorCss || {"reject-note-editor": true};
+  self.editObservable = params.editObservable || _.noop;
+
 
   // The following are initialized in the context-specific init
   // functions (see below)
@@ -115,7 +117,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
                            function( event ) {
                              if( event.attachmentId === attachmentId
                                  && /^(approve|reject)-attachment$/.test( event.commandName)) {
-                               resetRejected( event.commandName === "reject-attachment");
+                               resetRejected(event.commandName === "reject-attachment");
                              }
                            });
   }

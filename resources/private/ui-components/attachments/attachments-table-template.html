@@ -20,8 +20,11 @@
       </thead>
       <tbody data-bind="foreach: attachments">
         <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
-                              'data-test-state': $data.state,
-                              'attachment-id': $data.id}">
+                       'data-test-state': $data.state,
+                       'attachment-id': $data.id},
+                       css: {'even-row': $index() % 2 === 0,
+                       'odd-row': $index() % 2,
+                       'row--rejected':  $parent.isRejected( $data )}">
           <td>
             <state-icons params="attachment: $data"></state-icons>
           </td>
@@ -103,6 +106,14 @@
               <i class="lupicon-remove"></i>
             </button>
           </td>
+        </tr>
+        <tr class="reject-note-row"
+            data-bind="visible: $parent.isRejected( $data ),
+                       css: {'even-row': $index() % 2 === 0,
+                       'odd-row': $index() % 2}">
+          <td colspan="7"
+              data-bind="component: {name: 'reject-note',
+                         params: {attachmentId: id}}"></td>
         </tr>
         <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
         <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
