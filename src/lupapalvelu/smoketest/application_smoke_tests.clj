@@ -150,3 +150,12 @@
 (mongocheck :applications (some-timestamp-is-set #{:sent :acknowledged} #{:sent :complementNeeded}) :state :sent :acknowledged)
 
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
+
+(defn validate-verdict-history-entry [{:keys [state history verdicts]}]
+  (when (contains? states/post-verdict-states (keyword state))
+    (let [verdict-history-entries (->> (app/state-history-entries history)
+                                       (filter #(= (:state %) "verdictGiven")))]
+      (when (and (zero? (count verdict-history-entries)) (not (zero? (count verdicts))))
+        (format "Application has verdict, but no verdict history entry (has %d verdicts)" (count verdicts))))))
+
+(mongocheck :applications validate-verdict-history-entry :history :verdicts :state)
