@@ -12,65 +12,65 @@ Approve application
   Wait until  Application state should be  sent
 
 Accordion approved
-  [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] div.sticky button.positive i.approved
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.approved
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+  [Arguments]  ${name}  ${idx}=0
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) div.sticky button.positive i.approved
+  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
   # Every group is approved or neutral
-  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] i.rejected
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) i.rejected
 
 
 Approve button visible
-  [Arguments]  ${name}
-  Element should be visible  jquery=section[data-doc-type=${name}] button[data-test-id=approve-doc-${name}]
+  [Arguments]  ${name}  ${idx}=0
+  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) button[data-test-id=approve-doc-${name}]
 
 Reject button visible
-  [Arguments]  ${name}
-  Element should be visible  jquery=section[data-doc-type=${name}] button[data-test-id=reject-doc-${name}]
+  [Arguments]  ${name}  ${idx}=0
+  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) button[data-test-id=reject-doc-${name}]
 
 Approve button not visible
-  [Arguments]  ${name}
-  Element should not be visible  jquery=section[data-doc-type=${name}] button[data-test-id=approve-doc-${name}]
+  [Arguments]  ${name}  ${idx}=0
+  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) button[data-test-id=approve-doc-${name}]
 
 Reject button not visible
-  [Arguments]  ${name}
-  Element should not be visible  jquery=section[data-doc-type=${name}] button[data-test-id=reject-doc-${name}]
+  [Arguments]  ${name}  ${idx}=0
+  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) button[data-test-id=reject-doc-${name}]
 
 Sonja accordion approved
-  [Arguments]  ${name}
-  Accordion approved  ${name}
-  Approve button not visible  ${name}
-  Reject button visible  ${name}
+  [Arguments]  ${name}  ${idx}=0
+  Accordion approved  ${name}  ${idx}
+  Approve button not visible  ${name}  ${idx}
+  Reject button visible  ${name}  ${idx}
   # Every group is approved
-  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}] .accordion_content i.lupicon-check
+  Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .accordion_content i.lupicon-check
 
 
 Accordion rejected
-  [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky button.secondary.rejected i.rejected
-  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
-  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status i.rejected
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky .form-approval-status span:contains('Sibbo Sonja')
+  [Arguments]  ${name}  ${idx}=0
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky button.secondary.rejected i.rejected
+  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']:eq(${idx})
+  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.rejected
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
 
 Sonja accordion rejected
-  [Arguments]  ${name}
-  Accordion rejected  ${name}
-  Approve button visible  ${name}
-  Reject button not visible  ${name}
+  [Arguments]  ${name}  ${idx}=0
+  Accordion rejected  ${name}  ${idx}
+  Approve button visible  ${name}  ${idx}
+  Reject button not visible  ${name}  ${idx}
 
 # If a subgroup is rejected, the approved accordion is negated: it is no longer positive, has reject icon
 # but both buttons are visible.
 Accordion negated
-  [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}] .sticky button.secondary.rejected i.rejected
-  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']
+  [Arguments]  ${name}  ${idx}=0
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky button.secondary.rejected i.rejected
+  Element should not be visible  jquery=button.positve[data-accordion-id='${name}']:eq(${idx})
 
 
 Sonja accordion negated
-  [Arguments]  ${name}
-  Accordion negated  ${name}
-  Approve button visible  ${name}
-  Reject button visible  ${name}
+  [Arguments]  ${name}  ${idx}=0
+  Accordion negated  ${name}  ${idx}
+  Approve button visible  ${name}  ${idx}
+  Reject button visible  ${name}  ${idx}
   # Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.approved
   # Element should be visible  jquery=section[data-doc-type=${name}] .sticky .group-buttons button.rejected
 
@@ -109,24 +109,24 @@ Sonja group rejected
 # Clickers
 
 Click reject
-  [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]
-  Scroll and click test id  reject-doc-${name}
+  [Arguments]  ${name}  ${idx}=0
+  Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]:eq(${idx})
+  Scroll and click   button[data-test-id='reject-doc-${name}']:eq(${idx})
 
 Click approve
-  [Arguments]  ${name}
-  Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]
-  Scroll and click test id  approve-doc-${name}
+  [Arguments]  ${name}  ${idx}=0
+  Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]:eq(${idx})
+  Scroll and click  button[data-test-id='approve-doc-${name}']:eq(${idx})
 
 Approve accordion
-  [Arguments]  ${name}
-  Click approve  ${name}
-  Sonja accordion approved  ${name}
+  [Arguments]  ${name}  ${idx}=0
+  Click approve  ${name}  ${idx}
+  Sonja accordion approved  ${name}  ${idx}
 
 Reject accordion
-  [Arguments]  ${name}
-  Click reject  ${name}
-  Sonja accordion rejected  ${name}
+  [Arguments]  ${name}  ${idx}=0
+  Click reject  ${name}  ${idx}
+  Sonja accordion rejected  ${name}  ${idx}
 
 Approve group
   [Arguments]  ${name}
