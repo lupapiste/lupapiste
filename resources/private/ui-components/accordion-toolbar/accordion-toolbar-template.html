@@ -39,7 +39,9 @@
           <i class="lupicon-circle-attention rejected"></i>
           <i class="lupicon-circle-check approved"></i>
           <span class="is-details"
-                data-bind="text: details"></span>
+                data-bind="text: details,
+                           css: {'is-details--rejected': isRejected}">
+          </span>
         </div>
         <div data-bind="component: {name: 'reject-note',
                         params: {docModel: docModel, 

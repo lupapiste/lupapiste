@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1479722854849');
 
 /* line 1183, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8,21 +9,62 @@
 =======
 @import url('main-blessed1.css?z=1479914752960');
 >>>>>>> Accordion and toolbar reject notes.
+=======
+@import url('main-blessed1.css?z=1479995033855');
+>>>>>>> Different color for rejection texts.
 
-/* line 1228, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid input[type=text]:disabled, .form-grid textarea:disabled, .form-grid select:disabled, .form-grid .checkbox-wrapper.disabled {
+  border-color: #dddddd;
+  background-color: #f6f6f6;
+}
+/* line 1206, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid input[type=text].err, .form-grid input[type=password].err {
+  border: 1px solid #df3215;
+  color: #df3215;
+}
+/* line 1211, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button {
+  display: table-row;
+}
+/* line 1213, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submit-button__item {
+  display: table-cell;
+}
+/* line 1215, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submit-button__item:first-child {
+  width: 100%;
+}
+/* line 1221, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .submit-button .submittable input {
+  border-color: #2ca92c;
+}
+/* line 1227, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field {
+  position: relative;
+}
+/* line 1229, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field input {
+  padding-right: 40px !important;
+}
+/* line 1234, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .search-field.active i {
+  color: #fbc732;
+}
+/* line 1238, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .search-field i {
   color: #f39129;
   position: absolute;
   top: 8px;
   right: 8px;
 }
-/* line 1236, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1246, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid button.input-button {
   position: absolute;
   bottom: 0;
   right: 0;
 }
-/* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 {
   position: relative;
   float: left;
@@ -31,29 +73,29 @@
   max-width: 25%;
   padding-left: 20px;
 }
-/* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 .col--vertical, .form-grid .col-1 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-1.col--full > * {
   width: 100%;
 }
-/* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 {
   position: relative;
   float: left;
@@ -62,29 +104,29 @@
   max-width: 50%;
   padding-left: 20px;
 }
-/* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 .col--vertical, .form-grid .col-2 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-2.col--full > * {
   width: 100%;
 }
-/* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 {
   position: relative;
   float: left;
@@ -93,29 +135,29 @@
   max-width: 75%;
   padding-left: 20px;
 }
-/* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 .col--vertical, .form-grid .col-3 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-3.col--full > * {
   width: 100%;
 }
-/* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4 {
   position: relative;
   float: left;
@@ -124,34 +166,38 @@
   max-width: 100%;
   padding-left: 20px;
 }
-/* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4 label.required:after {
   content: " *";
   color: #df3215;
 }
-/* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4 .col--vertical, .form-grid .col-4 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-4.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-5 {
   position: relative;
   float: left;
@@ -162,6 +208,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -169,10 +216,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-5 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -182,10 +233,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-5 .col--vertical, .form-grid .col-5 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -206,23 +261,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-5 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-5:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-5.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-6 {
   position: relative;
   float: left;
@@ -233,6 +295,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -240,10 +303,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-6 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -253,10 +320,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-6 .col--vertical, .form-grid .col-6 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -277,23 +348,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-6 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-6:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-6.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-7 {
   position: relative;
   float: left;
@@ -304,6 +382,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -311,10 +390,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-7 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -324,10 +407,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-7 .col--vertical, .form-grid .col-7 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -348,23 +435,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-7 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-7.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-8 {
   position: relative;
   float: left;
@@ -375,6 +469,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -382,10 +477,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-8 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -395,10 +494,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-8 .col--vertical, .form-grid .col-8 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -419,23 +522,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-8 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-8:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-8.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-9 {
   position: relative;
   float: left;
@@ -446,6 +556,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -453,10 +564,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-9 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -466,10 +581,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-9 .col--vertical, .form-grid .col-9 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -490,23 +609,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-9 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-9.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-10 {
   position: relative;
   float: left;
@@ -517,6 +643,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -524,10 +651,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-10 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -537,10 +668,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-10 .col--vertical, .form-grid .col-10 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -561,23 +696,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-10 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-10.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-11 {
   position: relative;
   float: left;
@@ -588,6 +730,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -595,10 +738,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-11 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -608,10 +755,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-11 .col--vertical, .form-grid .col-11 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -632,23 +783,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-11 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-11.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1207, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1243, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1253, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-12 {
   position: relative;
   float: left;
@@ -659,6 +817,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
@@ -666,10 +825,14 @@
 =======
 /* line 1097, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-12 label.required:after {
   content: " *";
   color: #df3215;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
@@ -679,10 +842,14 @@
 =======
 /* line 1102, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1112, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-12 .col--vertical, .form-grid .col-12 .col--horizontal {
   width: 100%;
   box-sizing: border-box;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1047, ../../../private/common-html/sass/partials/_forms.scss */
@@ -703,23 +870,30 @@
 =======
 /* line 1107, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1117, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .col-12 .col--vertical label {
   display: block;
 }
-/* line 1245, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12:first-child {
   padding-left: 0;
 }
-/* line 1249, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1259, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col-12.col--full > * {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1219, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1255, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1265, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .row {
   *zoom: 1;
   margin: 20px 0;
@@ -733,6 +907,7 @@
 .form-grid .row:after {
   clear: both;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1200, ../../../private/common-html/sass/partials/_forms.scss */
@@ -753,23 +928,30 @@
 =======
 /* line 1260, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1270, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .row--no-margin {
   margin: 0;
 }
-/* line 1264, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1274, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .row--no-bottom-margin {
   margin-bottom: 0;
 }
-/* line 1268, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1278, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .autocomplete-component {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1236, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1272, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1282, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .info-message {
   background-color: #df3215;
   color: #fff;
@@ -780,6 +962,7 @@
   display: block;
   height: 40px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1224, ../../../private/common-html/sass/partials/_forms.scss */
@@ -828,51 +1011,58 @@
 =======
 /* line 1284, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1294, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .poor.info-message {
   background-color: #df3215;
 }
-/* line 1288, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1298, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .low.info-message {
   background-color: #e7541d;
 }
-/* line 1292, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1302, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .average.info-message {
   background-color: #f7ac2e;
 }
-/* line 1296, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1306, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .good.info-message {
   background-color: #61b72f;
 }
-/* line 1300, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1310, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .excellent.info-message {
   background-color: #2ca92c;
 }
-/* line 1304, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1314, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].poor {
   border-color: #df3215;
 }
-/* line 1308, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1318, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].low {
   border-color: #e7541d;
 }
-/* line 1312, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1322, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].average {
   border-color: #f7ac2e;
 }
-/* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1326, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].good {
   border-color: #61b72f;
 }
-/* line 1320, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1330, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=password].excellent {
   border-color: #2ca92c;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1288, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1324, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1334, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .error-message {
   background-color: #df3215;
   color: #fff;
@@ -883,6 +1073,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1271, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1295, ../../../private/common-html/sass/partials/_forms.scss */
@@ -890,6 +1081,9 @@
 =======
 /* line 1331, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1341, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid .error-message:before {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'lupapiste' !important;
@@ -909,6 +1103,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1279, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1303, ../../../private/common-html/sass/partials/_forms.scss */
@@ -916,10 +1111,14 @@
 =======
 /* line 1339, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1349, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .no-padding {
   padding: 0 !important;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1288, ../../../private/common-html/sass/partials/_forms.scss */
@@ -929,6 +1128,9 @@
 =======
 /* line 1348, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1358, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-cell__message {
   background-color: #df3215;
   color: white;
@@ -938,6 +1140,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1296, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1320, ../../../private/common-html/sass/partials/_forms.scss */
@@ -945,11 +1148,15 @@
 =======
 /* line 1356, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1366, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-cell--warning input, .form-cell--warning select {
   border: 1px solid #df3215 !important;
   color: #df3215 !important;
   margin-bottom: 0 !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1301, ../../../private/common-html/sass/partials/_forms.scss */
@@ -959,10 +1166,14 @@
 =======
 /* line 1361, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1371, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-cell--warning .form-cell__message {
   display: inline-block;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1306, ../../../private/common-html/sass/partials/_forms.scss */
@@ -972,11 +1183,15 @@
 =======
 /* line 1366, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-cell--required input, .form-cell--required select {
   border: 1px solid #f39129 !important;
   margin-bottom: 0 !important;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
@@ -986,6 +1201,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-1 > .row .col-1 {
   width: 100%;
   min-width: 100%;
@@ -994,6 +1212,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1001,6 +1220,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-2 > .row .col-1 {
   width: 50%;
   min-width: 50%;
@@ -1008,6 +1230,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1015,6 +1238,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-2 > .row .col-2 {
   width: 100%;
   min-width: 100%;
@@ -1023,6 +1249,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1030,6 +1257,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-3 > .row .col-1 {
   width: 33.33333%;
   min-width: 33.33333%;
@@ -1037,6 +1267,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1044,6 +1275,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-3 > .row .col-2 {
   width: 66.66667%;
   min-width: 66.66667%;
@@ -1051,6 +1285,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1058,6 +1293,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-3 > .row .col-3 {
   width: 100%;
   min-width: 100%;
@@ -1066,6 +1304,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1073,6 +1312,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-4 > .row .col-1 {
   width: 25%;
   min-width: 25%;
@@ -1080,6 +1322,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1087,6 +1330,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-4 > .row .col-2 {
   width: 50%;
   min-width: 50%;
@@ -1094,6 +1340,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1101,6 +1348,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-4 > .row .col-3 {
   width: 75%;
   min-width: 75%;
@@ -1108,6 +1358,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1115,6 +1366,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-4 > .row .col-4 {
   width: 100%;
   min-width: 100%;
@@ -1123,6 +1377,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1130,6 +1385,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-5 > .row .col-1 {
   width: 20%;
   min-width: 20%;
@@ -1137,6 +1395,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1144,6 +1403,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-5 > .row .col-2 {
   width: 40%;
   min-width: 40%;
@@ -1151,6 +1413,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1158,6 +1421,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-5 > .row .col-3 {
   width: 60%;
   min-width: 60%;
@@ -1165,6 +1431,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1172,6 +1439,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-5 > .row .col-4 {
   width: 80%;
   min-width: 80%;
@@ -1179,6 +1449,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1186,6 +1457,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-5 > .row .col-5 {
   width: 100%;
   min-width: 100%;
@@ -1194,6 +1468,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1201,6 +1476,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-1 {
   width: 16.66667%;
   min-width: 16.66667%;
@@ -1208,6 +1486,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1215,6 +1494,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-2 {
   width: 33.33333%;
   min-width: 33.33333%;
@@ -1222,6 +1504,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1229,6 +1512,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-3 {
   width: 50%;
   min-width: 50%;
@@ -1236,6 +1522,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1243,6 +1530,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-4 {
   width: 66.66667%;
   min-width: 66.66667%;
@@ -1250,6 +1540,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1257,6 +1548,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-5 {
   width: 83.33333%;
   min-width: 83.33333%;
@@ -1264,6 +1558,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1271,6 +1566,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-6 > .row .col-6 {
   width: 100%;
   min-width: 100%;
@@ -1279,6 +1577,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1286,6 +1585,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-1 {
   width: 14.28571%;
   min-width: 14.28571%;
@@ -1293,6 +1595,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1300,6 +1603,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-2 {
   width: 28.57143%;
   min-width: 28.57143%;
@@ -1307,6 +1613,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1314,6 +1621,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-3 {
   width: 42.85714%;
   min-width: 42.85714%;
@@ -1321,6 +1631,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1328,6 +1639,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-4 {
   width: 57.14286%;
   min-width: 57.14286%;
@@ -1335,6 +1649,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1342,6 +1657,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-5 {
   width: 71.42857%;
   min-width: 71.42857%;
@@ -1349,6 +1667,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1356,6 +1675,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-6 {
   width: 85.71429%;
   min-width: 85.71429%;
@@ -1363,6 +1685,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1370,6 +1693,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-7 > .row .col-7 {
   width: 100%;
   min-width: 100%;
@@ -1378,6 +1704,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1385,6 +1712,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-1 {
   width: 12.5%;
   min-width: 12.5%;
@@ -1392,6 +1722,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1399,6 +1730,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-2 {
   width: 25%;
   min-width: 25%;
@@ -1406,6 +1740,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1413,6 +1748,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-3 {
   width: 37.5%;
   min-width: 37.5%;
@@ -1420,6 +1758,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1427,6 +1766,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-4 {
   width: 50%;
   min-width: 50%;
@@ -1434,6 +1776,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1441,6 +1784,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-5 {
   width: 62.5%;
   min-width: 62.5%;
@@ -1448,6 +1794,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1455,6 +1802,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-6 {
   width: 75%;
   min-width: 75%;
@@ -1462,6 +1812,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1469,6 +1820,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-7 {
   width: 87.5%;
   min-width: 87.5%;
@@ -1476,6 +1830,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1483,6 +1838,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-8 > .row .col-8 {
   width: 100%;
   min-width: 100%;
@@ -1491,6 +1849,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1498,6 +1857,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-1 {
   width: 11.11111%;
   min-width: 11.11111%;
@@ -1505,6 +1867,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1512,6 +1875,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-2 {
   width: 22.22222%;
   min-width: 22.22222%;
@@ -1519,6 +1885,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1526,6 +1893,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-3 {
   width: 33.33333%;
   min-width: 33.33333%;
@@ -1533,6 +1903,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1540,6 +1911,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-4 {
   width: 44.44444%;
   min-width: 44.44444%;
@@ -1547,6 +1921,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1554,6 +1929,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-5 {
   width: 55.55556%;
   min-width: 55.55556%;
@@ -1561,6 +1939,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1568,6 +1947,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-6 {
   width: 66.66667%;
   min-width: 66.66667%;
@@ -1575,6 +1957,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1582,6 +1965,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-7 {
   width: 77.77778%;
   min-width: 77.77778%;
@@ -1589,6 +1975,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1596,6 +1983,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-8 {
   width: 88.88889%;
   min-width: 88.88889%;
@@ -1603,6 +1993,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1610,6 +2001,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-9 > .row .col-9 {
   width: 100%;
   min-width: 100%;
@@ -1618,6 +2012,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1625,6 +2020,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-1 {
   width: 10%;
   min-width: 10%;
@@ -1632,6 +2030,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1639,6 +2038,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-2 {
   width: 20%;
   min-width: 20%;
@@ -1646,6 +2048,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1653,6 +2056,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-3 {
   width: 30%;
   min-width: 30%;
@@ -1660,6 +2066,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1667,6 +2074,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-4 {
   width: 40%;
   min-width: 40%;
@@ -1674,6 +2084,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1681,6 +2092,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-5 {
   width: 50%;
   min-width: 50%;
@@ -1688,6 +2102,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1695,6 +2110,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-6 {
   width: 60%;
   min-width: 60%;
@@ -1702,6 +2120,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1709,6 +2128,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-7 {
   width: 70%;
   min-width: 70%;
@@ -1716,6 +2138,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1723,6 +2146,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-8 {
   width: 80%;
   min-width: 80%;
@@ -1730,6 +2156,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1737,6 +2164,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-9 {
   width: 90%;
   min-width: 90%;
@@ -1744,6 +2174,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1751,6 +2182,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-10 > .row .col-10 {
   width: 100%;
   min-width: 100%;
@@ -1759,6 +2193,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1766,6 +2201,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-1 {
   width: 9.09091%;
   min-width: 9.09091%;
@@ -1773,6 +2211,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1780,6 +2219,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-2 {
   width: 18.18182%;
   min-width: 18.18182%;
@@ -1787,6 +2229,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1794,6 +2237,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-3 {
   width: 27.27273%;
   min-width: 27.27273%;
@@ -1801,6 +2247,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1808,6 +2255,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-4 {
   width: 36.36364%;
   min-width: 36.36364%;
@@ -1815,6 +2265,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1822,6 +2273,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-5 {
   width: 45.45455%;
   min-width: 45.45455%;
@@ -1829,6 +2283,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1836,6 +2291,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-6 {
   width: 54.54545%;
   min-width: 54.54545%;
@@ -1843,6 +2301,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1850,6 +2309,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-7 {
   width: 63.63636%;
   min-width: 63.63636%;
@@ -1857,6 +2319,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1864,6 +2327,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-8 {
   width: 72.72727%;
   min-width: 72.72727%;
@@ -1871,6 +2337,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1878,6 +2345,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-9 {
   width: 81.81818%;
   min-width: 81.81818%;
@@ -1885,6 +2355,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1892,6 +2363,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-10 {
   width: 90.90909%;
   min-width: 90.90909%;
@@ -1899,6 +2373,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1906,6 +2381,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-11 > .row .col-11 {
   width: 100%;
   min-width: 100%;
@@ -1914,6 +2392,7 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1921,6 +2400,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-1 {
   width: 8.33333%;
   min-width: 8.33333%;
@@ -1928,6 +2410,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1935,6 +2418,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-2 {
   width: 16.66667%;
   min-width: 16.66667%;
@@ -1942,6 +2428,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1949,6 +2436,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-3 {
   width: 25%;
   min-width: 25%;
@@ -1956,6 +2446,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1963,6 +2454,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-4 {
   width: 33.33333%;
   min-width: 33.33333%;
@@ -1970,6 +2464,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1977,6 +2472,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-5 {
   width: 41.66667%;
   min-width: 41.66667%;
@@ -1984,6 +2482,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -1991,6 +2490,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-6 {
   width: 50%;
   min-width: 50%;
@@ -1998,6 +2500,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2005,6 +2508,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-7 {
   width: 58.33333%;
   min-width: 58.33333%;
@@ -2012,6 +2518,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2019,6 +2526,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-8 {
   width: 66.66667%;
   min-width: 66.66667%;
@@ -2026,6 +2536,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2033,6 +2544,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-9 {
   width: 75%;
   min-width: 75%;
@@ -2040,6 +2554,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2047,6 +2562,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-10 {
   width: 83.33333%;
   min-width: 83.33333%;
@@ -2054,6 +2572,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2061,6 +2580,9 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-11 {
   width: 91.66667%;
   min-width: 91.66667%;
@@ -2068,6 +2590,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1316, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1340, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2075,12 +2598,16 @@
 =======
 /* line 1376, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1386, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid.form-grid--columns-12 > .row .col-12 {
   width: 100%;
   min-width: 100%;
   max-width: 100%;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1323, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2090,6 +2617,9 @@
 =======
 /* line 1383, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1393, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid--no-border {
   border: none;
   padding-left: 0;
@@ -2097,6 +2627,7 @@
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1329, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-1:first-child {
   padding-left: 0;
@@ -2147,59 +2678,67 @@
 =======
 /* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid--no-border .col-1:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-2:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-3:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-4:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-5:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-6:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-7:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-8:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-9:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-10:first-child {
   padding-left: 0;
 }
-/* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid--no-border .col-11:first-child {
   padding-left: 0;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1353, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1389, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1399, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .form-grid--no-border .col-12:first-child {
   padding-left: 0;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1337, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2209,6 +2748,9 @@
 =======
 /* line 1397, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1407, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .identifier-editors input[type=text], .identifier-editors input[type=password], .identifier-editors select, .identifier-editors textarea {
   padding: 0 12px;
   min-height: 40px;
@@ -2222,6 +2764,7 @@
   -moz-appearance: none;
   margin: 0 6px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1350, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2243,10 +2786,18 @@
 }
 /* line 1413, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1420, ../../../private/common-html/sass/partials/_forms.scss */
+.identifier-editors input[type=text].required, .identifier-editors input[type=password].required, .identifier-editors select.required, .identifier-editors textarea.required {
+  border-color: #f6aa59;
+}
+/* line 1423, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .identifier-editors input[type=text]:focus, .identifier-editors input[type=password]:focus, .identifier-editors select:focus, .identifier-editors textarea:focus {
   color: #333333;
   border-color: #fbc732;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1358, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2267,28 +2818,36 @@
 =======
 /* line 1418, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1428, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .identifier-editors > div {
   margin: 12px 12px;
 }
-/* line 1421, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1431, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors button {
   margin: 0 12px;
 }
-/* line 1424, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1434, ../../../private/common-html/sass/partials/_forms.scss */
 .identifier-editors label.required {
   color: #f39129;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1390, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1426, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1436, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .identifier-editors label.required:after {
   content: "*";
   display: inline;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1374, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2298,6 +2857,9 @@
 =======
 /* line 1434, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1444, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown {
   color: #333333;
   border: 1px solid #bbbbbb;
@@ -2317,6 +2879,7 @@ select.dropdown {
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1403, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1427, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2324,11 +2887,15 @@ select.dropdown {
 =======
 /* line 1463, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1473, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown:disabled {
   border-color: #dddddd;
   background-image: url("/lp-static/img/lupicon-chevron-down-gray187.png");
   background-color: #f6f6f6;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1410, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2338,11 +2905,15 @@ select.dropdown:disabled {
 =======
 /* line 1470, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1480, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown:focus {
   background-image: url("/lp-static/img/lupicon-chevron-down-orange-light.png");
   border-color: #fbc732;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1417, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2352,10 +2923,14 @@ select.dropdown:focus {
 =======
 /* line 1477, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1487, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown::-ms-expand {
   display: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1421, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2365,10 +2940,14 @@ select.dropdown::-ms-expand {
 =======
 /* line 1481, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1491, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown.mandatory {
   border-color: #f39129;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1425, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2378,10 +2957,14 @@ select.dropdown.mandatory {
 =======
 /* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1495, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown--full-width {
   min-width: 100%;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1429, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2391,11 +2974,15 @@ select.dropdown--full-width {
 =======
 /* line 1489, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1499, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown--plain {
   border: none;
   background-image: white;
   padding-left: 0;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1433, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2405,12 +2992,16 @@ select.dropdown--plain {
 =======
 /* line 1493, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1503, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 select.dropdown--plain:disabled {
   border: none;
   background-image: none;
   background-color: white;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1441, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2420,6 +3011,9 @@ select.dropdown--plain:disabled {
 =======
 /* line 1501, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1511, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -2445,6 +3039,7 @@ select.dropdown--plain:disabled {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1445, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1469, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2452,11 +3047,15 @@ select.dropdown--plain:disabled {
 =======
 /* line 1505, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1515, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 textarea.grid-style-input {
   height: 160px;
   padding: 6px 12px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1450, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2466,10 +3065,14 @@ textarea.grid-style-input {
 =======
 /* line 1510, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1520, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 textarea.grid-style-input.really-high {
   height: 320px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1454, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2479,10 +3082,14 @@ textarea.grid-style-input.really-high {
 =======
 /* line 1514, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1524, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .no-wrap-whitespace {
   white-space: nowrap;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1458, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2492,10 +3099,14 @@ textarea.grid-style-input.really-high {
 =======
 /* line 1518, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1528, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .wrapped_text {
   white-space: pre-wrap;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1462, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2505,10 +3116,14 @@ textarea.grid-style-input.really-high {
 =======
 /* line 1522, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1532, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .cell-span {
   line-height: 40px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1466, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2518,10 +3133,14 @@ textarea.grid-style-input.really-high {
 =======
 /* line 1526, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1536, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .check-string {
   display: block;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1471, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2531,10 +3150,14 @@ textarea.grid-style-input.really-high {
 =======
 /* line 1531, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1541, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 div.review-done {
   margin: 24px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1475, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2556,12 +3179,20 @@ div.review-done {
 }
 /* line 1538, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
+.huoneistot-table {
+  padding-top: 6px;
+}
+/* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table .form-label {
   display: inline;
   width: initial;
   vertical-align: initial;
   font-weight: bold;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1485, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2583,11 +3214,19 @@ div.review-done {
 }
 /* line 1548, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1555, ../../../private/common-html/sass/partials/_forms.scss */
+.huoneistot-table .checkbox-wrapper {
+  border: none;
+}
+/* line 1558, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table .dropdown {
   height: 30px;
   min-width: 140px;
   lineheight: default;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1494, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2597,10 +3236,14 @@ div.review-done {
 =======
 /* line 1554, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1564, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table input[type=text] {
   height: 26px;
   min-width: 32px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1500, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2610,12 +3253,16 @@ div.review-done {
 =======
 /* line 1560, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1570, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table .err {
   color: red !important;
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 1px !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1506, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2625,11 +3272,15 @@ div.review-done {
 =======
 /* line 1566, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1576, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table .warn {
   border-color: red !important;
   border-width: 1px !important;
   border-radius: 0px !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1511, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2639,11 +3290,15 @@ div.review-done {
 =======
 /* line 1571, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1581, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .huoneistot-table .tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1517, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2653,10 +3308,14 @@ div.review-done {
 =======
 /* line 1577, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1587, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .foreman-info {
   padding-left: 6px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1521, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2678,11 +3337,19 @@ div.review-done {
 }
 /* line 1583, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1591, ../../../private/common-html/sass/partials/_forms.scss */
+.building-select-container {
+  margin-left: 6px;
+}
+/* line 1593, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .building-select-container .building-select-box {
   position: relative;
   width: 30em;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1529, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2699,24 +3366,32 @@ div.review-done {
 =======
 /* line 1589, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1599, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .link-permit-selector {
   padding-left: 6px;
 }
-/* line 1591, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1601, ../../../private/common-html/sass/partials/_forms.scss */
 .link-permit-selector label.form-label {
   width: 100%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1558, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Group approval reject note.
 =======
 /* line 1594, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1604, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .link-permit-selector .errorPanel {
   top: -80px;
   left: 200px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1559, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2726,10 +3401,14 @@ div.review-done {
 =======
 /* line 1619, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1629, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-2 {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2751,12 +3430,20 @@ div.review-done {
 }
 /* line 1608, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1615, ../../../private/common-html/sass/partials/_forms.scss */
+.row.label-x-2 .inline {
+  display: inherit;
+}
+/* line 1618, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-2 .form-label {
   display: table-cell;
   vertical-align: bottom;
   height: 49px;
   padding-bottom: 1px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1554, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2766,10 +3453,14 @@ div.review-done {
 =======
 /* line 1614, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1624, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-2 .form-input, .row.label-x-2 .form-input--inline {
   margin: 0;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1563, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2779,10 +3470,14 @@ div.review-done {
 =======
 /* line 1623, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1633, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-3 {
   margin-top: 5;
   margin-bottom: 5;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1545, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2804,12 +3499,20 @@ div.review-done {
 }
 /* line 1608, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1615, ../../../private/common-html/sass/partials/_forms.scss */
+.row.label-x-3 .inline {
+  display: inherit;
+}
+/* line 1618, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-3 .form-label {
   display: table-cell;
   vertical-align: bottom;
   height: 73px;
   padding-bottom: 1px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1554, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2819,10 +3522,14 @@ div.review-done {
 =======
 /* line 1614, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1624, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.label-x-3 .form-input, .row.label-x-3 .form-input--inline {
   margin: 0;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1567, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2832,11 +3539,15 @@ div.review-done {
 =======
 /* line 1627, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1637, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .row.row--tight {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1575, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2846,6 +3557,9 @@ div.review-done {
 =======
 /* line 1635, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1645, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .calculation-result {
   font-size: 16px;
   text-align: center;
@@ -2856,6 +3570,7 @@ div.review-done {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 1583, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 1607, ../../../private/common-html/sass/partials/_forms.scss */
@@ -2863,6 +3578,9 @@ div.review-done {
 =======
 /* line 1643, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
+=======
+/* line 1653, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Different color for rejection texts.
 .calculation-error {
   color: #db2111;
   line-height: 40px;

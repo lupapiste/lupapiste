@@ -61,7 +61,9 @@
       </div>
 
       <div data-bind="component: { name:'approval', params: {approval: $data.approval} }"></div>
-
+      <div data-bind="component: {name: 'reject-note',
+                      params: {attachmentId: id,
+                      editorCss: 'attachment-reject-note-editor'}}"></div>
       <div class="attachment-info-wrapper">
         <div class="attachment-info-header">
           <h1>
