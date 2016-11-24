@@ -600,7 +600,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var day = dateString.slice(0, 2);
     var month = dateString.slice(3,5)      ;
     var year = dateString.slice(6, 10);
-    var date = new Date(year, month-1, day);
+    var date = new Date();
+    date.setUTCFullYear(year, month-1, day);
     return date.getTime();
   }
 
