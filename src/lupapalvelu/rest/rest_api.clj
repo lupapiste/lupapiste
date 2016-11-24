@@ -1,5 +1,6 @@
 (ns lupapalvelu.rest.rest-api
-  (:require [ring.swagger.swagger2 :as rs]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
+            [ring.swagger.swagger2 :as rs]
             [noir.core :refer [defpage]]
             [noir.response :as resp]
             [schema.core :as sc]
@@ -17,6 +18,12 @@
 
 (defonce endpoints (atom []))
 
+(defn valid-inputs? [request param-map]
+  (not-every? (fn [key]
+                (let [input-schema (or (get param-map key) sc/Any)
+                      input-val    (get request key)]
+                  (sc/check input-schema input-val))) (keys param-map)))
+
 (defmacro defendpoint [path & content]
   (let [meta-data (when (map? (first content)) (first content))
         params (->> (util/select-values meta-data [:parameters :optional-parameters])
@@ -24,12 +31,7 @@
                      (apply assoc {}))
         letkeys (keys params)]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
-           retval-schema# (get ~meta-data :returns)
-           valid-inputs?# (fn [request#]
-                            (not-every? (fn [key#]
-                                          (let [input-schema# (or (get ~params key#) sc/Any)
-                                                input-val#    (get request# key#)]
-                                            (sc/check input-schema# input-val#))) (keys ~params)))]
+           retval-schema# (get ~meta-data :returns)]
        (swap! endpoints conj {:method (keyword m#)
                               :path   p#
                               :meta   ~meta-data})
@@ -37,14 +39,17 @@
          (if-let [~'user (basic-authentication (request/ring-request))]
            (if (usr/rest-user? ~'user)
              ; Input schema validation
-             (if (valid-inputs?# request#)
+             (if (valid-inputs? request# ~params)
                (let [response-data# (do ~@content)]
                  ; Response data schema validation
                  (if (action/response? response-data#)
                    response-data#
-                   (do
+                   (try
                      (sc/validate retval-schema# response-data#)
-                     (resp/status 200 (resp/json response-data#)))))
+                     (resp/status 200 (resp/json response-data#))
+                     (catch Exception e#
+                       (errorf "Possible schema error or other failure in %s: %s" ~path e#)
+                       (resp/status 500 "Unknown server error")))))
                (resp/status 404 {:ok "false" :text :error.input-validation-error}))
              (resp/status 401 "Unauthorized"))
            basic-401)))))
@@ -71,15 +76,13 @@
          (resp/status 404 (resp/json response))))))
 
 (defn paths []
-  (let [paths (map
-                (fn [{:keys [path method meta]}]
-                  (let [parameters (apply assoc {} (:parameters meta))]
-                    {path {method {:summary    (:summary meta)
-                                   :description (:description meta)
-                                   :parameters {:query parameters}
-                                   :responses  {200 {:schema (:returns meta)}}}}}))
-                @endpoints)]
-    (rs/swagger-json {:paths (into {} paths)})))
+  (letfn [(mapper [{:keys [path method meta]}]
+            (let [parameters (apply assoc {} (:parameters meta))]
+              {path {method {:summary    (:summary meta)
+                             :description (:description meta)
+                             :parameters {:query parameters}
+                             :responses  {200 {:schema (:returns meta)}}}}}))]
+    (rs/swagger-json {:paths (into {} (map mapper @endpoints))})))
 
 (defpage "/rest/swagger.json" []
   (if-let [user (basic-authentication (request/ring-request))]
