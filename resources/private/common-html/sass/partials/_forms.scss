@@ -718,7 +718,7 @@ div.sticky {
     //display:inline-block;
     text-align: right;
     float: right;
-    min-width: 200px;
+     min-width: 200px;
   }
   i.approved, i.rejected  {
     display: none;
@@ -746,6 +746,9 @@ div.sticky {
   min-width: 500px;
   span {
     color: $gray187;
+  }
+  span.is-details--rejected {
+    color: $red;
   }
   .lupicon-circle-attention {
     color: $red;
@@ -808,60 +811,61 @@ div.sticky {
   }
 }
 
-%reject-note {
-  margin-left: 34px;
+@mixin reject( $margin-left: 34px,
+               $margin-top: -10px,
+               $color: inherit) {
+  margin: {
+    left: $margin-left;
+    top: $margin-top;
+  }
   font-size: 16px;
-  margin-top: -10px;
+  color: $color;
 }
 
 .reject-note {
-  @extend %reject-note;
+  @include reject( $color: $gray187);
   padding-right: 1em;
-  color: $gray187;
+}
 
+.reject-note--rejected {
+  color: $red;
 }
 
 .reject-note-editor {
-  @extend %reject-note;
+  @include reject;
   @include description-bubble-mixin( 50%, 0);
 }
 
-%accordion-reject-note {
-  margin-left: 44px;
-  font-size: 16px;
-  margin-top: -10px;
-}
-
 .accordion-reject-note {
-  @extend %accordion-reject-note;
-  color: $gray153;
+  @include reject( $margin-left: 44px, $color: $gray153 );
 }
 
 .accordion-reject-note-editor {
-  @extend %reject-note;
+  @include reject( 45px );
   @include description-bubble-mixin( 100%, 0);
   margin-left: 45px;
 }
 
-%toolbar-reject-note {
-  margin-left: 44px;
-  font-size: 16px;
-  margin-top: -10px;
-}
-
 .toolbar-reject-note {
-  @extend %toolbar-reject-note;
+  @include reject( $margin-left: 44px, $color: $gray153 );
   color: $gray153;
   min-height: 40px;
   line-height: 40px;
 }
 
 .toolbar-reject-note-editor {
-  @extend %reject-note;
+  @include reject( 45px );
   @include description-bubble-mixin( 50%, 10px);
   min-height: 40px;
   margin-left: 45px;
   margin-bottom: 10px;
+}
+
+.attachment-reject-note-editor {
+  @include reject;
+  @include description-bubble-mixin( 40%, 0 );
+  //margin-bottom: 10px;
+  float: none;
 }
 
 // Top-level form-approval-status
@@ -875,6 +879,9 @@ div.sticky .form-approval-status.no-border-bottom {
     }
     span {
       color: $gray153;
+    }
+    span.is-details--rejected {
+      color: $red;
     }
   }
 }
@@ -894,6 +901,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
     line-height: initial;
     span {
       color: $gray153;
+    }
+    span.is-details--rejected {
+      color: $red;
     }
   }
 }

@@ -7700,33 +7700,42 @@ div.sticky {
   color: #bbbbbb;
 }
 /* line 750, ../../../private/common-html/sass/partials/_forms.scss */
-.is-status > .like-btn .lupicon-circle-attention, .is-status > a.link-btn .lupicon-circle-attention, .is-status > a.link-btn-julkipano .lupicon-circle-attention {
+.is-status > .like-btn span.is-details--rejected, .is-status > a.link-btn span.is-details--rejected, .is-status > a.link-btn-julkipano span.is-details--rejected {
   color: #e34319;
 }
 /* line 753, ../../../private/common-html/sass/partials/_forms.scss */
+.is-status > .like-btn .lupicon-circle-attention, .is-status > a.link-btn .lupicon-circle-attention, .is-status > a.link-btn-julkipano .lupicon-circle-attention {
+  color: #e34319;
+}
+/* line 756, ../../../private/common-html/sass/partials/_forms.scss */
 .is-status > .like-btn .lupicon-circle-check, .is-status > a.link-btn .lupicon-circle-check, .is-status > a.link-btn-julkipano .lupicon-circle-check {
   color: #46b02d;
 }
-/* line 756, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 759, ../../../private/common-html/sass/partials/_forms.scss */
 .is-status > .like-btn .approved, .is-status > a.link-btn .approved, .is-status > a.link-btn-julkipano .approved {
   padding-right: 10px;
 }
 
-/* line 811, ../../../private/common-html/sass/partials/_forms.scss */
-.reject-note, .reject-note-editor, .accordion-reject-note-editor, .toolbar-reject-note-editor {
-  margin-left: 34px;
-  font-size: 16px;
-  margin-top: -10px;
-}
-
-/* line 817, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 825, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note {
-  padding-right: 1em;
+  margin-left: 34px;
+  margin-top: -10px;
+  font-size: 16px;
   color: #bbbbbb;
+  padding-right: 1em;
 }
 
-/* line 824, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 830, ../../../private/common-html/sass/partials/_forms.scss */
+.reject-note--rejected {
+  color: #e34319;
+}
+
+/* line 834, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor {
+  margin-left: 34px;
+  margin-top: -10px;
+  font-size: 16px;
+  color: inherit;
   display: block;
   position: relative;
   float: left;
@@ -7738,7 +7747,7 @@ div.sticky {
   padding: 6px 6px 6px 6px;
   margin-top: 0;
 }
-/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:after, .reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -7749,21 +7758,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -7772,26 +7781,26 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 829, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 839, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note {
   margin-left: 44px;
-  font-size: 16px;
   margin-top: -10px;
-}
-
-/* line 835, ../../../private/common-html/sass/partials/_forms.scss */
-.accordion-reject-note {
+  font-size: 16px;
   color: #999999;
 }
 
-/* line 840, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 843, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor {
+  margin-left: 45px;
+  margin-top: -10px;
+  font-size: 16px;
+  color: inherit;
   display: block;
   position: relative;
   float: left;
@@ -7804,7 +7813,7 @@ div.sticky {
   margin-top: 0;
   margin-left: 45px;
 }
-/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:after, .accordion-reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -7815,21 +7824,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -7838,28 +7847,29 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 846, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 849, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note {
   margin-left: 44px;
-  font-size: 16px;
   margin-top: -10px;
-}
-
-/* line 852, ../../../private/common-html/sass/partials/_forms.scss */
-.toolbar-reject-note {
+  font-size: 16px;
+  color: #999999;
   color: #999999;
   min-height: 40px;
   line-height: 40px;
 }
 
-/* line 859, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 856, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor {
+  margin-left: 45px;
+  margin-top: -10px;
+  font-size: 16px;
+  color: inherit;
   display: block;
   position: relative;
   float: left;
@@ -7874,7 +7884,7 @@ div.sticky {
   margin-left: 45px;
   margin-bottom: 10px;
 }
-/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:after, .toolbar-reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -7885,21 +7895,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -7908,55 +7918,121 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 869, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 864, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor {
+  margin-left: 34px;
+  margin-top: -10px;
+  font-size: 16px;
+  color: inherit;
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 40%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 0;
+  float: none;
+}
+/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor:after, .attachment-reject-note-editor:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
+.attachment-reject-note-editor input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 873, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: 1px solid #dddddd;
   float: left;
 }
-/* line 872, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 876, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
   padding-left: 10px;
 }
-/* line 876, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 880, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span {
   color: #999999;
 }
+/* line 883, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span.is-details--rejected {
+  color: #e34319;
+}
 
-/* line 882, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 889, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
-/* line 886, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 893, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line {
   width: 100%;
 }
-/* line 888, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 895, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano {
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
-/* line 895, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 902, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
   color: #999999;
+}
+/* line 905, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
+  color: #e34319;
 }
 
 /* button.rejected ~ .group-buttons .is-top.rejected { */
 /*   display: none; */
 /* } */
-/* line 907, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 917, ../../../private/common-html/sass/partials/_forms.scss */
 .is-middle {
   vertical-align: middle;
 }
 
-/* line 912, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 922, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble {
   display: block;
   position: relative;
@@ -7969,7 +8045,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
-/* line 774, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble:after, .description-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -7980,21 +8056,21 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   position: absolute;
   pointer-events: none;
 }
-/* line 785, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 791, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 797, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble input {
   box-sizing: border-box;
   border: none;
@@ -8003,13 +8079,13 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: none;
   color: #333333;
 }
-/* line 804, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 916, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 926, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble {
   display: block;
   position: relative;
@@ -8022,7 +8098,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
 }
-/* line 927, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 937, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble:after, .container-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -8033,14 +8109,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   position: absolute;
   pointer-events: none;
 }
-/* line 938, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 944, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 954, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
@@ -8048,12 +8124,12 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   margin-left: -11px;
 }
 
-/* line 952, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 962, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble.is-closed {
   display: none;
 }
 
-/* line 956, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 966, ../../../private/common-html/sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -8068,7 +8144,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   box-shadow: 2px 2px 3px #4f4f4f;
   text-align: left;
 }
-/* line 969, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 979, ../../../private/common-html/sass/partials/_forms.scss */
 .form-help:after {
   content: " ";
   width: 0;
@@ -8081,7 +8157,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
-/* line 981, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 991, ../../../private/common-html/sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8094,14 +8170,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
-/* line 993, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1003, ../../../private/common-html/sass/partials/_forms.scss */
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
-/* line 998, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1008, ../../../private/common-html/sass/partials/_forms.scss */
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -8115,7 +8191,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
-/* line 1011, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1021, ../../../private/common-html/sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8128,70 +8204,70 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.s
   right: 6px;
 }
 
-/* line 1024, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1034, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .form-input, .three-col .form-input--inline {
   width: 17.25em;
 }
-/* line 1031, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1041, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 1036, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1046, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 1041, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1051, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 1048, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1058, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 1051, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 1054, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1064, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 1057, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1067, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 1060, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1070, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 1063, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1073, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
 
-/* line 1068, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1078, ../../../private/common-html/sass/partials/_forms.scss */
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
-/* line 1074, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1084, ../../../private/common-html/sass/partials/_forms.scss */
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
 }
 
-/* line 1113, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1123, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
@@ -8199,36 +8275,36 @@ div.alleYli-radioGroup {
   padding-left: 20px;
   padding-right: 20px;
 }
-/* line 1121, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1131, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid:last-child {
   border-bottom: none;
 }
-/* line 1125, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1135, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid h2 {
   margin: 12px 0;
 }
-/* line 1130, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1140, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
-/* line 1135, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1145, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin {
   padding: 0 !important;
 }
-/* line 1137, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1147, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin .checkbox-wrapper {
   border: none;
 }
-/* line 1142, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1152, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select::-ms-expand {
   display: none;
 }
-/* line 1146, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1156, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid button::-moz-focus-inner {
   border: 0;
 }
-/* line 1150, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1160, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
   padding: 0 12px;
   box-sizing: border-box;
@@ -8252,20 +8328,20 @@ div.alleYli-radioGroup {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
-/* line 1157, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1167, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid span.form-string {
   display: block;
 }
-/* line 1161, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1171, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid textarea {
   height: 160px;
   padding: 6px 12px;
 }
-/* line 1168, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1178, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select.required, .form-grid input.required {
   border-color: #f39129;
 }
-/* line 1172, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1182, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .select-arrow {
   position: absolute;
   right: 2px;
@@ -8277,46 +8353,8 @@ div.alleYli-radioGroup {
   line-height: 38px;
   vertical-align: middle;
 }
-/* line 1186, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1196, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .select-arrow.disabled {
   background-color: #f6f6f6;
   color: #bbbbbb;
-}
-/* line 1191, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid input[type=text]:disabled, .form-grid textarea:disabled, .form-grid select:disabled, .form-grid .checkbox-wrapper.disabled {
-  border-color: #dddddd;
-  background-color: #f6f6f6;
-}
-/* line 1196, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid input[type=text].err, .form-grid input[type=password].err {
-  border: 1px solid #df3215;
-  color: #df3215;
-}
-/* line 1201, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .submit-button {
-  display: table-row;
-}
-/* line 1203, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .submit-button .submit-button__item {
-  display: table-cell;
-}
-/* line 1205, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .submit-button .submit-button__item:first-child {
-  width: 100%;
-}
-/* line 1211, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .submit-button .submittable input {
-  border-color: #2ca92c;
-}
-/* line 1217, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .search-field {
-  position: relative;
-}
-/* line 1219, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .search-field input {
-  padding-right: 40px !important;
-}
-/* line 1224, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .search-field.active i {
-  color: #fbc732;
 }
