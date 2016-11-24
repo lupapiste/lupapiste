@@ -312,9 +312,33 @@ div.attachments-table-container {
   top: 1em;
   right: .6em;
   left: .5em;
-}
+  }
   table.attachments-table {
     @include no-row-hover;
+    tr.even-row,
+    tr.even-row:hover {
+      background-color: $tr-color-even;
+    }
+    tr.odd-row,
+    tr.odd-row:hover {
+      background-color: white;
+    }
+    tr.row--rejected {
+      border-bottom: none;
+      td {
+        padding-bottom: 0;
+
+      }
+    }
+    tr.reject-note-row {
+      border-top: none;
+      padding: 0;
+      > td {
+        padding: 0;
+        min-height: 0;
+        height: auto;
+      }
+    }
     margin-bottom: 1em;
     .checkbox-wrapper {
       border: none;
