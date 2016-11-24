@@ -615,7 +615,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var lang = loc.getCurrentLanguage();
     var myPath = path.join(".");
     var validationResult = getValidationResult(model, subSchema.name);
-    var value = parseMsToDateString(getModelValue(model, subSchema.name));
+    var value;
+    if (getModelValue(model, subSchema.name)) {
+      value = parseMsToDateString(getModelValue(model, subSchema.name));
+    }
 
     var span = makeEntrySpan(subSchema, myPath, validationResult);
 
