@@ -23,6 +23,7 @@
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
+            [lupapalvelu.document.parties-canonical]
             [lupapiste-commons.attachment-types :as attachment-types]))
 
 (defn- get-begin-of-link [permit-type use-http-links?]

@@ -18,6 +18,9 @@
                   :applicant "Panaani Pena",
                   :propertyId "75341600550007",
                   :documents docs
+                  :authority {:username "sonja"
+                              :firstName "Sonja"
+                              :lastName "Sibbo"}
                   :primaryOperation {:id "5829761bf63a8012e88685a5",
                                      :name "kerrostalo-rivitalo",
                                      :description "GASD",
