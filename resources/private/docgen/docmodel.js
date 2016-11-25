@@ -958,8 +958,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var element = document.createElement(name);
     ko.options.deferUpdates = true; // http://knockoutjs.com/documentation/deferred-updates.html
 
+    var finalParams = _.defaults(params, {documentAuthModel: self.authorizationModel});
+
     $(element)
-      .attr("params", paramsStr(params))
+      .attr("params", paramsStr(finalParams))
       .addClass(classes ? classes + " docgen-component" : "docgen-component")
       .applyBindings(params);
 
