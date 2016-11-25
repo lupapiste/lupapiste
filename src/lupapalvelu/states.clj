@@ -1,6 +1,7 @@
 (ns lupapalvelu.states
   (:require [clojure.set :refer [difference union ]]
             [sade.strings :as ss]
+            [sade.util :refer [map-values]]
             [lupapiste-commons.states :as common-states]))
 
 (defn initial-state [graph]
@@ -88,11 +89,15 @@
 ;; Calculated state sets
 ;;
 
-(def all-graphs
+(def ^:private all-graphs
+  "A looback from 'submitted' to 'draft' was allowed for LPK-2345. This is ignored for the purposes of calculating the state graphs."
   (->>
     (ns-publics 'lupapalvelu.states)
     (filter #(ss/ends-with (name (first %)) "-graph"))
-    (map (fn [v] @(second v)))))
+    (map (fn [v] @(second v)))
+    (map (fn [graph]
+           (map-values #(into [] (remove (partial = :draft) %))
+                       graph)))))
 
 (defn all-next-states
   "Returns a set of states that are after the start state in graph, including start state itself."
