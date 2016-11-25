@@ -1,10 +1,11 @@
-
 // Parameters [optional]. Note docModel and attachmentId are are mutually exclusive.
 // docModel: DocModel instance
 // attachmentId: Attachment id
 // [path]: Group path within document. Requires docModel.
 // [noteCss]: Note top-level CSS definitions (default reject-note class)
 // [editorCss]: Note top-level CSS definitions (default reject-note-editor class)
+// [storeState]: If true, then the editor state is retained after
+// reinitialization. Used by attachment table (default false)
 LUPAPISTE.RejectNoteModel = function( params ) {
   "use strict";
   var self = this;
@@ -13,8 +14,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
 
   self.noteCss = params.noteCss || {"reject-note": true};
   self.editorCss = params.editorCss || {"reject-note-editor": true};
-  self.editObservable = params.editObservable || _.noop;
-
+  var editObservable = _.noop;
 
   // The following are initialized in the context-specific init
   // functions (see below)
@@ -39,6 +39,8 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   self.showEditor.subscribe( function( flag ) {
     if( flag ) {
       self.editorNote( self.note() );
+    } else {
+      editObservable( null );
     }
   });
 
@@ -112,12 +114,23 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     self.note( approved.note );
     updateNote = _.partial( service.rejectAttachmentNote, attachmentId );
 
+    editObservable = params.storeState ? service.rejectAttachmentNoteEditorState : _.noop;
+
+    if( ko.isObservable( editObservable )) {
+      self.disposedComputed( function() {
+        if( editObservable() === attachmentId ) {
+          resetRejected( true );
+        }
+      });
+    }
+
     self.addEventListener( service.serviceName,
                            "update",
                            function( event ) {
                              if( event.attachmentId === attachmentId
                                  && /^(approve|reject)-attachment$/.test( event.commandName)) {
-                               resetRejected(event.commandName === "reject-attachment");
+                               var rejected = event.commandName === "reject-attachment";
+                               resetRejected( rejected );
                              }
                            });
   }

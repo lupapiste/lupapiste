@@ -334,7 +334,12 @@ div.attachments-table-container {
       border-top: none;
       padding: 0;
       > td {
-        padding: 0;
+        padding: {
+          top: 0;
+          left: 4px;
+          right: 0;
+          bottom: 4px;
+        }
         min-height: 0;
         height: auto;
       }
