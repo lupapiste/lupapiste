@@ -195,11 +195,18 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
+
+Hakemuksen jattaminen tab title shown to applicant
+  Open application  ${newName}  ${propertyId}
+  Test id text is  application-open-requiredFieldSummary-tab  Hakemuksen j\u00e4tt\u00e4minen
   [Teardown]  Logout
 
-Authority deletes paasuunnittelija
+Siirra kasittelyyn tab title shown to authority
   Sonja logs in
   Open application  ${newName}  ${propertyId}
+  Test id text is  application-open-requiredFieldSummary-tab  Siirr\u00e4 k\u00e4sittelyyn
+
+Authority deletes paasuunnittelija
   Open tab  parties
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
   Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
