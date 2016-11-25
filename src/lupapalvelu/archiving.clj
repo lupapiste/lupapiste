@@ -22,7 +22,8 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman])
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.domain :as domain])
   (:import (java.util.concurrent ThreadFactory Executors)
            (java.io File)))
 
@@ -199,16 +200,22 @@
 (defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
   (str type-group "." type-id))
 
-(defn- foreman-name [document]
-  (ss/trim (str (get-in document [:data :henkilotiedot :sukunimi :value]) \space (get-in document [:data :henkilotiedot :etunimi :value]))))
+(defn- person-name [person-data]
+  (ss/trim (str (get-in person-data [:henkilotiedot :sukunimi :value]) \space (get-in person-data [:henkilotiedot :etunimi :value]))))
 
 (defn- foremen [application]
   (if (empty? (:foreman application))
     (let [foreman-applications (foreman/get-linked-foreman-applications (:id application))
           foreman-documents (mapv foreman/get-foreman-documents foreman-applications)
-          foremen (mapv foreman-name foreman-documents)]
+          foremen (mapv (fn [document] (person-name (:data document))) foreman-documents)]
       (apply str (interpose ", " foremen)))
     (:foreman application)))
+
+(defn- tyomaasta-vastaava [application]
+  (when-let [document (domain/get-document-by-name application "tyomaastaVastaava")]
+    (if (empty? (get-in document [:data :henkilo :henkilotiedot :sukunimi :value]))
+      (get-in document [:data :yritys :yritysnimi :value])
+      (person-name (get-in document [:data :henkilo])))))
 
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality location location-wgs84] :as application}
@@ -240,7 +247,9 @@
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
-                       :foremen               (foremen application)}]
+                       :foremen               (foremen application)
+                       :tyomaasta-vastaava    (tyomaasta-vastaava application)
+                       :closed                (:closed application)}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
@@ -273,6 +282,7 @@
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
+          (println "Archiving, with metadata: " metadata)
           (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
