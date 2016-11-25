@@ -9,4 +9,4 @@ fi
 # download lastest chromedriver from http://chromedriver.storage.googleapis.com/index.html
 # put it to your path and maek it executablez
 
-pybot --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite --variable BROWSER:chrome -d target $target
+robot --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite --variable BROWSER:chrome -d target $target

@@ -1,7 +1,6 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.java.io :as io]
-            [me.raynes.fs :as fs]
             [swiss.arrows :refer :all]
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
@@ -10,7 +9,9 @@
             [sade.util :as util]
             [lupapalvelu.organization :as org]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.states :as states]
             ;; Make sure all the mappers are registered
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rl-mapping]
@@ -22,6 +23,7 @@
             [lupapalvelu.xml.krysp.kiinteistotoimitus-mapping]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :as yi-mapping]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :as vh-mapping]
+            [lupapalvelu.document.parties-canonical]
             [lupapiste-commons.attachment-types :as attachment-types]))
 
 (defn- get-begin-of-link [permit-type use-http-links?]
@@ -66,14 +68,19 @@
     application))
 
 (defn- non-approved-designer? [document]
-  (let [subtype  (keyword (get-in document [:schema-info :subtype]))
-        approval (get-in document [:meta :_approved :value])]
+  (let [subtype  (keyword (get-in document [:schema-info :subtype]))]
     (and (= :suunnittelija subtype)
-         (or (not= "approved" approval)
+         (or (not (doc/approved? document))
            (pos? (model/modifications-since-approvals document))))))
 
 (defn- remove-non-approved-designers [application]
   (update application :documents #(remove non-approved-designer? %)))
+
+(defn- remove-pre-verdict-designers [application]
+  (update application :documents (fn [docs] (filter #(doc/created-after-verdict? % application) docs))))
+
+(defn- remove-disabled-documents [application]
+  (update application :documents (fn [docs] (remove :disabled docs))))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -93,6 +100,22 @@
                                     (filter-attachments-by-state current-state))]
     (or (permit/application-krysp-mapper filtered-app lang filtered-submitted-app krysp-version output-dir begin-of-link)
         (fail! :error.unknown))))
+
+(defn save-parties-as-krysp
+  "Send application's parties to municipality backend. Returns sent party document ids."
+  [application lang organization]
+  (let [permit-type   (permit/permit-type application)
+        krysp-version (resolve-krysp-version organization permit-type)
+        output-dir    (resolve-output-directory organization permit-type)
+        filtered-app  (-> application
+                          (dissoc :attachments)            ; attachments not needed
+                          remove-non-approved-designers
+                          remove-pre-verdict-designers
+                          remove-disabled-documents)
+        write-result (permit/parties-krysp-mapper filtered-app lang krysp-version output-dir)]
+    (if write-result
+      (map :id (domain/get-documents-by-subtype (:documents filtered-app) :suunnittelija))
+      (fail! :error.unknown))))
 
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

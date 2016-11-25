@@ -26,19 +26,16 @@
       [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
       [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
       [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
-      [lupapalvelu.document.schemas :as schemas]
       [lupapalvelu.document.tools :as tools]
       [lupapalvelu.document.model :as model]
       [lupapalvelu.permit :as permit]
-      [lupapalvelu.operations :as operations]
       [lupapalvelu.i18n :refer [with-lang loc localize]]
       [lupapalvelu.tasks]                                   ; ensure task schemas are loaded
       [sade.env :as env]
       [sade.xml :as xml]
       [sade.util :as util]
       [sade.strings :as ss]
-      [sade.core :refer [def- now]]
-      [lupapalvelu.application :as ns-app])
+      [sade.core :refer [def- now]])
     (:import [java.net URI]))
 
 (apply-remote-minimal)

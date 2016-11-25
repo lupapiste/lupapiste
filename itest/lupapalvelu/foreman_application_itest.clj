@@ -516,7 +516,7 @@
       (command foreman :approve-invite :id foreman-app-id) => ok?)
 
     (fact "foreman can NOT add parteis"
-      (command foreman :create-doc :id application-id :schemaName "hakija-r") => (partial expected-failure? "error.command-illegal-state") ; verdict has been given
+      (command foreman :create-doc :id application-id :schemaName "hakija-r") => unauthorized? ; verdict has been given
       (command foreman :create-doc :id foreman-app-id :schemaName "hakija-tj") => unauthorized?)
 
     (fact "applicant can add parties"

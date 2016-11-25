@@ -22,13 +22,12 @@
                                                                 rakennuslupa_to_krysp_216
                                                                 rakennuslupa_to_krysp_218
                                                                 rakennuslupa_to_krysp_220
-                                                                save-katselmus-as-krysp]]
+                                                                save-katselmus-as-krysp
+                                                                rakennuslupa-element-to-xml]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.xml.emit :refer :all]))
-
-(testable-privates lupapalvelu.xml.krysp.rakennuslupa-mapping rakennuslupa-element-to-xml)
 
 (fact "2.1.2: :tag is set" (has-tag rakennuslupa_to_krysp_212) => true)
 (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)

@@ -8,4 +8,4 @@ fi
 
 source remote-config.sh
 
-pybot -d target --exclude fail --exclude integration --exclude ajanvaraus --RunEmptySuite --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown
+robot -d target --exclude fail --exclude integration --exclude ajanvaraus --RunEmptySuite --variable SELENIUM:http://$remote:$port/wd/hub --variable SERVER:https://www-dev.lupapiste.fi common/setup $target common/teardown

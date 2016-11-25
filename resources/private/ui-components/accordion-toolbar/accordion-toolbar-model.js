@@ -26,10 +26,17 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.isOpen.subscribe( params.openCallback );
   self.isOpen( !params.docModelOptions
             || !params.docModelOptions.accordionCollapsed);
+  self.disabledStatus = ko.observable(!!self.docModel.docDisabled);
 
   AccordionState.register( self.docModel.docId, self.isOpen );
 
   self.info = self.docModel.schema.info;
+
+  // Test ids must contain document name in order to avoid
+  // hard to track selector conflicts in Robot tests.
+  self.testId = function( id ) {
+    return self.docModel.testId( id + "-" + self.docModel.schemaName);
+  };
 
   // Operation data
   var op = self.info.op;
@@ -67,6 +74,8 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   // Required accordion title from operation/schema-info name
   self.titleLoc = ((op && op.name) || self.info.name) + "._group_label";
 
+  var disabledlocText = self.info.type === "party" ? "document.party.disabled" : "document.disabled";
+
   // Optional accordion header text.
   // Consists of optional properties: identifier field, operation description, and accordion paths (from schema)
   self.headerDescription = ko.pureComputed(function() {
@@ -74,18 +83,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     var identifier = self.identifierField && self.identifierField.value();
     var operation  = self.operationDescription();
     var accordionText = self.accordionText();
-    return docutils.headerDescription(identifier, operation, accordionText);
+    var disabledText = self.disabledStatus() ? " (" + loc(disabledlocText) + ")" : "";
+    return docutils.headerDescription(identifier, operation, accordionText) + disabledText;
   });
 
   self.toggleAccordion = function() {
     self.isOpen( !self.isOpen());
   };
 
-  // Test ids must contain document name in order to avoid
-  // hard to track selector conflicts in Robot tests.
-  self.testId = function( id ) {
-    return self.docModel.testId( id + "-" + self.docModel.schemaName);
-  };
 
   // Remove
   self.remove = {testClass: "delete-schemas."  + self.docModel.schemaName};
@@ -120,8 +125,43 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   self.reject  = _.partial( self.approvalModel.changeStatus, false );
   self.approve = _.partial( self.approvalModel.changeStatus, true );
 
+
+  self.canBeDisabled = self.disposedPureComputed(function () {
+    return self.auth.ok("set-doc-status");
+  });
+  self.changeDocStatus = function() {
+    var currentValue = self.disabledStatus();
+    var ajaxValue = !currentValue ? "disabled" : "enabled";
+    var documentName = loc(self.titleLoc) + (self.accordionText() ? " - " + self.accordionText() : "");
+
+    var setStatus = function() {
+      ajax.command("set-doc-status", {id: self.docModel.appId, docId: self.docModel.docId, value: ajaxValue})
+        .success(function(resp) {
+          self.disabledStatus(!currentValue);
+          util.showSavedIndicatorIcon(resp);
+          // refreshing authorization makes docmodel be redrawn
+          authorization.refreshModelsForCategory(_.set({}, self.docModel.docId, self.auth), self.docModel.appId, "documents");
+          // Refresh assignments for document
+          hub.send("assignmentService::targetsQuery", {applicationId: self.docModel.appId});
+          hub.send("assignmentService::applicationAssignments", {applicationId: self.docModel.appId});
+        })
+        .call();
+    };
+    if (ajaxValue === "disabled") {
+      hub.send("show-dialog", {ltitle: "areyousure",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: loc("document.party.disabled.areyousure", documentName),
+                                                 yesFn: setStatus,
+                                                 lyesTitle: "document.party.disabled.areyousure.confirmation",
+                                                 lnoTitle: "cancel"}});
+    } else {
+      setStatus();
+    }
+  };
+
   self.showToolbar = ko.pureComputed(function() {
-    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation();
+    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation() || self.canBeDisabled();
   });
 
   self.closeEditors = function( data, event ) {

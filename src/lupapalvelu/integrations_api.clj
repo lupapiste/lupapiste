@@ -41,13 +41,13 @@
 ;; Application approval
 ;;
 
-(defn get-transfer-item [type {:keys [created user]} & [attachments]]
+(defn get-transfer-item [type {:keys [created user]} & [data-map]]
   (let [transfer {:type type
                   :user (select-keys user [:id :role :firstName :lastName])
                   :timestamp created}]
-    (if (empty? attachments)
+    (if-not (and (map? data-map) (seq (:data data-map)))
       transfer
-      (assoc transfer :attachments (map :id attachments)))))
+      (assoc transfer (:data-key data-map) (:data data-map)))))
 
 (defn- do-approve [application organization created id current-state lang do-rest-fn]
   (if (org/krysp-integration? organization (permit/permit-type application))
@@ -147,11 +147,28 @@
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang @organization)
             data-argument (attachment/create-sent-timestamp-update-statements all-attachments sent-file-ids created)
-            transfer      (get-transfer-item :exported-to-backing-system command attachments-wo-sent-timestamp)]
+            attachments-data {:data-key :attachments
+                              :data (map :id attachments-wo-sent-timestamp)}
+            transfer      (get-transfer-item :exported-to-backing-system command attachments-data)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))
       (fail :error.sending-unsent-attachments-failed))))
+
+(defcommand parties-as-krysp
+  {:description "Sends new designers to backing system after verdict"
+   :parameters [id lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is permit/R)
+                (application-already-exported :exported-to-backing-system)]
+   :states     states/post-verdict-states}
+  [{:keys [application organization] :as command}]
+  (let [sent-document-ids (mapping-to-krysp/save-parties-as-krysp application lang @organization)
+        transfer-item     (get-transfer-item :parties-to-backing-system command {:data-key :party-documents
+                                                                                 :data sent-document-ids})]
+    (update-application command {$push {:transfers transfer-item}})
+    (ok :sentDocuments sent-document-ids)))
 
 ;;
 ;; krysp enrichment
@@ -308,7 +325,9 @@
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
                                         all-attachments)
-        transfer (get-transfer-item :exported-to-asianhallinta command attachments-wo-sent-timestamp)]
+        attachments-transfer-data {:data-key :attachments
+                                   :data (map :id attachments-wo-sent-timestamp)}
+        transfer (get-transfer-item :exported-to-asianhallinta command attachments-transfer-data)]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [application (meta-fields/enrich-with-link-permit-data application)
             application (update-kuntalupatunnus application)
