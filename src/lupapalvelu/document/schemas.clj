@@ -237,6 +237,7 @@
                           :body [{:name "kunta" :type :string :i18nkey "osoite.kunta"}
                                  {:name "lahiosoite" :type :string :i18nkey "osoite.katu"}
                                  {:name "osoitenumero" :type :string}
+                                 {:name "osoitenumero2" :type :string}
                                  {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :s :hidden true :readonly true}
                                  {:name "jakokirjain2" :type :string :size :s :hidden true :readonly true}
                                  {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size :s :hidden true :readonly true}

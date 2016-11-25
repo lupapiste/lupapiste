@@ -80,7 +80,8 @@
                                       :kaapeliKytkin false}
                   :osoite {:kunta "245"
                            :lahiosoite "Vehkalantie"
-                           :osoitenumero "2\u20133"
+                           :osoitenumero "2"
+                           :osoitenumero2 "3"
                            :jakokirjain "a"
                            :jakokirjain2 "b"
                            :porras "G"
