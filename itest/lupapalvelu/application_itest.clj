@@ -614,7 +614,9 @@
         (-> application :history last :state) => "draft")
 
       (fact "The authority's comments are also stored in application comments"
-        (-> application :comments last :text) => "comment-text"))))
+        (-> application :comments last :text) => "comment-text")
+      (fact "Application's submission date is nil"
+        (-> application :submitted) => nil?))))
 
 (facts "Authority can create application in other organisation"
        (let [application-id (create-app-id luukas

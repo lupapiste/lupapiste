@@ -581,7 +581,8 @@
   (->> (util/deep-merge
         (app/state-transition-update :draft created application user)
         (when (seq text)
-          (comment/comment-mongo-update state text {:type "application"} role false user nil created)))
+          (comment/comment-mongo-update state text {:type "application"} role false user nil created))
+        {$set {:submitted nil}})
        (update-application command)))
 
 (defcommand change-warranty-start-date
