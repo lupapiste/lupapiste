@@ -106,12 +106,18 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   function attachmentInit() {
     var service = lupapisteApp.services.attachmentsService;
     var attachmentId = params.attachmentId;
-    var approved = util.getIn( service.getAttachment( attachmentId ),
-                               ["approved"],
-                               {});
+    var attachment = service.getAttachment( attachmentId );
 
-    self.isRejected( approved.value === "rejected");
-    self.note( approved.note );
+    self.disposedComputed( function() {
+      self.isRejected( util.getIn( attachment,
+                                   ["approved", "value"]) === "rejected");
+
+      self.note( _.get( _.find( util.getIn( attachment, ["rejectNotes"]),
+                                {fileId: util.getIn( attachment, ["latestVersion",
+                                                                  "fileId"])}),
+                        "note") );
+    });
+
     updateNote = _.partial( service.rejectAttachmentNote, attachmentId );
 
     editObservable = params.storeState ? service.rejectAttachmentNoteEditorState : _.noop;

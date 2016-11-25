@@ -263,4 +263,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
   self.addHubListener("side-panel-close", _.partial(self.disablePreview, false));
 
+  // Initial refresh just in case
+  querySelf();
 };
