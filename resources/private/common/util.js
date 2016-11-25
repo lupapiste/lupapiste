@@ -424,6 +424,13 @@ var util = (function($) {
     return _.isEqual( _.pick( obj, _.keys( sub )), sub );
   }
 
+  function isOdd( number ) {
+    return number % 2;
+  }
+  function isEven( number ) {
+    return !isOdd();
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -471,7 +478,9 @@ var util = (function($) {
     identLogoutRedirect: identLogoutRedirect,
     identLogoutRedirectBulletins: identLogoutRedirectBulletins,
     arrayToObject: arrayToObject,
-    isSubObject: isSubObject
+    isSubObject: isSubObject,
+    isOdd: isOdd,
+    isEven: isEven
   };
 
 })(jQuery);

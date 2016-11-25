@@ -112,10 +112,10 @@ LUPAPISTE.RejectNoteModel = function( params ) {
       self.isRejected( util.getIn( attachment,
                                    ["approved", "value"]) === "rejected");
 
-      self.note( _.get( _.find( util.getIn( attachment, ["rejectNotes"]),
-                                {fileId: util.getIn( attachment, ["latestVersion",
-                                                                  "fileId"])}),
-                        "note") );
+      self.note( service.getRejectNote( attachmentId,
+                                        util.getIn( attachment,
+                                                    ["latestVersion",
+                                                     "fileId"])));
     });
 
     updateNote = _.partial( service.rejectAttachmentNote, attachmentId );

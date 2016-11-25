@@ -1,7 +1,7 @@
 <script type="text/x-jquery-tmpl" class="ko-template"
         id="attachments-table-template">
   <div class="attachments-table-container">
-    <table class="attachments-table">
+    <table class="attachments-table table-even-odd">
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
@@ -22,8 +22,8 @@
         <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
                        'data-test-state': $data.state,
                        'attachment-id': $data.id},
-                       css: {'even-row': $index() % 2 === 0,
-                       'odd-row': $index() % 2,
+                       css: {'even-row': util.isEven( $index() ),
+                       'odd-row': util.isOdd( $index() ),
                        'row--rejected':  $parent.isRejected( $data )}">
           <td>
             <state-icons params="attachment: $data"></state-icons>
@@ -108,8 +108,8 @@
         </tr>
         <!-- ko if: $parent.isRejected( $data ) -->
         <tr class="reject-note-row"
-            data-bind="css: {'even-row': $index() % 2 === 0,
-                       'odd-row': $index() % 2}">
+            data-bind="css: {'even-row': util.isEven( $index() ),
+                       'odd-row': util.isOdd( $index() )}">
           <td colspan="7"
               data-bind="component: {name: 'reject-note',
                          params: {attachmentId: id,
