@@ -7991,6 +7991,7 @@ div.sticky {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 764, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 812, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8001,6 +8002,9 @@ div.sticky {
 >>>>>>> Accordion and toolbar reject notes.
 =======
 /* line 825, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 823, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .reject-note {
 >>>>>>> Different color for rejection texts.
   margin-left: 34px;
@@ -8010,12 +8014,12 @@ div.sticky {
   padding-right: 1em;
 }
 
-/* line 830, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 828, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note--rejected {
   color: #e34319;
 }
 
-/* line 834, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 832, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor {
   margin-left: 34px;
   margin-top: -10px;
@@ -8032,7 +8036,7 @@ div.sticky {
   padding: 6px 6px 6px 6px;
   margin-top: 0;
 }
-/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:after, .reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -8043,21 +8047,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -8066,12 +8070,13 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
 .reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 833, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8081,6 +8086,9 @@ div.sticky {
 =======
 /* line 839, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 837, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .accordion-reject-note {
   margin-left: 44px;
   margin-top: -10px;
@@ -8088,7 +8096,7 @@ div.sticky {
   color: #999999;
 }
 
-/* line 843, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 841, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor {
   margin-left: 45px;
   margin-top: -10px;
@@ -8106,7 +8114,7 @@ div.sticky {
   margin-top: 0;
   margin-left: 45px;
 }
-/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:after, .accordion-reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -8117,21 +8125,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -8140,13 +8148,13 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
 .accordion-reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
-/* line 849, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 847, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note {
   margin-left: 44px;
   margin-top: -10px;
@@ -8157,7 +8165,7 @@ div.sticky {
   line-height: 40px;
 }
 
-/* line 856, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 854, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor {
   margin-left: 45px;
   margin-top: -10px;
@@ -8177,7 +8185,7 @@ div.sticky {
   margin-left: 45px;
   margin-bottom: 10px;
 }
-/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:after, .toolbar-reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -8188,21 +8196,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -8211,17 +8219,21 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
 .toolbar-reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 869, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Accordion and toolbar reject notes.
 =======
 /* line 864, ../../../private/common-html/sass/partials/_forms.scss */
+=======
+/* line 862, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .attachment-reject-note-editor {
   margin-left: 34px;
   margin-top: -10px;
@@ -8239,7 +8251,7 @@ div.sticky {
   margin-top: 0;
   float: none;
 }
-/* line 777, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
 .attachment-reject-note-editor:after, .attachment-reject-note-editor:before {
   bottom: 100%;
   left: 5%;
@@ -8250,21 +8262,21 @@ div.sticky {
   position: absolute;
   pointer-events: none;
 }
-/* line 788, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .attachment-reject-note-editor:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
-/* line 794, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
 .attachment-reject-note-editor:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
-/* line 800, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .attachment-reject-note-editor input {
   box-sizing: border-box;
   border: none;
@@ -8273,18 +8285,88 @@ div.sticky {
   box-shadow: none;
   color: #333333;
 }
-/* line 807, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
 .attachment-reject-note-editor input:focus {
   border: none;
   box-shadow: none;
 }
 
+/* line 869, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note {
+  margin-left: 0;
+  margin-top: 0;
+  font-size: 16px;
+  color: inherit;
+}
+
 /* line 873, ../../../private/common-html/sass/partials/_forms.scss */
+<<<<<<< HEAD
 >>>>>>> Different color for rejection texts.
+=======
+.table-reject-note-editor {
+  margin-left: 0;
+  margin-top: -10px;
+  font-size: 16px;
+  color: inherit;
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 40%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 0;
+  float: none;
+}
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note-editor:after, .table-reject-note-editor:before {
+  bottom: 100%;
+  left: 18px;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note-editor:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note-editor:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note-editor input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
+.table-reject-note-editor input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 881, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: 1px solid #dddddd;
   float: left;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8314,14 +8396,22 @@ div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-ap
 }
 /* line 880, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 884, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano {
+  padding-left: 10px;
+}
+/* line 888, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span {
   color: #999999;
 }
-/* line 883, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 891, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span.is-details--rejected {
   color: #e34319;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8335,10 +8425,14 @@ div.sticky .form-approval-status.no-border-bottom .like-btn span.is-details--rej
 =======
 /* line 889, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 897, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.sticky .form-approval-status.no-border-bottom {
   border-bottom: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8368,11 +8462,19 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
 }
 /* line 895, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 901, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+}
+/* line 903, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano {
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8386,10 +8488,13 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky
 =======
 /* line 902, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 910, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
   color: #999999;
 }
-/* line 905, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 913, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
   color: #e34319;
 }
@@ -8397,6 +8502,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 /* button.rejected ~ .group-buttons .is-top.rejected { */
 /*   display: none; */
 /* } */
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8410,10 +8516,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 917, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 925, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .is-middle {
   vertical-align: middle;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8427,6 +8537,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 922, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 930, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble {
   display: block;
   position: relative;
@@ -8441,6 +8554,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 819, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 774, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8448,6 +8562,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 777, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble:after, .description-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -8460,6 +8577,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 830, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 785, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8467,12 +8585,16 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 788, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 836, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8482,12 +8604,16 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 794, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 842, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8497,6 +8623,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 800, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble input {
   box-sizing: border-box;
   border: none;
@@ -8507,6 +8636,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 849, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 804, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8514,11 +8644,15 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 807, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble input:focus {
   border: none;
   box-shadow: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8532,6 +8666,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 926, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 934, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .container-bubble {
   display: block;
   position: relative;
@@ -8547,6 +8684,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 867, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 891, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8557,6 +8695,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 937, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 945, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .container-bubble:after, .container-bubble:before {
   bottom: 100%;
   left: 5%;
@@ -8570,6 +8711,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 878, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 902, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8580,12 +8722,16 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 948, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 956, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .container-bubble:after {
   border-color: rgba(255, 255, 255, 0);
   border-bottom-color: #fff;
   border-width: 10px;
   margin-left: -10px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8599,6 +8745,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 954, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 962, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .container-bubble:before {
   border-color: rgba(251, 199, 50, 0);
   border-bottom-color: #fbc732;
@@ -8606,6 +8755,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   margin-left: -11px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8619,10 +8769,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 962, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 970, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .description-bubble.is-closed {
   display: none;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8636,6 +8790,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 966, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 974, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -8653,6 +8810,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 909, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 933, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8663,6 +8821,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 979, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 987, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-help:after {
   content: " ";
   width: 0;
@@ -8678,6 +8839,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 921, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 945, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8688,6 +8850,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 991, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 999, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8703,6 +8868,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 933, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 957, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8713,12 +8879,16 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1003, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1011, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8732,6 +8902,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1008, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1016, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -8748,6 +8921,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* line 951, ../../../private/common-html/sass/partials/_forms.scss */
 =======
 /* line 975, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8758,6 +8932,9 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1021, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1029, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/lp-static/img/icons-sprite-1.18.png");
@@ -8770,6 +8947,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   right: 6px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8790,13 +8968,17 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1034, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1042, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .three-col {
   width: 100%;
 }
-/* line 1037, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1045, ../../../private/common-html/sass/partials/_forms.scss */
 .three-col .form-input, .three-col .form-input--inline {
   width: 17.25em;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 995, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8807,10 +8989,14 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1041, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1049, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8824,11 +9010,15 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1046, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1054, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8842,11 +9032,15 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 =======
 /* line 1051, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1059, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8879,25 +9073,29 @@ foreman-history th.fourth {
 =======
 /* line 1058, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1066, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 1061, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1069, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 1064, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1072, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 1067, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1075, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 1070, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1078, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1027, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8908,10 +9106,14 @@ foreman-history th.fourth {
 =======
 /* line 1073, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 foreman-history th.fifth {
   width: 45%;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8925,12 +9127,16 @@ foreman-history th.fifth {
 =======
 /* line 1078, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1086, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .indicator-wrapper {
   position: relative;
   display: inline-block;
   width: 100%;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8944,11 +9150,15 @@ foreman-history th.fifth {
 =======
 /* line 1084, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1092, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 div.alleYli-radioGroup {
   display: inline-block;
   margin-top: 24px;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8962,6 +9172,9 @@ div.alleYli-radioGroup {
 =======
 /* line 1123, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1131, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-grid {
   width: 100%;
   border-top: 1px solid #dddddd;
@@ -8969,6 +9182,7 @@ div.alleYli-radioGroup {
   padding-left: 20px;
   padding-right: 20px;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -8989,13 +9203,17 @@ div.alleYli-radioGroup {
 =======
 /* line 1131, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1139, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-grid:last-child {
   border-bottom: none;
 }
-/* line 1135, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1143, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid h2 {
   margin: 12px 0;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1094, ../../../private/common-html/sass/partials/_forms.scss */
@@ -9006,10 +9224,14 @@ div.alleYli-radioGroup {
 =======
 /* line 1140, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1148, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-grid p {
   padding: 0 !important;
   margin: 0 !important;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -9038,21 +9260,25 @@ div.alleYli-radioGroup {
 =======
 /* line 1145, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1153, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-grid .col--no-margin {
   padding: 0 !important;
 }
-/* line 1147, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1155, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid .col--no-margin .checkbox-wrapper {
   border: none;
 }
-/* line 1152, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1160, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid select::-ms-expand {
   display: none;
 }
-/* line 1156, ../../../private/common-html/sass/partials/_forms.scss */
+/* line 1164, ../../../private/common-html/sass/partials/_forms.scss */
 .form-grid button::-moz-focus-inner {
   border: 0;
 }
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 /* line 1114, ../../../private/common-html/sass/partials/_forms.scss */
@@ -9063,6 +9289,9 @@ div.alleYli-radioGroup {
 =======
 /* line 1160, ../../../private/common-html/sass/partials/_forms.scss */
 >>>>>>> Different color for rejection texts.
+=======
+/* line 1168, ../../../private/common-html/sass/partials/_forms.scss */
+>>>>>>> Attachment table reject note editing.
 .form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
   padding: 0 12px;
   box-sizing: border-box;
@@ -9085,6 +9314,7 @@ div.alleYli-radioGroup {
 .form-grid input[type=text]:disabled, .form-grid input[type=password]:disabled, .form-grid select:disabled, .form-grid textarea:disabled, .form-grid span.form-string:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
+<<<<<<< HEAD
 }
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -9475,4 +9705,6 @@ div.alleYli-radioGroup {
   background-color: #f6f6f6;
   color: #bbbbbb;
 >>>>>>> Different color for rejection texts.
+=======
+>>>>>>> Attachment table reject note editing.
 }

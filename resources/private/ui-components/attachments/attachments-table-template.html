@@ -89,7 +89,6 @@
             <button class="btn-icon-only"
                     data-bind="enable: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
-                                      'no-events': $parent.isRejected( $data ),
                                       reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,
                                clickBubble: false">
@@ -107,14 +106,18 @@
             </button>
           </td>
         </tr>
+        <!-- ko if: $parent.isRejected( $data ) -->
         <tr class="reject-note-row"
-            data-bind="visible: $parent.isRejected( $data ),
-                       css: {'even-row': $index() % 2 === 0,
+            data-bind="css: {'even-row': $index() % 2 === 0,
                        'odd-row': $index() % 2}">
           <td colspan="7"
               data-bind="component: {name: 'reject-note',
-                         params: {attachmentId: id}}"></td>
+                         params: {attachmentId: id,
+                         storeState: true,
+                         noteCss: 'table-reject-note',
+                         editorCss: 'table-reject-note-editor'}}"></td>
         </tr>
+        <!-- /ko -->
         <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
         <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
           <td colspan="7">
@@ -123,7 +126,6 @@
                                            authorities: $component.authorities"></accordion-assignments>
           </td>
         </tr>
-        <tr class="hidden-row"><td colspan="7"></td></tr>
         <!-- /ko -->
       </tbody>
     </table>

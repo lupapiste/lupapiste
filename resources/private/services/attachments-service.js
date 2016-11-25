@@ -303,11 +303,13 @@ LUPAPISTE.AttachmentsService = function() {
   self.approveAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( null );
   };
 
   self.rejectAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( attachmentId );
   };
 
   self.rejectAttachmentNote = function(attachmentId, note, hubParams) {
@@ -317,7 +319,11 @@ LUPAPISTE.AttachmentsService = function() {
                           {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
                            note: note},
                           hubParams);
+    self.rejectAttachmentNoteEditorState( null );
   };
+
+  // Used by reject-note component.
+  self.rejectAttachmentNoteEditorState = ko.observable();
 
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
     _.forEach(filterSets, function(filterSet) { filterSet.forceVisibility(attachmentId); });
