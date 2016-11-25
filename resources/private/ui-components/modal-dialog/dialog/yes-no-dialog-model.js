@@ -12,6 +12,6 @@ LUPAPISTE.YesNoDialogModel = function (params) {
 
   self.no = params.noFn || _.noop;
 
-  self.yesEnabled = params.yesEnabled || true;
+  self.yesEnabled = _.isUndefined(params.yesEnabled) ? true : params.yesEnabled;
 
 };

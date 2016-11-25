@@ -19,7 +19,7 @@ LUPAPISTE.AddPartyModel = function() {
                                    componentParams: {yesFn: self.addParty,
                                                      lyesTitle: "add",
                                                      lnoTitle: "cancel",
-                                                     yesEnabled: self.addPartyEnabled,
+                                                     yesEnabled: false,
                                                      options: self.partyDocumentNames(),
                                                      optionsText: function(item) { return loc(["schemas", item]); },
                                                      optionsValue: function(item) { return item; },

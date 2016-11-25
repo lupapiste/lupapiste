@@ -90,35 +90,39 @@
 (defn validate-post-verdict-not-approved
   "In post verdict states, validates that given document is approved.
    Approval 'locks' documents in post-verdict state."
-  [key {:keys [application data]}]
-  (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                   (domain/get-document-by-id application (get data key)))]
-    (when (approved? document)
-      (fail :error.document.approved))))
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+                          (domain/get-document-by-id application (get data key)))]
+      (when (approved? document)
+        (fail :error.document.approved)))))
 
 (defn validate-created-after-verdict
   "In post-verdict state, validates that document is post-verdict-party and it's not created-after-verdict.
    This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
    they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
-  [key {:keys [application data]}]
-  (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
-                        (domain/get-document-by-id application (get data key)))]
-    (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
-      (fail :error.document.pre-verdict-document))))
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+                          (domain/get-document-by-id application (get data key)))]
+      (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
+        (fail :error.document.pre-verdict-document)))))
 
 (defn doc-disabled-validator
   "Deny action if document is marked as disabled"
-  [key {:keys [application data]}]
-  (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-    (when (:disabled doc)
-      (fail :error.document.disabled))))
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+      (when (:disabled doc)
+        (fail :error.document.disabled)))))
 
 (defn validate-disableable-schema
   "Checks if document can be disabled from document's schema"
-  [key {:keys [application data]}]
-  (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
-    (when-not (get-in doc [:schema-info :disableable])
-      (fail :error.document.not-disableable))))
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+      (when-not (get-in doc [:schema-info :disableable])
+        (fail :error.document.not-disableable)))))
 
 (defn validate-document-is-pre-verdict-or-approved
   "Pre-check for document disabling. If document is added after verdict, it needs to be approved."

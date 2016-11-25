@@ -820,4 +820,7 @@
 "error.document.pre-verdict-document" "en" ""
 "error.document.pre-verdict-document" "fi" "Ennen päätöstä lisättyä dokumenttia ei voi muuttaa"
 "error.document.pre-verdict-document" "sv" ""
+"error.document-not-editable-in-current-state" "en" ""
+"error.document-not-editable-in-current-state" "fi" "Dokumenttia ei voi muokata"
+"error.document-not-editable-in-current-state" "sv" ""
 

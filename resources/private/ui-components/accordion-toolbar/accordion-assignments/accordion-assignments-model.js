@@ -9,7 +9,7 @@ LUPAPISTE.AccordionAssignmentsModel = function(params) {
 
 
   self.assignments = params.documentAssignments;
-  self.possibleTargets = lupapisteApp.services.assignmentService && lupapisteApp.services.assignmentService.targets;
+  self.possibleTargets = _.get(lupapisteApp.services.assignmentService, "targets");
 
   self.descriptionText = function(data) {
     return "\"" + data.description + "\"";
