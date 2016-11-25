@@ -257,7 +257,7 @@
    :categories       #{:documents :tasks}
    :input-validators [(partial action/non-blank-parameters [:id :doc :collection])
                       doc-persistence/validate-collection]
-   :pre-checks       [(partial editable-by-state? approve-doc-states)]
+   :pre-checks       [(editable-by-state? :doc states/approve-doc-states)]
    :user-roles       #{:authority}}
   [command]
   (set-rejection-note command note)
