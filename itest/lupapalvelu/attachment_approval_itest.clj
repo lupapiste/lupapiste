@@ -25,11 +25,12 @@
       (:timestamp approved) => pos?)))
 
 (defn- reject-attachment-note [application-id {:keys [id latestVersion]} note]
-  (fact {:midje/description (str "reject-note" application-id "/" id ":" note)}
-        (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId (:fileId latestVersion) :note note) => ok?
-        (let [{:keys [approved] :as att} (get-attachment-by-id veikko application-id id)]
-          att => (in-state? "requires_user_action")
-          (:note approved) => note)))
+  (let [file-id (:fileId latestVersion)]
+   (fact {:midje/description (str "reject-note" application-id "/" id ":" note)}
+         (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId file-id :note note) => ok?
+         (let [{:keys [rejectNotes] :as att} (get-attachment-by-id veikko application-id id)]
+           att => (in-state? "requires_user_action")
+           rejectNotes => (contains {:fileId file-id :note note})))))
 
 (facts "attachment approval"
   (let [{application-id :id attachments :attachments} (create-and-open-application  pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
@@ -70,6 +71,19 @@
         (:approved att) => nil
         att => (in-state? "requires_authority_action"))
 
+      (fact "Veikko rejects attachment"
+            (reject-attachment application-id (first attachments)))
+
+      (fact "Veikko sets reject note"
+            (reject-attachment-note application-id (first attachments) "Zhe ge ye bu hao!"))
+
+      (fact "Veikko sets reject note again"
+            (reject-attachment-note application-id (first attachments) "Mei wenti.")
+            (let [{:keys [attachments]} (query-application veikko application-id)
+                  {notes :rejectNotes} (first attachments)]
+              (count notes) => 2
+              (map :note notes) => ["Bu hao!" "Mei wenti."]))
+
       (fact "Veikko re-approves"
         (approve-attachment application-id (first attachments)))
 
@@ -85,4 +99,7 @@
 
         (fact "After the latest version was deleted the attachment is no longer approved/rejected"
           (:approved att) => nil
-          att => (in-state? "requires_authority_action"))))))
+          att => (in-state? "requires_authority_action")
+          (let [{notes :rejectNotes} att]
+            (count notes) => 1
+            (-> notes first :note) => "Bu hao!"))))))
