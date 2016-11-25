@@ -785,7 +785,7 @@ var checkDesigners = function(yesFn) {
         self.returnToDraftText("");
         self.reload();
       })
-      .error(function(e) { self.reload(); })
+      .error(function() { self.reload(); })
       .fuse(self.stateChanged)
       .processing(self.processing)
       .call();
