@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.document.data-schema :as dds]
             [lupapalvelu.document.parties-canonical :refer :all]
-            [sade.schema-generators :as ssg]))
+            [sade.schema-generators :as ssg]
+            [sade.strings :as ss]))
 
 (def paasuunnittelija-schema      (dds/doc-data-schema "paasuunnittelija" true))
 (def hankkeen-kuvaus-data-schema  (dds/doc-data-schema "hankkeen-kuvaus"))
@@ -200,7 +201,12 @@
 (facts "parties canonical"
   (let [canonical          (parties-to-canonical application "fi")
         asia               (get-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia])
-        krysp-element-keys (keys asia)]
+        krysp-element-keys (keys asia)
+        valid-names        (->> (:documents application)
+                                (filter (fn [{info :schema-info}]
+                                          (= (:subtype info) :suunnittelija)))
+                                (remove (fn [{data :data}]  ; Canonical skips designers without sukunimi
+                                          (ss/blank? (get-in data [:henkilotiedot :sukunimi :value])))))]
     canonical => map?
     (fact "no toimenpide or rakennuspaikka information"
       krysp-element-keys => (just [:osapuolettieto
@@ -212,4 +218,4 @@
 
     (fact "only suunnittelijatiedot"
       (keys (get-in asia [:osapuolettieto :Osapuolet])) => (just :suunnittelijatieto)
-      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => 2)))
+      (count (get-in asia [:osapuolettieto :Osapuolet :suunnittelijatieto])) => (count valid-names))))
