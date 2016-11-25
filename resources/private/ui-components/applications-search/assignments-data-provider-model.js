@@ -19,6 +19,8 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   self.skip             = ko.observable(0);
   self.searchResultType = ko.observable(params.searchResultType);
 
+  self.assignmentsCount = ko.observable(0); // Count of open assignments received by the current user.
+
   self.pending = ko.observable(false);
 
   var stateClasses = {
@@ -100,6 +102,12 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
       .onError("error.unauthorized", notify.ajaxError)
       .pending(self.pending)
       .call();
+
+      ajax.query("assignment-count")
+        .success(function(response) {
+          self.assignmentsCount(response.assignmentCount);
+        })
+        .call();
     }
   }
 
@@ -108,4 +116,5 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
   hub.subscribe("assignmentService::assignmentCompleted", loadAssignments);
 
   ko.computed(loadAssignments).extend({rateLimit: 0}); // http://knockoutjs.com/documentation/rateLimit-observable.html#example-3-avoiding-multiple-ajax-requests
+
 };

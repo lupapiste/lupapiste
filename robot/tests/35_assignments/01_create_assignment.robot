@@ -47,6 +47,10 @@ Sonja edits description of the assignment
   Positive indicator should be visible
   Wait until  Element should not be visible  xpath=//${docPath}//bubble-dialog[@data-test-id='edit-assignment-bubble']
   Wait until  Element should contain  xpath=//${docPath}//div[@data-test-id='accordion-assignment'][1]//div[@data-test-id='assignment-text']  Katsoisitko?
+
+Sonja has no open assignments
+  Go to page  applications
+  Count of open assignments is  0
   Logout
 
 Pena does not see assignment
@@ -67,6 +71,7 @@ Luukas does not see assignment
 
 Ronja logs in, sees assignment in document
   Ronja logs in
+  Count of open assignments is  1
   Open application  ${appname}  ${propertyid}
   Open tab  parties
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
