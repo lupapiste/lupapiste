@@ -143,6 +143,7 @@
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
+   :sprintf        {:js ["sprintf.min.js"]}
    :moment         {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
    :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
    ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
@@ -154,7 +155,7 @@
    :waypoints      {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
-   :init         {:depends [:underscore]
+   :init         {:depends [:underscore :sprintf]
                   :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
@@ -173,7 +174,7 @@
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :sprintf :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
@@ -211,7 +212,8 @@
                    "building-service.js"
                    "assignment-service.js"
                    "assignment-recipient-filter-service.js"
-                   "assignment-target-filter-service.js"]}
+                   "assignment-target-filter-service.js"
+                   "event-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

@@ -25,7 +25,7 @@
             [lupapalvelu.document.document-api]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vetuma :as vetuma]
-            [lupapalvelu.web :as web]
+            [lupapalvelu.api-common :as api-common]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]
             [lupapalvelu.organization :as organization]
@@ -530,10 +530,10 @@
         (web-fn (name action) params *request*)))))
 
 (defn local-command [apikey command-name & args]
-  (apply execute-local apikey web/execute-command command-name args))
+  (apply execute-local apikey api-common/execute-command command-name args))
 
 (defn local-query [apikey query-name & args]
-  (apply execute-local apikey web/execute-query query-name args))
+  (apply execute-local apikey api-common/execute-query query-name args))
 
 (defn create-local-app
   "Runs the create-application command locally, returns reply map. Use ok? to check it."

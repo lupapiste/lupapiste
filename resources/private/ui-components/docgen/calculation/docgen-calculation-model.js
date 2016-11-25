@@ -6,6 +6,8 @@ LUPAPISTE.DocgenCalculationModel = function( params ) {
 
   var service = lupapisteApp.services.documentDataService;
 
+  self.testId = _.join( params.path, "-");
+
   var rowModels = _.map( params.schema.columns, function( col ) {
     return service.getInDocument( params.documentId,
                                   _.concat( _.dropRight( params.path, 1 ),

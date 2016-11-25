@@ -14,7 +14,7 @@
       <p><span data-bind="ltext: 'register.was-canceled'"></span></p>
       <!-- /ko -->
 
-      <!-- ko if: util.identLogoutUrl -->
+      <!-- ko if: util.identLogoutUrl() -->
       <p data-bind="ltext: 'ident.logout.info-text'"></p>
       <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect" />
       <!-- /ko -->

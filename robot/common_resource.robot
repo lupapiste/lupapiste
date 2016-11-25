@@ -397,18 +397,34 @@ Jussi logs in
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
 
+
+# Return quoted (or rather ticked)  string
+# Quote  hello   -> "hello"
+# Quote  "hello" -> "hello"
+# Quote  hei "hou" ->  "hei 'hou'"  
+Quote
+  [Arguments]  ${s}
+  ${s}=  Convert to string  ${s}
+  ${s}=  Strip string  ${s}
+  ${s}=  Replace String  ${s}  "  '  # " Fix highlight
+  
+  ${quoted}=  Execute Javascript  return sprintf( '"%s"', _.unquote( "${s}", "'") )
+  [Return]  ${quoted}
+    
 Input text with jQuery
   [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
   Wait until page contains element  jquery=${selector}
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
-  Execute Javascript  $('${selector}')[0].scrollIntoView(false);
-  Execute Javascript  $('${selector}').focus().val("${value}").change();
-  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $('${selector}').blur();
+  ${q}=  Quote  ${selector}
+  Execute Javascript  $(${q})[0].scrollIntoView(false);
+  Execute Javascript  $(${q}).focus().val("${value}").change();
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $(${q}).blur();
 
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
-  Input text with jQuery  [data-test-id="${id}"]  ${value}  ${leaveFocus}
+  ${q}=  Quote  ${id}
+  Input text with jQuery  [data-test-id=${q}]  ${value}  ${leaveFocus}
 
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
@@ -1318,7 +1334,8 @@ Clear mocks
 
 Scroll to
   [Arguments]  ${selector}
-  Wait Until  Execute Javascript  $("${selector}")[0].scrollIntoView(false);
+  ${q}=  Quote  ${selector}
+  Wait Until  Execute Javascript  $(${q})[0].scrollIntoView(false);
 
 Scroll to top
   Execute javascript  window.scrollTo(0,0)
@@ -1487,13 +1504,13 @@ Fill tyoaika fields
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-alkaa-pvm']").val("${startDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-pvm')]  ${startDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-ms')]
+  Execute Javascript  $("input[id*='tyoaika-alkaa-ms']").val("${startDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-ms')]  ${startDate}
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-ms')]
+  Execute Javascript  $("input[id*='tyoaika-paattyy-ms']").val("${endDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-ms')]  ${endDate}
 
 Fill in yritys info
   [Arguments]  ${dataDocType}

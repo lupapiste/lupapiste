@@ -12,6 +12,7 @@
             [sade.property :as prop]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
@@ -41,6 +42,36 @@
                    :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
 
 (notifications/defemail :application-state-change state-change)
+
+(defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
+                              _
+                              recipient]
+  {:operation-fi (app-utils/operation-description application :fi)
+   :operation-sv (app-utils/operation-description application :sv)
+   :address (:address application)
+   :city-fi (i18n/localize :fi "municipality" (:municipality application))
+   :city-sv (i18n/localize :sv "municipality" (:municipality application))
+   :name (:firstName recipient)
+   :text text})
+
+(defn return-to-draft-recipients
+  "the notification is sent to applicants in auth array and application owners"
+  [{{:keys [auth documents] :as application} :application}]
+  (let [applicant-in-auth? (->> auth (remove :invite) (remove :unsubscribed) (map :id) set)
+        applicant-ids (->> (domain/get-applicant-documents documents)
+                           (map (comp :value :userId :henkilo :data))
+                           (filter applicant-in-auth?))
+        owner-ids (->> (auth/get-auths-by-role application :owner)
+                       (remove :invite)
+                       (remove :unsubscribed)
+                       (map :id))]
+    (map (comp usr/non-private usr/get-user-by-id)
+         (distinct (remove nil? (concat applicant-ids owner-ids))))))
+
+(notifications/defemail :application-return-to-draft
+  {:subject-key "return-to-draft"
+   :recipients-fn return-to-draft-recipients
+   :model-fn return-to-draft-model})
 
 ;; Validators
 
@@ -319,7 +350,7 @@
     {:id        (:id app)
      :title     (:title app)
      :location  {:x (first location) :y (second location)}
-     :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
+     :operation (app-utils/operation-description app lang)
      :authName  (-> app
                     (auth/get-auths-by-role :owner)
                     first
@@ -535,6 +566,24 @@
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
 
+(defcommand return-to-draft
+  {:description "Returns the application to draft state."
+   :parameters       [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :user-roles #{:authority}
+   :states #{:submitted}
+   :pre-checks [(partial sm/validate-state-transition :draft)]
+   :on-success (notify :application-return-to-draft)}
+  [{{:keys [role] :as user}         :user
+    {:keys [state] :as application} :application
+    created                         :created
+    :as command}]
+  (->> (util/deep-merge
+        (app/state-transition-update :draft created application user)
+        (when (seq text)
+          (comment/comment-mongo-update state text {:type "application"} role false user nil created)))
+       (update-application command)))
+
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"
    :parameters       [id startDate]
@@ -731,7 +780,7 @@
     (if (:started app)
       (util/to-local-date (:started app))
       (or
-        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-ms :value (util/to-local-date))
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 

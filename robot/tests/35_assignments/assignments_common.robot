@@ -43,5 +43,5 @@ Create attachment assignment
 
 Open assignments search
   Go to page  applications
-  Wait until  Element should be visible  searchTypeAssignments
+  Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
   Select Radio Button  searchType  searchTypeAssignments

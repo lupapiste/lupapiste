@@ -16,12 +16,15 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
   var tablePath = params.path;
   var footer = params.footer;
 
+  self.testId = _.join( _.concat( ["sum"], params.path, [columnSchema.name] ),
+                        "-");
+
   function columnData( column ) {
     return _(service.getInDocument( docId,  tablePath ).model())
-      .map( function( v, i ) {
+      .map( function( v ) {
         return service.getInDocument( docId,
                                       _.concat( tablePath,
-                                                [i, column]))
+                                                [v.index, column]))
           .model();
       })
       .value();
@@ -83,7 +86,7 @@ LUPAPISTE.DocgenFooterSumModel = function( params ) {
     var amount = _.round(calculateAmount(), 2);
     var unit = finalUnit();
     return  unit
-      ? _.sprintf( "%s %s", amount, loc( unitKeys[unit] ) )
+      ? sprintf( "%s %s", amount, loc( unitKeys[unit] ) )
       : amount;
   });
 

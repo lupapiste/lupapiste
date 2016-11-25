@@ -25,6 +25,7 @@
             [sade.session :as ssess]
             [sade.xml :as xml]
             [sade.common-reader :refer [strip-xml-namespaces]]
+            [lupapalvelu.api-common :refer :all]
             [lupapalvelu.control-api :as control]
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as app]
@@ -56,7 +57,8 @@
             [lupapalvelu.ident.suomifi]
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
-            [lupapalvelu.reports.reports-api])
+            [lupapalvelu.reports.reports-api]
+            [lupapalvelu.rest.rest-api])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -102,20 +104,6 @@
 (defn from-json [request]
   (:json request))
 
-(defn from-query [request]
-  (keywordize-keys (:query-params request)))
-
-(defn host [request]
-  (str (name (:scheme request)) "://" (get-in request [:headers "host"])))
-
-(defn user-agent [request]
-  (str (get-in request [:headers "user-agent"])))
-
-(defn- web-stuff [request]
-  {:user-agent (user-agent request)
-   :client-ip  (http/client-ip request)
-   :host       (host request)})
-
 (defn- logged-in? [request]
   (not (nil? (:id (usr/current-user request)))))
 
@@ -151,27 +139,9 @@
 ;; Commands
 ;;
 
-(defn enriched [m request]
-  (merge m {:user (usr/current-user request)
-            :lang *lang*
-            :session (:session request)
-            :web  (web-stuff request)}))
-
-(defn execute [action]
-  (with-logging-context
-    {:applicationId (get-in action [:data :id])
-     :userId        (get-in action [:user :id])}
-    (action/execute action)))
-
-(defn execute-command [name params request]
-  (execute (enriched (action/make-command name params) request)))
-
 (defjson [:post "/api/command/:name"] {name :name}
   (let [request (request/ring-request)]
     (execute-command name (from-json request) request)))
-
-(defn execute-query [name params request]
-  (execute (enriched (action/make-query name params) request)))
 
 (defjson "/api/query/:name" {name :name}
   (let [request (request/ring-request)]
@@ -180,31 +150,6 @@
 (defjson [:post "/api/datatables/:name"] {name :name}
   (let [request (request/ring-request)]
     (execute-query name (:params request) request)))
-
-(defn basic-authentication
-  "Returns a user map or nil if authentication fails"
-  [request]
-  (let [[u p] (http/decode-basic-auth request)]
-    (when (and u p)
-      (:user (execute-command "login" {:username u :password p} request)))))
-
-(def basic-401
-  (assoc-in (resp/status 401 "Unauthorized") [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\""))
-
-(defn execute-export [name params request]
-  (execute (enriched (action/make-export name params) request)))
-
-(defpage [:get "/rest/:name"] {name :name}
-  (let [request (request/ring-request)
-        user    (basic-authentication request)]
-    (if user
-      (let [response (execute (assoc (action/make-raw name (from-query request)) :user user))]
-        (if (action/response? response)
-          response
-          (if (:ok response)
-            (resp/status 200 (resp/json response))
-            (resp/status 404 (resp/json response)))))
-      basic-401)))
 
 (defn json-data-as-stream [data]
   (ring-io/piped-input-stream
@@ -539,11 +484,34 @@
 ;; Cross-site request forgery protection
 ;;
 
+
+(defn verbose-csrf-block [req]
+   (let [ip (http/client-ip req)
+         nothing "(not there)"
+         referer (get-in req [:headers "referer"])
+         cookie-csrf (get-in req [:cookies "anti-csrf-token" :value])
+         ring-session-full (or (get-in req [:cookies "ring-session" :value]) nothing)
+         ring-session (clojure.string/replace ring-session-full #"^(...).*(...)$" "$1...$2")
+         header-csrf (get-in req [:headers "x-anti-forgery-token"])
+         req-with (or (get-in req [:headers "x-requested-with"]) nothing)
+         user-agent (or (get-in req [:headers "user-agent"]) nothing)
+         uri (:uri req)
+         user (:username (:user req))
+         session-id (:id (:session req))]
+      (str "CSRF attempt blocked. " ip 
+           " requested '" uri 
+           "' for user '" user 
+           "' having cookie csrf '" cookie-csrf "' vs header csrf '" header-csrf 
+           "'. Ring session '" ring-session 
+              "', session id '" session-id 
+              "', user agent '" user-agent 
+              "', requested with '" req-with "'.")))
+
 (defn- csrf-attack-hander [request]
   (with-logging-context
     {:applicationId (or (get-in request [:params :id]) (:id (from-json request)))
      :userId        (:id (usr/current-user request) "???")}
-    (warnf "CSRF attempt blocked. Client IP: %s, Referer: %s" (http/client-ip request) (get-in request [:headers "referer"]))
+    (warnf (verbose-csrf-block request))
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn anti-csrf

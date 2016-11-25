@@ -243,6 +243,12 @@
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
 
+(defn application-to-canonical-operations
+  [application]
+  (let [application (tools/unwrapped application)
+        documents-by-type (documents-by-type-without-blanks application)]
+    (get-operations documents-by-type application)))
+
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
   [application lang]
