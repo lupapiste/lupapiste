@@ -27,8 +27,8 @@
 (defmacro defendpoint [path & content]
   (let [meta-data (when (map? (first content)) (first content))
         params (->> (util/select-values meta-data [:parameters :optional-parameters])
-                     (apply concat)
-                     (apply assoc {}))
+                    (apply concat)
+                    (apply assoc {}))
         letkeys (keys params)]
     `(let [[m# p#]        (if (string? ~path) [:get ~path] ~path)
            retval-schema# (get ~meta-data :returns)]
@@ -65,11 +65,9 @@
 
 (defendpoint "/rest/get-lp-id-from-previous-permit"
   {:summary     "Luo Lupapiste-hakemuksen taustaj\u00e4rjestelm\u00e4n hakemuksesta tai palauttaa olemassa olevan hakemuksen tunnuksen."
-   :description ""
-   :parameters  [:kuntalupatunnus (rjs/field sc/Str {:description "Taustaj\u00e4rjestelm\u00e4ss\u00e4 olevan hakemuksen kuntalupatunnus"})]
-   :returns     {:ok sc/Bool
-                 :text sc/Keyword
-                 (sc/optional-key :id) sc/Int}}
+   :description "Paluuarvot:\n* id - Luodun/aiemmin luodun Lupapiste-hakemuksen tunnus\n* ok - Onnistuiko pyynt\u00f6\n* text - Kuvaus muutoksista, voi olla\n    * created-new-application - Luotiin uusi hakemus\n    * already-existing-application - Kuntalupatunnusta vasten oli jo olemassa hakemus"
+   :parameters  [:kuntalupatunnus Kuntalupatunnus]
+   :returns     IdFromPreviousPermitResponse}
    (let [response (execute (assoc (action/make-raw "get-lp-id-from-previous-permit" {:kuntalupatunnus kuntalupatunnus}) :user user))]
      (if (action/response? response)
        response
@@ -80,10 +78,10 @@
 (defn paths []
   (letfn [(mapper [{:keys [path method meta]}]
             (let [parameters (apply assoc {} (:parameters meta))]
-              {path {method {:summary    (:summary meta)
+              {path {method {:summary     (:summary meta)
                              :description (:description meta)
-                             :parameters {:query parameters}
-                             :responses  {200 {:schema (:returns meta)}}}}}))]
+                             :parameters  {:query parameters}
+                             :responses   {200 {:schema (:returns meta)}}}}}))]
     (rs/swagger-json {:paths (into {} (map mapper @endpoints))})))
 
 (defpage "/rest/swagger.json" []

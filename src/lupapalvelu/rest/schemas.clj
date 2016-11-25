@@ -9,6 +9,9 @@
 (sc/defschema Asiointitunnus
   (field sc/Str "Hakemuksen asiointitunnus esim. LP-2016-000-90001"))
 
+(sc/defschema Kuntalupatunnus
+  (field sc/Str "Taustaj\u00e4rjestelm\u00e4ss\u00e4 olevan hakemuksen kuntalupatunnus"))
+
 (sc/defschema Kiinteistotunnus
   (field sc/Str "Kiinteist\u00f6tunnus"))
 
@@ -136,10 +139,15 @@
    (sc/optional-key :toimenpiteet) ToimenpideTiedot
    (sc/optional-key :yleisenAlueenKayttolupa) YleisenAlueenKayttolupa})
 
+(sc/defschema ApiResponse
+  {:ok sc/Bool
+   (sc/optional-key :text) sc/Keyword})
+
 (sc/defschema JatetytHakemuksetResponse
-  (field {:ok sc/Bool
-          (sc/optional-key :text) sc/Keyword
-          :data [HakemusTiedot]} "Vireill\u00e4 olevat hankkeet -rajapinnan vastauksen tyyppi"))
+  (assoc ApiResponse :data [HakemusTiedot]))
+
+(sc/defschema IdFromPreviousPermitResponse
+  (assoc ApiResponse (sc/optional-key :id) Asiointitunnus))
 
 (sc/defschema OrganizationId
   (field sc/Str "Organisaation tunnus"))
