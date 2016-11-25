@@ -270,6 +270,18 @@
     :private {:password "$2a$10$d2Ut/qSvKylOGhYm/7jXB..1ZC7/x39q5e/PFdtjHLqV1XW9wr3oO"
               :apikey "XDnPTeDDpPqU5yoYQEERgZ0p4H6dff1RIdYgyDCk"}}
 
+
+   {:id "sipoo-r-backend"
+    :username "sipoo-r-backend"
+    :email "sipoo-r-backend@sipoo.fi"
+    :firstName "Sipoo"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"} ;sipoo
+    :orgAuthz {:753-R #{:authority}}}
+
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
