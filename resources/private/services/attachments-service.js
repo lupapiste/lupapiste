@@ -322,6 +322,13 @@ LUPAPISTE.AttachmentsService = function() {
     self.rejectAttachmentNoteEditorState( null );
   };
 
+  self.getRejectNote = function( attachmentId, fileId ) {
+    return _.get( _.find( util.getIn( self.getAttachment( attachmentId ),
+                                      ["rejectNotes"]),
+                          {fileId: fileId}),
+                  "note");
+  };
+
   // Used by reject-note component.
   self.rejectAttachmentNoteEditorState = ko.observable();
 

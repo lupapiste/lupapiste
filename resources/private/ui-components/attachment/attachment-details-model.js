@@ -109,6 +109,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.showAttachmentVersionHistory(val);
   });
 
+  self.versions = self.disposedPureComputed( function() {
+    return _.reverse( self.attachment().versions );
+  });
+
+  self.rejectNote = function( version ) {
+    return service.getRejectNote( self.id, version.fileId );
+  };
+
   // Versions - add
   self.newAttachmentVersion = function() {
     self.disablePreview(true);

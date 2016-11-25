@@ -307,6 +307,18 @@ table.company-users-table {
   }
 }
 
+table.table-even-odd {
+  @include no-row-hover;
+  tr.even-row,
+  tr.even-row:hover {
+    background-color: $tr-color-even;
+  }
+  tr.odd-row,
+  tr.odd-row:hover {
+    background-color: white;
+  }
+}
+
 div.attachments-table-container {
   padding: {
   top: 1em;
@@ -314,16 +326,7 @@ div.attachments-table-container {
   left: .5em;
   }
   table.attachments-table {
-    @include no-row-hover;
-    tr.even-row,
-    tr.even-row:hover {
-      background-color: $tr-color-even;
-    }
-    tr.odd-row,
-    tr.odd-row:hover {
-      background-color: white;
-    }
-    tr.row--rejected {
+        tr.row--rejected {
       border-bottom: none;
       td {
         padding-bottom: 0;
@@ -369,6 +372,30 @@ div.attachments-table-container {
     magint-right: 1px;
   }
 }
+
+
+tr.version-row--noted {
+  border-bottom: none;
+  td {
+    padding-bottom: 0;
+  }
+}
+
+tr.version-reject-note-row {
+  border-top: none;
+  padding: 0;
+  > td {
+    padding: {
+      top: 0;
+      left: 4px;
+      right: 0;
+      bottom: 4px;
+    }
+    min-height: 0;
+    height: auto;
+  }
+}
+
 
 table.suti-admin-table {
   margin-top: $marginM;
