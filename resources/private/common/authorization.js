@@ -38,6 +38,10 @@ var authorization = (function() {
       self.data(data);
     };
 
+    self.getData = function() {
+      return self.data();
+    };
+
     self.clone = function() {
       return new AuthorizationModel( self.data() );
     };
@@ -48,6 +52,7 @@ var authorization = (function() {
       refreshWithCallback: self.refreshWithCallback,
       refresh: self.refresh,
       setData: self.setData,
+      getData: self.getData,
       clone: self.clone
     };
   }
@@ -55,18 +60,25 @@ var authorization = (function() {
   // authModels is an object where, field names are ids and values the
   // actual auth models.  For example, for documents category, the
   // field names are document ids and values document auth models.
-  function refreshModelsForCategory(authModels, applicationId, category) {
+  function refreshModelsForCategory(authModels, applicationId, category, callback) {
     ajax.query("allowed-actions-for-category", {id: applicationId, category: category})
       .success(function(d) {
         _.forEach(authModels, function(authModel, id) {
-          authModel.setData(d.actionsById[id] || {});
+          var oldData = authModel.getData();
+          var newData = d.actionsById[id] || {};
+          authModel.setData(newData);
+          if (!_.isEqual(oldData, newData)) {
+            hub.send("category-auth-model-changed", {targetId: id});
+          }
         });
+        if (_.isFunction(callback)) { callback(d.result); }
       })
       .error(function(e) {
         _.forEach(authModels, function(authModel) {
           authModel.setData({});
         });
         error(e);
+        if (_.isFunction(callback)) { callback(e.result); }
       })
       .call();
   }

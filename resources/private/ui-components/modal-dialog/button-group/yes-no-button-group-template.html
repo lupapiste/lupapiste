@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="yes-no-button-group-template">
-      <div class="button-group">
-        <button class="positive btn-dialog"
-                data-test-id="confirm-yes"
-                data-bind="enable: true, click: yes, text: yesTitle"></button>
-        <button class="secondary btn-dialog close"
-                data-test-id="confirm-no"
-                data-bind="click: no, text: noTitle"></button>
-      </div>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl" id="yes-no-button-group-template">
+  <div class="button-group">
+    <button class="positive btn-dialog"
+            data-test-id="confirm-yes"
+            data-bind="enable: yesEnabled, click: yes, text: yesTitle"></button>
+    <button class="secondary btn-dialog close"
+            data-test-id="confirm-no"
+            data-bind="click: no, text: noTitle"></button>
+  </div>
+</script>

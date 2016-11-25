@@ -205,6 +205,12 @@ Open accordion by test id
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
   Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
 
+Open docgen accordion
+  [Arguments]  ${doctype}  ${idx}=0
+  ${xpathIndex}=  Evaluate  ${idx} + 1
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=(//section[@data-doc-type="${doctype}"])[${xpathIndex}]//div[contains(@class,'accordion-toggle')]/button[contains(@class, 'toggled')]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("section[data-doc-type='${doctype}']:eq(${idx}) div.accordion-toggle button:first-child").click();
+
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
@@ -858,6 +864,7 @@ Cancel current application as authority
 # New yes no modal dialog
 Confirm yes no dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Wait until  Element should be enabled  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]

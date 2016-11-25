@@ -251,14 +251,14 @@
         (:repeating info) ; Can add more repeating docs
         (not has-same-document))))) ; Schema not repeating but document is valid and missing from the application
 
-(defn do-create-doc! [{created :created {schema-version :schema-version :as application} :application :as command} schema-name & [updates]]
-  (let [schema (schemas/get-schema (:schema-version application) schema-name)]
+(defn do-create-doc! [{created :created {:keys [schema-version] :as application} :application :as command} schema-name & [updates]]
+  (let [schema (schemas/get-schema schema-version schema-name)]
 
     (when-not (can-add-schema? schema application) (fail! :error.non-repeating-schema))
 
     (let [document (new-doc application schema created updates)]
       (update-application command {$push {:documents document}
-                                  $set  {:modified created}})
+                                   $set  {:modified created}})
       document)))
 
 (defn update-key-in-schema? [schema [update-key _]]
@@ -327,3 +327,13 @@
       (when-not company (fail! :error.company-not-found))
       (debugf "merging company %s into %s %s with db %s" model (get-in document [:schema-info :name]) (:id document) mongo/*db-name*)
       (persist-model-updates application "documents" document updates timestamp))))
+
+;;
+;; Disabling or de-activating
+;;
+
+(defn set-disabled-status [command doc-id value]
+  (update-application command
+                      {:documents {$elemMatch {:id doc-id}}}
+                      {$set {:modified (:created command)
+                             :documents.$.disabled (= "disabled" value)}}))

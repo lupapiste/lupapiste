@@ -12,12 +12,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.model = doc.data;
   self.meta = doc.meta;
   self.docId = doc.id;
+  self.docDisabled = doc.disabled;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
-  self.isDisabled = options && options.disabled;
+  self.isDisabled = (options && options.disabled) || self.docDisabled;
   self.events = [];
 
   self.subscriptions = [];
@@ -1022,8 +1023,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var element = document.createElement(name);
     ko.options.deferUpdates = true; // http://knockoutjs.com/documentation/deferred-updates.html
 
+    var finalParams = _.defaults(params, {documentAuthModel: self.authorizationModel});
+
     $(element)
-      .attr("params", paramsStr(params))
+      .attr("params", paramsStr(finalParams))
       .addClass(classes ? classes + " docgen-component" : "docgen-component")
       .applyBindings(params);
 
@@ -1740,7 +1743,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     elements.className = "accordion-fields";
     appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
-    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+    if (!self.authorizationModel.ok(getUpdateCommand()) || self.isDisabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
       $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
       // TODO a better way would be to hide each individual button based on authorizationModel.ok
@@ -1765,4 +1768,54 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   if (!doc.validationErrors) {
     validate();
   }
+
+  self.redraw = function() {
+    // Refresh document data from backend
+    ajax.query("document", {id: application.id, doc: doc.id, collection: self.getCollection()})
+      .success(function(data) {
+        var newDoc = data.document;
+        self.model = newDoc.data;
+        self.meta = newDoc.meta;
+        self.docDisabled = newDoc.disabled;
+
+        window.Stickyfill.remove($(".sticky", self.element));
+        var accordionState = AccordionState.get(doc.id);
+        _.set(options, "accordionCollapsed", !accordionState);
+
+        var previous = self.element.prev();
+        var next = self.element.next();
+        var h = self.element.outerHeight();
+        var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
+        self.element.before(placeholder);
+
+        self.element.remove();
+        self.element = buildSection();
+
+        if (_.isEmpty(previous)) {
+          next.before(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        } else {
+          previous.after(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        }
+
+        $(".sticky", self.element).Stickyfill();
+      })
+    .call();
+  };
+
+  self.approvalHubSubscribe(function() {
+    authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents");
+  }, true);
+
+  self.subscriptions.push(hub.subscribe({eventType: "category-auth-model-changed", targetId: doc.id}, function() {
+    if (self.schema.info["redraw-on-approval"] && application.inPostVerdictState) {
+      self.redraw();
+    }
+  }));
+
 };

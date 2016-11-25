@@ -239,6 +239,18 @@
   (error "No fetch method for permit type: " permit-type)
   nil)
 
+(defmulti parties-krysp-mapper
+  "Maps application into KRYSP XML and saves the XML to disk."
+  {:arglists '([application lang krysp-version output-dir])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
+
+(defmethod application-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'parties mapper' method not defined for permit type: " permit-type)
+  nil)
+
+
 (defn multiple-parties-allowed? [permit-type]
   (get-metadata permit-type :multiple-parties-allowed))
 

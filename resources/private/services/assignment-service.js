@@ -29,11 +29,13 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
   self.targets = ko.observableArray([]);
 
   function assignmentTargetsQuery(id) {
-    ajax.query("assignment-targets", {id: id, lang: loc.getCurrentLanguage()})
-      .success(function(resp) {
-        self.targets(_.fromPairs(resp.targets));
-      })
-      .call();
+    if (applicationAuthModel.ok("assignment-targets")) {
+      ajax.query("assignment-targets", {id: id, lang: loc.getCurrentLanguage()})
+        .success(function(resp) {
+          self.targets(_.fromPairs(resp.targets));
+        })
+        .call();
+    }
   }
 
   function assignmentsForApplication(id) {

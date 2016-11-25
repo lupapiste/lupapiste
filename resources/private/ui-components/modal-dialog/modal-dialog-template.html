@@ -18,6 +18,7 @@
         </div>
         <div id="modal-dialog-content-component" class="component"
              data-bind="component: {name: component, params: componentParams},
+                        attr: {'data-test-id': id},
                         style: {'height': dialogContentHeightPx()},
                         click: componentClicked"></div>
       </div>

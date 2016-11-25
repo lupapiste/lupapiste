@@ -1,18 +1,20 @@
 (ns lupapalvelu.document.document
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error]]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! unauthorized! now]]
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.action :refer [update-application] :as action]
+            [lupapalvelu.application :as app]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.permit :as permit]
             [lupapalvelu.document.persistence :as doc-persistence]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
             [clj-time.format :as tf]))
@@ -20,6 +22,21 @@
 ;;
 ;; Validators
 ;;
+
+
+(defn created-after-verdict? [document application]
+  (if (contains? states/post-verdict-states (keyword (:state application)))
+    (let [verdict-history-item (->> (app/state-history-entries (:history application))
+                                    (filter #(= (:state %) "verdictGiven"))
+                                    (sort-by :ts)
+                                    last)]
+      (when-not verdict-history-item
+        (error "Application in post-verdict, but doesnt have verdictGiven state in history"))
+      (> (:created document) (:ts verdict-history-item)))
+    false))
+
+(defn approved? [document]
+  (= "approved" (get-in document [:meta :_approved :value])))
 
 (defn user-can-be-set? [user-id application]
   (and (auth/has-auth? application user-id) (domain/no-pending-invites? application user-id)))
@@ -53,13 +70,67 @@
        schema-info
        (get-in (schemas/get-schema schema-info) [:info :removable-only-by-authority])))
 
+(defn- deny-remove-of-non-post-verdict-document [document {state :state :as application}]
+  (and (contains? states/post-verdict-states (keyword state)) (not (created-after-verdict? document application))))
+
+(defn- deny-remove-of-approved-post-verdict-document [document application]
+  (and (created-after-verdict? document application) (approved? document)))
+
 (defn remove-doc-validator [{data :data user :user application :application}]
   (if-let [document (when application (domain/get-document-by-id application (:docId data)))]
     (cond
       (deny-remove-of-non-removable-doc document)             (fail :error.not-allowed-to-remove-document)
       (deny-remove-for-non-authority-user user document)      (fail :error.action-allowed-only-for-authority)
       (deny-remove-of-last-document document application)     (fail :error.removal-of-last-document-denied)
-      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied))))
+      (deny-remove-of-primary-operation document application) (fail :error.removal-of-primary-document-denied)
+      (deny-remove-of-non-post-verdict-document document application) (fail :error.document.post-verdict-deletion)
+      (deny-remove-of-approved-post-verdict-document document application) (fail :error.document.post-verdict-deletion))))
+
+
+(defn validate-post-verdict-not-approved
+  "In post verdict states, validates that given document is approved.
+   Approval 'locks' documents in post-verdict state."
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+                          (domain/get-document-by-id application (get data key)))]
+      (when (approved? document)
+        (fail :error.document.approved)))))
+
+(defn validate-created-after-verdict
+  "In post-verdict state, validates that document is post-verdict-party and it's not created-after-verdict.
+   This is special case for post-verdict-parties. Also waste schemas can be edited in post-verdict states, though
+   they have been created before verdict. Thus we are only interested in 'post-verdict-party' documents here."
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [document (when (and application (contains? states/post-verdict-states (keyword (:state application))))
+                          (domain/get-document-by-id application (get data key)))]
+      (when (and (get-in document [:schema-info :post-verdict-party]) (not (created-after-verdict? document application)))
+        (fail :error.document.pre-verdict-document)))))
+
+(defn doc-disabled-validator
+  "Deny action if document is marked as disabled"
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+      (when (:disabled doc)
+        (fail :error.document.disabled)))))
+
+(defn validate-disableable-schema
+  "Checks if document can be disabled from document's schema"
+  [key]
+  (fn [{:keys [application data]}]
+    (when-let [doc (and (get data key) (domain/get-document-by-id application (get data key)))]
+      (when-not (get-in doc [:schema-info :disableable])
+        (fail :error.document.not-disableable)))))
+
+(defn validate-document-is-pre-verdict-or-approved
+  "Pre-check for document disabling. If document is added after verdict, it needs to be approved."
+  [{:keys [application data]}]
+  (when-let [document (when application (domain/get-document-by-id application (:docId data)))]
+    (when-not (or (not (created-after-verdict? document application)) (approved? document))
+      (fail :error.document-not-approved))))
+
 
 ;;
 ;; KTJ-info updation
@@ -136,6 +207,7 @@
 
 (defn- describe-parties-assignment-targets [application]
   (->> (domain/get-documents-by-type application :party)
+       (remove :disabled)
        (sort-by tools/document-ordering-fn)
        (map (partial document-assignment-info nil))))
 
@@ -143,6 +215,7 @@
   (let [party-doc-ids (set (map :id (domain/get-documents-by-type application :party)))
         operations (cons primaryOperation secondaryOperations)]
     (->> (remove (comp party-doc-ids :id) documents)
+         (remove :disabled)
          (sort-by tools/document-ordering-fn)
          (map (partial document-assignment-info operations)))))
 
