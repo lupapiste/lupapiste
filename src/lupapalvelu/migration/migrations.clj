@@ -2542,8 +2542,8 @@
     :documents
     (fn [doc]
       (-> doc
-          (assoc-in  [:data :osoite :osoitenumero :value] (ss/join "\u2013" (remove nil? [(get-in doc [:data :osoite :osoitenumero :value])
-                                                                                          (get-in doc [:data :osoite :osoitenumero2 :value])])))
+          (assoc-in  [:data :osoite :osoitenumero :value] (ss/join "\u2013" (remove ss/blank? [(get-in doc [:data :osoite :osoitenumero :value])
+                                                                                               (get-in doc [:data :osoite :osoitenumero2 :value])])))
           (dissoc-in [:data :osoite :osoitenumero2])))
     {:documents.data.osoite.osoitenumero2 {$exists true}}))
 
