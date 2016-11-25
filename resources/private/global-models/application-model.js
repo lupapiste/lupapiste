@@ -450,7 +450,7 @@ var checkDesigners = function(yesFn) {
     var sendParties = function() {
       ajax.command("parties-as-krysp", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
-          hub.send("indicator", {style: "positive", rawMessage: loc("integration.parties.sent", resp.sentDocuments.length)});
+          hub.send("indicator", {style: "positive", rawMessage: loc("integration.parties.sent", resp.sentDocuments.length), sticky: true});
           self.lightReload();
         })
         .onError("error.command-illegal-state", self.lightReload)

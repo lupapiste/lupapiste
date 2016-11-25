@@ -231,6 +231,15 @@ Positive indicator icon should be visible
 
 Positive indicator icon should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-icon-positive"]
+
+Indicator should contain text
+  [Arguments]  ${text}
+  Wait until  Element should contain  xpath=//div[@id='indicator']//div[contains(@class, 'indicator-message')]  ${text}
+
+Close sticky indicator
+  Click element  xpath=//div[@id='indicator']//div[contains(@class, 'indicator-close')]
+  Wait until  Element should not be visible  xpath=//div[@id="indicator"]//div[contains(@class,'indicator-bar')]
+
 #
 # Login stuff
 #
@@ -401,16 +410,16 @@ Jussi logs in
 # Return quoted (or rather ticked)  string
 # Quote  hello   -> "hello"
 # Quote  "hello" -> "hello"
-# Quote  hei "hou" ->  "hei 'hou'"  
+# Quote  hei "hou" ->  "hei 'hou'"
 Quote
   [Arguments]  ${s}
   ${s}=  Convert to string  ${s}
   ${s}=  Strip string  ${s}
   ${s}=  Replace String  ${s}  "  '  # " Fix highlight
-  
+
   ${quoted}=  Execute Javascript  return sprintf( '"%s"', _.unquote( "${s}", "'") )
   [Return]  ${quoted}
-    
+
 Input text with jQuery
   [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
   Wait until page contains element  jquery=${selector}

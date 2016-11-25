@@ -56,6 +56,7 @@ Mikko can add new suunnitelija docs
   Xpath should match X times  //section[@data-doc-type="suunnittelija"]  1
   Add suunnittelija  Herkko  Heraldic  1
   Add suunnittelija  Huge  L  2
+  Add suunnittelija  Masan  Jaardit  3
 
 New suunnittelija docs could be deleted but not disabled
   Wait Until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[2]//button[@data-test-class='delete-schemas.suunnittelija']
@@ -80,34 +81,53 @@ Mikko toggles DeAngelo back to enabled, and eventually to disabled again
   Scroll and click  section[data-doc-type='suunnittelija']:eq(0) button[data-test-id='toggle-document-status']
   Confirm yes no dialog
   Document status is disabled  suunnittelija  1
+
+Mikko does not see send-parties-to-krysp button
+  Element should not be visible  xpath=//button[@data-test-id='parties-to-krysp']
   Logout
 
 Sonja logs in and sees DeAngelo is disabled
   As Sonja
   Open application  ${appname}  753-416-25-30
   Open tab  parties
-  Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  3
+  Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  4
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[1]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
 
 Sonja could approve/reject/remove new suunnittelija docs
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[2]//button[@data-test-id='approve-doc-suunnittelija']
-  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[3]//button[@data-test-id='approve-doc-suunnittelija']
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[2]//button[@data-test-id='reject-doc-suunnittelija']
-  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[3]//button[@data-test-id='reject-doc-suunnittelija']
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[2]//button[@data-test-class='delete-schemas.suunnittelija']
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[3]//button[@data-test-id='approve-doc-suunnittelija']
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[3]//button[@data-test-id='reject-doc-suunnittelija']
   Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[3]//button[@data-test-class='delete-schemas.suunnittelija']
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[4]//button[@data-test-id='approve-doc-suunnittelija']
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[4]//button[@data-test-id='reject-doc-suunnittelija']
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='suunnittelija'])[4]//button[@data-test-class='delete-schemas.suunnittelija']
 
-Sonja adds fourth suunnittelija, but removes it instantly
-  Add suunnittelija  Ronja  Piippo  3
-  Scroll and click  section[data-doc-type='suunnittelija']:eq(3) button[data-test-class='delete-schemas.suunnittelija']
+Sonja adds fifth suunnittelija, but removes it instantly
+  Add suunnittelija  Ronja  Piippo  4
+  Scroll and click  section[data-doc-type='suunnittelija']:eq(4) button[data-test-class='delete-schemas.suunnittelija']
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  3
+  Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  4
 
 Sonja approves Herkko, but rejects Huge
   Approve accordion  suunnittelija  1
   Reject accordion  suunnittelija  2
+  Approve accordion  suunnittelija  3
   Accordion approved  suunnittelija  1
   Accordion rejected  suunnittelija  2
+  Accordion approved  suunnittelija  3
+
+Sonja can move new designers to KRYSP, after confirming warning dialog
+  Element should be visible  xpath=//button[@data-test-id='parties-to-krysp']
+  Click by test id  parties-to-krysp
+  Wait until  Element should be visible  xpath=//div[@id='modal-dialog']//div[@data-test-id='yes-no-dialog']
+  Wait until  Element should contain  xpath=//div[@id='modal-dialog']//div[@data-test-id='yes-no-dialog']//p  Huge L
+  Confirm yes no dialog
+  Positive indicator should be visible
+  # Two documents have been transferred to backing system
+  Indicator should contain text  2
+  Close sticky indicator
   Logout
 
 
