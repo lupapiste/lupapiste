@@ -146,7 +146,8 @@ Authority decides that a verdict is not required
   Positive indicator should be visible
 
 Authority tries to send application to backend
-  Click enabled by test id  approve-application
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
 
 Can not be send before base app
   Confirm  integration-error-dialog
@@ -161,7 +162,8 @@ Fetch verdict to base app
 
 Approve foreman app
   Open foreman application  1
-  Click enabled by test id  approve-application
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Wait Until  Application state should be  acknowledged
 
 Link foreman approval to base app
@@ -198,7 +200,8 @@ Verdict could be given
   Wait Until  Element should be visible  //div[@id="application-verdict-tab"]//button[@data-test-id="give-verdict"]
 
 Re-send and give verdict
-  Click enabled by test id  approve-application
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
   Submit empty verdict  foremanVerdictGiven
   Application state should be  foremanVerdictGiven

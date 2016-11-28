@@ -27,6 +27,8 @@ Sonja logs in and sends app to backing system
   Sonja logs in
   Open application  ${appname}  753-416-25-30
   Click enabled by test id  approve-application
+  Tab should be visible  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   # Deny warning about designers
   Wait Until  Page should contain  Suunnittelijoiden tietoja hyväksymättä
   Deny yes no dialog
@@ -37,6 +39,8 @@ Sonja logs in and sends app to backing system
   Accordion approved  paasuunnittelija
   Accordion approved  suunnittelija
   Click enabled by test id  approve-application
+  Tab should be visible  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Wait until  Application state should be  sent
 
 Sonja fetches verdict from municipality KRYSP service
