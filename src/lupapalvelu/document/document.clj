@@ -14,6 +14,7 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.state-machine :as sm]
             [lupapalvelu.states :as states]
             [lupapalvelu.user :as usr]
             [lupapalvelu.wfs :as wfs]
@@ -26,8 +27,9 @@
 
 (defn created-after-verdict? [document application]
   (if (contains? states/post-verdict-states (keyword (:state application)))
-    (let [verdict-history-item (->> (app/state-history-entries (:history application))
-                                    (filter #(= (:state %) "verdictGiven"))
+    (let [verdict-state        (sm/verdict-given-state application)
+          verdict-history-item (->> (app/state-history-entries (:history application))
+                                    (filter #(= (:state %) (name verdict-state)))
                                     (sort-by :ts)
                                     last)]
       (when-not verdict-history-item

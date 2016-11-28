@@ -7,10 +7,12 @@
             [lupapalvelu.server]                            ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
-            [sade.strings :as ss]
-            [sade.schemas :as ssc]
             [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
+            [lupapalvelu.state-machine :as sm]
+            [clojure.set :refer [difference]]
+            [sade.strings :as ss]
+            [sade.schemas :as ssc]
             [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
 
@@ -154,14 +156,17 @@
 
 (mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
 
-(defn validate-verdict-history-entry [{:keys [state history verdicts]}]
-  (when (contains? states/post-verdict-states (keyword state))
-    (let [verdict-history-entries (->> (app/state-history-entries history)
-                                       (filter #(= (:state %) "verdictGiven")))]
-      (when (and (zero? (count verdict-history-entries)) (not (zero? (count verdicts))))
-        (format "Application has verdict, but no verdict history entry (has %d verdicts)" (count verdicts))))))
+(def ignore-states-set #{:closed :acknowledged})
 
-(mongocheck :applications validate-verdict-history-entry :history :verdicts :state)
+(defn validate-verdict-history-entry [{:keys [state history verdicts] :as application}]
+  (when (contains? (difference states/post-verdict-states ignore-states-set) (keyword state))
+    (let [verdict-state (sm/verdict-given-state application)
+          verdict-history-entries (->> (app/state-history-entries history)
+                                       (filter #(= (:state %) (name verdict-state))))]
+      (when (and (zero? (count verdict-history-entries)) (not (zero? (count verdicts))))
+        (format "Application has verdict, but no verdict history entry ('%s' required, has %d verdicts)" verdict-state (count verdicts))))))
+
+(mongocheck :applications validate-verdict-history-entry :history :verdicts :state :primaryOperation :permitType :permitSubtype)
 
 (defn submitted-rest-interface-schema-check-app [application]
   (when (and (#{"R" "YA"} (:permitType application))
