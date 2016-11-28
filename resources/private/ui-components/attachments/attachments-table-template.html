@@ -115,7 +115,8 @@
                          params: {attachmentId: id,
                          storeState: true,
                          noteCss: 'table-reject-note',
-                         editorCss: 'table-reject-note-editor'}}"></td>
+                         editorCss: 'table-reject-note-editor',
+                         prefix: util.getIn($data, ['type','type-group']) + '-' + util.getIn($data, ['type','type-id'])}}"></td>
         </tr>
         <!-- /ko -->
         <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->

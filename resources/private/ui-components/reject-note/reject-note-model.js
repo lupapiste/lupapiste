@@ -6,6 +6,11 @@
 // [editorCss]: Note top-level CSS definitions (default reject-note-editor class)
 // [storeState]: If true, then the editor state is retained after
 // reinitialization. Used by attachment table (default false)
+// [prefix]: prefix for test ids. The ids are [prefix]-note and
+// [prefix]-editor. If the prefix is not given, the default
+// concatenated from docModel schema name and path. Thus, attachments
+// need always give explicit prefix.
+
 LUPAPISTE.RejectNoteModel = function( params ) {
   "use strict";
   var self = this;
@@ -20,6 +25,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   // functions (see below)
   self.isRejected = ko.observable();
   self.note = ko.observable();
+  self.testPrefix = params.prefix;
   // Gets the note contents as argument.
   var updateNote = _.noop;
 
@@ -30,7 +36,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
           || lupapisteApp.models.currentUser.isAuthority());
   });
 
-  // Editor (bubble dialog) related
+  // Editor related
 
   self.showEditor = ko.observable( false );
 
@@ -71,6 +77,10 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     var docModel = params.docModel;
     var path = params.path;
     var meta = docModel.getMeta( path );
+    self.testPrefix = _( docModel.schemaName )
+      .concat( path )
+      .filter()
+      .join( "-" );
 
     self.note( _.get( meta, "_approved.note" ) );
 
@@ -143,5 +153,6 @@ LUPAPISTE.RejectNoteModel = function( params ) {
 
   // Initialization based on parameters.
   (params.docModel ? docModelInit : attachmentInit)();
+  self.testPrefix = params.prefix || self.testPrefix;
 
 };

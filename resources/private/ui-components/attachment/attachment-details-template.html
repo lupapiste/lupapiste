@@ -63,7 +63,8 @@
       <div data-bind="component: { name:'approval', params: {approval: $data.approval} }"></div>
       <div data-bind="component: {name: 'reject-note',
                       params: {attachmentId: id,
-                      editorCss: 'attachment-reject-note-editor'}}"></div>
+                      editorCss: 'attachment-reject-note-editor',
+                      prefix: 'details-reject'}}"></div>
       <div class="attachment-info-wrapper">
         <div class="attachment-info-header">
           <h1>
@@ -159,7 +160,8 @@
                     data-bind="css: {'even-row': util.isEven( $index() ),
                                'odd-row': util.isOdd( $index() )}">
                   <td  colspan="6"
-                       data-bind="text: $parent.rejectNote( $data )"></td>
+                       data-bind="text: $parent.rejectNote( $data ),
+                                  testId: _.join( [$index(), $data.version.major, $data.version.minor, 'note'], '-')"></td>
                 </tr>
                 <!-- /ko -->
               </tbody>

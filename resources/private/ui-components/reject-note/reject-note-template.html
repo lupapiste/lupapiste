@@ -3,7 +3,8 @@
   <!-- ko if: showNote -->
   <div data-bind="css: noteCss">
     <span data-bind="text: note,
-                     css: {'reject-note--rejected': isRejected}">
+                     css: {'reject-note--rejected': isRejected},
+                     testId: testPrefix + '-note'">
     </span>
   </div>
   <!-- /ko -->
@@ -12,7 +13,8 @@
                   css: editorCss">
     <input type="text"
            data-bind="textInput: editorNote,
-                      hasFocus: showEditor">
+                      hasFocus: showEditor,
+                      testId: testPrefix + '-editor'">
   </div>
   <!-- /ko -->
 </script>
