@@ -11,7 +11,7 @@ $tr-color-even: $gray246;
     }
     &:hover:nth-child(even) {
       background: $tr-color-even;
-    }    
+    }
   }
 }
 
@@ -358,7 +358,7 @@ div.attachments-table-container {
     }
     td {
       vertical-align: top;
-    }    
+    }
     .attachments-table--widest {
       width: 80%;
     }
