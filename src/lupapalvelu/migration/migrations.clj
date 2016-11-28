@@ -2566,11 +2566,11 @@
                                   {:documents
                                   {$elemMatch {$or
                                                [{$and [{:schema-info.name "tyoaika"},
-                                                     {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
+                                                     {:data.tyoaika-alkaa-pvm.modified {$exists true, $gt 0}},
                                                      {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
                                                      {:data.tyoaika-alkaa-ms.value {$exists false}}]}
                                                {$and [{:schema-info.name "tyoaika"},
-                                                      {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                                      {:data.tyoaika-paattyy-pvm.modified {$exists true, $gt 0}},
                                                       {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
                                                       {:data.tyoaika-paattyy-ms.value {$exists false}}]}]}}}))}
 
@@ -2578,14 +2578,14 @@
                              add-start-timestamp
                              {:documents
                               {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                                 {:data.tyoaika-alkaa-pvm.modified {$gt 0}},
+                                                 {:data.tyoaika-alkaa-pvm.modified {$exists true, $gt 0}},
                                                  {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
                                                  {:data.tyoaika-alkaa-ms.value {$exists false}}]}}})
   (update-applications-array :documents
                            add-end-timestamp
                            {:documents
                             {$elemMatch {$and [{:schema-info.name "tyoaika"},
-                                               {:data.tyoaika-paattyy-pvm.modified {$gt 0}},
+                                               {:data.tyoaika-paattyy-pvm.modified {$exists true, $gt 0}},
                                                {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
                                                {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
 ;;

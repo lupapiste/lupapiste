@@ -28,10 +28,15 @@
                 (> (count link-permit-data)))
     (warn "Application " app-id " has fewer link permits than required for operation '" primary-op "'!")))
 
+(defn- link-permit-approved? [link-permit]
+  (or (= (:type link-permit) "kuntalupatunnus") ; Links to external applications are assumend to already have been approved
+      (-> link-permit :app-data :state keyword states/post-sent-states)))
+
 (defn update-backend-ids-in-link-permit-data [application]
   (check-link-permit-count application)
   (let [link-permit-data (link-permits-with-app-data application)]
-    (when (and (foreman/foreman-app? application) (-> link-permit-data first :app-data :state keyword states/post-sent-states not))
+    (when (and (foreman/foreman-app? application)
+               (not (link-permit-approved? (first link-permit-data))))
       (fail! :error.link-permit-app-not-in-post-sent-state))
     (assoc application :linkPermitData (->> (map update-backend-id-in-link-permit link-permit-data)
                                             (map #(dissoc % :app-data))))))
