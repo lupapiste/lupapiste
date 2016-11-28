@@ -7,7 +7,9 @@
           <span class="like-btn">
             <i class="lupicon-circle-attention rejected"></i>
             <i class="lupicon-circle-check approved"></i>
-            <span class="is-details" data-bind="text: details"></span>
+            <span class="is-details"
+                  data-bind="text: details,
+                             css: {'is-details--rejected': isRejected }"></span>
           </span>
         </span>
 </script>

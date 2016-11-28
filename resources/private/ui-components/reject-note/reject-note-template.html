@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="reject-note-template">
+  <!-- ko if: showNote -->
+  <div data-bind="css: noteCss">
+    <span data-bind="text: note,
+                     css: {'reject-note--rejected': isRejected},
+                     testId: testPrefix + '-note'">
+    </span>
+  </div>
+  <!-- /ko -->
+  <!-- ko if: showEditor -->
+  <div data-bind="event: {keydown: closeEditor},
+                  css: editorCss">
+    <input type="text"
+           data-bind="textInput: editorNote,
+                      hasFocus: showEditor,
+                      testId: testPrefix + '-editor'">
+  </div>
+  <!-- /ko -->
+</script>

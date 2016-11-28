@@ -11,7 +11,7 @@ $tr-color-even: $gray246;
     }
     &:hover:nth-child(even) {
       background: $tr-color-even;
-    }    
+    }
   }
 }
 
@@ -307,14 +307,46 @@ table.company-users-table {
   }
 }
 
+table.table-even-odd {
+  @include no-row-hover;
+  tr.even-row,
+  tr.even-row:hover {
+    background-color: $tr-color-even;
+  }
+  tr.odd-row,
+  tr.odd-row:hover {
+    background-color: white;
+  }
+}
+
 div.attachments-table-container {
   padding: {
   top: 1em;
   right: .6em;
   left: .5em;
-}
+  }
   table.attachments-table {
-    @include no-row-hover;
+        tr.row--rejected {
+      border-bottom: none;
+      td {
+        padding-bottom: 0;
+
+      }
+    }
+    tr.reject-note-row {
+      border-top: none;
+      padding: 0;
+      > td {
+        padding: {
+          top: 0;
+          left: 4px;
+          right: 0;
+          bottom: 4px;
+        }
+        min-height: 0;
+        height: auto;
+      }
+    }
     margin-bottom: 1em;
     .checkbox-wrapper {
       border: none;
@@ -326,7 +358,7 @@ div.attachments-table-container {
     }
     td {
       vertical-align: top;
-    }    
+    }
     .attachments-table--widest {
       width: 80%;
     }
@@ -340,6 +372,10 @@ div.attachments-table-container {
     magint-right: 1px;
   }
 }
+
+
+
+
 
 table.suti-admin-table {
   margin-top: $marginM;

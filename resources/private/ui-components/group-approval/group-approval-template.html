@@ -25,7 +25,10 @@
           <i class="lupicon-check"></i>
           <span data-bind="ltext: 'document.approve'"></span>
         </button>
+        <div data-bind="component: {name: 'reject-note',
+                        params: {docModel: docModel, path: path}}"></div>
       </div>
+      
     </script>
   </section>
 </body>

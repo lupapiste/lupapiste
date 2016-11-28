@@ -1352,6 +1352,10 @@ Scroll to top
 Scroll to bottom
   Execute javascript  window.scrollTo(0,888888)
 
+Scroll by
+  [Arguments]  ${deltaY}
+  Execute javascript  window.scrollBy(0, ${deltaY})
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]

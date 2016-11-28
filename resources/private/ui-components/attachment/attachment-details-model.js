@@ -109,6 +109,16 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.showAttachmentVersionHistory(val);
   });
 
+  self.versions = self.disposedPureComputed( function() {
+    return _.reverse( _.clone( self.attachment().versions ) );
+  });
+
+  // Version notes are only shown to authorities.
+  self.rejectNote = function( version ) {
+    return lupapisteApp.models.currentUser.isAuthority()
+    && service.getRejectNote( self.id, version.fileId );
+  };
+
   // Versions - add
   self.newAttachmentVersion = function() {
     self.disablePreview(true);
@@ -263,4 +273,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
   self.addHubListener("side-panel-close", _.partial(self.disablePreview, false));
 
+  // Initial refresh just in case
+  querySelf();
 };

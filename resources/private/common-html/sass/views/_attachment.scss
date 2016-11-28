@@ -62,11 +62,33 @@ $previewHeight: 500px;
     th {
       padding: $marginS;
     }
-    td {
+    tr > td {
       padding: $marginS;
       max-width: 130px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    tr.version-row--noted {
+      border-bottom: none;
+      > td {
+        padding-bottom: 0;
+        min-height: 0;
+        height: initial;
+      }
+    }
+    tr.version-reject-note-row {
+      border-top: none;
+      padding: 0;
+      > td {
+        padding: {
+          top: 0;
+          left: 6px;
+          right: 0;
+          bottom: 4px;
+        }
+        min-height: 0;
+        height: auto;
+      }
     }
   }
 }

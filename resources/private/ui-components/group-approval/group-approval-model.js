@@ -19,6 +19,7 @@ LUPAPISTE.GroupApprovalModel = function( params ) {
 
   self.remove = params.remove || {};
   self.docModel = params.docModel;
+  self.path = params.path;
   self.model = params.model;
   self.isApprovable = Boolean(params.subSchema.approvable) ;
   self.hasContents = params.remove || self.isApprovable;

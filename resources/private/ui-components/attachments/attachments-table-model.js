@@ -54,7 +54,11 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   };
 
   self.reject = function(attachment) {
-    service.rejectAttachment(attachment.id);
+    if( service.isRejected( attachment )) {
+      service.rejectAttachmentNoteEditorState( attachment.id );
+    } else {
+      service.rejectAttachment(attachment.id);
+    }
   };
 
   self.authorities = accordionService.authorities;

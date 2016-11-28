@@ -61,7 +61,10 @@
       </div>
 
       <div data-bind="component: { name:'approval', params: {approval: $data.approval} }"></div>
-
+      <div data-bind="component: {name: 'reject-note',
+                      params: {attachmentId: id,
+                      editorCss: 'attachment-reject-note-editor',
+                      prefix: 'details-reject'}}"></div>
       <div class="attachment-info-wrapper">
         <div class="attachment-info-header">
           <h1>
@@ -117,7 +120,7 @@
           <div class="attachment-file-versions-content"
                data-bind="if: $data.showAttachmentVersionHistory">
             <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-            <table class="table">
+            <table class="table table-even-odd">
               <thead>
                 <tr>
                   <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
@@ -128,9 +131,11 @@
                   <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
                 </tr>
               </thead>
-              <tbody data-bind="foreach: $data.attachment().versions">
-                <tr style="cursor: pointer;"
-                    data-bind="attr: {'data-test-id': 'version-row-' + $data.version.major + '.' + $data.version.minor}">
+              <tbody data-bind="foreach: $data.versions">
+                <tr data-bind="attr: {'data-test-id': 'version-row-' + $data.version.major + '.' + $data.version.minor},
+                               css: {'even-row': util.isEven( $index() ),
+                               'odd-row': util.isOdd( $index() ),
+                               'version-row--noted': $parent.rejectNote( $data )}">
                   <td>
                     <!-- TODO: download via service -->
                     <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
@@ -150,6 +155,15 @@
                        data-test-id="delete-version"></a>
                   </td>
                 </tr>
+                <!-- ko if: $parent.rejectNote( $data ) -->
+                <tr class="version-reject-note-row"
+                    data-bind="css: {'even-row': util.isEven( $index() ),
+                               'odd-row': util.isOdd( $index() )}">
+                  <td  colspan="6"
+                       data-bind="text: $parent.rejectNote( $data ),
+                                  testId: _.join( [$index(), $data.version.major, $data.version.minor, 'note'], '-')"></td>
+                </tr>
+                <!-- /ko -->
               </tbody>
             </table>
           </div>
