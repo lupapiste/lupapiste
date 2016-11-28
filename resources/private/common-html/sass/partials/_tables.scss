@@ -374,27 +374,7 @@ div.attachments-table-container {
 }
 
 
-tr.version-row--noted {
-  border-bottom: none;
-  td {
-    padding-bottom: 0;
-  }
-}
 
-tr.version-reject-note-row {
-  border-top: none;
-  padding: 0;
-  > td {
-    padding: {
-      top: 0;
-      left: 4px;
-      right: 0;
-      bottom: 4px;
-    }
-    min-height: 0;
-    height: auto;
-  }
-}
 
 
 table.suti-admin-table {

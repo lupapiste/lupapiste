@@ -320,6 +320,7 @@ LUPAPISTE.AttachmentsService = function() {
                            note: note},
                           hubParams);
     self.rejectAttachmentNoteEditorState( null );
+    self.queryOne( attachmentId );
   };
 
   self.getRejectNote = function( attachmentId, fileId ) {

@@ -110,11 +110,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   self.versions = self.disposedPureComputed( function() {
-    return _.reverse( self.attachment().versions );
+    return _.reverse( _.clone( self.attachment().versions ) );
   });
 
+  // Version notes are only shown to authorities.
   self.rejectNote = function( version ) {
-    return service.getRejectNote( self.id, version.fileId );
+    return lupapisteApp.models.currentUser.isAuthority()
+    && service.getRejectNote( self.id, version.fileId );
   };
 
   // Versions - add
