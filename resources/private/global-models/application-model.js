@@ -375,35 +375,44 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-var checkDesigners = function(yesFn) {
-  var nonApprovedDesigners = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
-      return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
-    })
-    .map(function(docModel) {
-      var title = loc([docModel.schemaName, "_group_label"]);
-      var accordionService = lupapisteApp.services.accordionService;
-      var identifierField = accordionService.getIdentifier(docModel.docId);
-      var identifier = identifierField && identifierField.value();
-      var operation = null; // We'll assume designer is never attached to operation
-      var docData = accordionService.getDocumentData(docModel.docId); // The current data
-      var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
-      var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
-      // Escape HTML special chars
-      return "<li>" + _.escape(title + headerDescription) + "</li>";
-    })
-    .value();
+  self.nonApprovedDesigners = ko.observableArray([]);
 
-  // All designers have not been approved?
-  if (!_.isEmpty(nonApprovedDesigners)) {
-    var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
-    hub.send("show-dialog", {ltitle: "application.designers-not-approved",
-      size: "medium",
-      component: "yes-no-dialog",
-      componentParams: {text: text, yesFn: yesFn, lyesTitle: "continue", lnoTitle: "cancel"}});
-  } else {
-    yesFn();
+  var checkDesigners = function(yesFn) {
+    var nonApprovedDesigners = self.nonApprovedDesigners();
+    // All designers have not been approved?
+    if (!_.isEmpty(nonApprovedDesigners)) {
+      var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
+      hub.send("show-dialog", {ltitle: "application.designers-not-approved",
+        size: "medium",
+        component: "yes-no-dialog",
+        componentParams: {text: text, yesFn: yesFn, lyesTitle: "continue", lnoTitle: "cancel"}});
+    } else {
+      yesFn();
+    }
+  };
+
+  function checkForNonApprovedDesigners() {
+    var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+        return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
+      })
+      .map(function(docModel) {
+        var title = loc([docModel.schemaName, "_group_label"]);
+        var accordionService = lupapisteApp.services.accordionService;
+        var identifierField = accordionService.getIdentifier(docModel.docId);
+        var identifier = identifierField && identifierField.value();
+        var operation = null; // We'll assume designer is never attached to operation
+        var docData = accordionService.getDocumentData(docModel.docId); // The current data
+        var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
+        var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
+        // Escape HTML special chars
+        return "<li>" + _.escape(title + headerDescription) + "</li>";
+      })
+      .value();
+    self.nonApprovedDesigners(nonApproved);
   }
-};
+
+  hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
+  hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
 
   self.approveApplication = function() {
     if (self.stateChanged()) {
