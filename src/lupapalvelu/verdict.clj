@@ -214,6 +214,8 @@
           pk-urlhash (if (= (count attachments) 1)
                        (-> attachments first :linkkiliitteeseen pandect/sha1)
                        verdict-id)]
+      (when-not (seq attachments)
+        (warnf "no valid attachment links in poytakirja, verdict-id: %s" verdict-id))
       (doall
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
@@ -251,7 +253,9 @@
                                                :content temp-file}))
              (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
-    pk))
+    (do
+      (warnf "no attachments ('liite' elements) in poytakirja, verdict-id: %s" verdict-id)
+      pk)))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
