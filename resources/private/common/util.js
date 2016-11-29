@@ -428,7 +428,7 @@ var util = (function($) {
     return number % 2;
   }
   function isEven( number ) {
-    return !isOdd();
+    return !isOdd(number);
   }
 
   return {
