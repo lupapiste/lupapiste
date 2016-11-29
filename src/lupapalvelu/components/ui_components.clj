@@ -127,12 +127,6 @@
       (read-component-list-from-jar jar (str "private/" (name component)) pattern)
       (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
 
-(defn main-css-count []
-  (let [jar (util/this-jar lupapalvelu.main)
-        file-list (if (in-jar? jar)
-                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
-                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
-    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs

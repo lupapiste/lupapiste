@@ -1,15 +1,16 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapiste.mongocheck.core :refer [mongocheck]]
             [lupapiste.mongocheck.checks :as checks]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.document.model :as model]
-            [lupapalvelu.application :as app]
             [lupapalvelu.server]                            ; ensure all namespaces are loaded
+            [lupapalvelu.application :as app]
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.rest.applications-data :as rest-application-data]
             [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
             [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
             [clojure.set :refer [difference]]
             [sade.strings :as ss]
             [sade.schemas :as ssc]
@@ -172,7 +173,7 @@
   (when (and (#{"R" "YA"} (:permitType application))
              (= (keyword (:state application)) :submitted)
              (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
-    (let [app (select-keys application rest-application-data/required-fields-from-db)]
+    (let [app (select-keys (mongo/with-id application) rest-application-data/required-fields-from-db)]
       ((sc/checker HakemusTiedot) (rest-application-data/process-application app)))))
 
 (mongocheck :applications submitted-rest-interface-schema-check-app :documents :state :primaryOperation :drawings)
