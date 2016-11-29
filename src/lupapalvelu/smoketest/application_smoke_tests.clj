@@ -176,4 +176,4 @@
     (let [app (select-keys (mongo/with-id application) rest-application-data/required-fields-from-db)]
       ((sc/checker HakemusTiedot) (rest-application-data/process-application app)))))
 
-(mongocheck :applications submitted-rest-interface-schema-check-app :documents :state :primaryOperation :drawings)
+(apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
