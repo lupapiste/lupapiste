@@ -515,7 +515,7 @@
     (->> (fail :error.invalid-csrf-token) (resp/json) (resp/status 403))))
 
 (defn tokenless-request? [request]
-   (re-matches #"^/proxy/" (:uri request)))
+   (re-matches #"^/proxy/.*" (:uri request)))
 
 (defn anti-csrf [handler]
   (fn [request]
