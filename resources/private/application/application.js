@@ -538,6 +538,7 @@
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
         .complete(LUPAPISTE.ModalDialog.close)
         .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
+        .onError("error.neighbor-marked-done", _.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
         .call();
       return false;
     };
