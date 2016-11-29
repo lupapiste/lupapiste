@@ -249,7 +249,7 @@
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
                        :foremen               (foremen application)
                        :tyomaasta-vastaava    (tyomaasta-vastaava application)
-                       :closed                (:closed application)}]
+                       :closed                (->iso-8601-date (c/from-long (long (:closed application))))}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
