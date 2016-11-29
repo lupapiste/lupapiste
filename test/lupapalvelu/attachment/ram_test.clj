@@ -80,46 +80,49 @@
 (facts "RAM pre-checkers"
        (defn ram-fail [code] {:ok false :text (name code)})
 
-       (let [att1 (dissoc (ssg/generate Attachment) :ramLink)
-             att2 (assoc (ssg/generate Attachment) :ramLink (:id att1))
-             att3 (assoc (ssg/generate Attachment) :ramLink (:id att2))]
+       (let [att1    (assoc (dissoc (ssg/generate Attachment) :ramLink)
+                            :latestVersion {:fileId "fileid1"})
+             att2    (assoc (ssg/generate Attachment)
+                            :ramLink (:id att1)
+                            :latestVersion {:fileId "fileid2"})
+             att3    (assoc (ssg/generate Attachment) :ramLink (:id att2))]
          (fact "attachment-status-ok"
-               (attachment-status-ok {:data {:attachmentId (:id att2)}
-                                      :application {:attachments [att1 (dissoc att2 :state)]}}
+               (attachment-status-ok {:data        {:attachmentId (:id att2)}
+                                      :application {:attachments [att1 (assoc-in att2 [:approvals :fileid2 :state] :requires_user_action)]}}
                                      ) => (ram-fail :error.attachment-not-approved)
-               (attachment-status-ok {:data {:attachmentId (:id att2)}
-                                      :application {:attachments [att1 (assoc att2 :state :ok)]}}
+               (attachment-status-ok {:data        {:attachmentId (:id att2)}
+                                      :application {:attachments [att1 (assoc-in att2 [:approvals :fileid2 :state] :ok)]}}
                                      ) => nil?)
 
          (fact "ram-status-not-ok"
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}
-                                   :application {:attachments [(assoc att1 :state :bad) att2]}}
+               (ram-status-not-ok {:data        {:attachmentId (:id att1)}
+                                   :application {:attachments [att1 att2]}}
                                   ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att1)}
-                                   :application {:attachments [(assoc att1 :state :ok) att2]}}
+               (ram-status-not-ok {:data        {:attachmentId (:id att1)}
+                                   :application {:attachments [(assoc-in att1 [:approvals :fileid1 :state] :ok) att2]}}
                                   ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}
+               (ram-status-not-ok {:data        {:attachmentId (:id att2)}
                                    :application {:attachments [att1 (dissoc att2 :state)]}}
                                   ) => nil?
-               (ram-status-not-ok {:data {:attachmentId (:id att2)}
-                                   :application {:attachments [att1 (assoc att2 :state :ok)]}}
+               (ram-status-not-ok {:data        {:attachmentId (:id att2)}
+                                   :application {:attachments [att1 (assoc-in att2 [:approvals :fileid2 :state] :ok)]}}
                                   ) => (ram-fail :error.ram-approved))
 
          (fact "ram-not-linked"
-               (ram-not-linked {:data {:attachmentId (:id att3)}
+               (ram-not-linked {:data        {:attachmentId (:id att3)}
                                 :application {:attachments [att1 att2 att3]}}) => nil?
-               (ram-not-linked {:data {:attachmentId (:id att2)}
+               (ram-not-linked {:data        {:attachmentId (:id att2)}
                                 :application {:attachments [att1 att2 att3]}}
                                ) => (ram-fail :error.ram-linked)
-               (ram-not-linked {:data {:attachmentId (:id att1)}
+               (ram-not-linked {:data        {:attachmentId (:id att1)}
                                 :application {:attachments [att1 att2 att3]}}
                                ) => (ram-fail :error.ram-linked)
-               (ram-not-linked {:data {:attachmentId (:id att3)}
+               (ram-not-linked {:data        {:attachmentId (:id att3)}
                                 :application {:attachments [att1 att2 att3]}})=> nil?
-               (ram-not-linked {:data {}
+               (ram-not-linked {:data        {}
                                 :application {:attachments [att1 att2 att3]}}) => nil?)
          (fact "attachment-type-allows-ram"
-               (letfn [(params [type-group] {:data {:attachmentId (:id att1)}
+               (letfn [(params [type-group] {:data        {:attachmentId (:id att1)}
                                              :application {:attachments [(assoc-in att1 [:type :type-group] type-group)]}})]
                  (attachment-type-allows-ram (params "selvitykset")) => (ram-fail :error.ram-not-allowed)
                  (attachment-type-allows-ram (params "paapiirustus")) => nil?))))

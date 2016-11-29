@@ -65,13 +65,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rejectAttachment  = trackClickWrap("rejectAttachment",  service.rejectAttachment,  self.id);
   addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
   addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
-  self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
+  self.isApproved   = _.wrap( self.attachment(), service.isApproved );
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
+  self.isRejected   = _.wrap( self.attachment(), service.isRejected );
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
   self.approval = self.disposedPureComputed(function () {
-    return self.attachment().approved;
+    var fileId = util.getIn( self.attachment, ["latestVersion", "fileId"]);
+    return fileId && util.getIn( self.attachment, ["approvals", fileId]);
   });
 
   var editable = self.disposedComputed(function() {
@@ -110,14 +111,19 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   self.versions = self.disposedPureComputed( function() {
-    return _.reverse( _.clone( self.attachment().versions ) );
-  });
+    return _( self.attachment().versions)
+      .map( function( v ) {
+        var approval = util.getIn( self.attachment, ["approvals", v.fileId], {});
 
-  // Version notes are only shown to authorities.
-  self.rejectNote = function( version ) {
-    return lupapisteApp.models.currentUser.isAuthority()
-    && service.getRejectNote( self.id, version.fileId );
-  };
+        return _.merge( {note: lupapisteApp.models.currentUser.isAuthority()
+                         && approval.note,
+                         approved: approval.state === service.APPROVED,
+                         rejected: approval.state === service.REJECTED},
+                        v);
+      })
+      .reverse()
+      .value();
+  });
 
   // Versions - add
   self.newAttachmentVersion = function() {

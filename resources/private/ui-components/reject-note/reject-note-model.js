@@ -119,8 +119,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     var attachment = service.getAttachment( attachmentId );
 
     self.disposedComputed( function() {
-      self.isRejected( util.getIn( attachment,
-                                   ["approved", "value"]) === "rejected");
+      self.isRejected( service.isRejected( attachment ));
 
       self.note( service.getRejectNote( attachmentId,
                                         util.getIn( attachment,

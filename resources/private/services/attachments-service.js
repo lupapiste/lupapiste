@@ -324,10 +324,8 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.getRejectNote = function( attachmentId, fileId ) {
-    return _.get( _.find( util.getIn( self.getAttachment( attachmentId ),
-                                      ["rejectNotes"]),
-                          {fileId: fileId}),
-                  "note");
+    var fileId = util.getIn( attachment, ["latestVersion", "fileid"]);
+    return fileId && util.getIn( attachment, ["approvals", fileId, "note"]);
   };
 
   // Used by reject-note component.
@@ -404,12 +402,18 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
+  function attachmentState( attachment ) {
+    var fileId = util.getIn( attachment, ["latestVersion", "fileId"]);
+    return fileId && util.getIn( attachment, ["approvals", fileId, "state"]);
+  }
+
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.APPROVED;
+    return attachmentState(attachment ) === self.APPROVED;
   };
+
   self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED
+    return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {

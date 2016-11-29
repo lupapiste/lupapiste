@@ -9,8 +9,7 @@
     (command veikko :approve-attachment :id application-id :attachmentId id  :fileId (:fileId latestVersion)) => ok?
     (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
           approved (get approvals (keyword (:fileId latestVersion)))]
-      att => (in-state? "ok")
-      (:value approved) => "approved"
+      (:state approved) => "ok"
       (:user approved) => {:id veikko-id, :firstName "Veikko", :lastName "Viranomainen"}
       (:timestamp approved) => pos?)))
 
@@ -19,8 +18,7 @@
     (command veikko :reject-attachment :id application-id :attachmentId id :fileId (:fileId latestVersion)) => ok?
     (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
           approved (get approvals (keyword (:fileId latestVersion)))]
-      att => (in-state? "requires_user_action")
-      (:value approved) => "rejected"
+      (:state approved) => "requires_user_action"
       (:user approved) => {:id veikko-id, :firstName "Veikko", :lastName "Viranomainen"}
       (:timestamp approved) => pos?)))
 
@@ -30,7 +28,7 @@
          (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId file-id :note note) => ok?
          (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
                approved (get approvals (keyword file-id))]
-           att => (in-state? "requires_user_action")
+           (:state approved) => "requires_user_action"
            (:note approved) => note))))
 
 (facts "attachment approval"
@@ -69,8 +67,9 @@
           att (first attachments)]
 
       (fact "After new version upload the attachment is no longer approved/rejected"
-        (:approved att) => nil
-        att => (in-state? "requires_authority_action"))
+            (let [{:keys [approvals latestVersion]} att
+                  approved (get approvals (keyword (:fileId latestVersion)))]
+              (:state approved) => "requires_authority_action"))
 
       (fact "Veikko rejects attachment"
             (reject-attachment application-id (first attachments)))
@@ -96,11 +95,13 @@
           :originalFileId (get-in att [:latestVersion :originalFileId])) => ok?)
 
       (let [{:keys [attachments]} (query-application veikko application-id)
-            att (first attachments)]
+            att (first attachments)
+            {:keys [approvals latestVersion]} att
+            approved (get approvals (keyword (:fileId latestVersion)))]
 
-        (fact "After the latest version was deleted the attachment is no longer approved/rejected"
-          (:approved att) => nil
-          att => (in-state? "requires_authority_action")
-          (let [{approvals :approvals} att]
-            (count approvals) => 1
-            (-> approvals vals first :note) => "Bu hao!"))))))
+        (fact "After the latest version was deleted the previous version is popped"
+              approved =contains=> {:state "requires_user_action"
+                                    :note "Bu hao!"}
+              (let [{approvals :approvals} att]
+                (count approvals) => 1
+                (-> approvals vals first :note) => "Bu hao!"))))))

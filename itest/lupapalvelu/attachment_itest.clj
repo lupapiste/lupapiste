@@ -49,12 +49,12 @@
       (fact "attachment has been saved to application"
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
                                                                                  {:type                 {:type-group "paapiirustus" :type-id "asemapiirros"}
-                                                                                  :state                "requires_user_action"
+                                                                                  ;;:state                "requires_user_action"
                                                                                   :requestedByAuthority true
                                                                                   :versions             []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
                                                                                   {:type                 {:type-group "paapiirustus" :type-id "pohjapiirustus"}
-                                                                                   :state                "requires_user_action"
+                                                                                   ;;:state                "requires_user_action"
                                                                                    :requestedByAuthority true
                                                                                    :versions             []}))
 
@@ -596,7 +596,7 @@
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
 
     (fact "Attachment state is not ok"
-      (:state (get-attachment-info application (:id attachment))) =not=> "ok")
+      (attachment-state (get-attachment-info application (:id attachment))) =not=> "ok")
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
@@ -617,7 +617,7 @@
          (get-in attachment [:auth 1 :role]) => "stamper")
 
       (fact "Attachment state is ok"
-        (:state attachment) => "ok")
+        (attachment-state attachment) => "ok")
 
       (fact "New fileid is in response" (get-in attachment [:latestVersion :fileId]) =not=> file-id)
 
@@ -862,7 +862,7 @@
       (fact "Sonja approves RAM attachment"
             (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
       (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]
-        (fact "RAM is approved" (:state ram) => "ok")
+        (fact "RAM is approved" (attachment-state ram) => "ok")
         (fact "Sonja cannot delete approved RAM"
               (command sonja :delete-attachment :id application-id :attachmentId ram-id) => (partial expected-failure? :error.ram-approved))
         (fact "Sonja cannot delete approved RAM version"

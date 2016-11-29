@@ -27,7 +27,8 @@
                    build-version-updates
                    default-metadata-for-attachment-type
                    make-ram-attachment
-                   attachment-assignment-info)
+                   attachment-assignment-info
+                   version-approval-path)
 
 (def ascii-pattern #"[a-zA-Z0-9\-\.]+")
 
@@ -99,7 +100,7 @@
                :locked               false
                :modified             999
                :op                   nil
-               :state                :requires_user_action
+               ;;:state                :requires_user_action
                :target               nil
                :type                 type1
                :applicationState     :draft
@@ -116,7 +117,7 @@
                :locked               false
                :modified             999
                :op                   nil
-               :state                :requires_user_action
+               ;;:state                :requires_user_action
                :target               nil
                :type                 type2
                :applicationState     :draft
@@ -177,7 +178,7 @@
                :locked               false
                :modified             999
                :op                   nil
-               :state                :requires_user_action
+               ;;:state                :requires_user_action
                :target               nil
                :type                 type1
                :applicationState     :draft
@@ -195,7 +196,7 @@
                :locked               false
                :modified             999
                :op                   nil
-               :state                :requires_user_action
+               ;;:state                :requires_user_action
                :target               nil
                :type                 type2
                :applicationState     :draft
@@ -290,26 +291,27 @@
 (defspec build-version-updates-new-attachment {:num-tests 20 :max-size 100}
   (prop/for-all [attachment     (ssg/generator Attachment {Version nil [Version] (gen/elements [[]])})
                  version-model  (ssg/generator Version)
+                 file-id        (ssg/generator ssc/ObjectIdStr)
                  user           (ssg/generator user/SummaryUser)
-                 options        (ssg/generator {:created ssc/Timestamp
-                                                :target (sc/maybe Target)
-                                                :stamped (sc/maybe sc/Bool)
-                                                :comment? sc/Bool
-                                                :comment-text sc/Str
-                                                :state (:state Attachment)})]
-                (let [updates (build-version-updates user attachment version-model options)]
+                 options        (ssg/generator {:created      ssc/Timestamp
+                                                :target       (sc/maybe Target)
+                                                :stamped      (sc/maybe sc/Bool)
+                                                :comment?     sc/Bool
+                                                :comment-text sc/Str})
+                 state  (gen/elements (cons nil attachment-states))]
+                (let [version-model (assoc version-model :fileId file-id)
+                      options       (if state (assoc options :state state) options)
+                      updates       (build-version-updates user attachment version-model options)]
                   (is (= (get-in updates [$addToSet :attachments.$.auth :role])
                          (if (:stamped options) :stamper :uploader)))
                   (is (= (get-in updates [$set :modified]) (:created options)))
                   (is (= (get-in updates [$set :attachments.$.modified]) (:created options)))
-                  (is (= (get-in updates [$set :attachments.$.state])
-                         (if (:state options)
-                           (:state options)
-                           :requires_authority_action)))
                   (is (if (:target options)
                         (= (get-in updates [$set :attachments.$.target]) (:target options))
                         (not (contains? (get updates $set) :attachments.$.target))))
                   (is (= (get-in updates [$set :attachments.$.latestVersion]) version-model))
+                  (is (= (:state (get-in updates [$set (version-approval-path (:fileId version-model))]))
+                         (or (:state options) :requires_authority_action)))
                   (is (= (get-in updates [$set "attachments.$.versions.0"]) version-model)))))
 
 (defspec build-version-updates-update-existing-version {:num-tests 20 :max-size 100}

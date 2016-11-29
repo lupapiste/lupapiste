@@ -90,10 +90,10 @@
 
 (defschema VersionApprovals
   "An approvals are version-specific. Keys are fileIds."
-  {sc/Keyword                           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
-                                         :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
-                                         :timestamp ssc/Timestamp
-                                         :note sc/Str}})
+  {sc/Keyword {:state                       (sc/enum attachment-states)
+               (sc/optional-key :timestamp) ssc/Timestamp
+               (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
+               (sc/optional-key :note)      sc/Str}})
 
 (defschema Version
   "Attachment version"
@@ -127,7 +127,6 @@
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
    (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
-   :state                                (apply sc/enum attachment-states) ;; attachment state
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
@@ -145,7 +144,7 @@
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
-   :approvals                            VersionApprovals})
+   (sc/optional-key :approvals)          VersionApprovals})
 
 ;;
 ;; Utils
@@ -174,6 +173,10 @@
         (cons "attachments.$.approvals")
         (ss/join ".")
         keyword))
+
+(defn attachment-state [attachment]
+  (when-let [file-id (some-> attachment :latestVersion :fileId keyword)]
+    (some-> attachment :approvals file-id :state)))
 
 ;;
 ;; Api
@@ -229,7 +232,7 @@
            :applicationState (if (and (= :verdict (:type target)) (not (states/post-verdict-states application-state)))
                                :verdictGiven
                                application-state)
-           :state :requires_user_action
+           ;;:state :requires_user_action
            :target target
            :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
@@ -238,7 +241,7 @@
            :op (not-empty (select-keys group [:id :name]))
            :signatures []
            :versions []
-           :approvals {}
+           ;:approvals {}
            :auth []
            :contents contents}
           (:groupType group) (assoc :groupType (:groupType group))
@@ -360,13 +363,14 @@
         :autoConversion autoConversion))))
 
 (defn- ->approval [state user timestamp]
-  {:value (if (= :ok state) :approved :rejected)
+  {:state state
    :user (select-keys user [:id :firstName :lastName])
    :timestamp timestamp})
 
-(defn- build-version-updates [user attachment version-model {:keys [created target state stamped replaceable-original-file-id]
-                                                             :or   {state :requires_authority_action} :as options}]
-  {:pre [(map? attachment) (map? version-model) (number? created) (map? user) (keyword? state)]}
+(defn- build-version-updates [user attachment version-model
+                              {:keys [created target stamped state replaceable-original-file-id]
+                               :or {state :requires_authority_action} :as options}]
+  {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [version-index  (or (-> (map :originalFileId (:versions attachment))
                                (zipmap (range))
@@ -380,10 +384,9 @@
        {$set {:attachments.$.latestVersion version-model}})
      (if (and (usr/authority? user) (not= state :requires_authority_action))
        {$set {(version-approval-path (:fileId version-model)) (->approval state user created)}}
-       {$unset {(version-approval-path (:fileId version-model)) 1}})
+       {$set {(version-approval-path (:fileId version-model)) {:state state}}})
      {$set {:modified created
             :attachments.$.modified created
-            :attachments.$.state  state
             :attachments.$.notNeeded false                  ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
             (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
@@ -510,19 +513,13 @@
     (update-application
      (application->command application)
      {:attachments {$elemMatch {:id attachment-id}}}
-     (util/deep-merge
-       (when (= file-id (-> attachment :versions last :fileId))
-         ; Deleting latest version resets attachment state
-         {$set {:attachments.$.state :requires_authority_action}})
-       {$pull {:attachments.$.versions {:fileId file-id}
-               :attachments.$.signatures {:fileId file-id}}
-        $unset {(version-approval-path file-id) 1}
-        $set  (merge
-                {:attachments.$.latestVersion latest-version}
-                (when (nil? latest-version)
-                  ; No latest version: reset auth and state
-                  {:attachments.$.auth []
-                   :attachments.$.state :requires_user_action}))}))
+     {$pull {:attachments.$.versions {:fileId file-id}
+             :attachments.$.signatures {:fileId file-id}}
+      $unset {(version-approval-path file-id) 1}
+      $set  (merge
+             {:attachments.$.latestVersion latest-version}
+             (when (nil? latest-version) ; No latest version: reset auth and state
+               {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
 (defn get-attachment-file-as!
@@ -689,7 +686,7 @@
 (defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
   (if-let [attachment-id (:id (get-attachment-info-by-file-id application file-id))]
-    (let [data (into {:state new-state}
+    (let [data (into {}
                      (map (fn [[k v]] [(->> [file-id k]
                                             (map name)
                                             (cons "approvals")
