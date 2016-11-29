@@ -11,11 +11,12 @@
             [sade.core :refer [now]]
             [sade.util :refer [fn->] :as util]))
 
-(mongo/with-db test-db-name (fixture/apply-fixture "minimal"))
+(apply-remote-minimal)
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
 (defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
 (defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-vetuma-user"}))
+(defn neighbor-marked-done? [resp] (= (dissoc resp :response) {:ok false, :text "error.neighbor-marked-done"}))
 
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id)]
@@ -100,11 +101,12 @@
 
 (facts* "neighbor invite & view on application"
   (let [[{application-id :id :as application} neighborId] (create-app-with-neighbor)
+        neighborEmail   "abba@example.com"
         _               (upload-attachment-to-all-placeholders pena application)
         _               (command pena :neighbor-send-invite
                                       :id application-id
                                       :neighborId neighborId
-                                      :email "abba@example.com") => ok?
+                                      :email neighborEmail) => ok?
         application     (query-application pena application-id)
         hakija-doc-id   (:id (domain/get-applicant-document (:documents application)))
         uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))]
@@ -249,6 +251,12 @@
             :token token
             :response "comments"
             :message "kehno suunta") => ok?)
+
+        (fact "new invite can not be sent after response"
+          (command pena :neighbor-send-invite
+                   :id application-id
+                   :neighborId neighborId
+                   :email neighborEmail) => neighbor-marked-done?)
 
         (fact "applicant can not see neighbor's person id"
           (let [application (query-application pena application-id)
