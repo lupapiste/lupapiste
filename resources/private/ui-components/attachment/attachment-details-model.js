@@ -65,9 +65,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rejectAttachment  = trackClickWrap("rejectAttachment",  service.rejectAttachment,  self.id);
   addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
   addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
-  self.isApproved   = _.wrap( self.attachment(), service.isApproved );
+  self.isApproved   = _.wrap( self.attachment, service.isApproved );
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected   = _.wrap( self.attachment(), service.isRejected );
+  self.isRejected   = _.wrap( self.attachment, service.isRejected );
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
   self.approval = self.disposedPureComputed(function () {
@@ -113,7 +113,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.versions = self.disposedPureComputed( function() {
     return _( self.attachment().versions)
       .map( function( v ) {
-        var approval = util.getIn( self.attachment, ["approvals", v.fileId], {});
+        var approval = service.attachmentApproval( self.attachment, v.fileId ) || {};
 
         return _.merge( {note: lupapisteApp.models.currentUser.isAuthority()
                          && approval.note,

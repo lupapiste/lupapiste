@@ -402,9 +402,17 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
+
+
+
+  // If fileId is not given, the approval for the latestVersion is returned.
+  self.attachmentApproval = function ( attachment, fileId ) {
+    fileId = fileId || util.getIn( attachment, ["latestVersion", "fileId"]);
+    return fileId && util.getIn( attachment, ["approvals", fileId]);
+  };
+
   function attachmentState( attachment ) {
-    var fileId = util.getIn( attachment, ["latestVersion", "fileId"]);
-    return fileId && util.getIn( attachment, ["approvals", fileId, "state"]);
+    return _.get( self.attachmentApproval( attachment), "state");
   }
 
   //helpers for checking relevant attachment states

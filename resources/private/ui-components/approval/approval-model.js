@@ -38,20 +38,19 @@ LUPAPISTE.ApprovalModel = function(params) {
     self.details = self.disposedPureComputed(_.partial(self.approvalInfo, self.approval));
   }
   if( params.attachment ) {
-    console.log( "Attachment:", params.attachment);
     var attachment = params.attachment;
     var service = lupapisteApp.services.attachmentsService;
-
-    self.isApproved = self.disposedPureComputed( _.wrap( attachment(), service.isApproved ));
-    self.isRejected = self.disposedPureComputed( _.wrap( attachment(), service.isRejected ));
+    self.isApproved = self.disposedPureComputed( _.wrap( attachment, service.isApproved));
+    self.isRejected = self.disposedPureComputed( _.wrap( attachment, service.isRejected));
     self.showStatus = self.disposedPureComputed( function() {
       return self.isApproved() || self.isRejected();
     });
-    var fileId = util.getIn( attachment, ["latestVersion", "fileId"]);
-    self.details = self.disposedPureComputed( _.wrap( util.getIn( attachment,
-                                                                  ["approvals", fileId],
-                                                                  _.noop),
-                                                    self.approvalInfo));
-    console.log( "rejected:", self.isRejected(), "approved:", self.isApproved(), "details:", self.details());
+
+
+    self.details = self.disposedComputed( function()  {
+      var fileId = util.getIn( attachment, ["latestVersion", "fileId"]);
+      return self.approvalInfo(  util.getIn( attachment,
+                                             ["approvals", fileId])) ;
+    } );
   }
 };
