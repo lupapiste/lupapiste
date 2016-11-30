@@ -171,9 +171,8 @@
 
 (defn submitted-rest-interface-schema-check-app [application]
   (when (and (#{"R" "YA"} (:permitType application))
-             (= (keyword (:state application)) :submitted)
+             (#{"submitted"} (:state application))
              (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
-    (let [app (select-keys (mongo/with-id application) rest-application-data/required-fields-from-db)]
-      ((sc/checker HakemusTiedot) (rest-application-data/process-application app)))))
+    (sc/check HakemusTiedot (rest-application-data/process-application application))))
 
 (apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
