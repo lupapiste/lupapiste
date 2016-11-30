@@ -59,7 +59,7 @@
                                :organization organization
                                :state        :submitted
                                :primaryOperation.name
-                                             {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]}}}
+                                             {$not {$in [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :ya-jatkoaika]}}}
                 required-fields-from-db))
 
 (defn- process-applications [coll]
