@@ -26,7 +26,8 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.file-upload :as file-upload])
+            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.authorization :as auth])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -321,6 +322,17 @@
        $push {:attachments {$each attachments}}})
     (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
+
+(defn can-delete-version?
+  "False if the attachment version is a) rejected or approved and b)
+  the user is not authority."
+  [user application attachment-id file-id]
+  (not (when-not (auth/application-authority? application user)
+         (when (some-> (get-attachment-info application attachment-id)
+                       (attachment-version-state file-id)
+                       keyword
+                       #{:ok :requires_user_action})
+           :cannot-delete))))
 
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)

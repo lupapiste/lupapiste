@@ -113,16 +113,7 @@
                        (usr/authority? user)))
          (fail :error.pre-verdict-attachment))))))
 
-(defn- version-approval-constraint
-  "Pre-checker fails if the attachment version is a) rejected or
-  approved and b) the user is not authority"
-  [{user :user application :application {attachmentId :attachmentId fileId :fileId} :data :as command}]
-  (when-not (auth/application-authority? application user)
-    (when (some-> (attachment/get-attachment-info application attachmentId)
-                  (attachment/attachment-version-state fileId)
-                  keyword
-                  #{:ok :requires_user_action})
-      (fail :error.unauthorized))))
+
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -443,14 +434,13 @@
                  verdict-attachment-edit-by-authority-only
                  statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
-                 ram/ram-not-linked
-                 version-approval-constraint]}
+                 ram/ram-not-linked]}
   [{:keys [application user]}]
-
-  (if (and (attachment/file-id-in-application? application attachmentId fileId)
-           (attachment/file-id-in-application? application attachmentId originalFileId))
-    (attachment/delete-attachment-version! application attachmentId fileId originalFileId)
-    (fail :file_not_linked_to_the_document)))
+  (cond
+    (not (and (attachment/file-id-in-application? application attachmentId fileId)
+              (attachment/file-id-in-application? application attachmentId originalFileId))) (fail :file_not_linked_to_the_document)
+    (not (attachment/can-delete-version? user application attachmentId fileId)) (fail :error.unauthorized)
+    :else (attachment/delete-attachment-version! application attachmentId fileId originalFileId)))
 
 ;;
 ;; Download

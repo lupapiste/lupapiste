@@ -4,6 +4,8 @@
 
 (apply-remote-minimal)
 
+
+
 (defn- approve-attachment [application-id {:keys [id latestVersion]}]
   (fact {:midje/description (str "approve " application-id \/ id)}
     (command veikko :approve-attachment :id application-id :attachmentId id  :fileId (:fileId latestVersion)) => ok?
@@ -31,6 +33,16 @@
            (:state approved) => "requires_user_action"
            (:note approved) => note))))
 
+(defn- delete-latest-version [apikey application-id {:keys [id latestVersion]} success?]
+  (let [{:keys [fileId originalFileId]} latestVersion]
+    (fact {:midje/description (str "Delete latest version" application-id "/" id)}
+          (command apikey :delete-attachment-version :id application-id
+                   :attachmentId id :fileId fileId :originalFileId originalFileId)
+          => (if success? ok? unauthorized?)
+          (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)]
+            (get approvals (keyword fileId)) => (if success? nil? truthy)))))
+
+
 (facts "attachment approval"
   (let [{application-id :id attachments :attachments} (create-and-open-application  pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
 
@@ -57,12 +69,23 @@
         (:state (query-application veikko application-id)) => "submitted")
 
       (fact "Veikko can still approve attachment"
-        (approve-attachment application-id (first attachments)))
+            (approve-attachment application-id (first attachments)))
+
+      (fact "Pena cannot delete approved version"
+            (delete-latest-version pena application-id (first attachments) false))
 
       (fact "Veikko can still reject attachment"
-        (reject-attachment application-id (first attachments))))
+            (reject-attachment application-id (first attachments)))
+      (fact "Pena cannot delete rejected version"
+            (delete-latest-version pena application-id (first attachments) false)))
+
+    (fact "Pena can delete new version"
+          (upload-attachment pena application-id (first attachments) true)
+          (let [{:keys [attachments]} (query-application veikko application-id)]
+            (delete-latest-version pena application-id (first attachments) true)))
 
     (upload-attachment pena application-id (first attachments) true)
+
     (let [{:keys [attachments]} (query-application veikko application-id)
           att (first attachments)]
 
@@ -88,11 +111,7 @@
         (approve-attachment application-id (first attachments)))
 
       (fact "Delete version"
-        (command veikko :delete-attachment-version
-          :id application-id
-          :attachmentId (:id att)
-          :fileId (get-in att [:latestVersion :fileId])
-          :originalFileId (get-in att [:latestVersion :originalFileId])) => ok?)
+            (delete-latest-version veikko application-id att true))
 
       (let [{:keys [attachments]} (query-application veikko application-id)
             att (first attachments)
@@ -104,4 +123,5 @@
                                     :note "Bu hao!"}
               (let [{approvals :approvals} att]
                 (count approvals) => 1
-                (-> approvals vals first :note) => "Bu hao!"))))))
+                (-> approvals vals first :note) => "Bu hao!"))
+        ))))
