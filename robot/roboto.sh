@@ -86,7 +86,7 @@ check_env() {
    FF=$(firefox --version)
    echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."   
    echo -n "Server: $SERVER "
-   curl -s "$SERVER" | grep -q html && echo "ok" || fail "Lupapiste does not appear to be running at '$SERVER'"
+   curl -s "$SERVER/system/ping" | grep -q true && echo "ok" || fail "A web server does not appear to be running at '$SERVER'"
 }
 
 parse_args $@
@@ -145,10 +145,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 
 show_stats() {
-   clear
+   echo "---------------------- 8< ----------------------"
    MSG="$@"
+   NOW=$(date +'%H:%M:%S %d.%m.%Y')
    test -z "$MSG" && MSG="Waiting for $(jobs | grep run_test | wc -l) threads"
-   echo -e "${BRIGHT}${MSG}${DEFAULT}"
+   echo -e "${BRIGHT}$NOW: ${MSG}${DEFAULT}"
    for log in target/*.out
    do
       NPASS=$(grep PASS $log | wc -l)
@@ -171,7 +172,7 @@ do
    do
       RUNNING=$(jobs | grep run_test | wc -l)
       show_stats "$RUNNING/$MAXTHREADS threads running"
-      sleep 2
+      sleep 10
       jobs > /dev/null
    done 
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
@@ -186,7 +187,7 @@ while true
 do
    jobs | grep -q run_test || break
    show_stats
-   sleep 5
+   sleep 10
    jobs > /dev/null
 done 
 
