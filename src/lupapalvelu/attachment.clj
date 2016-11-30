@@ -174,9 +174,14 @@
         (ss/join ".")
         keyword))
 
+(defn attachment-version-state [attachment file-id]
+  (when-let [file-key (keyword file-id)]
+    (some-> attachment :approvals file-key :state keyword)))
+
 (defn attachment-state [attachment]
-  (when-let [file-id (some-> attachment :latestVersion :fileId keyword)]
-    (some-> attachment :approvals file-id :state)))
+  (attachment-version-state attachment (some-> attachment
+                                               :latestVersion
+                                               :fileId)))
 
 ;;
 ;; Api

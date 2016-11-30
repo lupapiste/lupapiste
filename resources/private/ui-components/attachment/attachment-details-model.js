@@ -114,11 +114,16 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return _( self.attachment().versions)
       .map( function( v ) {
         var approval = service.attachmentApproval( self.attachment, v.fileId ) || {};
-
-        return _.merge( {note: lupapisteApp.models.currentUser.isAuthority()
-                         && approval.note,
-                         approved: approval.state === service.APPROVED,
-                         rejected: approval.state === service.REJECTED},
+        var authority = lupapisteApp.models.currentUser.isAuthority();
+        var rejected = approval.state === service.REJECTED;
+        var approved = approval.state === service.APPROVED;
+        // Authority sees every version note, applicant only the rejected.
+        return _.merge( {note: (authority || rejected) && approval.note,
+                         approved: approved,
+                         rejected: rejected,
+                         // Applicant can only delete version without approval status.
+                         canDelete: authModel.ok( "delete-attachment-version")
+                         && (authority || !(approved || rejected))},
                         v);
       })
       .reverse()
@@ -144,7 +149,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
 
   // Versions - delete
-  self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version"); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;

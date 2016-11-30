@@ -420,12 +420,18 @@ LUPAPISTE.AttachmentsService = function() {
     return attachmentState(attachment ) === self.APPROVED;
   };
 
-  self.isRejected = function(attachment) {
+  self.isRejected = function(attachment ) {
     return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+
+  // True if the attachment is needed but does not have file yet.
+  self.isMissingFile = function( attachment ) {
+    return !self.isNotNeeded( attachment )
+      && _.isEmpty( util.getIn( attachment, ["versions"]) );
   };
 
   //

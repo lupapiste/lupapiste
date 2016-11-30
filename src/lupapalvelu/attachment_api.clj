@@ -40,7 +40,7 @@
 (defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
   {:id           application-id
    :attachmentId attachment-id
-   :fileId       latest-version})
+   :fileId       (:fileId latest-version)})
 
 (defmethod action/allowed-actions-for-category :attachments
   [command]
@@ -112,6 +112,17 @@
                        (states/post-verdict-states (keyword create-state))
                        (usr/authority? user)))
          (fail :error.pre-verdict-attachment))))))
+
+(defn- version-approval-constraint
+  "Pre-checker fails if the attachment version is a) rejected or
+  approved and b) the user is not authority"
+  [{user :user application :application {attachmentId :attachmentId fileId :fileId} :data :as command}]
+  (when-not (auth/application-authority? application user)
+    (when (some-> (attachment/get-attachment-info application attachmentId)
+                  (attachment/attachment-version-state fileId)
+                  keyword
+                  #{:ok :requires_user_action})
+      (fail :error.unauthorized))))
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -297,7 +308,7 @@
    :states     states/all-states}
   [{{attachments :attachments} :application}]
   (->> (ram/resolve-ram-links attachments attachmentId)
-       (map #(select-keys % [:id :latestVersion :approved :ramLink]))
+       (map #(select-keys % [:id :latestVersion :ramLink]))
        (ok :ram-links)))
 
 ;;
@@ -432,7 +443,8 @@
                  verdict-attachment-edit-by-authority-only
                  statement-attachment-edit-by-authority-or-statement-giver-only
                  ram/ram-status-not-ok
-                 ram/ram-not-linked]}
+                 ram/ram-not-linked
+                 version-approval-constraint]}
   [{:keys [application user]}]
 
   (if (and (attachment/file-id-in-application? application attachmentId fileId)

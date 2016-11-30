@@ -140,9 +140,9 @@ Pena opens attachment details
   Open attachment details  muut.muu
   Reject note is  details-reject  Bad version
 
-Pena does not see version notes
+Pena sees only the rejected version notes
   Click button  show-attachment-versions
-  No such test id  0-1-1-note
+  Reject note is  0-1-1  Bad version
   No such test id  1-1-0-note
   Return to application
 
@@ -179,44 +179,6 @@ Pena logs in and does not see note for the approved address
   [Teardown]  Logout
 
 
-*** Keywords ***
 
-Press Key Test Id
-  [Arguments]  ${id}  ${key}
-  Press Key  jquery=input[data-test-id=${id}]  ${key}
-
-Reject note is
-  [Arguments]  ${prefix}  ${text}
-  Scroll to test id  ${prefix}-note
-  Wait test id visible  ${prefix}-note
-  Test id text is  ${prefix}-note  ${text}
-  
-Reject and fill note  
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
-  Run Keyword if  ${doc-style}  Click reject  ${button}
-  Run Keyword unless  ${doc-style}  Click button  ${button}
-  Wait test id visible  ${prefix}-editor
-  Input text by test id  ${prefix}-editor  ${text}  True
-
-Reject with note
-  [Arguments]  ${button}  ${prefix}  ${text}
-  Reject and fill note  ${button}  ${prefix}  ${text}
-  Press Key test id  ${prefix}-editor  \\13
-  Reject note is  ${prefix}  ${text}
-
-Reject with note but cancel
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
-  ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()
-  Reject and fill note  ${button}  ${prefix}  ${text}  ${doc-style}
-  Press Key test id  ${prefix}-editor  \\27  
-  No such test id  ${prefix}-editor
-  Reject note is  ${prefix}  ${old}
-
-Reject attachment with note
-  [Arguments]  ${selector}  ${prefix}  ${text}
-  Reject and fill note  ${selector}  ${prefix}  ${text}  False
-  Press Key test id  ${prefix}-editor  \\13
-  Reject note is  ${prefix}  ${text}
-  
   
      

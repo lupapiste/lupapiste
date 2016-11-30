@@ -4,6 +4,7 @@ Documentation  Rakentamisen aikaiset muutokset (RAM)
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
+Resource       ../common_keywords/approve_helpers.robot
 Variables      variables.py
 
 *** Variables ***
@@ -132,7 +133,7 @@ Sonja rejects attachment but could not delete base attachment
   Follow ram link  0
   No such test id  ram-prefix
   Delete disallowed
-  Wait Until  Click button  id=test-attachment-reject
+  Reject attachment with note  test-attachment-reject  details-reject  Rejected!  
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Delete disallowed
 
@@ -179,7 +180,7 @@ Sonja goes to attachments tab
 Sonja rejects the first RAM but cannot delete it
   Open attachment details  ${type}  0
   Element should be visible by test id  ram-prefix
-  Wait Until  Click button  id=test-attachment-reject
+  Reject attachment with note  test-attachment-reject  details-reject  Rejected too!  
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Delete disallowed
   [Teardown]  Logout

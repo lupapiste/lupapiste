@@ -156,7 +156,7 @@
                   <td>
                     <a data-bind="click: $parent.deleteVersion,
                                   ltext: 'remove',
-                                  visible: $parent.deleteAttachmentVersionAllowed()"
+                                  visible: $data.canDelete"
                        data-test-id="delete-version"></a>
                   </td>
                 </tr>
