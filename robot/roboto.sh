@@ -129,6 +129,8 @@ run_test() {
       --RunEmptySuite \
       --variable SERVER:$SERVER \
       -d target \
+      -L TRACE \
+      -b $TEST.debug.log \
       -o $TEST.xml \
       -l $TEST.log \
       -r $TEST.html \
