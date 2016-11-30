@@ -120,6 +120,7 @@ run_test() {
    DISPLAY=:$SCREEN xset s off # disable screensaver
    WMPID=$!
    sleep 1
+   mkdir -p target
    DISPLAY=:$SCREEN pybot \
       --exclude integration \
       --exclude ajanvaraus \
