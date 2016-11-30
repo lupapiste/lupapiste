@@ -260,6 +260,12 @@
      :assignments    (->> assignments
                           (enrich-targets))}))
 
+(sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
+  [{user-id :id}]
+  (mongo/count :assignments {:status "active"
+                             :states.type {$ne "completed"}
+                             :recipient.id user-id}))
+
 ;;
 ;; Inserting and modifying assignments
 ;;

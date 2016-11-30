@@ -45,3 +45,8 @@ Open assignments search
   Go to page  applications
   Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
   Select Radio Button  searchType  searchTypeAssignments
+
+Count of open assignments is
+  [Arguments]  ${count}
+  Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
+  Wait until  Element should contain  xpath=//label[@for='searchTypeAssignments']  ${count}
