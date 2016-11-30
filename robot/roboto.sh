@@ -84,9 +84,9 @@ check_env() {
    echo "Browser: "
    which geckodriver && fail "Remove geckodriver from path."
    FF=$(firefox --version)
-   echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."   
+   echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
    echo -n "Server: $SERVER "
-   curl -s "$SERVER/system/ping" | grep -q true && echo "ok" || fail "A web server does not appear to be running at '$SERVER'"
+   curl -s "$SERVER/api/alive" | grep -q unauthorized && echo "ok" || fail "A web server does not appear to be running at '$SERVER'"
 }
 
 parse_args $@
@@ -116,7 +116,7 @@ run_test() {
    esac
    sleep 1
    # browser window maximize works in openbox, but not in many other small wms
-   DISPLAY=:$SCREEN openbox &>/dev/null & 
+   DISPLAY=:$SCREEN openbox &>/dev/null &
    DISPLAY=:$SCREEN xset s off # disable screensaver
    WMPID=$!
    sleep 1
@@ -174,7 +174,7 @@ do
       show_stats "$RUNNING/$MAXTHREADS threads running"
       sleep 10
       jobs > /dev/null
-   done 
+   done
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    echo " - Starting $test"
    run_test $SCREEN "$test" &
@@ -189,7 +189,7 @@ do
    show_stats
    sleep 10
    jobs > /dev/null
-done 
+done
 
 echo "Tests finished"
 echo "Closing WM $WMPID"
