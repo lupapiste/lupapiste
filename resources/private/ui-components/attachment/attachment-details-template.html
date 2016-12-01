@@ -139,7 +139,8 @@
                                'version-row--noted': $data.note}">
                   <td>                    
                     <i  data-bind="css: {'lupicon-circle-check positive': $data.approved,
-                                   'lupicon-circle-attention negative': $data.rejected}"></i>
+                                   'lupicon-circle-attention negative': $data.rejected},
+                                   testId: $parent.versionTestId( $index, $data )"></i>
                   </td>
                   <td>
                     <!-- TODO: download via service -->
@@ -167,7 +168,7 @@
                   <td  colspan="7"
                        data-bind="text: $data.note,
                                   css: {'reject-note--rejected': $data.rejected},
-                                  testId: _.join( [$index(), $data.version.major, $data.version.minor, 'note'], '-')"></td>
+                                  testId: $parent.versionTestId( $index, $data, 'note')"></td>
                 </tr>
                 <!-- /ko -->
               </tbody>

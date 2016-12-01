@@ -130,6 +130,19 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
       .value();
   });
 
+  // If postfix is not given, we use approved/rejected
+  self.versionTestId = function( prefix, version, postfix ) {
+    var nums = version.version;
+    if( !postfix) {
+      postfix = (version.approved && "approved")
+        || (version.rejected && "rejected")
+        || "neutral";
+    }
+    return _( [prefix, nums.major, nums.minor, postfix])
+      .map( ko.unwrap )
+      .join(  "-" );
+  };
+
   // Versions - add
   self.newAttachmentVersion = function() {
     self.disablePreview(true);
