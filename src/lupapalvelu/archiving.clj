@@ -282,7 +282,6 @@
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
-          (println "Archiving, with metadata: " metadata)
           (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
