@@ -138,7 +138,8 @@
   (perf-mon/init)
 
   (server/add-middleware headers/sanitize-header-values)
-  (server/add-middleware control/lockdown-middleware))
+  (server/add-middleware control/lockdown-middleware)
+  (server/add-middleware web/cookie-monster))
 
 (defn read-session-key []
   {:post [(or (nil? %) (= (count %) 16))]}
