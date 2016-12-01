@@ -310,7 +310,7 @@
                         (= (get-in updates [$set :attachments.$.target]) (:target options))
                         (not (contains? (get updates $set) :attachments.$.target))))
                   (is (= (get-in updates [$set :attachments.$.latestVersion]) version-model))
-                  (is (= (:state (get-in updates [$set (version-approval-path (:fileId version-model))]))
+                  (is (= (:state (get-in updates [$set (version-approval-path (:originalFileId version-model))]))
                          (or (:state options) :requires_authority_action)))
                   (is (= (get-in updates [$set "attachments.$.versions.0"]) version-model)))))
 

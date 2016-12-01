@@ -319,7 +319,7 @@
 ;;
 
 (defcommand approve-attachment
-  {:description "Authority can approve attachment, moves to ok"
+  {:description "Authority can approve attachment. Updates approval map."
    :parameters  [id fileId]
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
@@ -330,7 +330,7 @@
   (attachment/set-attachment-state! command fileId :ok))
 
 (defcommand reject-attachment
-  {:description "Authority can reject attachment, requires user action."
+  {:description "Authority can reject attachment. Updates approval map."
    :parameters  [id fileId]
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]

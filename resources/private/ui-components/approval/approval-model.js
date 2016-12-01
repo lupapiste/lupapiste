@@ -48,9 +48,7 @@ LUPAPISTE.ApprovalModel = function(params) {
 
 
     self.details = self.disposedComputed( function()  {
-      var fileId = util.getIn( attachment, ["latestVersion", "fileId"]);
-      return self.approvalInfo(  util.getIn( attachment,
-                                             ["approvals", fileId])) ;
+      return self.approvalInfo( service.attachmentApproval( attachment)) ;
     } );
   }
 };

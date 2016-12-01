@@ -81,10 +81,12 @@
        (defn ram-fail [code] {:ok false :text (name code)})
 
        (let [att1    (assoc (dissoc (ssg/generate Attachment) :ramLink)
-                            :latestVersion {:fileId "fileid1"})
+                            :versions [{:originalFileId "fileid1"}]
+                            :latestVersion {:originalFileId "fileid1"})
              att2    (assoc (ssg/generate Attachment)
                             :ramLink (:id att1)
-                            :latestVersion {:fileId "fileid2"})
+                            :versions [{:originalFileId "fileid2"}]
+                            :latestVersion {:originalFileId "fileid2"})
              att3    (assoc (ssg/generate Attachment) :ramLink (:id att2))]
          (fact "attachment-status-ok"
                (attachment-status-ok {:data        {:attachmentId (:id att2)}

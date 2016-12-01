@@ -323,11 +323,6 @@ LUPAPISTE.AttachmentsService = function() {
     self.queryOne( attachmentId );
   };
 
-  self.getRejectNote = function( attachmentId, fileId ) {
-    var fileId = util.getIn( attachment, ["latestVersion", "fileid"]);
-    return fileId && util.getIn( attachment, ["approvals", fileId, "note"]);
-  };
-
   // Used by reject-note component.
   self.rejectAttachmentNoteEditorState = ko.observable();
 
@@ -406,8 +401,18 @@ LUPAPISTE.AttachmentsService = function() {
 
 
   // If fileId is not given, the approval for the latestVersion is returned.
+  // The fileId can be either fileId or originalFileId.
   self.attachmentApproval = function ( attachment, fileId ) {
-    fileId = fileId || util.getIn( attachment, ["latestVersion", "fileId"]);
+    if( fileId ) {
+      var version = _.find( util.getIn(attachment, ["versions"] ),
+                            function( v ) {
+                              return v.fileId === fileId
+                                || v.originalFileId === fileId;
+                            });
+      fileId = _.get( version, "originalFileId");
+    } else {
+      fileId = util.getIn( attachment, ["latestVersion", "originalFileId"]);
+    }
     return fileId && util.getIn( attachment, ["approvals", fileId]);
   };
 

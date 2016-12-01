@@ -10,7 +10,7 @@
   (fact {:midje/description (str "approve " application-id \/ id)}
     (command veikko :approve-attachment :id application-id :attachmentId id  :fileId (:fileId latestVersion)) => ok?
     (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
-          approved (get approvals (keyword (:fileId latestVersion)))]
+          approved (get approvals (keyword (:originalFileId latestVersion)))]
       (:state approved) => "ok"
       (:user approved) => {:id veikko-id, :firstName "Veikko", :lastName "Viranomainen"}
       (:timestamp approved) => pos?)))
@@ -19,17 +19,17 @@
   (fact {:midje/description (str "reject " application-id \/ id)}
     (command veikko :reject-attachment :id application-id :attachmentId id :fileId (:fileId latestVersion)) => ok?
     (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
-          approved (get approvals (keyword (:fileId latestVersion)))]
+          approved (get approvals (keyword (:originalFileId latestVersion)))]
       (:state approved) => "requires_user_action"
       (:user approved) => {:id veikko-id, :firstName "Veikko", :lastName "Viranomainen"}
       (:timestamp approved) => pos?)))
 
 (defn- reject-attachment-note [application-id {:keys [id latestVersion]} note]
-  (let [file-id (:fileId latestVersion)]
+  (let [{:keys [fileId originalFileId]} latestVersion]
    (fact {:midje/description (str "reject-note" application-id "/" id ":" note)}
-         (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId file-id :note note) => ok?
+         (command veikko :reject-attachment-note :id application-id :attachmentId id :fileId fileId :note note) => ok?
          (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)
-               approved (get approvals (keyword file-id))]
+               approved (get approvals (keyword originalFileId))]
            (:state approved) => "requires_user_action"
            (:note approved) => note))))
 
@@ -40,7 +40,7 @@
                    :attachmentId id :fileId fileId :originalFileId originalFileId)
           => (if success? ok? unauthorized?)
           (let [{:keys [approvals] :as att} (get-attachment-by-id veikko application-id id)]
-            (get approvals (keyword fileId)) => (if success? nil? truthy)))))
+            (get approvals (keyword originalFileId)) => (if success? nil? truthy)))))
 
 
 (facts "attachment approval"
