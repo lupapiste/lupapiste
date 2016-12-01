@@ -70,6 +70,7 @@ Sonja rejects kaytto with note
 
 Sonja rejects attachment
   Open tab  attachments
+  Tab indicator is  2
   Reject attachment with note  jquery=tr[data-test-state=requires_authority_action] button.reject  muut-muu  Bad attachment
 
 Clicking reject button again is supported
@@ -147,6 +148,7 @@ Pena does not see notes for the approved
 
 Pena goes to attachments tab
   Open tab  attachments
+  Tab indicator is  1
   Reject note is  muut-muu  Bad version
 
 Pena opens attachment details
@@ -194,6 +196,7 @@ Sonja rejects with note and approves osoite
 
 Attachment state is changed when the latest version is deleted
   Open tab  attachments
+  No tab indicator
   Open attachment details  muut.muu
   Click button  show-attachment-versions
 
@@ -217,6 +220,7 @@ Attachment state is changed when the latest version is deleted
 Pena logs in and does not see note for the approved address
   Pena logs in
   Open application  ${appname}  ${propertyId}
+  No tab indicator
   No such test id  rakennuksen-muuttaminen-osoite-note
   [Teardown]  Logout
 
@@ -257,3 +261,9 @@ Attachment neutral
   Wait Until  Element should be enabled  test-attachment-approve
   Wait Until  Element should be enabled  test-attachment-reject
 
+Tab indicator is
+  [Arguments]  ${n}
+  Wait until  Element text should be  applicationAttachmentsRequiringAction  ${n}
+
+No tab indicator
+  Wait Until  Element should not be visible  applicationAttachmentsRequiringAction

@@ -2590,7 +2590,7 @@
                                                {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
 
 (defn- build-approvals
-  "Approvals is originnal-file-id - approval map, where approval includes state
+  "Approvals is original-file-id - approval map, where approval includes state
   and approved information.Explicit approved/rejected flag is no
   longer used. The flag is determined by the version state. In
   migration, we create approval for the latestVersion and remove old
