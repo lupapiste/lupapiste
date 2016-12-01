@@ -588,6 +588,20 @@
           :else
              (anti-forgery/set-token-in-cookie request (handler request) cookie-name cookie-attrs))))))
 
+(defn cookie-monster
+   "Remove cookies from requests in which only IE would send and update original cookie information
+    due to differing behavior in subdomain cookie handling."
+   [handler]
+   (fn [request]
+      ;; use (env/value :host) != (:host request) later, but now just the specific requests
+      (let [response (handler request)]
+         (if (tokenless-request? request)
+            (let [session (:session response)]
+               (when session
+                  (info (str "Removing session " session " from tokenless request to " (:uri request) ".")))
+               (dissoc response :session :session-cookie-attrs :cookies))
+            response))))
+
 ;;
 ;; Session timeout:
 ;;
