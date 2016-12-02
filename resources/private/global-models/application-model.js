@@ -796,7 +796,7 @@ var checkDesigners = function(yesFn) {
   self.returnToDraft = function() {
     if (!self.stateChanged()) {
       hub.send("track-click", {category:"Application", label:"", event:"returnApplicationToDraft"});
-      hub.send("show-dialog", {ltitle: "areyousure",
+      hub.send("show-dialog", {ltitle: "application.returnToDraft.title",
                                size: "large",
                                component: "textarea-dialog",
                                componentParams: {text: loc("application.returnToDraft.areyousure"),
