@@ -53,16 +53,15 @@
 (defn attachment-status-ok
   "Pre-checker that fails only if the attachment is not approved"
   [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [state]} (util/find-by-id attachment-id (:attachments app))]
-    (when (util/not=as-kw state :ok)
-      (fail :error.attachment-not-approved))))
+  (when (util/not=as-kw (att/attachment-state (util/find-by-id attachment-id (:attachments app))) :ok)
+    (fail :error.attachment-not-approved)))
 
 (defn ram-status-not-ok
   "Pre-checker that fails only if the attachment is approved RAM attachment."
   [{{attachment-id :attachmentId} :data app :application}]
-  (let [{:keys [ramLink state]} (util/find-by-id attachment-id (:attachments app))]
+  (let [{:keys [ramLink] :as attachment} (util/find-by-id attachment-id (:attachments app))]
     (when (and (ss/not-blank? ramLink)
-               (util/=as-kw state :ok))
+               (util/=as-kw (att/attachment-state attachment) :ok))
       (fail :error.ram-approved))))
 
 (defn- find-by-ram-link [link attachments]

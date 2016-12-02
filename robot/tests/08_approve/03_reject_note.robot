@@ -63,13 +63,14 @@ Sonja rejects primary operation with note
   Reject with note  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
 
 Sonja rejects kaytto with note
-  Reject with note  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage
+  Reject with note and save  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage
   Click approve  kaytto
   Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
   Reject with note but cancel  kaytto  rakennuksen-muuttaminen-kaytto  foobar
 
 Sonja rejects attachment
   Open tab  attachments
+  Tab indicator is  2
   Reject attachment with note  jquery=tr[data-test-state=requires_authority_action] button.reject  muut-muu  Bad attachment
 
 Clicking reject button again is supported
@@ -91,19 +92,32 @@ Sonja rejects but cancels attachment
 Sonja approves attachment again
   Click button  test-attachment-approve
 
-Sonja adds new version
+Sonja adds two new versions
+  Add attachment version  ${PNG_TESTFILE_PATH}
+  Wait until  No such test id  details-reject-note
   Add attachment version  ${PNG_TESTFILE_PATH}
   Wait until  No such test id  details-reject-note
 
 Sonja checks versions
   Click button  show-attachment-versions
-  No such test id  0-1-1-note
-  Reject note is  1-1-0  Worse attachment
+  No such test id  0-1-2-note
+  No such test id  1-1-1-note
+  Reject note is  2-1-0  Worse attachment
 
 Sonja rejects new version with note
   Reject attachment with note  test-attachment-reject  details-reject  Bad version
-  Reject note is  0-1-1  Bad version
+  Reject note is  0-1-2  Bad version
 
+There is now one approved, one rejected and one neutral version
+  Wait test id visible  0-1-2-rejected
+  Neutral version  1-1-1-neutral
+  Wait test id visible  2-1-0-approved
+
+Sonja could delete every version
+  Can delete version  1.2
+  Can delete version  1.1
+  Can delete version  1.0
+  
 Sonja returns the attachments tab and opens the other attachment
   Return to application
   Reject note is  muut-muu  Bad version
@@ -134,16 +148,29 @@ Pena does not see notes for the approved
 
 Pena goes to attachments tab
   Open tab  attachments
+  Tab indicator is  1
   Reject note is  muut-muu  Bad version
 
 Pena opens attachment details
   Open attachment details  muut.muu
-  Reject note is  details-reject  Bad version
+  Attachment rejected  Bad version  
+  #Reject note is  details-reject  Bad version
 
-Pena does not see version notes
+Pena sees only the rejected version notes
   Click button  show-attachment-versions
-  No such test id  0-1-1-note
+  Reject note is  0-1-2  Bad version
+  No such test id  1-1-1-note
   No such test id  1-1-0-note
+
+Pena checks versions' approval states
+  Wait test id visible  0-1-2-rejected
+  Neutral version  1-1-1-neutral
+  Wait test id visible  2-1-0-approved
+
+Pena could delete only the neutral version
+  Cannot delete version  1.2
+  Can delete version  1.1
+  Cannot delete version  1.0
   Return to application
 
 Pena does not see approved attachment's note
@@ -166,6 +193,24 @@ Sonja rejects with note and approves osoite
   Reject with note  osoite  rakennuksen-muuttaminen-osoite  Bad address
   Click approve  osoite
   Reject note is  rakennuksen-muuttaminen-osoite  Bad address
+
+Attachment state is changed when the latest version is deleted
+  Open tab  attachments
+  No tab indicator
+  Open attachment details  muut.muu
+  Click button  show-attachment-versions
+
+... from rejected to neutral
+  Attachment rejected  Bad version
+  Delete version  1.2
+  Attachment neutral
+  Neutral version  0-1-1-neutral
+  Wait test id visible  1-1-0-approved
+
+... from neutral to approved
+  Delete version  1.1
+  Attachment approved
+  Wait test id visible  0-1-0-approved
   [Teardown]  Logout
 
 # --------------------------
@@ -175,48 +220,50 @@ Sonja rejects with note and approves osoite
 Pena logs in and does not see note for the approved address
   Pena logs in
   Open application  ${appname}  ${propertyId}
+  No tab indicator
   No such test id  rakennuksen-muuttaminen-osoite-note
   [Teardown]  Logout
 
-
 *** Keywords ***
 
-Press Key Test Id
-  [Arguments]  ${id}  ${key}
-  Press Key  jquery=input[data-test-id=${id}]  ${key}
+Can delete version
+  [Arguments]  ${version}
+  Wait Until  Element should be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
 
-Reject note is
-  [Arguments]  ${prefix}  ${text}
-  Scroll to test id  ${prefix}-note
-  Wait test id visible  ${prefix}-note
-  Test id text is  ${prefix}-note  ${text}
+Cannot delete version
+  [Arguments]  ${version}
+  Wait Until  Element should not be visible  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
+
+# Visible selector does not match 0x0 element
+Neutral version
+  [Arguments]  ${testid}
+  jQuery should match X times  i[data-test-id=${testid}]  1
+
+Delete version
+  [Arguments]  ${version}
+  Click Element  jquery=tr[data-test-id='version-row-${version}'] td a[data-test-id=delete-version]
+  Confirm yes no dialog
+  Cannot delete version  ${version}
+
+Attachment approved
+  Wait Until  Element should be disabled  test-attachment-approve
+  Wait Until  Element should be enabled   test-attachment-reject
+  Wait until  Element should be visible  jquery=span.form-approval-status.approved
   
-Reject and fill note  
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
-  Run Keyword if  ${doc-style}  Click reject  ${button}
-  Run Keyword unless  ${doc-style}  Click button  ${button}
-  Wait test id visible  ${prefix}-editor
-  Input text by test id  ${prefix}-editor  ${text}  True
+Attachment rejected
+  [Arguments]  ${note}
+  Wait Until  Element should be disabled  test-attachment-reject
+  Wait Until  Element should be enabled   test-attachment-approve
+  Wait until  Element should be visible  jquery=span.form-approval-status.rejected
+  Reject note is  details-reject  ${note}
 
-Reject with note
-  [Arguments]  ${button}  ${prefix}  ${text}
-  Reject and fill note  ${button}  ${prefix}  ${text}
-  Press Key test id  ${prefix}-editor  \\13
-  Reject note is  ${prefix}  ${text}
+Attachment neutral
+  Wait Until  Element should be enabled  test-attachment-approve
+  Wait Until  Element should be enabled  test-attachment-reject
 
-Reject with note but cancel
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
-  ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()
-  Reject and fill note  ${button}  ${prefix}  ${text}  ${doc-style}
-  Press Key test id  ${prefix}-editor  \\27  
-  No such test id  ${prefix}-editor
-  Reject note is  ${prefix}  ${old}
+Tab indicator is
+  [Arguments]  ${n}
+  Wait until  Element text should be  applicationAttachmentsRequiringAction  ${n}
 
-Reject attachment with note
-  [Arguments]  ${selector}  ${prefix}  ${text}
-  Reject and fill note  ${selector}  ${prefix}  ${text}  False
-  Press Key test id  ${prefix}-editor  \\13
-  Reject note is  ${prefix}  ${text}
-  
-  
-     
+No tab indicator
+  Wait Until  Element should not be visible  applicationAttachmentsRequiringAction

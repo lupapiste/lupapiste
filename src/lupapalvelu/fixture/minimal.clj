@@ -458,7 +458,7 @@
     :city "Loppi"
     :private {:password "$2a$10$MX9RWSqjBocwxg1ikSp/POV8lXd6lKA4yDymRIg7.GsXdRigZxmjK"}}
 
-   ;; Helsinki - rakennnustarkastaja@hel.fi / helsinki
+   ;; Helsinki - rakennustarkastaja@hel.fi / helsinki
    {:id "5770f6ffd358719a09397a45"
     :email "rakennustarkastaja@hel.fi"
     :enabled true

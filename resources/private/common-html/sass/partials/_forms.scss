@@ -761,7 +761,7 @@ div.sticky {
   }
 }
 
-@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px, $arrow-left: 5%) {
+@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px, $arrow-left: 5%, $padding: $marginS) {
   display: block;
   position: relative;
   float: left;
@@ -770,7 +770,7 @@ div.sticky {
   width: $width;
   border-radius: 2px;
   border: 1px solid $orange-light;
-  padding: $marginS $marginS $marginS $marginS;
+  padding: $padding;
   margin-top: $margin-top;
   &:after, &:before {
              bottom: 100%;
@@ -809,6 +809,8 @@ div.sticky {
   }
 }
 
+@include input-and-button( reject-edits ) {}
+
 @mixin reject( $margin-left: 34px,
                $margin-top: -10px,
                $color: inherit) {
@@ -831,7 +833,8 @@ div.sticky {
 
 .reject-note-editor {
   @include reject;
-  @include description-bubble-mixin( 50%, 0);
+  @include description-bubble-mixin( initial, $padding: 0);
+  display: inline-block;
 }
 
 .accordion-reject-note {
@@ -840,7 +843,7 @@ div.sticky {
 
 .accordion-reject-note-editor {
   @include reject( 45px );
-  @include description-bubble-mixin( 100%, 0);
+  @include description-bubble-mixin( initial, 0, $padding: 0);
   margin-left: 45px;
 }
 
@@ -853,17 +856,17 @@ div.sticky {
 
 .toolbar-reject-note-editor {
   @include reject( 45px );
-  @include description-bubble-mixin( 50%, 10px);
-  min-height: 40px;
+  @include description-bubble-mixin( initial, 10px, $padding: 0);
+  //min-height: 40px;
   margin-left: 45px;
   margin-bottom: 10px;
 }
 
 .attachment-reject-note-editor {
   @include reject;
-  @include description-bubble-mixin( 40%, 0 );
-  //margin-bottom: 10px;
-  float: none;
+  @include description-bubble-mixin( initial, 0, $padding: 0 );
+  margin-bottom: 10px;
+  //float: none;
 }
 
 .table-reject-note {
@@ -872,8 +875,8 @@ div.sticky {
 
 .table-reject-note-editor {
   @include reject( 0 );
-  @include description-bubble-mixin( 40%, 0, 18px );
-  float: none;
+  @include description-bubble-mixin( initial, 0, 18px, $padding: 0 );
+  //float: none;
 }
 
 // Top-level form-approval-status

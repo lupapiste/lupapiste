@@ -20,7 +20,7 @@
       </thead>
       <tbody data-bind="foreach: attachments">
         <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
-                       'data-test-state': $data.state,
+                       'data-test-state': $parent.testState( $data ),
                        'attachment-id': $data.id},
                        css: {'even-row': util.isEven( $index() ),
                        'odd-row': util.isOdd( $index() ),

@@ -26,7 +26,8 @@
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
-            [lupapalvelu.file-upload :as file-upload])
+            [lupapalvelu.file-upload :as file-upload]
+            [lupapalvelu.authorization :as auth])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File InputStream]))
 
@@ -88,10 +89,12 @@
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
 
-(defschema RejectNote
-  "An approval reject note is version-specific"
-  {:fileId                               sc/Str             ;; used as 'foreign key' to attachment version
-   :note                                 sc/Str})
+(defschema VersionApprovals
+  "An approvals are version-specific. Keys are originalFileIds."
+  {sc/Keyword {:state                       (sc/enum attachment-states)
+               (sc/optional-key :timestamp) ssc/Timestamp
+               (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
+               (sc/optional-key :note)      sc/Str}})
 
 (defschema Version
   "Attachment version"
@@ -125,11 +128,6 @@
    (sc/optional-key :readOnly)           sc/Bool            ;;
    :applicationState                     (apply sc/enum states/all-states) ;; state of the application when attachment is created if not forced to any other
    (sc/optional-key :originalApplicationState) (apply sc/enum states/pre-verdict-states) ;; original application state if visible application state if forced to any other
-   :state                                (apply sc/enum attachment-states) ;; attachment state
-   (sc/optional-key :approved)           {:value (sc/enum :approved :rejected) ; Key name and value structure are the same as in document meta data.
-                                          :user {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
-                                          :timestamp ssc/Timestamp
-                                          :fileId ssc/ObjectIdStr}
    :target                               (sc/maybe Target)  ;;
    (sc/optional-key :source)             Source             ;;
    (sc/optional-key :ramLink)            AttachmentId       ;; reference from ram attachment to base attachment
@@ -147,7 +145,7 @@
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
    (sc/optional-key :metadata)           {sc/Keyword sc/Any}
-   (sc/optional-key :rejectNotes)        [RejectNote]})
+   (sc/optional-key :approvals)          VersionApprovals})
 
 ;;
 ;; Utils
@@ -169,6 +167,34 @@
 
 (def attachment-is-readOnly? (partial attachment-value-is? true? :readOnly))
 (def attachment-is-locked?   (partial attachment-value-is? true? :locked))
+
+(defn get-original-file-id
+  "Returns original file id of the attachment version that matches
+  file-id. File-id can be either fileId or originalFileId."
+  [attachment file-id]
+  (some->> (:versions attachment)
+           (util/find-first (fn [{:keys [fileId originalFileId]}]
+                              (or (= fileId file-id)
+                                  (= originalFileId file-id))))
+           :originalFileId))
+
+(defn- version-approval-path
+  [original-file-id & [subkey]]
+  (->>  (if (ss/blank? (str subkey))
+          [original-file-id]
+          [original-file-id (name subkey)])
+        (cons "attachments.$.approvals")
+        (ss/join ".")
+        keyword))
+
+(defn attachment-version-state [attachment file-id]
+  (when-let [file-key (keyword (get-original-file-id attachment file-id))]
+    (some-> attachment :approvals file-key :state keyword)))
+
+(defn attachment-state [attachment]
+  (attachment-version-state attachment (some-> attachment
+                                               :latestVersion
+                                               :originalFileId)))
 
 ;;
 ;; Api
@@ -224,7 +250,7 @@
            :applicationState (if (and (= :verdict (:type target)) (not (states/post-verdict-states application-state)))
                                :verdictGiven
                                application-state)
-           :state :requires_user_action
+           ;;:state :requires_user_action
            :target target
            :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
@@ -233,6 +259,7 @@
            :op (not-empty (select-keys group [:id :name]))
            :signatures []
            :versions []
+           ;:approvals {}
            :auth []
            :contents contents}
           (:groupType group) (assoc :groupType (:groupType group))
@@ -308,6 +335,17 @@
     (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
 
+(defn can-delete-version?
+  "False if the attachment version is a) rejected or approved and b)
+  the user is not authority."
+  [user application attachment-id file-id]
+  (not (when-not (auth/application-authority? application user)
+         (when (some-> (get-attachment-info application attachment-id)
+                       (attachment-version-state file-id)
+                       keyword
+                       #{:ok :requires_user_action})
+           :cannot-delete))))
+
 (defn- delete-attachment-file-and-preview! [file-id]
   (mongo/delete-file-by-id file-id)
   (mongo/delete-file-by-id (str file-id "-preview")))
@@ -353,35 +391,41 @@
         :missing-fonts missing-fonts
         :autoConversion autoConversion))))
 
-(defn- ->approval [state user timestamp file-id & [note]]
-  {:value (if (= :ok state) :approved :rejected)
+(defn- ->approval [state user timestamp]
+  {:state state
    :user (select-keys user [:id :firstName :lastName])
-   :timestamp timestamp
-   :fileId file-id
-   :note note})
+   :timestamp timestamp})
 
-(defn- build-version-updates [user attachment version-model {:keys [created target state stamped replaceable-original-file-id]
-                                                             :or   {state :requires_authority_action} :as options}]
-  {:pre [(map? attachment) (map? version-model) (number? created) (map? user) (keyword? state)]}
+(defn- build-version-updates [user attachment version-model
+                              {:keys [created target stamped replaceable-original-file-id state]
+                               :as   options}]
+  {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
-  (let [version-index  (or (-> (map :originalFileId (:versions attachment))
-                               (zipmap (range))
-                               (some [(or replaceable-original-file-id (:originalFileId version-model))]))
-                           (count (:versions attachment)))
-        user-role      (if stamped :stamper :uploader)]
+  (let [{:keys [originalFileId]} version-model
+        version-index            (or (-> (map :originalFileId (:versions attachment))
+                                         (zipmap (range))
+                                         (some [(or replaceable-original-file-id originalFileId)]))
+                                     (count (:versions attachment)))
+        user-role                (if stamped :stamper :uploader)]
     (util/deep-merge
      (when target
        {$set {:attachments.$.target target}})
-     (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
+     (when (->> (:versions attachment) butlast (map :originalFileId) (some #{originalFileId}) not)
        {$set {:attachments.$.latestVersion version-model}})
-     (if (and (usr/authority? user) (not= state :requires_authority_action))
-       {$set {:attachments.$.approved (->approval state user created (:fileId version-model))}}
-       {$unset {:attachments.$.approved 1}})
-     {$set {:modified created
-            :attachments.$.modified created
-            :attachments.$.state  state
-            :attachments.$.notNeeded false                  ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
-            (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
+
+     ;;
+     (when-let [approval (cond
+                           state                                           (->approval state user created )
+                           (not (attachment-version-state attachment
+                                                          originalFileId)) {:state :requires_authority_action})]
+       {$set {(version-approval-path originalFileId) approval}})
+
+     {$set      {:modified                            created
+                 :attachments.$.modified              created
+                 :attachments.$.notNeeded             false ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
+                 (ss/join "."
+                          ["attachments" "$"
+                           "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
 
 (defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
@@ -506,20 +550,13 @@
     (update-application
      (application->command application)
      {:attachments {$elemMatch {:id attachment-id}}}
-     (util/deep-merge
-       (when (= file-id (-> attachment :versions last :fileId))
-         ; Deleting latest versions resets approval
-         {$unset {:attachments.$.approved 1}
-          $set {:attachments.$.state :requires_authority_action}})
-       {$pull {:attachments.$.versions {:fileId file-id}
-               :attachments.$.signatures {:fileId file-id}
-               :attachments.$.rejectNotes {:fileId file-id}}
-        $set  (merge
-                {:attachments.$.latestVersion latest-version}
-                (when (nil? latest-version)
-                  ; No latest version: reset auth and state
-                  {:attachments.$.auth []
-                   :attachments.$.state :requires_user_action}))}))
+     {$pull {:attachments.$.versions {:fileId file-id}
+             :attachments.$.signatures {:fileId file-id}}
+      $unset {(version-approval-path original-file-id) 1}
+      $set  (merge
+             {:attachments.$.latestVersion latest-version}
+             (when (nil? latest-version) ; No latest version: reset auth and state
+               {:attachments.$.auth []}))})
     (infof "3/3 deleted meta-data of file %s of attachment" file-id attachment-id)))
 
 (defn get-attachment-file-as!
@@ -683,21 +720,33 @@
     (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
     (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
-(defn set-attachment-state! [{:keys [created user application] :as command} file-id new-state]
+(defn set-attachment-state!
+  "Updates attachment's approvals."
+  [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
-  (if-let [{attachment-id :id {note :note} :approved} (get-attachment-info-by-file-id application file-id)]
-    (let [data {:state new-state,
-                :approved (->approval new-state user created file-id note)}]
-      (update-attachment-data! command attachment-id data created :set-app-modified? true :set-attachment-modified? false))
+  (if-let [attachment (get-attachment-info-by-file-id application file-id)]
+    (let [data (into {}
+                     (map (fn [[k v]] [(->> [(get-original-file-id attachment file-id) k]
+                                            (map name)
+                                            (cons "approvals")
+                                            (ss/join ".")
+                                            keyword)
+                                       v])
+                          (->approval new-state user created)))]
+      (update-attachment-data! command (:id attachment) data created :set-app-modified? true :set-attachment-modified? false))
     (fail :error.attachment.id)))
 
 (defn set-attachment-reject-note! [{:keys [created user application] :as command} file-id note]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id)]}
   (if-let [attachment (get-attachment-info-by-file-id application file-id)]
-    (let [query {:attachments {$elemMatch {:id (:id attachment)}}}]
-      (update-application command query {$pull {:attachments.$.rejectNotes {:fileId file-id}}})
-      (update-application command query {$push {:attachments.$.rejectNotes {:fileId file-id :note note}}
-                                         $set  {:modified created}}))
+    (update-attachment-data! command
+                             (:id attachment)
+                             {(keyword (str "approvals."
+                                            (get-original-file-id attachment file-id)
+                                            ".note")) note}
+                             created
+                             :set-app-modified? true
+                             :set-attachment-modified? false)
     (fail :error.attachment.id)))
 
 (defn convert-existing-to-pdfa! [application user attachment]

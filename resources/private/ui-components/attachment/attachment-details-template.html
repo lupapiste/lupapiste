@@ -60,7 +60,7 @@
         </button>
       </div>
 
-      <div data-bind="component: { name:'approval', params: {approval: $data.approval} }"></div>
+      <div data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
       <div data-bind="component: {name: 'reject-note',
                       params: {attachmentId: id,
                       editorCss: 'attachment-reject-note-editor',
@@ -123,19 +123,25 @@
             <table class="table table-even-odd">
               <thead>
                 <tr>
+                  <th data-bind="ltext: 'application.attachmentState'"></th>
                   <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
                   <th data-bind="ltext: 'attachment.version'">Versio</th>
                   <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
                   <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
                   <th data-bind="ltext: 'attachment.autoConversion'">Muunnettu</th>
                   <th data-bind="ltext: 'attachment.actions'">Toiminto</th>
-                </tr>
+                </t>
               </thead>
               <tbody data-bind="foreach: $data.versions">
                 <tr data-bind="attr: {'data-test-id': 'version-row-' + $data.version.major + '.' + $data.version.minor},
                                css: {'even-row': util.isEven( $index() ),
                                'odd-row': util.isOdd( $index() ),
-                               'version-row--noted': $parent.rejectNote( $data )}">
+                               'version-row--noted': $data.note}">
+                  <td>                    
+                    <i  data-bind="css: {'lupicon-circle-check positive': $data.approved,
+                                   'lupicon-circle-attention negative': $data.rejected},
+                                   testId: $parent.versionTestId( $index, $data )"></i>
+                  </td>
                   <td>
                     <!-- TODO: download via service -->
                     <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}, click: function() {hub.send('track-click', {category:'Attachments', label: '', event:'downloadVersion'});return true;}"></a>
@@ -151,17 +157,18 @@
                   <td>
                     <a data-bind="click: $parent.deleteVersion,
                                   ltext: 'remove',
-                                  visible: $parent.deleteAttachmentVersionAllowed()"
+                                  visible: $data.canDelete"
                        data-test-id="delete-version"></a>
                   </td>
                 </tr>
-                <!-- ko if: $parent.rejectNote( $data ) -->
+                <!-- ko if: $data.note -->
                 <tr class="version-reject-note-row"
                     data-bind="css: {'even-row': util.isEven( $index() ),
                                'odd-row': util.isOdd( $index() )}">
-                  <td  colspan="6"
-                       data-bind="text: $parent.rejectNote( $data ),
-                                  testId: _.join( [$index(), $data.version.major, $data.version.minor, 'note'], '-')"></td>
+                  <td  colspan="7"
+                       data-bind="text: $data.note,
+                                  css: {'reject-note--rejected': $data.rejected},
+                                  testId: $parent.versionTestId( $index, $data, 'note')"></td>
                 </tr>
                 <!-- /ko -->
               </tbody>

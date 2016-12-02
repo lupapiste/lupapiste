@@ -40,7 +40,7 @@
 (defn- build-attachment-query-params [{application-id :id} {attachment-id :id latest-version :latestVersion}]
   {:id           application-id
    :attachmentId attachment-id
-   :fileId       latest-version})
+   :fileId       (:fileId latest-version)})
 
 (defmethod action/allowed-actions-for-category :attachments
   [command]
@@ -112,6 +112,8 @@
                        (states/post-verdict-states (keyword create-state))
                        (usr/authority? user)))
          (fail :error.pre-verdict-attachment))))))
+
+
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -297,7 +299,7 @@
    :states     states/all-states}
   [{{attachments :attachments} :application}]
   (->> (ram/resolve-ram-links attachments attachmentId)
-       (map #(select-keys % [:id :latestVersion :approved :ramLink]))
+       (map #(select-keys % [:id :latestVersion :ramLink]))
        (ok :ram-links)))
 
 ;;
@@ -317,7 +319,7 @@
 ;;
 
 (defcommand approve-attachment
-  {:description "Authority can approve attachment, moves to ok"
+  {:description "Authority can approve attachment. Updates approval map."
    :parameters  [id fileId]
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
@@ -328,7 +330,7 @@
   (attachment/set-attachment-state! command fileId :ok))
 
 (defcommand reject-attachment
-  {:description "Authority can reject attachment, requires user action."
+  {:description "Authority can reject attachment. Updates approval map."
    :parameters  [id fileId]
    :categories  #{:attachments}
    :input-validators [(partial action/non-blank-parameters [:fileId])]
@@ -434,11 +436,11 @@
                  ram/ram-status-not-ok
                  ram/ram-not-linked]}
   [{:keys [application user]}]
-
-  (if (and (attachment/file-id-in-application? application attachmentId fileId)
-           (attachment/file-id-in-application? application attachmentId originalFileId))
-    (attachment/delete-attachment-version! application attachmentId fileId originalFileId)
-    (fail :file_not_linked_to_the_document)))
+  (cond
+    (not (and (attachment/file-id-in-application? application attachmentId fileId)
+              (attachment/file-id-in-application? application attachmentId originalFileId))) (fail :file_not_linked_to_the_document)
+    (not (attachment/can-delete-version? user application attachmentId fileId)) (fail :error.unauthorized)
+    :else (attachment/delete-attachment-version! application attachmentId fileId originalFileId)))
 
 ;;
 ;; Download

@@ -2588,6 +2588,25 @@
                                                {:data.tyoaika-paattyy-pvm.modified {$exists true, $gt 0}},
                                                {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
                                                {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
+
+(defn- build-approvals
+  "Approvals is original-file-id - approval map, where approval includes state
+  and approved information.Explicit approved/rejected flag is no
+  longer used. The flag is determined by the version state. In
+  migration, we create approval for the latestVersion and remove old
+  state and approved."
+  [{:keys [state approved latestVersion] :as attachment}]
+  (merge (dissoc attachment :state :approved)
+         (when-let [filekey (some-> latestVersion :originalFileId keyword)]
+           {:approvals {filekey (assoc (select-keys approved [:timestamp :user])
+                                      :state state)}})))
+
+(defmigration version-specific-attachment-state
+  {:apply-when (pos? (mongo/count :applications {:attachments.state {$exists true}}))}
+  (update-applications-array :attachments
+                             build-approvals
+                             {:attachments.0 {$exists true}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

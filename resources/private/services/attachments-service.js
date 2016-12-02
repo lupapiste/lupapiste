@@ -323,13 +323,6 @@ LUPAPISTE.AttachmentsService = function() {
     self.queryOne( attachmentId );
   };
 
-  self.getRejectNote = function( attachmentId, fileId ) {
-    return _.get( _.find( util.getIn( self.getAttachment( attachmentId ),
-                                      ["rejectNotes"]),
-                          {fileId: fileId}),
-                  "note");
-  };
-
   // Used by reject-note component.
   self.rejectAttachmentNoteEditorState = ko.observable();
 
@@ -404,16 +397,46 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
+
+
+
+  // If fileId is not given, the approval for the latestVersion is returned.
+  // The fileId can be either fileId or originalFileId.
+  self.attachmentApproval = function ( attachment, fileId ) {
+    if( fileId ) {
+      var version = _.find( util.getIn(attachment, ["versions"] ),
+                            function( v ) {
+                              return v.fileId === fileId
+                                || v.originalFileId === fileId;
+                            });
+      fileId = _.get( version, "originalFileId");
+    } else {
+      fileId = util.getIn( attachment, ["latestVersion", "originalFileId"]);
+    }
+    return fileId && util.getIn( attachment, ["approvals", fileId]);
+  };
+
+  function attachmentState( attachment ) {
+    return _.get( self.attachmentApproval( attachment), "state");
+  }
+
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.APPROVED;
+    return attachmentState(attachment ) === self.APPROVED;
   };
-  self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED
+
+  self.isRejected = function(attachment ) {
+    return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+
+  // True if the attachment is needed but does not have file yet.
+  self.isMissingFile = function( attachment ) {
+    return !self.isNotNeeded( attachment )
+      && _.isEmpty( util.getIn( attachment, ["versions"]) );
   };
 
   //

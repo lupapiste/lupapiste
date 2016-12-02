@@ -65,13 +65,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rejectAttachment  = trackClickWrap("rejectAttachment",  service.rejectAttachment,  self.id);
   addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
   addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
-  self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
+  self.isApproved   = _.wrap( self.attachment, service.isApproved );
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
+  self.isRejected   = _.wrap( self.attachment, service.isRejected );
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
   self.approval = self.disposedPureComputed(function () {
-    return self.attachment().approved;
+    return  service.attachmentApproval( self.attachment ) ;
   });
 
   var editable = self.disposedComputed(function() {
@@ -110,13 +110,36 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   self.versions = self.disposedPureComputed( function() {
-    return _.reverse( _.clone( self.attachment().versions ) );
+    return _( self.attachment().versions)
+      .map( function( v ) {
+        var approval = service.attachmentApproval( self.attachment, v.fileId ) || {};
+        var authority = lupapisteApp.models.currentUser.isAuthority();
+        var rejected = approval.state === service.REJECTED;
+        var approved = approval.state === service.APPROVED;
+        // Authority sees every version note, applicant only the rejected.
+        return _.merge( {note: (authority || rejected) && approval.note,
+                         approved: approved,
+                         rejected: rejected,
+                         // Applicant can only delete version without approval status.
+                         canDelete: authModel.ok( "delete-attachment-version")
+                         && (authority || !(approved || rejected))},
+                        v);
+      })
+      .reverse()
+      .value();
   });
 
-  // Version notes are only shown to authorities.
-  self.rejectNote = function( version ) {
-    return lupapisteApp.models.currentUser.isAuthority()
-    && service.getRejectNote( self.id, version.fileId );
+  // If postfix is not given, we use approved/rejected
+  self.versionTestId = function( prefix, version, postfix ) {
+    var nums = version.version;
+    if( !postfix) {
+      postfix = (version.approved && "approved")
+        || (version.rejected && "rejected")
+        || "neutral";
+    }
+    return _( [prefix, nums.major, nums.minor, postfix])
+      .map( ko.unwrap )
+      .join(  "-" );
   };
 
   // Versions - add
@@ -138,7 +161,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
 
   // Versions - delete
-  self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version"); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;

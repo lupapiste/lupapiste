@@ -50,20 +50,22 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     }
   });
 
+  self.saveNote = function() {
+    self.note( self.editorNote());
+    updateNote( self.note());
+    self.showEditor( false );
+  };
+
   self.closeEditor = function( data, event ) {
-    // Toggle editors visibility with key press
-    switch( event.keyCode ) {
-    case 13: // Enter
-      self.note( self.editorNote());
-      updateNote( self.note());
-      self.showEditor( false );
-      break;
-    case 27: // Esc
-      self.showEditor( false );
-      break;
+    // Enter closes editor and saves note.
+    if( event.keyCode === 13) {
+      self.saveNote();
     }
     return true;
   };
+
+  // Global ESC event
+  self.addHubListener( "dialog-close", _.wrap( false, self.showEditor));
 
   function resetRejected( rejected ) {
     self.showEditor( rejected );
@@ -98,16 +100,13 @@ LUPAPISTE.RejectNoteModel = function( params ) {
                                }
                              }
                            });
-    }
-    else {
-      // Document
+    } else {
+      // Document accordion
       self.addHubListener( "document-approval-" + docModel.docId,
                            function( event ) {
                              if( _.isBoolean( event.approved )) {
                                resetRejected( !event.approved );
-                               if( self.showEditor() ) {
-                                 window.Stickyfill.rebuild();
-                               }
+                               _.delay( window.Stickyfill.rebuild, 500 );
                              }
                            });
     }
@@ -119,13 +118,9 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     var attachment = service.getAttachment( attachmentId );
 
     self.disposedComputed( function() {
-      self.isRejected( util.getIn( attachment,
-                                   ["approved", "value"]) === "rejected");
+      self.isRejected( service.isRejected( attachment ));
 
-      self.note( service.getRejectNote( attachmentId,
-                                        util.getIn( attachment,
-                                                    ["latestVersion",
-                                                     "fileId"])));
+      self.note( _.get( service.attachmentApproval( attachment), "note"));
     });
 
     updateNote = _.partial( service.rejectAttachmentNote, attachmentId );
@@ -154,5 +149,4 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   // Initialization based on parameters.
   (params.docModel ? docModelInit : attachmentInit)();
   self.testPrefix = params.prefix || self.testPrefix;
-
 };

@@ -137,3 +137,51 @@ Reject group
   [Arguments]  ${name}
   Click reject  ${name}
   Sonja group rejected  ${name}
+
+# Reject notes and related
+
+
+Press Key Test Id
+  [Arguments]  ${id}  ${key}
+  Press Key  jquery=input[data-test-id=${id}]  ${key}
+
+Reject note is
+  [Arguments]  ${prefix}  ${text}
+  Scroll to test id  ${prefix}-note
+  Wait test id visible  ${prefix}-note
+  Test id text is  ${prefix}-note  ${text}
+  
+Reject and fill note  
+  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
+  Run Keyword if  ${doc-style}  Click reject  ${button}
+  Run Keyword unless  ${doc-style}  Click button  ${button}
+  Wait test id visible  ${prefix}-editor
+  Input text by test id  ${prefix}-editor  ${text}  True
+
+Reject with note
+  [Arguments]  ${button}  ${prefix}  ${text}
+  Reject and fill note  ${button}  ${prefix}  ${text}
+  Press Key test id  ${prefix}-editor  \\13
+  Reject note is  ${prefix}  ${text}
+
+Reject with note and save
+  [Arguments]  ${button}  ${prefix}  ${text}
+  Reject and fill note  ${button}  ${prefix}  ${text}
+  Scroll and click test id  ${prefix}-save
+  Reject note is  ${prefix}  ${text}
+
+
+Reject with note but cancel
+  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
+  ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()
+  Reject and fill note  ${button}  ${prefix}  ${text}  ${doc-style}
+  Press Key test id  ${prefix}-editor  \\27  
+  No such test id  ${prefix}-editor
+  Reject note is  ${prefix}  ${old}
+
+Reject attachment with note
+  [Arguments]  ${selector}  ${prefix}  ${text}
+  Reject and fill note  ${selector}  ${prefix}  ${text}  False
+  Press Key test id  ${prefix}-editor  \\13
+  Reject note is  ${prefix}  ${text}
+  
