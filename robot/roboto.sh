@@ -110,9 +110,11 @@ run_test() {
    case $OUTPUT in
       xvfb)
          SCREEN=$1
+         echo "STARTING Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24"
          Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
          DISPLAY=:$SCREEN
+         echo "DISPLAY set to $DISPLAY"
          ;;
       xnest)
          SCREEN=$1
@@ -130,7 +132,7 @@ run_test() {
          ;;
    esac
   
-   sleep 1 # wait for X to start
+   sleep 2 # wait for X to start
    
    WMPID=""
    # start openbox to handle window maximize if we're running in a non-local X
@@ -142,12 +144,12 @@ run_test() {
    # disable screensaver (needed when recording) 
    test -z "$XPID" || DISPLAY=:$SCREEN xset s off
    
-   sleep 1 # wait for window manager to start
+   sleep 2 # wait for window manager to start
    
    mkdir -p target # make log directory if necessary
-  
+ 
    # exclude tests with non-roboto-proof tag
-   timeout $TIMEOUT pybot \
+   DISPLAY=:$SCREEN timeout $TIMEOUT pybot \
       --exclude integration \
       --exclude ajanvaraus \
       --exclude fail \
@@ -161,10 +163,11 @@ run_test() {
       -l $TEST.log \
       -r $TEST.html \
          common/setup "$test" common/teardown &> target/$TEST.out
+
    BOT=$?
    test -z "$WMPID" || kill -9 $WMPID; sleep 1
    test -z "$XPID" || kill -9 $XPID; sleep 1
-   test "$BOT" == "0" || { 
+   test "$BOT" = "0" || { 
       echo "ERROR: pybot run exited with $BOT for test '$test'"; 
       echo "FAIL: pybot exited with non-zero $BOT, timeout was $TIMEOUT" >> target/$TEST.out;
    }
