@@ -229,7 +229,7 @@
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped"></div>
             <div data-bind="if: $parent.showWillPublish && _.has($data.metadata(), 'myyntipalvelu')" class="will-publish">
-              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu']" class="lupicon-check enabled"></i>
+              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
               <span data-bind="visible: !util.getIn($data, ['metadata', 'myyntipalvelu']), ltext: 'no'"></span>
             </div>
           </div>
