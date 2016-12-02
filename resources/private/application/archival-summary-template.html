@@ -80,7 +80,7 @@
       </div>
     <!-- /ko -->
 
-    <!-- ko if: showMarkArchivedSection -->
+    <!-- ko if: showMarkArchivedSection && !$root.authorization.ok("common-area-application") -->
     <div class="mark-as-archived">
       <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
       <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>

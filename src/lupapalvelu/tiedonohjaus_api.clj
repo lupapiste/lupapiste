@@ -13,7 +13,8 @@
             [lupapiste-commons.schema-utils :as schema-utils]
             [lupapalvelu.attachment-api :as aa]
             [lupapalvelu.application :as a]
-            [lupapalvelu.archiving-api :as archiving-api]))
+            [lupapalvelu.archiving-api :as archiving-api]
+            [lupapalvelu.permit :as permit]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -204,3 +205,11 @@
    :categories #{:attachments}
    :states states/all-application-states}
   (ok))
+
+
+(defquery common-area-application
+  {:parameters [id]
+   :states states/all-states
+   :user-roles #{:applicant :authority}
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]}
+  [_])
