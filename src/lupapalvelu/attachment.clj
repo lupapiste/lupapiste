@@ -397,27 +397,35 @@
    :timestamp timestamp})
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped state replaceable-original-file-id]
-                               :or {state :requires_authority_action} :as options}]
+                              {:keys [created target stamped replaceable-original-file-id state]
+                               :as   options}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
-  (let [version-index  (or (-> (map :originalFileId (:versions attachment))
-                               (zipmap (range))
-                               (some [(or replaceable-original-file-id (:originalFileId version-model))]))
-                           (count (:versions attachment)))
-        user-role      (if stamped :stamper :uploader)]
+  (let [{:keys [originalFileId]} version-model
+        version-index            (or (-> (map :originalFileId (:versions attachment))
+                                         (zipmap (range))
+                                         (some [(or replaceable-original-file-id originalFileId)]))
+                                     (count (:versions attachment)))
+        user-role                (if stamped :stamper :uploader)]
     (util/deep-merge
      (when target
        {$set {:attachments.$.target target}})
-     (when (->> (:versions attachment) butlast (map :originalFileId) (some #{(:originalFileId version-model)}) not)
+     (when (->> (:versions attachment) butlast (map :originalFileId) (some #{originalFileId}) not)
        {$set {:attachments.$.latestVersion version-model}})
-     (if (and (usr/authority? user) (not= state :requires_authority_action))
-       {$set {(version-approval-path (:originalFileId version-model)) (->approval state user created)}}
-       {$set {(version-approval-path (:originalFileId version-model)) {:state state}}})
-     {$set {:modified created
-            :attachments.$.modified created
-            :attachments.$.notNeeded false                  ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
-            (ss/join "." ["attachments" "$" "versions" version-index]) version-model}
+
+     ;;
+     (when-let [approval (cond
+                           state                                           (->approval state user created )
+                           (not (attachment-version-state attachment
+                                                          originalFileId)) {:state :requires_authority_action})]
+       {$set {(version-approval-path originalFileId) approval}})
+
+     {$set      {:modified                            created
+                 :attachments.$.modified              created
+                 :attachments.$.notNeeded             false ; if uploaded, attachment is needed then, right? LPK-2275 copy-user-attachments
+                 (ss/join "."
+                          ["attachments" "$"
+                           "versions" version-index]) version-model}
       $addToSet {:attachments.$.auth (usr/user-in-role (usr/summary user) user-role)}})))
 
 (defn- remove-old-files! [{old-versions :versions} {file-id :fileId original-file-id :originalFileId :as new-version}]
