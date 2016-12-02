@@ -117,8 +117,8 @@
             <div class="retention-period" data-bind="text: $data.retentionDescription"></div>
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped">
-              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.stamped, attr: {title: loc('attachment.stamped')}"></i>
-              <span data-bind="visible: !$data.stamped, ltext: 'no'"></span>
+              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.latestVersion.stamped, attr: {title: loc('attachment.stamped')}"></i>
+              <span data-bind="visible: !$data.latestVersion.stamped, ltext: 'no'"></span>
             </div>
             <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
               <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
