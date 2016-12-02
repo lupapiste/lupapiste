@@ -2564,7 +2564,7 @@
 (defmigration add-ms-timestamp-for-work-started-and-ended
   {:apply-when (pos? (mongo/count :applications
                                   {:documents
-                                  {$elemMatch {$or
+                                  {$elemMatch {$and
                                                [{$and [{:schema-info.name "tyoaika"},
                                                      {:data.tyoaika-alkaa-pvm.modified {$exists true, $gt 0}},
                                                      {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
