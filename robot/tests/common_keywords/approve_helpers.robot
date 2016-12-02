@@ -164,6 +164,13 @@ Reject with note
   Press Key test id  ${prefix}-editor  \\13
   Reject note is  ${prefix}  ${text}
 
+Reject with note and save
+  [Arguments]  ${button}  ${prefix}  ${text}
+  Reject and fill note  ${button}  ${prefix}  ${text}
+  Scroll and click test id  ${prefix}-save
+  Reject note is  ${prefix}  ${text}
+
+
 Reject with note but cancel
   [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
   ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()

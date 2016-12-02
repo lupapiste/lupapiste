@@ -11,10 +11,18 @@
   <!-- ko if: showEditor -->
   <div data-bind="event: {keydown: closeEditor},
                   css: editorCss">
-    <input type="text"
-           data-bind="textInput: editorNote,
-                      hasFocus: true,
-                      testId: testPrefix + '-editor'">
+    <div class="reject-edits">
+      <input type="text"
+             class="reject-edits--input" 
+             data-bind="textInput: editorNote,
+                        hasFocus: true,
+                        testId: testPrefix + '-editor'">
+      <button class="primary reject-edits--input"
+              data-bind="click: saveNote,
+                         testId: testPrefix + '-save'">
+        <i class="lupicon-save"></i>
+      </button>
+    </div>
   </div>
   <!-- /ko -->
 </script>

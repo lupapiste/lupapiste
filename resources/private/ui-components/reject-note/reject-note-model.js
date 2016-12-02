@@ -50,12 +50,16 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     }
   });
 
+  self.saveNote = function() {
+    self.note( self.editorNote());
+    updateNote( self.note());
+    self.showEditor( false );
+  };
+
   self.closeEditor = function( data, event ) {
     // Enter closes editor and saves note.
     if( event.keyCode === 13) {
-      self.note( self.editorNote());
-      updateNote( self.note());
-      self.showEditor( false );
+      self.saveNote();
     }
     return true;
   };

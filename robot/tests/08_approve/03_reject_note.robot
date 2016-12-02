@@ -63,7 +63,7 @@ Sonja rejects primary operation with note
   Reject with note  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
 
 Sonja rejects kaytto with note
-  Reject with note  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage
+  Reject with note and save  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage
   Click approve  kaytto
   Reject note is  rakennuksen-muuttaminen-kaytto  Bad usage
   Reject with note but cancel  kaytto  rakennuksen-muuttaminen-kaytto  foobar
