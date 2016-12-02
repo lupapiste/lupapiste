@@ -2,26 +2,28 @@
 
 ## robot running script for Linux
 
-# todo: check root window minimum geometry with xwininfo -root
-# todo: speed check (e.g. dd + urandom + gzip)
-# todo: flaky tags
-# todo: check for openbox and needed X servers, if used
-# todo: option to run in local X missing
-
 MAXTHREADS=1
 SCREEN=100
 OUTPUT=xvfb
 RESOLUTION=1200x1200
+TIMEOUT=360
 TESTS=
 NOENV=
 SERVER=http://localhost:8000
+
+fail() {
+   echo "Roboto fail: $@"
+   exit 1
+}
 
 usage() {
    echo \
 "roboto.sh [args] test-dir ...
   -j | --threads n  use up to n threads, one per argument test
   -n | --nested     use a nested X server instead of a virtual one
+  -l | --local      use current X server
   -s | --server     use a specific server [$SERVER]
+  -t | --timeout    timeout for individual robot file [$TIMEOUT]
   -h | --help       show this thing
 "
 }
@@ -48,12 +50,24 @@ parse_args() {
          usage
          exit 0
          ;;
+      (-l|--local)
+         OUTPUT=local
+         shift
+         parse_args $@
+         ;;
       (-E|--no-env-check)
          NOENV=1
+         parse_args $@
          ;;
       (-s|--server)
          SERVER=$2
          shift 2
+         parse_args $@
+         ;;
+      (-t|--timeout)
+         TIMEOUT=$2
+         shift 2
+         echo "$TIMEOUT" | grep -q "^[0-9]*$" || fail "bad timeout"
          parse_args $@
          ;;
       (*)
@@ -61,11 +75,6 @@ parse_args() {
          echo "Tests are $TESTS"
          ;;
    esac
-}
-
-fail() {
-   echo "Roboto fail: $@"
-   exit 1
 }
 
 check_env() {
@@ -95,37 +104,54 @@ check_env
 
 echo "Starting robots"
 
-# each pybot runs in a fresh X with only one browser window
 run_test() {
-   SCREEN=$1
    test=$2
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
-   #echo "Starting test $TEST on screen $SCREEN"
    case $OUTPUT in
       xvfb)
+         SCREEN=$1
          Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
+         DISPLAY=:$SCREEN
          ;;
       xnest)
+         SCREEN=$1
          Xnest :$SCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
+         DISPLAY=:$SCREEN
          XPID=$!
+         ;;
+      local)
+         # use current DISPLAY
+         SCREEN=$DISPLAY
+         XPID=""
          ;;
       *)
          fail "output must be xvfb or xnest"
          ;;
    esac
-   sleep 1
-   # browser window maximize works in openbox, but not in many other small wms
-   DISPLAY=:$SCREEN openbox &>/dev/null &
-   DISPLAY=:$SCREEN xset s off # disable screensaver
-   WMPID=$!
-   sleep 1
-   mkdir -p target
-   DISPLAY=:$SCREEN pybot \
+  
+   sleep 1 # wait for X to start
+   
+   WMPID=""
+   # start openbox to handle window maximize if we're running in a non-local X
+   test -z "$XPID" || { 
+      DISPLAY=:$SCREEN openbox &>/dev/null &
+      WMPID=$! 
+   }
+  
+   # disable screensaver (needed when recording) 
+   test -z "$XPID" || DISPLAY=:$SCREEN xset s off
+   
+   sleep 1 # wait for window manager to start
+   
+   mkdir -p target # make log directory if necessary
+  
+   # exclude tests with non-roboto-proof tag
+   timeout $TIMEOUT pybot \
       --exclude integration \
       --exclude ajanvaraus \
       --exclude fail \
-      --exclude non-parallel \
+      --exclude non-roboto-proof \
       --RunEmptySuite \
       --variable SERVER:$SERVER \
       -d target \
@@ -135,9 +161,13 @@ run_test() {
       -l $TEST.log \
       -r $TEST.html \
          common/setup "$test" common/teardown &> target/$TEST.out
-   kill -9 $WMPID
-   sleep 1
-   kill -9 $XPID
+   BOT=$?
+   test -z "$WMPID" || kill -9 $WMPID; sleep 1
+   test -z "$XPID" || kill -9 $XPID; sleep 1
+   test "$BOT" == "0" || { 
+      echo "ERROR: pybot run exited with $BOT for test '$test'"; 
+      echo "FAIL: pybot exited with non-zero $BOT, timeout was $TIMEOUT" >> target/$TEST.out;
+   }
 }
 
 RED='\033[0;31m'
@@ -153,6 +183,7 @@ show_stats() {
    NOW=$(date +'%H:%M:%S %d.%m.%Y')
    test -z "$MSG" && MSG="Waiting for $(jobs | grep run_test | wc -l) threads"
    echo -e "${BRIGHT}$NOW: ${MSG}${DEFAULT}"
+   ls target | grep -q "\.out" || { echo "No results yet."; return; }
    for log in target/*.out
    do
       NPASS=$(grep PASS $log | wc -l)
@@ -166,9 +197,12 @@ show_stats() {
    done
 }
 
-rm target/*.out
+# clear results
+test -d target && rm -rf target
+mkdir target
+
 echo "Running tests $TESTS"
-for test in $TESTS
+for test in $(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
 do
    RUNNING=$(jobs | grep run_test | wc -l)
    while [ $RUNNING -ge $MAXTHREADS ]
