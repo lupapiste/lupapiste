@@ -10,6 +10,7 @@ TIMEOUT=360
 TESTS=
 NOENV=
 SERVER=http://localhost:8000
+LUPISPID=
 
 fail() {
    echo "Roboto fail: $@"
@@ -22,10 +23,28 @@ usage() {
   -j | --threads n  use up to n threads, one per argument test
   -n | --nested     use a nested X server instead of a virtual one
   -l | --local      use current X server
-  -s | --server     use a specific server [$SERVER]
+  -s | --start      start lupapiste with lein
   -t | --timeout    timeout for individual robot file [$TIMEOUT]
   -h | --help       show this thing
+  -S | --server     use a specific server [$SERVER]
 "
+}
+# start lupapiste, assuming we're runnign at robot/
+start_lupapiste() {
+   cd ..
+   test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
+   echo "Starting lupapiste."
+   lein run &> lupapiste-roboto.log &
+   echo -n "Waiting for lupapiste: "
+   LUPISPID=$!
+   for foo in $(seq $TIMEOUT)
+   do
+      grep -q 'You can view the site at http://localhost:8000' lupapiste-roboto.log && break
+      echo -n "x"
+      sleep 1
+   done
+   echo
+   cd robot
 }
 
 parse_args() {
@@ -59,9 +78,14 @@ parse_args() {
          NOENV=1
          parse_args $@
          ;;
-      (-s|--server)
+      (-S|--server)
          SERVER=$2
          shift 2
+         parse_args $@
+         ;;
+      (-s|--start)
+         start_lupapiste
+         shift
          parse_args $@
          ;;
       (-t|--timeout)
@@ -97,6 +121,8 @@ check_env() {
    echo -n "Server: $SERVER "
    curl -s "$SERVER/api/alive" | grep -q unauthorized && echo "ok" || fail "A web server does not appear to be running at '$SERVER'"
 }
+
+
 
 parse_args $@
 
@@ -237,4 +263,7 @@ kill -9 $WMPID &>/dev/null
 sleep 1
 echo "Closing X $XPID"
 kill -9 $XPID &>/dev/null
-
+test -z "$LUPISPID" || { 
+   echo "Shutting down lupapiste $LUPISPID"
+   kill -9 $LUPISPID &>/dev/null
+}
