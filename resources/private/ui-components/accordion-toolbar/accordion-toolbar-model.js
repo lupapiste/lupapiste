@@ -102,12 +102,14 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
+  var hasRole = lupapisteApp.models.currentUser.role();
+
   // Approval functionality
   self.isApprovable = Boolean(self.info.approvable);
   self.showStatus = self.approvalModel.showStatus;
-  self.isApproved = self.approvalModel.isApproved;
-  self.isRejected = self.approvalModel.isRejected;
-  self.isSummaryRejected = self.approvalModel.isSummaryRejected;
+  self.isApproved = hasRole && self.approvalModel.isApproved;
+  self.isRejected = hasRole && self.approvalModel.isRejected;
+  self.isSummaryRejected = hasRole && self.approvalModel.isSummaryRejected;
   self.details = self.approvalModel.details;
 
   self.approveTestId = self.docModel.approvalTestId( [], APPROVE );
@@ -161,7 +163,9 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
   };
 
   self.showToolbar = ko.pureComputed(function() {
-    return self.remove.fun || self.showStatus() || self.showReject() || self.showApprove() || self.hasOperation() || self.canBeDisabled();
+    return hasRole &&  (self.remove.fun || self.showStatus()
+                        || self.showReject() || self.showApprove()
+                        || self.hasOperation() || self.canBeDisabled());
   });
 
   self.closeEditors = function( data, event ) {

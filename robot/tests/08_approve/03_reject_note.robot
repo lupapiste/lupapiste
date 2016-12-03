@@ -224,6 +224,36 @@ Pena logs in and does not see note for the approved address
   No such test id  rakennuksen-muuttaminen-osoite-note
   [Teardown]  Logout
 
+# --------------------------
+# Sonja invites neighbor
+# --------------------------
+
+Sonja logs in and invites neighbor
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
+  Open tab  statement
+  Scroll and click test id  manage-neighbors
+  Add neighbor  753-416-22-22  Penade Linju  linju@example.com
+  Scroll and click test id  manager-neighbors-done
+  Wait test id visible  manage-neighbors
+  Scroll and click test id  neighbor-row-invite
+  Wait test id visible  neighbors-sendemail-send
+  Scroll and click test id  neighbors-sendemail-send
+  Wait until  Element should not be visible  dialog-send-neighbor-email
+  [Teardown]  Logout  
+
+Neighbor reads email
+  Open last email
+  # Last email page does not include jQuery
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  linju@example.com
+  Click element  xpath=//a
+  Neighbor application address should be  ${appname}
+
+Approval/rejection states not visible to neighbor
+  Page should not contain  jquery=i.lupicon-circle-check
+  Page should not contain  jquery=i.lupicon-circle-attention
+
+
 *** Keywords ***
 
 Can delete version
