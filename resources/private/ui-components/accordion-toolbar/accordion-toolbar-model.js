@@ -102,7 +102,7 @@ LUPAPISTE.AccordionToolbarModel = function( params ) {
     }
   });
 
-  var hasRole = lupapisteApp.models.currentUser.role();
+  var hasRole = util.getIn( lupapisteApp, ["models", "currentUser", "role"] );
 
   // Approval functionality
   self.isApprovable = Boolean(self.info.approvable);

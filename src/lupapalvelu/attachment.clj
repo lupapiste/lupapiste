@@ -91,7 +91,7 @@
 
 (defschema VersionApprovals
   "An approvals are version-specific. Keys are originalFileIds."
-  {sc/Keyword {:state                       (sc/enum attachment-states)
+  {sc/Keyword {:state                       (apply sc/enum attachment-states)
                (sc/optional-key :timestamp) ssc/Timestamp
                (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
                (sc/optional-key :note)      sc/Str}})

@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="group-approval-template">
-  <!-- ko if: lupapisteApp.models.currentUser.role() -->
+  <!-- ko if: util.getIn( lupapisteApp, ["models", "currentUser", "role"] ) -->
     <div class="group-buttons"
          data-bind="if: hasContents">
       <span data-bind="template: 'approval-template'"></span>
