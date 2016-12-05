@@ -19,16 +19,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.selectedTab = self.dataProvider.searchResultType;
 
-  self.offset = 0;
-  self.onPageLoad = hub.onPageLoad(pageutil.getPage(), function() {
-    // Offset is not supported in IE8
-    if (self.offset) {
-      window.scrollTo(0, self.offset);
-    }
-  });
-
   self.openApplication = function(model, event, target) {
-    self.offset = window.pageYOffset;
     pageutil.openApplicationPage(model, target);
   };
 
@@ -60,4 +51,15 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     util.createSortableColumn("ninth",   "applications.authority",  {sortField: "handler",
                                                                      currentSort: self.dataProvider.sort})
   ];
+
+  // Scroll support.
+  hub.send( "scrollService::setName", {name: "search-results"});
+  hub.send( "scrollService::follow", {hashRe: /\/applications$/} );
+
+
+  // Scroll position support
+  self.scrollPop = _.debounce( function()  {
+    _.defer( hub.send,  "scrollService::pop", {name: "search-results"});
+  }, 100 );
+
 };
