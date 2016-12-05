@@ -43,14 +43,9 @@
   [command]
   (action/allowed-actions-for-collection :tasks build-task-params command))
 
-(defn- state-valid-by-schema? [schema schema-states-key default-states state]
-  (-> (get-in schema [:info (keyword schema-states-key)])
-      (or default-states)
-      (contains? (keyword state))))
-
 (defn editable-by-state?
   "Pre-check to determine if documents are editable in abnormal states"
-  [data-key default-states ]
+  [data-key default-states]
   (fn [{data :data {docs :documents state :state} :application}]
     (when-let [doc-id (get data (keyword data-key))]
       (when-not (-> (domain/get-document-by-id docs doc-id)
@@ -106,7 +101,7 @@
    :optional-parameters [updates fetchRakennuspaikka]
    :input-validators [(partial action/non-blank-parameters [:id :schemaName])]
    :user-roles #{:applicant :authority}
-   :pre-checks [(addable-by-state? #{:draft :answered :open :submitted :complementNeeded})
+   :pre-checks [(addable-by-state? states/create-doc-states)
                 create-doc-validator
                 application/validate-authority-in-drafts]}
   [{{schema-name :schemaName} :data :as command}]

@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [clj-time.format :as tf]
             [monger.operators :refer :all]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
@@ -19,6 +18,7 @@
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
@@ -118,15 +118,20 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :states     states/all-application-states}
-  [{{:keys [documents schema-version] :as application} :application}]
+  [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
         original-party-schemas  (app/filter-party-docs schema-version original-schema-names false)
         repeating-party-schemas (app/filter-party-docs schema-version original-schema-names true)
         current-schema-name-set (->> documents (filter app/party-document?) (map (comp name :name :schema-info)) set)
-        missing-schema-names    (remove current-schema-name-set original-party-schemas)]
-    (ok :partyDocumentNames (-> (concat missing-schema-names repeating-party-schemas)
-                                (conj (op/get-applicant-doc-schema-name application))
+        missing-schema-names    (remove current-schema-name-set original-party-schemas)
+        candidate-schema-names  (conj
+                                  (concat missing-schema-names repeating-party-schemas)
+                                  (op/get-applicant-doc-schema-name application))
+        remove-by-state-fn      (fn [schemaName]
+                                  (let [schema (schemas/get-schema schema-version schemaName)]
+                                    (doc/state-valid-by-schema? schema :addable-in-states states/create-doc-states state)))]
+    (ok :partyDocumentNames (-> (filter remove-by-state-fn candidate-schema-names)
                                 distinct))))
 
 (defcommand mark-seen

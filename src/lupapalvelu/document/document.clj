@@ -24,6 +24,10 @@
 ;; Validators
 ;;
 
+(defn state-valid-by-schema? [schema schema-states-key default-states state]
+  (-> (get-in schema [:info (keyword schema-states-key)])
+      (or default-states)
+      (contains? (keyword state))))
 
 (defn created-after-verdict? [document application]
   (if (contains? states/post-verdict-states (keyword (:state application)))

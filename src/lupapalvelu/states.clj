@@ -85,6 +85,8 @@
 
 (def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
 
+(def create-doc-states #{:draft :answered :open :submitted :complementNeeded})
+
 (def update-doc-states #{:draft :open :submitted :complementNeeded})
 
 (def approve-doc-states #{:open :submitted :complementNeeded})

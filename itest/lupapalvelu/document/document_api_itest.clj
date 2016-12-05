@@ -122,9 +122,15 @@
 
 (facts "facts about party-document-names query"
   (let [application-id        (create-app-id pena)
-        application0          (query-application pena application-id)
         party-document-names  (:partyDocumentNames (query pena :party-document-names :id application-id))]
-    party-document-names => ["hakija-r" "hakijan-asiamies" "maksaja" "suunnittelija"]))
+    (fact "pre-verdict"
+      party-document-names => ["hakija-r" "hakijan-asiamies" "maksaja" "suunnittelija"])
+
+    (command pena :submit-application :id application-id) => ok?
+    (give-verdict sonja application-id) => ok?
+
+    (fact "post-verdict"
+      (:partyDocumentNames (query pena :party-document-names :id application-id)) => (just ["suunnittelija"]))))
 
 (facts* "approve and reject document"
         (let [application    (create-and-submit-application pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
