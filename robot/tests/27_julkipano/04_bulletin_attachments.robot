@@ -3,7 +3,7 @@
 Documentation   Bulletin has published attachemnts in attachments tab
 Suite Setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
-Resource        ./27_common.robot
+Resource        ./julkipano_common.robot
 Variables        ../21_stamping/variables.py
 
 *** Test Cases ***

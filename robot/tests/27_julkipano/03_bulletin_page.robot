@@ -3,7 +3,7 @@
 Documentation   Bulletin page
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ./27_common.robot
+Resource        ./julkipano_common.robot
 
 *** Test Cases ***
 

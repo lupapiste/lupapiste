@@ -255,13 +255,15 @@ halt() {
 maybe_finish() {
    test "$1" -gt 0 && test -n "$PERFECT" && {
       echo "Not tolerating a failure."
-      halt
+      recursive_kill -9 $$ ""
+      # this won't be reached
       fail "Stopping due to failure in perfect mode"
    }
    test -f "stop" && {
       echo "./stop file exists. Stopping robots."
-      halt
       rm stop
+      recursive_kill -9 $$ ""
+      # won't be reached
       exit 0
    }
 }
