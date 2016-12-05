@@ -66,7 +66,8 @@ LUPAPISTE.ApplicationsSearchModel = function() {
                                      });
     var label = ko.pureComputed(function() {
       var count = dataProviderForAssignments.assignmentsCount();
-      return loc("application.assignment.search.label") + " (" + count + ")";
+      return loc("application.assignment.search.label")
+        + (count ? " (" + count + ")" : "");
     });
 
     self.searchModels.push(new LUPAPISTE.SearchSectionModel({
