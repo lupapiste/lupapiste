@@ -49,4 +49,5 @@ Open assignments search
 Count of open assignments is
   [Arguments]  ${count}
   Wait until  Element should be visible  xpath=//label[@for='searchTypeAssignments']
-  Wait until  Element should contain  xpath=//label[@for='searchTypeAssignments']  ${count}
+  Run Keyword Unless  ${count}==0  Wait until  Element should contain  xpath=//label[@for='searchTypeAssignments']  ${count}
+  Run Keyword If  ${count}==0  Wait until  Element should not contain  xpath=//label[@for='searchTypeAssignments']  ${count}
