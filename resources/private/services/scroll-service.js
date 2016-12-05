@@ -59,7 +59,7 @@ LUPAPISTE.ScrollService = function() {
         }
       }, options.delay || 1 );
     }
-  };
+  }
 
   // Options [optional]
   // [delay]: delay in milliseconds before scrolling (default 1).
