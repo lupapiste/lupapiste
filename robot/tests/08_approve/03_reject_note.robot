@@ -6,7 +6,6 @@ Resource       ../../common_resource.robot
 Resource       ../common_keywords/approve_helpers.robot
 Variables      ../06_attachments/variables.py
 
-
 *** Variables ***
 
 ${appname}     Reject Note
