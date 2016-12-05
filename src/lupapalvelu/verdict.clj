@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.java.io :as io]
@@ -411,14 +412,16 @@
 
 (defn validate-section-requirement
   "Validator that fails if the organization requires section (pykala)
-  in verdicts and app-xml is missing one. Note: besides organization,
-  the requirement is also operation-specific. The requirement is
-  fulfilled if _any_ paatostieto element contains at least one
-  non-blank pykala."
-  [{operation :name} app-xml {section :section}]
+  in verdicts and app-xml is missing one (muutoslupa permits are
+  excluded from validation) Note: besides organization, the
+  requirement is also operation-specific. The requirement is fulfilled
+  if _any_ paatostieto element contains at least one non-blank
+  pykala."
+  [{:keys [primaryOperation permitSubtype]} app-xml {section :section}]
   (let [{:keys [enabled operations]} section]
     (when (and enabled
-               (contains? (set operations) operation)
+               (util/not=as-kw permitSubtype :muutoslupa)
+               (contains? (set operations) (:name primaryOperation))
                (not (some-<> app-xml
                              cr/strip-xml-namespaces
                              (xml/select [:paatostieto :pykala])
