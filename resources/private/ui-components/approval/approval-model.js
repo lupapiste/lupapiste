@@ -43,7 +43,7 @@ LUPAPISTE.ApprovalModel = function(params) {
     self.isApproved = self.disposedPureComputed( _.wrap( attachment, service.isApproved));
     self.isRejected = self.disposedPureComputed( _.wrap( attachment, service.isRejected));
     self.showStatus = self.disposedPureComputed( function() {
-      return self.isApproved() || self.isRejected();
+      return self.details() && (self.isApproved() || self.isRejected());
     });
 
 
