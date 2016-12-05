@@ -51,7 +51,7 @@
             <br>
             <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
-          <td data-bind="if: !$parent.isNotNeeded( $data )">
+          <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('upload-attachment')">
             <a class="link-btn link-btn--link"
                data-bind="click: $parent.addFile"
                data-test-id="add-attachment-file">
