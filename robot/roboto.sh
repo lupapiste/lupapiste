@@ -14,6 +14,7 @@ LUPISPID=
 NICENESS=+15
 STARTUPTIMEOUT=60
 PERFECT=
+BLACKLIST=
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -34,14 +35,15 @@ fail() {
 usage() {
    echo \
 "roboto.sh [args] test-dir ...
-  -j | --threads n  use up to n threads, one per argument test
-  -n | --nested     use a nested X server instead of a virtual one
-  -l | --local      use current X server
-  -s | --start      start lupapiste with lein
-  -t | --timeout    timeout for individual robot file [$TIMEOUT]
-  -h | --help       show this thing
-  -S | --server     use a specific server [$SERVER]
-  -p | --prefect    fail immediately if anything fails
+  -j | --threads n      use up to n threads, one per argument test
+  -n | --nested         use a nested X server instead of a virtual one
+  -l | --local          use current X server
+  -s | --start          start lupapiste with lein
+  -t | --timeout n      timeout for individual robot file [$TIMEOUT]
+  -h | --help           show this thing
+  -S | --server uri     use a specific server [$SERVER]
+  -p | --prefect        fail immediately if anything fails
+  -b | --blacklist path skip tests in roboto-blacklist.txt
 "
 }
 
@@ -116,6 +118,13 @@ parse_args() {
          PERFECT=1
          shift
          echo "Failure is not an option"
+         parse_args $@
+         ;;
+      (-b|--blacklist)
+         BLACKLIST=$2
+         echo "Skipping tests in '$BLACKLIST'"
+         test -f $BLACKLIST || fail "$BLACKLIST is not a file"
+         shift 2
          parse_args $@
          ;;
       (*)
@@ -308,6 +317,9 @@ do
       sleep 10
       jobs > /dev/null
    done
+   test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
+      echo "WARNING: skippin blacklisted test $test";
+      continue; }
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    echo " - Starting $test"
    run_test $SCREEN "$test" &
