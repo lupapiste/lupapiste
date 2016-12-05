@@ -146,6 +146,10 @@
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
 
+(defn- ts->iso-8601-date [ts]
+  (when (number? ts)
+    (->iso-8601-date (c/from-long (long ts)))))
+
 (defn- get-verdict-date [{:keys [verdicts]} type]
   (let [ts (->> verdicts
                 (map (fn [{:keys [paatokset]}]
@@ -154,8 +158,7 @@
                             (first))))
                 (remove nil?)
                 (first))]
-    (when (number? ts)
-      (->iso-8601-date (c/from-long (long ts))))))
+    (ts->iso-8601-date ts)))
 
 (defn- get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
@@ -173,8 +176,7 @@
                 (remove nil?)
                 (sort)
                 (last))]
-    (when (number? ts)
-      (->iso-8601-date (c/from-long (long ts))))))
+    (ts->iso-8601-date ts)))
 
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
@@ -247,13 +249,13 @@
                        :kieli                 "fi"
                        :versio                (if attachment (make-version-number attachment) "1.0")
                        :suunnittelijat        (:_designerIndex (amf/designers-index application))
-                       :foremen               (foremen application)
-                       :tyomaasta-vastaava    (tyomaasta-vastaava application)
-                       :closed                (->iso-8601-date (c/from-long (long (:closed application))))}]
+                       :foremen               (foremen application)}]
     (cond-> base-metadata
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
             (:scale attachment) (conj {:scale (:scale attachment)})
+            (tyomaasta-vastaava application) (conj {:tyomaasta-vastaava (tyomaasta-vastaava application)})
+            (:closed application) (conj {:closed (ts->iso-8601-date (:closed application))})
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
