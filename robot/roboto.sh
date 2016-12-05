@@ -11,6 +11,20 @@ TESTS=
 NOENV=
 SERVER=http://localhost:8000
 LUPISPID=
+NICENESS=+15
+STARTUPTIMEOUT=60
+
+
+# kill recursive all leaf processes and the given one
+recursive_kill() { # sig pid indent
+   SUBS=$(pgrep -P $2)
+   echo "${3}Killing $2 ($SUBS)"
+   for SUB in $SUBS; do
+      recursive_kill $1 $SUB "  $3"
+   done
+   echo "${3}Closing $2"
+   kill $1 $2
+}
 
 fail() {
    echo "Roboto fail: $@"
@@ -29,15 +43,17 @@ usage() {
   -S | --server     use a specific server [$SERVER]
 "
 }
+
 # start lupapiste, assuming we're runnign at robot/
 start_lupapiste() {
+   lupapiste_runningp && fail "Trying to start lupapiste, but it's already running at $SERVER"
    cd ..
    test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
    echo "Starting lupapiste."
    lein run &> lupapiste-roboto.log &
-   echo -n "Waiting for lupapiste: "
    LUPISPID=$!
-   for foo in $(seq $TIMEOUT)
+   echo -n "Waiting for lupapiste $LUPISPID: "
+   for foo in $(seq $STARTUPTIMEOUT)
    do
       grep -q 'You can view the site at http://localhost:8000' lupapiste-roboto.log && break
       echo -n "x"
@@ -45,6 +61,7 @@ start_lupapiste() {
    done
    echo
    cd robot
+   lupapiste_runningp || fail "Failed to bring up Lupapiste. Check lupapiste-roboto.log for details."
 }
 
 parse_args() {
@@ -101,6 +118,10 @@ parse_args() {
    esac
 }
 
+lupapiste_runningp() {
+   curl -s "$SERVER/api/alive" | grep -q unauthorized || return 1
+}
+
 check_env() {
    test -z "$NOENV" || return
    # routes
@@ -119,9 +140,8 @@ check_env() {
    FF=$(firefox --version)
    echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
    echo -n "Server: $SERVER "
-   curl -s "$SERVER/api/alive" | grep -q unauthorized && echo "ok" || fail "A web server does not appear to be running at '$SERVER'"
+   lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
 }
-
 
 
 parse_args $@
@@ -230,6 +250,10 @@ show_stats() {
 test -d target && rm -rf target
 mkdir target
 
+# lower priority
+renice $NICENESS $$
+
+# run tests
 echo "Running tests $TESTS"
 for test in $(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
 do
@@ -257,13 +281,25 @@ do
    jobs > /dev/null
 done
 
-echo "Tests finished"
-echo "Closing WM $WMPID"
-kill -9 $WMPID &>/dev/null
-sleep 1
-echo "Closing X $XPID"
-kill -9 $XPID &>/dev/null
-test -z "$LUPISPID" || { 
-   echo "Shutting down lupapiste $LUPISPID"
-   kill -9 $LUPISPID &>/dev/null
+halt() {
+   echo "Cleaning up..."
+   test -n "$WMPID" && { echo "Closing WM $WMPID"; kill -9 $WMPID &>/dev/null; }
+   sleep 1
+   test -n "$XPID" && { echo "Closing X $XPID"; kill -9 $XPID &>/dev/null; }
+   sleep 1
+   test -z "$LUPISPID" || { 
+      echo "Shutting down lupapiste $LUPISPID"
+      # pstree -p $LUPISPID
+      recursive_kill -9 $LUPISPID ""
+      for foo in $(seq 10)
+      do
+         sleep 1
+         lupapiste_runningp || break
+      done
+      lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
+   }
 }
+
+halt
+
+echo "Tests finished."
