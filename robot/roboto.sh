@@ -13,7 +13,7 @@ SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
 STARTUPTIMEOUT=60
-
+PERFECT=
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -41,6 +41,7 @@ usage() {
   -t | --timeout    timeout for individual robot file [$TIMEOUT]
   -h | --help       show this thing
   -S | --server     use a specific server [$SERVER]
+  -p | --prefect    fail immediately if anything fails
 "
 }
 
@@ -111,6 +112,12 @@ parse_args() {
          echo "$TIMEOUT" | grep -q "^[0-9]*$" || fail "bad timeout"
          parse_args $@
          ;;
+      (-p|--prefect)
+         PERFECT=1
+         shift
+         echo "Failure is not an option"
+         parse_args $@
+         ;;
       (*)
          TESTS=$@
          echo "Tests are $TESTS"
@@ -152,15 +159,14 @@ echo "Starting robots"
 
 run_test() {
    test=$2
-   TEST=$(echo $test | sed -e 's/[/ ]/_/g')
+   local TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    case $OUTPUT in
       xvfb)
          SCREEN=$1
-         echo "STARTING Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24"
+         #echo "STARTING Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24"
          Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
          DISPLAY=:$SCREEN
-         echo "DISPLAY set to $DISPLAY"
          ;;
       xnest)
          SCREEN=$1
@@ -180,7 +186,7 @@ run_test() {
   
    sleep 2 # wait for X to start
    
-   WMPID=""
+   local WMPID=""
    # start openbox to handle window maximize if we're running in a non-local X
    test -z "$XPID" || { 
       DISPLAY=:$SCREEN openbox &>/dev/null &
@@ -188,7 +194,7 @@ run_test() {
    }
   
    # disable screensaver (needed when recording) 
-   test -z "$XPID" || DISPLAY=:$SCREEN xset s off
+   #test -z "$XPID" || DISPLAY=:$SCREEN xset s off
    
    sleep 2 # wait for window manager to start
    
@@ -209,12 +215,13 @@ run_test() {
       -l $TEST.log \
       -r $TEST.html \
          common/setup "$test" common/teardown &> target/$TEST.out
-
    BOT=$?
-   test -z "$WMPID" || kill -9 $WMPID; sleep 1
-   test -z "$XPID" || kill -9 $XPID; sleep 1
+   # shut down X and WM if they were started
+   test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
+   test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
+   # check that pybot exited with success.
    test "$BOT" = "0" || { 
-      echo "ERROR: pybot run exited with $BOT for test '$test'"; 
+      echo "ERROR: pybot exited with $BOT for test '$test'"; 
       echo "FAIL: pybot exited with non-zero $BOT, timeout was $TIMEOUT" >> target/$TEST.out;
    }
 }
@@ -225,6 +232,39 @@ DEFAULT='\033[0m'
 BRIGHT='\033[1m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
+
+halt() {
+   echo "Cleaning up..."
+   test -n "$WMPID" && { echo "Closing WM $WMPID"; kill -9 $WMPID &>/dev/null; }
+   sleep 1
+   test -n "$XPID" && { echo "Closing X $XPID"; kill -9 $XPID &>/dev/null; }
+   sleep 1
+   test -z "$LUPISPID" || { 
+      echo "Shutting down lupapiste $LUPISPID"
+      # pstree -p $LUPISPID
+      recursive_kill -9 $LUPISPID ""
+      for foo in $(seq 10)
+      do
+         sleep 1
+         lupapiste_runningp || break
+      done
+      lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
+   }
+}
+
+maybe_finish() {
+   test "$1" -gt 0 && test -n "$PERFECT" && {
+      echo "Not tolerating a failure."
+      halt
+      fail "Stopping due to failure in perfect mode"
+   }
+   test -f "stop" && {
+      echo "./stop file exists. Stopping robots."
+      halt
+      rm stop
+      exit 0
+   }
+}
 
 show_stats() {
    echo "---------------------- 8< ----------------------"
@@ -243,6 +283,7 @@ show_stats() {
       test "$NFAIL" = 0 && COLOR=$GREEN
       STATUS="$COLOR - $log $(grep FAIL $log | wc -l) failed, $(grep PASS $log | wc -l) ok$DEFAULT"
       echo -e $STATUS
+      maybe_finish $NFAIL
    done
 }
 
@@ -280,25 +321,6 @@ do
    sleep 10
    jobs > /dev/null
 done
-
-halt() {
-   echo "Cleaning up..."
-   test -n "$WMPID" && { echo "Closing WM $WMPID"; kill -9 $WMPID &>/dev/null; }
-   sleep 1
-   test -n "$XPID" && { echo "Closing X $XPID"; kill -9 $XPID &>/dev/null; }
-   sleep 1
-   test -z "$LUPISPID" || { 
-      echo "Shutting down lupapiste $LUPISPID"
-      # pstree -p $LUPISPID
-      recursive_kill -9 $LUPISPID ""
-      for foo in $(seq 10)
-      do
-         sleep 1
-         lupapiste_runningp || break
-      done
-      lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
-   }
-}
 
 halt
 
