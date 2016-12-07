@@ -222,7 +222,7 @@ run_test() {
       -b $TEST.debug.log \
       -o $TEST.xml \
       -l $TEST.log.html \
-      -r $TEST.html \
+      -r $TEST_report.html \
          common/setup "$test" common/teardown &> target/$TEST.out
    BOT=$?
    # shut down X and WM if they were started
