@@ -1,5 +1,3 @@
-(ns lupapalvelu.xml.krysp.review-reader)
-
 (ns lupapalvelu.xml.krysp.review-reader
   (:require [taoensso.timbre :refer [trace debug info warn error]]
             [lupapalvelu.xml.krysp.common-reader :as common]
