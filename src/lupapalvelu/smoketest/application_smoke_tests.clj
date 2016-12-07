@@ -173,6 +173,8 @@
   (when (and (#{"R" "YA"} (:permitType application))
              (#{"submitted"} (:state application))
              (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
-    (sc/check HakemusTiedot (rest-application-data/process-application application))))
+    (->> (mongo/with-id application)
+         (rest-application-data/process-application)
+         (sc/check HakemusTiedot))))
 
 (apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)
