@@ -278,6 +278,10 @@ input.grid-style-input--wide {
     white-space: nowrap;
     > .#{$cls}--input {
       display: table-cell;
+      line-height: $height;
+      height: $height;
+      min-height: $height;
+      max-height: $height;
     }
     > input.#{$cls}--input {
       width: $input-width;
@@ -285,10 +289,6 @@ input.grid-style-input--wide {
       padding-right: 4px;
   }
   > button.#{$cls}--input {
-    min-height: $height;
-    height: $height;
-    max-height: $height;
-    line-height:  $height;
     padding: {
       left: $padding;
       right: $padding;
