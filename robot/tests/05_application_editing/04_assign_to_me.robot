@@ -150,5 +150,5 @@ Sonja checks that the reason is in the comments
   Logout
 
 No errors so far
-  [Tags] non-roboto-proof
+  [Tags]  non-roboto-proof
   There are no frontend errors
