@@ -27,17 +27,17 @@
            (catch com.mongodb.MongoException e
              (errorf "Application search query=%s failed: %s" query e)
              (fail! :error.unknown)))
-         (map :_id)
+         (map :id)
          (set))))
 
 (defonce canceled-applications (delay (get-canceled-application-ids)))
 
 (defn- application-canceled? [id]
-  (boolean (@canceled-applications id)))
+  (contains? @canceled-applications id))
 
 (defn- status-corresponds-to-application-state [{:keys [application status]}]
-  (when-not (= (application-canceled? (:id application))
-               (= status "canceled"))
+  (when-not (and (application-canceled? (:id application))
+                 (= status "canceled"))
     (str "status was '" status "', but application was "
          (if (application-canceled? (:id application))
            "" "not ")
