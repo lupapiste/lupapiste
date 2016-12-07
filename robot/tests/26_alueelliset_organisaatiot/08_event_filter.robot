@@ -51,7 +51,7 @@ Olli-ya prepares worktime applications
   Go to page  applications
   Open application  ${appname3}  564-423-2-164
   Open accordions  info
-  Fill tyoaika fields  01.12.2016  15.12.2016
+  Fill tyoaika fields  01.12.2116  15.12.2116
 
 Olli-ya see all applications without filters
   Go to page  applications
@@ -92,8 +92,8 @@ Olli-ya selects worktime started filter and see only one worktime applications
 
 Olli-ya selects worktime ended filter and see only one worktime applications
   Select From Autocomplete  div[@data-test-id="event-filter-component"]  Lupa-ajan päättyminen
-  Input text by test id  event-search-start-date  10.12.2016
-  Input text by test id  event-search-end-date  20.12.2016
+  Input text by test id  event-search-start-date  10.12.2116
+  Input text by test id  event-search-end-date  20.12.2116
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
 
