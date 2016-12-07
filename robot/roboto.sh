@@ -221,7 +221,7 @@ run_test() {
       -L TRACE \
       -b $TEST.debug.log \
       -o $TEST.xml \
-      -l $TEST.log \
+      -l $TEST.log.html \
       -r $TEST.html \
          common/setup "$test" common/teardown &> target/$TEST.out
    BOT=$?
