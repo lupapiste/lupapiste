@@ -54,7 +54,7 @@ Pena adds operation
   Scroll and click test id  add-operation
   Select operation branch  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
   Select operation branch  "Rakennuksen korjaaminen ja/tai muuttaminen (käyttötarkoitus, julkisivut, remontit yms.)"
-  Select operation branch  "Rakennuksen julkisivujen tai katon muutos"
+  Select operation branch  "Rakennuksen julkisivujen tai katon muutos, mainoslaitteet tai opasteet rakennuksissa"
   Scroll and click test id  add-operation-to-application
   Wait until  Element should be visible  jquery=section[data-doc-type=${doctype2}]
   

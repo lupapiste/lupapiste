@@ -419,6 +419,18 @@ var util = (function($) {
     }
   }
 
+  // True if every key in sub has an equal value in obj.
+  function isSubObject( obj, sub ) {
+    return _.isEqual( _.pick( obj, _.keys( sub )), sub );
+  }
+
+  function isOdd( number ) {
+    return number % 2;
+  }
+  function isEven( number ) {
+    return !isOdd(number);
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -465,7 +477,10 @@ var util = (function($) {
     identLogoutUrl: identLogoutUrl,
     identLogoutRedirect: identLogoutRedirect,
     identLogoutRedirectBulletins: identLogoutRedirectBulletins,
-    arrayToObject: arrayToObject
+    arrayToObject: arrayToObject,
+    isSubObject: isSubObject,
+    isOdd: isOdd,
+    isEven: isEven
   };
 
 })(jQuery);

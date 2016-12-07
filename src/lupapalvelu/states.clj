@@ -1,6 +1,7 @@
 (ns lupapalvelu.states
   (:require [clojure.set :refer [difference union ]]
             [sade.strings :as ss]
+            [sade.util :refer [map-values]]
             [lupapiste-commons.states :as common-states]))
 
 (defn initial-state [graph]
@@ -65,7 +66,7 @@
   kt-application-state-graph
   (merge
     (select-keys default-application-state-graph [:draft :open :canceled]) ; is open needed?
-    {:submitted [:survey :canceled]
+    {:submitted [:survey :draft :canceled]
      :survey [:sessionProposal :canceled] ; Maastotyot
      :sessionProposal [:sessionHeld :canceled] ; Kokouskutsu
      :sessionHeld [:registered :canceled] ; Kokous pidetty
@@ -84,15 +85,26 @@
 
 (def pre-sent-application-states #{:draft :open :submitted :complementNeeded})
 
+(def create-doc-states #{:draft :answered :open :submitted :complementNeeded})
+
+(def update-doc-states #{:draft :open :submitted :complementNeeded})
+
+(def approve-doc-states #{:open :submitted :complementNeeded})
+
+
 ;;
 ;; Calculated state sets
 ;;
 
-(def all-graphs
+(def ^:private all-graphs
+  "A looback from 'submitted' to 'draft' was allowed for LPK-2345. This is ignored for the purposes of calculating the state graphs."
   (->>
     (ns-publics 'lupapalvelu.states)
     (filter #(ss/ends-with (name (first %)) "-graph"))
-    (map (fn [v] @(second v)))))
+    (map (fn [v] @(second v)))
+    (map (fn [graph]
+           (map-values #(into [] (remove (partial = :draft) %))
+                       graph)))))
 
 (defn all-next-states
   "Returns a set of states that are after the start state in graph, including start state itself."

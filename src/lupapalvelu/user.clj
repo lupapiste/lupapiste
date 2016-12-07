@@ -41,7 +41,8 @@
               (sc/optional-key :tags)          [sc/Str]
               (sc/optional-key :operations)    [sc/Str]
               (sc/optional-key :organizations) [sc/Str]
-              (sc/optional-key :areas)         [sc/Str]}})
+              (sc/optional-key :areas)         [sc/Str]
+              (sc/optional-key :event)        [sc/Str]}})
 
 (def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 

@@ -36,7 +36,8 @@
                      {:attachment-id attachment-id
                       :replaceable-original-file-id stamped-original-file-id
                       :comment-text nil :created created
-                      :stamped true :comment? false :state :ok}
+                      :stamped true :comment? false
+                      :state :ok}
                      {:filename filename :content file
                       :size (.length file)})]
         (tos/mark-attachment-final! application created attachment-id)

@@ -217,7 +217,7 @@
     (not-empty (sort-by :created toimenpiteet))))
 
 
-(defn- get-lisatiedot [documents-by-type lang]
+(defn- get-lisatiedot [lang]
   {:Lisatiedot {:asioimiskieli (case lang
                                  "sv" "ruotsi"
                                  "suomi")}})
@@ -242,6 +242,12 @@
 
 (defn- get-hankkeen-vaativuus [documents-by-type]
   (get-in documents-by-type [:hankkeen-kuvaus-rakennuslupa 0 :data :hankkeenVaativuus]))
+
+(defn application-to-canonical-operations
+  [application]
+  (let [application (tools/unwrapped application)
+        documents-by-type (documents-by-type-without-blanks application)]
+    (get-operations documents-by-type application)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -269,7 +275,7 @@
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents-by-type toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents-by-type)
-                      :lisatiedot (get-lisatiedot documents-by-type lang)
+                      :lisatiedot (get-lisatiedot lang)
                       :hankkeenVaativuus (get-hankkeen-vaativuus documents-by-type)}}}}
         canonical (if (not-empty link-permits)
                     (assoc-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :viitelupatieto]
@@ -375,7 +381,7 @@
                                                                                          :sahkopostiosoite (:email user)
                                                                                          :puhelin (:phone user)}}}}}
                       :katselmustieto {:Katselmus katselmus}
-                      :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
+                      :lisatiedot (get-lisatiedot lang)
                       :kayttotapaus (katselmus-kayttotapaus katselmuksen-nimi tyyppi)
                       }}}}]
     canonical))
@@ -389,5 +395,5 @@
       {:RakennusvalvontaAsia
        {:kasittelynTilatieto (get-state application)
         :luvanTunnisteTiedot (lupatunnus application)
-        :lisatiedot (get-lisatiedot (:lisatiedot documents-by-type) lang)
+        :lisatiedot (get-lisatiedot lang)
         :kayttotapaus "Liitetiedoston lis\u00e4ys"}}}}))

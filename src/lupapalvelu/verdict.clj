@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.java.io :as io]
@@ -214,6 +215,8 @@
           pk-urlhash (if (= (count attachments) 1)
                        (-> attachments first :linkkiliitteeseen pandect/sha1)
                        verdict-id)]
+      (when-not (seq attachments)
+        (warnf "no valid attachment links in poytakirja, verdict-id: %s" verdict-id))
       (doall
        (for [att  attachments
              :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
@@ -251,7 +254,9 @@
                                                :content temp-file}))
              (error (str (:status resp) " - unable to download " url ": " resp))))))
       (-> pk (assoc :urlHash pk-urlhash) (dissoc :liite)))
-    pk))
+    (do
+      (warnf "no attachments ('liite' elements) in poytakirja, verdict-id: %s" verdict-id)
+      pk)))
 
 (defn- verdict-attachments [application user timestamp verdict]
   {:pre [application]}
@@ -407,14 +412,16 @@
 
 (defn validate-section-requirement
   "Validator that fails if the organization requires section (pykala)
-  in verdicts and app-xml is missing one. Note: besides organization,
-  the requirement is also operation-specific. The requirement is
-  fulfilled if _any_ paatostieto element contains at least one
-  non-blank pykala."
-  [{operation :name} app-xml {section :section}]
+  in verdicts and app-xml is missing one (muutoslupa permits are
+  excluded from validation) Note: besides organization, the
+  requirement is also operation-specific. The requirement is fulfilled
+  if _any_ paatostieto element contains at least one non-blank
+  pykala."
+  [{:keys [primaryOperation permitSubtype]} app-xml {section :section}]
   (let [{:keys [enabled operations]} section]
     (when (and enabled
-               (contains? (set operations) operation)
+               (util/not=as-kw permitSubtype :muutoslupa)
+               (contains? (set operations) (:name primaryOperation))
                (not (some-<> app-xml
                              cr/strip-xml-namespaces
                              (xml/select [:paatostieto :pykala])
@@ -430,7 +437,7 @@
     (let [app-xml          (normalize-special-verdict application app-xml)
           organization     (if organization @organization (org/get-organization (:organization application)))
           validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
-                               (validate-section-requirement (:primaryOperation application)
+                               (validate-section-requirement application
                                                              app-xml
                                                              organization))]
       (if-not validation-error

@@ -3,6 +3,7 @@
     <button class="secondary"
             data-bind="css: {positive: isApproved,
                              rejected: isSummaryRejected,
+                             disabled: disabledStatus,
                              toggled: isOpen},
                        click: toggleAccordion">
       <i class="lupicon-chevron-down"></i>
@@ -38,16 +39,24 @@
           <i class="lupicon-circle-attention rejected"></i>
           <i class="lupicon-circle-check approved"></i>
           <span class="is-details"
-                data-bind="text: details"></span>
+                data-bind="text: details,
+                           css: {'is-details--rejected': isRejected}">
+          </span>
         </div>
-      </span>
+        <div data-bind="component: {name: 'reject-note',
+                        params: {docModel: docModel, 
+                        noteCss: {'accordion-reject-note': !hasOperation(),
+                        'toolbar-reject-note': hasOperation()},
+                        editorCss: {'accordion-reject-note-editor': !hasOperation(),
+'toolbar-reject-note-editor': hasOperation()}}}"></div>
+      </span>      
       <button class="secondary is-left"
               data-bind="attr: {'data-test-id': testId('toggle-identifiers') },
                          visible: hasOperation,
                          toggleClick: showIdentifierEditors">
         <i class="lupicon-pen"></i>
         <span data-bind="ltext: 'document.operation-identifiers'"></span>
-      </button>
+      </button>      
       <button class="secondary is-right"
           data-bind="visible: showRemove,
                      attr: {'data-test-class': remove.testClass},
@@ -55,6 +64,14 @@
         <i class="lupicon-remove"></i>
         <span data-bind="ltext: 'remove'"></span>
       </button>
+      <!-- ko if: canBeDisabled -->
+      <button class="secondary is-right"
+              data-bind="attr: {'data-test-id': 'toggle-document-status'},
+                         click: changeDocStatus">
+        <i data-bind="css: {'lupicon-remove': !disabledStatus(), 'lupicon-check': disabledStatus}"></i>
+        <span data-bind="ltext: disabledStatus() ? 'document.status.toggle.enable' : 'document.status.toggle.disable'"></span>
+      </button>
+      <!-- /ko -->
       <button class="secondary is-right"
               data-bind="attr: {'data-test-id': rejectTestId},
                          visible: showReject,

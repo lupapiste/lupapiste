@@ -21,6 +21,16 @@
     <div data-bind="component: 'application-guests'"></div>
     <!-- /ko -->
 
+    <button data-bind="click: partiesAsKrysp,
+                       visible: $root.authorization.ok('parties-as-krysp'),
+                       enable: !stateChanged() && !processing() && $root.authorization.ok('parties-as-krysp'),
+                       attr: {'title': loc('tooltip.partiesAsKrysp')}"
+            data-test-id="parties-to-krysp"
+            class="positive caps">
+        <i class="lupicon-circle-arrow-right"></i>
+        <span data-bind="ltext: 'application.partiesAsKrysp'"></span>
+    </button>
+
     <p data-bind="lhtml: 'required.field.desc'"></p>
 
     <!-- docgen generated content: -->

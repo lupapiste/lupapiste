@@ -5,6 +5,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
+            [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -53,11 +54,15 @@
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
+                 :disableable
                  :removable-only-by-authority
                  :user-authz-roles
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
+                 :redraw-on-approval
+                 :post-verdict-party
+                 :addable-in-states
                  :exclude-from-pdf
                  :editable-in-states
                  :accordion-fields})
@@ -236,7 +241,7 @@
                           :validator :address
                           :body [{:name "kunta" :type :string :i18nkey "osoite.kunta"}
                                  {:name "lahiosoite" :type :string :i18nkey "osoite.katu"}
-                                 {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
+                                 {:name "osoitenumero" :type :string}
                                  {:name "osoitenumero2" :type :string}
                                  {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :s :hidden true :readonly true}
                                  {:name "jakokirjain2" :type :string :size :s :hidden true :readonly true}
@@ -1448,9 +1453,15 @@
            :order 5
            :removable true
            :approvable true
+           :disableable true
+           :redraw-on-approval true
+           :post-verdict-party true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
+           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
+                                         (set/difference states/post-verdict-states states/terminal-states))
+           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 

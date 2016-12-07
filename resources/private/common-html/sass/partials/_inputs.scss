@@ -270,3 +270,29 @@ input.grid-style-input--wide {
   @include input-fields;
   width: 100%;
 }
+
+@mixin input-and-button( $cls, $padding: 8px, $input-width: 20em) {
+  $height: $font-size + 2 * $padding;
+  .#{$cls} {
+    display: table;
+    white-space: nowrap;
+    > .#{$cls}--input {
+      display: table-cell;
+      line-height: $height;
+      height: $height;
+      min-height: $height;
+      max-height: $height;
+    }
+    > input.#{$cls}--input {
+      width: $input-width;
+      vertical-align: middle;
+      padding-right: 4px;
+  }
+  > button.#{$cls}--input {
+    padding: {
+      left: $padding;
+      right: $padding;
+    }
+  }
+}
+}

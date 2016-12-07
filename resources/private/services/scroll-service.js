@@ -16,6 +16,7 @@ LUPAPISTE.ScrollService = function() {
 
   var positions = {};
   var followed  = [];
+  var popNames  = {};
 
   function getHash() {
     // Null-safe regarding location.
@@ -38,7 +39,6 @@ LUPAPISTE.ScrollService = function() {
     options = _.defaults( options, {override: false,
                                     followed: false,
                                     hash: getHash()});
-
     if( hashSupported( options)
         && ( !positions[options.hash] || options.override ) ) {
           // scrollX/Y not supported by IE.
@@ -47,10 +47,7 @@ LUPAPISTE.ScrollService = function() {
     }
   };
 
-  // Options [optional]
-  // [delay]: delay in milliseconds before scrolling (default 1).
-  self.pop = function( options ) {
-    options = options || {};
+  function doPop( options ) {
     var hash = getHash();
     var pos = positions[hash];
     delete positions[hash];
@@ -62,13 +59,36 @@ LUPAPISTE.ScrollService = function() {
         }
       }, options.delay || 1 );
     }
+  }
+
+  // Options [optional]
+  // [delay]: delay in milliseconds before scrolling (default 1).
+  // [name]: If the hash is named (via setName) it can only popped
+  // with the name.
+  self.pop = function( options ) {
+    options = options || {};
+    var name = popNames[getHash()];
+    if( !name || name === options.name ) {
+      doPop( options);
+    }
   };
 
+  // Page is followed if its hash matches any of the follow regexps.
+  // Followed page positions are automatically pushed when navigated out.
+  // See hashChanged function in app.js for details.
   self.follow = function( options ) {
     var hashRe = _.get( options, "hashRe");
     if( _.isRegExp( hashRe)) {
-      followed.push( hashRe );
+      followed = _.union( followed, [hashRe]);
     }
+  };
+
+  // Sets name for hash. Named hashes can only popped with name.
+  // Options [optional]:
+  // name: Name for hash
+  // [hash]: Hash to be named (default window.location.hash);
+  self.setName = function( options ) {
+    popNames[_.get( options, "hash", getHash())] = options.name;
   };
 
   // There really should be a better way to restore
@@ -78,4 +98,5 @@ LUPAPISTE.ScrollService = function() {
   hub.subscribe( self.serviceName + "::push", self.push );
   hub.subscribe( self.serviceName + "::pop", self.pop);
   hub.subscribe( self.serviceName + "::follow", self.follow);
+  hub.subscribe( self.serviceName + "::setName", self.setName);
 };

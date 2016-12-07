@@ -9,7 +9,7 @@
             [sade.email :as email]
             [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]))
 
 ;;
@@ -20,14 +20,14 @@
   (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
   (assert (#{"attachment" "statement" "neighbors"} subpage) (str "Unsupported subpage"))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
-    (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!/" full-path)))
+    (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
 (defn get-application-link [{:keys [infoRequest id]} tab lang {role :role :or {role "applicant"}}]
   (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
   (let [suffix (if (and (not (ss/blank? tab)) (not (ss/starts-with tab "/"))) (str "/" tab) tab)
         permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
-    (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!" full-path)))
+    (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!" full-path)))
 
 (defn- ->to [{:keys [email firstName lastName]}]
   (letfn [(sanit [s] (s/replace s #"[<>]"  ""))]
@@ -61,14 +61,14 @@
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
    More specific set recipients can be defined by user roles."
-  [{:keys [auth statements]} included-roles excluded-roles]
+  [{:keys [auth]} included-roles excluded-roles]
   {:post [every? map? %]}
   (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
                                         (set excluded-roles))]
     (->> (filter (comp recipient-roles keyword :role) auth)
          (remove :invite)
          (remove :unsubscribed)
-         (map (comp u/non-private u/get-user-by-id :id)))))
+         (map (comp usr/non-private usr/get-user-by-id :id)))))
 
 ;;
 ;; Model creation functions
@@ -142,19 +142,19 @@
 (def non-notified-roles
   #{"rest-api" "trusted-etl"})
 
-;; email template ids, which are sent regardless of current user state
+ ; email template ids, which are sent regardless of current user state
 (def always-sent-templates
   #{:invite-company-user :reset-password})
 
 (defn invalid-recipient? [for-template]
-   "Notifications are not sent to certain roles, users who do not 
-    have a valid email address, and registered but removed users 
+   "Notifications are not sent to certain roles, users who do not
+    have a valid email address, and registered but removed users
     receive only specific message types defined above."
   (fn [rec]
      (or (ss/blank? (:email rec))
         (if (contains? always-sent-templates for-template)
           false
-          (not (u/email-recipient? rec)))
+          (not (usr/email-recipient? rec)))
         (contains? non-notified-roles (:role rec)))))
 
 (defn notify! [template-name command & [result]]

@@ -356,6 +356,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.addLink = function() {
     self.editLinkModel.init({
       commandName: "add",
+      langs: self.langs(),
       command: function(links) {
         ajax
           .command("add-organization-link", linksForCommand(links))

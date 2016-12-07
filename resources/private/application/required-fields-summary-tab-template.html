@@ -25,7 +25,7 @@
           <!-- ko ifnot: missingSomeInfo -->
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <!-- /ko -->
-          
+
           <button class="positive top-marginM"
                   data-test-id="application-submit-btn"
                   data-bind="click: submitApplication,
@@ -38,7 +38,7 @@
           <div class="auth-actions stacked inner-margins">
               <button data-bind="click: approveApplication,
                                  visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
-                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'), 
+                                 enable: !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                                  attr: {'title': loc('tooltip.approveApplication')}"
                       data-test-id="approve-application-summaryTab"
                       class="positive">
@@ -47,7 +47,7 @@
               </button>
               <button data-bind="click: approveExtension,
                                  visible: $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
-                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'), 
+                                 enable: !processing() && $root.authorization.ok('approve-application') && $root.authorization.ok('approve-ya-extension'),
                                  attr: {'title': loc('tooltip.approveApplication')}"
                       data-test-id="approve-extension-summaryTab"
                       class="positive">
@@ -63,6 +63,15 @@
                       class="positive">
                   <i class="lupicon-circle-arrow-right"></i>
                   <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+              </button>
+
+              <button data-test-id="application-return-to-draft-btn"
+                      data-bind="click: returnToDraft,
+                                 visible: $root.authorization.ok( 'return-to-draft' ),
+                                 enable: !processing() && $root.authorization.ok( 'return-to-draft' )"
+                      class="positive">
+                <i class="lupicon-circle-arrow-left"></i>
+                <span data-bind="ltext: 'application.returnToDraft'"></span>
               </button>
           </div>
 
@@ -143,4 +152,3 @@
       </div>
   </div>
 </script>
-

@@ -771,7 +771,7 @@
 (defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
 
-(defn- drawings-as-krysp [drawings]
+(defn drawings-as-krysp [drawings]
    (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
            (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
            (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))

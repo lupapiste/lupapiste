@@ -1,0 +1,28 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="reject-note-template">
+  <!-- ko if: showNote -->
+  <div data-bind="css: noteCss">
+    <span data-bind="text: note,
+                     css: {'reject-note--rejected': isRejected},
+                     testId: testPrefix + '-note'">
+    </span>
+  </div>
+  <!-- /ko -->
+  <!-- ko if: showEditor -->
+  <div data-bind="event: {keydown: closeEditor},
+                  css: editorCss">
+    <div class="reject-edits">
+      <input type="text"
+             class="reject-edits--input" 
+             data-bind="textInput: editorNote,
+                        hasFocus: true,
+                        testId: testPrefix + '-editor'">
+      <button class="primary reject-edits--input"
+              data-bind="click: saveNote,
+                         testId: testPrefix + '-save'">
+        <i class="lupicon-save"></i>
+      </button>
+    </div>
+  </div>
+  <!-- /ko -->
+</script>

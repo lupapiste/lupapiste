@@ -37,6 +37,9 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
 
   self.pending = ko.observable(false);
 
+  self.searchStartDate = ko.observable();
+  self.searchEndDate = ko.observable();
+
   // Application <-> foremanApplication
   // foremanNotice -> application
   self.updateSearchResultType = function( searchType ) {
@@ -57,6 +60,9 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
       operations = defaultOperations();
     }
 
+    var searchStartDateInMillis = self.searchStartDate() ? new Date(self.searchStartDate()).getTime() : null;
+    var searchEndDateInMillis = self.searchEndDate() ? moment(new Date(self.searchEndDate()).getTime()).add(1, "days").valueOf() : null;
+
     return { searchText: self.searchFieldDelayed(),
              tags: _.map(lupapisteApp.services.tagFilterService.selected(), "id"),
              organizations: _.map(lupapisteApp.services.organizationFilterService.selected(), "id"),
@@ -64,6 +70,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
              handlers: _.map(lupapisteApp.services.handlerFilterService.selected(), "id"),
              applicationType: self.searchResultType(),
              areas: _.map(lupapisteApp.services.areaFilterService.selected(), "id"),
+             event: {eventType:_.map(lupapisteApp.services.eventFilterService.selected(), "id"), start: searchStartDateInMillis, end: searchEndDateInMillis},
              limit: self.limit(),
              sort: ko.mapping.toJS(self.sort),
              skip: self.skip() };
@@ -75,6 +82,7 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     lupapisteApp.services.organizationFilterService.selected();
     lupapisteApp.services.operationFilterService.selected();
     lupapisteApp.services.handlerFilterService.selected();
+    lupapisteApp.services.eventFilterService.selected();
     self.searchResultType();
     lupapisteApp.services.areaFilterService.selected();
     self.limit();
@@ -121,6 +129,9 @@ LUPAPISTE.ApplicationsDataProvider = function(params) {
     lupapisteApp.services.organizationFilterService.selected([]);
     lupapisteApp.services.areaFilterService.selected([]);
     lupapisteApp.services.applicationFiltersService.selected(undefined);
+    lupapisteApp.services.eventFilterService.selected([]);
+    self.searchStartDate("");
+    self.searchEndDate("");
     self.searchField("");
   };
 

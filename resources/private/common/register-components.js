@@ -37,6 +37,8 @@ jQuery(document).ready(function() {
     {name: "company-invite-dialog"},
     {name: "submit-button-group"},
     {name: "yes-no-dialog"},
+    {name: "yes-no-select-dialog"},
+    {name: "textarea-dialog"},
     {name: "yes-no-button-group"},
     {name: "company-registration-init"},
     {name: "invoice-operator-selector"},
@@ -72,6 +74,7 @@ jQuery(document).ready(function() {
     {name: "autocomplete-recipient"},
     {name: "autocomplete-application-tags", template: "autocomplete-tags-components-template"},
     {name: "autocomplete-assignment-targets", template: "autocomplete-tags-components-template"},
+    {name: "autocomplete-event", template: "autocomplete-tags-components-template"},
     {name: "add-property"},
     {name: "add-property-dialog"},
     {name: "autocomplete-saved-filters"},
@@ -155,7 +158,8 @@ jQuery(document).ready(function() {
     {name: "attachment-type-id"},
     {name: "state-icons"},
     {name: "docgen-calculation"},
-    {name: "docgen-footer-sum"}
+    {name: "docgen-footer-sum"},
+    {name: "reject-note"}
 ];
 
   ko.registerLupapisteComponents(components);

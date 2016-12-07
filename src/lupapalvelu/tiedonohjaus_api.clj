@@ -13,7 +13,8 @@
             [lupapiste-commons.schema-utils :as schema-utils]
             [lupapalvelu.attachment-api :as aa]
             [lupapalvelu.application :as a]
-            [lupapalvelu.archiving-api :as archiving-api]))
+            [lupapalvelu.archiving-api :as archiving-api]
+            [lupapalvelu.permit :as permit]))
 
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
@@ -158,8 +159,7 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-with-acknowledged-but-not-draft-or-terminal
-   :pre-checks [aa/attachment-not-readOnly]}
+   :states states/all-with-acknowledged-but-not-draft-or-terminal}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -205,3 +205,11 @@
    :categories #{:attachments}
    :states states/all-application-states}
   (ok))
+
+
+(defquery common-area-application
+  {:parameters [id]
+   :states states/all-states
+   :user-roles #{:applicant :authority}
+   :pre-checks [(permit/validate-permit-type-is permit/YA)]}
+  [_])

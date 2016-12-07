@@ -69,6 +69,14 @@
   (let [query (assignment/search-query data)]
     (ok :data (assignment/assignments-search user query))))
 
+(defquery assignment-count
+  {:description ""
+   :parameters []
+   :user-roles #{:authority}
+   :pre-checks [assignments-enabled]}
+  [{user :user}]
+  (ok :assignmentCount (assignment/count-active-assignments-for-user user)))
+
 (env/in-dev                                                 ; These are only used in itest
   (defquery assignments
     {:description "Return all the assignments the user is allowed to see"

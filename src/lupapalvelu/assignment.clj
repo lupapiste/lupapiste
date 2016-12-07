@@ -241,7 +241,8 @@
 (sc/defn ^:always-validate get-assignments-for-application :- [Assignment]
   [user           :- usr/SessionSummaryUser
    application-id :- sc/Str]
-  (get-assignments user {:application.id application-id}))
+  (get-assignments user {:application.id application-id
+                         :status {$ne "canceled"}}))
 
 (sc/defn ^:always-validate assignments-search :- AssignmentsSearchResponse
   [user  :- usr/SessionSummaryUser
@@ -258,6 +259,12 @@
      :totalCount     (count assignments)
      :assignments    (->> assignments
                           (enrich-targets))}))
+
+(sc/defn ^:always-validate count-active-assignments-for-user :- sc/Int
+  [{user-id :id}]
+  (mongo/count :assignments {:status "active"
+                             :states.type {$ne "completed"}
+                             :recipient.id user-id}))
 
 ;;
 ;; Inserting and modifying assignments
@@ -289,15 +296,18 @@
                      (organization-query-for-user completer {:status "active", :states.type {$ne "completed"}})
                      {$push {:states (new-state "completed" (usr/summary completer) timestamp)}}))
 
-(defn- set-assignments-statuses [application-id status]
+(defn- set-assignments-statuses [query status]
   {:pre [(assignment-statuses status)]}
-  (update-assignments {:application.id application-id} {$set {:status status}}))
+  (update-assignments query {$set {:status status}}))
 
 (sc/defn ^:always-validate cancel-assignments [application-id :- ssc/ApplicationId]
-  (set-assignments-statuses application-id "canceled"))
+  (set-assignments-statuses {:application.id application-id} "canceled"))
 
 (sc/defn ^:always-validate activate-assignments [application-id :- ssc/ApplicationId]
-  (set-assignments-statuses application-id "active"))
+  (set-assignments-statuses {:application.id application-id} "active"))
+
+(defn set-assignment-status [application-id target-id status]
+  (set-assignments-statuses {:application.id application-id :target.id target-id} status))
 
 (defn remove-assignments-by-target [application-id target-id]
   (mongo/remove-many :assignments {:application.id application-id :target.id target-id}))

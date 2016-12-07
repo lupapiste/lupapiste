@@ -59,14 +59,21 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     }));
   }
   if (self.authorizationModel.ok("assignments-search")) {
+    var dataProviderForAssignments = new LUPAPISTE.AssignmentsDataProvider({
+                                       sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
+                                       searchResultType: "created",
+                                       currentLimit:     self.currentLimit
+                                     });
+    var label = ko.pureComputed(function() {
+      var count = dataProviderForAssignments.assignmentsCount();
+      return loc("application.assignment.search.label")
+        + (count ? " (" + count + ")" : "");
+    });
+
     self.searchModels.push(new LUPAPISTE.SearchSectionModel({
       type:             "assignments",
-      lLabel:           "application.assignment.search.label",
-      dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
-        sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-        searchResultType: "created",
-        currentLimit:     self.currentLimit
-      }),
+      label:            label,
+      dataProvider:     dataProviderForAssignments,
       externalApi:      null,
       resultsTextKey:   "application.assignment.search.results",
       limits:           self.limits,

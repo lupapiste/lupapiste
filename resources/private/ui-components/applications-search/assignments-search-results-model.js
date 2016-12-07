@@ -19,12 +19,7 @@ LUPAPISTE.AssignmentsSearchResultsModel = function(params) {
         target = "attachments";
         break;
     }
-    ajax.query("application", {id: model.application.id, lang: loc.getCurrentLanguage()})
-      .success(function(res) {
-        self.offset = window.pageYOffset;
-        pageutil.openApplicationPage(res.application, target);
-      })
-      .call();
+    pageutil.openApplicationPage(model.application, target);
   };
 
   self.markComplete = function(id) {

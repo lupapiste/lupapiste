@@ -135,21 +135,21 @@ Mikko can't delete maksaja, as it's only removable by authority
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
   Wait until  Xpath Should Match X Times  ${asiamiesXpath}  1
@@ -157,6 +157,7 @@ Mikko adds party hakijan-asiamies using dialog
 
 Mikko adds party hakija-r using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']
+  Set Suite Variable  ${hakijajQueryPath}  section[id='application'] div[id='application-parties-tab'] section[data-doc-type='hakija-r']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1
   Click enabled by test id  hakija-r_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
@@ -164,20 +165,18 @@ Mikko adds party hakija-r using button
 Mikko fills his name as applicant, accordion text is updated
   # Ensure elements are visible:
   Scroll to top
-  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
-  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
-  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
 
 Mikko toggles applicant to company, company's name is updated to accordion
-  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='yritys']
+  Scroll and click  ${hakijajQueryPath} input[data-docgen-path='_selected'][value='yritys']
   Wait until  Element should be visible  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']
   Wait until  Element should not contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
-  Input text  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']  Mikon Firma
-  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='yritys.yritysnimi']  Mikon Firma
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikon Firma
   # Toggle applicant back to 'person'
-  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='henkilo']
+  Scroll and click  ${hakijajQueryPath} input[data-docgen-path='_selected'][value='henkilo']
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
 
 Mikko changes application address

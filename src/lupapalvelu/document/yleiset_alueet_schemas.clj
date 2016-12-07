@@ -45,8 +45,10 @@
 
 (def tyo-aika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date :required true} ;; alkuPvm / loppuPvm
-    {:name "tyoaika-paattyy-pvm" :type :date :required true}))
+    {:name "tyoaika-alkaa-pvm" :type :date :hidden true} ;; alkuPvm / loppuPvm
+    {:name "tyoaika-paattyy-pvm" :type :date :hidden true}
+    {:name "tyoaika-alkaa-ms" :type :msDate}
+    {:name "tyoaika-paattyy-ms" :type :msDate}))
 
 (def tyo-aika-for-jatkoaika
   (body

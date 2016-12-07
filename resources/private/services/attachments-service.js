@@ -303,12 +303,33 @@ LUPAPISTE.AttachmentsService = function() {
   self.approveAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( null );
   };
 
   self.rejectAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( attachmentId );
   };
+
+  self.rejectAttachmentNote = function(attachmentId, note, hubParams) {
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId,
+                          "reject-attachment-note",
+                          {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
+                           note: note},
+                          hubParams);
+    self.rejectAttachmentNoteEditorState( null );
+  };
+
+  hub.subscribe( "attachmentsService::update", function( event ) {
+    if( event.commandName === "reject-attachment-note" ) {
+      self.queryOne( event.attachmentId );
+    }
+  });
+
+  // Used by reject-note component.
+  self.rejectAttachmentNoteEditorState = ko.observable();
 
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
     _.forEach(filterSets, function(filterSet) { filterSet.forceVisibility(attachmentId); });
@@ -381,16 +402,46 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
+
+
+
+  // If fileId is not given, the approval for the latestVersion is returned.
+  // The fileId can be either fileId or originalFileId.
+  self.attachmentApproval = function ( attachment, fileId ) {
+    if( fileId ) {
+      var version = _.find( util.getIn(attachment, ["versions"] ),
+                            function( v ) {
+                              return v.fileId === fileId
+                                || v.originalFileId === fileId;
+                            });
+      fileId = _.get( version, "originalFileId");
+    } else {
+      fileId = util.getIn( attachment, ["latestVersion", "originalFileId"]);
+    }
+    return fileId && util.getIn( attachment, ["approvals", fileId]);
+  };
+
+  function attachmentState( attachment ) {
+    return _.get( self.attachmentApproval( attachment), "state");
+  }
+
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.APPROVED;
+    return attachmentState(attachment ) === self.APPROVED;
   };
-  self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED
+
+  self.isRejected = function(attachment ) {
+    return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+
+  // True if the attachment is needed but does not have file yet.
+  self.isMissingFile = function( attachment ) {
+    return !self.isNotNeeded( attachment )
+      && _.isEmpty( util.getIn( attachment, ["versions"]) );
   };
 
   //

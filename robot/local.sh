@@ -6,4 +6,4 @@ if [ -z "$target" ] ; then
   target="tests"
 fi
 
-pybot --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite -d target $target
+robot --exclude integration --exclude ajanvaraus --exclude fail --RunEmptySuite -d target $target

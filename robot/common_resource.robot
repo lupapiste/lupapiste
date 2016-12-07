@@ -205,6 +205,12 @@ Open accordion by test id
   ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=//div[@data-test-id="${testId}"]//div[@data-accordion-state="open"]
   Run keyword If  ${accordionIsClosed}  Execute Javascript  $("div[data-test-id='${testId}'] button.accordion-toggle:not(.toggled)").click();
 
+Open docgen accordion
+  [Arguments]  ${doctype}  ${idx}=0
+  ${xpathIndex}=  Evaluate  ${idx} + 1
+  ${accordionIsClosed} =  Run Keyword And Return Status  Element should not be visible  xpath=(//section[@data-doc-type="${doctype}"])[${xpathIndex}]//div[contains(@class,'accordion-toggle')]/button[contains(@class, 'toggled')]
+  Run keyword If  ${accordionIsClosed}  Execute Javascript  $("section[data-doc-type='${doctype}']:eq(${idx}) div.accordion-toggle button:first-child").click();
+
 Positive indicator should be visible
   Wait until  Element should be visible  xpath=//div[@data-test-id="indicator-positive"]
 
@@ -225,6 +231,15 @@ Positive indicator icon should be visible
 
 Positive indicator icon should not be visible
   Wait until  Element should not be visible  xpath=//div[@data-test-id="indicator-icon-positive"]
+
+Indicator should contain text
+  [Arguments]  ${text}
+  Wait until  Element should contain  xpath=//div[@id='indicator']//div[contains(@class, 'indicator-message')]  ${text}
+
+Close sticky indicator
+  Click element  xpath=//div[@id='indicator']//div[contains(@class, 'indicator-close')]
+  Wait until  Element should not be visible  xpath=//div[@id="indicator"]//div[contains(@class,'indicator-bar')]
+
 #
 # Login stuff
 #
@@ -395,19 +410,18 @@ Jussi logs in
 # Return quoted (or rather ticked)  string
 # Quote  hello   -> "hello"
 # Quote  "hello" -> "hello"
-# Quote  hei "hou" ->  "hei 'hou'"  
+# Quote  hei "hou" ->  "hei 'hou'"
 Quote
   [Arguments]  ${s}
   ${s}=  Convert to string  ${s}
   ${s}=  Strip string  ${s}
   ${s}=  Replace String  ${s}  "  '  # " Fix highlight
-  
+
   ${quoted}=  Execute Javascript  return sprintf( '"%s"', _.unquote( "${s}", "'") )
   [Return]  ${quoted}
-    
+
 Input text with jQuery
   [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
-  Wait until page contains element  jquery=${selector}
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
   ${q}=  Quote  ${selector}
@@ -524,18 +538,18 @@ Primary operation is
 
 Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
+  ${jQueryIdx}=  Evaluate  ${idx} - 1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
   ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
+  ${opDescriptionjQueryPath}=  Set Variable  div[id='application-info-tab'] section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
   Wait until element is visible  ${opDescriptionXpath}
-  Input text   ${opDescriptionXpath}  ${text}
-  # Blur
-  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//button[@data-test-id='toggle-identifiers-${doc}']
+  Input text with jQuery  ${opDescriptionjQueryPath}  ${text}
   # Close the input
-  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Scroll and click  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   Wait until  Element should not be visible  ${opDescriptionXpath}
 
 # This only works if there is only one applicable document.
@@ -858,6 +872,7 @@ Cancel current application as authority
 # New yes no modal dialog
 Confirm yes no dialog
   Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Wait until  Element should be enabled  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
@@ -1336,6 +1351,10 @@ Scroll to top
 Scroll to bottom
   Execute javascript  window.scrollTo(0,888888)
 
+Scroll by
+  [Arguments]  ${deltaY}
+  Execute javascript  window.scrollBy(0, ${deltaY})
+
 Scroll to test id
   [Arguments]  ${id}
   Scroll to  [data-test-id=${id}]
@@ -1475,6 +1494,7 @@ Open frontend log
   Wait until  Element text should be  xpath=//h1  Frontend log
 
 There are no frontend errors
+  [Tags]  non-roboto-proof
   Open frontend log
   Set test variable  ${FATAL_LOG_XPATH}  //div[@data-test-level='fatal']
   Set test variable  ${ERROR_LOG_XPATH}  //div[@data-test-level='error']
@@ -1497,13 +1517,13 @@ Fill tyoaika fields
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']
   Execute JavaScript  $(".hasDatepicker").unbind("focus");
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-alkaa-pvm']").val("${startDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-pvm')]  ${startDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-alkaa-ms')]
+  Execute Javascript  $("input[id*='tyoaika-alkaa-ms']").val("${startDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-alkaa-ms')]  ${startDate}
 
-  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-pvm')]
-  Execute Javascript  $("input[id*='tyoaika-paattyy-pvm']").val("${endDate}").change();
-  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-pvm')]  ${endDate}
+  Wait until  Element should be visible  //input[contains(@id,'tyoaika-paattyy-ms')]
+  Execute Javascript  $("input[id*='tyoaika-paattyy-ms']").val("${endDate}").change();
+  Wait Until  Textfield Value Should Be  //input[contains(@id,'tyoaika-paattyy-ms')]  ${endDate}
 
 Fill in yritys info
   [Arguments]  ${dataDocType}

@@ -21,6 +21,9 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   self.isRejected = service.isRejected;
   self.isNotNeeded = service.isNotNeeded;
   self.isAuthority = lupapisteApp.models.currentUser.isAuthority;
+  self.testState = function( attachment ) {
+    return _.get( service.attachmentApproval( attachment), "state", "neutral");
+  };
 
   self.hasFile = function(attachment) {
     return _.get(ko.utils.unwrapObservable(attachment), "latestVersion.fileId");
@@ -54,7 +57,11 @@ LUPAPISTE.AttachmentsTableModel = function(attachments) {
   };
 
   self.reject = function(attachment) {
-    service.rejectAttachment(attachment.id);
+    if( service.isRejected( attachment )) {
+      service.rejectAttachmentNoteEditorState( attachment.id );
+    } else {
+      service.rejectAttachment(attachment.id);
+    }
   };
 
   self.authorities = accordionService.authorities;

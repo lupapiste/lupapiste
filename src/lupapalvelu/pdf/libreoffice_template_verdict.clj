@@ -94,8 +94,8 @@
   (let [applicants (map (fn [val] [val]) (map template/name-from-doc (template/get-applicant-docs application)))
         verdict (first (filter #(= id (:id %)) (:verdicts application)))
         paatos (nth (:paatokset verdict) paatos-idx)
-        start-time (template/get-in-document-data application :tyoaika [:tyoaika-alkaa-pvm :value])
-        end-time (template/get-in-document-data application :tyoaika [:tyoaika-paattyy-pvm :value])]
+        start-time (util/to-local-date (template/get-in-document-data application :tyoaika [:tyoaika-alkaa-ms :value]))
+        end-time (util/to-local-date (template/get-in-document-data application :tyoaika [:tyoaika-paattyy-ms :value]))]
     (when (nil? paatos) (throw (Exception. (str "verdict.paatos.id [" paatos-idx "] not found in verdict:\n" (with-out-str (clojure.pprint/pprint verdict))))))
     (template/create-libre-doc (io/resource (if (:sopimus verdict) "private/lupapiste-ya-contract-template.fodt" "private/lupapiste-ya-verdict-template.fodt"))
                                file

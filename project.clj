@@ -13,6 +13,8 @@
                  [ring "1.5.0" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
+                 [metosin/ring-swagger "0.22.12"]
+                 [metosin/ring-swagger-ui "2.2.5-0"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
@@ -121,7 +123,7 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.57"]
+                 [lupapiste/commons "0.7.60"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
@@ -148,6 +150,7 @@
              :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
+
              :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}

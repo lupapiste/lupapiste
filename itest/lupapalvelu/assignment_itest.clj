@@ -42,7 +42,15 @@
           doc-id (-> (query-application sonja id) :documents first :id)
           {assignment-id :id} (create-assignment sonja ronja-id id {:group "group" :id doc-id} "Valmistuva")]
       (-> (query sonja :assignments) :assignments count)  => pos?
-      (-> (query veikko :assignments) :assignments count) => zero?))
+      (-> (query veikko :assignments) :assignments count) => zero?
+
+    (fact "open assignments count for user"
+      (-> (query ronja :assignment-count) :assignmentCount) => 1
+      (-> (query sonja :assignment-count) :assignmentCount) => zero?
+
+      (fact "completed assignment decreases the count"
+            (complete-assignment ronja assignment-id) => ok?
+            (-> (query ronja :assignment-count) :assignmentCount) => zero?))))
 
   (fact "assignments can be fetched by application id"
     (let [id1 (create-app-id sonja :propertyId sipoo-property-id)

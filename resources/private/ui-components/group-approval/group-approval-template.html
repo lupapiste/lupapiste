@@ -1,32 +1,30 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <section class="page container">
-    <script type="text/x-jquery-tmpl" id="group-approval-template">
-      <div class="group-buttons"
-           data-bind="if: hasContents">
-        <span data-bind="template: 'approval-template'"></span>
-        <button class="secondary is-right"
-                data-bind="visible: remove.fun,
-                           data-test-class: remove.testClass,
-                           click: remove.fun">
-          <i class="lupicon-remove"></i>
-          <span data-bind="ltext: 'remove'"></span>
-        </button>
-        <button class="secondary is-right"
-                data-bind="attr: {'data-test-id': testId( 'reject')},
-                           ltext: 'document.reject',
-                           click: reject,
-                           visible: showReject"></button>
-        <button class="positive is-right"
-                data-bind="attr: {'data-test-id': testId( 'approve')},
-                           click: approve,
-                           visible: showApprove">
-          <i class="lupicon-check"></i>
-          <span data-bind="ltext: 'document.approve'"></span>
-        </button>
-      </div>
-    </script>
-  </section>
-</body>
-</html>
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="group-approval-template">
+  <!-- ko if: util.getIn( lupapisteApp, ["models", "currentUser", "role"] ) -->
+    <div class="group-buttons"
+         data-bind="if: hasContents">
+      <span data-bind="template: 'approval-template'"></span>
+      <button class="secondary is-right"
+              data-bind="visible: remove.fun,
+                         data-test-class: remove.testClass,
+                         click: remove.fun">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: 'remove'"></span>
+      </button>
+      <button class="secondary is-right"
+              data-bind="attr: {'data-test-id': testId( 'reject')},
+                         ltext: 'document.reject',
+                         click: reject,
+                         visible: showReject"></button>
+      <button class="positive is-right"
+              data-bind="attr: {'data-test-id': testId( 'approve')},
+                         click: approve,
+                         visible: showApprove">
+        <i class="lupicon-check"></i>
+        <span data-bind="ltext: 'document.approve'"></span>
+      </button>
+      <div data-bind="component: {name: 'reject-note',
+                      params: {docModel: docModel, path: path}}"></div>
+    </div>
+    <!-- /ko -->
+</script>

@@ -127,19 +127,13 @@
       (read-component-list-from-jar jar (str "private/" (name component)) pattern)
       (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
 
-(defn main-css-count []
-  (let [jar (util/this-jar lupapalvelu.main)
-        file-list (if (in-jar? jar)
-                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
-                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
-    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
+   :knockout       {:js ["knockout-3.4.1.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -212,7 +206,8 @@
                    "building-service.js"
                    "assignment-service.js"
                    "assignment-recipient-filter-service.js"
-                   "assignment-target-filter-service.js"]}
+                   "assignment-target-filter-service.js"
+                   "event-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}

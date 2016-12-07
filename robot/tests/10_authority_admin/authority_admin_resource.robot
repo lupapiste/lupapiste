@@ -25,6 +25,7 @@ Add link
 
 Update link
   [Arguments]  ${name}  ${url}
+  Wait test id visible  organization-links-table
   Scroll to test id  organization-links-table
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
@@ -35,6 +36,7 @@ Update link
 
 Remove link
   [Arguments]  ${name}
+  Wait test id visible  organization-links-table
   Scroll to test id  organization-links-table
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
 

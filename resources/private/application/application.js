@@ -301,7 +301,7 @@
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
               applicationModel.summaryAvailable() ? uneditableDocs : [],
-              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }

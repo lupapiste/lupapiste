@@ -80,7 +80,7 @@
       </div>
     <!-- /ko -->
 
-    <!-- ko if: showMarkArchivedSection -->
+    <!-- ko if: showMarkArchivedSection && !$root.authorization.ok("common-area-application") -->
     <div class="mark-as-archived">
       <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
       <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
@@ -107,9 +107,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row" data-bind="testId: $data.attachmentType(), attr: {'data-test-group': $parent.groupName}">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: $data.archivable() && $data.state() !== 'arkistoitu', checked: $data.sendToArchive, testId: 'send-to-archive'">
+           <input type="checkbox" data-bind="visible: $data.archivable() && !$data.archived(), checked: $data.sendToArchive, testId: 'send-to-archive'">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !$data.archivable(), attr: {title: loc($data.archivabilityError())}"></i>
-           <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: $data.toggleAdditionalControls">
@@ -117,8 +117,8 @@
             <div class="retention-period" data-bind="text: $data.retentionDescription"></div>
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped">
-              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.stamped, attr: {title: loc('attachment.stamped')}"></i>
-              <span data-bind="visible: !$data.stamped, ltext: 'no'"></span>
+              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.latestVersion.stamped, attr: {title: loc('attachment.stamped')}"></i>
+              <span data-bind="visible: !$data.latestVersion.stamped, ltext: 'no'"></span>
             </div>
             <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
               <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
@@ -154,7 +154,7 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: _.isEmpty($data.readOnly) || (_.isFunction($data.readOnly) && !$data.readOnly()) -->
+            <!-- ko if: !$data.readOnly && !$data.archived() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
               <div class="contents">
@@ -196,6 +196,7 @@
             </div>
           </div>
         </div>
+
       </div>
       <!-- /ko -->
     </div>
@@ -219,8 +220,8 @@
       <!-- ko foreach: documents -->
       <div class="attachment-row" data-bind="testId: $data.documentType + '-document', attr: {'data-test-group': 'application-documents'}">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: $data.state() !== 'arkistoitu', checked: sendToArchive">
-           <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <input type="checkbox" data-bind="visible: !$data.archived(), checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: $data.toggleAdditionalControls">
@@ -229,7 +230,7 @@
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped"></div>
             <div data-bind="if: $parent.showWillPublish && _.has($data.metadata(), 'myyntipalvelu')" class="will-publish">
-              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu']" class="lupicon-check enabled"></i>
+              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
               <span data-bind="visible: !util.getIn($data, ['metadata', 'myyntipalvelu']), ltext: 'no'"></span>
             </div>
           </div>

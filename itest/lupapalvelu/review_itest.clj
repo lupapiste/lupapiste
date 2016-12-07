@@ -52,7 +52,7 @@
            (fact "RAM is not allowed for review minutes"
                  (let [minutes (->> (query-application sonja application-id)
                                     :attachments
-                                    (util/find-first (util/fn-> :type :type-id (util/=as-kw :katselmuksen_tai_tarkastuksen_poytakirja))))]
+                                    (util/find-first (util/fn-> :type :type-id (util/=as-kw :aloituskokouksen_poytakirja))))]
                    minutes => truthy
                    (command sonja :approve-attachment :id application-id :attachmentId (:id minutes) :fileId (-> minutes :latestVersion :fileId))
                    (command sonja :create-ram-attachment :id application-id :attachmentId (:id minutes))

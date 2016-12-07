@@ -138,7 +138,7 @@
 (facts "Section requirement for verdicts"
        (let [org        {:section {:operations ["pool" "house"]
                                    :enabled    true}}
-             pool       {:name "pool"}
+             pool       {:primaryOperation {:name "pool"}}
              no-xml1    (->xml {:root {:foo {:bar "nope"}}})
              no-xml2    (->xml {:root {:foo {:bar "nope"}
                                        :paatostieto {:hii "hoo"}}})
@@ -155,6 +155,8 @@
                (validate-section-requirement pool no-xml1 org) => fail-check)
          (fact "No pykala element"
                (validate-section-requirement pool no-xml2 org) => fail-check)
+         (fact "Muutoslupa"
+               (validate-section-requirement (assoc pool :permitSubtype "muutoslupa") no-xml2 org) => nil)
          (fact "Blank section 1"
                (validate-section-requirement pool blank-xml1 org) => fail-check)
          (fact "Blank section 2"

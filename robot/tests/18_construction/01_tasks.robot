@@ -286,7 +286,7 @@ Deleting R verdict does not delete its done reviews
 
 Attachments have been updated
   Open tab  attachments
-  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja']").length === 3
+  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.aloituskokouksen_poytakirja']").length === 3
   Javascript?  $("tr[data-test-type='muut.muu']").length === 1
   Has review attachment  muut.muu  /robot.*pdf/
   [Teardown]  Logout
@@ -296,6 +296,7 @@ Attachments have been updated
 # This would require a well-formed application with all the required fields.
 
 No errors so far
+  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***
