@@ -13,7 +13,6 @@
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapiste-commons.tos-metadata-schema :as tms]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.attachment :as att]
@@ -24,8 +23,8 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.domain :as domain])
-  (:import (java.util.concurrent ThreadFactory Executors)
-           (java.io File)))
+  (:import [java.util.concurrent ThreadFactory Executors]
+           [java.io InputStream]))
 
 (defn thread-factory []
   (let [security-manager (System/getSecurityManager)
@@ -46,17 +45,22 @@
         app-id (env/value :arkisto :app-id)
         app-key (env/value :arkisto :app-key)
         encoded-id (codec/url-encode id)
-        url (str host "/documents/" encoded-id)]
-    (http/put url {:basic-auth [app-id app-key]
-                   :throw-exceptions false
-                   :quiet true
-                   :multipart  [{:name      "metadata"
-                                 :mime-type "application/json"
-                                 :encoding  "UTF-8"
-                                 :content   (json/generate-string metadata)}
-                                {:name      "file"
-                                 :content   is-or-file
-                                 :mime-type content-type}]})))
+        url (str host "/documents/" encoded-id)
+        result (http/put url {:basic-auth [app-id app-key]
+                              :throw-exceptions false
+                              :quiet true
+                              :multipart  [{:name      "metadata"
+                                            :mime-type "application/json"
+                                            :encoding  "UTF-8"
+                                            :content   (json/generate-string metadata)}
+                                           {:name      "file"
+                                            :content   is-or-file
+                                            :mime-type content-type}]})]
+    (when (instance? InputStream is-or-file)
+      (try
+        (.close is-or-file)
+        (catch Exception _)))
+    result))
 
 (defn- set-attachment-state [next-state application now id]
   (action/update-application
@@ -272,15 +276,14 @@
           (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
         (files/with-temp-file libre-file
-          (files/with-temp-file xml-tmp-file
-            (let [case-file-file (libre/generate-casefile-pdfa application :fi libre-file)
-                  case-file-xml (tiedonohjaus/xml-case-file application :fi)
-                  metadata (-> (generate-archive-metadata application user)
+          (let [pdf-is (libre/generate-casefile-pdfa application :fi libre-file)
+                case-file-xml (tiedonohjaus/xml-case-file application :fi)
+                xml-is (-> (.getBytes case-file-xml "UTF-8") io/input-stream)
+                metadata (-> (generate-archive-metadata application user)
                              (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
-                  xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
-              (spit xml-tmp-file case-file-xml)
-              (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
-              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))))
+                xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
+            (upload-and-set-state case-file-archive-id pdf-is "application/pdf" metadata application created set-process-state)
+            (upload-and-set-state case-file-xml-id xml-is "text/xml" xml-metadata application created set-process-state))))
       (doseq [attachment selected-attachments]
         (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
