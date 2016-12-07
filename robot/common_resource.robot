@@ -1494,6 +1494,7 @@ Open frontend log
   Wait until  Element text should be  xpath=//h1  Frontend log
 
 There are no frontend errors
+  [Tags]  non-roboto-proof
   Open frontend log
   Set test variable  ${FATAL_LOG_XPATH}  //div[@data-test-level='fatal']
   Set test variable  ${ERROR_LOG_XPATH}  //div[@data-test-level='error']
