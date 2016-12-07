@@ -9,7 +9,7 @@
         <table data-test-id="organization-links-table">
           <thead>
             <tr>
-              <!-- ko foreach: loc.supported -->
+              <!-- ko foreach: organization.langs -->
               <th data-bind="ltext: 'auth-admin.link.' + $data"></th>
               <!-- /ko -->
               <th data-bind="ltext: 'auth-admin.actions'"></th>
@@ -17,7 +17,7 @@
           </thead>
           <tbody data-bind="foreach: organization.links">
             <tr>
-              <!-- ko foreach: loc.supported -->
+              <!-- ko foreach: $parent.organization.langs -->
               <td>
                 <div class="organization-link-cell"
                      data-bind="text: $parent.name[$data]">

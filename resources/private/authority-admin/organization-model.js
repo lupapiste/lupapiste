@@ -17,7 +17,7 @@ LUPAPISTE.OrganizationModel = function () {
       self.commandName(params.commandName);
       self.command = params.command;
       self.links.removeAll();
-      self.links(_.map(loc.supported, function(lang) {
+      self.links(_.map(params.langs, function(lang) {
         return {lang: lang,
                 name: ko.observable(util.getIn(params, ["source", "name", lang], "")),
                 url:  ko.observable(util.getIn(params, ["source", "url",  lang], ""))};
@@ -37,6 +37,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.editLinkModel = new EditLinkModel();
 
   self.organizationId = ko.observable();
+  self.langs = ko.observableArray();
   self.links = ko.observableArray();
   self.operationsAttachments = ko.observableArray();
   self.attachmentTypes = {};
@@ -213,6 +214,8 @@ LUPAPISTE.OrganizationModel = function () {
     //
     var operationsAttachmentsPerPermitType = organization.operationsAttachments || {};
     var localizedOperationsAttachmentsPerPermitType = [];
+
+    self.langs(_.keys(organization.name));
     self.links(organization.links || []);
 
     var operationsTosFunctions = organization["operations-tos-functions"] || {};
@@ -334,6 +337,7 @@ LUPAPISTE.OrganizationModel = function () {
     var index = indexFn();
     self.editLinkModel.init({
       source: this,
+      langs: self.langs(),
       commandName: "edit",
       command: function(links) {
         ajax
