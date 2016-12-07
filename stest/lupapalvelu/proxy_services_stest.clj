@@ -316,9 +316,9 @@
     (wfs/raster-images request "plandocument") => http200?))
 
 (facts "Get address from Turku"
-  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
-  (fact "get-addresses-proxy"
-    (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, turku" :lang "fi"}})
+  #_(against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.kuopio.fi/TeklaOGCWeb/wfs.ashx"})
+  #_(fact "get-addresses-proxy"
+    (let [response (get-addresses-proxy {:params {:query "Isokaari 10, Kuopio" :lang "fi"}})
           body (json/decode (:body response) true)]
       (fact (:suggestions body) =contains=> "Linnankatu 80, Turku")
       (fact (first (:data body)) => (contains {:street "Linnankatu",
