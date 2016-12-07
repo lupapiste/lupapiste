@@ -422,7 +422,6 @@ Quote
 
 Input text with jQuery
   [Arguments]  ${selector}  ${value}  ${leaveFocus}=${false}
-  Wait until page contains element  jquery=${selector}
   Wait until  Element should be visible  jquery=${selector}
   Wait until  Element should be enabled  jquery=${selector}
   ${q}=  Quote  ${selector}
