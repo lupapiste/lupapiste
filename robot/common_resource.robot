@@ -538,18 +538,18 @@ Primary operation is
 
 Edit operation description
   [Arguments]  ${doc}  ${text}  ${idx}=1
+  ${jQueryIdx}=  Evaluate  ${idx} - 1
   Wait until   Element should be visible  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]//button[@data-test-id='toggle-identifiers-${doc}']
   ${docId}=  Get Element Attribute  xpath=//div[@id='application-info-tab']//section[@data-doc-type='${doc}'][${idx}]@data-doc-id
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
-  Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
+  ${opDescriptionjQueryPath}=  Set Variable  div[id='application-info-tab'] section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
   Wait until element is visible  ${opDescriptionXpath}
-  Input text   ${opDescriptionXpath}  ${text}
-  # Blur
-  Focus  xpath=//div[@id='application-info-tab']//section[@data-doc-id='${docId}']//button[@data-test-id='toggle-identifiers-${doc}']
+  Input text with jQuery  ${opDescriptionjQueryPath}  ${text}
   # Close the input
-  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
+  Scroll and click  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   Wait until  Element should not be visible  ${opDescriptionXpath}
 
 # This only works if there is only one applicable document.
