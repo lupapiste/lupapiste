@@ -437,7 +437,7 @@
     (let [app-xml          (normalize-special-verdict application app-xml)
           organization     (if organization @organization (org/get-organization (:organization application)))
           validation-error (or (permit/validate-verdict-xml (:permitType application) app-xml organization)
-                               (validate-section-requirement (:primaryOperation application)
+                               (validate-section-requirement application
                                                              app-xml
                                                              organization))]
       (if-not validation-error
