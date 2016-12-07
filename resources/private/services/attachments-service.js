@@ -320,8 +320,13 @@ LUPAPISTE.AttachmentsService = function() {
                            note: note},
                           hubParams);
     self.rejectAttachmentNoteEditorState( null );
-    self.queryOne( attachmentId );
   };
+
+  hub.subscribe( "attachmentsService::update", function( event ) {
+    if( event.commandName === "reject-attachment-note" ) {
+      self.queryOne( event.attachmentId );
+    }
+  });
 
   // Used by reject-note component.
   self.rejectAttachmentNoteEditorState = ko.observable();

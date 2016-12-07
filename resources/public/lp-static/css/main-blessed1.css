@@ -7724,19 +7724,19 @@ div.sticky {
 /* line 279, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > .reject-edits--input {
   display: table-cell;
+  line-height: 32px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
 }
-/* line 282, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 286, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > input.reject-edits--input {
   width: 20em;
   vertical-align: middle;
   padding-right: 4px;
 }
-/* line 287, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 291, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > button.reject-edits--input {
-  min-height: 32px;
-  height: 32px;
-  max-height: 32px;
-  line-height: 32px;
   padding-left: 8px;
   padding-right: 8px;
 }
