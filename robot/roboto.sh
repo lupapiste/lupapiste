@@ -192,23 +192,23 @@ run_test() {
          fail "output must be xvfb or xnest"
          ;;
    esac
-  
+
    sleep 2 # wait for X to start
-   
+
    local WMPID=""
    # start openbox to handle window maximize if we're running in a non-local X
-   test -z "$XPID" || { 
+   test -z "$XPID" || {
       DISPLAY=:$SCREEN openbox &>/dev/null &
-      WMPID=$! 
+      WMPID=$!
    }
-  
-   # disable screensaver (needed when recording) 
+
+   # disable screensaver (needed when recording)
    #test -z "$XPID" || DISPLAY=:$SCREEN xset s off
-   
+
    sleep 2 # wait for window manager to start
-   
+
    mkdir -p target # make log directory if necessary
- 
+
    # exclude tests with non-roboto-proof tag
    DISPLAY=:$SCREEN timeout $TIMEOUT pybot \
       --exclude integration \
@@ -229,8 +229,8 @@ run_test() {
    test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
    test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
    # check that pybot exited with success.
-   test "$BOT" = "0" || { 
-      echo "ERROR: pybot exited with $BOT for test '$test'"; 
+   test "$BOT" = "0" || {
+      echo "ERROR: pybot exited with $BOT for test '$test'";
       echo "FAIL: pybot exited with non-zero $BOT, timeout was $TIMEOUT" >> target/$TEST.out;
    }
 }
@@ -248,7 +248,7 @@ halt() {
    sleep 1
    test -n "$XPID" && { echo "Closing X $XPID"; kill -9 $XPID &>/dev/null; }
    sleep 1
-   test -z "$LUPISPID" || { 
+   test -z "$LUPISPID" || {
       echo "Shutting down lupapiste $LUPISPID"
       # pstree -p $LUPISPID
       recursive_kill -9 $LUPISPID ""
@@ -259,6 +259,7 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
+   cp -R target archive
 }
 
 maybe_finish() {
