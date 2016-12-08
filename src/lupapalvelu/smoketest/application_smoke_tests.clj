@@ -169,10 +169,12 @@
 
 (mongocheck :applications validate-verdict-history-entry :history :verdicts :state :primaryOperation :permitType :permitSubtype)
 
+(def excluded-operations #{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen})
+
 (defn submitted-rest-interface-schema-check-app [application]
   (when (and (#{"R" "YA"} (:permitType application))
              (#{"submitted"} (:state application))
-             (not (#{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2} (-> application :primaryOperation :name))))
+             (not (excluded-operations (-> application :primaryOperation :name keyword))))
     (->> (mongo/with-id application)
          (rest-application-data/process-application)
          (sc/check HakemusTiedot))))

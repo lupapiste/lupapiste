@@ -749,32 +749,40 @@
     :korkeusTaiSyvyys (:height drawing)
     :pintaAla (:area drawing)))
 
-(defn- point-drawing [drawing]
-  (let [p (-> drawing :geometry jts/read-wkt-str)
-        cord (.getCoordinate p)]
+(defn- parse-krysp-geometry [drawing parser-fn]
+  (try
     {:Sijainti
-     (merge {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}
-       (get-basic-drawing-info drawing))}))
+     (merge (parser-fn (-> drawing :geometry jts/read-wkt-str))
+            (get-basic-drawing-info drawing))}
+    (catch IllegalArgumentException e
+      (warnf "Invalid geometry: %s, message is: %s" (:geometry drawing) (.getMessage e))
+      nil)))
+
+(defn- point-drawing [drawing]
+  (letfn [(point-parser
+            [geometry]
+            (let [cord (.getCoordinate geometry)]
+              {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}))]
+    (parse-krysp-geometry drawing point-parser)))
 
 (defn- linestring-drawing [drawing]
-  (let [ls (-> drawing :geometry jts/read-wkt-str)]
-    {:Sijainti
-     (merge {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}
-       (get-basic-drawing-info drawing))}))
+  (letfn [(linestring-parser [geometry]
+            {:viiva {:LineString (get-pos (.getCoordinates geometry))}})]
+    (parse-krysp-geometry drawing linestring-parser)))
 
 (defn- polygon-drawing [drawing]
-  (let [polygon (-> drawing :geometry jts/read-wkt-str)]
-    {:Sijainti
-     (merge {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}
-       (get-basic-drawing-info drawing))}))
+  (letfn [(polygon-parser [geometry]
+            {:alue {:Polygon {:exterior {:LinearRing (get-pos (.getCoordinates geometry))}}}})]
+    (parse-krysp-geometry drawing polygon-parser)))
 
 (defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
 
 (defn drawings-as-krysp [drawings]
-   (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
-           (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
-           (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings))))
+   (remove nil?
+           (concat (map point-drawing (filter (partial drawing-type? "POINT") drawings))
+                   (map linestring-drawing (filter (partial drawing-type? "LINESTRING") drawings))
+                   (map polygon-drawing (filter (partial drawing-type? "POLYGON") drawings)))))
 
 
 (defn get-sijaintitieto [application]
