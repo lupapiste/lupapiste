@@ -23,8 +23,11 @@
        (map transform-operation)))
 
 (defn- get-ya [application]
-  {:kayttotarkoitus (ya-operation-type-to-usage-description (-> application :primaryOperation :name keyword))
-   :sijainnit       (map :Sijainti (drawings-as-krysp (:drawings application)))})
+  (let [operation (-> application :primaryOperation :name keyword)]
+    {:kayttotarkoitus (if (= :ya-jatkoaika operation)
+                        "jatkoaika"
+                        (ya-operation-type-to-usage-description operation))
+     :sijainnit       (map :Sijainti (drawings-as-krysp (:drawings application)))}))
 
 (defn process-application [application]
   (if (empty? (:documents application))
