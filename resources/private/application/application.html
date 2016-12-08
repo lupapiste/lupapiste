@@ -1194,22 +1194,6 @@
 
                     </div>
                 </div>
-
-                <div id="dialog-cancel-application" class="window autosized">
-                    <div class="dialog-header">
-                        <p data-bind="ltext: 'application.cancelApplication'"></p>
-                        <p class="dialog-close close lupicon-remove"></p>
-                    </div>
-                    <div class="dialog-content" data-bind="with: application">
-                        <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea grid-style-input high"
-                                  data-bind="textInput: cancelText"
-                                  data-test-id="cancel-application-reason"></textarea>
-                        <div class='dialog-user-content application-cancel-text-content'></div>
-                        <button class='positive btn-dialog close' data-test-id='confirm-yes'></button>
-                        <button class='secondary btn-dialog close' data-test-id='confirm-no'></button>
-                    </div>
-                </div>
             </div>
 
         </section>
