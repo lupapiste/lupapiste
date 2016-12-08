@@ -556,37 +556,43 @@ var checkDesigners = function(yesFn) {
 
   self.cancelText = ko.observable("");
 
+  function cancelApplicationAjax(command) {
+    return function() {
+      ajax
+        .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
+        .success(function() {
+          self.cancelText("");
+          if (command === "cancel-application") {
+            // regular user, can't undo cancellation so redirect to applications view
+            pageutil.openPage("applications");
+          } else { // authority, can undo so don't redirect, just reload application to canceled state
+            self.lightReload();
+          }
+        })
+        .onError("error.command-illegal-state", self.lightReload)
+        .fuse(self.stateChanged)
+        .processing(self.processing)
+        .call();
+      return false;
+    };
+  }
+
   self.cancelApplication = function() {
     if (!self.stateChanged()) {
       var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
             ? "cancel-application-authority"
             : "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-      LUPAPISTE.ModalDialog.setDialogContent(
-        $("#dialog-cancel-application"),
-        loc("areyousure"),
-        loc("areyousure.cancel-application"),
-        {title: loc("yes"),
-         fn: function() {
-          ajax
-            .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
-            .success(function() {
-              self.cancelText("");
-              if (command === "cancel-application") {
-                // regular user, can't undo cancellation so redirect to applications view
-                pageutil.openPage("applications");
-              } else { // authority, can undo so don't redirect, just reload application to canceled state
-                self.lightReload();
-              }
-            })
-            .onError("error.command-illegal-state", self.lightReload)
-            .fuse(self.stateChanged)
-            .processing(self.processing)
-            .call();
-          return false;}},
-        {title: loc("no")}
-      );
-      LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+      hub.send("show-dialog", {ltitle: "application.cancelApplication",
+                               size: "medium",
+                               component: "textarea-dialog",
+                               componentParams: {text: loc("areyousure.cancel-application"),
+                                                 yesFn: cancelApplicationAjax(command),
+                                                 lyesTitle: "yes",
+                                                 lnoTitle: "no",
+                                                 textarea: {llabel: "application.canceled.reason",
+                                                            rows: 10,
+                                                            observable: self.cancelText}}});
     }
   };
 
