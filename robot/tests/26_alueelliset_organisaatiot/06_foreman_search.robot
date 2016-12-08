@@ -26,10 +26,11 @@ Teppo logs in and creates some applications
 Sonja logs in and sees some only foreman applications on foreman search tab
   Sonja logs in  False
   Go to page  applications
+  Switch to applications
   Active search tab is  application
   Scroll and click test id  search-tab-all
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
-  Switch to foremen  
+  Switch to foremen
   Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  3
 
 Sonja can see foreman application on verdict tab
@@ -56,7 +57,7 @@ Sonja switches between applications and foremen view
   Scroll and click test id  search-tab-foremanNotice
   Switch to applications
   Active search tab is  application
-    
+
 
 *** Keywords ***
 
