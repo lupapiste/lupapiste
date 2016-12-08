@@ -111,7 +111,7 @@
 (sc/defschema ToimenpideTiedot
   (field [Toimenpide] "Hakemuksen toimenpiteiden tiedot"))
 
-(sc/defschema GMLPoint      {:Point {:pos [sc/Str]}})
+(sc/defschema GMLPoint      {:Point {:pos sc/Str}})
 (sc/defschema GMLPolygon    {:Polygon {:exterior {:LinearRing {:pos [sc/Str]}}}})
 (sc/defschema GMLLineString {:LineString {:pos [sc/Str]}})
 
@@ -123,7 +123,7 @@
                          :nimi   sc/Str
                          :kuvaus sc/Str
                          :korkeusTaiSyvyys sc/Str
-                         :pintaAla sc/Str}) ""))
+                         :pintaAla (sc/cond-pre sc/Str sc/Int)}) ""))
 
 (sc/defschema YleisenAlueenKayttolupa
   (field {:kayttotarkoitus sc/Str
