@@ -1284,6 +1284,7 @@ Fill in new password
 
 Open company user listing
   Click Element  user-name
+  Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
   Open accordion by test id  mypage-company-accordion
   Wait Until  Element should be visible  //div[@data-test-id='my-company']
   Click by test id  company-edit-users
