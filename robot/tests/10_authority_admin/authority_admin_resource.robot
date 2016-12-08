@@ -26,7 +26,7 @@ Add link
 Update link
   [Arguments]  ${name}  ${url}
   Wait test id visible  organization-links-table
-  Scroll to test id  organization-links-table
+  Scroll to top
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-url-fi  ${url}
