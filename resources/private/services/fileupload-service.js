@@ -4,13 +4,46 @@ LUPAPISTE.FileuploadService = function() {
 
   self.serviceName = "fileuploadService";
 
+  function hubscribe( event, fun ) {
+    hub.subscribe( sprintf( "%s::%s", self.serviceName, event),
+                   fun );
+  }
+
+  function prepareDropZone( dropZone ) {
+    (function () {
+      var latest = 0;
+      if( dropZone ) {
+        var sel = $( dropZone );
+        var clear = function( count ) {
+          if( count === latest ) {
+            sel.removeClass( "drop-zone--highlight");
+            latest = 0;
+          } else {
+            _.delay( clear, 100, latest );
+          }
+        };
+
+        sel.on( "dragover",
+                function()  {
+                  sel.addClass( "drop-zone--highlight");
+                  if( !latest ) {
+                    clear( -1 );
+                  }
+                  latest++;
+                });
+        return sel;
+      }
+    })();
+  }
+
   self.bindFileInput = function( options ) {
 
     options = _.defaults( options, {
-      maximumUploadSize: 15000000 // 15 MB
+      maximumUploadSize: 15000000, // 15 MB
+      id: util.randomElementId("fileupload-input")
     });
 
-    var fileInputId = options.id || util.randomElementId("fileupload-input");
+    var fileInputId = options.id;
 
     if (!document.getElementById(self.fileInputId)) {
       var input = document.createElement("input");
@@ -34,6 +67,8 @@ LUPAPISTE.FileuploadService = function() {
                 _.defaults( event, {input: fileInputId}));
     }
 
+    var $dropZone = prepareDropZone( options.dropZone );
+
     $("#" + fileInputId).fileupload({
       url: "/api/raw/upload-file",
       type: "POST",
@@ -41,22 +76,23 @@ LUPAPISTE.FileuploadService = function() {
       formData: [
         { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
       ],
+      dropZone: $dropZone,
       add: function(e, data) {
-        var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions, getFileExtension(data.files[0].name));
+        var file = _.get( data, "files.0", {});
+        var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
+                                      getFileExtension(file.name));
 
         // IE9 doesn't have size, submit data and check files in server
-        var size = util.getIn(data, ["files", 0, "size"], 0);
+        var size = file.size || 0;
         if(acceptedFile && size <= options.maximumUploadSize) {
           data.submit();
         } else {
-          var message = !acceptedFile ?
-                "error.file-upload.illegal-file-type" :
-                "error.file-upload.illegal-upload-size";
-
-          hub.send("indicator", {
-            style: "negative",
-            message: message
-          });
+          hubSend( "badFile",
+                   {message: acceptedFile
+                    ? "error.file-upload.illegal-upload-size"
+                    : "error.file-upload.illegal-file-type",
+                    file: file}
+                 );
         }
       },
       start: function() {
@@ -80,10 +116,20 @@ LUPAPISTE.FileuploadService = function() {
         hubSend("filesUploadingProgress", {progress: progress});
       }
     });
+
+    hubscribe( "destroy", function( event )  {
+      if( event.fileInputId === fileInputId ) {
+        $("#" + fileInputId ).fileupload( "destroy");
+        if( $dropZone ) {
+          $dropZone.off($dropZone );
+        }
+      }
+    } );
+
     return fileInputId;
   };
 
-  hub.subscribe("fileuploadService::removeFile", function(event) {
+  hubscribe("removeFile", function(event) {
     ajax
       .command("remove-uploaded-file", {attachmentId: event.attachmentId})
       .success(function(res) {

@@ -6931,6 +6931,11 @@ input.grid-style-input--wide:disabled {
   background-color: #f6f6f6;
 }
 
+/* line 300, ../../../private/common-html/sass/partials/_inputs.scss */
+.drop-zone--highlight {
+  border: 4px dashed #f39129 !important;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;

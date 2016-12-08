@@ -296,3 +296,7 @@ input.grid-style-input--wide {
   }
 }
 }
+
+.drop-zone--highlight {
+  border: 4px dashed $primary !important;
+}
