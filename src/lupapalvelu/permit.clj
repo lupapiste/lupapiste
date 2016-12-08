@@ -278,10 +278,10 @@
         (fail :error.invalid-application-parameter)))))
 
 (defn validate-permit-type-is [& validator-permit-types]
-  (let [valid-permit-types (set (map name validator-permit-types))]
+  (let [valid-types (set (map name validator-permit-types))]
     (fn [{:keys [application]}]
       (if application
-        (when-not (valid-permit-types (permit-type application))
+        (when-not (valid-types (permit-type application))
           (fail :error.invalid-permit-type :permit-type validator-permit-types))
         (fail :error.invalid-application-parameter)))))
 

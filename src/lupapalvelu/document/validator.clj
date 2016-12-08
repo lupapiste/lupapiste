@@ -48,7 +48,7 @@
 (defmacro defvalidator
   "Macro to create document-level validators. Unwraps data etc."
   [code validator-data & body]
-  {:pre (keyword? code)}
+  {:pre [(keyword? code)]}
   (let [validator-data (-> validator-data
                          (update-in [:doc] eval)
                          (update-in [:schemas] eval))  ;; needed to handle possible def given in :schemas

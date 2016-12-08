@@ -9,6 +9,7 @@
             [sade.env :as env]
             [sade.util :refer [fn->>] :as util]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -229,8 +230,9 @@
     {:pre [(map? query)]}
     (with-id (mc/find-one-as-map (get-db)  collection (remove-null-chars query) projection))))
 
-(defn select-ordered [collection query order-by]
+(defn select-ordered
   "Convenience select for ordered results without projection requirement."
+  [collection query order-by]
   {:pre [collection (map? query) (instance? clojure.lang.PersistentArrayMap order-by)]}
   (map with-id (with-collection (name collection)
                  (query/find (remove-null-chars query))
@@ -470,7 +472,7 @@
       (gfs/remove-all (get-gfs))
       ; Collections must be dropped individially, otherwise index cache will be stale
       (doseq [coll (db/get-collection-names (get-db))]
-        (when-not (or (.startsWith coll "system") (= "poi" coll)) (mc/drop (get-db) coll)))
+        (when-not (or (ss/starts-with coll "system") (= "poi" coll)) (mc/drop (get-db) coll)))
       (ensure-indexes))))
 
 (defstatus :mongo (server-status (get-db)))

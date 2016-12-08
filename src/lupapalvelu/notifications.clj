@@ -62,7 +62,7 @@
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
    More specific set recipients can be defined by user roles."
   [{:keys [auth]} included-roles excluded-roles]
-  {:post [every? map? %]}
+  {:post [(every? map? %)]}
   (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
                                         (set excluded-roles))]
     (->> (filter (comp recipient-roles keyword :role) auth)
@@ -146,10 +146,11 @@
 (def always-sent-templates
   #{:invite-company-user :reset-password})
 
-(defn invalid-recipient? [for-template]
-   "Notifications are not sent to certain roles, users who do not
-    have a valid email address, and registered but removed users
-    receive only specific message types defined above."
+(defn invalid-recipient?
+  "Notifications are not sent to certain roles, users who do not
+   have a valid email address, and registered but removed users
+   receive only specific message types defined above."
+  [for-template]
   (fn [rec]
      (or (ss/blank? (:email rec))
         (if (contains? always-sent-templates for-template)

@@ -230,9 +230,9 @@
 (defn merge-rakennustieto [rakennustieto-from-xml rakennus-from-buildings]
   (let [match-rt (fn [[rak-index rak-map]]
                    (let [rak-rak-map (:rakennus rak-map)
-                         match-by (fn [key one-rt]
-                                    (and (not-empty (key rak-rak-map))
-                                         (= (key rak-rak-map) (key one-rt))))
+                         match-by (fn [k one-rt]
+                                    (and (not-empty (k rak-rak-map))
+                                         (= (k rak-rak-map) (k one-rt))))
                          match-by-key (fn [key] (doall  (util/find-first (partial match-by key) rakennustieto-from-xml)))
                          match-by-vn (match-by-key :valtakunnallinenNumero)
                          match-by-ks (match-by-key :kunnanSisainenPysyvaRakennusnumero)

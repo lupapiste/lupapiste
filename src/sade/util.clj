@@ -333,8 +333,8 @@
     (tc/to-long (-> amount time-fn ago-from-now-fn))))
 
 (defn get-timestamp-ago
-  [time-key amount]
   "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
   (get-timestamp-ago-or-from-now ago time-key amount))
 
 (defn get-timestamp-from-now

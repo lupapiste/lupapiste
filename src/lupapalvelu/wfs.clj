@@ -181,7 +181,7 @@
 
 (defn property-is-like [prop-name value]
   (property-filter "PropertyIsLike" prop-name value
-    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"})))
+                   {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"}))
 
 (defn property-is-equal [prop-name value]
   (property-filter "PropertyIsEqualTo" prop-name value))

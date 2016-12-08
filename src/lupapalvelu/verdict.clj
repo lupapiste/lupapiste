@@ -177,7 +177,7 @@
 (defn verdict-attachment-type
   ([application] (verdict-attachment-type application "paatosote"))
   ([{permit-type :permitType :as application} type]
-   (if (and (#{:P :R} (keyword permit-type)))
+   (if (#{:P :R} (keyword permit-type))
      {:type-group "paatoksenteko" :type-id type}
      {:type-group "muut" :type-id type})))
 
