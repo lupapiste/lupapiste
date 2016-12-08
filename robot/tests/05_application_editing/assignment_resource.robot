@@ -20,6 +20,12 @@ Assign application to
   Select From List By Label  //section[@id='application']//select[@data-test-id='assignee-select']  ${to}
   Positive indicator should be visible
 
+Assign inforequest to
+  [Arguments]  ${to}
+  Wait Until  Element Should Be Visible  //section[@id='inforequest']//select[@data-test-id='assignee-select']
+  Select From List By Label  //section[@id='inforequest']//select[@data-test-id='assignee-select']  ${to}
+  Positive indicator should be visible
+
 Assign application to nobody
   Wait Until  Element Should Be Visible  //section[@id='application']//select[@data-test-id='assignee-select']
   Select From List By Index  //section[@id='application']//select[@data-test-id='assignee-select']  0

@@ -25,7 +25,7 @@ Sonja sees comment indicator on applications list
 Authority assigns an inforequest to herself
   Inforequest is not assigned  ${inforequest-handling}
   Open inforequest  ${inforequest-handling}  ${propertyId}
-  Assign application to  Sibbo Sonja
+  Assign inforequest to  Sibbo Sonja
 
 Comment indicator is no longer visible (LPK-454)
   Go to page  applications
@@ -139,4 +139,3 @@ Inforequest is not assigned
 Inforequest is assigned to
   [Arguments]  ${address}  ${name}
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td[@data-test-col-name='authority']  ${name}
-
