@@ -37,7 +37,7 @@ Sonja selects the Sipoo's YA filter and sees only the YA application in the appl
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
 
 Same organization cannot be selected twice as organization filter
-  Click Element  xpath=//div[@data-test-id="organization-filter-component"]//span[contains(@class, "autocomplete-selection")]
+  Click Element  xpath=//div[@data-test-id="organization-filter-component"]//span[contains(@class, "autocomplete-selection")]//i[contains(@class, "lupicon-chevron-small-down")]
   Wait until  Element should be visible  xpath=//div[@data-test-id="organization-filter-component"]//div[@class="autocomplete-dropdown"]
   Xpath should match X times  //div[@data-test-id="organization-filter-component"]//ul[@class="autocomplete-result"]//li[contains(@class,"autocomplete-result-item")]  2
   Element should not be visible  xpath=//ul[@class="autocomplete-result"]//li[@class="autocomplete-result-item"]//span[contains(., "Sipoon yleisten alueiden rakentaminen")]
