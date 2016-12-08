@@ -11,10 +11,11 @@
            (java.util Date)))
 
 (defpage "/perfmon/data" {:keys [start end]}
-  (->> (perf/get-data (Date. (or (perf/to-long start) (- (System/currentTimeMillis) (* 60 60 1000))))
-                      (Date. (or (perf/to-long end) (System/currentTimeMillis))))
-       (resp/json)
-       (resp/status 200)))
+  (let [now-ts (now)]
+    (->> (perf/get-data (Date. (or (perf/to-long start) (- now-ts (* 60 60 1000))))
+                        (Date. (or (perf/to-long end) now-ts)))
+         (resp/json)
+         (resp/status 200))))
 
 (defpage [:get "/perfmon/throttle"] _
   (->> {:db @perf/db-throttle :web @perf/web-throttle} (resp/json) (resp/status 200)))
