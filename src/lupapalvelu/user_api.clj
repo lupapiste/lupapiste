@@ -373,7 +373,6 @@
   {:parameters [email roles]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
