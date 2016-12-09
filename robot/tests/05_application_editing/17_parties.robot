@@ -8,7 +8,7 @@ Resource        ../../common_resource.robot
 *** Variables ***
 
 ${remove-button}  button[data-test-class='delete-schemas.hakija-r']
-  
+
 *** Test Cases ***
 
 Pena logs in and creates application
@@ -19,9 +19,9 @@ Pena logs in and creates application
   Create application with state  ${appname}  ${propertyId}  aita  open
 
 Pena executes test scenario
-  Test scenario  
+  Test scenario
   [Teardown]  Logout
-  
+
 Sonja logs in
   Sonja logs in
   Open application  ${appname}  ${propertyId}
@@ -38,9 +38,9 @@ Test scenario
   Add hakija-r
   Two remove buttons
   Scroll and click  ${remove-button}:first
-  Deny  dynamic-yes-no-confirm-dialog
+  Deny yes no dialog
   Scroll and click  ${remove-button}:last
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   No remove button
 
 No remove button
@@ -51,4 +51,3 @@ Add hakija-r
 
 Two remove buttons
   jQuery should match X times  ${remove-button}  2
-

@@ -204,14 +204,14 @@ Authority deletes paasuunnittelija
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
   Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
   Execute Javascript  $("button[data-test-class='delete-schemas.paasuunnittelija']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
 
 Authority deletes maksaja
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing
