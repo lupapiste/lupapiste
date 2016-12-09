@@ -38,7 +38,7 @@ Remove link
   [Arguments]  ${name}
   Wait test id visible  organization-links-table
   Scroll to test id  organization-links-table
-  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
+  Click element  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
 
 User sees link
   [Arguments]  ${name}  ${url}
