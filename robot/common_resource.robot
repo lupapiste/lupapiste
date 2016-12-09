@@ -657,7 +657,7 @@ Prepare first request
 
 Selected Municipality Is
   [Arguments]  ${municipality}
-  ${selectedMuni} =  Execute javascript  return $("div#popup-id span[data-test-id=create-municipality-select]").attr("data-test-value");
+  ${selectedMuni} =  Get Element Attribute  xpath=//div[@id="popup-id"]//span[@data-test-id='create-municipality-select']@data-test-value
   Should Be Equal  ${selectedMuni}  ${municipality}
 
 Address is not blank

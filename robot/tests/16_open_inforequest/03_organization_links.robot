@@ -49,6 +49,8 @@ Open inforequest tree
   Scroll and click test id  applications-create-new-inforequest
   Input text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
+  Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
+  Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
   Wait Until  Selected Municipality Is  753
   Wait until element is enabled  create-location-continue
   Click by test id  create-continue
