@@ -37,7 +37,8 @@ Update link
 Remove link
   [Arguments]  ${name}
   Wait test id visible  organization-links-table
-  Scroll to test id  organization-links-table
+  # Ugly fix for small roboto screen
+  Execute javascript  window.scrollTo(200,0)
   Click element  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
 
 User sees link
