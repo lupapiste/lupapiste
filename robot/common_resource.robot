@@ -456,20 +456,20 @@ Select From List by id
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
-  Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  jquery=${container} span.autocomplete-selection
 
-  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//${container}//div[@class="autocomplete-dropdown"]
-  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
+  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} span.autocomplete-selection
 
-  Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
-  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
+  Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
+  Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
+  Scroll and click  ${container} ul.autocomplete-result li span:contains('${value}')
+  Wait until  Element should not be visible  jquery=${container} ul.autocomplete-result
   Wait for jQuery
 
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
-  Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+  Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
@@ -1112,7 +1112,7 @@ Invite company to application
   Open tab  parties
   Scroll and click test id  application-invite-company
   Wait test id visible  company-invite-bubble-dialog-ok
-  Select From Autocomplete  div[@data-test-id="company-invite-companies"]  ${company}
+  Select From Autocomplete  div[data-test-id="company-invite-companies"]  ${company}
   Scroll and click test id  company-invite-bubble-dialog-ok
   Is authorized party  ${company}
 

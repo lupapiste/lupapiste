@@ -35,20 +35,20 @@ Sonja sees all her operations in the dropdown of the operations filter autocompl
   # BUG in closing the dropdown - sometimes does not close but flickers -> false error
 
 Sonja selects the Asuinkerrostalo operation and sees only that application
-  Select From Autocomplete  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
+  Select from autocomplete by test id  operations-filter-component  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
 
 
 Sonja selects Asuinkerrostalo and Katulupa operations and sees only those applications
-  #Select From Autocomplete  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
+  #Select from autocomplete by test id  operations-filter-component  Asuinkerrostalon tai rivitalon rakentaminen
   # Asuinkerrostalo already selected in previous test
   Autocomplete selectable values should not contain  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Wait until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
-  Select From Autocomplete  div[@data-test-id="operations-filter-component"]  Vesi- ja viemäritöiden tekeminen
+  Select from autocomplete by test id  operations-filter-component  Vesi- ja viemäritöiden tekeminen
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
