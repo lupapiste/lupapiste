@@ -13,7 +13,7 @@ Rollup rejected
   [Arguments]  ${name}
   Scroll to  rollup-status-button[data-test-name='${name}'] button.rollup-button
   Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button
-  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button span.lupicon-circle-attention
+  Wait until  Element should be visible  jquery=rollup-status-button[data-test-name='${name}'] button.rollup-button span.lupicon-circle-attention
 
 Rollup neutral
   [Arguments]  ${name}
