@@ -267,3 +267,6 @@
 "attachments.title" "en" "An application has new attachments"
 "attachments.title" "fi" "Hakemuksella on uusia liitteitä"
 "attachments.title" "sv" "Ansökan har nya bilaogor"
+"attachment.drawing-number" "fi" "Piirrosnumero"
+"attachment.bad-files" "fi" "Seuraavien tiedostojen lisääminen ei onnistunut:"
+"attachment.add-multiple" "fi" "Lisää liitteitä"

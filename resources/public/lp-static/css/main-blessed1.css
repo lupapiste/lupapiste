@@ -5911,66 +5911,66 @@ i.toggle {
   overflow-y: hidden;
 }
 
-/* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 532, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn-base, .inner-margins [type=submit], .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .check-string, .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 534, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 535, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 540, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 541, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn-base, .inner-margins.stacked [type=submit], .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .check-string, .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 544, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 545, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 550, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 551, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 554, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 555, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-m {
   margin: 12px 12px 12px 12px;
 }
 
-/* line 558, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 559, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-top {
   margin-top: 0 !important;
 }
 
-/* line 564, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 565, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 569, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 570, ../../../private/common-html/sass/partials/_buttons.scss */
 div.docgen-content > section + button {
   margin-bottom: 6px;
 }
 
-/* line 573, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 574, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 579, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 580, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 584, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 585, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 586, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 587, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -5980,37 +5980,52 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 594, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 595, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 597, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 598, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 600, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 601, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 608, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 609, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 610, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 611, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 615, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 616, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
 
-/* line 634, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 635, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-events {
   pointer-events: none;
+}
+
+/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
+.operation-button-row {
+  display: inline-block;
+  margin-left: 12px;
+}
+/* line 622, ../../../private/common-html/sass/partials/_buttons.scss */
+.operation-button-row .btn-base, .operation-button-row [type=submit], .operation-button-row .btn, .operation-button-row .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .operation-button-row .paginate_disabled_previous, .operation-button-row .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .operation-button-row .paginate_disabled_next, .operation-button-row button, .operation-button-row .like-btn, .operation-button-row a.link-btn, .operation-button-row a.link-btn-julkipano, .operation-button-row .check-string, .operation-button-row .btn, .operation-button-row .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .operation-button-row .paginate_disabled_previous, .operation-button-row .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .operation-button-row .paginate_disabled_next, .operation-button-row button, .operation-button-row div, .operation-button-row a {
+  margin-right: 12px;
+  margin-bottom: 0;
+}
+/* line 628, ../../../private/common-html/sass/partials/_buttons.scss */
+.operation-button-row :last-child {
+  margin-right: 0;
 }
 
 /* line 56, ../../../private/common-html/sass/partials/_inputs.scss */
@@ -8339,82 +8354,4 @@ foreman-history th.second {
 /* line 1078, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
-}
-/* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
-foreman-history th.fourth {
-  width: 20%;
-}
-/* line 1084, ../../../private/common-html/sass/partials/_forms.scss */
-foreman-history th.fifth {
-  width: 45%;
-}
-
-/* line 1089, ../../../private/common-html/sass/partials/_forms.scss */
-.indicator-wrapper {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-
-/* line 1095, ../../../private/common-html/sass/partials/_forms.scss */
-div.alleYli-radioGroup {
-  display: inline-block;
-  margin-top: 24px;
-}
-
-/* line 1134, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid {
-  width: 100%;
-  border-top: 1px solid #dddddd;
-  color: #333333;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-/* line 1142, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid:last-child {
-  border-bottom: none;
-}
-/* line 1146, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid h2 {
-  margin: 12px 0;
-}
-/* line 1151, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid p {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-/* line 1156, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col--no-margin {
-  padding: 0 !important;
-}
-/* line 1158, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid .col--no-margin .checkbox-wrapper {
-  border: none;
-}
-/* line 1163, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid select::-ms-expand {
-  display: none;
-}
-/* line 1167, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid button::-moz-focus-inner {
-  border: 0;
-}
-/* line 1171, ../../../private/common-html/sass/partials/_forms.scss */
-.form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
-  padding: 0 12px;
-  box-sizing: border-box;
-  min-height: 40px;
-  height: 40px;
-  font-size: 16px;
-  color: #333333;
-  border: 1px solid #bbbbbb;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-  -moz-appearance: none;
-  width: 100%;
-}
-/* line 16, ../../../private/common-html/sass/partials/_inputs.scss */
-.form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus, .form-grid textarea:focus, .form-grid span.form-string:focus {
-  color: #333333;
-  border-color: #fbc732;
 }

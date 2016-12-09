@@ -526,6 +526,7 @@ i.toggle {
   vertical-align: top;
 }
 
+
 // Only inner margins
 .inner-margins {
   .btn-base, .btn, button, div, a {
@@ -633,4 +634,10 @@ button {
 // http://caniuse.com/#feat=pointer-events
 .no-events {
    pointer-events: none;
+}
+
+.operation-button-row {
+  @include button-row( $margin-bottom: 0);
+  display: inline-block;
+  margin-left: $btn-spacer;
 }

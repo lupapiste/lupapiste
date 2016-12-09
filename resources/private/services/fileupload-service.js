@@ -10,7 +10,7 @@ LUPAPISTE.FileuploadService = function() {
   }
 
   function prepareDropZone( dropZone ) {
-    (function () {
+    return (function () {
       var latest = 0;
       if( dropZone ) {
         var sel = $( dropZone );
@@ -77,6 +77,7 @@ LUPAPISTE.FileuploadService = function() {
         { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
       ],
       dropZone: $dropZone,
+      maxNumberOfFiles: options.allowMultiple ? undefined : 1,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
         var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
@@ -121,7 +122,7 @@ LUPAPISTE.FileuploadService = function() {
       if( event.fileInputId === fileInputId ) {
         $("#" + fileInputId ).fileupload( "destroy");
         if( $dropZone ) {
-          $dropZone.off($dropZone );
+          $dropZone.off();
         }
       }
     } );

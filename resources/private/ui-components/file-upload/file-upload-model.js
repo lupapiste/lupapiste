@@ -2,9 +2,12 @@
 // Params [optional]:
 //  [buttonIcon]: Icon for add button (default lupicon-circle-plus)
 //  [buttonText]: Ltext for the button ('application.attachmentsAdd')
+//  [buttonClass]: Button classes (positive). In addition, the button always has btn class.
+//  [allowMultiple]: Whether multiple files can be uploaded at the same time (false).
 //  files: ObservableArray for the files.
 //  [readOnly]: If true only the file listing is shown (false).
-//  [dropZone]: Dropzone selector as string (default null).
+//  [dropZone]: Dropzone selector as string (default null, no dropzone).
+//  [doNotInitialize]: If true, the init function is not called automatically (false).
 LUPAPISTE.FileUploadModel = function( params ) {
   "use strict";
   var self = this;
@@ -13,16 +16,28 @@ LUPAPISTE.FileUploadModel = function( params ) {
 
   ko.utils.extend( self, base);
 
-  self.params = _.defaults( params, {buttonIcon: "lupicon-circle-plus",
-                                     buttonText: "application.attachmentsAdd"});
   self.files = params.files;
   self.fileInputId = _.uniqueId( "file-input-id-" );
   self.waiting = ko.observable();
+  self.readOnly = params.readOnly;
 
   // Setting for attribute to "" effectively disables file selection.
   self.labelFor = self.disposedComputed( function() {
-    return self.waiting() || params.readOnly ? "" : self.fileInputId;
+    return self.waiting() || self.readOnly ? "" : self.fileInputId;
   });
+
+  self.buttonOptions = _.defaults( _.pick( params,
+                                           ["buttonIcon", "buttonText",
+                                            "readOnly", "allowMultiple"]),
+                                   {buttonIcon: "lupicon-circle-plus",
+                                    buttonText: "application.attachmentsAdd",
+                                    buttonClass: "btn "
+                                    + _.get(params, "buttonClass", "positive"),
+                                    readOnly: false,
+                                    allowMultiple: false,
+                                    fileInputId: self.fileInputId,
+                                    waiting: self.waiting,
+                                    labelFor: self.labelFor});
 
   self.listenService = function ( message, fn ) {
     self.addEventListener( service.serviceName, message, function( event ) {
@@ -32,14 +47,24 @@ LUPAPISTE.FileUploadModel = function( params ) {
     });
   };
 
-  self.process = function() {
+  function baseProcess() {
     self.listenService( "filesUploaded", function( event ) {
-          self.files(_.concat( self.files(), event.files));
+      self.files(_.concat( self.files(), event.files));
+      // Since the basic file upload jQuery plugin does not support
+      // limiting drag'n'drop to only on file, we prune the files
+      // arrary, if needed.
+      if( !params.allowMultiple ) {
+        self.files( [_.last( self.files())]);
+      }
      });
 
     self.listenService( "filesUploading", function( event ) {
       self.waiting( event.state !== "finished" );
     });
+    //self.process();
+  };
+
+  function badFileIndicator() {
     self.listenService( "badFile", function( event ) {
       hub.send("indicator", {
         style: "negative",
@@ -48,16 +73,13 @@ LUPAPISTE.FileUploadModel = function( params ) {
     });
   };
 
-  function bindToService() {
+  function bindToService( extraFun ) {
     service.bindFileInput({maximumUploadSize: 100000000, // 100 MB
                            id: self.fileInputId,
-                           dropZone: params.dropZone});
-    self.process();
-  }
-
-  if( !params.readOnly ) {
-    // Trick to ensure that rendering is done before binding.
-    _.defer(bindToService);
+                           dropZone: params.dropZone,
+                           allowMultiple: params.allowMultiple});
+    baseProcess();
+    extraFun();
   }
 
   self.removeFile = function( data ) {
@@ -74,4 +96,15 @@ LUPAPISTE.FileUploadModel = function( params ) {
                     {fileInputId: self.fileInputId});
     base.dispose();
   };
+
+  self.init = function( extraFun ) {
+    if( !self.readOnly ) {
+      // Trick to ensure that rendering is done before binding.
+      _.defer(bindToService, extraFun || _.noop);
+    }
+  };
+
+  if( !params.doNotInitialize ) {
+    self.init( badFileIndicator );
+  }
 };

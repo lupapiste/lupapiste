@@ -1,0 +1,50 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachment-batch-template">
+  <div>
+    <span data-bind="text: progress,
+                     visible: progress"></span>
+
+    <!-- ko if: _.size(files()) -->
+    <table class="attachment-batch-table">
+      <thead>
+        <th data-bind="ltext:'attachment.file'"></th>
+        <th data-bind="ltext:'application.attachmentType'"></th>
+        <th data-bind="ltext:'application.attachmentContents'"></th>
+        <th data-bind="ltext:'attachment.drawing-number'"></th>
+        <th data-bind="ltext:'attachment.label.operation'"></th>
+        <th data-bind="ltext:'signAttachment.select'"></th>
+        <th data-bind="ltext:'attachment.label.manuallySetConstructionTime'"></th>
+        <th data-bind="ltext:'remove'"></th>        
+      </thead>
+      <tbody data-bind="foreach: files">
+        <td data-bind="file: $data"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tbody>
+    </table>
+    <!-- /ko -->
+
+    <!-- ko if: _.size(badFiles()) -->
+    <div class="like-btn negative">
+      <i class="lupicon-warning negative"></i>
+      <span data-bind="ltext: 'attachment.bad-files'"></span>
+    </div>
+    <ul data-bind="foreach: badFiles">
+      <li>
+        <span data-bind="text: file.name"></span>
+        <span data-bind="ltext: message"></span></li>
+    </ul>
+    <!-- /ko -->
+    
+    <span data-bind="template: {name: 'upload-button-template',
+                     data: buttonOptions}"></span>
+    <attachments-operation-buttons></attachments-operation-buttons>
+  </div>
+  
+</script>

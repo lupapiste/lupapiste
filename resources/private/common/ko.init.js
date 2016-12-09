@@ -367,6 +367,26 @@
     }
   };
 
+  var fileTemplate =
+      _.template( "<a href='/api/raw/view-file?file-id"
+                  + "=<%- fileId %>'><%- filename %></a><br>"
+                  + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
+
+  // Fills the target element with:
+  // <a href="file view url">filename</a><br>
+  // <span>localized content type size string</span>
+  ko.bindingHandlers.file = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).html( fileTemplate( _.merge( data, {contentText: loc( data.contentType),
+                                                       sizeText: sizeString( data.size )})));
+      }
+    }
+  };
+
+
   ko.bindingHandlers.version = {
     update: function(element, valueAccessor) {
       var verValue = ko.utils.unwrapObservable(valueAccessor());

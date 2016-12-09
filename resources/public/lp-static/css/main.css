@@ -1,9 +1,91 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1481266653574');
 =======
 @import url('main-blessed1.css?z=1481199880312');
 >>>>>>> Dropzone support for fileuploads.
+=======
+@import url('main-blessed1.css?z=1481297152176');
+>>>>>>> Fileupload refactoring and further componentization.
 
+/* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.fourth {
+  width: 20%;
+}
+/* line 1084, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.fifth {
+  width: 45%;
+}
+
+/* line 1089, ../../../private/common-html/sass/partials/_forms.scss */
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+/* line 1095, ../../../private/common-html/sass/partials/_forms.scss */
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-top: 24px;
+}
+
+/* line 1134, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid {
+  width: 100%;
+  border-top: 1px solid #dddddd;
+  color: #333333;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+/* line 1142, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid:last-child {
+  border-bottom: none;
+}
+/* line 1146, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid h2 {
+  margin: 12px 0;
+}
+/* line 1151, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid p {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* line 1156, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col--no-margin {
+  padding: 0 !important;
+}
+/* line 1158, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid .col--no-margin .checkbox-wrapper {
+  border: none;
+}
+/* line 1163, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid select::-ms-expand {
+  display: none;
+}
+/* line 1167, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid button::-moz-focus-inner {
+  border: 0;
+}
+/* line 1171, ../../../private/common-html/sass/partials/_forms.scss */
+.form-grid input[type=text], .form-grid input[type=password], .form-grid select, .form-grid textarea, .form-grid span.form-string {
+  padding: 0 12px;
+  box-sizing: border-box;
+  min-height: 40px;
+  height: 40px;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+  width: 100%;
+}
+/* line 16, ../../../private/common-html/sass/partials/_inputs.scss */
+.form-grid input[type=text]:focus, .form-grid input[type=password]:focus, .form-grid select:focus, .form-grid textarea:focus, .form-grid span.form-string:focus {
+  color: #333333;
+  border-color: #fbc732;
+}
 /* line 20, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input[type=text]:disabled, .form-grid input[type=password]:disabled, .form-grid select:disabled, .form-grid textarea:disabled, .form-grid span.form-string:disabled {
   border-color: #dddddd;
@@ -7813,12 +7895,12 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 621, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 622, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 627, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 628, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
