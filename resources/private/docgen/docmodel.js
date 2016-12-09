@@ -113,7 +113,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.updateRejectNote = function( path, note, cb ) {
-    approvalCommand( "reject-doc-note", path, cb, {note: note});
+    approvalCommand( "reject-doc-note", path, cb, {note: note || ""});
   };
 
   // Returns the latest modification time of the model or
@@ -1783,6 +1783,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     validate();
   }
 
+  // Temporary storage for the document approval state after redraw.
+  // The state is read and cleared by the reject-note component.
+  self.redrawnDocumentApprovalState = ko.observable({});
+
   self.redraw = function() {
     // Refresh document data from backend
     ajax.query("document", {id: application.id, doc: doc.id, collection: self.getCollection()})
@@ -1818,6 +1822,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
 
         $(".sticky", self.element).Stickyfill();
+        self.redrawnDocumentApprovalState( {approved: _.get( self.meta, "_approved.value")
+                                            === "approved"});
       })
     .call();
   };

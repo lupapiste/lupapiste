@@ -110,13 +110,15 @@ Sonja group rejected
 
 Click reject
   [Arguments]  ${name}  ${idx}=0
-  Wait Until  Element should be visible  jquery=button[data-test-id=reject-doc-${name}]:eq(${idx})
-  Scroll and click   button[data-test-id='reject-doc-${name}']:eq(${idx})
+  ${selector}=  Set variable  button[data-test-id=reject-doc-${name}]:visible:eq(${idx})
+  Wait Until  Element should be visible  jquery=${selector}  
+  Scroll and click   ${selector}
 
 Click approve
   [Arguments]  ${name}  ${idx}=0
-  Wait Until  Element should be visible  jquery=button[data-test-id=approve-doc-${name}]:eq(${idx})
-  Scroll and click  button[data-test-id='approve-doc-${name}']:eq(${idx})
+  ${selector}=  Set variable  button[data-test-id=approve-doc-${name}]:visible:eq(${idx})
+  Wait Until  Element should be visible  jquery=${selector}  
+  Scroll and click   ${selector}
 
 Approve accordion
   [Arguments]  ${name}  ${idx}=0
@@ -143,7 +145,7 @@ Reject group
 
 Press Key Test Id
   [Arguments]  ${id}  ${key}
-  Press Key  jquery=input[data-test-id=${id}]  ${key}
+  Press Key  jquery=input[data-test-id=${id}]:visible  ${key}
 
 Reject note is
   [Arguments]  ${prefix}  ${text}
@@ -155,14 +157,17 @@ Reject and fill note
   [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
   Run Keyword if  ${doc-style}  Click reject  ${button}
   Run Keyword unless  ${doc-style}  Click button  ${button}
+  Scroll by  100
   Wait test id visible  ${prefix}-editor
+  Focus test id  ${prefix}-editor
   Input text by test id  ${prefix}-editor  ${text}  True
 
 Reject with note
   [Arguments]  ${button}  ${prefix}  ${text}
   Reject and fill note  ${button}  ${prefix}  ${text}
   Press Key test id  ${prefix}-editor  \\13
-  Reject note is  ${prefix}  ${text}
+  Run keyword if  "${text}"  Reject note is  ${prefix}  ${text}
+  RUN keyword unless  "${text}"  No such test id  ${prefix}-note
 
 Reject with note and save
   [Arguments]  ${button}  ${prefix}  ${text}
