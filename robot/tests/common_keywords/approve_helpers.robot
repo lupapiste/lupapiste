@@ -14,7 +14,7 @@ Approve application
 Accordion approved
   [Arguments]  ${name}  ${idx}=0
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) div.sticky button.positive i.approved
-  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
   # Every group is approved or neutral
   Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) i.rejected
@@ -150,8 +150,8 @@ Reject note is
   Scroll to test id  ${prefix}-note
   Wait test id visible  ${prefix}-note
   Test id text is  ${prefix}-note  ${text}
-  
-Reject and fill note  
+
+Reject and fill note
   [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
   Run Keyword if  ${doc-style}  Click reject  ${button}
   Run Keyword unless  ${doc-style}  Click button  ${button}
@@ -175,7 +175,7 @@ Reject with note but cancel
   [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
   ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()
   Reject and fill note  ${button}  ${prefix}  ${text}  ${doc-style}
-  Press Key test id  ${prefix}-editor  \\27  
+  Press Key test id  ${prefix}-editor  \\27
   No such test id  ${prefix}-editor
   Reject note is  ${prefix}  ${old}
 
@@ -184,4 +184,3 @@ Reject attachment with note
   Reject and fill note  ${selector}  ${prefix}  ${text}  False
   Press Key test id  ${prefix}-editor  \\13
   Reject note is  ${prefix}  ${text}
-  
