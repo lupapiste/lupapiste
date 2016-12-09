@@ -6,7 +6,7 @@ MAXTHREADS=1
 SCREEN=100
 OUTPUT=xvfb
 RESOLUTION=1200x1200
-TIMEOUT=360
+TIMEOUT=600
 TESTS=
 NOENV=
 SERVER=http://localhost:8000
@@ -277,6 +277,28 @@ maybe_finish() {
    }
 }
 
+show_finished() {
+   local STATUS=$(grep "tests total" $1 | tail -n 1)
+   local COLOR=$GREEN
+   echo "$STATUS" | grep -q "0 failed" || COLOR=$RED
+   echo -e "$COLOR - $1 done: $STATUS"
+   grep "FAIL" "$1" | sed -e 's/^/      /'
+   echo -n -e "$DEFAULT"
+}
+
+show_running() {
+  local NPASS=$(grep PASS $log | wc -l)
+  local NFAIL=$(grep FAIL $log | wc -l)
+  local COLOR=$LIGHTRED
+  test "$NFAIL" -lt "$NPASS" && COLOR=$RED
+  test "$(expr $NFAIL '*' 5)" -lt "$NPASS" && COLOR=$YELLOW
+  test "$NFAIL" = 0 && COLOR=$GREEN
+  echo -e "$COLOR o $log $(grep FAIL $log | wc -l) failed, $(grep PASS $log | wc -l) ok"
+  grep "FAIL" $log | sed -e 's/^/      /'
+  echo -e -n "$DEFAULT"
+  maybe_finish $NFAIL
+}
+
 show_stats() {
    echo "---------------------- 8< ----------------------"
    MSG="$@"
@@ -286,15 +308,12 @@ show_stats() {
    ls target | grep -q "\.out" || { echo "No results yet."; return; }
    for log in target/*.out
    do
-      NPASS=$(grep PASS $log | wc -l)
-      NFAIL=$(grep FAIL $log | wc -l)
-      COLOR=$LIGHTRED
-      test "$NFAIL" -lt "$NPASS" && COLOR=$RED
-      test "$(expr $NFAIL '*' 5)" -lt "$NPASS" && COLOR=$YELLOW
-      test "$NFAIL" = 0 && COLOR=$GREEN
-      STATUS="$COLOR - $log $(grep FAIL $log | wc -l) failed, $(grep PASS $log | wc -l) ok$DEFAULT"
-      echo -e $STATUS
-      maybe_finish $NFAIL
+      if [ -z "$(grep -E '(pybot exited|^Report: )' $log)" ]
+      then
+         show_running $log
+      else
+         show_finished $log
+      fi
    done
 }
 

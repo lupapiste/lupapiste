@@ -62,4 +62,5 @@ Pena does not see assignment
   Logout
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors

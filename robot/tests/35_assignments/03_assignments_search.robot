@@ -115,5 +115,6 @@ Completed assignments are not visible in application
   Wait until  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  0
 
 No frontend errors
+  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors

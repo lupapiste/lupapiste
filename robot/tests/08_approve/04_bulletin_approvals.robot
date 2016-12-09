@@ -43,6 +43,7 @@ Olli opens bulletin and checks that not icons are visible
   No icons  attachments
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***

@@ -155,4 +155,5 @@ Sonja removes Vainamoinen
   Logout
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors

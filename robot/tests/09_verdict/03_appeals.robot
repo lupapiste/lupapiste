@@ -277,6 +277,7 @@ Appeals row file check
   Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
 
 No frontend errors
+  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors
 
