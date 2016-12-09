@@ -9,8 +9,9 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
   var service = lupapisteApp.services.buildingService;
 
   self.buildingOptions = self.disposedComputed( function() {
-    var infos = service.buildingsInfo();
-    return _.concat( infos(), [{buildingId: OTHER}]);
+    var infosObservable = service.buildingsInfo();
+    var infos = infosObservable() || [];
+    return _.concat( infos , [{buildingId: OTHER}]);
   });
 
   // Notify service that application has changed.
