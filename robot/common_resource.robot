@@ -432,7 +432,7 @@ Input text with jQuery
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   ${q}=  Quote  ${id}
-  Input text with jQuery  [data-test-id=${q}]  ${value}  ${leaveFocus}
+  Input text with jQuery  [data-test-id=${q}]:visible  ${value}  ${leaveFocus}
 
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
@@ -1378,7 +1378,7 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]
+  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
