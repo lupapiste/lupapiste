@@ -102,13 +102,17 @@ LUPAPISTE.RejectNoteModel = function( params ) {
                            });
     } else {
       // Document accordion
+      var docEventHandler = function( event ) {
+        if( _.isBoolean( event.approved )) {
+          resetRejected( !event.approved );
+          _.delay( window.Stickyfill.rebuild, 500 );
+        }
+      };
+
       self.addHubListener( "document-approval-" + docModel.docId,
-                           function( event ) {
-                             if( _.isBoolean( event.approved )) {
-                               resetRejected( !event.approved );
-                               _.delay( window.Stickyfill.rebuild, 500 );
-                             }
-                           });
+                           docEventHandler );
+      docEventHandler( docModel.redrawnDocumentApprovalState() || {});
+      docModel.redrawnDocumentApprovalState({});
     }
   }
 
