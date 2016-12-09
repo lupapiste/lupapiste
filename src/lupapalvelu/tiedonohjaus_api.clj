@@ -159,7 +159,7 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-with-acknowledged-but-not-draft-or-terminal}
+   :states states/all-but-draft}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -168,7 +168,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
@@ -182,7 +182,7 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft-or-terminal}
+   :states states/all-but-draft}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
