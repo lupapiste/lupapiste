@@ -59,7 +59,7 @@ Sonja selects application sorting
   Click by test id  set-MEGA-as-default-filter
 
 Sonja reloads the page and expects that saved filter is applied as default
-  Reload Page
+  Reload page and kill dev-box
   Show all applications
   Click by test id  toggle-advanced-filters
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
@@ -140,7 +140,7 @@ Sonja closes saved filters
   Wait Until  Element Should Not Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
 Default filter should be sort-by-location filter
-  Reload page
+  Reload page and kill dev-box
   Show all applications
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 

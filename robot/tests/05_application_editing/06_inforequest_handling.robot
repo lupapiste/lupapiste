@@ -50,7 +50,7 @@ Mikko sees that inforequest is assigned to Sonja
   Application assignee span is  Sibbo Sonja
 
 ... even after reload
-  Reload page
+  Reload page and kill dev-box
   Application assignee span is  Sibbo Sonja
 
 Mikko should be able to add attachment

@@ -48,6 +48,10 @@ Browser
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Set DB cookie
 
+Reload page and kill dev-box
+  Reload page
+  Kill dev-box
+
 Open browser to login page
   Browser
   Maximize browser window
@@ -114,6 +118,7 @@ Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  15
 
 Kill dev-box
+  Wait until  Element should be visible  jquery=.dev-debug
   Execute Javascript  $(".dev-debug").hide();
 
 Resurrect dev-box

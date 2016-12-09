@@ -17,6 +17,6 @@ Poikkari default subtype = poikkeamislupa
 Change permit subtype
   Select From List By Value  permitSubtypeSelect  suunnittelutarveratkaisu
   Positive indicator should be visible
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  List Selection Should Be  permitSubtypeSelect  suunnittelutarveratkaisu
   [Teardown]  Logout
