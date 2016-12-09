@@ -84,7 +84,7 @@ Ronja opens her assignments and ends up in parties tab
 Ronja goes back to search and selects filter for all authorities in organization
   Open assignments search
   Active search tab is  created
-  Select From Autocomplete  div[@data-test-id="recipient-filter-component"]  Kaikki
+  Select from autocomplete by test id  recipient-filter-component  Kaikki
 
 Sonja's completed assignment is visible for Ronja
   Click by test id  search-tab-completed

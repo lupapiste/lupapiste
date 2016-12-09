@@ -59,7 +59,7 @@ Assignee has changed
 Viewing attachment should not reset the assignee select
   Open tab  attachments
   Add attachment file  tr[data-test-type='hakija.valtakirja']  ${PDF_TESTFILE_PATH}
-  Return to application  
+  Return to application
   Wait Until  Application assignee select is  Sibbo Sonja
   Open tab  parties
 
@@ -104,7 +104,7 @@ Mikko sees that application is assigned to Sonja
   Application assignee span is  Sibbo Sonja
 
 ... even after a page reload
-  Reload page
+  Reload page and kill dev-box
   Application assignee span is  Sibbo Sonja
   [Teardown]  Logout
 
@@ -112,7 +112,7 @@ Sonja logs in and clears authority
   Sonja logs in
   Open application  ${appname}  ${propertyId}
   Assign application to nobody
-  Reload page
+  Reload page and kill dev-box
   Application assignee select empty
 
 Sonja assigns application to Ronja
@@ -135,7 +135,7 @@ Sonja logs in and sees Ronja still assigned
 
 Sonja assigns application to herself
   Assign application to  Sibbo Sonja
-  Reload Page
+  Reload page and kill dev-box
   Application assignee select is  Sibbo Sonja
   Page Should Not Contain  jquery=option[value=777777777777777777000024]
 

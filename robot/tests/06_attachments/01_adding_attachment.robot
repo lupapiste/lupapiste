@@ -128,7 +128,7 @@ Mikko checks Not needed for the attachment
 
 Not needed should be checked after reload with correct filters
   [Tags]  attachments
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Not needed should be visible  hakija.valtakirja
   Not needed should not be visible  paapiirustus.asemapiirros
   Scroll to  div.filter-wrapper:last-child label.filter-label

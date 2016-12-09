@@ -107,7 +107,7 @@ Sonja could approve/reject/remove new suunnittelija docs
 Sonja adds fifth suunnittelija, but removes it instantly
   Add suunnittelija  Ronja  Piippo  4
   Scroll and click  section[data-doc-type='suunnittelija']:eq(4) button[data-test-class='delete-schemas.suunnittelija']
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  4
 
 Sonja approves Herkko, but rejects Huge
@@ -151,4 +151,3 @@ Document status is enabled
   [Arguments]  ${docType}  ${xpathIdx}
   Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
   Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
-

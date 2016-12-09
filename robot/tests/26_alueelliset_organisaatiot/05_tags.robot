@@ -32,8 +32,8 @@ Sonja sets tags for application
   Open application  ${appname}  ${propertyId}
   Wait until  Element should be visible  //div[@id='side-panel']//button[@id='open-notice-side-panel']
   Open side panel  notice
-  Select From Autocomplete  div[@id="notice-panel"]  ylämaa
-  Select From Autocomplete  div[@id="notice-panel"]  kalamaa
+  Select from autocomplete  div#notice-panel  ylämaa
+  Select from autocomplete  div#notice-panel  kalamaa
   Wait until  Xpath should match X times  //div[@id='notice-panel']//ul[@class="tags"]//li[@class="tag"]  2
 
 Sonja sees tags component where tags are grouped by organizations
@@ -51,7 +51,7 @@ Sonja sees tags component where tags are grouped by organizations
   Wait until  Element should not be visible  xpath=//div[@data-test-id="tags-filter-component"]//input[@data-test-id='autocomplete-input']
 
 Sonja uses tags filter by selecting tag from autocomplete
-  Select From Autocomplete  div[@data-test-id="tags-filter-component"]  kalamaa
+  Select from autocomplete by test id  tags-filter-component  kalamaa
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Logout

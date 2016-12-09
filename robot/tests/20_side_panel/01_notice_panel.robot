@@ -4,7 +4,7 @@ Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
 
 *** Variables ***
-  
+
 ${notice}  Hakmuss on tosi kiirreeliene!
 
 *** Test Cases ***
@@ -31,13 +31,13 @@ Sonja can see notice button
 
 Sonja can add tags
   Open side panel  notice
-  Select From Autocomplete  div[@id="notice-panel"]  ylämaa
+  Select From Autocomplete  div#notice-panel  ylämaa
   Wait save
 
 Sonja can leave notice
   Fill test id  application-authority-notice  ${notice}
   Wait save
-  
+
 Sonja can set application urgency to urgent
   Select From List by id  application-authority-urgency  urgent
   Wait save
@@ -86,13 +86,13 @@ Check status
   Run Keyword If  '${urgency}' == "urgent"  Wait until  Element should be visible  jquery=button#open-notice-side-panel i.lupicon-warning
   Run Keyword If  '${urgency}' == "pending"  Wait until  Element should be visible  jquery=button#open-notice-side-panel i.lupicon-circle-dash
   Wait until  Javascript?  Boolean( $("button#open-notice-side-panel.positive").length) === ${new}
-  
+
 Check notice
   [Arguments]  ${tag}  ${urgency}  ${note}
-  Wait Until  Element text should be  jquery=li.tag span.tag-label  ${tag}  
+  Wait Until  Element text should be  jquery=li.tag span.tag-label  ${tag}
   Wait Until  List Selection Should Be  application-authority-urgency  ${urgency}
   Textarea value should be  application-authority-notice  ${note}
-  
+
 Wait save
   Positive indicator icon should be visible
-  Positive indicator icon should not be visible  
+  Positive indicator icon should not be visible

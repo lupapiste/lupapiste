@@ -49,7 +49,7 @@ Mikko adds three owners to the Uusirakennus document
   Wait for jQuery
 
 Owners are visible after page refresh
-  Reload Page
+  Reload page and kill dev-box
   Application address should be  ${appname}
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
@@ -82,7 +82,7 @@ Huoneistot info for Uusirakennus is correct
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]  1
   Sleep  0.5s
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
@@ -204,14 +204,14 @@ Authority deletes paasuunnittelija
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
   Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
   Execute Javascript  $("button[data-test-class='delete-schemas.paasuunnittelija']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
 
 Authority deletes maksaja
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing

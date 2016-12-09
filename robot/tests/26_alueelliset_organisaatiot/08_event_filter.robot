@@ -74,7 +74,7 @@ Olli-ya can see all filters
   Wait until  Element should not be visible  xpath=//div[@data-test-id="event-filter-component"]//div[@class="autocomplete-dropdown"]
 
 Olli-ya selects warranty filter and see only warranty applications
-  Select From Autocomplete  div[@data-test-id="event-filter-component"]  Takuun päättyminen
+  Select from autocomplete by test id  event-filter-component  Takuun päättyminen
   Input text by test id  event-search-start-date  01.01.2020
   Input text by test id  event-search-end-date  01.03.2020
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname1}"]
@@ -84,14 +84,14 @@ Olli-ya selects warranty filter and see only warranty applications
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname5}"]
 
 Olli-ya selects worktime started filter and see only one worktime applications
-  Select From Autocomplete  div[@data-test-id="event-filter-component"]  Lupa-ajan alkaminen
+  Select from autocomplete by test id  event-filter-component  Lupa-ajan alkaminen
   Input text by test id  event-search-start-date  01.05.2014
   Input text by test id  event-search-end-date  02.05.2014
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
 
 Olli-ya selects worktime ended filter and see only one worktime applications
-  Select From Autocomplete  div[@data-test-id="event-filter-component"]  Lupa-ajan päättyminen
+  Select from autocomplete by test id  event-filter-component  Lupa-ajan päättyminen
   Input text by test id  event-search-start-date  10.12.2116
   Input text by test id  event-search-end-date  20.12.2116
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
@@ -99,13 +99,13 @@ Olli-ya selects worktime ended filter and see only one worktime applications
 
 Olli-ya selects worktime ended, not ready and see only worktime application 1
   Click by test id  clear-saved-filters
-  Select From Autocomplete  div[@data-test-id="event-filter-component"]  Lupa-aika päättynyt, ei valmis
+  Select from autocomplete by test id  event-filter-component  Lupa-aika päättynyt, ei valmis
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
 
 Olli-ya selects worktime started, not ready and see only worktime application 2
   Click by test id  clear-saved-filters
-  Select From Autocomplete  div[@data-test-id="event-filter-component"]  Lupa-aika alkanut, ei valmis
+  Select from autocomplete by test id  event-filter-component  Lupa-aika alkanut, ei valmis
   Wait until  Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname3}"]
 

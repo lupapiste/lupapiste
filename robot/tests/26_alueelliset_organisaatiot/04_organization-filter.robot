@@ -32,7 +32,7 @@ Sonja sees all her organizations in the dropdown of the organization filter auto
   Wait until  Element should not be visible  xpath=//div[@data-test-id="organization-filter-component"]//div[@class="autocomplete-dropdown"]
 
 Sonja selects the Sipoo's YA filter and sees only the YA application in the applications list
-  Select From Autocomplete  div[@data-test-id="organization-filter-component"]  Sipoon yleisten alueiden rakentaminen
+  Select from autocomplete by test id  organization-filter-component  Sipoon yleisten alueiden rakentaminen
   Wait Until  Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
   Element should be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname2}"]
 

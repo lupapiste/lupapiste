@@ -56,7 +56,7 @@ Admin removes layer
   Remove layer  2
 
 Admin reloads page and makes sure that layers are still present
-  Reload page
+  Reload page and kill dev-box
   Wait until  Yes layers
   Check layer value  0  ${layer1}
   Check layer value  1  ${layer2}

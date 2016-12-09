@@ -113,7 +113,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   self.updateRejectNote = function( path, note, cb ) {
-    approvalCommand( "reject-doc-note", path, cb, {note: note});
+    approvalCommand( "reject-doc-note", path, cb, {note: note || ""});
   };
 
   // Returns the latest modification time of the model or
@@ -205,12 +205,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                 + loc("removeDoc.message1")
                 + " <strong>" + documentName + ".</strong></div><div>"
                 + loc("removeDoc.message2") + "</div>";
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"),
-                                           message,
-                                           { title: loc("removeDoc.ok"),
-                                             fn: onRemovalConfirmed },
-                                           {title: loc("removeDoc.cancel") },
-                                           {html: true });
+    hub.send("show-dialog", {ltitle: "removeDoc.sure",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: message,
+                                               yesFn: onRemovalConfirmed,
+                                               lyesTitle: "removeDoc.ok",
+                                               lnoTitle: "removeDoc.cancel"} });
   };
 
   function getUpdateCommand() {
@@ -802,9 +803,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if(subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
       opts = {
         fun: function () {
-          LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                                                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
-                                                 { title: loc("no") });
+          hub.send("show-dialog", {ltitle: "document.delete.header",
+                                   size: "medium",
+                                   component: "yes-no-dialog",
+                                   componentParams: {ltext: "document.delete.message",
+                                                     yesFn: function () { removeData(self.appId, self.docId, path); } }});
         }
       };
       if( options && options.dataTestSpecifiers ) {
@@ -1780,6 +1783,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     validate();
   }
 
+  // Temporary storage for the document approval state after redraw.
+  // The state is read and cleared by the reject-note component.
+  self.redrawnDocumentApprovalState = ko.observable({});
+
   self.redraw = function() {
     // Refresh document data from backend
     ajax.query("document", {id: application.id, doc: doc.id, collection: self.getCollection()})
@@ -1815,6 +1822,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
 
         $(".sticky", self.element).Stickyfill();
+        self.redrawnDocumentApprovalState( {approved: _.get( self.meta, "_approved.value")
+                                            === "approved"});
       })
     .call();
   };

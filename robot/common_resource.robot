@@ -34,7 +34,8 @@ ${DB PREFIX}                    test_
 
 Set DB cookie
   ${timestamp}=  Get Time  epoch
-  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}
+  ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
+  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
   Add Cookie  ${DB COOKIE}  ${dbname}
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
@@ -47,6 +48,10 @@ Browser
   # Open a static HTML page and set cookie there
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Set DB cookie
+
+Reload page and kill dev-box
+  Reload page
+  Kill dev-box
 
 Open browser to login page
   Browser
@@ -114,6 +119,7 @@ Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  15
 
 Kill dev-box
+  Wait until  Element should be visible  jquery=.dev-debug
   Execute Javascript  $(".dev-debug").hide();
 
 Resurrect dev-box
@@ -432,7 +438,7 @@ Input text with jQuery
 Input text by test id
   [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   ${q}=  Quote  ${id}
-  Input text with jQuery  [data-test-id=${q}]  ${value}  ${leaveFocus}
+  Input text with jQuery  [data-test-id=${q}]:visible  ${value}  ${leaveFocus}
 
 Select From List by test id and index
   [Arguments]  ${id}  ${index}
@@ -451,20 +457,20 @@ Select From List by id
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
-  Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  jquery=${container} span.autocomplete-selection
 
-  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//${container}//div[@class="autocomplete-dropdown"]
-  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
+  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} span.autocomplete-selection
 
-  Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
-  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
+  Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
+  Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
+  Scroll and click  ${container} ul.autocomplete-result li span:contains('${value}')
+  Wait until  Element should not be visible  jquery=${container} ul.autocomplete-result
   Wait for jQuery
 
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
-  Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+  Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
@@ -1107,7 +1113,7 @@ Invite company to application
   Open tab  parties
   Scroll and click test id  application-invite-company
   Wait test id visible  company-invite-bubble-dialog-ok
-  Select From Autocomplete  div[@data-test-id="company-invite-companies"]  ${company}
+  Select From Autocomplete  div[data-test-id="company-invite-companies"]  ${company}
   Scroll and click test id  company-invite-bubble-dialog-ok
   Is authorized party  ${company}
 
@@ -1379,7 +1385,7 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]
+  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
