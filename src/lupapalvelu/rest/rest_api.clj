@@ -93,4 +93,4 @@
 
 (server/add-middleware
   (fn [handler]
-    (ui/wrap-swagger-ui handler "/rest/api-docs/" :swagger-docs "/rest/swagger.json")))
+    (ui/wrap-swagger-ui handler "/rest/api-docs/" :swagger-docs "/rest/swagger.json" :validator-uri nil)))
