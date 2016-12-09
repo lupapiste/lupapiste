@@ -259,7 +259,6 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
-   cp -R target archive
 }
 
 maybe_finish() {
