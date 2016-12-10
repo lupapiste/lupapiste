@@ -29,3 +29,12 @@
   }
   display: inline-block;
 }
+
+.upload-progress-bar {
+  border: {
+    color: $primary;
+    width: 1px;
+    top-right-radius: 45%;
+    bottom-right-radius: 45%;
+  }
+}

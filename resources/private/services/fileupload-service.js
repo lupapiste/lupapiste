@@ -77,7 +77,6 @@ LUPAPISTE.FileuploadService = function() {
         { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
       ],
       dropZone: $dropZone,
-      maxNumberOfFiles: options.allowMultiple ? undefined : 1,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
         var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
@@ -86,6 +85,7 @@ LUPAPISTE.FileuploadService = function() {
         // IE9 doesn't have size, submit data and check files in server
         var size = file.size || 0;
         if(acceptedFile && size <= options.maximumUploadSize) {
+          hubSend( "fileAdded", {file: file});
           data.submit();
         } else {
           hubSend( "badFile",
@@ -114,7 +114,10 @@ LUPAPISTE.FileuploadService = function() {
       },
       progress: function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        hubSend("filesUploadingProgress", {progress: progress});
+        hubSend("filesUploadingProgress", {progress: progress,
+                                           loaded: data.loaded,
+                                           total: data.total,
+                                           file: _.get(data, "files.0")});
       }
     });
 

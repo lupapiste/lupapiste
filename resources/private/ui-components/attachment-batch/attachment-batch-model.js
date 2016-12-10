@@ -1,25 +1,24 @@
-LUPAPISTE.AttachmentBatchModel = function( params ) {
+LUPAPISTE.AttachmentBatchModel = function() {
   "use strict";
   var self = this;
-  params = _.defaults( params, {dropZone: "#application-attachments-tab",
-                                files: ko.observableArray(),
-                                buttonClass: "positive caps",
-                                buttonText: "attachment.add-multiple",
-                                allowMultiple: true,
-                                doNotInitialize: true});
-  ko.utils.extend( self, new LUPAPISTE.FileUploadModel( params ));
 
-  self.badFiles = ko.observableArray();
-  self.progress = ko.observable();
+  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  function process() {
-    self.listenService( "badFile", function( event ) {
-      self.badFiles.push( _.pick( event, ["message", "file"]));
-    });
-    self.listenService( "filesUploadingProgress", function( event ) {
-      self.progress( event.progress );
-    });
+  function badFileHandler( event ) {
+    self.badFiles.push( _.pick( event, ["message", "file"]));
   }
 
-  self.init( process );
+  self.upload = new LUPAPISTE.UploadModel( self,
+                                         {dropZone: "#application-attachments-tab",
+                                          allowMultiple: true,
+                                          errorHandler: badFileHandler});
+
+  self.buttonOptions = { buttonClass: "positive caps",
+                         buttonText: "attachment.add-multiple",
+                         upload: self.upload };
+
+  self.badFiles = ko.observableArray();
+
+  self.upload.init();
+
 };

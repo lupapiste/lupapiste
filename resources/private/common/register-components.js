@@ -160,7 +160,9 @@ jQuery(document).ready(function() {
     {name: "docgen-calculation"},
     {name: "docgen-footer-sum"},
     {name: "reject-note"},
-    {name: "attachment-batch"}
+    {name: "upload-button"},
+    {name: "attachment-batch"},
+    {name: "upload-progress"}
 ];
 
   ko.registerLupapisteComponents(components);

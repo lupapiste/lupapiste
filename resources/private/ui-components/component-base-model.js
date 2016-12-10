@@ -6,6 +6,8 @@ LUPAPISTE.ComponentBaseModel = function() {
   var koSubscriptions = [];
   // Subscriptions that can be turned on by applySubscriptions and turned off by disposeAppliedSubscriptions
   var applyableSubscriptions = [];
+  // Dispose methods of the queue items are called on base dispose.
+  var disposeQueue = [];
 
   self.sendEvent = function(service, event, data) {
     hub.send(service + "::" + event, data);
@@ -76,6 +78,9 @@ LUPAPISTE.ComponentBaseModel = function() {
     });
   };
 
+  self.addToDisposeQueue = function( obj ) {
+    disposeQueue.push( obj );
+  };
 
   self.dispose = function() {
     while(hubSubscriptions.length !== 0) {
@@ -83,6 +88,9 @@ LUPAPISTE.ComponentBaseModel = function() {
     }
     while(koSubscriptions.length !== 0) {
       (koSubscriptions.pop()).dispose();
+    }
+    while(_.size(disposeQueue) !== 0 ) {
+      (disposeQueue.pop()).dispose();
     }
   };
 };

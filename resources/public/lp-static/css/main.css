@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-@import url('main-blessed1.css?z=1481266653574');
-=======
-@import url('main-blessed1.css?z=1481199880312');
->>>>>>> Dropzone support for fileuploads.
-=======
-@import url('main-blessed1.css?z=1481297152176');
->>>>>>> Fileupload refactoring and further componentization.
+@import url('main-blessed1.css?z=1481386985825');
 
 /* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
@@ -10011,6 +10003,14 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   margin-top: 12px;
   margin-bottom: 6px;
   display: inline-block;
+}
+
+/* line 33, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress-bar {
+  border-color: #f39129;
+  border-width: 1px;
+  border-top-right-radius: 45%;
+  border-bottom-right-radius: 45%;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
