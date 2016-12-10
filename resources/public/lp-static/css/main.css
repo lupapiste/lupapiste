@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1481396482293');
+@import url('main-blessed1.css?z=1481397306550');
 
 /* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
@@ -10060,6 +10060,12 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   padding-left: 6px;
   float: left;
   margin: 0;
+}
+
+/* line 88, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-required:after {
+  content: "*";
+  color: #df3215;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */

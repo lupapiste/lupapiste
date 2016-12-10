@@ -31,7 +31,7 @@
 }
 
 // ----------------------------
-// Upload
+// Upload and related
 // ----------------------------
 
 .upload-progress {
@@ -83,4 +83,9 @@
       margin: 0;
     }
   }
+}
+
+.batch-required:after {
+  content: "*";
+  color: $negative;
 }
