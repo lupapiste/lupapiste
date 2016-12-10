@@ -30,11 +30,57 @@
   display: inline-block;
 }
 
-.upload-progress-bar {
+// ----------------------------
+// Upload
+// ----------------------------
+
+.upload-progress {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  i {
+    color: white;
+    background-color: $positive;
+  }
+}
+
+@mixin progress-bar( $color ) {
   border: {
-    color: $primary;
+    color: $color;
+    style: solid;
     width: 1px;
-    top-right-radius: 45%;
-    bottom-right-radius: 45%;
+    top-right-radius: 20px;
+    bottom-right-radius: 20px;
+  }
+  box-sizing: border-box;
+}
+
+
+.upload-progress__bar {
+  @include progress-bar( $primary );
+  width: 50%;
+}
+
+.upload-progress__percentage {
+  @include progress-bar( $primary );
+  display: inline-block;
+  color: white;
+  text-align: right;
+  background-color: $primary;
+  padding-right: 10px;
+  span {
+    font-size: 20px;
+  }
+}
+
+.upload-progress__bar.upload-progress--finished {
+  border-color: $positive;
+  > .upload-progress__percentage {
+    border-color: $positive;
+    background-color: $positive;
+    i {
+      padding-left: 6px;
+      float: left;
+      margin: 0;
+    }
   }
 }

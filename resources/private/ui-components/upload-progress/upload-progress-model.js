@@ -38,6 +38,14 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     targetCount( 0 );
   });
 
+  self.isFinished = self.disposedPureComputed( function() {
+    return self.progress() === 100;
+  });
+
+  self.percentage = self.disposedPureComputed( function () {
+    return self.progress() + "%";
+  });
+
   self.progress = self.disposedPureComputed( function() {
     var loaded = 0;
     var total = 0;

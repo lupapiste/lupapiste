@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1481386985825');
+@import url('main-blessed1.css?z=1481396482293');
 
 /* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
@@ -10005,12 +10005,61 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
   display: inline-block;
 }
 
-/* line 33, ../../../private/common-html/sass/views/_attachments.scss */
-.upload-progress-bar {
+/* line 37, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+/* line 40, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress i {
+  color: white;
+  background-color: #2ca92c;
+}
+
+/* line 58, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__bar {
   border-color: #f39129;
+  border-style: solid;
   border-width: 1px;
-  border-top-right-radius: 45%;
-  border-bottom-right-radius: 45%;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-sizing: border-box;
+  width: 50%;
+}
+
+/* line 63, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__percentage {
+  border-color: #f39129;
+  border-style: solid;
+  border-width: 1px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-sizing: border-box;
+  display: inline-block;
+  color: white;
+  text-align: right;
+  background-color: #f39129;
+  padding-right: 10px;
+}
+/* line 70, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__percentage span {
+  font-size: 20px;
+}
+
+/* line 75, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__bar.upload-progress--finished {
+  border-color: #2ca92c;
+}
+/* line 77, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__bar.upload-progress--finished > .upload-progress__percentage {
+  border-color: #2ca92c;
+  background-color: #2ca92c;
+}
+/* line 80, ../../../private/common-html/sass/views/_attachments.scss */
+.upload-progress__bar.upload-progress--finished > .upload-progress__percentage i {
+  padding-left: 6px;
+  float: left;
+  margin: 0;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
