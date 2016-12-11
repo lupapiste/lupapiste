@@ -89,3 +89,26 @@
   content: "*";
   color: $negative;
 }
+
+.batch-buttons {
+  margin-top: $marginS;
+  margin-bottom: $marginL;
+}
+
+.batch-bad-files {
+  .like-btn {
+    color: $negative;
+    span {
+      font-size: 20px;
+    }
+  }
+  ul {
+    margin-top: $marginS;
+    margin-bottom: $marginL;
+    font-size: 16px;
+    li {
+      list-style-type: none;
+    }
+  }
+
+}

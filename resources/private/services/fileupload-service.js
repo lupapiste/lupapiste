@@ -4,11 +4,6 @@ LUPAPISTE.FileuploadService = function() {
 
   self.serviceName = "fileuploadService";
 
-  function hubscribe( event, fun ) {
-    hub.subscribe( sprintf( "%s::%s", self.serviceName, event),
-                   fun );
-  }
-
   function prepareDropZone( dropZone ) {
     return (function () {
       var latest = 0;
@@ -45,6 +40,19 @@ LUPAPISTE.FileuploadService = function() {
 
     var fileInputId = options.id;
 
+    var hubscriptions = [];
+
+    function hubscribe( message, fun ) {
+      hubscriptions.push( hub.subscribe( sprintf( "%s::%s",
+                                                  self.serviceName,
+                                                  event),
+                                         function( event ) {
+                                           if( event.input === fileInputId ) {
+                                             fun( event );
+                                           }
+                                         }));
+    }
+
     if (!document.getElementById(self.fileInputId)) {
       var input = document.createElement("input");
       input.className = "hidden";
@@ -69,7 +77,7 @@ LUPAPISTE.FileuploadService = function() {
 
     var $dropZone = prepareDropZone( options.dropZone );
 
-    $("#" + fileInputId).fileupload({
+    var jqHxr = $("#" + fileInputId).fileupload({
       url: "/api/raw/upload-file",
       type: "POST",
       dataType: "json",
@@ -121,19 +129,23 @@ LUPAPISTE.FileuploadService = function() {
       }
     });
 
-    hubscribe( "destroy", function( event )  {
-      if( event.fileInputId === fileInputId ) {
-        $("#" + fileInputId ).fileupload( "destroy");
-        if( $dropZone ) {
-          $dropZone.off();
-        }
+    hubscribe( "destroy", function()  {
+      $("#" + fileInputId ).fileupload( "destroy");
+      if( $dropZone ) {
+        $dropZone.off();
       }
+      _.each( hubscriptions, hub.unsubscribe );
+      hubscriptions = [];
     } );
+
+    hubscribe( "cancel", function() {
+      jqHxr.abort();
+    });
 
     return fileInputId;
   };
 
-  hubscribe("removeFile", function(event) {
+  hub.subscribe( self.serviceName + "::removeFile", function(event) {
     ajax
       .command("remove-uploaded-file", {attachmentId: event.attachmentId})
       .success(function(res) {

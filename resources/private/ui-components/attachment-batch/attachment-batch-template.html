@@ -34,17 +34,34 @@
     <!-- /ko -->
 
     <!-- ko if: _.size(badFiles()) -->
-    <div class="like-btn negative">
-      <i class="lupicon-warning negative"></i>
-      <span data-bind="ltext: 'attachment.bad-files'"></span>
+    <div class="batch-bad-files">
+      <div class="like-btn">
+        <i class="lupicon-warning negative"></i>
+        <span data-bind="ltext: 'attachment.bad-files'"></span>
+      </div>
+      <ul data-bind="foreach: badFiles">
+        <li>
+          <strong data-bind="text: file.name + ':'"></strong>
+          <span data-bind="ltext: message"></span></li>
+      </ul>
     </div>
-    <ul data-bind="foreach: badFiles">
-      <li>
-        <span data-bind="text: file.name"></span>
-        <span data-bind="ltext: message"></span></li>
-    </ul>
     <!-- /ko -->
-    
+
+    <!-- ko if: _.size(upload.files()) -->
+    <div class="inner-margins batch-buttons">
+      <button class="positive"
+              data-bind="disable: waiting,
+                         css: {waiting: waiting}">
+        <i class="lupicon-check"></i>
+        <i class="wait spin lupicon-refresh"></i>
+        <span data-bind="ltext: 'attachment.batch-ready'"></span>        
+      </button>
+      <button class="secondary">
+        <i class="lupicon-remove"></i>
+        <span data-bind="ltext: 'cancel'"></span>        
+      </button>
+    </div>
+    <!-- /ko -->
     <span data-bind="component: {name: 'upload-button',
                      params: buttonOptions}"></span>
     <attachments-operation-buttons></attachments-operation-buttons>

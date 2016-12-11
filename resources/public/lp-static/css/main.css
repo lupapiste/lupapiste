@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1481397306550');
+@import url('main-blessed1.css?z=1481459202771');
 
 /* line 1081, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.fourth {
@@ -10066,6 +10066,31 @@ div.olControlZoom a:hover, .olControlLupapisteEditingToolbar div:hover {
 .batch-required:after {
   content: "*";
   color: #df3215;
+}
+
+/* line 93, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-buttons {
+  margin-top: 6px;
+  margin-bottom: 24px;
+}
+
+/* line 99, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bad-files .like-btn, .batch-bad-files a.link-btn, .batch-bad-files a.link-btn-julkipano {
+  color: #df3215;
+}
+/* line 101, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bad-files .like-btn span, .batch-bad-files a.link-btn span, .batch-bad-files a.link-btn-julkipano span {
+  font-size: 20px;
+}
+/* line 105, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bad-files ul {
+  margin-top: 6px;
+  margin-bottom: 24px;
+  font-size: 16px;
+}
+/* line 109, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bad-files ul li {
+  list-style-type: none;
 }
 
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */

@@ -274,4 +274,7 @@
 "progress.add.many" "fi" "Lisätään {0} tiedostoa, odota hetki..."
 "progress.ready.one" "fi" "Tiedosto lisätty."
 "progress.ready.many" "fi" "{0} tiedostoa lisätty."
+"attachment.batch-ready" "en" "Done"
+"attachment.batch-ready" "fi" "Valmis"
+"attachment.batch-ready" "sv" "Färdig"
 

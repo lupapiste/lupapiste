@@ -2,6 +2,8 @@ LUPAPISTE.AttachmentBatchModel = function() {
   "use strict";
   var self = this;
 
+  var ajaxWaiting = ko.observable();
+
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
   function badFileHandler( event ) {
@@ -21,4 +23,7 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   self.upload.init();
 
+  self.waiting = self.disposedPureComputed( function() {
+    return self.upload.waiting() || ajaxWaiting();
+  });
 };

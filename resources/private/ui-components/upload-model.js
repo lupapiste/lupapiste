@@ -65,11 +65,17 @@ LUPAPISTE.UploadModel = function( owner, params ) {
                           }));
   };
 
-
-  self.dispose = function() {
+  function notifyService( message ) {
     self.sendEvent( service.serviceName,
-                    "destroy",
+                    message,
                     {fileInputId: self.fileInputId});
+  }
+
+  self.dispose = _.wrap( "destroy", notifyService );
+
+  self.cancel = function() {
+    notifyService( "cancel" );
+    self.files.removeAll();
   };
 
   self.init = function() {
