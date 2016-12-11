@@ -93,6 +93,9 @@
 .batch-buttons {
   margin-top: $marginS;
   margin-bottom: $marginL;
+  button {
+    margin-right: $marginL;
+  }
 }
 
 .batch-bad-files {

@@ -687,6 +687,10 @@
     this(this() + 1);
   };
 
+  ko.observable.fn.decrement = function () {
+    this(this() - 1);
+  };
+
   ko.extenders.limited = function(target, optionObj) {
     var result = ko.pureComputed({
         read: target,

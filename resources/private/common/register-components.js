@@ -162,7 +162,8 @@ jQuery(document).ready(function() {
     {name: "reject-note"},
     {name: "upload-button"},
     {name: "attachment-batch"},
-    {name: "upload-progress"}
+    {name: "upload-progress"},
+    {name: "icon-button"}
 ];
 
   ko.registerLupapisteComponents(components);

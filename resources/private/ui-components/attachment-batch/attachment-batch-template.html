@@ -18,7 +18,7 @@
                   data-bind="ltext:'attachment.label.operation'"></span></th>
         <th><span data-bind="ltext:'signAttachment.select'"></span></th>
         <th data-bind="ltext:'attachment.label.manuallySetConstructionTime'"></th>
-        <th data-bind="ltext:'remove'"></th>        
+        <th class="td-center" data-bind="ltext:'remove'"></th>        
       </thead>
       <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
@@ -28,7 +28,9 @@
         <td></td>
         <td></td>
         <td></td>
-        <td></td>
+        <td class="td-center">
+          <i class="lupicon-remove primary"
+             data-bind="click: $parent.upload.removeFile"></i></td>
       </tbody>
     </table>
     <!-- /ko -->
@@ -48,18 +50,15 @@
     <!-- /ko -->
 
     <!-- ko if: _.size(upload.files()) -->
-    <div class="inner-margins batch-buttons">
-      <button class="positive"
-              data-bind="disable: waiting,
-                         css: {waiting: waiting}">
-        <i class="lupicon-check"></i>
-        <i class="wait spin lupicon-refresh"></i>
-        <span data-bind="ltext: 'attachment.batch-ready'"></span>        
-      </button>
-      <button class="secondary">
-        <i class="lupicon-remove"></i>
-        <span data-bind="ltext: 'cancel'"></span>        
-      </button>
+    <div class="batch-buttons">
+      <icon-button params="waiting: waiting,
+                           icon: 'check',
+                           ltext: 'attachment.batch-ready',
+                           click: done"></icon-button>
+      <icon-button params="icon: 'remove',
+                           buttonClass: 'secondary',
+                           ltext: 'cancel',
+                           click: cancel"></icon-button>
     </div>
     <!-- /ko -->
     <span data-bind="component: {name: 'upload-button',

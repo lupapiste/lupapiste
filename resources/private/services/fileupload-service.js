@@ -39,13 +39,13 @@ LUPAPISTE.FileuploadService = function() {
     });
 
     var fileInputId = options.id;
-
     var hubscriptions = [];
+    var connections = [];
 
     function hubscribe( message, fun ) {
       hubscriptions.push( hub.subscribe( sprintf( "%s::%s",
                                                   self.serviceName,
-                                                  event),
+                                                  message),
                                          function( event ) {
                                            if( event.input === fileInputId ) {
                                              fun( event );
@@ -77,7 +77,7 @@ LUPAPISTE.FileuploadService = function() {
 
     var $dropZone = prepareDropZone( options.dropZone );
 
-    var jqHxr = $("#" + fileInputId).fileupload({
+    $("#" + fileInputId).fileupload({
       url: "/api/raw/upload-file",
       type: "POST",
       dataType: "json",
@@ -94,7 +94,7 @@ LUPAPISTE.FileuploadService = function() {
         var size = file.size || 0;
         if(acceptedFile && size <= options.maximumUploadSize) {
           hubSend( "fileAdded", {file: file});
-          data.submit();
+          connections.push( data.submit() );
         } else {
           hubSend( "badFile",
                    {message: acceptedFile
@@ -115,9 +115,10 @@ LUPAPISTE.FileuploadService = function() {
                                   files: data.result.files});
       },
       fail: function(e, data) {
+        console.log( "Fail:", data );
         hubSend("filesUploaded", {
           status: "failed",
-          message: data.jqXHR.responseJSON.text
+          message: data.textStatus || data.jqXHR.responseJSON.text
         });
       },
       progress: function (e, data) {
@@ -139,7 +140,10 @@ LUPAPISTE.FileuploadService = function() {
     } );
 
     hubscribe( "cancel", function() {
-      jqHxr.abort();
+      _.filter( connections, function( conn ) {
+        conn.abort();
+        return false;
+      });
     });
 
     return fileInputId;
@@ -149,7 +153,9 @@ LUPAPISTE.FileuploadService = function() {
     ajax
       .command("remove-uploaded-file", {attachmentId: event.attachmentId})
       .success(function(res) {
-        hub.send("fileuploadService::fileRemoved", {attachmentId: res.attachmentId});
+        hub.send("fileuploadService::fileRemoved",
+                 {attachmentId: res.attachmentId,
+                  input: event.input});
       })
       .call();
   });

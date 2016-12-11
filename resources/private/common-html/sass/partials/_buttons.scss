@@ -463,6 +463,17 @@ span + .waiting.wait {
   padding-right: $icon-pad;
 }
 
+// icon-button spin
+.icon-spin {
+  @include rotate( spin );
+  vertical-align: middle;
+  padding: 0 !important;
+}
+
+.icon-spin + span {
+  padding-left: $icon-pad;
+}
+
 // Toggle support
 // Very similar to waiting.
 

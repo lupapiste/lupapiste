@@ -474,8 +474,6 @@ th.full-width-column {
   }
 }
 
-
-
 .form-table--waste.waste-report-table {
   th {
     white-space: initial;
@@ -485,4 +483,11 @@ th.full-width-column {
 select.waste-unit-select {
   font-size: 16px;
   width: 5em;
+}
+
+.attachment-batch-table {
+  @include no-row-hover;
+  .td-center {
+    text-align: center;
+  }
 }

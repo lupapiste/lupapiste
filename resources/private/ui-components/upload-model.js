@@ -44,8 +44,8 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     self.listenService( "filesUploaded", function( event ) {
       self.files(_.concat( self.files(), event.files));
       // Since the basic file upload jQuery plugin does not support
-      // limiting drag'n'drop to only on file, we prune the files
-      // arrary, if needed.
+      // limiting drag'n'drop to only one file, we prune the files
+      // array, if needed.
       if( !self.allowMultiple ) {
         self.files( [_.last( self.files())]);
       }
@@ -58,18 +58,21 @@ LUPAPISTE.UploadModel = function( owner, params ) {
 
   }
 
+  function notifyService( message, data ) {
+    self.sendEvent( service.serviceName,
+                    message,
+                    _.merge( data, {input: self.fileInputId}));
+  }
+
   self.removeFile = function( data ) {
     self.files( _.filter( self.files(),
                           function( file ) {
                             return file.fileId !== data.fileId;
                           }));
+    notifyService( "removeFile", {attachmentId: data.fileId});
   };
 
-  function notifyService( message ) {
-    self.sendEvent( service.serviceName,
-                    message,
-                    {fileInputId: self.fileInputId});
-  }
+
 
   self.dispose = _.wrap( "destroy", notifyService );
 

@@ -26,4 +26,13 @@ LUPAPISTE.AttachmentBatchModel = function() {
   self.waiting = self.disposedPureComputed( function() {
     return self.upload.waiting() || ajaxWaiting();
   });
+
+  self.done = function() {
+    console.log( "Done!");
+  };
+
+  self.cancel = function() {
+    self.upload.cancel();
+    self.badFiles.removeAll();
+  };
 };

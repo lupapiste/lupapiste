@@ -9,10 +9,11 @@ LUPAPISTE.UploadProgressModel = function( params ) {
   // We keep the count separately in order to handle the filename
   // conflicts somewhat successfully.
   var targetCount = ko.observable(0);
+  var canceled = false;
 
   function updateTarget( data ) {
     var file = data.file || {};
-    if( file.name ) {
+    if( !canceled && file.name ) {
       var m = targets();
       m[file.name] = {loaded: data.loaded,
                       size: file.size};
@@ -20,23 +21,22 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     }
   }
 
-  function hubscribe( message, fun ) {
-    self.addHubListener( message, function( event ) {
-      if( event.input === upload.fileInputId ) {
-        fun( event );
-      }
-    });
-  }
-
   upload.listenService( "fileAdded", function( event ) {
+    canceled = false;
     targetCount.increment();
     updateTarget( event );
   });
+
   upload.listenService( "filesUploadingProgress", updateTarget);
-  hubscribe( "uploadProgress::reset", function() {
+
+  upload.listenService( "cancel", function() {
+    canceled = true;
     targets({});
     targetCount( 0 );
   });
+
+  upload.listenService( "fileRemoved",
+                        _.bind( targetCount.decrement, targetCount ));
 
   self.isFinished = self.disposedPureComputed( function() {
     return self.progress() === 100;
