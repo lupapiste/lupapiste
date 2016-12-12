@@ -16,6 +16,14 @@
             [lupapalvelu.archiving-api :as archiving-api]
             [lupapalvelu.permit :as permit]))
 
+(defn- target-is-not-archived [target-type {{attachment-id :attachmentId} :data {:keys [metadata processMetadata attachments]} :application}]
+  (let [md (case target-type
+             :application metadata
+             :process processMetadata
+             :attachment (-> (filter #(= attachment-id (:id %)) attachments) first :metadata))]
+    (when (= :arkistoitu (keyword (:tila md)))
+      (fail :error.command-illegal-state))))
+
 (defquery available-tos-functions
   {:user-roles #{:anonymous}
    :parameters [organizationId]
@@ -159,7 +167,8 @@
    :input-validators [(partial non-blank-parameters [:id :attachmentId])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft}
+   :states states/all-but-draft
+   :pre-checks [(partial target-is-not-archived :attachment)]}
   [{:keys [application created] :as command}]
   (update-application-child-metadata! command :attachments attachmentId metadata))
 
@@ -168,7 +177,8 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft}
+   :states states/all-but-draft
+   :pre-checks [(partial target-is-not-archived :application)]}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         {processed-metadata :metadata} (update-document-metadata application metadata user-roles application)]
@@ -182,7 +192,8 @@
    :input-validators [(partial non-blank-parameters [:id])
                       (partial action/map-parameters [:metadata])]
    :user-roles #{:authority}
-   :states states/all-but-draft}
+   :states states/all-but-draft
+   :pre-checks [(partial target-is-not-archived :process)]}
   [{:keys [application created user] :as command}]
   (let [user-roles (get-in user [:orgAuthz (keyword (:organization application))])
         processed-metadata (-> (process-case-file-metadata (:processMetadata application) metadata user-roles)
