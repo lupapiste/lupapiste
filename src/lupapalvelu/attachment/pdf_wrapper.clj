@@ -5,8 +5,7 @@
            [java.io File ByteArrayOutputStream]
            [org.apache.pdfbox.pdmodel.common PDRectangle PDMetadata]
            [javax.imageio.stream FileImageInputStream]
-           [javax.imageio ImageIO]
-           [com.twelvemonkeys.imageio.plugins.jpeg JPEGImageReader]
+           [javax.imageio ImageIO ImageReader]
            [org.apache.xmpbox XMPMetadata]
            [org.apache.xmpbox.xml XmpSerializer]
            [org.apache.pdfbox.pdmodel.graphics.color PDOutputIntent]
@@ -30,7 +29,7 @@
 (defn- read-image-ppi [^File file]
   (with-open [in (FileImageInputStream. file)]
     (let [readers (ImageIO/getImageReadersByFormatName "jpeg")
-          ^JPEGImageReader reader (.next readers)
+          ^ImageReader reader (.next readers)
           _ (.setInput reader in false false)
           metadata (.getImageMetadata reader 0)
           tree ^IIOMetadataNode (.getAsTree metadata IIOMetadataFormatImpl/standardMetadataFormatName)
@@ -51,7 +50,7 @@
         (.addPage doc page)
         (.drawImage contents pd-image-x-object 0.0 0.0 intended-width intended-height)))))
 
-(defn- metadata-to-pdf [doc pdf-title]
+(defn- metadata-to-pdf [^PDDocument doc pdf-title]
   (with-open [xmp-os (ByteArrayOutputStream.)
               color-is (io/input-stream (io/resource color-profile))]
     ;; Add the metadata and output intent to make the file PDF/A-1b compliant
