@@ -392,6 +392,20 @@
 ;; Change and reset password:
 ;;
 
+(defcommand check-password
+  {:parameters [password]
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:password])]}
+  [{user :user}]
+  (if (security/check-password password
+                               (some->> user
+                                        :id
+                                        (mongo/by-id :users)
+                                        :private
+                                        :password))
+    (ok)
+    (fail :error.password)))
+
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
    :input-validators [(partial action/non-blank-parameters [:oldPassword :newPassword])]
