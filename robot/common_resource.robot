@@ -802,12 +802,6 @@ Add attachment file
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
 
-
-Open attachments tab and unselect post verdict filter
-  Open tab  attachments
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Scroll and click test id  postVerdict-filter-label
-
 Select operation path by permit type
   [Arguments]  ${permitType}
   Run Keyword If  '${permitType}' == 'R'  Select operations path R
@@ -1447,6 +1441,11 @@ Test id visible
   [Arguments]  ${id}
   Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
+Click label
+  [Arguments]  ${for}
+  Scroll to  label[for=${for}]
+  Click element  jquery=label[for=${for}]
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
@@ -1454,11 +1453,6 @@ Checkbox wrapper selected by test id
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
-
-Click label
-  [Arguments]  ${for}
-  Scroll to  label[for=${for}]
-  Click element  jquery=label[for=${for}]
 
 Checkbox wrapper selected
   [Arguments]  ${id}
