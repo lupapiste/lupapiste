@@ -240,7 +240,7 @@
     (let [{:keys [action web]} command
           {:keys [user-agent client-ip]} web]
       (errorf "action '%s' not found. User agent '%s' from %s"
-             (log/sanitize 50 action) (log/sanitize 100 action) client-ip)
+             (log/sanitize 50 action) (log/sanitize 100 user-agent) client-ip)
       (fail :error.invalid-command))))
 
 (defn missing-feature [command]
