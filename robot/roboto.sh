@@ -222,7 +222,7 @@ run_test() {
       -b $TEST.debug.log \
       -o $TEST.xml \
       -l $TEST.log.html \
-      -r $TEST.report.html \
+      -r NONE \
          common/setup "$test" common/teardown &> target/$TEST.out
    BOT=$?
    # shut down X and WM if they were started
@@ -259,6 +259,8 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
+   echo "Writing report.html"
+   rebot --report report.html --name Roboto target/*.xml
 }
 
 maybe_finish() {
