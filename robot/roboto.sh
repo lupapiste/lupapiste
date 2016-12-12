@@ -248,7 +248,10 @@ run_test() {
       BOT=$?
       test "0" "=" "$BOT" && break
    done
-   echo "NOTE: pybot exited with $BOT after round $ROUND/$RETRIES, timeout was $TIMEOUT" >> target/$TEST.out;
+   # round 0 is first
+   ROUND=$(expr $ROUND "+" 1)
+   LASTROUND=$(expr $RETRIES "+" 1)
+   echo "NOTE: pybot exited with $BOT after round $ROUND/$LASTROUND" >> target/$TEST.out;
    # shut down X and WM if they were started
    test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
    test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
@@ -301,10 +304,10 @@ maybe_finish() {
 show_finished() {
    local STATUS=$(grep "tests total" $1 | tail -n 1)
    local COLOR=$GREEN
-   local ATTEMPTS=$(grep "pybot exited with" "$1" | wc -l)
+   local ATTEMPTS=$(grep "pybot exited with" "$1" | sed -e 's/.*round //')
    echo "$STATUS" | grep -q "0 failed" || COLOR=$RED
    echo -e "$COLOR - $1 done: $STATUS, $ATTEMPTS runs"
-   grep -E "FAIL" "$1" | sed -e 's/^/      /'
+   grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"
 }
 
@@ -316,7 +319,7 @@ show_running() {
   test "$(expr $NFAIL '*' 5)" -lt "$NPASS" && COLOR=$YELLOW
   test "$NFAIL" = 0 && COLOR=$GREEN
   echo -e "$COLOR o $log $(grep FAIL $log | wc -l) failed, $(grep PASS $log | wc -l) ok"
-  grep -E "(FAIL|exited with)" "$1" | sed -e 's/^/      /'
+  grep -E "(FAIL|exited with)" "$1" | head -n 1 | sed -e 's/^/      /'
   echo -e -n "$DEFAULT"
   maybe_finish $NFAIL
 }
