@@ -260,7 +260,7 @@ halt() {
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
    echo "Writing report.html"
-   rebot --report report.html --name Roboto target/*.xml
+   rebot -outputdir target --report report.html --name Roboto target/*.xml
 }
 
 maybe_finish() {
