@@ -3,7 +3,14 @@
 <button data-bind="attr: {'class': buttonClass},
                    disable: isDisabled,
                    click: click">
+  <!-- ko ifnot:  right -->
   <i data-bind="attr: {'class': iconClass}" ></i>
+  <!-- /ko -->
+  <!-- ko if: buttonText -->
   <span data-bind="text: buttonText"></span>
+  <!-- /ko -->
+  <!-- ko if:  right -->
+  <i data-bind="attr: {'class': iconClass}" ></i>
+  <!-- /ko -->
 </button>
 </script>

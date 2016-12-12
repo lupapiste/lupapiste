@@ -5,6 +5,7 @@
 //  icon: Lupicon without prefix: check -> lupicon-check.
 //  [buttonClass]. Default positive.
 //  click: Similar to KO binding
+//  right: If true, the icon is on the right side (default false)
 //  [enable]: Similar to kO binding (default true)
 //  [disable]: Similar to binding (false)
 //  [waiting]: Waiting observable (false)
@@ -15,6 +16,7 @@ LUPAPISTE.IconButtonModel = function( params ) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
+  self.right = params.right || false;
   self.waiting = params.waiting || false;
 
   self.buttonClass = params.buttonClass || "positive";

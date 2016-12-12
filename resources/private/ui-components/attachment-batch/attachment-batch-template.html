@@ -12,8 +12,7 @@
                   data-bind="ltext:'application.attachmentType'"></span></th>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
-        <th><span class="batch-required"
-                  data-bind="ltext:'attachment.drawing-number'"></span></th>
+        <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span class="batch-required"
                   data-bind="ltext:'attachment.label.operation'"></span></th>
         <th><span data-bind="ltext:'signAttachment.select'"></span></th>
@@ -22,12 +21,25 @@
       </thead>
       <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
+        <td>
+        </td>
         <td></td>
+        <td>
+          <input type="text" class="grid-style-input"
+                 data-bind="textInput: $parent.cell( $data, 'drawing').value">
+          <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
+                               buttonClass: 'function',
+                               icon: 'copy',
+                               enable: $parent.canFillDown( 'drawing', $data)"></icon-button>
+        </td>
         <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td class="td-center">
+          <toggle params="prefix: 'signbox',
+                          value: $parent.cell( $data, 'sign' ).value"></toggle>
+        </td>
+        <td class="td-center">
+          <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
+        </td>
         <td class="td-center">
           <i class="lupicon-remove primary"
              data-bind="click: $parent.upload.removeFile"></i></td>

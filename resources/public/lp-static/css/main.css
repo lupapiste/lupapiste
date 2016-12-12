@@ -1,5 +1,144 @@
-@import url('main-blessed1.css?z=1481474837403');
+@import url('main-blessed1.css?z=1481560485065');
 
+/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after, .container-bubble:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+
+/* line 973, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble.is-closed {
+  display: none;
+}
+
+/* line 977, ../../../private/common-html/sass/partials/_forms.scss */
+.form-help {
+  min-height: 100px;
+  padding: 6px 24px 6px 6px;
+  width: 350px;
+  background: #4f4f4f;
+  color: white;
+  display: none;
+  position: absolute;
+  bottom: 88px;
+  left: 0;
+  z-index: 11000;
+  box-shadow: 2px 2px 3px #4f4f4f;
+  text-align: left;
+}
+/* line 990, ../../../private/common-html/sass/partials/_forms.scss */
+.form-help:after {
+  content: " ";
+  width: 0;
+  height: 0;
+  position: absolute;
+  bottom: -14px;
+  left: 6px;
+  display: block;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 14px solid #4f4f4f;
+}
+/* line 1002, ../../../private/common-html/sass/partials/_forms.scss */
+.form-help:before {
+  content: " ";
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  background-position: 0px -2700px;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+/* line 1014, ../../../private/common-html/sass/partials/_forms.scss */
+.form-full-width .form-help {
+  top: 4px;
+  left: 85%;
+  bottom: auto;
+  width: 55%;
+}
+/* line 1019, ../../../private/common-html/sass/partials/_forms.scss */
+.form-full-width .form-help:after {
+  content: " ";
+  width: 0;
+  height: 0;
+  position: absolute;
+  top: 16px;
+  left: -14px;
+  display: block;
+  border-left: none;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  border-right: 14px solid #4f4f4f;
+}
+/* line 1032, ../../../private/common-html/sass/partials/_forms.scss */
+.form-full-width .form-help:before {
+  content: " ";
+  background-image: url("/lp-static/img/icons-sprite-1.18.png");
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  background-position: 0px -2700px;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+/* line 1045, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col {
+  width: 100%;
+}
+/* line 1048, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col .form-input, .three-col .form-input--inline {
+  width: 17.25em;
+}
+/* line 1052, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col .col1 {
+  float: left;
+  padding-right: 12px;
+}
+/* line 1057, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col .col2 {
+  float: left;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+/* line 1062, ../../../private/common-html/sass/partials/_forms.scss */
+.three-col .col3 {
+  float: left;
+  padding-left: 12px;
+}
+
+/* line 1069, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history h2 {
+  background-color: #f6f6f6 !important;
+}
+/* line 1072, ../../../private/common-html/sass/partials/_forms.scss */
+foreman-history th.first {
+  width: 10%;
+}
 /* line 1075, ../../../private/common-html/sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
@@ -2986,6 +3125,23 @@ select.waste-unit-select {
 /* line 490, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .td-center {
   text-align: center;
+}
+/* line 492, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .td-center .checkbox-wrapper {
+  border: none;
+}
+/* line 496, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table input {
+  vertical-align: middle;
+}
+/* line 499, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table icon-button {
+  margin-left: -4px;
+}
+/* line 502, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table button.function,
+.attachment-batch-table button.function:disabled:disabled {
+  background-color: transparent !important;
 }
 
 /*Tab styles*/

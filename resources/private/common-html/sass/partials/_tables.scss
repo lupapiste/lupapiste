@@ -489,5 +489,18 @@ select.waste-unit-select {
   @include no-row-hover;
   .td-center {
     text-align: center;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  icon-button {
+    margin-left: -4px;
+  }
+  button.function,
+  button.function:disabled:disabled {
+    background-color: transparent !important;
   }
 }
