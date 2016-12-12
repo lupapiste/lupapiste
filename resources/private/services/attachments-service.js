@@ -14,6 +14,11 @@ LUPAPISTE.AttachmentsService = function() {
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
 
+  self.attachmentTypes = ko.observableArray([]);
+  self.attachmentTypeGroups = ko.pureComputed(function() {
+    return _(self.attachmentTypes()).map("type-group").uniq().value();
+  });
+
   self.groupTypes = ko.observableArray([]);
 
   self.tagGroups = ko.observableArray([]);
@@ -44,6 +49,7 @@ LUPAPISTE.AttachmentsService = function() {
     disposeItems(tagGroupSets);
     disposeItems(filterSets);
     self.attachments([]);
+    self.attachmentTypes([]);
     filterSets = {};
     self.tagGroups([]);
     tagGroupSets = {};
@@ -231,6 +237,9 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachment-groups", "groups", self.setGroupTypes);
   };
 
+  self.queryAttachmentTypes = function() {
+    queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
+  };
 
   function sendHubNotification(eventType, commandName, params, response) {
     hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
