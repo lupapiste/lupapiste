@@ -576,6 +576,18 @@ Input building identifier
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
+
+Document status is disabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
+
+Document status is enabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
+
+
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
   ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
@@ -1379,7 +1391,7 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
@@ -1409,7 +1421,7 @@ Fill test id
 
 Focus test id
   [Arguments]  ${id}
-  Focus  jquery=[data-test-id=${id}]
+  Wait until  Focus  jquery=[data-test-id=${id}]
 
 No such test id
   [Arguments]  ${id}
