@@ -37,16 +37,16 @@ fail() {
 usage() {
    echo \
 "roboto.sh [args] test-dir ...
-  -j | --threads n      use up to n threads, one per argument test
-  -n | --nested         use a nested X server instead of a virtual one
-  -l | --local          use current X server
+  -j | --threads n      use up to n threads, one per argument test [$MAXTHREADS]
+  -n | --nested         use a nested X server instead of a virtual one (Xvfb)
+  -l | --local          use current X server ($DISPLAY)
   -s | --start          start lupapiste with lein
   -t | --timeout n      timeout for individual robot file [$TIMEOUT]
   -h | --help           show this thing
   -S | --server uri     use a specific server [$SERVER]
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
-  -r | --retries n      maximum number of failing suite reruns [$MAXROUNDS]
+  -r | --retries n      maximum number of failing suite reruns [$RETRIES]
 "
 }
 
@@ -56,18 +56,18 @@ start_lupapiste() {
    cd ..
    test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
    echo "Starting lupapiste."
-   lein run &> lupapiste-roboto.log &
+   lein run &> robot/target/lupapiste.log &
    LUPISPID=$!
    echo -n "Waiting for lupapiste $LUPISPID: "
    for foo in $(seq $STARTUPTIMEOUT)
    do
-      grep -q 'You can view the site at http://localhost:8000' lupapiste-roboto.log && break
+      grep -q 'You can view the site at http://localhost:8000' robot/target/lupapiste.log && break
       echo -n "x"
       sleep 1
    done
    echo
    cd robot
-   lupapiste_runningp || fail "Failed to bring up Lupapiste. Check lupapiste-roboto.log for details."
+   lupapiste_runningp || fail "Failed to bring up Lupapiste. Check robot/target/lupapiste.log for details."
 }
 
 check_integer() {
@@ -247,6 +247,9 @@ run_test() {
             common/setup "$test" common/teardown &> target/$TEST.out
       BOT=$?
       test "0" "=" "$BOT" && break
+      # sometimes ff seems to have persistent trouble starting and/or selenium connecting to it
+      # ruling out causes by by spreading pybot startups temporally and seeing if the issue persists
+      sleep 5 
    done
    # round 0 is first
    ROUND=$(expr $ROUND "+" 1)
