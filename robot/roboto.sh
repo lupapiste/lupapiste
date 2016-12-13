@@ -175,6 +175,7 @@ check_env() {
    echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
    echo -n "Server: $SERVER "
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
+   pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
 }
 
 
@@ -185,26 +186,26 @@ check_env
 echo "Starting robots"
 
 run_test() {
-   test=$2
+   local test=$2
    local TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    local BOT=
+   local MYSCREEN=$1
    case $OUTPUT in
       xvfb)
-         SCREEN=$1
-         #echo "STARTING Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24"
-         Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
+         MYSCREEN=$1
+         Xvfb :$MYSCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
-         DISPLAY=:$SCREEN
+         DISPLAY=:$MYSCREEN
          ;;
       xnest)
-         SCREEN=$1
-         Xnest :$SCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
-         DISPLAY=:$SCREEN
+         MYSCREEN=$1
+         Xnest :$MYSCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
+         DISPLAY=:$MYSCREEN
          XPID=$!
          ;;
       local)
          # use current DISPLAY
-         SCREEN=$DISPLAY
+         MYSCREEN=$DISPLAY
          XPID=""
          ;;
       *)
@@ -212,17 +213,20 @@ run_test() {
          ;;
    esac
 
-   sleep 2 # wait for X to start
+   # Wait for X to be ready for connections
+   for foo in $(seq 20)
+   do
+     DISPLAY=:$MYSCREEN xwininfo -root 2>&1 | grep -q "root window" && break
+     sleep 1
+   done
+   DISPLAY=:$MYSCREEN xwininfo -root | grep -q "root window" || fail "FAIL: failed to bring up X at :$MYSCREEN for test $test"
 
    local WMPID=""
    # start openbox to handle window maximize if we're running in a non-local X
    test -z "$XPID" || {
-      DISPLAY=:$SCREEN openbox &>/dev/null &
+      DISPLAY=:$MYSCREEN openbox &>/dev/null &
       WMPID=$!
    }
-
-   # disable screensaver (needed when recording)
-   #test -z "$XPID" || DISPLAY=:$SCREEN xset s off
 
    sleep 2 # wait for window manager to start
 
@@ -231,7 +235,7 @@ run_test() {
    # -L TRACE
    for ROUND in $(seq 0 $RETRIES)
    do
-      DISPLAY=:$SCREEN timeout $TIMEOUT pybot \
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
          --exclude integration \
          --exclude ajanvaraus \
          --exclude fail \
