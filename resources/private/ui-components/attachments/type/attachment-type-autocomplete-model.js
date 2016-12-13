@@ -2,6 +2,8 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
   "use strict";
   var self = this;
 
+  ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
+
   var service = lupapisteApp.services.attachmentsService;
 
   self.selected = params.selectedType;
@@ -10,7 +12,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
     return loc(["attachmentType", type["type-group"], type["type-id"]].join("."));
   }
 
-  var attachmentTypes = ko.pureComputed(function() {
+  var attachmentTypes = self.disposedPureComputed(function() {
     return _.map(service.attachmentTypes(), function(type) {
       return _.set(type, "title", buildTitle(type));
     });
@@ -20,7 +22,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
     return type["type-group"] === group;
   }
 
-  var options = ko.pureComputed(function() {
+  var options = self.disposedPureComputed(function() {
     if (ko.unwrap(params.selectedTypeGroup)) {
       return _.filter(attachmentTypes(), _.partial(typeGroupIs, params.selectedTypeGroup().value));
     } else {
@@ -48,7 +50,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
   }
 
 
-  self.data = ko.pureComputed(function() {
+  self.data = self.disposedPureComputed(function() {
     return withGroupHeaders(util.filterDataByQuery({data: options(),
                                                     query: self.query(),
                                                     selected: self.selected(),
