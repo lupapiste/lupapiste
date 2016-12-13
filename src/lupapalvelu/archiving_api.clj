@@ -9,10 +9,8 @@
             [lupapalvelu.user :as usr]))
 
 (defn check-user-is-archivist [{user :user {:keys [organization]} :application}]
-  (let [archive-orgs (usr/organization-ids-by-roles user #{:archivist})
-        org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
-    (when (or (empty? org-set) (not (organization/some-organization-has-archive-enabled? org-set)))
-      unauthorized)))
+  (when-not (usr/user-is-archivist? user organization)
+    unauthorized))
 
 (defcommand archive-documents
   {:parameters       [:id attachmentIds documentIds]

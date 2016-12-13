@@ -47,7 +47,7 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
     self.sendEvent("attachments", "attachment-type-selected", {attachmentId: attachmentId, attachmentType: valueToType[self.attachmentType()]});
   });
 
-  self.changingTypeAllowed = function() { return authModel.ok("set-attachment-type"); };
+  self.changingTypeAllowed = function() { return _.isFunction(authModel.ok) && authModel.ok("set-attachment-type"); };
 
   self.ok = function() {
     self.sendEvent("attachments", "change-attachment-type", {attachmentType: valueToType[self.attachmentType()]});

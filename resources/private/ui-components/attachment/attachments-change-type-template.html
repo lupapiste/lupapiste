@@ -13,7 +13,7 @@
       <div>
         <select id="attachment-type-select"
                 class="long"
-                data-bind="enable: $data.changingTypeAllowed,
+                data-bind="enable: $data.changingTypeAllowed(),
                            value: $data.attachmentType,
                            foreach: $data.selectableAttachmentTypes">
           <optgroup data-bind="attr: {label: label}, foreach: types">
