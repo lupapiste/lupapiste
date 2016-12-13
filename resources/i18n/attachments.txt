@@ -277,6 +277,7 @@
 "attachment.batch-ready" "en" "Done"
 "attachment.batch-ready" "fi" "Valmis"
 "attachment.batch-ready" "sv" "Färdig"
+"attachment.batch-fill-down" "fi" "Kopioi alle"
 "attachments.type.search.no-selection" "en" ""
 "attachments.type.search.no-selection" "fi" "Ei valittu"
 "attachments.type.search.no-selection" "sv" ""

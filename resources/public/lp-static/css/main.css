@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-@import url('main-blessed1.css?z=1481626105914');
-=======
-@import url('main-blessed1.css?z=1481634703365');
->>>>>>> develop
+@import url('main-blessed1.css?z=1481647322357');
 
 /* line 948, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble:after, .container-bubble:before {
@@ -3127,25 +3123,76 @@ select.waste-unit-select {
   background: #f6f6f6;
 }
 /* line 490, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table th > .fill-down {
+  float: right;
+  font-weight: normal;
+  font-style: italic;
+}
+/* line 495, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table td {
+  white-space: nowrap;
+}
+/* line 498, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .td-center {
   text-align: center;
 }
-/* line 492, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 500, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .td-center .checkbox-wrapper {
   border: none;
 }
-/* line 496, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 504, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table input {
   vertical-align: middle;
 }
-/* line 499, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 507, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table icon-button {
   margin-left: -4px;
 }
-/* line 502, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 510, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table button.function,
 .attachment-batch-table button.function:disabled:disabled {
   background-color: transparent !important;
+}
+/* line 514, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete {
+  display: inherit;
+}
+/* line 516, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete icon-button {
+  height: 100%;
+  display: inline-block;
+}
+/* line 519, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete icon-button button {
+  height: 100%;
+  max-height: 100%;
+}
+/* line 525, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete {
+  min-width: 20em;
+  max-width: 20em;
+  display: inline-block;
+  vertical-align: middle;
+}
+/* line 531, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete .autocomplete-selection-wrapper {
+  display: table;
+}
+/* line 533, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete .autocomplete-selection-wrapper .autocomplete-selection {
+  padding-left: 6px;
+  display: table-cell;
+  vertical-align: middle;
+}
+/* line 539, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete span.caption {
+  white-space: normal;
+  line-height: normal;
+  padding-left: 0;
+}
+/* line 546, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-drawing {
+  max-width: 4em;
 }
 
 /*Tab styles*/

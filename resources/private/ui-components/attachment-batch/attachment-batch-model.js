@@ -6,6 +6,8 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
+  var service = lupapisteApp.services.attachmentsService;
+
   self.password = ko.observable();
 
   // Rows is {fileId: {name: Cell}}
@@ -50,7 +52,7 @@ LUPAPISTE.AttachmentBatchModel = function() {
       if( oldRows[fileId]) {
         keepRows[fileId] = oldRows[fileId];
       } else {
-        newRows[fileId] = {type: new Cell( ko.observable(), true ),
+        newRows[fileId] = {typeGroup: new Cell( ko.observable(), true ),
                            content: new Cell( ko.observable(), true ),
                            drawing: new Cell( ko.observable()),
                            context: new Cell( ko.observable, true ),
@@ -156,4 +158,8 @@ LUPAPISTE.AttachmentBatchModel = function() {
     }
     return "lupicon-" + icon;
   });
+
+  // Make sure that a) type group list is up-to-date and b) we do not
+  // try to do query before auth model is OK.
+  self.addHubListener( "contextService::enter", service.queryAttachmentTypes );
 };

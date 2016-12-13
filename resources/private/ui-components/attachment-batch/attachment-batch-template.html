@@ -6,10 +6,13 @@
     <!-- ko if: fileCount -->
     <table class="attachment-batch-table">
       <thead>
+        <th><span data-bind="ltext:'attachment.file'"></span></th>
         <th><span class="batch-required"
-                  data-bind="ltext:'attachment.file'"></span></th>
-        <th><span class="batch-required"
-                  data-bind="ltext:'application.attachmentType'"></span></th>
+                  data-bind="ltext:'application.attachmentType'"></span>
+          <span class="fill-down"
+                data-bind="ltext: 'attachment.batch-fill-down',
+                           visible: fileCount"></span>
+        </th>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
@@ -22,10 +25,19 @@
       <tbody data-bind="foreach: rowFiles">
         <td data-bind="file: $data"></td>
         <td>
+          <div class="batch-autocomplete">
+            <attachment-type-group-autocomplete params="selectedTypeGroup: $parent.cell( $data, 'typeGroup').value">   
+            </attachment-type-group-autocomplete>
+            <icon-button params="click: $parent.filler( 'typeGroup', $data),
+                                 buttonClass: 'function',
+                                 icon: 'copy',
+                                 enable: $parent.canFillDown( 'typeGroup', $data)"
+                         data-bind="visible: $parent.fileCount() > 1"></icon-button>
+          </div>
         </td>
         <td></td>
         <td>
-          <input type="text" class="grid-style-input"
+          <input type="text" class="batch-drawing grid-style-input"
                  data-bind="textInput: $parent.cell( $data, 'drawing').value">
           <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
                                buttonClass: 'function',

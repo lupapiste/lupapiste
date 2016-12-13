@@ -487,6 +487,14 @@ select.waste-unit-select {
 
 .attachment-batch-table {
   @include no-row-hover;
+  th > .fill-down {
+    float: right;
+    font-weight: normal;
+    font-style: italic;
+  }
+  td {
+    white-space: nowrap;
+  }
   .td-center {
     text-align: center;
     .checkbox-wrapper {
@@ -502,5 +510,40 @@ select.waste-unit-select {
   button.function,
   button.function:disabled:disabled {
     background-color: transparent !important;
+  }
+  .batch-autocomplete {
+    display: inherit;
+    icon-button {
+      height: 100%;
+      display: inline-block;
+      button {
+        height: 100%;
+        max-height: 100%
+      }
+    }
+
+    attachment-type-group-autocomplete {
+      $width: 20em;
+      min-width: $width;
+      max-width: $width;
+      display: inline-block;
+      vertical-align: middle;
+      .autocomplete-selection-wrapper {
+        display: table;
+        .autocomplete-selection {
+          padding-left: 6px;
+          display: table-cell;
+          vertical-align: middle;
+        }
+      }
+      span.caption {
+        white-space: normal;
+        line-height: normal;
+        padding-left: 0;
+      }
+    }
+  }
+  .batch-drawing {
+    max-width: 4em;
   }
 }
