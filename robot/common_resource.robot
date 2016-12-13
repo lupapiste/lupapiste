@@ -1,14 +1,14 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   10
+${WAIT_DELAY}                   12
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
