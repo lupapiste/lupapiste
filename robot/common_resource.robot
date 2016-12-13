@@ -576,6 +576,18 @@ Input building identifier
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
+
+Document status is disabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
+
+Document status is enabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
+
+
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
   ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
@@ -801,12 +813,6 @@ Add attachment file
   Wait Until     Element should be visible  jquery=${row}
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
-
-
-Open attachments tab and unselect post verdict filter
-  Open tab  attachments
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Scroll and click test id  postVerdict-filter-label
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -1385,7 +1391,7 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
@@ -1415,7 +1421,7 @@ Fill test id
 
 Focus test id
   [Arguments]  ${id}
-  Focus  jquery=[data-test-id=${id}]
+  Wait until  Focus  jquery=[data-test-id=${id}]
 
 No such test id
   [Arguments]  ${id}
@@ -1447,6 +1453,11 @@ Test id visible
   [Arguments]  ${id}
   Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
+Click label
+  [Arguments]  ${for}
+  Scroll to  label[for=${for}]
+  Click element  jquery=label[for=${for}]
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
@@ -1454,11 +1465,6 @@ Checkbox wrapper selected by test id
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
-
-Click label
-  [Arguments]  ${for}
-  Scroll to  label[for=${for}]
-  Click element  jquery=label[for=${for}]
 
 Checkbox wrapper selected
   [Arguments]  ${id}

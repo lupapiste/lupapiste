@@ -47,8 +47,10 @@
     <label data-bind="ltext: 'attachment.chooseType'" for="attachmentType"></label> *
     <select data-bind="if: typeSelector, value: attachmentType" id="attachmentType" name="attachmentType" class="form-input combobox long">
       <option data-bind="ltext: 'selectone'" value="" class="default-option"></option>
-      <optgroup data-bind="repeat: {foreach: attachmentTypeGroups, item: '$group'}" data-repeat-bind="attr: {label: loc('attachmentType.' + $group().group + '._group_label')}, foreach: $group().types">
-        <option data-bind="text: loc('attachmentType.' + $group().group + '.' + name), value: $group().group + '.' + name"></option>
+      <optgroup data-bind="repeat: {foreach: attachmentTypeGroups, item: '$group'}"
+                data-repeat-bind="attr: {label: loc('attachmentType.' + $group().group + '._group_label')},
+                                  foreach: $group().types">
+        <option data-bind="text: loc('attachmentType.' + $data['type-group'] + '.' + $data['type-id']), value: $data['type-group'] + '.' + $data['type-id']"></option>
       </optgroup>
     </select>
     <!-- /ko -->

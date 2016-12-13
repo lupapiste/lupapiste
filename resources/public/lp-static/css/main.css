@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1481626105914');
+=======
+@import url('main-blessed1.css?z=1481634703365');
+>>>>>>> develop
 
 /* line 948, ../../../private/common-html/sass/partials/_forms.scss */
 .container-bubble:after, .container-bubble:before {
@@ -4738,7 +4742,7 @@ ul.no-bullets {
   position: relative;
   z-index: 5;
   height: auto;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 /* line 9, ../../../private/common-html/sass/partials/_accordion.scss */
@@ -8096,6 +8100,33 @@ td.comment-text {
   height: 0px;
   padding: 0px;
   margin: 0px;
+}
+
+/* line 368, ../../../private/common-html/sass/views/_attachment.scss */
+.selected-attachment-types-container {
+  min-height: 320px;
+  width: 430px;
+}
+/* line 371, ../../../private/common-html/sass/views/_attachment.scss */
+.selected-attachment-types-container .selected-attachment-type-tag {
+  position: relative;
+  border: 1px solid #bbbbbb;
+  height: 40px;
+  width: 100%;
+  display: inline-block;
+}
+/* line 377, ../../../private/common-html/sass/views/_attachment.scss */
+.selected-attachment-types-container .selected-attachment-type-tag span.tag-label {
+  line-height: 40px;
+  vertical-align: top;
+  margin-right: 6px;
+  margin-left: 6px;
+}
+/* line 383, ../../../private/common-html/sass/views/_attachment.scss */
+.selected-attachment-types-container .selected-attachment-type-tag .tag-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */

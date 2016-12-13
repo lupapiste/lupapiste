@@ -44,8 +44,9 @@
 
 (defn with-application-kind [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
-                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
+                     (not (ss/blank? permitSubtype))
+                                 (str "permitSubtype." permitSubtype)
                      :else       "applications.application")))
 
 (defn enrich-applications-with-organization-name [applications]

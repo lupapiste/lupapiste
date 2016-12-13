@@ -15,6 +15,8 @@ NICENESS=+15
 STARTUPTIMEOUT=60
 PERFECT=
 BLACKLIST=
+RETRIES=5
+UPDATE=15
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -35,15 +37,16 @@ fail() {
 usage() {
    echo \
 "roboto.sh [args] test-dir ...
-  -j | --threads n      use up to n threads, one per argument test
-  -n | --nested         use a nested X server instead of a virtual one
-  -l | --local          use current X server
+  -j | --threads n      use up to n threads, one per argument test [$MAXTHREADS]
+  -n | --nested         use a nested X server instead of a virtual one (Xvfb)
+  -l | --local          use current X server ($DISPLAY)
   -s | --start          start lupapiste with lein
   -t | --timeout n      timeout for individual robot file [$TIMEOUT]
   -h | --help           show this thing
   -S | --server uri     use a specific server [$SERVER]
-  -p | --prefect        fail immediately if anything fails
+  -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
+  -r | --retries n      maximum number of failing suite reruns [$RETRIES]
 "
 }
 
@@ -53,18 +56,26 @@ start_lupapiste() {
    cd ..
    test -d src || fail "Cannot start lupapiste at $(pwd), can't see src/ here"
    echo "Starting lupapiste."
-   lein run &> lupapiste-roboto.log &
+   lein run &> robot/target/lupapiste.log &
    LUPISPID=$!
    echo -n "Waiting for lupapiste $LUPISPID: "
    for foo in $(seq $STARTUPTIMEOUT)
    do
-      grep -q 'You can view the site at http://localhost:8000' lupapiste-roboto.log && break
+      grep -q 'You can view the site at http://localhost:8000' robot/target/lupapiste.log && break
       echo -n "x"
       sleep 1
    done
    echo
    cd robot
-   lupapiste_runningp || fail "Failed to bring up Lupapiste. Check lupapiste-roboto.log for details."
+   lupapiste_runningp || fail "Failed to bring up Lupapiste. Check robot/target/lupapiste.log for details."
+}
+
+check_integer() {
+   echo "$1" | grep -q "^[0-9][0-9]*$" || fail "Error: $2: '$1'"
+}
+
+check_nonzero_integer() {
+   echo "$1" | grep -q "^[1-9][0-9]*$" || fail "Error: $2: '$1'"
 }
 
 parse_args() {
@@ -75,6 +86,7 @@ parse_args() {
    case $ARG in
       (-j|--threads)
          MAXTHREADS=$2
+         check_integer "$MAXTHREADS" "Number of threads should be an integer"
          shift 2
          echo "Using up to $MAXTHREADS threads."
          parse_args $@
@@ -111,10 +123,10 @@ parse_args() {
       (-t|--timeout)
          TIMEOUT=$2
          shift 2
-         echo "$TIMEOUT" | grep -q "^[0-9]*$" || fail "bad timeout"
+         check_nonzero_integer "$TIMEOUT" "Bad timeout"
          parse_args $@
          ;;
-      (-p|--prefect)
+      (-p|--perfect)
          PERFECT=1
          shift
          echo "Failure is not an option"
@@ -124,6 +136,12 @@ parse_args() {
          BLACKLIST=$2
          echo "Skipping tests in '$BLACKLIST'"
          test -f $BLACKLIST || fail "$BLACKLIST is not a file"
+         shift 2
+         parse_args $@
+         ;;
+      (-r|--retries)
+         RERUNS=$2
+         check_integer "$RERUNS" "Reruns must be an integer"
          shift 2
          parse_args $@
          ;;
@@ -157,6 +175,7 @@ check_env() {
    echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
    echo -n "Server: $SERVER "
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
+   pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
 }
 
 
@@ -167,25 +186,26 @@ check_env
 echo "Starting robots"
 
 run_test() {
-   test=$2
+   local test=$2
    local TEST=$(echo $test | sed -e 's/[/ ]/_/g')
+   local BOT=
+   local MYSCREEN=$1
    case $OUTPUT in
       xvfb)
-         SCREEN=$1
-         #echo "STARTING Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24"
-         Xvfb :$SCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
+         MYSCREEN=$1
+         Xvfb :$MYSCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
-         DISPLAY=:$SCREEN
+         DISPLAY=:$MYSCREEN
          ;;
       xnest)
-         SCREEN=$1
-         Xnest :$SCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
-         DISPLAY=:$SCREEN
+         MYSCREEN=$1
+         Xnest :$MYSCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
+         DISPLAY=:$MYSCREEN
          XPID=$!
          ;;
       local)
          # use current DISPLAY
-         SCREEN=$DISPLAY
+         MYSCREEN=$DISPLAY
          XPID=""
          ;;
       *)
@@ -193,46 +213,55 @@ run_test() {
          ;;
    esac
 
-   sleep 2 # wait for X to start
+   # Wait for X to be ready for connections
+   for foo in $(seq 20)
+   do
+     DISPLAY=:$MYSCREEN xwininfo -root 2>&1 | grep -q "root window" && break
+     sleep 1
+   done
+   DISPLAY=:$MYSCREEN xwininfo -root | grep -q "root window" || fail "FAIL: failed to bring up X at :$MYSCREEN for test $test"
 
    local WMPID=""
    # start openbox to handle window maximize if we're running in a non-local X
    test -z "$XPID" || {
-      DISPLAY=:$SCREEN openbox &>/dev/null &
+      DISPLAY=:$MYSCREEN openbox &>/dev/null &
       WMPID=$!
    }
-
-   # disable screensaver (needed when recording)
-   #test -z "$XPID" || DISPLAY=:$SCREEN xset s off
 
    sleep 2 # wait for window manager to start
 
    mkdir -p target # make log directory if necessary
 
-   # exclude tests with non-roboto-proof tag
-   DISPLAY=:$SCREEN timeout $TIMEOUT pybot \
-      --exclude integration \
-      --exclude ajanvaraus \
-      --exclude fail \
-      --exclude non-roboto-proof \
-      --RunEmptySuite \
-      --variable SERVER:$SERVER \
-      -d target \
-      -L TRACE \
-      -b $TEST.debug.log \
-      -o $TEST.xml \
-      -l $TEST.log.html \
-      -r $TEST_report.html \
-         common/setup "$test" common/teardown &> target/$TEST.out
-   BOT=$?
+   # -L TRACE
+   for ROUND in $(seq 0 $RETRIES)
+   do
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
+         --exclude integration \
+         --exclude ajanvaraus \
+         --exclude fail \
+         --exclude non-roboto-proof \
+         --RunEmptySuite \
+         --variable SERVER:$SERVER \
+         -d target \
+         --exitonfailure \
+         -b $TEST.debug.log \
+         -o $TEST.xml \
+         -l $TEST.log.html \
+         -r NONE \
+            common/setup "$test" common/teardown &> target/$TEST.out
+      BOT=$?
+      test "0" "=" "$BOT" && break
+      # sometimes ff seems to have persistent trouble starting and/or selenium connecting to it
+      # ruling out causes by by spreading pybot startups temporally and seeing if the issue persists
+      sleep 5 
+   done
+   # round 0 is first
+   ROUND=$(expr $ROUND "+" 1)
+   LASTROUND=$(expr $RETRIES "+" 1)
+   echo "NOTE: pybot exited with $BOT after round $ROUND/$LASTROUND" >> target/$TEST.out;
    # shut down X and WM if they were started
    test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
    test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
-   # check that pybot exited with success.
-   test "$BOT" = "0" || {
-      echo "ERROR: pybot exited with $BOT for test '$test'";
-      echo "FAIL: pybot exited with non-zero $BOT, timeout was $TIMEOUT" >> target/$TEST.out;
-   }
 }
 
 RED='\033[0;31m'
@@ -259,6 +288,8 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
+   echo "Writing report.html"
+   rebot --outputdir target --report report.html --name Roboto target/*.xml
 }
 
 maybe_finish() {
@@ -280,9 +311,10 @@ maybe_finish() {
 show_finished() {
    local STATUS=$(grep "tests total" $1 | tail -n 1)
    local COLOR=$GREEN
+   local ATTEMPTS=$(grep "pybot exited with" "$1" | sed -e 's/.*round //')
    echo "$STATUS" | grep -q "0 failed" || COLOR=$RED
-   echo -e "$COLOR - $1 done: $STATUS"
-   grep "FAIL" "$1" | sed -e 's/^/      /'
+   echo -e "$COLOR - $1 done: $STATUS, $ATTEMPTS runs"
+   grep -E "FAIL" "$1" | head -n 1 | sed -e 's/^/      /'
    echo -n -e "$DEFAULT"
 }
 
@@ -294,7 +326,7 @@ show_running() {
   test "$(expr $NFAIL '*' 5)" -lt "$NPASS" && COLOR=$YELLOW
   test "$NFAIL" = 0 && COLOR=$GREEN
   echo -e "$COLOR o $log $(grep FAIL $log | wc -l) failed, $(grep PASS $log | wc -l) ok"
-  grep "FAIL" $log | sed -e 's/^/      /'
+  grep -E "(FAIL|exited with)" "$1" | head -n 1 | sed -e 's/^/      /'
   echo -e -n "$DEFAULT"
   maybe_finish $NFAIL
 }
@@ -333,7 +365,7 @@ do
    do
       RUNNING=$(jobs | grep run_test | wc -l)
       show_stats "$RUNNING/$MAXTHREADS threads running"
-      sleep 10
+      sleep $UPDATE
       jobs > /dev/null
    done
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
@@ -351,9 +383,11 @@ while true
 do
    jobs | grep -q run_test || break
    show_stats
-   sleep 10
+   sleep $UPDATE
    jobs > /dev/null
 done
+
+show_stats
 
 halt
 
