@@ -21,7 +21,7 @@ LUPAPISTE.AttachmentTypeAutocompleteModel = function(params) {
   }
 
   var options = ko.pureComputed(function() {
-    if (params.selectedTypeGroup()) {
+    if (ko.unwrap(params.selectedTypeGroup)) {
       return _.filter(attachmentTypes(), _.partial(typeGroupIs, params.selectedTypeGroup().value));
     } else {
       return attachmentTypes();
