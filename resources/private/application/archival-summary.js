@@ -190,7 +190,7 @@
                                  previewAction: "pdf-export",
                                  documentType: "application" }) ];
 
-    if (["extinct", "closed", "foremanVerdictGiven"].indexOf(applicationState) !== -1) {
+    if (["extinct", "closed", "foremanVerdictGiven", "acknowledged"].indexOf(applicationState) !== -1) {
       docs.push( ko.observable({ documentNameKey: "caseFile.heading",
                                  metadata: application.processMetadata,
                                  id: caseFileDocId,
