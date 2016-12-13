@@ -140,6 +140,8 @@ jQuery(document).ready(function() {
     {name: "attachments-listing-accordion"},
     {name: "attachments-table"},
     {name: "attachments-operation-buttons"},
+    {name: "attachment-type-group-autocomplete"},
+    {name: "attachment-type-autocomplete"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
