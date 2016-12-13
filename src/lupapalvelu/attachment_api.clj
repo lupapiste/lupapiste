@@ -661,12 +661,12 @@
     (ok :job job)))
 
 (defquery stamp-attachments-job
-  {:parameters [:job-id :version]
+  {:parameters [:jobId :version]
    :categories #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:job-id :version])]
+   :input-validators [(partial action/non-blank-parameters [:jobId :version])]
    :user-roles #{:authority}
    :description "Returns state of stamping job"}
-  [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
+  [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (stamping/status job-id version timeout)))
 
 (defcommand sign-attachments

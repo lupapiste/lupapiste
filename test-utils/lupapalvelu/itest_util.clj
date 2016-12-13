@@ -734,6 +734,13 @@
                     :multipart [{:name "files[]" :content uploadfile}]
                     :throw-exceptions false})))))
 
+(defn poll-job [apikey command id version limit]
+  (when (pos? limit)
+    (let [resp (query apikey (keyword command) :jobId id :version version)]
+      (when-not (= (get-in resp [:job :status]) "done")
+        (Thread/sleep 200)
+        (poll-job apikey command id (get-in resp [:job :version]) (dec limit))))))
+
 ;; statements
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
