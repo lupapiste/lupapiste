@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script class="ko-template" type="text/x-jquery-tmpl" id="attachments-require-template">
+      <div class="content">
+        <label data-bind="ltext: 'attachments.type-group.search.label'"></label>
+        <div data-bind="component: { name: 'attachment-type-group-autocomplete',
+                                     params: { selectedTypeGroup: selectedTypeGroup } }"></div>
+
+        <label data-bind="ltext: 'attachments.type.search.label'"></label>
+        <div data-bind="component: { name: 'attachment-type-autocomplete',
+                                     params: { selectedTypeGroup: selectedTypeGroup,
+                                               selectedType: selectedType } }"></div>
+
+        <label data-bind="ltext: 'attachments.selected-types'"></label>
+        <div class="selected-attachment-types-container" data-bind="foreach: selectedTypes">
+          <div class="selected-attachment-type-tag">
+            <span class="tag-label" data-bind="text: $data.title"></span>
+            <i class="tag-remove lupicon-remove" data-bind="click: _.partial($component.removeSelection, $index)"></i>
+          </div>
+        </div>
+
+        <div data-bind="component: { name: 'submit-button-group',
+                                     params: { isSubmitVisible: true,
+                                               submit: requireAttachmentTemplates,
+                                               lSubmitTitle: 'ok',
+                                               isSubmitEnabled: submitEnabled } }"></div>
+      </div>
+
+    </script>
+  </section>
+</body>
+</html>

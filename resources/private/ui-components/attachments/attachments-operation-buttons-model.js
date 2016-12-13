@@ -14,43 +14,10 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
     hub.send( "add-attachment-file", {} );
   };
 
-  function AttachmentTemplatesModel() {
-    var templateModel = this;
-    templateModel.init = function() {
-      templateModel.initDone = true;
-      templateModel.selectm = $("#dialog-add-attachment-templates-v2 .attachment-templates").selectm();
-      templateModel.selectm
-        .allowDuplicates(true)
-        .ok(_.ary(service.createAttachmentTemplates, 1))
-        .cancel(LUPAPISTE.ModalDialog.close);
-      return templateModel;
-    };
-
-    templateModel.show = function() {
-      if (!templateModel.initDone) {
-        templateModel.init();
-      }
-
-      var data = _.map(appModel.allowedAttachmentTypes(), function(g) {
-        var groupId = g[0];
-        var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var typeIds = g[1];
-        var attachments = _.map(typeIds, function(typeId) {
-          var id = {"type-group": groupId, "type-id": typeId};
-          var text = loc(["attachmentType", groupId, typeId]);
-          return {id: id, text: text};
-        });
-        return [groupText, attachments];
-      });
-      templateModel.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates-v2");
-      return templateModel;
-    };
-  }
-
-  var attachmentTemplatesModel = new AttachmentTemplatesModel();
   self.attachmentTemplatesAdd = function() {
-    attachmentTemplatesModel.show();
+    hub.send("show-dialog", { ltitle: "attachments.require-attachments",
+                              size: "large",
+                              component: "attachments-require"});
   };
 
   self.copyUserAttachments = function() {
