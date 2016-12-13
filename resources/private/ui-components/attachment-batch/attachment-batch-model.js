@@ -6,6 +6,8 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
+  self.password = ko.observable();
+
   // Rows is {fileId: {name: Cell}}
   var rows = ko.observable({});
 
@@ -24,17 +26,10 @@ LUPAPISTE.AttachmentBatchModel = function() {
   }
 
   self.cell = function ( file, name ) {
-    return rows()[file.fileId][name];
+    // The weird default value is needed in order to gracefully handle
+    // file removal or rather the resulting "phantom" cell query.
+    return _.get(rows(), sprintf( "%s.%s", file.fileId, name), {value: _.noop});
   };
-
-  function rowPair( file ) {
-    return [file.fileId, {type: new Cell( ko.observable(), true ),
-                          content: new Cell( ko.observable(), true ),
-                          drawing: new Cell( ko.observable()),
-                          context: new Cell( ko.observable, true ),
-                          sign: new Cell( ko.observable()),
-                          construction: new Cell( ko.observable())}];
-  }
 
   function badFileHandler( event ) {
     self.badFiles.push( _.pick( event, ["message", "file"]));
@@ -45,23 +40,36 @@ LUPAPISTE.AttachmentBatchModel = function() {
                                           allowMultiple: true,
                                           errorHandler: badFileHandler});
 
-  self.disposedSubscribe( self.upload.files, function( files ) {
-    var newRows = _(files )
-        .reject( function( file ) {
-          return rows()[file.fileId];
-        })
-        .map( rowPair )
-        .fromPairs()
-        .value();
-    rows( _.merge( rows(), newRows ));
-  } );
+  self.rowFiles = self.disposedComputed( function() {
+    var oldRows = rows();
+    var newRows = {};
+    var keepRows = {};
 
+    _.each( self.upload.files(), function( file ) {
+      var fileId = file.fileId;
+      if( oldRows[fileId]) {
+        keepRows[fileId] = oldRows[fileId];
+      } else {
+        newRows[fileId] = {type: new Cell( ko.observable(), true ),
+                           content: new Cell( ko.observable(), true ),
+                           drawing: new Cell( ko.observable()),
+                           context: new Cell( ko.observable, true ),
+                           sign: new Cell( ko.observable()),
+                           construction: new Cell( ko.observable())}
+      }
+    });
+    rows( _.merge( keepRows, newRows ));
+    return self.upload.files();
+  });
 
   self.buttonOptions = { buttonClass: "positive caps",
                          buttonText: "attachment.add-multiple",
                          upload: self.upload };
 
   self.badFiles = ko.observableArray();
+
+  self.fileCount = self.disposedPureComputed( _.flow( self.upload.files,
+                                                      _.size ));
 
   self.upload.init();
 
@@ -121,4 +129,31 @@ LUPAPISTE.AttachmentBatchModel = function() {
         && (index < _.size( self.upload.files()) - 1);
     });
   };
+
+  self.signingSelected = self.disposedPureComputed( function() {
+    return _.some( _.values( rows()), function( cell ) {
+      return cell.sign.value();
+    });
+  });
+
+  self.passwordState = ko.observable( null );
+
+  self.disposedComputed( function()  {
+    self.passwordState( null );
+    if( self.password() ) {
+      ajax.command( "check-password", {password: self.password()})
+        .success( _.wrap( true, self.passwordState))
+        .error( _.wrap( false, self.passwordState))
+        .call();
+    }
+  } );
+
+  self.passwordIconClass = self.disposedPureComputed( function() {
+    var flag = self.passwordState();
+    var icon = "flag";
+    if( _.isBoolean( flag )) {
+      icon = flag ? "check" : "warning";
+    }
+    return "lupicon-" + icon;
+  });
 };

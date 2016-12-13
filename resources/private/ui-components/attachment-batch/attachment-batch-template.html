@@ -3,7 +3,7 @@
   <div>
     <upload-progress params="upload: upload"></upload-progress>
 
-    <!-- ko if: _.size(upload.files()) -->
+    <!-- ko if: fileCount -->
     <table class="attachment-batch-table">
       <thead>
         <th><span class="batch-required"
@@ -19,7 +19,7 @@
         <th data-bind="ltext:'attachment.label.manuallySetConstructionTime'"></th>
         <th class="td-center" data-bind="ltext:'remove'"></th>        
       </thead>
-      <tbody data-bind="foreach: upload.files">
+      <tbody data-bind="foreach: rowFiles">
         <td data-bind="file: $data"></td>
         <td>
         </td>
@@ -30,7 +30,8 @@
           <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
                                buttonClass: 'function',
                                icon: 'copy',
-                               enable: $parent.canFillDown( 'drawing', $data)"></icon-button>
+                               enable: $parent.canFillDown( 'drawing', $data)"
+                       data-bind="visible: $parent.fileCount() > 1"></icon-button>
         </td>
         <td></td>
         <td class="td-center">
@@ -61,7 +62,21 @@
     </div>
     <!-- /ko -->
 
-    <!-- ko if: _.size(upload.files()) -->
+    <!-- ko if: signingSelected -->
+    <div class="batch-password">
+      <label class="batch-required"
+             for="batch-password"
+             data-bind="ltext: 'signAttachment.verifyPassword'">
+      </label>
+      <input type="password"
+             id="batch-password" 
+             class="grid-style-input"
+             data-bind="value: password">
+      <i data-bind="attr: {class: passwordIconClass}"></i>
+    </div>
+    <!-- /ko -->
+    
+    <!-- ko if: fileCount -->
     <div class="batch-buttons">
       <icon-button params="waiting: waiting,
                            icon: 'check',

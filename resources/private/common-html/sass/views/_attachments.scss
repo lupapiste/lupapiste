@@ -90,11 +90,15 @@
   color: $negative;
 }
 
+label.batch-required {
+  display: block;
+}
+
 .batch-buttons {
-  margin-top: $marginS;
+  margin-top: $marginL;
   margin-bottom: $marginL;
   button {
-    margin-right: $marginL;
+    margin-right: $marginM;
   }
 }
 
@@ -113,5 +117,19 @@
       list-style-type: none;
     }
   }
+}
 
+.batch-password {
+  i {
+    vertical-align: middle;
+  }
+  i.lupicon-check {
+    color: $positive;
+  }
+  i.lupicon-warning {
+    color: $negative;
+  }
+  i.lupicon-flag {
+    color: $primary;
+  }
 }
