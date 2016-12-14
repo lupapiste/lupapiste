@@ -301,7 +301,7 @@
 (defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
-     :content-type (.getContentType attachment)
+     :contentType (.getContentType attachment)
      :size (.getLength attachment)
      :file-name (.getFilename attachment)
      :fileId (.getId attachment)

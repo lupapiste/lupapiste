@@ -15,7 +15,7 @@
          (fact "appeal-attachment-data"
                (let [file-id  (mongo/create-id)
                      file-obj {:content (constantly nil),
-                               :content-type "application/pdf",
+                               :contentType "application/pdf",
                                :size 123,
                                :file-name "test-pdf.pdf",
                                :metadata {:uploaded 12344567, :linked false},
@@ -34,7 +34,7 @@
                  (fact "Version has correct keys"
                        (:latestVersion result-attachment) => (contains {:size (:size file-obj)
                                                                         :filename (:file-name file-obj)
-                                                                        :contentType (:content-type file-obj)
+                                                                        :contentType (:contentType file-obj)
                                                                         :fileId (:fileId file-obj)}))))))
 
 (facts "appeal attachments"
@@ -60,7 +60,7 @@
     (appeals-attachments {:attachments attachments} "foo") => empty?
     (appeals-attachments {:attachments attachments} ["foo" "faa"]) => empty?
     (appeals-attachments {:attachments attachments} ["appeal1" "faa"]) => (just (nth attachments 0))
-    (appeals-attachments {:attachments attachments} ["appeal1" "appeal2" nil]) => (just (nth attachments 0)
-                                                                                        (nth attachments 3)
-                                                                                        (nth attachments 4)
-                                                                                        (nth attachments 5))))
+    (appeals-attachments {:attachments attachments} ["appeal1" "appeal2" nil]) => (just [(nth attachments 0)
+                                                                                         (nth attachments 3)
+                                                                                         (nth attachments 4)
+                                                                                         (nth attachments 5)])))

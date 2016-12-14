@@ -116,7 +116,7 @@
 
 (defpage [:get "/dev/dummy-onnistuu/doc/:stamp"] {:keys [stamp]}
   (if-let [pdf (mongo/download-find {:metadata.process.stamp stamp})]
-    (let [{:keys [content content-type]} pdf
+    (let [{:keys [content contentType]} pdf
           document (content)]
-      (->> (content) (resp/status 200) (resp/content-type content-type)))
+      (->> (content) (resp/status 200) (resp/content-type contentType)))
     (resp/status 404 "Not fould")))

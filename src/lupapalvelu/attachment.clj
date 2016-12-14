@@ -591,7 +591,7 @@
     (let [filename (ss/encode-filename (:file-name attachment))
           response {:status 200
                     :body ((:content attachment))
-                    :headers {"Content-Type" (:content-type attachment)
+                    :headers {"Content-Type" (:contentType attachment)
                               "Content-Length" (str (:size attachment))
                               "Content-Disposition" (format "filename=\"%s\"" filename)}}]
       (if download?
@@ -609,7 +609,7 @@
       (do
         (when (zero? (mongo/count :fs.files {:_id preview-id}))
           (let [file-name (:file-name attachment)
-                content-type (:content-type attachment)
+                content-type (:contentType attachment)
                 application-id (:application attachment)]
             (preview/create-preview! file-id file-name content-type application-id mongo/*db-name*)))
         (output-attachment preview-id false attachment-fn))
