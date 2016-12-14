@@ -1,0 +1,11 @@
+<script class="ko-template" type="text/x-jquery-tmpl" id="attachment-group-selector-template">
+
+  <select data-test-id="attachment-operation-select"
+          data-bind="options: $data.selectableGroups,
+                     optionsText: $data.getGroupOptionsText,
+                     optionsCaption: loc('attachment.label.operation.choose'),
+                     value: $data.selectedGroup,
+                     valueAllowUnset: true,
+                     enable: $data.updateAllowed() "></select>
+
+</script>
