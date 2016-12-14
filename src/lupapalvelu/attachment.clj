@@ -400,7 +400,7 @@
    :timestamp timestamp})
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state contents]}]
+                              {:keys [created target stamped replaceable-original-file-id state contents group]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -416,6 +416,9 @@
        {$set {:attachments.$.latestVersion version-model}})
      (when-not (ss/blank? contents)
        {$set {:attachments.$.contents contents}})
+     (when (not-empty group)
+       {$set {:attachments.$.op (not-empty (select-keys group [:id :name]))
+              :attachments.$.groupType (:groupType group)}})
      (when-let [approval (cond
                            state                                           (->approval state user created )
                            (not (attachment-version-state attachment
