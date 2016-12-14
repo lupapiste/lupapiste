@@ -33,6 +33,4 @@ LUPAPISTE.AttachmentsRequireModel = function() {
     hub.send("close-dialog");
   };
 
-  service.queryAttachmentTypes();
-
 };
