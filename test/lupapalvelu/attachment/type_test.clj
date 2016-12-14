@@ -70,6 +70,13 @@
   (->> (keys type-grouping)
        (remove (partial contains? (mapcat val attachment-types-by-permit-type)))) => empty?)
 
+(facts "predefined content mapping keys are valid"
+  (doseq [{:keys [type-id type-group] :as type} (keys content-mapping)]
+    (fact {:midje/description (str "type-id of " type)}
+      (all-attachment-type-ids type-id) => truthy)
+    (fact {:midje/description (str "type-group of " type)}
+      (all-attachment-type-groups type-group) => truthy)))
+
 (sc/defschema AType
   {(sc/optional-key :type-id)     (sc/enum :type1 :type2)
    (sc/optional-key :type-group)  (sc/enum :group1 :group2)
