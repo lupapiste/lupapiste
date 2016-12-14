@@ -15,6 +15,7 @@
    :type-group                 sc/Keyword
    (sc/optional-key :metadata) {(sc/optional-key :permitType)     sc/Keyword
                                 (sc/optional-key :grouping)       sc/Keyword
+                                (sc/optional-key :contents)       [sc/Keyword]
                                 (sc/optional-key :for-operations) #{(apply sc/enum (keys op/operations))}}})
 
 (def osapuolet attachment-types/osapuolet-v2)
@@ -158,6 +159,8 @@
              {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat} :kvv_suunnitelma
              {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma))
 
+(def content-mapping (util/read-edn-resource "attachments/contents.edn"))
+
 (def other-type-group :other)
 (def type-groups (-> (vals type-grouping) distinct (concat [other-type-group])))
 
@@ -165,6 +168,7 @@
   ([{type-group :type-group type-id :type-id :as attachment-type}]
    (->> (update attachment-type :metadata util/assoc-when
                 :grouping       (some-> (util/find-first (fn-> val (contains? attachment-type)) default-grouping) key)
+                :contents       (not-empty (content-mapping (select-keys attachment-type [:type-id :type-group])))
                 :for-operations (not-empty (for-operations attachment-type)))
         (util/strip-nils)
         (sc/validate AttachmentType)))
