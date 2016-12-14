@@ -68,7 +68,7 @@
                      (vec body))
         attachments (when attachments
                       (for [attachment attachments]
-                        (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
+                        (assoc (select-keys attachment [:content :filename]) :type :attachment)))
         body       (if attachments
                      (into body attachments)
                      body)]

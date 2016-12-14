@@ -303,7 +303,7 @@
     {:content (fn [] (.getInputStream attachment))
      :contentType (.getContentType attachment)
      :size (.getLength attachment)
-     :file-name (.getFilename attachment)
+     :filename (.getFilename attachment)
      :fileId (.getId attachment)
      :metadata metadata
      :application (:application metadata)}))

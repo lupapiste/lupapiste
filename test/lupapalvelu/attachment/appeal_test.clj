@@ -17,7 +17,7 @@
                      file-obj {:content (constantly nil),
                                :contentType "application/pdf",
                                :size 123,
-                               :file-name "test-pdf.pdf",
+                               :filename "test-pdf.pdf",
                                :metadata {:uploaded 12344567, :linked false},
                                :application nil
                                :fileId file-id}
@@ -33,7 +33,7 @@
                        (sc/check att/Attachment result-attachment) => nil)
                  (fact "Version has correct keys"
                        (:latestVersion result-attachment) => (contains {:size (:size file-obj)
-                                                                        :filename (:file-name file-obj)
+                                                                        :filename (:filename file-obj)
                                                                         :contentType (:contentType file-obj)
                                                                         :fileId (:fileId file-obj)}))))))
 

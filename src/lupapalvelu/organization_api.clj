@@ -636,7 +636,7 @@
   (let [org-id (usr/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
         content-type (mime/mime-type filename)
-        file-info {:file-name    filename
+        file-info {:filename    filename
                    :contentType  content-type
                    :size         size
                    :organization org-id

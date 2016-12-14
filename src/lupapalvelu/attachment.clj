@@ -588,7 +588,7 @@
 (defn output-attachment
   ([attachment download?]
   (if attachment
-    (let [filename (ss/encode-filename (:file-name attachment))
+    (let [filename (ss/encode-filename (:filename attachment))
           response {:status 200
                     :body ((:content attachment))
                     :headers {"Content-Type" (:contentType attachment)
@@ -608,14 +608,14 @@
     (if-let [attachment (attachment-fn file-id)]
       (do
         (when (zero? (mongo/count :fs.files {:_id preview-id}))
-          (let [file-name (:file-name attachment)
+          (let [file-name (:filename attachment)
                 content-type (:contentType attachment)
                 application-id (:application attachment)]
             (preview/create-preview! file-id file-name content-type application-id mongo/*db-name*)))
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
-(defn- cleanup-temp-file [conversion-result]
+(defn cleanup-temp-file [conversion-result]
   (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
     (io/delete-file (:content conversion-result) :silently)))
 
