@@ -619,6 +619,19 @@
   (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
     (io/delete-file (:content conversion-result) :silently)))
 
+(defn conversion
+  "Does archivability conversion, if required, for given file.
+   If file was converted, uploads converted file to mongo.
+   Returns map with conversion result and :file if conversion was made."
+  [application filedata]
+  (let [conversion-result  (conversion/archivability-conversion application filedata)
+        converted-filedata (when (:autoConversion conversion-result)
+                             ; upload and return new fileId for converted file
+                             (file-upload/save-file (select-keys conversion-result [:content :filename])
+                                                    {:application (:id application) :linked false}))]
+    {:result conversion-result
+     :file converted-filedata}))
+
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
    2) Validates and converts for archivability, uploads converted file to GridFS if applicable
@@ -632,24 +645,20 @@
                              (:content file-options)
                              ; stream is consumed at this point, load from mongo
                              ((-> initial-filedata :fileId mongo/download :content)))
-        conversion-result  (conversion/archivability-conversion application (assoc initial-filedata
-                                                                              :attachment-type (:attachment-type attachment-options)
-                                                                              :content content))
-        converted-filedata (when (:autoConversion conversion-result)
-                                 ;; when conversion was made, upload is needed, initial-filedata's fileId will be overwritten
-                                 (file-upload/save-file (select-keys conversion-result [:content :filename])
-                                                        {:application (:id application) :linked false}))
+        conversion-data    (conversion application (assoc initial-filedata
+                                                     :content content
+                                                     :attachment-type (:attachment-type attachment-options)))
         options            (merge attachment-options
                                   initial-filedata
-                                  conversion-result
+                                  (:result conversion-data)
                                   {:original-file-id (or (:original-file-id attachment-options)
                                                          (:fileId initial-filedata))}
-                                  converted-filedata)
+                                  (:file conversion-data))
         attachment         (get-or-create-attachment! application user attachment-options)
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
-    (cleanup-temp-file conversion-result)
+    (cleanup-temp-file (:result conversion-data))
     linked-version))
 
 (defn- append-stream [zip file-name in]
