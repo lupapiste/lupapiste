@@ -1,9 +1,13 @@
-// If owner argument is given, it should be a ComponentBaseModel instance. The UploadModel then adds itself to owner's dispose queue.
+// If owner argument is given, it should be a ComponentBaseModel
+// instance. The UploadModel then adds itself to owner's dispose
+// queue.
 // Parameters [optional]:
+//  [files]: Observable array.
 //  [allowMultiple]: Whether multiple files can be uploaded at the same time (false).
 //  [readOnly]: If true only the file listing is shown (false).
 //  [dropZone]: Dropzone selector as string (default null, no dropzone).
-//  [errorHandler]. Function to be called on errors. If not given, the errors are display with indicators.
+//  [errorHandler]. Function to be called on errors. If not given, the
+//  errors are displayed with indicators.
 LUPAPISTE.UploadModel = function( owner, params ) {
   "use strict";
   var self = this;
@@ -15,7 +19,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   if( owner ) {
     owner.addToDisposeQueue( self );
   }
-  self.files = ko.observableArray();
+  self.files = params.files || ko.observableArray();
   self.fileInputId = _.uniqueId( "file-input-id-" );
   self.waiting = ko.observable();
   self.readOnly = params.readOnly;

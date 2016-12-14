@@ -59,7 +59,7 @@ LUPAPISTE.UploadProgressModel = function( params ) {
 
     var castFun = _.cond( [[_.isNaN, _.wrap( 0, _.constant )],
                            [_.isFinite, _.constant],
-                           // Infinity result interpretaion comes from IE9 that does
+                           // Infinity result interpretation comes from IE9 that does
                            // not support progress info.
                            [_.stubTrue,_.wrap( 100, _.constant)]]);
     return castFun( _.round( loaded / total * 100 ))();

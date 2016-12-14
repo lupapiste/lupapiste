@@ -73,8 +73,8 @@
              data-bind="component: {name: 'file-upload',
                         params: {files: $parent.model.files,
                         dropZone: sprintf( '.%s .bubble-dialog', $parent.dropZone),
-                        allowMultiple: false}},
-                        attr: {'data-test-id': 'appeal-files-' + $parent.test}">
+                        allowMultiple: true}},
+                        testId: 'appeal-files-' + $parent.test">
         </div>
       </div>
     </div>

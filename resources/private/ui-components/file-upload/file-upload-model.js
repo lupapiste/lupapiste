@@ -1,5 +1,7 @@
 // Convenient file upload mechanism that utilises the FileuploadService.
 // Parameters can include both UploadModel and UploadButtonModel params.
+// Parameter notes:
+//   files: Observable array that is passed to UploadModel.
 LUPAPISTE.FileUploadModel = function( params ) {
   "use strict";
   var self = this;
