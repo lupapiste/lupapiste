@@ -489,6 +489,14 @@
                                    (when set-app-modified? {:modified now})
                                    (when set-attachment-modified? {:attachments.$.modified now}))}))
 
+(defn type-match? [type {att-type :type}]
+  (= type att-type))
+
+(defn get-empty-attachment-placeholder-id [attachments type]
+  (util/find-first #(and (type-match? type %)
+                         (empty? (:versions %)))
+                   attachments))
+
 (defn get-or-create-attachment!
   "If the attachment-id matches any old attachment, it is returned.
    Otherwise a new attachment is created."
