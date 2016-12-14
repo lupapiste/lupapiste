@@ -119,6 +119,8 @@
   {:type-id                              (apply sc/enum att-type/all-attachment-type-ids)
    :type-group                           (apply sc/enum att-type/all-attachment-type-groups)})
 
+(def GroupType (apply sc/enum att-tags/attachment-groups))
+
 (defschema Attachment
   {:id                                   AttachmentId
    :type                                 Type               ;; Attachment type
@@ -136,7 +138,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :groupType)          (sc/maybe (apply sc/enum att-tags/attachment-groups))
+   (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -153,6 +155,7 @@
 
 (def attachment-type-coercer (ssc/json-coercer Type))
 (def attachment-target-coercer (ssc/json-coercer Target))
+(def group-type-coercer (ssc/json-coercer GroupType))
 
 
 (defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
@@ -262,7 +265,7 @@
            ;:approvals {}
            :auth []
            :contents contents}
-          (:groupType group) (assoc :groupType (:groupType group))
+          (:groupType group) (assoc :groupType (group-type-coercer (:groupType group)))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
@@ -397,8 +400,7 @@
    :timestamp timestamp})
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state]
-                               :as   options}]
+                              {:keys [created target stamped replaceable-original-file-id state]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -412,8 +414,6 @@
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{originalFileId}) not)
        {$set {:attachments.$.latestVersion version-model}})
-
-     ;;
      (when-let [approval (cond
                            state                                           (->approval state user created )
                            (not (attachment-version-state attachment
