@@ -4,7 +4,9 @@ LUPAPISTE.StateIconsModel = function( params ) {
   "use strict";
   var self = this;
 
+
   var attachment = ko.unwrap( params.attachment );
+
   var service    = lupapisteApp.services.attachmentsService;
   var transfers  = lupapisteApp.models.application._js.transfers;
 
@@ -49,7 +51,7 @@ LUPAPISTE.StateIconsModel = function( params ) {
   }
 
   function requiresAuthorityAction(attachment) {
-    return attachment.state === "requires_authority_action";
+    return service.requiresAuthorityAction(attachment);
   }
 
   function stamped(attachment) {

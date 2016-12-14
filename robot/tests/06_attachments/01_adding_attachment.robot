@@ -341,7 +341,7 @@ Sonja deletes the newly created attachment template
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
-  Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
+  Wait Until  Attachment indicator icon should be visible  state  rakennuspaikka.ote_alueen_peruskartasta
 
 Sonja opens attachment details
   [Tags]  attachments
