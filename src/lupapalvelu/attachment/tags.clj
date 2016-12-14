@@ -34,9 +34,11 @@
   (when file-id
     :hasFile))
 
+(def op-id-prefix "op-id-")
+
 (defn op-id->tag [op-id]
   (when op-id
-    (str "op-id-" op-id)))
+    (str op-id-prefix op-id)))
 
 (defn tag-by-group-type [{group-type :groupType {op-id :id} :op}]
   (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))

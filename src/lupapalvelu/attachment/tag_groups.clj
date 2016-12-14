@@ -1,50 +1,83 @@
 (ns lupapalvelu.attachment.tag-groups
-  (:require [lupapalvelu.attachment.tags :as att-tags]))
+  (:require [clojure.set :refer [intersection union]]
+            [sade.strings :as ss]
+            [lupapalvelu.attachment.tags :as att-tags]))
 
 
-(defn- attachments-group-types [attachments]
-  (->> (map att-tags/tag-by-group-type attachments)
-       (remove nil?)
-       (map keyword)
-       distinct))
+(def attachment-tag-group-hierarchy
+  "A model for the attachment hierarchy"
+  [[:general]
+   [:parties]
+   [:building-site]
+   [:operation
+    [:paapiirustus]
+    [:rakennesuunnitelma]
+    [:kvv_suunnitelma]
+    [:iv_suunnitelma]
+    [:default]]])
 
 (defn- attachments-operation-ids [attachments]
   (->> (map (comp :id :op) attachments)
        (remove nil?)
        distinct))
 
-(defn- type-groups-for-operation
-  "Returns attachment type based grouping, used inside operation groups."
-  [attachments operation-id]
-  (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map att-tags/tag-by-type)
-       distinct))
+(defn- hierarchy-level-tags [hierarchy]
+  (->> hierarchy
+       (map first)
+       (set)))
 
-(defn- operation-grouping
-  "Creates subgrouping for operations attachments if needed."
-  [type-groups operation-id]
-  (if (empty? type-groups)
-    [(att-tags/op-id->tag operation-id)]
-    (->> (map vector type-groups)
-         (cons (att-tags/op-id->tag operation-id)))))
+(defn- tag-set [attachment]
+  (-> attachment :tags set))
 
-(defmulti tag-grouping-for-group-type (fn [application group-type] group-type))
+(defn- tags-for-hierarchy-level [hierarchy attachment]
+  (let [tags (intersection (hierarchy-level-tags hierarchy)
+                           (tag-set attachment))]
+    (if (empty? tags)
+      #{:general}
+      tags)))
 
-(defmethod tag-grouping-for-group-type :default [_ group-type]
-  [[group-type]])
+(defn- all-tags-for-hierarchy-level [hierarchy attachments]
+  (apply union (map (partial tags-for-hierarchy-level hierarchy) attachments)))
 
-(defmethod tag-grouping-for-group-type :operation [{attachments :attachments primary-op :primaryOperation secondary-ops :secondaryOperations :as application} _]
-  (->> (map :id (cons primary-op secondary-ops)) ; all operation ids sorted
-       (filter (set (attachments-operation-ids attachments)))
-       (map #(-> (type-groups-for-operation attachments %)
-                 (operation-grouping %)))))
+(defn- filter-tag-groups
+  "remove the tag groups whose tag is not found in the attachments"
+  [attachments hierarchy]
+  (filter (comp (all-tags-for-hierarchy-level hierarchy attachments)
+                first)
+          hierarchy))
+
+(defn- for-operation? [op-id attachment]
+  (= op-id (-> attachment :op :id)))
+
+(defn- operation-tag-group [attachments hierarchy op-id]
+  (concat [(att-tags/op-id->tag op-id)]
+          (filter-tag-groups (filter (partial for-operation? op-id) attachments)
+                             hierarchy)))
+
+(defn- add-operation-tag-groups
+  "replace the operation hierarchy template with the actual hierarchies"
+  [attachments hierarchy]
+  (let [[pre operation post] (partition-by #(= (first %) :operation)
+                                           hierarchy)
+        op-ids               (attachments-operation-ids attachments)]
+    (if-let [operation-template (first operation)]
+      (concat pre
+              (map (partial operation-tag-group attachments (rest operation-template))
+                   op-ids)
+              post)
+      hierarchy)))
+
+(defn- add-tags [attachment]
+  (assoc attachment :tags (att-tags/attachment-tags attachment)))
 
 (defn attachment-tag-groups
-  "Get hierarchical attachment grouping by attachments tags.
+  "Get hierarchical attachment grouping by attachments tags for a specific application, based on a tag group hierarchy.
   There are one and two level groups in tag hierarchy (operations are two level groups).
   eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
-  [{attachments :attachments :as application}]
-  (->> (filter (set (attachments-group-types attachments))
-               (cons att-tags/general-group-tag
-                     att-tags/attachment-groups)) ; keep sorted
-       (mapcat (partial tag-grouping-for-group-type application))))
+  ([application]
+   (attachment-tag-groups application attachment-tag-group-hierarchy))
+  ([{attachments :attachments :as application} hierarchy]
+   (let [enriched-attachments (map add-tags attachments)]
+     (->> hierarchy
+          (filter-tag-groups enriched-attachments)
+          (add-operation-tag-groups enriched-attachments)))))

@@ -803,7 +803,7 @@
 
 (defn- describe-assignment-targets [application]
   (let [attachments (map enrich-attachment (:attachments application))]
-    (->> (att-tag-groups/attachment-tag-groups (assoc application :attachments attachments))
+    (->> (att-tag-groups/attachment-tag-groups application)
          (att-tags/sort-by-tags attachments)
          (map attachment-assignment-info))))
 

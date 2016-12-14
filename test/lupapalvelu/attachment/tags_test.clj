@@ -87,33 +87,6 @@
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
     (provided (att-type/tag-by-type anything) => nil))))
 
-
-(fact "tag-grouping-for-group-type - operation"
-  (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
-        operation-id2 (ssg/generate ssc/ObjectIdStr)
-        operation-id3 (ssg/generate ssc/ObjectIdStr)
-        attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
-        application {:primaryOperation {:id operation-id1}
-                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
-                     :attachments attachments}]
-
-    (tag-grouping-for-group-type application :operation) => [[(str "op-id-" operation-id1) [:somegroup]]
-                                                             [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
-                                                             [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
-
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
-    (provided (att-type/tag-by-type anything) => nil)))
-
-
 (fact "attachment-tag-groups"
   (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
         operation-id2 (ssg/generate ssc/ObjectIdStr)
@@ -131,13 +104,18 @@
                       {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
         application {:primaryOperation {:id operation-id1}
                      :secondaryOperations [{:id operation-id2} {:id operation-id3}]
-                     :attachments attachments}]
-    (attachment-tag-groups application) => [[:general]
-                                            [:parties]
-                                            [(str "op-id-" operation-id1) [:somegroup]]
-                                            [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
-                                            [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
-
+                     :attachments attachments}
+        test-hierarchy [[:general]
+                        [:parties]
+                        [:operation
+                         [:somegroup]
+                         [:anothergroup]
+                         [:other]]]]
+    (attachment-tag-groups application test-hierarchy) => [[:general]
+                                                           [:parties]
+                                                           [(str "op-id-" operation-id1) [:somegroup]]
+                                                           [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
+                                                           [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
     (provided (att-type/tag-by-type anything) => nil)))
