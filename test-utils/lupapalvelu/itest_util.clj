@@ -735,11 +735,14 @@
                     :throw-exceptions false})))))
 
 (defn poll-job [apikey command id version limit]
-  (when (pos? limit)
+  (if (pos? limit)
     (let [resp (query apikey (keyword command) :jobId id :version version)]
-      (when-not (= (get-in resp [:job :status]) "done")
-        (Thread/sleep 200)
-        (poll-job apikey command id (get-in resp [:job :version]) (dec limit))))))
+      (if-not (= (get-in resp [:job :status]) "done")
+        (do
+          (Thread/sleep 200)
+          (poll-job apikey command id (get-in resp [:job :version]) (dec limit)))
+        true))
+    false))
 
 ;; statements
 
