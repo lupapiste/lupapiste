@@ -8,42 +8,47 @@
       <thead>
         <th><span data-bind="ltext:'attachment.file'"></span></th>
         <th><span class="batch-required"
-                  data-bind="ltext:'application.attachmentType'"></span>
-          <span class="fill-down"
-                data-bind="ltext: 'attachment.batch-fill-down',
-                           visible: fileCount"></span>
+                  data-bind="ltext:'application.attachmentType'"></span>          
         </th>
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span class="batch-required"
                   data-bind="ltext:'attachment.label.operation'"></span></th>
-        <th><span data-bind="ltext:'signAttachment.select'"></span></th>
-        <th data-bind="ltext:'attachment.label.manuallySetConstructionTime'"></th>
+        <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
+        <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
         <th class="td-center" data-bind="ltext:'remove'"></th>        
       </thead>
-      <tbody data-bind="foreach: rowFiles">
+      <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
-        <td>
-          <div class="batch-autocomplete">
+        <td>          
+          <div class="batch-autocomplete fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'typeGroup')">
             <attachment-type-group-autocomplete params="selectedTypeGroup: $parent.cell( $data, 'typeGroup').value">   
             </attachment-type-group-autocomplete>
             <icon-button params="click: $parent.filler( 'typeGroup', $data),
                                  buttonClass: 'function',
-                                 icon: 'copy',
-                                 enable: $parent.canFillDown( 'typeGroup', $data)"
-                         data-bind="visible: $parent.fileCount() > 1"></icon-button>
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'typeGroup', $data)"
+                         class="fill-down"></icon-button>
           </div>
         </td>
         <td></td>
         <td>
-          <input type="text" class="batch-drawing grid-style-input"
-                 data-bind="textInput: $parent.cell( $data, 'drawing').value">
-          <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
-                               buttonClass: 'function',
-                               icon: 'copy',
-                               enable: $parent.canFillDown( 'drawing', $data)"
-                       data-bind="visible: $parent.fileCount() > 1"></icon-button>
+          <div class="fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'drawing')">
+            <input type="text" class="batch-drawing grid-style-input"
+                   data-bind="textInput: $parent.cell( $data, 'drawing').value">
+            <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-fill-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'drawing', $data)"
+                         class="fill-down"></icon-button>
+          </div>
         </td>
         <td></td>
         <td class="td-center">
@@ -57,6 +62,22 @@
           <i class="lupicon-remove primary"
              data-bind="click: $parent.upload.removeFile"></i></td>
       </tbody>
+      <tfoot data-bind="if: fileCount() > 1">
+        <tr>
+          <td colspan="5"></td>
+          <td class="td-center">
+            <a class="link-btn"
+               data-bind="click: _.wrap( 'sign', footClick ),
+                          ltext: footText( 'sign')"></a>
+          </td>
+          <td class="td-center">
+            <a class="link-btn"
+               data-bind="click: _.wrap( 'construction', footClick ),
+                          ltext: footText( 'construction')"></a>
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
     </table>
     <!-- /ko -->
 

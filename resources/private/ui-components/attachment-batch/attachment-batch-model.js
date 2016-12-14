@@ -6,11 +6,18 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  var service = lupapisteApp.services.attachmentsService;
-
   self.password = ko.observable();
 
-  // Rows is {fileId: {name: Cell}}
+  var currentHover = ko.observable();
+
+  self.fillEvents = function( file, column ) {
+    return {mouseover: _.wrap( {fileId: file.fileId,
+                                column: column},
+                               currentHover),
+            mouseout: _.wrap( {}, currentHover)};
+  };
+
+  // Rows is {fileId: {column: Cell}}
   var rows = ko.observable({});
 
   function Cell( valueObs, required ) {
@@ -27,11 +34,18 @@ LUPAPISTE.AttachmentBatchModel = function() {
     };
   }
 
-  self.cell = function ( file, name ) {
+  self.cell = function ( file, column ) {
     // The weird default value is needed in order to gracefully handle
     // file removal or rather the resulting "phantom" cell query.
-    return _.get(rows(), sprintf( "%s.%s", file.fileId, name), {value: _.noop});
+    return _.get(rows(), sprintf( "%s.%s", file.fileId, column), {value: _.noop});
   };
+
+  function someSelected( column ) {
+    return _.some( _.values( rows() ),
+                   function( row ) {
+                     return util.getIn( row, [column, "value"]);
+                   });
+  }
 
   function badFileHandler( event ) {
     self.badFiles.push( _.pick( event, ["message", "file"]));
@@ -42,12 +56,12 @@ LUPAPISTE.AttachmentBatchModel = function() {
                                           allowMultiple: true,
                                           errorHandler: badFileHandler});
 
-  self.rowFiles = self.disposedComputed( function() {
+  self.disposedSubscribe( self.upload.files, function( files ) {
     var oldRows = rows();
     var newRows = {};
     var keepRows = {};
 
-    _.each( self.upload.files(), function( file ) {
+    _.each( files, function( file ) {
       var fileId = file.fileId;
       if( oldRows[fileId]) {
         keepRows[fileId] = oldRows[fileId];
@@ -57,11 +71,10 @@ LUPAPISTE.AttachmentBatchModel = function() {
                            drawing: new Cell( ko.observable()),
                            context: new Cell( ko.observable, true ),
                            sign: new Cell( ko.observable()),
-                           construction: new Cell( ko.observable())}
+                           construction: new Cell( ko.observable())};
       }
     });
     rows( _.merge( keepRows, newRows ));
-    return self.upload.files();
   });
 
   self.buttonOptions = { buttonClass: "positive caps",
@@ -80,7 +93,7 @@ LUPAPISTE.AttachmentBatchModel = function() {
   });
 
   self.done = function() {
-    console.log( "Done!");
+
   };
 
   self.cancel = function() {
@@ -126,17 +139,16 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   self.canFillDown = function( column, file  ) {
     return self.disposedPureComputed( function() {
-      var index = fileIndex( file );
-      return _.trim( self.cell( file, column ).value())
-        && (index < _.size( self.upload.files()) - 1);
+      if(_.isEqual( currentHover(), {fileId: file.fileId,
+                                     column: column })) {
+        var index = fileIndex( file );
+        return _.trim( self.cell( file, column ).value())
+          && (index < _.size( self.upload.files()) - 1);
+      }
     });
   };
 
-  self.signingSelected = self.disposedPureComputed( function() {
-    return _.some( _.values( rows()), function( cell ) {
-      return cell.sign.value();
-    });
-  });
+  self.signingSelected = self.disposedPureComputed( _.wrap( "sign", someSelected));
 
   self.passwordState = ko.observable( null );
 
@@ -158,4 +170,21 @@ LUPAPISTE.AttachmentBatchModel = function() {
     }
     return "lupicon-" + icon;
   });
+
+
+  self.footClick = function( column ) {
+    var flag = !someSelected( column );
+    _.each( _.values( rows() ),
+            function( row ) {
+              row[column].value( flag );
+            });
+  };
+
+  self.footText = function( column ) {
+    return self.disposedPureComputed( function() {
+      return  "attachment.batch-"
+        + (someSelected( column) ? "clear" : "select");
+    });
+  };
+
 };

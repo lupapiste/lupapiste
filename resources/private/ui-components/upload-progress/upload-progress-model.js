@@ -1,3 +1,6 @@
+// Shows UploadModel progress.
+// Parameter:
+//   upload: UploadModel instance.
 LUPAPISTE.UploadProgressModel = function( params ) {
   "use strict";
   var self = this;
