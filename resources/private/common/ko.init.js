@@ -684,4 +684,23 @@
     return result;
   };
 
+  ko.extenders.autoFetch = function(target, optionsObj) {
+    // Observable extender that fetches content automatically when read and not initialized.
+    // fetchFn should write result in autofetching observable array
+    var fetching = false;
+    return ko.pureComputed({
+      read: function() {
+        if (_.isEmpty(target()) && !fetching) {
+          fetching = true;
+          optionsObj.fetchFn(optionsObj.fetchParams);
+        }
+        return target();
+      },
+      write: function(result) {
+        target(result);
+        fetching = false;
+      }
+    });
+  };
+
 })(jQuery);

@@ -14,8 +14,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
 
-  self.groupTypes = ko.observableArray([]);
-
   self.tagGroups = ko.observableArray([]);
   var tagGroupSets = {};
 
@@ -150,10 +148,6 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.setGroupTypes = function(data) {
-    self.groupTypes(data);
-  };
-
   self.queryAttachments = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
@@ -229,28 +223,17 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryGroupTypes = function() {
-    queryData("attachment-groups", "groups", self.setGroupTypes);
+    queryData("attachment-groups", "groups", self.groupTypes);
   };
+
+  self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
 
   self.queryAttachmentTypes = function() {
     queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
   };
 
-  var attachmentTypes = ko.observableArray();
-  var fetchingAttachmentTypes = false;
-  self.attachmentTypes = ko.pureComputed({
-    read: function() {
-      if (_.isEmpty(attachmentTypes()) && !fetchingAttachmentTypes) {
-        fetchingAttachmentTypes = true;
-        self.queryAttachmentTypes();
-      }
-      return attachmentTypes();
-    },
-    write: function(types) {
-      attachmentTypes(types);
-      fetchingAttachmentTypes = false;
-    }
-  });
+  self.attachmentTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryAttachmentTypes}});
+
   self.attachmentTypeGroups = ko.pureComputed(function() {
     return _(self.attachmentTypes()).map("type-group").uniq().value();
   });
