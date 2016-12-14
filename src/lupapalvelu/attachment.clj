@@ -493,9 +493,9 @@
   (= type att-type))
 
 (defn get-empty-attachment-placeholder-id [attachments type]
-  (util/find-first #(and (type-match? type %)
-                         (empty? (:versions %)))
-                   attachments))
+  (:id (util/find-first #(and (type-match? type %)
+                              (empty? (:versions %)))
+                        attachments)))
 
 (defn get-or-create-attachment!
   "If the attachment-id matches any old attachment, it is returned.
