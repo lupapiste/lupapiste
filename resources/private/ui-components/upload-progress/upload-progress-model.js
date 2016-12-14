@@ -39,11 +39,11 @@ LUPAPISTE.UploadProgressModel = function( params ) {
                         _.bind( targetCount.decrement, targetCount ));
 
   self.isFinished = self.disposedPureComputed( function() {
-    return self.progress() === 100;
+    return _.includes( [100, Infinity], self.progress());
   });
 
   self.percentage = self.disposedPureComputed( function () {
-    return self.progress() + "%";
+    return  self.progress() + "%";
   });
 
   self.progress = self.disposedPureComputed( function() {
@@ -53,15 +53,21 @@ LUPAPISTE.UploadProgressModel = function( params ) {
       loaded += file.loaded || 0;
       total += file.size || 0;
     } );
-    var result = _.round( loaded / total * 100 );
-    return _.isNaN( result ) ? 0 : result;
+
+    var castFun = _.cond( [[_.isNaN, _.wrap( 0, _.constant )],
+                           [_.isFinite, _.constant],
+                           // Infinity result interpretaion comes from IE9 that does
+                           // not support progress info.
+                           [_.stubTrue,_.wrap( 100, _.constant)]]);
+    return castFun( _.round( loaded / total * 100 ))();
+
   });
 
   self.title = self.disposedPureComputed( function() {
     var count = targetCount();
     if( count ) {
       return loc( sprintf( "progress.%s.%s",
-                           self.progress() < 100 ? "add" : "ready",
+                           self.isFinished() ? "ready" : "add",
                            count > 1 ? "many" : "one"),
                   count);
 

@@ -158,8 +158,4 @@ LUPAPISTE.AttachmentBatchModel = function() {
     }
     return "lupicon-" + icon;
   });
-
-  // Make sure that a) type group list is up-to-date and b) we do not
-  // try to do query before auth model is OK.
-  self.addHubListener( "contextService::enter", service.queryAttachmentTypes );
 };
