@@ -1593,7 +1593,7 @@
 "missing.title" "fi" "Suunnitelmaa ei ole liitetty tai viranomainen on merkinnyt sen puutteelliseksi"
 "missing.title" "sv" "Planen har inte bifogats eller myndigheten har märkt den som ofullkomlig"
 "mitat-muutos.help" "en" "The authority will adjust the buildings' dimensions, if necessary"
-"mitat-muutos.help" "fi" "Viranomainen muuttaa rakennukset mittatiedot tarvittaessa."
+"mitat-muutos.help" "fi" "Viranomainen muuttaa rakennuksen mittatiedot tarvittaessa."
 "mitat-muutos.help" "sv" "Vid behov ändrar myndigheten uppgifterna om byggnadens mått."
 "more-prev-app-info-needed-desc" "en" "It has not been possible to retrieve all the necessary information about the property from the background system. Enter the street address of the property in the box below."
 "more-prev-app-info-needed-desc" "fi" "Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Syötä kiinteistön katuosoite alla olevaan kenttään."
