@@ -365,25 +365,29 @@ td.comment-text {
   }
 }
 
+.selected-attachment-types {
+  margin-top: $marginM;
+}
+
 .selected-attachment-types-container {
   min-height: 320px;
   width: 430px;
   .selected-attachment-type-tag {
     position: relative;
     border: 1px solid $input-border-color;
-    height: $grid-input-height;
+    min-height: $grid-input-height;
     width: 100%;
     display: inline-block;
     span.tag-label {
-      line-height: $grid-input-height;
-      vertical-align: top;
-      margin-right: $marginS;
-      margin-left: $marginS;
+      display: inline-block;
+      margin: $marginS;
+      width: 380px;
     }
     .tag-remove {
       position: absolute;
       top: 8px;
       right: 8px;
+      color: $lp-orange;
     }
   }
 }
