@@ -4,14 +4,13 @@ LUPAPISTE.AttachmentTypeGroupAutocompleteModel = function(params) {
 
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
+  self.selected = params.selectedTypeGroup;
+
   var service = lupapisteApp.services.attachmentsService;
 
   function buildTitle(typeGroup) {
     return loc(["attachmentType", typeGroup, "_group_label"].join("."));
   }
-
-
-  self.selected = params.selectedTypeGroup;
 
   var options = self.disposedPureComputed(function() {
     return _.map(service.attachmentTypeGroups(), function(typeGroup) {

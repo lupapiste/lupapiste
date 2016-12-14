@@ -19,23 +19,6 @@
       {:ok false :results (str results)}
       {:ok true})))
 
-(defn validate-org-krysp-details [{krysp-map :krysp id :id}]
-  (let [invalid-scopes (for [[k v] krysp-map
-                             :when (and (:ftpUser v) (not (:version v)))]
-                         [k v])]
-    (when-not (empty? invalid-scopes)
-      {id invalid-scopes})))
-
-(defmonster review-permit-type-organization-with-sftp-account-should-have-krysp-version
-  (let [results (->> (mongo/select :organizations {$or [{:krysp.R {$ne nil}}
-                                                        {:krysp.YA {$ne nil}}]} [:krysp])
-                     (map validate-org-krysp-details)
-                     (remove nil?)
-                     (into {}))]
-    (if (seq results)
-      {:ok false :results (str results)}
-      {:ok true})))
-
 (mongocheck :organizations
   #(when-let [res (sc/check org/Organization (mongo/with-id %))]
      (assoc (select-keys % [:id]) :errors res))

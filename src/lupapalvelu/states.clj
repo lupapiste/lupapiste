@@ -163,6 +163,7 @@
 (def all-application-states-but-draft-or-terminal (difference all-application-states #{:draft} terminal-states))
 
 (def pre-verdict-but-draft (difference pre-verdict-states #{:draft}))
+(def all-but-draft (difference all-states #{:draft}))
 
 (defn- drop-state-set [drop-states]
   (cond

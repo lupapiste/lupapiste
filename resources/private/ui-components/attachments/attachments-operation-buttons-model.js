@@ -16,7 +16,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
 
   self.attachmentTemplatesAdd = function() {
     hub.send("show-dialog", { ltitle: "attachments.require-attachments",
-                              size: "large",
+                              size: "medium",
                               component: "attachments-require"});
   };
 
