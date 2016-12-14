@@ -46,13 +46,13 @@
                   <!-- /ko -->
                 </div>
                 <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
-                    <a href="/document-search" data-bind="attr: {'title': loc('Dokumentit')}">
+                    <a data-bind="attr: {href: loc('document.search.url'), title: loc('Dokumentit')}">
                         <span class="lupicon-archives"></span>
                         <span class="narrow-hide" data-bind="ltext: 'Dokumentit'"></span>
                     </a>
                 </div>
                 <div class="header-box" data-bind="visible: $root.showArchiveMenuOptions">
-                    <a href="/tiedonohjaus" data-bind="attr: {'title': loc('Tiedonohjaus')}">
+                    <a data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
                         <span class="lupicon-tree-path"></span>
                         <span class="narrow-hide" data-bind="ltext: 'Tiedonohjaus'"></span>
                     </a>
