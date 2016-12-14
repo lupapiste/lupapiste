@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.attachment.tags :refer :all]
+            [lupapalvelu.attachment.tag-groups :refer :all]
             [lupapalvelu.attachment.type :as att-type]
             [sade.schemas :as ssc]
             [sade.schema-generators :as ssg]))
@@ -11,6 +12,9 @@
                    application-state-filters
                    group-and-type-filters
                    not-needed-filters)
+
+(testable-privates lupapalvelu.attachment.tag-groups
+                   type-groups-for-operation)
 
 (facts attachment-tags
 
@@ -128,7 +132,6 @@
         application {:primaryOperation {:id operation-id1}
                      :secondaryOperations [{:id operation-id2} {:id operation-id3}]
                      :attachments attachments}]
-
     (attachment-tag-groups application) => [[:general]
                                             [:parties]
                                             [(str "op-id-" operation-id1) [:somegroup]]

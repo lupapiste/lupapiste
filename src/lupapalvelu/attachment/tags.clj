@@ -34,11 +34,11 @@
   (when file-id
     :hasFile))
 
-(defn- op-id->tag [op-id]
+(defn op-id->tag [op-id]
   (when op-id
     (str "op-id-" op-id)))
 
-(defn- tag-by-group-type [{group-type :groupType {op-id :id} :op}]
+(defn tag-by-group-type [{group-type :groupType {op-id :id} :op}]
   (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))
       (when op-id :operation)
       general-group-tag))
@@ -46,7 +46,7 @@
 (defn- tag-by-operation [{{op-id :id} :op :as attachment}]
   (op-id->tag op-id))
 
-(defn- tag-by-type [{{op-id :id} :op :as attachment}]
+(defn tag-by-type [{{op-id :id} :op :as attachment}]
   (or (att-type/tag-by-type attachment)
       (when op-id att-type/other-type-group)))
 
@@ -61,51 +61,6 @@
               tag-by-file-status)
         attachment)
        (remove nil?)))
-
-(defn- attachments-group-types [attachments]
-  (->> (map tag-by-group-type attachments)
-       (remove nil?)
-       (map keyword)
-       distinct))
-
-(defn- attachments-operation-ids [attachments]
-  (->> (map (comp :id :op) attachments)
-       (remove nil?)
-       distinct))
-
-(defn- type-groups-for-operation
-  "Returns attachment type based grouping, used inside operation groups."
-  [attachments operation-id]
-  (->> (filter (comp #{operation-id} :id :op) attachments)
-       (map tag-by-type)
-       distinct))
-
-(defn- operation-grouping
-  "Creates subgrouping for operations attachments if needed."
-  [type-groups operation-id]
-  (if (empty? type-groups)
-    [(op-id->tag operation-id)]
-    (->> (map vector type-groups)
-         (cons (op-id->tag operation-id)))))
-
-(defmulti tag-grouping-for-group-type (fn [application group-type] group-type))
-
-(defmethod tag-grouping-for-group-type :default [_ group-type]
-  [[group-type]])
-
-(defmethod tag-grouping-for-group-type :operation [{attachments :attachments primary-op :primaryOperation secondary-ops :secondaryOperations :as application} _]
-  (->> (map :id (cons primary-op secondary-ops)) ; all operation ids sorted
-       (filter (set (attachments-operation-ids attachments)))
-       (map #(-> (type-groups-for-operation attachments %)
-                 (operation-grouping %)))))
-
-(defn attachment-tag-groups
-  "Get hierarchical attachment grouping by attachments tags.
-  There are one and two level groups in tag hierarchy (operations are two level groups).
-  eg. [[:default] [:parties] [:building-site] [opid1 [:paapiirustus] [:iv_suunnitelma] [:default]] [opid2 [:kvv_suunnitelma] [:default]]]"
-  [{attachments :attachments :as application}]
-  (->> (filter (set (attachments-group-types attachments)) (cons general-group-tag attachment-groups)) ; keep sorted
-       (mapcat (partial tag-grouping-for-group-type application))))
 
 (defn- filter-tag-group-attachments [attachments [tag & _]]
   (filter #((-> % :tags set) tag) attachments))
