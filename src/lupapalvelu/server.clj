@@ -30,6 +30,7 @@
             [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
             [lupapalvelu.attachment-api]
+            [lupapalvelu.attachment.bind-attachments-api]
             [lupapalvelu.authorization-api]
             [lupapalvelu.comment-api]
             [lupapalvelu.statement-api]
