@@ -6,6 +6,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.preview :as preview]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.job :as job]
             [lupapalvelu.mongo :as mongo]
             [sade.schemas :as ssc]))
@@ -21,33 +22,42 @@
    (sc/optional-key :constructionTime) sc/Bool})
 
 (defn- bind-attachments! [{:keys [application user created]} file-infos job-id]
-  (doseq [filedata file-infos
-          :let [fileId (:fileId filedata)
-                type   (:type filedata)]]
-    (job/update job-id assoc fileId {:status :working :fileId fileId})
-    (if-let [mongo-file (mongo/download fileId)]
-      (let [conversion-data    (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
-            placeholder-id     (att/get-empty-attachment-placeholder-id (:attachments application) type)
-            attachment-options (merge
-                                 (select-keys filedata [:group :contents])
-                                 {:attachment-id placeholder-id
-                                  :created created
-                                  :attachment-type type})
-            attachment      (att/get-or-create-attachment! application user attachment-options)
-            version-options (merge
-                              (select-keys mongo-file [:fileId :filename :contentType])
-                              {:created created
-                               :original-file-id fileId}
-                              (:result conversion-data)
-                              (:file conversion-data))
-            linked-version  (att/set-attachment-version! application user attachment version-options)]
-        (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
-        (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
-        (att/cleanup-temp-file (:result conversion-data))
-        (job/update job-id assoc fileId {:status :done :fileId fileId}))
-      (do
-        (warnf "no file with file-id %s in mongo" (:fileId))
-        (job/update job-id assoc fileId {:status :error :fileId fileId})))))
+  (reduce
+    (fn [results {:keys [fileId type] :as filedata}]
+      (job/update job-id assoc fileId {:status :working :fileId fileId})
+      (if-let [mongo-file (mongo/download fileId)]
+        (let [conversion-data (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
+              placeholder-id  (when (not-any? #(= type (:type %)) results)
+                                (att/get-empty-attachment-placeholder-id (:attachments application) type))
+              attachment-options (merge
+                                   (select-keys filedata [:group :contents])
+                                   {:attachment-id   placeholder-id
+                                    :created         created
+                                    :attachment-type type})
+              attachment (att/get-or-create-attachment! application user attachment-options)
+              version-options (merge
+                                (select-keys mongo-file [:fileId :filename :contentType])
+                                (select-keys filedata [:contents :group])
+                                {:created          created
+                                 :original-file-id fileId}
+                                (:result conversion-data)
+                                (:file conversion-data))
+              linked-version (att/set-attachment-version! application user attachment version-options)]
+          (preview/preview-image! (:id application) (:fileId version-options) (:filename version-options) (:contentType version-options))
+          (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+          (att/cleanup-temp-file (:result conversion-data))
+          (job/update job-id assoc fileId {:status :done :fileId fileId})
+          {:original-file-id fileId
+           :fileId (:fileId linked-version)
+           :attachment-id (:id linked-version)
+           :type type
+           :status :done})
+        (do
+          (warnf "no file with file-id %s in mongo" (:fileId))
+          (job/update job-id assoc fileId {:status :error :fileId fileId})
+          {:fileId fileId :type type :status :error})))
+    []
+    file-infos))
 
 (defn- bind-job-status [data]
   (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
