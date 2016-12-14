@@ -102,6 +102,14 @@ LUPAPISTE.AttachmentBatchModel = function() {
     rows( {});
   };
 
+  // The fill/copy down functionality works as follows:
+  // 1. The filling is possible if the file is not the last and the
+  //    current cell has a value.
+  // 2. The filling action is determined by policy. If number then the
+  //    filling is done with fillNumber, otherwise the fill value is just
+  //    a copy of the current cell value.
+  // 3. The filling action is executed for every following file.
+
   function fileIndex( file ) {
     return _.findIndex( self.upload.files(), file);
   }
@@ -123,7 +131,7 @@ LUPAPISTE.AttachmentBatchModel = function() {
 
   function fillDown( column, file, policy ) {
     var fill = self.cell( file, column ).value();
-    var fillFun = policy === "number" ? fillNumber( fill ) : _.constant( fill );
+    var fillFun = policy === "number" ? fillNumber( fill ) : _.constant(fill);
     var index = fileIndex( file );
     _.each( _.drop( self.upload.files(), index + 1 ),
             function( f ) {
@@ -148,7 +156,8 @@ LUPAPISTE.AttachmentBatchModel = function() {
     });
   };
 
-  self.signingSelected = self.disposedPureComputed( _.wrap( "sign", someSelected));
+  self.signingSelected = self.disposedPureComputed( _.wrap( "sign",
+                                                            someSelected));
 
   self.passwordState = ko.observable( null );
 
