@@ -288,6 +288,8 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
+   echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
+   rm -rf /tmp/*/webdriver-py-profilecopy
    echo "Writing report.html"
    rebot --outputdir target --report report.html --name Roboto target/*.xml
 }
