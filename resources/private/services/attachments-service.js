@@ -28,6 +28,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
+    self.groupTypes([]);
     self.authModel.refresh({id: self.applicationId()});
   });
 
@@ -227,6 +228,8 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
+
+  hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
 
   self.queryAttachmentTypes = function() {
     queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
