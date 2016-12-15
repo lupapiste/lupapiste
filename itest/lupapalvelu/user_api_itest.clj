@@ -45,6 +45,15 @@
                                   :total 6
                                   :display 1
                                   :echo "123"})})))
+
+(facts "Check passwords"
+       (fact "Good password"
+             (command pena :check-password :password "pena") => ok?)
+       (fact "Bad password"
+             (command pena :check-password :password "bad") => {:ok false :text "error.password"})
+       (fact "Empty password"
+             (command pena :check-password :password "") => fail?))
+
 ;;
 ;; ==============================================================================
 ;; Creating users:

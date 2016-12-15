@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
+            [clojure.edn :as edn]
             [sade.core :refer [fail!]]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
@@ -550,3 +551,6 @@
         (recur (concat leafs (remove sequential? children)) (apply concat (filter sequential? children)))
         leafs))
     [tree]))
+
+(defn read-edn-resource [file-path]
+  (->> file-path io/resource slurp edn/read-string))

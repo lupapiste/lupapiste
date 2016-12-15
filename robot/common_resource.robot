@@ -1,14 +1,14 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   10
+${WAIT_DELAY}                   12
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -704,13 +704,10 @@ Do prepare new request
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
-  Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
-  List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list] option:contains('${templateName}')
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
-  Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Select From Autocomplete  div[data-test-id="attachment-type-autocomplete"]  ${templateName}
+  Wait Until Element Is Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment

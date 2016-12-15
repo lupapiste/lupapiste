@@ -44,7 +44,7 @@
   {:description "Return the assignments for the current application"
    :parameters [id]
    :pre-checks [assignments-enabled-for-application]
-   :states states/all-application-states-but-draft-or-terminal
+   :states (conj states/all-application-states-but-draft-or-terminal :acknowledged) ;LPK-2519
    :user-roles #{:authority}
    :categories #{:documents}}
   [{user     :user}]
@@ -56,7 +56,7 @@
    :user-roles #{:authority}
    :pre-checks [assignments-enabled-for-application]
    :input-validators [(partial action/non-blank-parameters [:id :lang])]
-   :states   states/all-application-states-but-draft-or-terminal}
+   :states   (conj states/all-application-states-but-draft-or-terminal :acknowledged)}
   [{:keys [application]}]
   (ok :targets (assignment/assignment-targets application)))
 

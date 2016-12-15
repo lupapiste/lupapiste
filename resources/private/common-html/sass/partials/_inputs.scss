@@ -119,6 +119,12 @@
   border: none;
 }
 
+@include toggle-helper ( signbox, "\e619", "\e620" ) {}
+.signbox-wrapper {
+  border: none;
+}
+
+
 // Radio buttons
 @include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
 
@@ -295,4 +301,8 @@ input.grid-style-input--wide {
     }
   }
 }
+}
+
+.drop-zone--highlight {
+  border: 4px dashed $primary !important;
 }

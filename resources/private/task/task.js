@@ -90,7 +90,7 @@ var taskPageController = (function() {
     return false;
   }
 
-  function reviewDone() {
+  function reviewDoneAjax() {
     ajax.command("review-done", { id: applicationModel.id(), taskId: currentTaskId, lang: loc.getCurrentLanguage()})
       .pending(pending)
       .processing(processing)
@@ -116,6 +116,17 @@ var taskPageController = (function() {
         LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);
       })
       .call();
+  }
+
+  function reviewDone() {
+    hub.send("show-dialog", {ltitle: "areyousure",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {ltext: "areyousure.review-done",
+                                               yesFn: reviewDoneAjax,
+                                               lyesTitle: "yes",
+                                               lnoTitle: "no"}});
+
   }
 
   /**

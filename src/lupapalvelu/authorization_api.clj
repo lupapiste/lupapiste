@@ -7,6 +7,7 @@
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
             [sade.util :as util]
+            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.action :refer [defquery defcommand defraw update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.authorization :as auth]
@@ -36,27 +37,6 @@
         invites    (mapcat invites-with-application data)
         my-invites (filter #(= id (get-in % [:user :id])) invites)]
     (ok :invites my-invites)))
-
-(defn- create-invite-email-model [command conf recipient]
-  (assoc (notifications/create-app-model command conf recipient)
-    :message (get-in command [:data :text])
-    :recipient-email (:email recipient)
-    :inviter-email (-> command :user :email)))
-
-(notifications/defemail :invite  {:recipients-fn :recipients
-                                  :model-fn create-invite-email-model})
-
-(notifications/defemail :guest-invite  {:recipients-fn :recipients
-                                        :model-fn create-invite-email-model})
-
-(defn- create-prev-permit-invite-email-model [command conf recipient]
-  (assoc (notifications/create-app-model command conf recipient)
-    :kuntalupatunnus (get-in command [:data :kuntalupatunnus])
-    :recipient-email (:email recipient)))
-
-(notifications/defemail :invite-to-prev-permit  {:recipients-fn :recipients
-                                                 :model-fn create-prev-permit-invite-email-model
-                                                 :subject-key "invite"})
 
 (def settable-roles #{:writer :foreman})
 (def changeable-roles #{:writer :foreman})

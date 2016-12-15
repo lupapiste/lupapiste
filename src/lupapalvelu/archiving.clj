@@ -106,7 +106,7 @@
                                   {:processMetadata.tila                     {$ne :arkistoitu}
                                    :processMetadata.sailytysaika.arkistointi {$ne :ei}}
                                   ; Check if the application is not in a final state
-                                  {:state {$nin [:closed :extinct :foremanVerdictGiven]}}]}]
+                                  {:state {$nin [:closed :extinct :foremanVerdictGiven :acknowledged]}}]}]
 
     (when (zero? (mongo/count :applications pre-verdict-query))
       (action/update-application

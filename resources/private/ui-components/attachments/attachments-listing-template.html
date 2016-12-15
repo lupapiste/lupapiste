@@ -14,7 +14,8 @@
                              targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
   <!-- /ko -->
   <div class="clear"></div>
-  <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
+  <attachment-batch></attachment-batch>
+
 
   <suti-display></suti-display>
 
@@ -29,15 +30,6 @@
   <div data-bind="component: { name: 'attachments-accordions',
                                params: { pageName: $data.pageName} }"></div>
   <!-- /ko -->
-  <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
-    <div class="dialog-header">
-      <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
-      <p class="dialog-close close lupicon-remove"></p>
-    </div>
-    <div class="dialog-content">
-      <div class="attachment-templates"></div>
-    </div>
-  </div>
 
   <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
   <div data-test-id="no-filtered-attachments-info">
