@@ -285,7 +285,7 @@
   (and (map?    (:attachment-type options-map))
        (number? (:created options-map))))
 
-(defn- resolve-group-name [{documents :documents} {op-id :id op-name :name :as group}]
+(defn- resolve-group-name [{op-id :id op-name :name :as group} {documents :documents}]
   (if (or (ss/blank? op-id) (ss/not-blank? op-name))
     group
     (->> (map (comp :op :schema-info) documents)
@@ -305,7 +305,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     (resolve-group-name application group)
+                     (resolve-group-name group application)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
@@ -453,7 +453,8 @@
   ([application user {attachment-id :id :as attachment} options]
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
-     (let [version-model (make-version attachment user options)
+     (let [options       (update options :group resolve-group-name application)
+           version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application user attachment options)
