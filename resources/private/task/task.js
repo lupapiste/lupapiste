@@ -122,7 +122,7 @@ var taskPageController = (function() {
     hub.send("show-dialog", {ltitle: "areyousure",
                              size: "medium",
                              component: "yes-no-dialog",
-                             componentParams: {text: loc("areyousure.review-done"),
+                             componentParams: {ltext: "areyousure.review-done",
                                                yesFn: reviewDoneAjax,
                                                lyesTitle: "yes",
                                                lnoTitle: "no"}});
