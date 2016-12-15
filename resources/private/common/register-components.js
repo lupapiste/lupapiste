@@ -162,7 +162,12 @@ jQuery(document).ready(function() {
     {name: "state-icons"},
     {name: "docgen-calculation"},
     {name: "docgen-footer-sum"},
-    {name: "reject-note"}
+    {name: "reject-note"},
+    {name: "upload-button"},
+    {name: "attachment-batch"},
+    {name: "upload-progress"},
+    {name: "icon-button"},
+    {name: "toggle"}
 ];
 
   ko.registerLupapisteComponents(components);

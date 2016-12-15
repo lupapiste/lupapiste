@@ -21,6 +21,7 @@ LUPAPISTE.VerdictAppealBubbleModel = function( params ) {
   self.error = m.error;
   self.waiting = m.waiting;
   self.test = "test";
+  self.dropZone = _.uniqueId( "appeal-drop-zone-");
   if( !_.isNull(params.test) || _.isUndefined( params.test) ) {
     self.test = ko.isObservable( params.test ) ? params.test() : params.test;
   }
