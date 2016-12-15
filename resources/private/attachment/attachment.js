@@ -40,9 +40,6 @@ var attachment = (function() {
       if (!service.getAttachment(attachmentId())) {
         service.queryOne(attachmentId());
       }
-      if (_.isEmpty(service.groupTypes())) {
-        service.queryGroupTypes();
-      }
     }
   });
 

@@ -361,17 +361,19 @@
 
 (defcommand create-attachments
   {:description      "Authority can set a placeholder for an attachment"
-   :parameters       [id attachmentTypes]
+   :parameters       [id attachmentTypes group]
    :pre-checks       [(fn [{{attachment-types :attachmentTypes} :data application :application}]
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                           (fail :error.unknown-attachment-type)))
                       app/validate-authority-in-drafts]
-   :input-validators [(partial action/vector-parameters [:attachmentTypes])]
+   :input-validators [(partial action/vector-parameters [:attachmentTypes])
+                      (fn-> (get-in [:data :group]) validate-group-op)
+                      (fn-> (get-in [:data :group]) validate-group-type)]
    :user-roles       #{:authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes created false true true)]
+  (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes group created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 

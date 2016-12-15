@@ -17,7 +17,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.groupTypes   = service.groupTypes;
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
@@ -181,28 +180,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  function groupToString(group) {
-    return _.filter([_.get(group, "id") ? "operation" : _.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
-  }
-  var groupMapping = {};
-  self.selectableGroups = self.disposedComputed(function() {
-    // Use group strings in group selector
-    groupMapping = _.keyBy(self.groupTypes(), groupToString);
-    return _.keys(groupMapping);
+  self.operationSelectorEditable = self.disposedPureComputed(function() {
+    return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
   });
-  self.selectedGroup = ko.observable(groupToString(self.attachment().group()));
-  self.disposedSubscribe(self.selectedGroup, function(groupString) {
-    self.attachment().group(_.get(groupMapping, groupString));
-  });
-  self.hasOperationSelector = _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
-  self.getGroupOptionsText = function(itemStr) {
-    var item = _.get(groupMapping, itemStr);
-    if (_.get(item, "groupType") === "operation") {
-      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
-    } else if (_.get(item, "groupType")) {
-      return loc([item.groupType, "_group_label"]);
-    }
-  };
+
   self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 

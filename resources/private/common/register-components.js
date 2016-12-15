@@ -143,6 +143,7 @@ jQuery(document).ready(function() {
     {name: "attachment-type-group-autocomplete"},
     {name: "attachment-type-autocomplete"},
     {name: "attachments-require"},
+    {name: "attachment-group-selector"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
