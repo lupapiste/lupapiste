@@ -15,7 +15,7 @@ NICENESS=+15
 STARTUPTIMEOUT=60
 PERFECT=
 BLACKLIST=
-RETRIES=5
+RETRIES=3
 UPDATE=15
 
 # kill recursive all leaf processes and the given one
@@ -253,7 +253,7 @@ run_test() {
       test "0" "=" "$BOT" && break
       # sometimes ff seems to have persistent trouble starting and/or selenium connecting to it
       # ruling out causes by by spreading pybot startups temporally and seeing if the issue persists
-      sleep 5 
+      sleep 5
    done
    # round 0 is first
    ROUND=$(expr $ROUND "+" 1)
