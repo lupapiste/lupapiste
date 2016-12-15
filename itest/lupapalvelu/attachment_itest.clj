@@ -37,7 +37,8 @@
                         :create-attachments
                         :id application-id
                         :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                        :group nil)
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -267,7 +268,8 @@
                             :create-attachments
                             :id application-id
                             :attachmentTypes [{:type-group "muut" :type-id "muu"}
-                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]) => ok?
+                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                            :group nil) => ok?
         attachment-ids (:attachmentIds resp)
         hidden-id (first attachment-ids)
         visible-id (second attachment-ids)
@@ -455,7 +457,8 @@
                 resp (command raktark-jarvenpaa
                               :create-attachments
                               :id application-id
-                              :attachmentTypes [type]) => ok?
+                              :attachmentTypes [type]
+                              :group nil) => ok?
                 attachment {:id (first (:attachmentIds resp))
                             :type type}
                 attachment-id (:id attachment)]
@@ -535,7 +538,8 @@
           resp (command raktark-jarvenpaa
                         :create-attachments
                         :id application-id
-                        :attachmentTypes [type]) => ok?
+                        :attachmentTypes [type]
+                        :group nil) => ok?
           attachment {:id (first (:attachmentIds resp))
                       :type type}
           attachment-id (:id attachment)]
@@ -973,7 +977,7 @@
       (fact "Give verdict"
         (command sonja :check-for-verdict :id application-id) => ok?)
       (facts "add attachment"
-        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
+        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}] :group nil)
               post-verdict-attachment-id (-> resp :attachmentIds first)
               attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
           (fact "added"
