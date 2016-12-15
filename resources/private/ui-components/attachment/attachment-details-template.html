@@ -216,7 +216,8 @@
               <div class="col2 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
                 <div data-bind="component: {name: 'attachment-group-selector',
-                                            params: { authModel: attachment().authModel,
+                                            params: { legacy: true,
+                                                      authModel: attachment().authModel,
                                                       editable: operationSelectorEditable,
                                                       currentGroup: attachment().group }}"></div>
               </div>

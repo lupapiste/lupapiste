@@ -1,11 +1,25 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="attachment-group-selector-template">
+  <div class="inline" data-bind="template: componentTemplate"></div>
+</script>
 
-  <select data-test-id="attachment-operation-select"
+<script class="ko-template" type="text/x-jquery-tmpl" id="attachment-group-selector-legacy-template">
+  <select data-bind="options: $data.selectableGroups,
+                     optionsText: $data.getGroupOptionsText,
+                     optionsCaption: loc('attachment.label.operation.choose'),
+                     value: $data.selectedGroup,
+                     valueAllowUnset: true,
+                     enable: $data.updateAllowed(),
+                     testId: 'attachment-operation-select'"></select>
+</script>
+
+<script class="ko-template" type="text/x-jquery-tmpl" id="attachment-group-selector-modern-template">
+  <select class="dropdown dropdown--full-width"
           data-bind="options: $data.selectableGroups,
                      optionsText: $data.getGroupOptionsText,
                      optionsCaption: loc('attachment.label.operation.choose'),
                      value: $data.selectedGroup,
                      valueAllowUnset: true,
-                     enable: $data.updateAllowed() "></select>
+                     enable: $data.updateAllowed(),
+                     testId: 'attachment-operation-select'"></select>
 
 </script>

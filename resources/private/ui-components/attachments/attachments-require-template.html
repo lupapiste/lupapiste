@@ -32,6 +32,13 @@
                                                  lSubmitTitle: 'ok',
                                                  isSubmitEnabled: submitEnabled } }"></div>
         </div>
+
+        <div>
+          <label data-bind="ltext: 'attachment.label.operation'"></label>
+          <div data-bind="component: { name: 'attachment-group-selector',
+                                       params: { authModel: lupapisteApp.models.applicationAuthModel,
+                                                 currentGroup: selectedGroup }}"></div>
+        </div>
       </div>
 
     </script>

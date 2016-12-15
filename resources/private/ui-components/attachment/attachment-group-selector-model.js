@@ -7,6 +7,8 @@ LUPAPISTE.AttachmentGroupSelectorModel = function(params) {
   var authModel = params.authModel;
   var currentGroup = params.currentGroup;
 
+  self.componentTemplate = params.legacy ? "attachment-group-selector-legacy-template" : "attachment-group-selector-modern-template";
+
   var service = lupapisteApp.services.attachmentsService;
 
   function groupToString(group) {
@@ -20,11 +22,13 @@ LUPAPISTE.AttachmentGroupSelectorModel = function(params) {
     return _.keys(groupMapping);
   });
 
-
-  self.selectedGroup = ko.observable(groupToString(currentGroup()));
-
-  self.disposedSubscribe(self.selectedGroup, function(groupString) {
-    currentGroup(_.get(groupMapping, groupString));
+  self.selectedGroup = self.disposedPureComputed({
+    read: function() {
+      return groupToString(currentGroup());
+    },
+    write: function(groupString) {
+      currentGroup(_.get(groupMapping, groupString));
+    }
   });
 
   self.getGroupOptionsText = function(itemStr) {

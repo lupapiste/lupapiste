@@ -18,9 +18,21 @@ LUPAPISTE.AttachmentsRequireModel = function() {
     }
   });
 
+  self.selectableGroups = self.disposedPureComputed(function() {
+    return service.groupTypes();
+  });
+
   self.removeSelection = function(ind) {
     self.selectedTypes.splice(ind(),1);
   };
+
+  self.selectedGroup = ko.observable();
+
+  self.subscribeChanged(self.selectedTypes, function(value, oldValue) {
+    if (_.isEmpty(oldValue) && !_.isEmpty(value)) {
+      self.selectedGroup(_.find(self.selectableGroups(), ["groupType", util.getIn(value, [0, "metadata", "grouping"])]));
+    }
+  });
 
   self.submitEnabled = self.disposedPureComputed(function() {
     return !_.isEmpty(self.selectedTypes());
