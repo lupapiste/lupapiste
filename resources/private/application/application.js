@@ -167,6 +167,7 @@
 
     // Plain data
     isInitializing = true;
+    authorizationModel.setData({});
     applicationModel._js = app;
     // Update observables
     var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
