@@ -101,6 +101,7 @@ Fill review info
 
 Transfering task emits LupapisteApi.integrationSent function call
   Click enabled by test id  review-done
+  Confirm yes no dialog
   Confirm  dynamic-ok-confirm-dialog
   Permit properties should be visible in dialog
 
