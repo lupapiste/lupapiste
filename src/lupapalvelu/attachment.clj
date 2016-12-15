@@ -619,13 +619,10 @@
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
   (let [preview-id (str file-id "-preview")]
-    (if-let [attachment (attachment-fn file-id)]
+    (if-let [{:keys [filename contentType application]} (attachment-fn file-id)]
       (do
         (when (zero? (mongo/count :fs.files {:_id preview-id}))
-          (let [file-name (:filename attachment)
-                content-type (:contentType attachment)
-                application-id (:application attachment)]
-            (preview/create-preview! file-id file-name content-type application-id mongo/*db-name*)))
+          (preview/create-preview! file-id filename contentType application mongo/*db-name*))
         (output-attachment preview-id false attachment-fn))
       not-found)))
 

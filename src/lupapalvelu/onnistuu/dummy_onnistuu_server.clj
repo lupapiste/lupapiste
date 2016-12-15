@@ -119,4 +119,4 @@
     (let [{:keys [content contentType]} pdf
           document (content)]
       (->> (content) (resp/status 200) (resp/content-type contentType)))
-    (resp/status 404 "Not fould")))
+    (resp/status 404 "Not found")))
