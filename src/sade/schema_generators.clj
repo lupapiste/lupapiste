@@ -154,12 +154,14 @@
 (register-generator ssc/FinnishOVTid finnish-ovt)
 
 (def ddMMyy-formatter (ctf/formatter "ddMMyy"))
-(def hetu (gen/fmap (fn [[day n]] (let [date (->> (* 86400000 day) ; day in milliseconds
+(def hetu (gen/fmap (fn [[day n]] (let [day-ts (* 86400000 day) ; day in milliseconds
+                                        date (->> day-ts
                                                   (ctc/from-long)
                                                   (ctf/unparse ddMMyy-formatter))
                                         end  (format "9%02d" n)
-                                        checksum  (sv/hetu-checksum (str date \- end))]
-                                    (str date \- end checksum)))
+                                        delim     (if (>= day-ts 946684800000) \A \-)
+                                        checksum  (sv/hetu-checksum (str date delim end))]
+                                    (str date delim end checksum)))
                     (gen/tuple (gen/fmap #(mod % 36524) gen/large-integer)
                                (gen/fmap #(mod % 100) gen/int))))
 

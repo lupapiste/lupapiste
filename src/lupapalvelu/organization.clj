@@ -484,9 +484,7 @@
     (.close iterator)
     (DataUtilities/collection list)))
 
-(defn parse-shapefile-to-organization-areas [org-id tempfile tmpdir file-info]
-  (when-not (= (:content-type file-info) "application/zip")
-    (fail! :error.illegal-shapefile))
+(defn parse-shapefile-to-organization-areas [org-id tempfile tmpdir]
   (let [target-dir (util/unzip (.getPath tempfile) tmpdir)
         shape-file (first (util/get-files-by-regex (.getPath target-dir) #"^.+\.shp$"))
         data-store (FileDataStoreFinder/getDataStore shape-file)

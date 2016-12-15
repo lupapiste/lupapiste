@@ -111,7 +111,7 @@
 (defn stamp [stamp file-id out {:keys [x-margin y-margin transparency] :as options}]
   {:pre [(number? x-margin) (number? y-margin) (number? transparency)]}
   (try
-    (let [{content-type :content-type :as attachment} (mongo/download file-id)]
+    (let [{content-type :contentType :as attachment} (mongo/download file-id)]
       (with-open [in ((:content attachment))]
         (stamp-stream stamp content-type in out options)))
     (catch InvalidPdfException e

@@ -564,13 +564,6 @@
           (get-in attachment [:latestVersion :version :major]) => 1
           (get-in attachment [:latestVersion :version :minor]) => 0)))))
 
-(defn- poll-job [id version limit]
-  (when (pos? limit)
-    (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
-      (when-not (= (get-in resp [:job :status]) "done")
-        (Thread/sleep 200)
-        (poll-job id (get-in resp [:job :version]) (dec limit))))))
-
 (facts "Stamping"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
         application-id (:id application)
@@ -607,7 +600,7 @@
     (fact "FileId is returned" file-id => truthy)
 
     ; Poll for 5 seconds
-    (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+    (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
           comments-after (:comments (query-application sonja application-id))]
@@ -644,7 +637,7 @@
                               :section "")]
           resp => ok?
           ; Poll for 5 seconds
-          (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+          (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
           (fact "Latest version has chaned"
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]

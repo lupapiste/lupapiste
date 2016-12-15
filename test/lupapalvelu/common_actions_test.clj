@@ -35,6 +35,7 @@
                           :set-attachment-type
                           :set-attachment-meta
                           :upload-attachment
+                          :bind-attachments
                           :rotate-pdf
                           :pdf-export
                           :submitted-application-pdf-export
