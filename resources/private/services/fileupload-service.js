@@ -40,7 +40,7 @@ LUPAPISTE.FileuploadService = function() {
 
     var fileInputId = options.id;
     var hubscriptions = [];
-    var connections = [];
+    var connections = [];  // jqXHRs
 
     function hubscribe( message, fun ) {
       hubscriptions.push( hub.subscribe( sprintf( "%s::%s",
@@ -97,9 +97,9 @@ LUPAPISTE.FileuploadService = function() {
           connections.push( data.submit() );
         } else {
           hubSend( "badFile",
-                   {message: acceptedFile
-                    ? "error.file-upload.illegal-upload-size"
-                    : "error.file-upload.illegal-file-type",
+                   {message: loc(acceptedFile
+                                 ? "error.file-upload.illegal-upload-size"
+                                 : "error.file-upload.illegal-file-type"),
                     file: file}
                  );
         }
@@ -115,7 +115,6 @@ LUPAPISTE.FileuploadService = function() {
                                   files: data.result.files});
       },
       fail: function(e, data) {
-        console.log( "Fail:", data );
         hubSend("filesUploaded", {
           status: "failed",
           message: data.textStatus || data.jqXHR.responseJSON.text

@@ -6,6 +6,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+ try+]]
             [monger.operators :refer :all]
+            [swiss.arrows :refer :all]
             [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
@@ -398,9 +399,9 @@
    :input-validators [(partial action/non-blank-parameters [:password])]}
   [{user :user}]
   (if (security/check-password password
-                               (some->> user
+                               (some-<>> user
                                         :id
-                                        (mongo/by-id :users)
+                                        (mongo/by-id :users <> {:private.password true})
                                         :private
                                         :password))
     (ok)

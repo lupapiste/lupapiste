@@ -54,7 +54,7 @@ LUPAPISTE.AttachmentBatchModel = function() {
   self.upload = new LUPAPISTE.UploadModel( self,
                                          {dropZone: "#application-attachments-tab",
                                           allowMultiple: true,
-                                          errorHandler: badFileHandler});
+                                          badFileHandler: badFileHandler});
 
   self.disposedSubscribe( self.upload.files, function( files ) {
     var oldRows = rows();

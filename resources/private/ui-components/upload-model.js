@@ -3,11 +3,16 @@
 // queue.
 // Parameters [optional]:
 //  [files]: Observable array.
-//  [allowMultiple]: Whether multiple files can be uploaded at the same time (false).
+//  [allowMultiple]: Whether multiple files can be uploaded at the
+//  same time (false).
 //  [readOnly]: If true only the file listing is shown (false).
 //  [dropZone]: Dropzone selector as string (default null, no dropzone).
-//  [errorHandler]. Function to be called on errors. If not given, the
-//  errors are displayed with indicators.
+//  [badFileHandler]. Function to be called on bad files (size,
+//  type). If not given, errors are displayed with indicators. Event
+//  argument contains (localized) message and file.
+//  [errorHandler]. Function to be called on server errors. If not
+//  given, the errors are displayed with indicators. The event
+//  argument contains generic localized message.
 LUPAPISTE.UploadModel = function( owner, params ) {
   "use strict";
   var self = this;
@@ -19,11 +24,13 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   if( owner ) {
     owner.addToDisposeQueue( self );
   }
+
   self.files = params.files || ko.observableArray();
   self.fileInputId = _.uniqueId( "file-input-id-" );
   self.waiting = ko.observable();
   self.readOnly = params.readOnly;
   self.allowMultiple = params.allowMultiple;
+
 
   self.listenService = function ( message, fn ) {
     self.addEventListener( service.serviceName, message, function( event ) {
@@ -33,10 +40,16 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     });
   };
 
+  function notifyService( message, data ) {
+    self.sendEvent( service.serviceName,
+                    message,
+                    _.merge( data, {input: self.fileInputId}));
+  }
+
   function indicatorError( event ) {
     hub.send("indicator", {
       style: "negative",
-      message: event.message
+      rawMessage: event.message
     });
   }
 
@@ -46,27 +59,28 @@ LUPAPISTE.UploadModel = function( owner, params ) {
                            dropZone: params.dropZone,
                            allowMultiple: params.allowMultiple});
     self.listenService( "filesUploaded", function( event ) {
-      self.files(_.concat( self.files(), event.files));
-      // Since the basic file upload jQuery plugin does not support
-      // limiting drag'n'drop to only one file, we prune the files
-      // array, if needed.
-      if( !self.allowMultiple ) {
-        self.files( [_.last( self.files())]);
+      if( event.status === "success" ) {
+        self.files(_.concat( self.files(), event.files));
+        // Since the basic file upload jQuery plugin does not support
+        // limiting drag'n'drop to only one file, we prune the files
+        // array, if needed.
+        if( !self.allowMultiple ) {
+          self.files( [_.last( self.files())]);
+        }
+      } else {
+        (params.errorHandler || indicatorError)({
+          message: loc( "attachment.upload.failure",
+                        event.message )});
       }
     });
 
     self.listenService( "filesUploading", function( event ) {
       self.waiting( event.state !== "finished" );
     });
-    self.listenService( "badFile", params.errorHandler || indicatorError);
-
+    self.listenService( "badFile", params.badFileHandler || indicatorError);
   }
 
-  function notifyService( message, data ) {
-    self.sendEvent( service.serviceName,
-                    message,
-                    _.merge( data, {input: self.fileInputId}));
-  }
+
 
   self.removeFile = function( data ) {
     self.files( _.filter( self.files(),
