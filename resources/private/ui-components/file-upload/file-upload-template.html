@@ -1,27 +1,18 @@
 <script class="ko-template"
         type="text/x-jquery-tmpl"
         id="file-upload-template">
-  <div>
-    <input type="file" class="hidden" name="files[]" multiple="true"
-           data-bind="attr: {id: fileInputId}">
-    <ul data-bind="foreach: files" class="upload-files">
+  <div>    
+    <ul data-bind="foreach: upload.files" class="upload-files">
       <li>
         <span  data-bind="text: filename"></span>
         <span class="upload-files__size" data-bind="size: size"></span>
         <a data-bind="ltext: 'remove',
-                      visible: !$parent.params.readOnly,
-                      click: $parent.removeFile,
+                      visible: !$parent.upload.readOnly,
+                      click: $parent.upload.removeFile,
                       attr: {'data-test-id': 'remove-file-' + $index()}"></a>
       </li>
     </ul>
-
-    <label class="btn positive"
-           data-bind="attr: {'for': labelFor},
-                      css: {waiting: waiting},
-                      visible: !params.readOnly">
-      <i data-bind="attr: {'class': params.buttonIcon}"></i>
-      <i class="wait spin lupicon-refresh"></i>
-      <span data-bind="ltext: params.buttonText"></span>
-    </label>
+    <span data-bind="component: {name: 'upload-button',
+                     params: buttonOptions}"></span>
   </div>
 </script>

@@ -1,0 +1,129 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="attachment-batch-template">
+  <div>
+    <upload-progress params="upload: upload"></upload-progress>
+
+    <!-- ko if: fileCount -->
+    <table class="attachment-batch-table">
+      <thead>
+        <th><span data-bind="ltext:'attachment.file'"></span></th>
+        <th><span class="batch-required"
+                  data-bind="ltext:'application.attachmentType'"></span>          
+        </th>
+        <th><span class="batch-required"
+                  data-bind="ltext:'application.attachmentContents'"></span></th>
+        <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
+        <th><span class="batch-required"
+                  data-bind="ltext:'attachment.label.operation'"></span></th>
+        <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
+        <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
+        <th class="td-center" data-bind="ltext:'remove'"></th>        
+      </thead>
+      <tbody data-bind="foreach: upload.files">
+        <td data-bind="file: $data"></td>
+        <td>          
+          <div class="batch-autocomplete fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'typeGroup')">
+            <attachment-type-group-autocomplete params="selectedTypeGroup: $parent.cell( $data, 'typeGroup').value">   
+            </attachment-type-group-autocomplete>
+            <icon-button params="click: $parent.filler( 'typeGroup', $data),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'typeGroup', $data)"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
+        <td></td>
+        <td>
+          <div class="fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'drawing')">
+            <input type="text" class="batch-drawing grid-style-input"
+                   data-bind="textInput: $parent.cell( $data, 'drawing').value">
+            <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-fill-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'drawing', $data)"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
+        <td></td>
+        <td class="td-center">
+          <toggle params="prefix: 'signbox',
+                          value: $parent.cell( $data, 'sign' ).value"></toggle>
+        </td>
+        <td class="td-center">
+          <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
+        </td>
+        <td class="td-center">
+          <i class="lupicon-remove primary"
+             data-bind="click: $parent.upload.removeFile"></i></td>
+      </tbody>
+      <tfoot data-bind="if: fileCount() > 1">
+        <tr>
+          <td colspan="5"></td>
+          <td class="td-center">
+            <a class="link-btn"
+               data-bind="click: _.wrap( 'sign', footClick ),
+                          ltext: footText( 'sign')"></a>
+          </td>
+          <td class="td-center">
+            <a class="link-btn"
+               data-bind="click: _.wrap( 'construction', footClick ),
+                          ltext: footText( 'construction')"></a>
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+    <!-- /ko -->
+
+    <!-- ko if: _.size(badFiles()) -->
+    <div class="batch-bad-files">
+      <div class="like-btn">
+        <i class="lupicon-warning negative"></i>
+        <span data-bind="ltext: 'attachment.bad-files'"></span>
+      </div>
+      <ul data-bind="foreach: badFiles">
+        <li>
+          <strong data-bind="text: file.name + ':'"></strong>
+          <span data-bind="text: message"></span></li>
+      </ul>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: signingSelected -->
+    <div class="batch-password">
+      <label class="batch-required"
+             for="batch-password"
+             data-bind="ltext: 'signAttachment.verifyPassword'">
+      </label>
+      <input type="password"
+             id="batch-password" 
+             class="grid-style-input"
+             data-bind="value: password">
+      <i data-bind="attr: {class: passwordIconClass}"></i>
+    </div>
+    <!-- /ko -->
+    
+    <!-- ko if: fileCount -->
+    <div class="batch-buttons">
+      <icon-button params="waiting: waiting,
+                           icon: 'check',
+                           ltext: 'attachment.batch-ready',
+                           click: done"></icon-button>
+      <icon-button params="icon: 'remove',
+                           buttonClass: 'secondary',
+                           ltext: 'cancel',
+                           click: cancel"></icon-button>
+    </div>
+    <!-- /ko -->
+    <span data-bind="component: {name: 'upload-button',
+                     params: buttonOptions}"></span>
+    <attachments-operation-buttons></attachments-operation-buttons>
+  </div>
+  
+</script>

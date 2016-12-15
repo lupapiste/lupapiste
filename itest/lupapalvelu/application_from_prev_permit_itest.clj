@@ -4,6 +4,7 @@
             [sade.core :refer [def- now]]
             [sade.xml :as xml]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-api] ; require local endpoints
             [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]

@@ -6,6 +6,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+ try+]]
             [monger.operators :refer :all]
+            [swiss.arrows :refer :all]
             [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
@@ -391,6 +392,20 @@
 ;;
 ;; Change and reset password:
 ;;
+
+(defcommand check-password
+  {:parameters [password]
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:password])]}
+  [{user :user}]
+  (if (security/check-password password
+                               (some-<>> user
+                                        :id
+                                        (mongo/by-id :users <> {:private.password true})
+                                        :private
+                                        :password))
+    (ok)
+    (fail :error.password)))
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
