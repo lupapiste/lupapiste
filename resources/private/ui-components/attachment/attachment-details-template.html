@@ -424,10 +424,11 @@
     </div>
   </div>
 
-  <attachments-change-type params="attachmentType: $data.attachment().type,
-                                   authModel: $data.attachment().authModel,
-                                   attachmentId: $data.attachment().id,
-                                   allowedAttachmentTypes: $data.allowedAttachmentTypes">
-  </attachments-change-type>
+  <div data-bind="component: { name: 'attachments-change-type',
+                               params: { attachmentType: $data.attachment().type,
+                                         authModel: $data.attachment().authModel,
+                                         attachmentId: $data.attachment().id,
+                                         allowedAttachmentTypes: $data.allowedAttachmentTypes}}">
+  </div>
 
 </script>
