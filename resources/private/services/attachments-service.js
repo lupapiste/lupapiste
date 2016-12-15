@@ -371,8 +371,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, hubParams);
   };
 
-  self.createAttachmentTemplates = function(types, hubParams) {
-    var params =  {id: self.applicationId(), attachmentTypes: types};
+  self.createAttachmentTemplates = function(types, group, hubParams) {
+    var params =  {id: self.applicationId(), attachmentTypes: types, group: group};
     ajax.command("create-attachments", params)
       .success(function(res) {
         self.queryAll();

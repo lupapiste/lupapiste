@@ -262,14 +262,14 @@
            ;:approvals {}
            :auth []
            :contents contents}
-          (:groupType group) (assoc :groupType (:groupType group))
+          (:groupType group) (assoc :groupType (keyword (:groupType group)))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
-  [created application-state attachment-types-with-metadata locked? required? requested-by-authority?]
-  (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) nil (:type %) (:metadata %)) attachment-types-with-metadata))
+  [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
+  (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
@@ -322,12 +322,12 @@
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
-(defn create-attachments! [application attachment-types created locked? required? requested-by-authority?]
+(defn create-attachments! [application attachment-types group created locked? required? requested-by-authority?]
   {:pre [(map? application)]}
   (let [attachment-types-with-metadata (map (fn [type] {:type     (attachment-type-coercer type)
                                                         :metadata (default-tos-metadata-for-attachment-type type application)})
                                             attachment-types)
-        attachments (make-attachments created (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
+        attachments (make-attachments created (:state application) attachment-types-with-metadata group locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified created}

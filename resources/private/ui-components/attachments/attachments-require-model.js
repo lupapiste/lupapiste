@@ -18,9 +18,7 @@ LUPAPISTE.AttachmentsRequireModel = function() {
     }
   });
 
-  self.selectableGroups = self.disposedPureComputed(function() {
-    return service.groupTypes();
-  });
+  self.selectableGroups = service.groupTypes;
 
   self.removeSelection = function(ind) {
     self.selectedTypes.splice(ind(),1);
@@ -41,7 +39,7 @@ LUPAPISTE.AttachmentsRequireModel = function() {
   self.requireAttachmentTemplates = function() {
     service.createAttachmentTemplates(_.map(self.selectedTypes(), function(type) {
       return _.pick(type, ["type-group", "type-id"]);
-    }));
+    }), self.selectedGroup());
     hub.send("close-dialog");
   };
 
