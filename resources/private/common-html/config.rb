@@ -34,4 +34,5 @@ on_stylesheet_saved do |path|
   p = (using_windows ? relativepath.gsub('/', '\\') : relativepath)
   puts "Blessc compiling path: #{p}"
   system("blessc --force " + p) unless path[/\d+$/]
+  puts "Status from blessc call was: #{$?}"
 end
