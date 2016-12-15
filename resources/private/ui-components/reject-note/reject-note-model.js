@@ -76,7 +76,7 @@ LUPAPISTE.RejectNoteModel = function( params ) {
     // Editor is shown after the group has been rejected
     // There are different events for documents (no path) and groups.
 
-    var docModel = params.docModel;
+    var docModel = ko.unwrap(params.docModel);
     var path = params.path;
     var meta = docModel.getMeta( path );
     self.testPrefix = _( docModel.schemaName )
