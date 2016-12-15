@@ -9,15 +9,11 @@ LUPAPISTE.AttachmentsService = function() {
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
+  self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
-
-  self.attachmentTypes = ko.observableArray([]);
-  self.attachmentTypeGroups = ko.pureComputed(function() {
-    return _(self.attachmentTypes()).map("type-group").uniq().value();
-  });
 
   self.groupTypes = ko.observableArray([]);
 
@@ -241,6 +237,25 @@ LUPAPISTE.AttachmentsService = function() {
     queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
   };
 
+  var attachmentTypes = ko.observableArray();
+  var fetchingAttachmentTypes = false;
+  self.attachmentTypes = ko.pureComputed({
+    read: function() {
+      if (_.isEmpty(attachmentTypes()) && !fetchingAttachmentTypes) {
+        fetchingAttachmentTypes = true;
+        self.queryAttachmentTypes();
+      }
+      return attachmentTypes();
+    },
+    write: function(types) {
+      attachmentTypes(types);
+      fetchingAttachmentTypes = false;
+    }
+  });
+  self.attachmentTypeGroups = ko.pureComputed(function() {
+    return _(self.attachmentTypes()).map("type-group").uniq().value();
+  });
+
   function sendHubNotification(eventType, commandName, params, response) {
     hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
                                                            ok: response.ok,
@@ -445,6 +460,9 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+  self.requiresAuthorityAction = function(attachment) {
+    return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
   };
 
   // True if the attachment is needed but does not have file yet.

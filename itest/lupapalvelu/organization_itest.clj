@@ -771,8 +771,8 @@
   (fact "no allowed autologin ips for sipoo is empty"
     (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => empty?)
 
-  (fact "three allowed autologin ips for porvoo"
-    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3))
+  (fact "four allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 4))
 
 (facts update-allowed-autologin-ips
 
@@ -790,8 +790,8 @@
       (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ips) => ok?
       (-> (query admin :allowed-autologin-ips-for-organization :org-id "753-R") :ips) => ips))
 
-  (fact "there is still three allowed autologin ips for porvoo"
-    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 3)
+  (fact "there are still four allowed autologin ips for porvoo"
+    (-> (query admin :allowed-autologin-ips-for-organization :org-id "638-R") :ips count) => 4)
 
   (fact "trying to update with invalid ip address"
     (command admin :update-allowed-autologin-ips :org-id "753-R" :ips ["inv.val.id.ip"]) => (partial expected-failure? :error.invalid-ip)))

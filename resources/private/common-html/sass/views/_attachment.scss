@@ -364,3 +364,30 @@ td.comment-text {
     margin: 0px;
   }
 }
+
+.selected-attachment-types {
+  margin-top: $marginM;
+}
+
+.selected-attachment-types-container {
+  min-height: 320px;
+  width: 430px;
+  .selected-attachment-type-tag {
+    position: relative;
+    border: 1px solid $input-border-color;
+    min-height: $grid-input-height;
+    width: 100%;
+    display: inline-block;
+    span.tag-label {
+      display: inline-block;
+      margin: $marginS;
+      width: 380px;
+    }
+    .tag-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      color: $lp-orange;
+    }
+  }
+}

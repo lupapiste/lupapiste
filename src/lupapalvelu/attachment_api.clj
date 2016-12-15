@@ -103,18 +103,23 @@
 (defn- attachment-editable-by-application-state
   ([command]
    (attachment-editable-by-application-state false command))
-  ([authority-sent? {{attachmentId :attachmentId} :data user :user {current-state :state :as application} :application}]
+  ([authority-sent? {{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]
    (when-not (ss/blank? attachmentId)
-     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)]
-       (when-not (if (= (keyword current-state) :sent)
+     (let [{create-state :applicationState} (attachment/get-attachment-info application attachmentId)
+           cur-state-kw (keyword current-state)]
+       (when-not (cond
+                   (= cur-state-kw :sent)
                    (or (and authority-sent? (usr/authority? user))
                        (statement/delete-attachment-allowed? attachmentId application))
-                   (or (not (states/post-verdict-states (keyword current-state)))
+
+                   (states/terminal-states cur-state-kw)
+                   (usr/user-is-archivist? user organization)
+
+                   :else
+                   (or (not (states/post-verdict-states cur-state-kw))
                        (states/post-verdict-states (keyword create-state))
                        (usr/authority? user)))
          (fail :error.pre-verdict-attachment))))))
-
-
 
 (defn- validate-meta [{{meta :meta} :data}]
   (doseq [[k v] meta]
@@ -265,7 +270,7 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
-   :states     (states/all-states-but (conj states/terminal-states :answered :sent))
+   :states     (states/all-states-but :answered :sent)
    :pre-checks [app/validate-authority-in-drafts
                 foreman-must-be-uploader
                 verdict-attachment-edit-by-authority-only
@@ -719,7 +724,7 @@
    :categories #{:attachments}
    :user-roles #{:applicant :authority}
    :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
-   :states     (states/all-states-but (conj states/terminal-states :answered :sent))
+   :states     (states/all-states-but :answered :sent)
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       validate-meta validate-scale validate-size validate-operation validate-group]
    :pre-checks [app/validate-authority-in-drafts

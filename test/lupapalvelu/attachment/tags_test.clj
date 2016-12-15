@@ -8,13 +8,9 @@
             [sade.schema-generators :as ssg]))
 
 (testable-privates lupapalvelu.attachment.tags
-                   type-groups-for-operation
                    application-state-filters
                    group-and-type-filters
                    not-needed-filters)
-
-(testable-privates lupapalvelu.attachment.tag-groups
-                   type-groups-for-operation)
 
 (facts attachment-tags
 
@@ -42,50 +38,6 @@
 
   (fact "verdictGiven - RAM"
         (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :general :needed} :in-any-order :gaps-ok)))
-
-(facts type-groups-for-operation
-  (fact "one attachment"
-    (let [operation-id (ssg/generate ssc/ObjectIdStr)
-          attachments  [{:op {:id operation-id} :type {:type-group "somegroup" :type-id "sometype"}}]]
-
-      (type-groups-for-operation attachments operation-id) => [:somegroup]
-
-      (provided (att-type/tag-by-type anything) => :somegroup)))
-
-  (fact "two attachment - same group"
-    (let [operation-id (ssg/generate ssc/ObjectIdStr)
-          attachments  [{:op {:id operation-id} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "sometype"}}]]
-
-      (type-groups-for-operation attachments operation-id) => [:somegroup]
-
-      (provided (att-type/tag-by-type anything) => :somegroup)))
-
-
-  (fact "two attachment - same group - not grouping attachment type"
-    (let [operation-id (ssg/generate ssc/ObjectIdStr)
-          attachments  [{:op {:id operation-id} :type {:type-group "somegroup" :type-id "not-grouping-type"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "not-grouping-type"}}]]
-
-      (type-groups-for-operation attachments operation-id) => [:other]
-
-      (provided (att-type/tag-by-type anything) => nil)))
-
-
-  (fact "many attachment - many groups"
-    (let [operation-id (ssg/generate ssc/ObjectIdStr)
-          attachments  [{:op {:id operation-id} :type {:type-group "somegroup" :type-id "not-grouping-type"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "sometype"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "anothertype"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "anothertype"}}
-                        {:op {:id operation-id} :type {:type-group "somegroup" :type-id "other-type"}}]]
-
-      (type-groups-for-operation attachments operation-id) => [:other :somegroup :anothergroup]
-
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
-    (provided (att-type/tag-by-type anything) => nil))))
 
 (fact "attachment-tag-groups"
   (let [operation-id1 (ssg/generate ssc/ObjectIdStr)

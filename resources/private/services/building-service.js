@@ -31,7 +31,7 @@ LUPAPISTE.BuildingService = function() {
   });
 
   self.buildingsInfo = function() {
-    if( updateNeeded()) {
+    if( updateNeeded() && lupapisteApp.models.applicationAuthModel.ok("get-building-info-from-wfs")) {
       ajax.query( "get-building-info-from-wfs",
                   {id: appId()})
         .success( function( res ) {

@@ -30,13 +30,19 @@ LUPAPISTE.RamLinksModel = function( params ) {
   var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %><br><%- time %>");
   var attachmentsService = lupapisteApp.services.attachmentsService;
 
+  function approvedText( approval ) {
+    return _.isNumber( approval.timestamp ) && _.isPlainObject( approval.user )
+      ? approvalTemplate( {user: approval.user,
+                           time: moment( approval.timestamp).format( "D.M.YYYY HH:mm")})
+    : loc( "ok");
+  }
+
   self.approvalHtml = function( data ) {
     var attachment = attachmentsService.getAttachment( data.id );
     var approval = attachmentsService.attachmentApproval( attachment );
     return attachmentsService.isApproved( attachment )
-      ? approvalTemplate( {user: approval.user,
-                           time: moment( approval.timestamp).format( "D.M.YYYY HH:mm")})
-    : "-";
+      ? approvedText( approval )
+      : "-";
   };
 
   var ramLinkTemplate = _.template( "<a href='<%- url %>'><%- text %></a>");
