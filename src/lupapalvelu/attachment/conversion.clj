@@ -8,7 +8,8 @@
             [lupapalvelu.pdf.pdfa-conversion :as pdf-conversion]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre-conversion]
             [lupapalvelu.tiff-validation :as tiff-validation]
-            [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper])
+            [lupapalvelu.attachment.pdf-wrapper :as pdf-wrapper]
+            [taoensso.timbre :as timbre])
   (:import (java.io File InputStream))
   (:import (org.apache.commons.io FilenameUtils)))
 
@@ -91,6 +92,7 @@
            :content (files/temp-file-input-stream pdf-file)
            :filename (str (FilenameUtils/removeExtension filename) ".pdf")}
           (catch Exception e
+            (timbre/error "Could not wrap JPEG" e)
             {:archivable false :archivabilityError :not-validated}))))
     {:archivable false :archivabilityError :not-validated}))
 

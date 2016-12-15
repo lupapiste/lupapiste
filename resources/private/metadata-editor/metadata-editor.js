@@ -184,7 +184,7 @@
     };
 
     self.modificationAllowed = self.disposedPureComputed(function() {
-      return authModel.ok(saveCommand) && !_.includes(["arkistoitu", "arkistoidaan"], util.getIn(self.metadata, ["tila"]));
+      return authModel.ok(saveCommand);
     });
 
     self.save = function() {

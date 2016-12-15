@@ -59,7 +59,7 @@
                     :address      sc/Str
                     :municipality sc/Str}
    :target         {:group                         sc/Str
-                    :id                            ssc/ObjectIdStr
+                    :id                            sc/Str
                     (sc/optional-key :type-key)    sc/Str
                     (sc/optional-key :info-key)    sc/Str
                     (sc/optional-key :description) sc/Str}

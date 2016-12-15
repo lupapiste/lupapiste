@@ -1,14 +1,14 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   10
+${WAIT_DELAY}                   12
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -576,6 +576,18 @@ Input building identifier
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
   Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
+
+Document status is disabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
+
+Document status is enabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
+
+
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
   ${rowcount}=  Get Matching XPath Count  //table[@id='${id}']/tbody/tr
@@ -692,13 +704,10 @@ Do prepare new request
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
-  Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
-  List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list] option:contains('${templateName}')
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
-  Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
+  Select From Autocomplete  div[data-test-id="attachment-type-autocomplete"]  ${templateName}
+  Wait Until Element Is Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
@@ -1379,7 +1388,7 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
@@ -1409,7 +1418,7 @@ Fill test id
 
 Focus test id
   [Arguments]  ${id}
-  Focus  jquery=[data-test-id=${id}]
+  Wait until  Focus  jquery=[data-test-id=${id}]
 
 No such test id
   [Arguments]  ${id}

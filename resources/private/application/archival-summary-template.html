@@ -154,15 +154,14 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: !$data.readOnly && !$data.archived() -->
+            <!-- ko if: $data.typeChange.changingTypeAllowed() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
               <div class="contents">
                 <label class="label" data-bind="ltext: 'attachment.chooseType'"></label><br>
                 <select id="attachment-type-select"
                         class="long"
-                        data-bind="enable: $data.typeChange.changingTypeAllowed,
-                                   value: $data.typeChange.attachmentType,
+                        data-bind="value: $data.typeChange.attachmentType,
                                    foreach: $data.typeChange.selectableAttachmentTypes">
                   <optgroup data-bind="attr: {label: label}, foreach: types">
                     <option data-bind="text: label, value: value"></option>

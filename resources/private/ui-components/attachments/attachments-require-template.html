@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script class="ko-template" type="text/x-jquery-tmpl" id="attachments-require-template">
+      <div class="content">
+        <div class="attachment-type-selection">
+          <label data-bind="ltext: 'attachments.type-group.search.label'"></label>
+          <div data-bind="component: { name: 'attachment-type-group-autocomplete',
+                                       params: { selectedTypeGroup: selectedTypeGroup } },
+                          testId: 'attachment-type-group-autocomplete'"></div>
+
+          <label data-bind="ltext: 'attachments.type.search.label'"></label>
+          <div data-bind="component: { name: 'attachment-type-autocomplete',
+                                       params: { selectedTypeGroup: selectedTypeGroup,
+                                                 selectedType: selectedType } },
+                          testId: 'attachment-type-autocomplete'"></div>
+        </div>
+
+        <div class="selected-attachment-types">
+          <label data-bind="ltext: 'attachments.selected-types'"></label>
+          <div class="selected-attachment-types-container" data-bind="foreach: selectedTypes, testId: 'selected-attachment-types'">
+            <div class="selected-attachment-type-tag" data-bind="testId: 'selected-attachment-' + $data['type-group'] + '-' + $data['type-id']">
+              <span class="tag-label" data-bind="text: $data.title"></span>
+              <i class="tag-remove lupicon-remove" data-bind="click: _.partial($component.removeSelection, $index)"></i>
+            </div>
+          </div>
+
+          <div data-bind="component: { name: 'submit-button-group',
+                                       params: { isSubmitVisible: true,
+                                                 submit: requireAttachmentTemplates,
+                                                 lSubmitTitle: 'ok',
+                                                 isSubmitEnabled: submitEnabled } }"></div>
+        </div>
+      </div>
+
+    </script>
+  </section>
+</body>
+</html>
