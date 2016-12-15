@@ -8,6 +8,7 @@
             [lupapalvelu.mongo :as mongo]
             [monger.operators :refer :all]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.ya-extension-api]
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
             [clj-time.format :as fmt]
