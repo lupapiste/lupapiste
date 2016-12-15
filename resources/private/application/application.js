@@ -166,6 +166,7 @@
     var app = _.merge(LUPAPISTE.EmptyApplicationModel(), {});
 
     // Plain data
+    isInitializing = true;
     applicationModel._js = app;
     // Update observables
     var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
