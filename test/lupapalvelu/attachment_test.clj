@@ -95,7 +95,7 @@
 (fact "make attachments"
   (let [type1 (ssg/generate Type)
         type2 (ssg/generate Type)]
-    (make-attachments 999 :draft [{:type type1} {:type type2}] false true true)
+    (make-attachments 999 :draft [{:type type1} {:type type2}] nil false true true)
     => (just [{:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
@@ -173,7 +173,7 @@
         type2 (ssg/generate Type)
         types-with-metadata [{:type type1 :metadata {:foo "bar"}}
                              {:type type2 :metadata {:bar "baz"}}]]
-    (make-attachments 999 :draft types-with-metadata false true true)
+    (make-attachments 999 :draft types-with-metadata nil false true true)
     => (just [{:id                   "5790633c66e8f95ecc4287be"
                :locked               false
                :modified             999
@@ -212,6 +212,50 @@
                :readOnly             false}])
     (provided
      (mongo/create-id) => "5790633c66e8f95ecc4287be")))
+
+(fact "make attachments with group"
+  (let [type1 (ssg/generate Type)
+        type2 (ssg/generate Type)
+        op-id (ssg/generate ssc/ObjectIdStr)]
+    (make-attachments 999 :draft [{:type type1} {:type type2}] {:groupType "operation" :id op-id :name "Foo"} false true true)
+    => (just [{:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :groupType            :operation
+               :op                   {:id op-id :name "Foo"}
+               ;;:state                :requires_user_action
+               :target               nil
+               :type                 type1
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}
+              {:id                   "5790633c66e8f95ecc4287be"
+               :locked               false
+               :modified             999
+               :groupType            :operation
+               :op                   {:id op-id :name "Foo"}
+               ;;:state                :requires_user_action
+               :target               nil
+               :type                 type2
+               :applicationState     :draft
+               :contents             nil
+               :signatures           []
+               :versions             []
+               :auth                 []
+               :notNeeded            false
+               :required             true
+               :requestedByAuthority true
+               :forPrinting          false
+               :readOnly             false}])
+    (provided
+      (mongo/create-id) => "5790633c66e8f95ecc4287be")))
 
 (facts "facts about attachment metada"
   (fact "visibility"
