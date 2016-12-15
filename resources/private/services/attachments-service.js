@@ -9,6 +9,7 @@ LUPAPISTE.AttachmentsService = function() {
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
+  self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
@@ -340,7 +341,7 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId,
                           "reject-attachment-note",
                           {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
-                           note: note},
+                           note: note || ""},
                           hubParams);
     self.rejectAttachmentNoteEditorState( null );
   };
@@ -459,6 +460,9 @@ LUPAPISTE.AttachmentsService = function() {
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+  self.requiresAuthorityAction = function(attachment) {
+    return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
   };
 
   // True if the attachment is needed but does not have file yet.
