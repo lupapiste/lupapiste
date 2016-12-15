@@ -18,9 +18,19 @@ LUPAPISTE.AttachmentsRequireModel = function() {
     }
   });
 
+  self.selectableGroups = service.groupTypes;
+
   self.removeSelection = function(ind) {
     self.selectedTypes.splice(ind(),1);
   };
+
+  self.selectedGroup = ko.observable();
+
+  self.subscribeChanged(self.selectedTypes, function(value, oldValue) {
+    if (_.isEmpty(oldValue) && !_.isEmpty(value)) {
+      self.selectedGroup(_.find(self.selectableGroups(), ["groupType", util.getIn(value, [0, "metadata", "grouping"])]));
+    }
+  });
 
   self.submitEnabled = self.disposedPureComputed(function() {
     return !_.isEmpty(self.selectedTypes());
@@ -29,7 +39,7 @@ LUPAPISTE.AttachmentsRequireModel = function() {
   self.requireAttachmentTemplates = function() {
     service.createAttachmentTemplates(_.map(self.selectedTypes(), function(type) {
       return _.pick(type, ["type-group", "type-id"]);
-    }));
+    }), self.selectedGroup());
     hub.send("close-dialog");
   };
 

@@ -711,7 +711,7 @@
 
 (defn generate-construction-time-attachment [{id :id :as application} authority-apikey password]
   (let [attachment-type {:type-group "muut" :type-id "muu"}
-        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type])
+        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type] :group nil)
         attachment-id (-> resp :attachmentIds first)]
     (fact "attachment created"
       resp => ok?)
