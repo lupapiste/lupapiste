@@ -318,7 +318,7 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId,
                           "reject-attachment-note",
                           {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
-                           note: note},
+                           note: note || ""},
                           hubParams);
     self.rejectAttachmentNoteEditorState( null );
   };
