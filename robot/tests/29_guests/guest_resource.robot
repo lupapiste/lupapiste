@@ -118,7 +118,7 @@ Guest bubble ok
 
 Guest bubble cancel
   Scroll and click test id  guest-bubble-dialog-cancel
-  Wait test id hidden  guest-bubble-dialog-cancel
+  Wait until  Element should not be visible  jquery=[data-test-id=guest-bubble-dialog-cancel]
 
 Guest table contains
   [Arguments]  ${data}

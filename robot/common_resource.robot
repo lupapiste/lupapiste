@@ -1096,7 +1096,7 @@ Invite ${email} to application
   ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
   Fill application person invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
   Scroll and click test id  person-invite-bubble-dialog-ok
-  Wait test id hidden  person-invite-bubble-dialog-ok
+  Wait until  Element should not be visible  jquery=[data-test-id=person-invite-bubble-dialog-ok]
   Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
