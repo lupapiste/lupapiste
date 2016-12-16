@@ -472,6 +472,17 @@
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
 
+(defraw view-file
+  {:description      "Fetch uploaded file from MongoDB. Fetching is session bound."
+   :parameters       [fileId]
+   :categories       #{:attachments}
+   :input-validators [(partial action/non-blank-parameters [:fileId])]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles}
+  [{{:keys [fileId]} :data session :session}]
+  (attachment/output-file fileId (:id session)))
+
 (defraw "download-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
    :categories       #{:attachments}

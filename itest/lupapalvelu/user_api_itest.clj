@@ -308,7 +308,7 @@
        login        (http-post
                       (str (server-address) "/api/login")
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
-       csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
+       csrf-token   (get-anti-csrf store) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]

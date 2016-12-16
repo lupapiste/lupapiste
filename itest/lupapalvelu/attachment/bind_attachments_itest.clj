@@ -6,6 +6,16 @@
 
 (apply-remote-minimal)
 
+(facts "view-file"
+  (let [store        (atom {})
+        cookie-store (doto (->cookie-store store)
+                       (.addCookie test-db-cookie))
+        upload-resp  (upload-file pena "dev-resources/test-attachment.txt" :cookie-store cookie-store)
+        file-id      (get-in upload-resp [:files 0 :fileId])]
+    upload-resp => ok?
+    file-id => string?
+    (raw pena :view-file :fileId file-id :cookie-store cookie-store) => http200?))
+
 (facts "placholder bind"
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
         operation      (:primaryOperation application)

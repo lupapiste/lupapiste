@@ -599,21 +599,32 @@
                  :headers {"Content-Type" "text/plain"}
                  :body "404"})
 
+(defn- attachment-200-response [attachment filename]
+  {:status 200
+   :body ((:content attachment))
+   :headers {"Content-Type" (:contentType attachment)
+             "Content-Length" (str (:size attachment))
+             "Content-Disposition" (format "filename=\"%s\"" filename)}})
+
 (defn output-attachment
   ([attachment download?]
   (if attachment
     (let [filename (ss/encode-filename (:filename attachment))
-          response {:status 200
-                    :body ((:content attachment))
-                    :headers {"Content-Type" (:contentType attachment)
-                              "Content-Length" (str (:size attachment))
-                              "Content-Disposition" (format "filename=\"%s\"" filename)}}]
+          response (attachment-200-response attachment filename)]
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
         (update response :headers merge http/no-cache-headers)))
     not-found))
   ([file-id download? attachment-fn]
    (output-attachment (attachment-fn file-id) download?)))
+
+(defn output-file
+  [file-id session-id]
+  (if-let [attachment-file (mongo/download-find {:_id file-id :metadata.sessionId session-id})]
+    (update (attachment-200-response attachment-file (ss/encode-filename (:filename attachment-file)))
+            :headers
+            http/no-cache-headers)
+    not-found))
 
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
