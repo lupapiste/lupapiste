@@ -361,7 +361,8 @@
 
 (defcommand create-attachments
   {:description      "Authority can set a placeholder for an attachment"
-   :parameters       [id attachmentTypes group]
+   :parameters       [id attachmentTypes]
+   :optional-parameters [group]
    :pre-checks       [(fn [{{attachment-types :attachmentTypes} :data application :application}]
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
