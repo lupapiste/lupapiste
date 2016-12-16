@@ -180,9 +180,8 @@ No subscribe column
 
 Invite application guest start
   [Arguments]  ${email}  ${message}
-  Wait test id hidden  guest-bubble-dialog-ok
-  Scroll to test id  application-guest-add
   Wait test id visible  application-guest-add
+  Element should not be visible  jquery=[data-test-id=guest-bubble-dialog-ok]
   Scroll and click input  [data-test-id=application-guest-add]
   Test id empty  application-guest-email
   Textarea Value Should be  jquery=[data-test-id=application-guest-message]  Hei! Sinulle on annettu lukuoikeus hakemukselle Lupapisteessä.
