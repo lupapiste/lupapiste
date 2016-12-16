@@ -13,6 +13,8 @@
 //  [errorHandler]. Function to be called on server errors. If not
 //  given, the errors are displayed with indicators. The event
 //  argument contains generic localized message.
+//
+// Note: the init must have been called before the first upload.
 LUPAPISTE.UploadModel = function( owner, params ) {
   "use strict";
   var self = this;

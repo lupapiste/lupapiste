@@ -7102,7 +7102,7 @@ input.grid-style-input--wide:disabled {
   position: absolute;
   left: 0;
   top: 100%;
-  z-index: 1000;
+  z-index: 888;
   min-width: 100%;
   max-width: 200%;
   list-style: none;
@@ -7112,12 +7112,11 @@ input.grid-style-input--wide:disabled {
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 327, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 326, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li {
   padding-left: 6px;
-  text-overflow: ellipsis;
 }
-/* line 331, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 329, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li.combobox--selected {
   background-color: #f39129;
   color: white;
@@ -8351,7 +8350,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
-<<<<<<< HEAD
 }
 /* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble input {
@@ -8380,31 +8378,4 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border: 1px solid #fbc732;
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
-}
-/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after, .container-bubble:before {
-  bottom: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:before {
-  border-color: rgba(251, 199, 50, 0);
-  border-bottom-color: #fbc732;
-  border-width: 11px;
-  margin-left: -11px;
-=======
->>>>>>> Combobox component.
 }

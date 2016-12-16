@@ -8,6 +8,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
+  var service = lupapisteApp.services.attachmentsService;
+
   self.upload = params.upload;
 
   self.password = ko.observable();
@@ -51,11 +53,31 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function badFileHandler( event ) {
-    self.badFiles.push( _.pick( event, ["message", "file"]));
-  }
+  function newRow() {
+    var type = ko.observable();
+    var contentsList = ko.observableArray();
+    var grouping = ko.observable({});
+    self.disposedSubscribe( type, function( data ) {
+      var metadata = data.metadata || {};
+      contentsList(_.map( metadata.contents,
+                          function( id ) {
+                            return loc( "attachments.contents." + id);
+                          }));
 
-  self.upload.listenService("badFiles", badFileHandler);
+      grouping({groupType: metadata.grouping === "operation"
+                ? "operation-" + _.find (service.groupTypes(),
+                                         {groupType: "operation"}).id
+                : metadata.grouping});
+    } );
+    var contentsCell = new Cell( ko.observable(), true );
+    contentsCell.list = contentsList;
+    return {type: new Cell( type, true ),
+            contents: contentsCell,
+            drawing: new Cell( ko.observable()),
+            grouping: new Cell( grouping ),
+            sign: new Cell( ko.observable()),
+            construction: new Cell( ko.observable())};
+  }
 
   self.disposedSubscribe( self.upload.files, function( files ) {
     var oldRows = rows();
@@ -67,12 +89,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       if( oldRows[fileId]) {
         keepRows[fileId] = oldRows[fileId];
       } else {
-        newRows[fileId] = {typeGroup: new Cell( ko.observable(), true ),
-                           content: new Cell( ko.observable(), true ),
-                           drawing: new Cell( ko.observable()),
-                           context: new Cell( ko.observable, true ),
-                           sign: new Cell( ko.observable()),
-                           construction: new Cell( ko.observable())};
+        newRows[fileId] = newRow();
       }
     });
     rows( _.merge( keepRows, newRows ));
@@ -83,7 +100,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.fileCount = self.disposedPureComputed( _.flow( self.upload.files,
                                                       _.size ));
 
+  self.upload.listenService("badFile", function( event ) {
+    self.badFiles.push( _.pick( event, ["message", "file"]));
+  });
+
   self.upload.init();
+
 
   self.waiting = self.disposedPureComputed( function() {
     return self.upload.waiting() || ajaxWaiting();

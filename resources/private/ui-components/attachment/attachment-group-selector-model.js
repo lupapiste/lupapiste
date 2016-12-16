@@ -4,7 +4,7 @@ LUPAPISTE.AttachmentGroupSelectorModel = function(params) {
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
 
   var editable = params.editable || ko.observable(true);
-  var authModel = params.authModel;
+  var authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
   var currentGroup = params.currentGroup;
 
   self.componentTemplate = params.legacy ? "attachment-group-selector-legacy-template" : "attachment-group-selector-modern-template";
