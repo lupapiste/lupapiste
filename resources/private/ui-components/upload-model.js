@@ -92,7 +92,6 @@ LUPAPISTE.UploadModel = function( owner, params ) {
 
 
 
-  self.dispose = _.wrap( "destroy", notifyService );
 
   self.cancel = function() {
     notifyService( "cancel" );
@@ -104,5 +103,13 @@ LUPAPISTE.UploadModel = function( owner, params ) {
       // Trick to ensure that rendering is done before binding.
       _.defer(bindToService );
     }
+  };
+
+  var baseDispose = _.bind( self.dispose, self );
+
+  self.dispose = function() {
+    self.cancel();
+    notifyService( "destroy" );
+    baseDispose();
   };
 };

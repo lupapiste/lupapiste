@@ -15,7 +15,9 @@
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
         <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
+        <!-- ko if: showConstruction -->
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
+        <!-- /ko -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
       </thead>
       <tbody data-bind="foreach: upload.files">
@@ -79,9 +81,11 @@
           <toggle params="prefix: 'signbox',
                           value: $parent.cell( $data, 'sign' ).value"></toggle>
         </td>
+        <!-- ko if: $parent.showConstruction -->
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
         </td>
+        <!-- /ko -->
         <td class="td-center">
           <i class="lupicon-remove primary"
              data-bind="click: $parent.upload.removeFile"></i></td>
@@ -94,11 +98,13 @@
                data-bind="click: _.wrap( 'sign', footClick ),
                           ltext: footText( 'sign')"></a>
           </td>
+          <!-- ko if: showConstruction -->
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'construction', footClick ),
                           ltext: footText( 'construction')"></a>
           </td>
+          <!-- /ko -->
           <td></td>
         </tr>
       </tfoot>

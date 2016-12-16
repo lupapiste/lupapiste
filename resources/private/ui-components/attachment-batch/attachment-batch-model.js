@@ -13,6 +13,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.upload = params.upload;
 
   self.password = ko.observable();
+  self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
+                                                             lupapisteApp.models.applicationAuthModel.ok));
 
   var currentHover = ko.observable();
 
@@ -71,12 +73,14 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     } );
     var contentsCell = new Cell( ko.observable(), true );
     contentsCell.list = contentsList;
-    return {type: new Cell( type, true ),
-            contents: contentsCell,
-            drawing: new Cell( ko.observable()),
-            grouping: new Cell( grouping ),
-            sign: new Cell( ko.observable()),
-            construction: new Cell( ko.observable())};
+    var row = {type: new Cell( type, true ),
+               contents: contentsCell,
+               drawing: new Cell( ko.observable()),
+               grouping: new Cell( grouping ),
+               sign: new Cell( ko.observable())};
+    return self.showConstruction
+      ? _.set( row, "construction", new Cell( ko.observable()))
+      : row;
   }
 
   self.disposedSubscribe( self.upload.files, function( files ) {
@@ -214,4 +218,13 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         + (someSelected( column) ? "clear" : "select");
     });
   };
+
+
+  // Cancel the batch just in case when leaving the application.
+  // Without this, something weird happens:
+  // Uncaught Error: 'Too much recursion' after processing 5000 task
+  // groups.
+  // Part of the problem is the fact that the tab is not disposed when
+  // leaving the application.
+  self.addHubListener( "contextService::leave", self.cancel );
 };
