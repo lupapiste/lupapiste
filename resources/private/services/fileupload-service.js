@@ -35,7 +35,8 @@ LUPAPISTE.FileuploadService = function() {
 
     options = _.defaults( options, {
       maximumUploadSize: 15000000, // 15 MB
-      id: util.randomElementId("fileupload-input")
+      id: util.randomElementId("fileupload-input"),
+      allowMultiple: true
     });
 
     var fileInputId = options.id;
@@ -87,21 +88,23 @@ LUPAPISTE.FileuploadService = function() {
       dropZone: $dropZone,
       add: function(e, data) {
         var file = _.get( data, "files.0", {});
-        var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
-                                      getFileExtension(file.name));
-
-        // IE9 doesn't have size, submit data and check files in server
-        var size = file.size || 0;
-        if(acceptedFile && size <= options.maximumUploadSize) {
-          hubSend( "fileAdded", {file: file});
-          connections.push( data.submit() );
-        } else {
-          hubSend( "badFile",
-                   {message: loc(acceptedFile
-                                 ? "error.file-upload.illegal-upload-size"
-                                 : "error.file-upload.illegal-file-type"),
-                    file: file}
-                 );
+        // if allowMultiple is false, accept only first of the given files (in case of drag and dropping multiple files)
+        if (options.allowMultiple || _.indexOf(data.originalFiles, file) === 0) {
+          var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
+                                        getFileExtension(file.name));
+          // IE9 doesn't have size, submit data and check files in server
+          var size = file.size || 0;
+          if(acceptedFile && size <= options.maximumUploadSize) {
+            hubSend( "fileAdded", {file: file});
+            connections.push( data.submit() );
+          } else {
+            hubSend( "badFile",
+                     {message: loc(acceptedFile
+                                   ? "error.file-upload.illegal-upload-size"
+                                   : "error.file-upload.illegal-file-type"),
+                      file: file}
+                   );
+          }
         }
       },
       start: function() {

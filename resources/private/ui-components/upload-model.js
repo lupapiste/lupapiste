@@ -60,13 +60,11 @@ LUPAPISTE.UploadModel = function( owner, params ) {
                            allowMultiple: params.allowMultiple});
     self.listenService( "filesUploaded", function( event ) {
       if( event.status === "success" ) {
-        self.files(_.concat( self.files(), event.files));
         // Since the basic file upload jQuery plugin does not support
         // limiting drag'n'drop to only one file, we prune the files
         // array, if needed.
-        if( !self.allowMultiple ) {
-          self.files( [_.last( self.files())]);
-        }
+        var allFiles = _.concat( self.files(), event.files);
+        self.files(self.allowMultiple ? allFiles : allFiles.splice(-1));
       } else {
         (params.errorHandler || indicatorError)({
           message: loc( "attachment.upload.failure",
