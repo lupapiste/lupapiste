@@ -31,6 +31,17 @@
                                         {:type-group "hakija", :type-id "valtakirja"}
                                         {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat", :type-id "vaestonsuojasuunnitelma"}]))
 
+    (fact "unknown attachmentId"
+      (command pena :bind-attachments
+        :id application-id
+        :filedatas [{:fileId file-id-1 :type (:type (first attachments))
+                     :group {:groupType "operation" :id (:id operation) :name (:name operation)}
+                     :contents "eka"}
+                    {:fileId file-id-2 :type (:type (second attachments))
+                     :group {:groupType nil}
+                     :contents "toka"
+                     :attachmentId "foo"}]) => (partial expected-failure? :error.attachment.id))
+
     (let [{job :job :as resp} (command
                                 pena
                                 :bind-attachments

@@ -1019,5 +1019,4 @@
                :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
       (fact "Not needed can be set after version deletion"
         (command pena :set-attachment-not-needed :id application-id :notNeeded true
-                 :attachmentId (:id updated-attachment)) => ok?))
-    ))
+                 :attachmentId (:id updated-attachment)) => ok?))))
