@@ -21,6 +21,7 @@ LUPAPISTE.AttachmentsRequireBubbleModel = function(params) {
       return _.pick(type, ["type-group", "type-id"]);
     }), self.selectedGroup());
     self.selectedTypes([]);
+    self.bubbleVisible(false);
   };
 
 };
