@@ -106,7 +106,7 @@ Delete guest authority
 Bad email address
   [Arguments]  ${email}
   Add guest authority start  ${email}
-  Wait Until Element Is Visible  jquery=#dialog-add-guest-authority .form-input--error
+  Wait Until  Element Should Be Visible  jquery=#dialog-add-guest-authority .form-input--error
   Click Element  jquery=#dialog-add-guest-authority p.dialog-close.close
 
 # --------------------------------

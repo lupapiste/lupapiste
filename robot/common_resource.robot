@@ -552,7 +552,7 @@ Edit operation description
   Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
   ${opDescriptionjQueryPath}=  Set Variable  div[id='application-info-tab'] section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
-  Wait until element is visible  ${opDescriptionXpath}
+  Wait Until  Element Should Be Visible  ${opDescriptionXpath}
   Input text with jQuery  ${opDescriptionjQueryPath}  ${text}
   # Close the input
   Scroll and click  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
@@ -570,11 +570,11 @@ Input building identifier
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
   Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Wait Until  Element Should Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
   Input text by test id  ${docId}-identifier-input  ${text}
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Wait Until  Element Should Not Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
 
 
 Document status is disabled
@@ -705,10 +705,10 @@ Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
   Select From Autocomplete  div[data-test-id="attachment-type-autocomplete"]  ${templateName}
-  Wait Until Element Is Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
+  Wait Until  Element Should Be Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
   Click by test id  require-attachments-bubble-dialog-ok
   Wait Until  Element Should Not Be Visible  jquery=div.selected-attachment-types-container
-  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
+  Wait Until  Element Should Be Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
@@ -1393,7 +1393,7 @@ Wait test id visible
 Wait test id hidden
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Not Visible  jquery=[data-test-id=${id}]
+  Wait Until  Element should not be visible  jquery=[data-test-id=${id}]
 
 Test id empty
   [Arguments]  ${id}

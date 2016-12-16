@@ -27,7 +27,7 @@ Olli rejects period with note
 Olli adds and approves attachment
   Open tab  attachments
   Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}
-  Wait until element is visible  test-attachment-approve
+  Wait Until  Element Should Be Visible  test-attachment-approve
   Click button  test-attachment-approve
   Return to application
 

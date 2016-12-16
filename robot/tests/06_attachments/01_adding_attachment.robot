@@ -313,7 +313,7 @@ Sonja adds new attachment template
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
   Logout
 
 Mikko logs back in and browses to the Attachments tab
