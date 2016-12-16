@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1481875384105');
+@import url('main-blessed1.css?z=1481880968679');
 
 
 /* line 973, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8137,13 +8137,14 @@ td.comment-text {
 /* line 368, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types {
   margin-top: 12px;
+  margin-bottom: 12px;
 }
 
-/* line 372, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 373, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container {
   min-height: 40px;
 }
-/* line 374, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 375, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag {
   position: relative;
   border: 1px solid #bbbbbb;
@@ -8151,17 +8152,21 @@ td.comment-text {
   width: 100%;
   display: inline-block;
 }
-/* line 380, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 381, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag span.tag-label {
   display: inline-block;
   margin: 6px;
 }
-/* line 384, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 385, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove {
   position: absolute;
   top: 8px;
   right: 8px;
   color: #f39129;
+}
+/* line 390, ../../../private/common-html/sass/views/_attachment.scss */
+.selected-attachment-types-container .selected-attachment-type-tag .tag-remove:hover {
+  color: #f7ac2e;
 }
 
 /* line 3, ../../../private/common-html/sass/views/_statement.scss */
