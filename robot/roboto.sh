@@ -18,6 +18,7 @@ PERFECT=
 BLACKLIST=
 RETRIES=3
 UPDATE=15
+EXCLUDES="--exclude fail --exclude non-roboto-proof"
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -49,6 +50,8 @@ usage() {
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
   -r | --retries n      maximum number of failing suite reruns [$RETRIES]
+  -e | --exclude tags   comma separated list of tags to exclude; 
+                        fail and non-roboto-proof are always excluded
 "
 }
 
@@ -152,6 +155,14 @@ parse_args() {
          shift 2
          parse_args $@
          ;;
+      (-e|--exclude)
+         local tags=$(echo $2 | tr "," "\n")
+         for tag in $tags; do
+            EXCLUDES="$EXCLUDES --exclude $tag"
+         done
+         shift 2
+         parse_args $@
+         ;;         
       (*)
          TESTS=$@
          echo "Tests are $TESTS"
@@ -175,10 +186,11 @@ check_env() {
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
    echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || fail "Your selenium version '$SELENIUM' may cause tests to fail. Update script or change to 2.53.*."
-   # (lack of) geckodriver
+   
    echo "Browser: $BROWSER"
    case "$BROWSER" in
       "firefox" )
+         # (lack of) geckodriver
          which geckodriver 2> /dev/null && fail "Remove geckodriver from path."
          FF=$(firefox --version)
          echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
@@ -188,7 +200,7 @@ check_env() {
          echo "$CG" | grep "^Google Chrome 55\." || fail "Major version '$CG' of Chrome may not work yet. Update script if it's ok."
          ;;
       * )
-         fail "Unsupported browser $BROWSER"
+         fail "Unsupported browser '$BROWSER'"
          ;;
    esac
    
@@ -254,13 +266,9 @@ run_test() {
    # -L TRACE
    for ROUND in $(seq 0 $RETRIES)
    do
-      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
-         --exclude integration \
-         --exclude ajanvaraus \
-         --exclude fail \
-         --exclude non-roboto-proof \
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot $EXCLUDES \
          --RunEmptySuite \
-         --variable BROWSER:$BROWSER
+         --variable BROWSER:$BROWSER \
          --variable SERVER:$SERVER \
          -d target \
          --exitonfailure \
