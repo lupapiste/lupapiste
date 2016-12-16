@@ -1392,7 +1392,6 @@ Wait test id visible
 
 Wait test id hidden
   [Arguments]  ${id}
-  Scroll to test id  ${id}
   Wait Until  Element should not be visible  jquery=[data-test-id=${id}]
 
 Test id empty
