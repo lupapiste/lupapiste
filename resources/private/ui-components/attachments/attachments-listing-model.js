@@ -43,6 +43,11 @@ LUPAPISTE.AttachmentsListingModel = function() {
 
   hub.send( "scrollService::follow", {hashRe: /\/attachments$/} );
 
+  self.upload = new LUPAPISTE.UploadModel( self,
+                                           {dropZone: "#application-attachments-tab",
+                                            allowMultiple: true,
+                                            badFileHandler: _.noop} );
+
   function addAttachmentFile( params ) {
     var attachmentId = _.get( params, "attachmentId");
     var attachmentType = _.get( params, "attachmentType");

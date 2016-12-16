@@ -630,11 +630,16 @@ button {
 
 // Mixin for a button row that wraps
 @mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
-  .btn-base, .btn, button, div, a {
+  > .btn-base,
+  > .btn,
+  > button,
+  > div,
+  > a,
+  > .operation-button {
     margin: {
-    right: $margin-right;
-    bottom: $margin-bottom;
-  }
+      right: $margin-right;
+      bottom: $margin-bottom;
+    }
   }
   :last-child {
     margin-right: 0;
@@ -650,5 +655,4 @@ button {
 .operation-button-row {
   @include button-row( $margin-bottom: 0);
   display: inline-block;
-  margin-left: $btn-spacer;
 }

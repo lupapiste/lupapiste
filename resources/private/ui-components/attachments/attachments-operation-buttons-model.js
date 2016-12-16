@@ -1,4 +1,6 @@
-LUPAPISTE.AttachmentsOperationButtonsModel = function() {
+// Parameters:
+// upload: Upload model
+LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -9,6 +11,10 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
   self.authModel = lupapisteApp.models.applicationAuthModel;
 
   var attachments = service.attachments;
+
+  self.uploadOptions = { buttonClass: "positive caps",
+                         buttonText: "attachment.add-multiple",
+                         upload: params.upload };
 
   self.newAttachment = function() {
     hub.send( "add-attachment-file", {} );

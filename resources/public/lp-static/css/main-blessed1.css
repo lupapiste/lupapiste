@@ -6052,22 +6052,28 @@ button:focus {
   margin-right: 12px;
 }
 
-/* line 646, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 651, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-events {
   pointer-events: none;
 }
 
-/* line 650, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 655, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row {
   display: inline-block;
-  margin-left: 12px;
 }
 /* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
-.operation-button-row .btn-base, .operation-button-row [type=submit], .operation-button-row .btn, .operation-button-row .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .operation-button-row .paginate_disabled_previous, .operation-button-row .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .operation-button-row .paginate_disabled_next, .operation-button-row button, .operation-button-row .like-btn, .operation-button-row a.link-btn, .operation-button-row a.link-btn-julkipano, .operation-button-row .check-string, .operation-button-row .btn, .operation-button-row .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .operation-button-row .paginate_disabled_previous, .operation-button-row .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .operation-button-row .paginate_disabled_next, .operation-button-row button, .operation-button-row div, .operation-button-row a {
+.operation-button-row > .btn-base, .operation-button-row > [type=submit], .operation-button-row > .btn, .dataTables_paginate .operation-button-row > .paginate_disabled_previous, .dataTables_paginate .operation-button-row > .paginate_disabled_next, .operation-button-row > button, .operation-button-row > .like-btn, .operation-button-row > a.link-btn, .operation-button-row > a.link-btn-julkipano, .operation-button-row > .check-string,
+.operation-button-row > .btn,
+.dataTables_paginate .operation-button-row > .paginate_disabled_previous,
+.dataTables_paginate .operation-button-row > .paginate_disabled_next,
+.operation-button-row > button,
+.operation-button-row > div,
+.operation-button-row > a,
+.operation-button-row > .operation-button {
   margin-right: 12px;
   margin-bottom: 0;
 }
-/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 644, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row :last-child {
   margin-right: 0;
 }
@@ -8342,4 +8348,29 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border: 1px solid #fbc732;
   padding: 6px 6px 6px 6px;
   margin-top: 15px;
+}
+/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after, .container-bubble:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
 }

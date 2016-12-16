@@ -1,30 +1,5 @@
-@import url('main-blessed1.css?z=1481724484953');
+@import url('main-blessed1.css?z=1481874543524');
 
-/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after, .container-bubble:before {
-  bottom: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:before {
-  border-color: rgba(251, 199, 50, 0);
-  border-bottom-color: #fbc732;
-  border-width: 11px;
-  margin-left: -11px;
-}
 
 /* line 973, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble.is-closed {
@@ -8119,11 +8094,18 @@ td.comment-text {
   margin-bottom: 2em;
 }
 /* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
-.attachment-operations .btn-base, .attachment-operations [type=submit], .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations .like-btn, .attachment-operations a.link-btn, .attachment-operations a.link-btn-julkipano, .attachment-operations .check-string, .attachment-operations .btn, .attachment-operations .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .attachment-operations .paginate_disabled_previous, .attachment-operations .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .attachment-operations .paginate_disabled_next, .attachment-operations button, .attachment-operations div, .attachment-operations a {
+.attachment-operations > .btn-base, .attachment-operations > [type=submit], .attachment-operations > .btn, .dataTables_paginate .attachment-operations > .paginate_disabled_previous, .dataTables_paginate .attachment-operations > .paginate_disabled_next, .attachment-operations > button, .attachment-operations > .like-btn, .attachment-operations > a.link-btn, .attachment-operations > a.link-btn-julkipano, .attachment-operations > .check-string,
+.attachment-operations > .btn,
+.dataTables_paginate .attachment-operations > .paginate_disabled_previous,
+.dataTables_paginate .attachment-operations > .paginate_disabled_next,
+.attachment-operations > button,
+.attachment-operations > div,
+.attachment-operations > a,
+.attachment-operations > .operation-button {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 644, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }

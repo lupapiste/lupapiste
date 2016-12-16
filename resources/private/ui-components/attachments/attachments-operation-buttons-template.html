@@ -1,6 +1,9 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-operation-buttons-template">
   <div class="operation-button-row">
+    <span class="operation-button"
+          data-bind="component: { name: 'upload-button',
+                                  params: uploadOptions }"></span>
     <button class="positive caps"
             data-bind="click: $data.newAttachment,
                        visible: $data.authModel.ok('upload-attachment')"
