@@ -69,7 +69,7 @@
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly true}}))
+           :attachments.$.readOnly (contains? #{:arkistoidaan :arkistoitu} next-state)}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
