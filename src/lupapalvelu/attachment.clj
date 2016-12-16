@@ -650,12 +650,11 @@
                                   {:original-file-id (or (:original-file-id attachment-options)
                                                          (:fileId original-filedata))}
                                   (:file conversion-data))
-        attachment         (if-not (ss/blank? attachment-id)
-                             (get-attachment-info application attachment-id)
-                             (create-attachment! application
-                                                 (assoc attachment-options
-                                                   :requested-by-authority
-                                                   (usr/authority? user))))
+        attachment         (or (get-attachment-info application attachment-id)
+                               (create-attachment! application
+                                                   (assoc attachment-options
+                                                     :requested-by-authority
+                                                     (usr/authority? user))))
         linked-version     (set-attachment-version! application user attachment options)]
     (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
     (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))

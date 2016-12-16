@@ -18,6 +18,7 @@
    (sc/required-key :group)            {:groupType              (sc/maybe (apply sc/enum att-tags/attachment-groups))
                                         (sc/optional-key :id)   ssc/ObjectIdStr
                                         (sc/optional-key :name) sc/Str}
+   (sc/optional-key :attachmentId)     sc/Str
    (sc/optional-key :contents)         (sc/maybe sc/Str)
    (sc/optional-key :sign)             sc/Bool
    (sc/optional-key :constructionTime) sc/Bool})
@@ -30,17 +31,13 @@
         (let [conversion-data    (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
               placeholder-id     (or attachmentId
                                      (att/get-empty-attachment-placeholder-id (:attachments application) type (set (map :attachment-id results))))
-              attachment-options (merge
-                                   (select-keys filedata [:group :contents])
-                                   {:attachment-id   placeholder-id
-                                    :created         created
-                                    :attachment-type type})
-              attachment         (if-not (ss/blank? placeholder-id)
+              attachment         (or
                                    (att/get-attachment-info application placeholder-id)
                                    (att/create-attachment! application
-                                                           (assoc attachment-options
-                                                             :requested-by-authority
-                                                             (usr/authority? user))))
+                                                           (assoc (select-keys filedata [:group :contents])
+                                                             :requested-by-authority (usr/authority? user)
+                                                             :created         created
+                                                             :attachment-type type)))
               version-options (merge
                                 (select-keys mongo-file [:fileId :filename :contentType])
                                 (select-keys filedata [:contents :group])
