@@ -9,6 +9,7 @@ RESOLUTION=1400x1200
 TIMEOUT=600
 TESTS=
 NOENV=
+BROWSER=firefox
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
@@ -43,6 +44,7 @@ usage() {
   -s | --start          start lupapiste with lein
   -t | --timeout n      timeout for individual robot file [$TIMEOUT]
   -h | --help           show this thing
+  -B | --browser name   firefox (default) or chrome
   -S | --server uri     use a specific server [$SERVER]
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
@@ -110,6 +112,11 @@ parse_args() {
          NOENV=1
          parse_args $@
          ;;
+      (-B|--browser)
+         BROWSER=$2
+         shift 2
+         parse_args $@
+         ;;
       (-S|--server)
          SERVER=$2
          shift 2
@@ -169,10 +176,22 @@ check_env() {
    SELENIUM=$(pip list | grep "^selenium ")
    echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || fail "Your selenium version '$SELENIUM' may cause tests to fail. Update script or change to 2.53.*."
    # (lack of) geckodriver
-   echo "Browser: "
-   which geckodriver && fail "Remove geckodriver from path."
-   FF=$(firefox --version)
-   echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
+   echo "Browser: $BROWSER"
+   case "$BROWSER" in
+      "firefox" )
+         which geckodriver 2> /dev/null && fail "Remove geckodriver from path."
+         FF=$(firefox --version)
+         echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
+         ;;
+      "chrome" )
+         CG=$(google-chrome --version)
+         echo "$CG" | grep "^Google Chrome 55\." || fail "Major version '$CG' of Chrome may not work yet. Update script if it's ok."
+         ;;
+      * )
+         fail "Unsupported browser $BROWSER"
+         ;;
+   esac
+   
    echo -n "Server: $SERVER "
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
    pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
@@ -241,6 +260,7 @@ run_test() {
          --exclude fail \
          --exclude non-roboto-proof \
          --RunEmptySuite \
+         --variable BROWSER:$BROWSER
          --variable SERVER:$SERVER \
          -d target \
          --exitonfailure \
