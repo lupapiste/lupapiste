@@ -14,10 +14,10 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
     hub.send( "add-attachment-file", {} );
   };
 
+  self.requireAttachmentsBubbleVisible = ko.observable(false);
+
   self.attachmentTemplatesAdd = function() {
-    hub.send("show-dialog", { ltitle: "attachments.require-attachments",
-                              size: "medium",
-                              component: "attachments-require"});
+    self.requireAttachmentsBubbleVisible(!self.requireAttachmentsBubbleVisible());
   };
 
   self.copyUserAttachments = function() {

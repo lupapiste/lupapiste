@@ -1,5 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="bubble-dialog-template">
-  <div data-bind="visible: bubbleVisible,
+  <div data-bind="if: bubbleVisible,
+                  visible: bubbleVisible,
                   css: css">
     <div data-bind="template: {nodes: $componentTemplateNodes}"></div>
     <div class="error"

@@ -8,14 +8,21 @@
       <i class="lupicon-circle-plus"></i>
       <span data-bind="ltext: 'application.attachmentsAdd' "></span>
     </button>
-    <button class="positive caps"
-            data-bind="click: $data.attachmentTemplatesAdd,
-                       visible: $data.authModel.ok('create-attachments')"
-            data-test-id="add-attachment-templates">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
-    </button>
+    <div class="stacked--inline">
+      <button class="positive caps"
+              data-bind="click: $data.attachmentTemplatesAdd,
+                         visible: $data.authModel.ok('create-attachments')"
+              data-test-id="add-attachment-templates">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
+      </button>
+      <div class="bubble-dialog-arrow"
+           data-bind="visible: requireAttachmentsBubbleVisible">
+      </div>
   </div>
+
+  <div data-bind="component: { name: 'attachments-require-bubble',
+                               params: { bubbleVisible: requireAttachmentsBubbleVisible } }"></div>
 
   <div class="attachment-operations"
        data-test-id="attachment-operation-buttons">

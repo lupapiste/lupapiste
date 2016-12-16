@@ -1,6 +1,5 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="attachments-require-template">
   <div class="content">
-
     <div class="attachment-type-selection">
       <label data-bind="ltext: 'attachments.type-group.search.label'"></label>
       <div data-bind="component: { name: 'attachment-type-group-autocomplete',
@@ -31,12 +30,6 @@
                                              currentGroup: selectedGroup }}"></div>
     </div>
 
-    <div data-bind="component: { name: 'submit-button-group',
-                                 params: { isSubmitVisible: true,
-                                           submit: requireAttachmentTemplates,
-                                           lSubmitTitle: 'ok',
-                                           isSubmitEnabled: submitEnabled } }"></div>
-
-    </div>
+  </div>
 
 </script>
