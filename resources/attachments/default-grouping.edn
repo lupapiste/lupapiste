@@ -1,92 +1,126 @@
-{:operation     [{:type-id :pohjapiirustus     :type-group :paapiirustus}
-                 {:type-id :leikkauspiirustus  :type-group :paapiirustus}
-                 {:type-id :julkisivupiirustus :type-group :paapiirustus}
-                 {:type-id :muu_paapiirustus   :type-group :paapiirustus}
+{:operation         [{:type-id :pohjapiirustus     :type-group :paapiirustus}
+                     {:type-id :leikkauspiirustus  :type-group :paapiirustus}
+                     {:type-id :julkisivupiirustus :type-group :paapiirustus}
+                     {:type-id :muu_paapiirustus   :type-group :paapiirustus}
 
-                 {:type-id :iv_suunnitelma                       :type-group :erityissuunnitelmat}
-                 {:type-id :kvv_suunnitelma                      :type-group :erityissuunnitelmat}
-                 {:type-id :rakennesuunnitelma                   :type-group :erityissuunnitelmat}
-                 {:type-id :ikkunadetaljit                       :type-group :erityissuunnitelmat}
-                 {:type-id :kalliorakentamistekninen_suunnitelma :type-group :erityissuunnitelmat}
-                 {:type-id :lammityslaitesuunnitelma             :type-group :erityissuunnitelmat}
-                 {:type-id :pohjarakennesuunnitelma              :type-group :erityissuunnitelmat}
-                 {:type-id :radontekninen_suunnitelma            :type-group :erityissuunnitelmat}
-                 {:type-id :sahkosuunnitelma                     :type-group :erityissuunnitelmat}
+                     {:type-id :iv_suunnitelma                       :type-group :erityissuunnitelmat}
+                     {:type-id :kvv_suunnitelma                      :type-group :erityissuunnitelmat}
+                     {:type-id :rakennesuunnitelma                   :type-group :erityissuunnitelmat}
+                     {:type-id :ikkunadetaljit                       :type-group :erityissuunnitelmat}
+                     {:type-id :kalliorakentamistekninen_suunnitelma :type-group :erityissuunnitelmat}
+                     {:type-id :lammityslaitesuunnitelma             :type-group :erityissuunnitelmat}
+                     {:type-id :pohjarakennesuunnitelma              :type-group :erityissuunnitelmat}
+                     {:type-id :radontekninen_suunnitelma            :type-group :erityissuunnitelmat}
+                     {:type-id :sahkosuunnitelma                     :type-group :erityissuunnitelmat}
 
-                 {:type-id :yhteistilat                            :type-group :selvitykset}
-                 {:type-id :energiataloudellinen_selvitys          :type-group :selvitykset}
-                 {:type-id :energiatodistus                        :type-group :selvitykset}
-                 {:type-id :haittaaineselvitys                     :type-group :selvitykset}
-                 {:type-id :kokoontumishuoneisto                   :type-group :selvitykset}
-                 {:type-id :kosteudenhallintaselvitys              :type-group :selvitykset}
-                 {:type-id :laadunvarmistusselvitys                :type-group :selvitykset}
-                 {:type-id :liikkumis_ja_esteettomyysselvitys      :type-group :selvitykset}
-                 {:type-id :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta :type-group :selvitykset}
-                 {:type-id :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo :type-group :selvitykset}
-                 {:type-id :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta :type-group :selvitykset}
-                 {:type-id :rakenteellisen_turvallisuuden_alustava_riskiarvio :type-group :selvitykset}
-                 {:type-id :rh_tietolomake                         :type-group :selvitykset}
-                 {:type-id :selvitys_kiinteiston_jatehuollon_jarjestamisesta :type-group :selvitykset}
-                 {:type-id :selvitys_liittymisesta_ymparoivaan_rakennuskantaan :type-group :selvitykset}
-                 {:type-id :selvitys_rakennuksen_kunnosta          :type-group :selvitykset}
-                 {:type-id :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo :type-group :selvitykset}
-                 {:type-id :selvitys_rakennuksen_terveellisyydesta :type-group :selvitykset}
-                 {:type-id :selvitys_rakennuksen_aaniteknisesta_toimivuudesta :type-group :selvitykset}
-                 {:type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista :type-group :selvitykset}
-                 {:type-id :muu_selvitys                           :type-group :selvitykset}
+                     {:type-id :yhteistilat                            :type-group :selvitykset}
+                     {:type-id :energiataloudellinen_selvitys          :type-group :selvitykset}
+                     {:type-id :energiatodistus                        :type-group :selvitykset}
+                     {:type-id :haittaaineselvitys                     :type-group :selvitykset}
+                     {:type-id :kokoontumishuoneisto                   :type-group :selvitykset}
+                     {:type-id :kosteudenhallintaselvitys              :type-group :selvitykset}
+                     {:type-id :laadunvarmistusselvitys                :type-group :selvitykset}
+                     {:type-id :liikkumis_ja_esteettomyysselvitys      :type-group :selvitykset}
+                     {:type-id :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta :type-group :selvitykset}
+                     {:type-id :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo :type-group :selvitykset}
+                     {:type-id :selvitys_rakennusjatteen_maarasta_laadusta_ja_lajittelusta :type-group :selvitykset}
+                     {:type-id :rakenteellisen_turvallisuuden_alustava_riskiarvio :type-group :selvitykset}
+                     {:type-id :rh_tietolomake                         :type-group :selvitykset}
+                     {:type-id :selvitys_kiinteiston_jatehuollon_jarjestamisesta :type-group :selvitykset}
+                     {:type-id :selvitys_liittymisesta_ymparoivaan_rakennuskantaan :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_kunnosta          :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_rakennustaiteellisesta_ja_kulttuurihistoriallisesta_arvosta_jos_korjaus_tai_muutostyo :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_terveellisyydesta :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_aaniteknisesta_toimivuudesta :type-group :selvitykset}
+                     {:type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista :type-group :selvitykset}
+                     {:type-id :muu_selvitys                           :type-group :selvitykset}
 
-                 {:type-id :julkisivujen_varityssuunnitelma  :type-group :suunnitelmat}
-                 {:type-id :jatevesijarjestelman_suunnitelma :type-group :suunnitelmat}
-                 {:type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta :type-group :suunnitelmat}
-                 {:type-id :mainoslaitesuunnitelma           :type-group :suunnitelmat}
-                 {:type-id :opastesuunnitelma                :type-group :suunnitelmat}
-                 {:type-id :piha_tai_istutussuunnitelma      :type-group :suunnitelmat}
-                 {:type-id :valaistussuunnitelma             :type-group :suunnitelmat}
-                 {:type-id :muu_suunnitelma                  :type-group :suunnitelmat}
+                     {:type-id :julkisivujen_varityssuunnitelma  :type-group :suunnitelmat}
+                     {:type-id :jatevesijarjestelman_suunnitelma :type-group :suunnitelmat}
+                     {:type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta :type-group :suunnitelmat}
+                     {:type-id :mainoslaitesuunnitelma           :type-group :suunnitelmat}
+                     {:type-id :opastesuunnitelma                :type-group :suunnitelmat}
+                     {:type-id :piha_tai_istutussuunnitelma      :type-group :suunnitelmat}
+                     {:type-id :valaistussuunnitelma             :type-group :suunnitelmat}
+                     {:type-id :muu_suunnitelma                  :type-group :suunnitelmat}
 
-                 {:type-id :savunpoistosuunnitelma               :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
-                 {:type-id :sammutusautomatiikkasuunnitelma      :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
-                 {:type-id :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
-                 {:type-id :ilmoitus_vaestonsuojasta             :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
-                 {:type-id :vaestonsuojasuunnitelma              :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
-                 {:type-id :muu_pelastusviranomaisen_suunnitelma :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :savunpoistosuunnitelma               :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :sammutusautomatiikkasuunnitelma      :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :ilmoitus_vaestonsuojasta             :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :vaestonsuojasuunnitelma              :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :muu_pelastusviranomaisen_suunnitelma :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
 
-                 {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}]
+                     {:type-id :rakennuksen_tietomalli_BIM :type-group :tietomallit}]
 
- :building-site [{:type-id :todistus_hallintaoikeudesta            :type-group :rakennuspaikan_hallinta}
-                 {:type-id :ote_yhtiokokouksen_poytakirjasta       :type-group :rakennuspaikan_hallinta}
-                 {:type-id :rasitesopimus                          :type-group :rakennuspaikan_hallinta}
-                 {:type-id :rasitustodistus                        :type-group :rakennuspaikan_hallinta}
-                 {:type-id :todistus_erityisoikeuden_kirjaamisesta :type-group :rakennuspaikan_hallinta}
-                 {:type-id :kiinteiston_lohkominen                 :type-group :rakennuspaikan_hallinta}
-                 {:type-id :sopimusjaljennos                       :type-group :rakennuspaikan_hallinta}
+ :building-site     [{:type-id :todistus_hallintaoikeudesta            :type-group :rakennuspaikan_hallinta}
+                     {:type-id :ote_yhtiokokouksen_poytakirjasta       :type-group :rakennuspaikan_hallinta}
+                     {:type-id :rasitesopimus                          :type-group :rakennuspaikan_hallinta}
+                     {:type-id :rasitustodistus                        :type-group :rakennuspaikan_hallinta}
+                     {:type-id :todistus_erityisoikeuden_kirjaamisesta :type-group :rakennuspaikan_hallinta}
+                     {:type-id :kiinteiston_lohkominen                 :type-group :rakennuspaikan_hallinta}
+                     {:type-id :sopimusjaljennos                       :type-group :rakennuspaikan_hallinta}
 
-                 {:type-id :karttaaineisto                            :type-group :rakennuspaikka}
-                 {:type-id :ote_alueen_peruskartasta                  :type-group :rakennuspaikka}
-                 {:type-id :ote_asemakaavasta_jos_asemakaava_alueella :type-group :rakennuspaikka}
-                 {:type-id :ote_kiinteistorekisteristerista           :type-group :rakennuspaikka}
-                 {:type-id :ote_ranta-asemakaavasta                   :type-group :rakennuspaikka}
-                 {:type-id :ote_yleiskaavasta                         :type-group :rakennuspaikka}
-                 {:type-id :perustamistapalausunto                    :type-group :rakennuspaikka}
-                 {:type-id :pintavaaitus                              :type-group :rakennuspaikka}
-                 {:type-id :rakennusoikeuslaskelma                    :type-group :rakennuspaikka}
-                 {:type-id :tonttikartta_tarvittaessa                 :type-group :rakennuspaikka}
-                 {:type-id :selvitys_rakennuspaikan_korkeusasemasta   :type-group :rakennuspaikka}
+                     {:type-id :karttaaineisto                            :type-group :rakennuspaikka}
+                     {:type-id :ote_alueen_peruskartasta                  :type-group :rakennuspaikka}
+                     {:type-id :ote_asemakaavasta_jos_asemakaava_alueella :type-group :rakennuspaikka}
+                     {:type-id :ote_kiinteistorekisteristerista           :type-group :rakennuspaikka}
+                     {:type-id :ote_ranta-asemakaavasta                   :type-group :rakennuspaikka}
+                     {:type-id :ote_yleiskaavasta                         :type-group :rakennuspaikka}
+                     {:type-id :perustamistapalausunto                    :type-group :rakennuspaikka}
+                     {:type-id :pintavaaitus                              :type-group :rakennuspaikka}
+                     {:type-id :rakennusoikeuslaskelma                    :type-group :rakennuspaikka}
+                     {:type-id :tonttikartta_tarvittaessa                 :type-group :rakennuspaikka}
+                     {:type-id :selvitys_rakennuspaikan_korkeusasemasta   :type-group :rakennuspaikka}
 
-                 {:type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista     :type-group :selvitykset}
-                 {:type-id :selvitys_rakennuspaikan_terveellisyydesta                   :type-group :selvitykset}
-                 {:type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta :type-group :selvitykset}
-                 {:type-id :tarinaselvitys                                              :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista     :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuspaikan_terveellisyydesta                   :type-group :selvitykset}
+                     {:type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta :type-group :selvitykset}
+                     {:type-id :tarinaselvitys                                              :type-group :selvitykset}
 
-                 {:type-id :hulevesisuunnitelma            :type-group :erityissuunnitelmat}
-                 {:type-id :pohjaveden_hallintasuunnitelma :type-group :erityissuunnitelmat}]
+                     {:type-id :hulevesisuunnitelma            :type-group :erityissuunnitelmat}
+                     {:type-id :pohjaveden_hallintasuunnitelma :type-group :erityissuunnitelmat}]
 
- :parties       [{:type-id :osakeyhtion_perustamiskirja                                :type-group :hakija}
-                 {:type-id :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta :type-group :hakija}
-                 {:type-id :ote_kauppa_ja_yhdistysrekisterista                         :type-group :hakija}
-                 {:type-id :valtakirja                                                 :type-group :hakija}
+ :parties           [{:type-id :osakeyhtion_perustamiskirja                                :type-group :hakija}
+                     {:type-id :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta :type-group :hakija}
+                     {:type-id :ote_kauppa_ja_yhdistysrekisterista                         :type-group :hakija}
+                     {:type-id :valtakirja                                                 :type-group :hakija}
 
-                 {:type-id :cv                    :type-group :osapuolet}
-                 {:type-id :patevyystodistus      :type-group :osapuolet}
-                 {:type-id :tutkintotodistus      :type-group :osapuolet}
-                 {:type-id :suunnittelijan_tiedot :type-group :osapuolet}]}
+                     {:type-id :cv                     :type-group :osapuolet}
+                     {:type-id :patevyystodistus       :type-group :osapuolet}
+                     {:type-id :tutkintotodistus       :type-group :osapuolet}
+                     {:type-id :suunnittelijan_tiedot  :type-group :osapuolet}]
+
+ :technical-reports [{:type-id :perustamistapalausunto :type-group :rakennuspaikka}
+                     {:type-id :pintavaaitus           :type-group :rakennuspaikka}
+
+                     {:type-id :energiataloudellinen_selvitys                                                 :type-group :selvitykset}
+                     {:type-id :energiatodistus                                                               :type-group :selvitykset}
+                     {:type-id :haittaaineselvitys                                                            :type-group :selvitykset}
+                     {:type-id :kosteudenhallintaselvitys                                                     :type-group :selvitykset}
+                     {:type-id :laadunvarmistusselvitys                                                       :type-group :selvitykset}
+                     {:type-id :maalampo_porausraportti                                                       :type-group :selvitykset}
+                     {:type-id :maalampo_rakennettavuusselvitys                                               :type-group :selvitykset}
+                     {:type-id :meluselvitys                                                                  :type-group :selvitykset}
+                     {:type-id :rakennukseen_tai_sen_osaan_kohdistuva_kuntotutkimus_jos_korjaus_tai_muutostyo :type-group :selvitykset}
+                     {:type-id :rakennuttajan_valvojaa_koskeva_selvitys                                       :type-group :selvitykset}
+                     {:type-id :riskianalyysi                                                                 :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_kunnosta                                                 :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_terveellisyydesta                                        :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuksen_aaniteknisesta_toimivuudesta                             :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista                       :type-group :selvitykset}
+                     {:type-id :selvitys_rakennuspaikan_terveellisyydesta                                     :type-group :selvitykset}
+                     {:type-id :selvitys_sisailmastotavoitteista_ja_niihin_vaikuttavista_tekijoista           :type-group :selvitykset}
+                     {:type-id :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta                   :type-group :selvitykset}
+                     {:type-id :tarinaselvitys                                                                :type-group :selvitykset}
+
+                     {:type-id :jatevesijarjestelman_suunnitelma                     :type-group :suunnitelmat}
+                     {:type-id :selvitys_rakennuksen_kosteusteknisesta_toimivuudesta :type-group :suunnitelmat}
+
+                     {:type-id :merkki_ja_turvavalaistussuunnitelma  :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :palotekninen_lausunto                :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :paloturvallisuussuunnitelma          :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :savunpoistosuunnitelma               :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :sammutusautomatiikkasuunnitelma      :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}
+                     {:type-id :muu_pelastusviranomaisen_suunnitelma :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat}]}
