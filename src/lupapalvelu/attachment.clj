@@ -501,7 +501,8 @@
 (defn get-empty-attachment-placeholder-id [attachments type exclude-ids-set]
   (->> (filter (comp empty? :versions) attachments)
        (remove (comp exclude-ids-set :id))
-       (util/find-first (partial type-match? type))))
+       (util/find-first (partial type-match? type))
+       :id))
 
 (defn- attachment-file-ids
   "Gets all file-ids from attachment."
