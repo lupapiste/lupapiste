@@ -706,8 +706,8 @@ Add empty attachment template
   Click enabled by test id  add-attachment-templates
   Select From Autocomplete  div[data-test-id="attachment-type-autocomplete"]  ${templateName}
   Wait Until Element Is Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
-  Click by test id  modal-dialog-submit-button
-  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
+  Click by test id  require-attachments-bubble-dialog-ok
+  Wait Until  Element Should Not Be Visible  jquery=div.selected-attachment-types-container
   Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
 Add attachment
