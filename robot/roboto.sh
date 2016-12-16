@@ -20,6 +20,7 @@ RETRIES=3
 UPDATE=15
 EXCLUDES="--exclude fail --exclude non-roboto-proof"
 INCLUDES=
+PARALLEL=files
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -46,7 +47,7 @@ usage() {
   -s | --start          start lupapiste with lein
   -t | --timeout n      timeout for individual robot file [$TIMEOUT]
   -h | --help           show this thing
-  -B | --browser name   firefox (default) or chrome
+  -B | --browser name   'firefox' (default) or 'chrome'
   -S | --server uri     use a specific server [$SERVER]
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
@@ -54,6 +55,9 @@ usage() {
   -e | --exclude tags   comma separated list of tags to exclude;
                         fail and non-roboto-proof are always excluded
   -i | --include tags   comma separated list of tags to include
+  -P | --parallel style 'files': find files under test-dirs and run them in 
+                                 parallel (dafault)  
+                        'args': run test-dirs in parallel
 "
 }
 
@@ -170,6 +174,11 @@ parse_args() {
          for tag in $tags; do
             INCLUDES="$INCLUDES --include $tag"
          done
+         shift 2
+         parse_args $@
+         ;;
+      (-P | --parallel)
+         PARALLEL=$2
          shift 2
          parse_args $@
          ;;
@@ -399,7 +408,23 @@ renice $NICENESS $$
 
 # run tests
 echo "Running tests $TESTS"
-for test in $(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
+test -z "$INCLUDES" || echo $INCLUDES
+echo $EXCLUDES
+
+TARGETS=
+case "$PARALLEL" in
+   "files" )
+      TARGETS=$(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
+      ;;
+   "args" )
+      TARGETS=$TESTS
+      ;;
+   * )
+      fail "Unsupported parallel style '$PARALLEL'"
+      ;;
+esac
+
+for test in $TARGETS
 do
    RUNNING=$(jobs | grep run_test | wc -l)
    while [ $RUNNING -ge $MAXTHREADS ]
