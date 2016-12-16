@@ -192,5 +192,4 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         + (someSelected( column) ? "clear" : "select");
     });
   };
-
 };

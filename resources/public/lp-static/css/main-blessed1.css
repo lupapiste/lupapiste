@@ -7092,6 +7092,37 @@ input.grid-style-input--wide:disabled {
   border: 4px dashed #f39129 !important;
 }
 
+/* line 310, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container {
+  position: relative;
+  display: inline-block;
+}
+/* line 313, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 1000;
+  min-width: 100%;
+  max-width: 200%;
+  list-style: none;
+  background-color: white;
+  border: 1px solid #fbc732;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* line 327, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list li {
+  padding-left: 6px;
+  text-overflow: ellipsis;
+}
+/* line 331, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list li.combobox--selected {
+  background-color: #f39129;
+  color: white;
+}
+
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
 legend {
   font-size: 21.6px;
@@ -8320,6 +8351,7 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
+<<<<<<< HEAD
 }
 /* line 798, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble input {
@@ -8373,4 +8405,6 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
   border-bottom-color: #fbc732;
   border-width: 11px;
   margin-left: -11px;
+=======
+>>>>>>> Combobox component.
 }

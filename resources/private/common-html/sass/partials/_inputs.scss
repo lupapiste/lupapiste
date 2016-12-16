@@ -306,3 +306,30 @@ input.grid-style-input--wide {
 .drop-zone--highlight {
   border: 4px dashed $primary !important;
 }
+
+.combobox-container {
+  position: relative;
+  display: inline-block;
+  ul.combobox__list {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 1000;
+    min-width: 100%;
+    max-width: 200%;
+    list-style: none;
+    background-color: white;
+    border: 1px solid $input-focus-border-color;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    li {
+      padding-left: $marginS;
+    }
+    li.combobox--selected {
+      background-color: $primary;
+      color: white;
+    }
+  }
+
+}

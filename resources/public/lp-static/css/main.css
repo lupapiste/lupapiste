@@ -1,5 +1,63 @@
+<<<<<<< HEAD
 @import url('main-blessed1.css?z=1481880968679');
 
+=======
+@import url('main-blessed1.css?z=1481882842499');
+
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 937, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 15px;
+}
+/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after, .container-bubble:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+>>>>>>> Combobox component.
 
 /* line 973, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble.is-closed {
