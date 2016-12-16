@@ -6,13 +6,14 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.tags :as att-tags]
             [lupapalvelu.attachment.preview :as preview]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.job :as job]
             [lupapalvelu.mongo :as mongo]
-            [sade.schemas :as ssc]))
+            [lupapalvelu.user :as usr]
+            [sade.schemas :as ssc]
+            [sade.strings :as ss]))
 
 (sc/defschema BindableFile
-  {(sc/required-key :fileId)           sc/Str
+  {(sc/required-key :fileId)           ssc/ObjectIdStr
    (sc/required-key :type)             att/Type
    (sc/required-key :group)            {:groupType              (sc/maybe (apply sc/enum att-tags/attachment-groups))
                                         (sc/optional-key :id)   ssc/ObjectIdStr
@@ -23,18 +24,23 @@
 
 (defn- bind-attachments! [{:keys [application user created]} file-infos job-id]
   (reduce
-    (fn [results {:keys [fileId type] :as filedata}]
+    (fn [results {:keys [fileId type attachmentId] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
       (if-let [mongo-file (mongo/download fileId)]
-        (let [conversion-data (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
-              placeholder-id  (when (not-any? #(= type (:type %)) results)
-                                (att/get-empty-attachment-placeholder-id (:attachments application) type))
+        (let [conversion-data    (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
+              placeholder-id     (or attachmentId
+                                     (att/get-empty-attachment-placeholder-id (:attachments application) type (set (map :attachment-id results))))
               attachment-options (merge
                                    (select-keys filedata [:group :contents])
                                    {:attachment-id   placeholder-id
                                     :created         created
                                     :attachment-type type})
-              attachment (att/get-or-create-attachment! application user attachment-options)
+              attachment         (if-not (ss/blank? placeholder-id)
+                                   (att/get-attachment-info application placeholder-id)
+                                   (att/create-attachment! application
+                                                           (assoc attachment-options
+                                                             :requested-by-authority
+                                                             (usr/authority? user))))
               version-options (merge
                                 (select-keys mongo-file [:fileId :filename :contentType])
                                 (select-keys filedata [:contents :group])
