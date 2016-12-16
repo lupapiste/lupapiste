@@ -64,6 +64,9 @@ LUPAPISTE.AttachmentsService = function() {
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -225,7 +228,9 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryGroupTypes = function() {
-    queryData("attachment-groups", "groups", self.groupTypes);
+    if (!queryData("attachment-groups", "groups", self.groupTypes)) {
+      self.groupTypes([]);
+    }
   };
 
   self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
@@ -233,7 +238,9 @@ LUPAPISTE.AttachmentsService = function() {
   hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
 
   self.queryAttachmentTypes = function() {
-    queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
+    if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
+      self.attachmentTypes([]);
+    }
   };
 
   self.attachmentTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryAttachmentTypes}});
