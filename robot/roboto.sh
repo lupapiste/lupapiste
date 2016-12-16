@@ -19,6 +19,7 @@ BLACKLIST=
 RETRIES=3
 UPDATE=15
 EXCLUDES="--exclude fail --exclude non-roboto-proof"
+INCLUDES=
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -50,8 +51,9 @@ usage() {
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
   -r | --retries n      maximum number of failing suite reruns [$RETRIES]
-  -e | --exclude tags   comma separated list of tags to exclude; 
+  -e | --exclude tags   comma separated list of tags to exclude;
                         fail and non-roboto-proof are always excluded
+  -i | --include tags   comma separated list of tags to include
 "
 }
 
@@ -162,7 +164,15 @@ parse_args() {
          done
          shift 2
          parse_args $@
-         ;;         
+         ;;
+      (-i|--include)
+         local tags=$(echo $2 | tr "," "\n")
+         for tag in $tags; do
+            INCLUDES="$INCLUDES --include $tag"
+         done
+         shift 2
+         parse_args $@
+         ;;
       (*)
          TESTS=$@
          echo "Tests are $TESTS"
@@ -186,7 +196,7 @@ check_env() {
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
    echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || fail "Your selenium version '$SELENIUM' may cause tests to fail. Update script or change to 2.53.*."
-   
+
    echo "Browser: $BROWSER"
    case "$BROWSER" in
       "firefox" )
@@ -203,7 +213,7 @@ check_env() {
          fail "Unsupported browser '$BROWSER'"
          ;;
    esac
-   
+
    echo -n "Server: $SERVER "
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
    pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
@@ -266,7 +276,8 @@ run_test() {
    # -L TRACE
    for ROUND in $(seq 0 $RETRIES)
    do
-      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot $EXCLUDES \
+      DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
+         $INCLUDES $EXCLUDES \
          --RunEmptySuite \
          --variable BROWSER:$BROWSER \
          --variable SERVER:$SERVER \
