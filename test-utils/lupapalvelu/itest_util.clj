@@ -819,12 +819,13 @@
 
 
 (defn get-local-filename [directory file-prefix]
-  (let [filename (->> (file-seq (io/file directory))
-                      (filter #(and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml")))
-                      (sort-by #(.getName %))
-                      last
-                      (.getName))]
-    (str directory filename)))
+  (if-let [filename (some->> (file-seq (io/file directory))
+                             (filter #(and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml")))
+                             (sort-by #(.getName %))
+                             last
+                             (.getName))]
+    (str directory filename)
+    (throw (AssertionError. (str "File not found: " directory file-prefix ".xml")))))
 
 (def dev-password "Lupapiste")
 
