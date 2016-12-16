@@ -53,11 +53,11 @@
           (att/link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
           (att/cleanup-temp-file (:result conversion-data))
           (job/update job-id assoc fileId {:status :done :fileId fileId})
-          {:original-file-id fileId
-           :fileId (:fileId linked-version)
-           :attachment-id (:id linked-version)
-           :type type
-           :status :done})
+          (conj results {:original-file-id fileId
+                         :fileId (:fileId linked-version)
+                         :attachment-id (:id linked-version)
+                         :type type
+                         :status :done}))
         (do
           (warnf "no file with file-id %s in mongo" (:fileId))
           (job/update job-id assoc fileId {:status :error :fileId fileId})
