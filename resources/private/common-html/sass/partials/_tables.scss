@@ -532,6 +532,10 @@ select.waste-unit-select {
       border: none;
       > td {
         padding: 0;
+        a.link-btn {
+          white-space: normal;
+          text-align: center;
+        }
       }
     }
   }

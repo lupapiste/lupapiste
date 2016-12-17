@@ -13,8 +13,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.upload = params.upload;
 
   self.password = ko.observable();
+
+  var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
-                                                             lupapisteApp.models.applicationAuthModel.ok));
+                                                             authModel.ok));
+  self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
+                                                     authModel.ok));
 
   var currentHover = ko.observable();
 
@@ -42,10 +46,19 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     };
   }
 
+  function rowData( file ) {
+    return _.get( rows(), file.fileId );
+  }
+
   self.cell = function ( file, column ) {
     // The weird default value is needed in order to gracefully handle
     // file removal or rather the resulting "phantom" cell query.
-    return _.get(rows(), sprintf( "%s.%s", file.fileId, column), {value: _.noop});
+    return _.get( rowData( file ), column, {value: _.noop});
+  };
+
+  self.rowDisabled = function( file ) {
+    var d = _.get( rowData( file ), "disabled" );
+    return d;
   };
 
   function someSelected( column ) {
@@ -73,11 +86,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     } );
     var contentsCell = new Cell( ko.observable(), true );
     contentsCell.list = contentsList;
-    var row = {type: new Cell( type, true ),
-               contents: contentsCell,
-               drawing: new Cell( ko.observable()),
-               grouping: new Cell( grouping ),
-               sign: new Cell( ko.observable())};
+    var row = { disabled: ko.observable(),
+                type: new Cell( type, true ),
+                contents: contentsCell,
+                drawing: new Cell( ko.observable()),
+                grouping: new Cell( grouping ),
+                sign: new Cell( ko.observable())};
     return self.showConstruction
       ? _.set( row, "construction", new Cell( ko.observable()))
       : row;

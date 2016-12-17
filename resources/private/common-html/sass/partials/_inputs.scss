@@ -91,6 +91,10 @@
     color: $disabled;
   }
 
+  .no-label-text.#{$cls}-label:before {
+    margin-right: 0;
+  }
+
   .#{$cls}-wrapper {
     display: $wrapper-display;
     box-sizing: border-box;

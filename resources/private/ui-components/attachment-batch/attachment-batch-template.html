@@ -18,7 +18,9 @@
         <!-- ko if: showConstruction -->
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
         <!-- /ko -->
+        <!-- ko if: showSign -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
+        <!-- /ko -->
       </thead>
       <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
@@ -40,7 +42,8 @@
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'contents')">
             <combobox params="value: $parent.cell( $data, 'contents').value,
-                              list: $parent.cell( $data, 'contents').list"></combobox>
+                              list: $parent.cell( $data, 'contents').list,
+                              disable: $parent.rowDisabled( $data )"></combobox>
             <icon-button params="click: $parent.filler( 'contents', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',
@@ -54,7 +57,8 @@
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'drawing')">
             <input type="text" class="batch-drawing grid-style-input"
-                   data-bind="textInput: $parent.cell( $data, 'drawing').value">
+                   data-bind="textInput: $parent.cell( $data, 'drawing').value,
+                              disable: $parent.rowDisabled( $data )">
             <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-fill-down',
@@ -77,27 +81,34 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
+        <!-- ko if: $parent.showSign -->
         <td class="td-center">
           <toggle params="prefix: 'signbox',
                           value: $parent.cell( $data, 'sign' ).value"></toggle>
         </td>
+        <!-- /ko -->
         <!-- ko if: $parent.showConstruction -->
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
         </td>
         <!-- /ko -->
         <td class="td-center">
+          <!-- ko ifnot: $parent.rowDisabled( $data ) -->
           <i class="lupicon-remove primary"
-             data-bind="click: $parent.upload.removeFile"></i></td>
+             data-bind="click: $parent.upload.removeFile"></i>
+          <!-- /ko -->
+        </td>
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
         <tr>
           <td colspan="5"></td>
+          <!-- ko if: showSign -->
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'sign', footClick ),
                           ltext: footText( 'sign')"></a>
           </td>
+          <!-- /ko -->
           <!-- ko if: showConstruction -->
           <td class="td-center">
             <a class="link-btn"

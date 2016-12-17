@@ -6143,6 +6143,11 @@ input:disabled + .arrow-label:hover.arrow-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.arrow-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6159,7 +6164,7 @@ input:disabled + .arrow-label:hover.arrow-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6229,6 +6234,11 @@ input:disabled + .checkbox-label:hover.checkbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.checkbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6245,7 +6255,7 @@ input:disabled + .checkbox-label:hover.checkbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6315,6 +6325,11 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.docgen-checkbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper {
   display: block;
   box-sizing: border-box;
@@ -6331,12 +6346,12 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 111, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 115, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.form-input, .docgen-checkbox-wrapper.form-input--inline {
   height: auto;
   width: auto;
@@ -6407,6 +6422,11 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.sectionbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6423,7 +6443,7 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6493,6 +6513,11 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.stampbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6509,12 +6534,12 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 118, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 122, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   border: none;
 }
@@ -6584,6 +6609,11 @@ input:disabled + .signbox-label:hover.signbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.signbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6600,12 +6630,12 @@ input:disabled + .signbox-label:hover.signbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 123, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 127, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper {
   border: none;
 }
@@ -6675,6 +6705,11 @@ input:disabled + .radio-label:hover.radio-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.radio-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6691,7 +6726,7 @@ input:disabled + .radio-label:hover.radio-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6761,6 +6796,11 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.radio-field-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   display: inline;
   box-sizing: border-box;
@@ -6777,22 +6817,22 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 135, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 139, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 148, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -6862,6 +6902,11 @@ input:disabled + .filter-label:hover.filter-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.filter-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6878,12 +6923,12 @@ input:disabled + .filter-label:hover.filter-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 160, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6892,51 +6937,51 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 166, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 170, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 170, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 174, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 173, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 177, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 177, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 181, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 184, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 188, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 186, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 190, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 189, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 193, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
 }
 
-/* line 196, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 200, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput {
   box-sizing: border-box;
   padding: 4px;
   display: block;
 }
-/* line 200, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 204, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput:focus {
   border-color: #fbc732;
 }
 
-/* line 205, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 209, ../../../private/common-html/sass/partials/_inputs.scss */
 .textinput.textinput--big {
   min-height: 40px;
   max-height: 40px;
@@ -6945,7 +6990,7 @@ input[type=text].textinput:focus {
   font-size: 16px;
 }
 
-/* line 211, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 215, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput {
   padding: 0 12px;
   box-sizing: border-box;
@@ -6973,11 +7018,11 @@ input.dateinput:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
-/* line 218, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 222, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:focus {
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 221, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 225, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:disabled {
   background-image: url("/lp-static/img/calendar-gray187.png");
   color: #bbbbbb;
@@ -6986,19 +7031,19 @@ input.dateinput:disabled {
   padding-right: 34px;
 }
 
-/* line 230, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput,
 input.tip.dateinput {
   background-image: url("/lp-static/img/calendar-orange.png");
   border-color: #f39129;
 }
-/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 238, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:focus,
 input.tip.dateinput:focus {
   border-color: #fbc732;
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 238, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 242, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:disabled,
 input.tip.dateinput:disabled {
   border-color: #dddddd;
@@ -7006,39 +7051,39 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-/* line 245, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 249, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small {
   height: 26px;
   background-image: url("/lp-static/img/calendar-12-orange-dark.png");
   min-height: initial;
   font-size: 0.875em;
 }
-/* line 250, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 254, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 253, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 257, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 258, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 262, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small,
 input.tip.dateinput.dateinput--small {
   background-image: url("/lp-static/img/calendar-12-orange.png");
 }
-/* line 261, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 265, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:focus,
 input.tip.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 264, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 268, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:disabled,
 input.tip.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 271, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 275, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7062,7 +7107,7 @@ input.grid-style-input:disabled {
   background-color: #f6f6f6;
 }
 
-/* line 275, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 279, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input--wide {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7087,17 +7132,17 @@ input.grid-style-input--wide:disabled {
   background-color: #f6f6f6;
 }
 
-/* line 306, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 310, ../../../private/common-html/sass/partials/_inputs.scss */
 .drop-zone--highlight {
   border: 4px dashed #f39129 !important;
 }
 
-/* line 310, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 314, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container {
   position: relative;
   display: inline-block;
 }
-/* line 313, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 317, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list {
   position: absolute;
   left: 0;
@@ -7112,11 +7157,11 @@ input.grid-style-input--wide:disabled {
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 326, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 330, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li {
   padding-left: 6px;
 }
-/* line 329, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 333, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li.combobox--selected {
   background-color: #f39129;
   color: white;
@@ -7907,12 +7952,12 @@ div.sticky {
   padding-right: 10px;
 }
 
-/* line 282, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 286, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits {
   display: table;
   white-space: nowrap;
 }
-/* line 285, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 289, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > .reject-edits--input {
   display: table-cell;
   line-height: 32px;
@@ -7920,13 +7965,13 @@ div.sticky {
   min-height: 32px;
   max-height: 32px;
 }
-/* line 292, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 296, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > input.reject-edits--input {
   width: 20em;
   vertical-align: middle;
   padding-right: 4px;
 }
-/* line 297, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 301, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > button.reject-edits--input {
   padding-left: 8px;
   padding-right: 8px;
@@ -8307,75 +8352,4 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-det
 
 /* button.rejected ~ .group-buttons .is-top.rejected { */
 /*   display: none; */
-/* } */
-/* line 928, ../../../private/common-html/sass/partials/_forms.scss */
-.is-middle {
-  vertical-align: middle;
-}
-
-/* line 933, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble {
-  display: block;
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  background-color: white;
-  width: 100%;
-  border-radius: 2px;
-  border: 1px solid #fbc732;
-  padding: 6px;
-  margin-top: 15px;
-}
-/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:after, .description-bubble:before {
-  bottom: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:before {
-  border-color: rgba(251, 199, 50, 0);
-  border-bottom-color: #fbc732;
-  border-width: 11px;
-  margin-left: -11px;
-}
-/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble input {
-  box-sizing: border-box;
-  border: none;
-  font-size: 16px;
-  width: 100%;
-  box-shadow: none;
-  color: #333333;
-}
-/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble input:focus {
-  border: none;
-  box-shadow: none;
-}
-
-/* line 937, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble {
-  display: block;
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  background-color: white;
-  width: 100%;
-  border-radius: 2px;
-  border: 1px solid #fbc732;
-  padding: 6px 6px 6px 6px;
-  margin-top: 15px;
-}
+/* }
