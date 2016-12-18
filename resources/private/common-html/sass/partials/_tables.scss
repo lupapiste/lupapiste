@@ -499,6 +499,9 @@ select.waste-unit-select {
   input {
     vertical-align: middle;
   }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
   .batch-autocomplete {
     display: inherit;
     attachment-type-autocomplete {
@@ -521,6 +524,14 @@ select.waste-unit-select {
         white-space: normal;
         line-height: normal;
         padding-left: 0;
+      }
+    }
+    attachment-type-autocomplete.no-events {
+      .autocomplete-selection-wrapper {
+        background-color: $gray246;
+        i.tag-chevron, span.selection-text {
+          color: $gray187;
+        }
       }
     }
   }

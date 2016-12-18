@@ -38,7 +38,7 @@ LUPAPISTE.UploadProgressModel = function( params ) {
     targetCount( 0 );
   });
 
-  upload.listenService( "fileRemoved",
+  upload.listenService( "fileCleared",
                         _.bind( targetCount.decrement, targetCount ));
 
   self.isFinished = self.disposedPureComputed( function() {

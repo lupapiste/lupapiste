@@ -468,6 +468,12 @@ span + .waiting.wait {
   @include rotate( spin );
   vertical-align: middle;
   padding: 0 !important;
+  margin: 0;
+  display: inline-block;
+}
+
+button > .icon-spin {
+  display: table-cell;
 }
 
 .icon-spin + span {

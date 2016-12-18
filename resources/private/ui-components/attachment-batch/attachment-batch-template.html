@@ -27,7 +27,8 @@
         <td>
           <div class="batch-autocomplete fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'type')">
-            <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value">
+            <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value"
+                                          data-bind="css: {'no-events': $parent.rowDisabled( $data )}">
             </attachment-type-autocomplete>
             <icon-button params="click: $parent.filler( 'type', $data),
                                  buttonClass: 'function',
@@ -71,7 +72,8 @@
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'grouping')">
-            <attachment-group-selector params="currentGroup: $parent.cell( $data, 'grouping').value"></attachment-group-selector>
+            <attachment-group-selector params="currentGroup: $parent.cell( $data, 'grouping').value,
+                                               editable: !$parent.rowDisabled( $data )"></attachment-group-selector>
             <icon-button params="click: $parent.filler( 'grouping', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',
@@ -84,12 +86,14 @@
         <!-- ko if: $parent.showSign -->
         <td class="td-center">
           <toggle params="prefix: 'signbox',
-                          value: $parent.cell( $data, 'sign' ).value"></toggle>
+                          value: $parent.cell( $data, 'sign' ).value,
+                          disable: $parent.rowDisabled( $data )"></toggle>
         </td>
         <!-- /ko -->
         <!-- ko if: $parent.showConstruction -->
         <td class="td-center">
-          <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
+          <toggle params="value: $parent.cell( $data, 'construction' ).value,
+                          disable: $parent.rowDisabled( $data )"></toggle>
         </td>
         <!-- /ko -->
         <td class="td-center">
@@ -97,6 +101,9 @@
           <i class="lupicon-remove primary"
              data-bind="click: $parent.upload.removeFile"></i>
           <!-- /ko -->
+          <!-- ko if: $parent.rowDisabled( $data ) -->
+          <i class="icon-spin lupicon-refresh"></i>
+          <!-- /ko -->          
         </td>
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
@@ -153,10 +160,12 @@
     <!-- ko if: fileCount -->
     <div class="batch-buttons">
       <icon-button params="waiting: waiting,
+                           enable: canBind,
                            icon: 'check',
                            ltext: 'attachment.batch-ready',
-                           click: done"></icon-button>
+                           click: bind"></icon-button>
       <icon-button params="icon: 'remove',
+                           disable: waiting,
                            buttonClass: 'secondary',
                            ltext: 'cancel',
                            click: cancel"></icon-button>

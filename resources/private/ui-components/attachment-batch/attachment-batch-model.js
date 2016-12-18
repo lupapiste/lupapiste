@@ -34,15 +34,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function Cell( valueObs, required ) {
     this.value = valueObs;
-    this.isOK = function() {
+    this.isOk = function() {
       return !required || valueObs();
-    };
-
-    this.asParam = function( name ) {
-      var v = valueObs();
-      if( _.isBoolean( v ) || _.trim( v )) {
-        return _.fromPairs([[name, v]] );
-      }
     };
   }
 
@@ -57,9 +50,15 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   };
 
   self.rowDisabled = function( file ) {
-    var d = _.get( rowData( file ), "disabled" );
-    return d;
+    return util.getIn( rowData( file ), ["disabled"] );
   };
+
+  function disableRows( flag ) {
+    _.each( _.values( rows()),
+            function( row ) {
+              row.disabled( flag );
+            });
+  }
 
   function someSelected( column ) {
     return _.some( _.values( rows() ),
@@ -124,24 +123,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.upload.init();
 
-
-  self.waiting = self.disposedPureComputed( function() {
-    return self.upload.waiting() || ajaxWaiting();
-  });
-
-  self.done = function() {
-
-  };
-
-  self.cancel = function() {
-    self.upload.cancel();
-    self.badFiles.removeAll();
-    rows( {});
-  };
-
   // The fill/copy down functionality works as follows:
-  // 1. The filling is possible if the file is not the last and the
-  //    current cell has a value.
+  // 1. The filling is possible if the file is not the last one, the
+  //    current cell has a value and the row is enabled.
   // 2. The filling action is determined by policy. If number then the
   //    filling is done with fillNumber, otherwise the fill value is just
   //    a copy of the current cell value.
@@ -184,7 +168,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.canFillDown = function( column, file  ) {
     return self.disposedPureComputed( function() {
-      if(_.isEqual( currentHover(), {fileId: file.fileId,
+      if(!self.rowDisabled( file ) &&
+         _.isEqual( currentHover(), {fileId: file.fileId,
                                      column: column })) {
         var index = fileIndex( file );
         return _.trim( self.cell( file, column ).value())
@@ -222,7 +207,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var flag = !someSelected( column );
     _.each( _.values( rows() ),
             function( row ) {
-              row[column].value( flag );
+              if( !row.disabled()) {
+                row[column].value( flag );
+              }
             });
   };
 
@@ -232,6 +219,87 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
         + (someSelected( column) ? "clear" : "select");
     });
   };
+
+  // Bind and cancel
+
+  self.waiting = self.disposedPureComputed( function() {
+    return  self.upload.waiting() || ajaxWaiting();
+  });
+
+  self.canBind = self.disposedPureComputed( function() {
+    var cellsOk = _.every( _.values( rows()),
+                           function( obj ) {
+                             return _( _.values( obj ))
+                               .filter( function( a ) {
+                                 return a instanceof Cell;
+                               })
+                               .every( function( cell ) {
+                                 return cell.isOk();
+                               });
+                           });
+    return cellsOk && (self.signingSelected()
+                       ? self.passwordState()
+                       : true );
+  });
+
+  function pollJob( response ) {
+    var job = response.job;
+    _.each( _.values( job.value ),
+            function( fileData ) {
+              if( fileData.status === "done"
+                && rows()[fileData.fileId]) {
+                self.upload.clearFile( fileData );
+              }
+            });
+    if( job.status !== "done" ) {
+      ajax.query( "bind-attachments-job",
+                  {jobId: job.id,
+                   version: job.version})
+        .success( pollJob)
+        .call();
+    } else {
+      ajaxWaiting( false );
+      service.queryAll();
+    }
+  }
+
+  function groupParam( value ) {
+    var g = /operation-(.+)/.exec( value.groupType );
+    return g ? {groupType: "operation", id: _.last( g )} : value;
+  }
+
+  self.bind = function() {
+    disableRows( true );
+    self.badFiles.removeAll();
+    var signing = self.signingSelected();
+    ajax.command( "bind-attachments",
+                  _.merge( {id: lupapisteApp.models.application.id()},
+                           signing ? {password: self.password()} : {},
+                           {filedatas: _.map( rows(),
+                                              function( data, fileId ) {
+                                                return _.merge({
+                                                  fileId: fileId ,
+                                                  type:_.pick( data.type.value(),
+                                                               ["type-group", "type-id"]),
+                                                  group: groupParam( data.grouping.value() ),
+                                                  contents: data.contents.value()},
+                                                               signing ? {sign: data.sign.value()} : {},
+                                                               data.construction
+                                                               ? {constructionTime: data.construction.value()}
+                                                               : {});
+                                              })}))
+      .fuse( ajaxWaiting )
+      .success( pollJob )
+      .call();
+
+  };
+
+  self.cancel = function() {
+    self.upload.cancel();
+    self.badFiles.removeAll();
+    rows( {});
+  };
+
 
 
   // Cancel the batch just in case when leaving the application.

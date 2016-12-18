@@ -68,6 +68,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
         var allFiles = _.concat( self.files(), event.files);
         self.files(self.allowMultiple ? allFiles : allFiles.splice(-1));
       } else {
+        notifyService( "fileCleared", {} );
         (params.errorHandler || indicatorError)({
           message: loc( "attachment.upload.failure",
                         event.message )});
@@ -80,13 +81,18 @@ LUPAPISTE.UploadModel = function( owner, params ) {
     self.listenService( "badFile", params.badFileHandler || indicatorError);
   }
 
+  // Removes file from files but from server.
+  self.clearFile = function( data ) {
+    if( self.files.remove( function( file ) {
+      return file.fileId === data.fileId;
+    })) {
+      notifyService( "fileCleared", {fileId: data.fileId});
+    }
+  };
 
-
+  // Remove file from files and server.
   self.removeFile = function( data ) {
-    self.files( _.filter( self.files(),
-                          function( file ) {
-                            return file.fileId !== data.fileId;
-                          }));
+    self.clearFile( data );
     notifyService( "removeFile", {attachmentId: data.fileId});
   };
 
