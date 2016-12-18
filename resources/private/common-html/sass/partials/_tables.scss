@@ -499,9 +499,12 @@ select.waste-unit-select {
   input {
     vertical-align: middle;
   }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
   .batch-autocomplete {
     display: inherit;
-    attachment-type-group-autocomplete {
+    attachment-type-autocomplete {
       $width: 20em;
       min-width: $width;
       max-width: $width;
@@ -523,6 +526,14 @@ select.waste-unit-select {
         padding-left: 0;
       }
     }
+    attachment-type-autocomplete.no-events {
+      .autocomplete-selection-wrapper {
+        background-color: $gray246;
+        i.tag-chevron, span.selection-text {
+          color: $gray187;
+        }
+      }
+    }
   }
   .batch-drawing {
     max-width: 4em;
@@ -532,6 +543,10 @@ select.waste-unit-select {
       border: none;
       > td {
         padding: 0;
+        a.link-btn {
+          white-space: normal;
+          text-align: center;
+        }
       }
     }
   }

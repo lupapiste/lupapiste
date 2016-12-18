@@ -5888,133 +5888,140 @@ span + .waiting.wait {
   animation: spin 4s linear infinite;
   vertical-align: middle;
   padding: 0 !important;
+  margin: 0;
+  display: inline-block;
 }
 
-/* line 473, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 475, ../../../private/common-html/sass/partials/_buttons.scss */
+button > .icon-spin {
+  display: table-cell;
+}
+
+/* line 479, ../../../private/common-html/sass/partials/_buttons.scss */
 .icon-spin + span {
   padding-left: 10px;
 }
 
-/* line 480, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 486, ../../../private/common-html/sass/partials/_buttons.scss */
 i.toggle {
   display: none;
   padding: 0 !important;
 }
 
-/* line 489, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 495, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled > i, .toggled > button > i {
   display: none;
 }
 
-/* line 493, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 499, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled i.toggle {
   display: table-cell;
 }
 
-/* line 497, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 503, ../../../private/common-html/sass/partials/_buttons.scss */
 .toggled .toggle + span {
   padding-left: 10px;
 }
 
-/* line 510, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 516, ../../../private/common-html/sass/partials/_buttons.scss */
 .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   cursor: default !important;
   color: white !important;
   background-color: #dddddd !important;
 }
 
-/* line 530, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 536, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked {
   display: table;
 }
-/* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked .btn-base, .stacked [type=submit], .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button, .stacked .like-btn, .stacked a.link-btn, .stacked a.link-btn-julkipano, .stacked .check-string, .stacked .btn, .stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked .paginate_disabled_previous, .stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked .paginate_disabled_next, .stacked button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 525, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked div {
   overflow-y: hidden;
 }
 
-/* line 534, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 540, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline {
   display: table;
   display: inline-table;
   vertical-align: top;
 }
-/* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline .btn-base, .stacked--inline [type=submit], .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button, .stacked--inline .like-btn, .stacked--inline a.link-btn, .stacked--inline a.link-btn-julkipano, .stacked--inline .check-string, .stacked--inline .btn, .stacked--inline .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .stacked--inline .paginate_disabled_previous, .stacked--inline .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .stacked--inline .paginate_disabled_next, .stacked--inline button {
   width: 100%;
   display: block;
   margin: 0;
 }
-/* line 525, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
 .stacked--inline div {
   overflow-y: hidden;
 }
 
-/* line 543, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 549, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins .btn-base, .inner-margins [type=submit], .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins .like-btn, .inner-margins a.link-btn, .inner-margins a.link-btn-julkipano, .inner-margins .check-string, .inner-margins .btn, .inner-margins .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins .paginate_disabled_previous, .inner-margins .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins .paginate_disabled_next, .inner-margins button, .inner-margins div, .inner-margins a {
   margin-left: 12px;
 }
-/* line 546, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 552, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins :first-child {
   margin-left: 0;
 }
 
-/* line 552, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 558, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked .btn-base, .inner-margins.stacked [type=submit], .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked .like-btn, .inner-margins.stacked a.link-btn, .inner-margins.stacked a.link-btn-julkipano, .inner-margins.stacked .check-string, .inner-margins.stacked .btn, .inner-margins.stacked .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .inner-margins.stacked .paginate_disabled_previous, .inner-margins.stacked .dataTables_paginate .paginate_disabled_next, .dataTables_paginate .inner-margins.stacked .paginate_disabled_next, .inner-margins.stacked button, .inner-margins.stacked div, .inner-margins.stacked a {
   margin-left: 0;
   margin-top: 12px;
 }
-/* line 556, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 562, ../../../private/common-html/sass/partials/_buttons.scss */
 .inner-margins.stacked :first-child {
   margin-top: 0;
 }
 
-/* line 562, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 568, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-s {
   margin: 6px 6px 6px 6px;
 }
 
-/* line 566, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 572, ../../../private/common-html/sass/partials/_buttons.scss */
 .margins-m {
   margin: 12px 12px 12px 12px;
 }
 
-/* line 570, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 576, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-top {
   margin-top: 0 !important;
 }
 
-/* line 576, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 582, ../../../private/common-html/sass/partials/_buttons.scss */
 .form-buttons button {
   margin-left: 12px;
 }
 
-/* line 581, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 587, ../../../private/common-html/sass/partials/_buttons.scss */
 div.docgen-content > section + button {
   margin-bottom: 24px;
 }
 
-/* line 585, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 591, ../../../private/common-html/sass/partials/_buttons.scss */
 #login-button span {
   text-align: center;
   width: 200px;
 }
 
-/* line 591, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 597, ../../../private/common-html/sass/partials/_buttons.scss */
 button:focus {
   outline: 0;
 }
 
-/* line 596, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 602, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button {
   position: relative;
 }
-/* line 598, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 604, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row {
   position: absolute;
   top: 0;
@@ -6024,44 +6031,44 @@ button:focus {
   overflow: hidden;
   z-index: 1;
 }
-/* line 606, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 612, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row.remove-button--show {
   width: auto;
 }
-/* line 609, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 615, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button {
   display: inline-block;
   width: 105px !important;
 }
-/* line 612, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 618, ../../../private/common-html/sass/partials/_buttons.scss */
 .remove-button .remove-button__row button.primary {
   margin-right: -3px;
 }
 
-/* line 620, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 626, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive {
   border: 1px solid #dddddd;
 }
-/* line 622, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 628, ../../../private/common-html/sass/partials/_buttons.scss */
 .application_actions button.positive:hover, .application_actions button.positive:active {
   border-color: #bbbbbb;
 }
 
-/* line 627, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
 .left-buttons > button {
   margin-right: 12px;
 }
 
-/* line 651, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 657, ../../../private/common-html/sass/partials/_buttons.scss */
 .no-events {
   pointer-events: none;
 }
 
-/* line 655, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 661, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row {
   display: inline-block;
 }
-/* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row > .btn-base, .operation-button-row > [type=submit], .operation-button-row > .btn, .dataTables_paginate .operation-button-row > .paginate_disabled_previous, .dataTables_paginate .operation-button-row > .paginate_disabled_next, .operation-button-row > button, .operation-button-row > .like-btn, .operation-button-row > a.link-btn, .operation-button-row > a.link-btn-julkipano, .operation-button-row > .check-string,
 .operation-button-row > .btn,
 .dataTables_paginate .operation-button-row > .paginate_disabled_previous,
@@ -6073,7 +6080,7 @@ button:focus {
   margin-right: 12px;
   margin-bottom: 0;
 }
-/* line 644, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 650, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row :last-child {
   margin-right: 0;
 }
@@ -6143,6 +6150,11 @@ input:disabled + .arrow-label:hover.arrow-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.arrow-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6159,7 +6171,7 @@ input:disabled + .arrow-label:hover.arrow-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .arrow-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6229,6 +6241,11 @@ input:disabled + .checkbox-label:hover.checkbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.checkbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6245,7 +6262,7 @@ input:disabled + .checkbox-label:hover.checkbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6315,6 +6332,11 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.docgen-checkbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper {
   display: block;
   box-sizing: border-box;
@@ -6331,12 +6353,12 @@ input:disabled + .docgen-checkbox-label:hover.docgen-checkbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 111, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 115, ../../../private/common-html/sass/partials/_inputs.scss */
 .docgen-checkbox-wrapper.form-input, .docgen-checkbox-wrapper.form-input--inline {
   height: auto;
   width: auto;
@@ -6407,6 +6429,11 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.sectionbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6423,7 +6450,7 @@ input:disabled + .sectionbox-label:hover.sectionbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .sectionbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6493,6 +6520,11 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.stampbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6509,12 +6541,12 @@ input:disabled + .stampbox-label:hover.stampbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 118, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 122, ../../../private/common-html/sass/partials/_inputs.scss */
 .stampbox-wrapper {
   border: none;
 }
@@ -6584,6 +6616,11 @@ input:disabled + .signbox-label:hover.signbox-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.signbox-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper {
   display: inherit;
   box-sizing: border-box;
@@ -6600,12 +6637,12 @@ input:disabled + .signbox-label:hover.signbox-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 123, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 127, ../../../private/common-html/sass/partials/_inputs.scss */
 .signbox-wrapper {
   border: none;
 }
@@ -6675,6 +6712,11 @@ input:disabled + .radio-label:hover.radio-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.radio-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6691,7 +6733,7 @@ input:disabled + .radio-label:hover.radio-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
@@ -6761,6 +6803,11 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.radio-field-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   display: inline;
   box-sizing: border-box;
@@ -6777,22 +6824,22 @@ input:disabled + .radio-field-label:hover.radio-field-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 135, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 139, ../../../private/common-html/sass/partials/_inputs.scss */
 .radio-field-wrapper {
   padding: 7px 7px 7px 7px;
 }
 
-/* line 140, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break {
   margin-bottom: 24px;
 }
 
-/* line 144, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 148, ../../../private/common-html/sass/partials/_inputs.scss */
 .wrapper--break-small {
   margin-bottom: 6px;
 }
@@ -6862,6 +6909,11 @@ input:disabled + .filter-label:hover.filter-label:before {
 }
 
 /* line 94, ../../../private/common-html/sass/partials/_inputs.scss */
+.no-label-text.filter-label:before {
+  margin-right: 0;
+}
+
+/* line 98, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper {
   display: inline-block;
   box-sizing: border-box;
@@ -6878,12 +6930,12 @@ input:disabled + .filter-label:hover.filter-label:before {
   font-size: 0;
 }
 
-/* line 101, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 105, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-wrapper.wrapper--disabled {
   background-color: #f6f6f6;
 }
 
-/* line 156, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 160, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group {
   border: 1px solid #bbbbbb;
   padding-top: 7px;
@@ -6892,51 +6944,51 @@ input:disabled + .filter-label:hover.filter-label:before {
   padding-bottom: 14px;
   margin-bottom: 1em;
 }
-/* line 166, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 170, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state i {
   cursor: pointer;
   color: #f39129;
 }
-/* line 170, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 174, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state span {
   text-transform: uppercase;
 }
-/* line 173, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 177, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__state:hover > i {
   color: #fbc732;
 }
-/* line 177, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 181, ../../../private/common-html/sass/partials/_inputs.scss */
 .filter-group .filter-group__toggles {
   margin-left: 2px;
   margin-top: 6px;
 }
 
-/* line 184, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 188, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input {
   white-space: nowrap;
 }
-/* line 186, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 190, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input, .button-input button {
   vertical-align: middle;
 }
-/* line 189, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 193, ../../../private/common-html/sass/partials/_inputs.scss */
 .button-input input {
   width: 50% !important;
   -webkit-appearance: textfield !important;
 }
 
-/* line 196, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 200, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput {
   box-sizing: border-box;
   padding: 4px;
   display: block;
 }
-/* line 200, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 204, ../../../private/common-html/sass/partials/_inputs.scss */
 input[type=text].textinput:focus {
   border-color: #fbc732;
 }
 
-/* line 205, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 209, ../../../private/common-html/sass/partials/_inputs.scss */
 .textinput.textinput--big {
   min-height: 40px;
   max-height: 40px;
@@ -6945,7 +6997,7 @@ input[type=text].textinput:focus {
   font-size: 16px;
 }
 
-/* line 211, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 215, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput {
   padding: 0 12px;
   box-sizing: border-box;
@@ -6973,11 +7025,11 @@ input.dateinput:disabled {
   border-color: #dddddd;
   background-color: #f6f6f6;
 }
-/* line 218, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 222, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:focus {
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 221, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 225, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput:disabled {
   background-image: url("/lp-static/img/calendar-gray187.png");
   color: #bbbbbb;
@@ -6986,19 +7038,19 @@ input.dateinput:disabled {
   padding-right: 34px;
 }
 
-/* line 230, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput,
 input.tip.dateinput {
   background-image: url("/lp-static/img/calendar-orange.png");
   border-color: #f39129;
 }
-/* line 234, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 238, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:focus,
 input.tip.dateinput:focus {
   border-color: #fbc732;
   background-image: url("/lp-static/img/calendar-orange-light.png");
 }
-/* line 238, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 242, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput:disabled,
 input.tip.dateinput:disabled {
   border-color: #dddddd;
@@ -7006,39 +7058,39 @@ input.tip.dateinput:disabled {
   color: #bbbbbb;
 }
 
-/* line 245, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 249, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small {
   height: 26px;
   background-image: url("/lp-static/img/calendar-12-orange-dark.png");
   min-height: initial;
   font-size: 0.875em;
 }
-/* line 250, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 254, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 253, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 257, ../../../private/common-html/sass/partials/_inputs.scss */
 input.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 258, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 262, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small,
 input.tip.dateinput.dateinput--small {
   background-image: url("/lp-static/img/calendar-12-orange.png");
 }
-/* line 261, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 265, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:focus,
 input.tip.dateinput.dateinput--small:focus {
   background-image: url("/lp-static/img/calendar-12-orange-light.png");
 }
-/* line 264, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 268, ../../../private/common-html/sass/partials/_inputs.scss */
 .form-grid input.tip.dateinput.dateinput--small:disabled,
 input.tip.dateinput.dateinput--small:disabled {
   background-image: url("/lp-static/img/calendar-12-gray187.png");
 }
 
-/* line 271, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 275, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7062,7 +7114,7 @@ input.grid-style-input:disabled {
   background-color: #f6f6f6;
 }
 
-/* line 275, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 279, ../../../private/common-html/sass/partials/_inputs.scss */
 input.grid-style-input--wide {
   padding: 0 12px;
   box-sizing: border-box;
@@ -7087,9 +7139,39 @@ input.grid-style-input--wide:disabled {
   background-color: #f6f6f6;
 }
 
-/* line 306, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 310, ../../../private/common-html/sass/partials/_inputs.scss */
 .drop-zone--highlight {
   border: 4px dashed #f39129 !important;
+}
+
+/* line 314, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container {
+  position: relative;
+  display: inline-block;
+}
+/* line 317, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 888;
+  min-width: 100%;
+  max-width: 200%;
+  list-style: none;
+  background-color: white;
+  border: 1px solid #fbc732;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* line 330, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list li {
+  padding-left: 6px;
+}
+/* line 333, ../../../private/common-html/sass/partials/_inputs.scss */
+.combobox-container ul.combobox__list li.combobox--selected {
+  background-color: #f39129;
+  color: white;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
@@ -7877,12 +7959,12 @@ div.sticky {
   padding-right: 10px;
 }
 
-/* line 282, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 286, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits {
   display: table;
   white-space: nowrap;
 }
-/* line 285, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 289, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > .reject-edits--input {
   display: table-cell;
   line-height: 32px;
@@ -7890,13 +7972,13 @@ div.sticky {
   min-height: 32px;
   max-height: 32px;
 }
-/* line 292, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 296, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > input.reject-edits--input {
   width: 20em;
   vertical-align: middle;
   padding-right: 4px;
 }
-/* line 297, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 301, ../../../private/common-html/sass/partials/_inputs.scss */
 .reject-edits > button.reject-edits--input {
   padding-left: 8px;
   padding-right: 8px;
@@ -8269,108 +8351,4 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky
 /* line 913, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
   color: #999999;
-}
-/* line 916, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
-  color: #e34319;
-}
-
-/* button.rejected ~ .group-buttons .is-top.rejected { */
-/*   display: none; */
-/* } */
-/* line 928, ../../../private/common-html/sass/partials/_forms.scss */
-.is-middle {
-  vertical-align: middle;
-}
-
-/* line 933, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble {
-  display: block;
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  background-color: white;
-  width: 100%;
-  border-radius: 2px;
-  border: 1px solid #fbc732;
-  padding: 6px;
-  margin-top: 15px;
-}
-/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:after, .description-bubble:before {
-  bottom: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble:before {
-  border-color: rgba(251, 199, 50, 0);
-  border-bottom-color: #fbc732;
-  border-width: 11px;
-  margin-left: -11px;
-}
-/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble input {
-  box-sizing: border-box;
-  border: none;
-  font-size: 16px;
-  width: 100%;
-  box-shadow: none;
-  color: #333333;
-}
-/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
-.description-bubble input:focus {
-  border: none;
-  box-shadow: none;
-}
-
-/* line 937, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble {
-  display: block;
-  position: relative;
-  float: left;
-  box-sizing: border-box;
-  background-color: white;
-  width: 100%;
-  border-radius: 2px;
-  border: 1px solid #fbc732;
-  padding: 6px 6px 6px 6px;
-  margin-top: 15px;
-}
-/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after, .container-bubble:before {
-  bottom: 100%;
-  left: 5%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-}
-/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-bottom-color: #fff;
-  border-width: 10px;
-  margin-left: -10px;
-}
-/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
-.container-bubble:before {
-  border-color: rgba(251, 199, 50, 0);
-  border-bottom-color: #fbc732;
-  border-width: 11px;
-  margin-left: -11px;
 }

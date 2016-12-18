@@ -6,7 +6,8 @@
                       checked: value,
                       disable: isDisabled">
     <label data-bind="attr: {'for': id,
-                      'class': labelClass,
-                      text: text}"></label>
+                      'class': labelClass},
+                      text: text,
+                      css: {'no-label-text': !_.size( ko.unwrap(text) )}"></label>
   </div>
 </script>

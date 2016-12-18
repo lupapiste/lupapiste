@@ -8,9 +8,17 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
+  var service = lupapisteApp.services.attachmentsService;
+
   self.upload = params.upload;
 
   self.password = ko.observable();
+
+  var authModel = lupapisteApp.models.applicationAuthModel;
+  self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
+                                                             authModel.ok));
+  self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
+                                                     authModel.ok));
 
   var currentHover = ko.observable();
 
@@ -26,23 +34,31 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function Cell( valueObs, required ) {
     this.value = valueObs;
-    this.isOK = function() {
+    this.isOk = function() {
       return !required || valueObs();
     };
+  }
 
-    this.asParam = function( name ) {
-      var v = valueObs();
-      if( _.isBoolean( v ) || _.trim( v )) {
-        return _.fromPairs([[name, v]] );
-      }
-    };
+  function rowData( file ) {
+    return _.get( rows(), file.fileId );
   }
 
   self.cell = function ( file, column ) {
     // The weird default value is needed in order to gracefully handle
     // file removal or rather the resulting "phantom" cell query.
-    return _.get(rows(), sprintf( "%s.%s", file.fileId, column), {value: _.noop});
+    return _.get( rowData( file ), column, {value: _.noop});
   };
+
+  self.rowDisabled = function( file ) {
+    return util.getIn( rowData( file ), ["disabled"] );
+  };
+
+  function disableRows( flag ) {
+    _.each( _.values( rows()),
+            function( row ) {
+              row.disabled( flag );
+            });
+  }
 
   function someSelected( column ) {
     return _.some( _.values( rows() ),
@@ -51,11 +67,34 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                    });
   }
 
-  function badFileHandler( event ) {
-    self.badFiles.push( _.pick( event, ["message", "file"]));
-  }
+  function newRow() {
+    var type = ko.observable();
+    var contentsList = ko.observableArray();
+    var grouping = ko.observable({});
+    self.disposedSubscribe( type, function( data ) {
+      var metadata = data.metadata || {};
+      contentsList(_.map( metadata.contents,
+                          function( id ) {
+                            return loc( "attachments.contents." + id);
+                          }));
 
-  self.upload.listenService("badFiles", badFileHandler);
+      grouping({groupType: metadata.grouping === "operation"
+                ? "operation-" + _.find (service.groupTypes(),
+                                         {groupType: "operation"}).id
+                : metadata.grouping});
+    } );
+    var contentsCell = new Cell( ko.observable(), true );
+    contentsCell.list = contentsList;
+    var row = { disabled: ko.observable(),
+                type: new Cell( type, true ),
+                contents: contentsCell,
+                drawing: new Cell( ko.observable()),
+                grouping: new Cell( grouping ),
+                sign: new Cell( ko.observable())};
+    return self.showConstruction
+      ? _.set( row, "construction", new Cell( ko.observable()))
+      : row;
+  }
 
   self.disposedSubscribe( self.upload.files, function( files ) {
     var oldRows = rows();
@@ -67,12 +106,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
       if( oldRows[fileId]) {
         keepRows[fileId] = oldRows[fileId];
       } else {
-        newRows[fileId] = {typeGroup: new Cell( ko.observable(), true ),
-                           content: new Cell( ko.observable(), true ),
-                           drawing: new Cell( ko.observable()),
-                           context: new Cell( ko.observable, true ),
-                           sign: new Cell( ko.observable()),
-                           construction: new Cell( ko.observable())};
+        newRows[fileId] = newRow();
       }
     });
     rows( _.merge( keepRows, newRows ));
@@ -83,25 +117,15 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   self.fileCount = self.disposedPureComputed( _.flow( self.upload.files,
                                                       _.size ));
 
-  self.upload.init();
-
-  self.waiting = self.disposedPureComputed( function() {
-    return self.upload.waiting() || ajaxWaiting();
+  self.upload.listenService("badFile", function( event ) {
+    self.badFiles.push( _.pick( event, ["message", "file"]));
   });
 
-  self.done = function() {
-
-  };
-
-  self.cancel = function() {
-    self.upload.cancel();
-    self.badFiles.removeAll();
-    rows( {});
-  };
+  self.upload.init();
 
   // The fill/copy down functionality works as follows:
-  // 1. The filling is possible if the file is not the last and the
-  //    current cell has a value.
+  // 1. The filling is possible if the file is not the last one, the
+  //    current cell has a value and the row is enabled.
   // 2. The filling action is determined by policy. If number then the
   //    filling is done with fillNumber, otherwise the fill value is just
   //    a copy of the current cell value.
@@ -144,7 +168,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.canFillDown = function( column, file  ) {
     return self.disposedPureComputed( function() {
-      if(_.isEqual( currentHover(), {fileId: file.fileId,
+      if(!self.rowDisabled( file ) &&
+         _.isEqual( currentHover(), {fileId: file.fileId,
                                      column: column })) {
         var index = fileIndex( file );
         return _.trim( self.cell( file, column ).value())
@@ -182,7 +207,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var flag = !someSelected( column );
     _.each( _.values( rows() ),
             function( row ) {
-              row[column].value( flag );
+              if( !row.disabled()) {
+                row[column].value( flag );
+              }
             });
   };
 
@@ -193,4 +220,93 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     });
   };
 
+  // Bind and cancel
+
+  self.waiting = self.disposedPureComputed( function() {
+    return  self.upload.waiting() || ajaxWaiting();
+  });
+
+  self.canBind = self.disposedPureComputed( function() {
+    var cellsOk = _.every( _.values( rows()),
+                           function( obj ) {
+                             return _( _.values( obj ))
+                               .filter( function( a ) {
+                                 return a instanceof Cell;
+                               })
+                               .every( function( cell ) {
+                                 return cell.isOk();
+                               });
+                           });
+    return cellsOk && (self.signingSelected()
+                       ? self.passwordState()
+                       : true );
+  });
+
+  function pollJob( response ) {
+    var job = response.job;
+    _.each( _.values( job.value ),
+            function( fileData ) {
+              if( fileData.status === "done"
+                && rows()[fileData.fileId]) {
+                self.upload.clearFile( fileData );
+              }
+            });
+    if( job.status !== "done" ) {
+      ajax.query( "bind-attachments-job",
+                  {jobId: job.id,
+                   version: job.version})
+        .success( pollJob)
+        .call();
+    } else {
+      ajaxWaiting( false );
+      service.queryAll();
+    }
+  }
+
+  function groupParam( value ) {
+    var g = /operation-(.+)/.exec( value.groupType );
+    return g ? {groupType: "operation", id: _.last( g )} : value;
+  }
+
+  self.bind = function() {
+    disableRows( true );
+    self.badFiles.removeAll();
+    var signing = self.signingSelected();
+    ajax.command( "bind-attachments",
+                  _.merge( {id: lupapisteApp.models.application.id()},
+                           signing ? {password: self.password()} : {},
+                           {filedatas: _.map( rows(),
+                                              function( data, fileId ) {
+                                                return _.merge({
+                                                  fileId: fileId ,
+                                                  type:_.pick( data.type.value(),
+                                                               ["type-group", "type-id"]),
+                                                  group: groupParam( data.grouping.value() ),
+                                                  contents: data.contents.value()},
+                                                               signing ? {sign: data.sign.value()} : {},
+                                                               data.construction
+                                                               ? {constructionTime: data.construction.value()}
+                                                               : {});
+                                              })}))
+      .fuse( ajaxWaiting )
+      .success( pollJob )
+      .call();
+
+  };
+
+  self.cancel = function() {
+    self.upload.cancel();
+    self.badFiles.removeAll();
+    rows( {});
+  };
+
+
+
+  // Cancel the batch just in case when leaving the application.
+  // Without this, something weird happens:
+  // Uncaught Error: 'Too much recursion' after processing 5000 task
+  // groups.
+  // Part of the problem is the fact that the tab is not disposed when
+  // leaving the application.
+  self.addHubListener( "contextService::leave", self.cancel );
 };

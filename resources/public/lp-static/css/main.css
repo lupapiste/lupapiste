@@ -1,5 +1,109 @@
-@import url('main-blessed1.css?z=1481880968679');
+@import url('main-blessed1.css?z=1481988361746');
 
+/* line 916, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
+  color: #e34319;
+}
+
+/* button.rejected ~ .group-buttons .is-top.rejected { */
+/*   display: none; */
+/* } */
+/* line 928, ../../../private/common-html/sass/partials/_forms.scss */
+.is-middle {
+  vertical-align: middle;
+}
+
+/* line 933, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px;
+  margin-top: 15px;
+}
+/* line 775, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble:after, .description-bubble:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 786, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 792, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
+/* line 798, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble input {
+  box-sizing: border-box;
+  border: none;
+  font-size: 16px;
+  width: 100%;
+  box-shadow: none;
+  color: #333333;
+}
+/* line 805, ../../../private/common-html/sass/partials/_forms.scss */
+.description-bubble input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+/* line 937, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble {
+  display: block;
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px;
+  border: 1px solid #fbc732;
+  padding: 6px 6px 6px 6px;
+  margin-top: 15px;
+}
+/* line 948, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after, .container-bubble:before {
+  bottom: 100%;
+  left: 5%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+/* line 959, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-bottom-color: #fff;
+  border-width: 10px;
+  margin-left: -10px;
+}
+/* line 965, ../../../private/common-html/sass/partials/_forms.scss */
+.container-bubble:before {
+  border-color: rgba(251, 199, 50, 0);
+  border-bottom-color: #fbc732;
+  border-width: 11px;
+  margin-left: -11px;
+}
 
 /* line 973, ../../../private/common-html/sass/partials/_forms.scss */
 .description-bubble.is-closed {
@@ -3114,52 +3218,69 @@ select.waste-unit-select {
   vertical-align: middle;
 }
 /* line 502, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table i.icon-spin.lupicon-refresh {
+  color: #999999;
+}
+/* line 505, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .batch-autocomplete {
   display: inherit;
 }
-/* line 504, ../../../private/common-html/sass/partials/_tables.scss */
-.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete {
+/* line 507, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete {
   min-width: 20em;
   max-width: 20em;
   display: inline-block;
   vertical-align: middle;
 }
-/* line 510, ../../../private/common-html/sass/partials/_tables.scss */
-.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete .autocomplete-selection-wrapper {
+/* line 513, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete .autocomplete-selection-wrapper {
   display: table;
 }
-/* line 512, ../../../private/common-html/sass/partials/_tables.scss */
-.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete .autocomplete-selection-wrapper .autocomplete-selection {
+/* line 515, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete .autocomplete-selection-wrapper .autocomplete-selection {
   padding-left: 6px;
   display: table-cell;
   vertical-align: middle;
   min-height: 40px;
   height: 40px;
 }
-/* line 520, ../../../private/common-html/sass/partials/_tables.scss */
-.attachment-batch-table .batch-autocomplete attachment-type-group-autocomplete span.caption {
+/* line 523, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete span.caption {
   white-space: normal;
   line-height: normal;
   padding-left: 0;
 }
-/* line 527, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 530, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper {
+  background-color: #f6f6f6;
+}
+/* line 532, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper i.tag-chevron, .attachment-batch-table .batch-autocomplete attachment-type-autocomplete.no-events .autocomplete-selection-wrapper span.selection-text {
+  color: #bbbbbb;
+}
+/* line 538, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .batch-drawing {
   max-width: 4em;
 }
-/* line 531, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 542, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table tfoot > tr {
   border: none;
 }
-/* line 533, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 544, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table tfoot > tr > td {
   padding: 0;
 }
-/* line 538, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 546, ../../../private/common-html/sass/partials/_tables.scss */
+.attachment-batch-table tfoot > tr > td a.link-btn {
+  white-space: normal;
+  text-align: center;
+}
+/* line 553, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .fill-pin {
   position: relative;
   display: inline-block;
 }
-/* line 541, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 556, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .fill-pin icon-button.fill-down {
   position: absolute;
   left: 100%;
@@ -3167,7 +3288,7 @@ select.waste-unit-select {
   bottom: 0;
   z-index: 100;
 }
-/* line 547, ../../../private/common-html/sass/partials/_tables.scss */
+/* line 562, ../../../private/common-html/sass/partials/_tables.scss */
 .attachment-batch-table .fill-pin icon-button.fill-down button {
   max-height: 100%;
   height: 100%;
@@ -8093,7 +8214,7 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 633, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations > .btn-base, .attachment-operations > [type=submit], .attachment-operations > .btn, .dataTables_paginate .attachment-operations > .paginate_disabled_previous, .dataTables_paginate .attachment-operations > .paginate_disabled_next, .attachment-operations > button, .attachment-operations > .like-btn, .attachment-operations > a.link-btn, .attachment-operations > a.link-btn-julkipano, .attachment-operations > .check-string,
 .attachment-operations > .btn,
 .dataTables_paginate .attachment-operations > .paginate_disabled_previous,
@@ -8105,7 +8226,7 @@ td.comment-text {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 644, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 650, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -9323,13 +9444,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 520, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 525, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

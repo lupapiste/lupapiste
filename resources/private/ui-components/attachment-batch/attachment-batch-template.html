@@ -13,34 +13,53 @@
         <th><span class="batch-required"
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
-        <th><span class="batch-required"
-                  data-bind="ltext:'attachment.label.operation'"></span></th>
+        <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
         <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
+        <!-- ko if: showConstruction -->
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
+        <!-- /ko -->
+        <!-- ko if: showSign -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
+        <!-- /ko -->
       </thead>
       <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
         <td>
           <div class="batch-autocomplete fill-pin"
-               data-bind="event: $parent.fillEvents( $data, 'typeGroup')">
-            <attachment-type-group-autocomplete params="selectedTypeGroup: $parent.cell( $data, 'typeGroup').value">
-            </attachment-type-group-autocomplete>
-            <icon-button params="click: $parent.filler( 'typeGroup', $data),
+               data-bind="event: $parent.fillEvents( $data, 'type')">
+            <attachment-type-autocomplete params="selectedType: $parent.cell( $data, 'type').value"
+                                          data-bind="css: {'no-events': $parent.rowDisabled( $data )}">
+            </attachment-type-autocomplete>
+            <icon-button params="click: $parent.filler( 'type', $data),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-copy-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'typeGroup', $data)"
+                         data-bind="visible: $parent.canFillDown( 'type', $data)"
                          class="fill-down"></icon-button>
           </div>
         </td>
-        <td></td>
+        <td>
+          <div class="fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'contents')">
+            <combobox params="value: $parent.cell( $data, 'contents').value,
+                              list: $parent.cell( $data, 'contents').list,
+                              disable: $parent.rowDisabled( $data )"></combobox>
+            <icon-button params="click: $parent.filler( 'contents', $data, 'number'),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'contents', $data)"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
         <td>
           <div class="fill-pin"
                data-bind="event: $parent.fillEvents( $data, 'drawing')">
             <input type="text" class="batch-drawing grid-style-input"
-                   data-bind="textInput: $parent.cell( $data, 'drawing').value">
+                   data-bind="textInput: $parent.cell( $data, 'drawing').value,
+                              disable: $parent.rowDisabled( $data )">
             <icon-button params="click: $parent.filler( 'drawing', $data, 'number'),
                                  buttonClass: 'function',
                                  ltext: 'attachment.batch-fill-down',
@@ -50,31 +69,60 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
-        <td></td>
+        <td>
+          <div class="fill-pin"
+               data-bind="event: $parent.fillEvents( $data, 'grouping')">
+            <attachment-group-selector params="currentGroup: $parent.cell( $data, 'grouping').value,
+                                               editable: !$parent.rowDisabled( $data )"></attachment-group-selector>
+            <icon-button params="click: $parent.filler( 'grouping', $data, 'number'),
+                                 buttonClass: 'function',
+                                 ltext: 'attachment.batch-copy-down',
+                                 icon: 'arrow-down',
+                                 right: true"
+                         data-bind="visible: $parent.canFillDown( 'grouping', $data)"
+                         class="fill-down"></icon-button>
+          </div>
+        </td>
+        <!-- ko if: $parent.showSign -->
         <td class="td-center">
           <toggle params="prefix: 'signbox',
-                          value: $parent.cell( $data, 'sign' ).value"></toggle>
+                          value: $parent.cell( $data, 'sign' ).value,
+                          disable: $parent.rowDisabled( $data )"></toggle>
         </td>
+        <!-- /ko -->
+        <!-- ko if: $parent.showConstruction -->
         <td class="td-center">
-          <toggle params="value: $parent.cell( $data, 'construction' ).value"></toggle>
+          <toggle params="value: $parent.cell( $data, 'construction' ).value,
+                          disable: $parent.rowDisabled( $data )"></toggle>
         </td>
+        <!-- /ko -->
         <td class="td-center">
+          <!-- ko ifnot: $parent.rowDisabled( $data ) -->
           <i class="lupicon-remove primary"
-             data-bind="click: $parent.upload.removeFile"></i></td>
+             data-bind="click: $parent.upload.removeFile"></i>
+          <!-- /ko -->
+          <!-- ko if: $parent.rowDisabled( $data ) -->
+          <i class="icon-spin lupicon-refresh"></i>
+          <!-- /ko -->          
+        </td>
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
         <tr>
           <td colspan="5"></td>
+          <!-- ko if: showSign -->
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'sign', footClick ),
                           ltext: footText( 'sign')"></a>
           </td>
+          <!-- /ko -->
+          <!-- ko if: showConstruction -->
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'construction', footClick ),
                           ltext: footText( 'construction')"></a>
           </td>
+          <!-- /ko -->
           <td></td>
         </tr>
       </tfoot>
@@ -112,10 +160,12 @@
     <!-- ko if: fileCount -->
     <div class="batch-buttons">
       <icon-button params="waiting: waiting,
+                           enable: canBind,
                            icon: 'check',
                            ltext: 'attachment.batch-ready',
-                           click: done"></icon-button>
+                           click: bind"></icon-button>
       <icon-button params="icon: 'remove',
+                           disable: waiting,
                            buttonClass: 'secondary',
                            ltext: 'cancel',
                            click: cancel"></icon-button>
