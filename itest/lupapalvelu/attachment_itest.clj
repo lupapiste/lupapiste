@@ -368,21 +368,21 @@
 
     query-resp => ok?
 
-    (fact "Three groups"
-      (count groups) => 3)
+    (fact "Five groups"
+      (count groups) => 5)
 
-    (fact "Three different kind of groups"
-      (map :groupType groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+    (fact "Five different kind of groups"
+      (map :groupType groups) => (just ["building-site" "parties" "operation" "reports" "technical-reports"] :in-any-order))
 
     (fact "Operation groupType has operation specific info fields"
       (keys (util/find-first (comp #{"operation"} :groupType) groups)) => (contains [:groupType :id :name :description] :in-any-order :gaps-ok))
 
     (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
 
-    (fact "Four groups"
+    (fact "Six groups"
       (-> (query sonja :attachment-groups :id application-id)
           :groups
-          count) => 4)))
+          count) => 6)))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
