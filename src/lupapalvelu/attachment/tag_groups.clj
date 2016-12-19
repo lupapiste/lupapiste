@@ -1,20 +1,21 @@
 (ns lupapalvelu.attachment.tag-groups
   (:require [clojure.set :refer [intersection union]]
             [sade.strings :as ss]
-            [lupapalvelu.attachment.tags :as att-tags]))
+            [lupapalvelu.attachment.tags :as att-tags]
+            [lupapalvelu.attachment.type :as att-type]))
 
+(defn- node
+  "(node :foo [:bar :quux]) => [:foo [:bar] [:quux]]"
+  [parent children]
+  (apply vector parent (map vector children)))
 
 (def attachment-tag-group-hierarchy
   "A model for the attachment hierarchy"
-  [[:general]
-   [:parties]
-   [:building-site]
-   [:operation
-    [:paapiirustus]
-    [:rakennesuunnitelma]
-    [:kvv_suunnitelma]
-    [:iv_suunnitelma]
-    [:default]]])
+  [[:building-site]
+   (node :application
+         att-tags/application-group-types)
+   (node :operation
+         att-type/type-groups)])
 
 (defn- attachments-operation-ids [attachments]
   (->> (map (comp :id :op) attachments)
@@ -33,7 +34,7 @@
   (let [tags (intersection (hierarchy-level-tags hierarchy)
                            (tag-set attachment))]
     (if (empty? tags)
-      #{:general}
+      #{}
       tags)))
 
 (defn- all-tags-for-hierarchy-level [hierarchy attachments]
@@ -42,9 +43,13 @@
 (defn- filter-tag-groups
   "remove the tag groups whose tag is not found in the attachments"
   [attachments hierarchy]
-  (filter (comp (all-tags-for-hierarchy-level hierarchy attachments)
-                first)
-          hierarchy))
+  (letfn [(filter-recursively [[parent & children :as group]]
+            (if children
+              (apply concat [[parent] (filter-tag-groups attachments children)])
+              group))]
+    (->> hierarchy
+         (filter (comp (all-tags-for-hierarchy-level hierarchy attachments) first))
+         (map filter-recursively))))
 
 (defn- for-operation? [op-id attachment]
   (= op-id (-> attachment :op :id)))

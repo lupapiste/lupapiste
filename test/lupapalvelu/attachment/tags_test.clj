@@ -15,29 +15,29 @@
 (facts attachment-tags
 
   (fact "submitted - not-needed"
-        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :general :notNeeded} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "submitted" :notNeeded true}) => (just #{:preVerdict :application :general :notNeeded} :in-any-order :gaps-ok))
 
   (fact "verdict-given - needed"
-        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :general :needed} :in-any-order :gaps-ok))
+        (attachment-tags {:applicationState "verdictGiven" :notNeeded false}) => (just #{:postVerdict :application :general :needed} :in-any-order :gaps-ok))
 
   (fact "defaults"
-    (attachment-tags {}) => (just #{:preVerdict :general :needed} :in-any-order :gaps-ok))
+    (attachment-tags {}) => (just #{:preVerdict :application :general :needed} :in-any-order :gaps-ok))
 
   (fact "parties"
-    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :parties :needed} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :application :parties :needed} :in-any-order :gaps-ok))
 
   (fact "operation"
     (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
 
   (fact "file"
-    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :general :needed :hasFile} :in-any-order :gaps-ok))
+    (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :application :general :needed :hasFile} :in-any-order :gaps-ok))
 
   (fact "type"
-    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :general :needed :somegroup} :in-any-order :gaps-ok)
+    (attachment-tags {:type {:type-group "somegroup" :type-id "sometype"}}) => (just #{:preVerdict :application :general :needed :somegroup} :in-any-order :gaps-ok)
     (provided (att-type/tag-by-type {:type {:type-group "somegroup" :type-id "sometype"}}) => :somegroup))
 
   (fact "verdictGiven - RAM"
-        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :general :needed} :in-any-order :gaps-ok)))
+        (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :application :general :needed} :in-any-order :gaps-ok)))
 
 (fact "attachment-tag-groups"
   (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
@@ -57,19 +57,23 @@
         application {:primaryOperation {:id operation-id1}
                      :secondaryOperations [{:id operation-id2} {:id operation-id3}]
                      :attachments attachments}
-        test-hierarchy [[:general]
-                        [:parties]
+        test-hierarchy [[:application
+                         [:general]
+                         [:parties]]
                         [:operation
                          [:somegroup]
                          [:anothergroup]
                          [:other]]]]
-    (attachment-tag-groups application test-hierarchy) => [[:general]
-                                                           [:parties]
+    (attachment-tag-groups application test-hierarchy) => [[:application
+                                                            [:general]
+                                                            [:parties]]
                                                            [(str "op-id-" operation-id1) [:somegroup]]
                                                            [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
                                                            [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
     (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
+    (provided (tag-by-application-group-types (as-checker (comp boolean #{"parties" "unknown"} :groupType)))  => :application)
+    (provided (tag-by-application-group-types (as-checker (comp nil? :groupType)))  => nil)
     (provided (att-type/tag-by-type anything) => nil)))
 
 

@@ -3,7 +3,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]))
 
-(def attachment-groups [:parties :building-site :operation])
+(def attachment-groups [:parties :building-site :operation :reports :technical-reports])
 (def general-group-tag :general)
 (def all-group-tags (cons general-group-tag attachment-groups))
 
@@ -45,6 +45,16 @@
       (when op-id :operation)
       general-group-tag))
 
+(def application-group-types [:parties :general :reports :technical-reports])
+
+(def application-group-type-tag :application)
+
+(defn tag-by-application-group-types
+  "tag attachments that have application related group types"
+  [attachment]
+  (when ((set application-group-types) (tag-by-group-type attachment))
+    application-group-type-tag))
+
 (defn- tag-by-operation [{{op-id :id} :op :as attachment}]
   (op-id->tag op-id))
 
@@ -57,6 +67,7 @@
   [attachment]
   (->> ((juxt tag-by-applicationState
               tag-by-group-type
+              tag-by-application-group-types
               tag-by-operation
               tag-by-notNeeded
               tag-by-type
