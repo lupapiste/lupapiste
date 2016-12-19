@@ -107,7 +107,7 @@
                                            (select-keys usr/User [:firstName :lastName]))
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
-   :size                                 (sc/maybe sc/Int)  ;; file size
+   :size                                 sc/Int             ;; file size
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
