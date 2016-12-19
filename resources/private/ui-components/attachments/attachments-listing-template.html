@@ -14,7 +14,10 @@
                              targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
   <!-- /ko -->
   <div class="clear"></div>
-  <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
+
+  <attachment-batch params="upload: upload"></attachment-batch>
+
+  <attachments-operation-buttons params="upload: upload"></attachments-operation-buttons>
 
   <suti-display></suti-display>
 

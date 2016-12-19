@@ -12,12 +12,57 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
+
+  function poll() {
+    ajax
+      .query("bind-attachments-job")
+      .param("jobId", self.jobId)
+      .param("version", self.jobVersion)
+      .success(self.update)
+      .call();
+  }
+
+  self.update = function(data) {
+    if (data.result === "update") {
+      var update = data.job;
+      self.jobVersion = update.version;
+
+      if (update.status === "done") {
+        querySelf();
+      } else {
+        poll();
+      }
+    }
+  };
+
+  function startPoll(data) {
+    self.jobId = data.job.id;
+    self.jobVersion = 0;
+    poll();
+    return false;
+  }
+
+  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
+  self.upload.init();
+  self.disposedComputed(function() {
+    var file = _.first(self.upload.files());
+    if (file) {
+      ajax.command("bind-attachments", {id: self.applicationId,
+                                        filedatas: [{attachmentId: self.id,
+                                                    fileId: file.fileId,
+                                                    type: self.attachment.peek().type,
+                                                    group: {groupType: util.getIn(self.attachment.peek(), ["groupType"]),
+                                                            id: util.getIn(self.attachment.peek(), ["op", "id"])}}]})
+      .success(startPoll)
+      .call();
+    }
+  });
+
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.groupTypes   = service.groupTypes;
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
@@ -181,28 +226,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  function groupToString(group) {
-    return _.filter([_.get(group, "id") ? "operation" : _.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
-  }
-  var groupMapping = {};
-  self.selectableGroups = self.disposedComputed(function() {
-    // Use group strings in group selector
-    groupMapping = _.keyBy(self.groupTypes(), groupToString);
-    return _.keys(groupMapping);
+  self.operationSelectorEditable = self.disposedPureComputed(function() {
+    return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
   });
-  self.selectedGroup = ko.observable(groupToString(self.attachment().group()));
-  self.disposedSubscribe(self.selectedGroup, function(groupString) {
-    self.attachment().group(_.get(groupMapping, groupString));
-  });
-  self.hasOperationSelector = _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
-  self.getGroupOptionsText = function(itemStr) {
-    var item = _.get(groupMapping, itemStr);
-    if (_.get(item, "groupType") === "operation") {
-      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
-    } else if (_.get(item, "groupType")) {
-      return loc([item.groupType, "_group_label"]);
-    }
-  };
+
   self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 

@@ -36,7 +36,8 @@
     (let [resp (command veikko
                         :create-attachments
                         :id application-id
-                        :attachmentTypes [tutkintotodistus-type])
+                        :attachmentTypes [tutkintotodistus-type]
+                        :group nil)
           tutkintotodistus-id (first (:attachmentIds resp))]
       (count (:attachmentIds resp)) => 1
       (fact "Authority asks for tutkintotodistus" resp => ok?)

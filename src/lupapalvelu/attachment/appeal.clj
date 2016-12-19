@@ -25,13 +25,13 @@
                                                           :read-only true})
         archivability-result (conversion/archivability-conversion app {:content ((:content file))
                                                                        :attachment-type type
-                                                                       :filename (:file-name file)
+                                                                       :filename (:filename file)
                                                                        :contentType (or (:contentType file) (:content-type file))})
         converted-filedata   (when (:autoConversion archivability-result)
                                (file-upload/save-file (select-keys archivability-result [:content :filename]) :application (:id app)))
         version-data         (merge {:fileId           (or (:fileId converted-filedata) (:fileId file))
                                      :original-file-id (:fileId file)
-                                     :filename         (or (:filename converted-filedata) (:file-name file))
+                                     :filename         (or (:filename converted-filedata) (:filename file))
                                      :contentType      (or (:contentType converted-filedata) (:contentType file) (:content-type file))
                                      :size             (or (:size converted-filedata) (:size file))
                                      :created created

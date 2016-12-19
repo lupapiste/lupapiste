@@ -143,6 +143,9 @@
 (defn ascii-parameters [params command]
   (filter-params-of-command params command (complement ss/ascii?) "error.illegal-value:not-ascii-string"))
 
+(defn numeric-parameters [params command]
+  (filter-params-of-command params command (complement ss/numeric?) :error.illegal-number))
+
 (defn select-parameters
   "Parameters are valid if each of them belong to the value-set"
   [params value-set command]

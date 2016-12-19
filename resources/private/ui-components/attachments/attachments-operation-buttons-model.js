@@ -1,4 +1,6 @@
-LUPAPISTE.AttachmentsOperationButtonsModel = function() {
+// Parameters:
+// upload: Upload model
+LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   "use strict";
   var self = this;
   ko.utils.extend(self, new LUPAPISTE.ComponentBaseModel());
@@ -10,14 +12,18 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function() {
 
   var attachments = service.attachments;
 
+  self.uploadOptions = { buttonClass: "positive caps",
+                         buttonText: "attachment.add-multiple",
+                         upload: params.upload };
+
   self.newAttachment = function() {
     hub.send( "add-attachment-file", {} );
   };
 
+  self.requireAttachmentsBubbleVisible = ko.observable(false);
+
   self.attachmentTemplatesAdd = function() {
-    hub.send("show-dialog", { ltitle: "attachments.require-attachments",
-                              size: "medium",
-                              component: "attachments-require"});
+    self.requireAttachmentsBubbleVisible(!self.requireAttachmentsBubbleVisible());
   };
 
   self.copyUserAttachments = function() {

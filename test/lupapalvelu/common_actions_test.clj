@@ -31,10 +31,12 @@
                           :attachment-types
                           :attachment-operations
                           :view-attachment
+                          :view-file
                           :delete-attachment
                           :set-attachment-type
                           :set-attachment-meta
                           :upload-attachment
+                          :bind-attachments
                           :rotate-pdf
                           :pdf-export
                           :submitted-application-pdf-export
@@ -120,7 +122,7 @@
                            :ram-linked-attachments :attachment-groups :attachments :attachment :attachments-filters :attachments-tag-groups
                            ; raw
                            :preview-attachment :view-attachment :download-attachment :download-attachments :download-all-attachments
-                           :pdf-export
+                           :view-file :pdf-export
                            :application-guests :latest-attachment-version :submitted-application-pdf-export
                            ; tab visibility
                            :tasks-tab-visible :application-info-tab-visible :application-summary-tab-visible

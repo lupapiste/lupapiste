@@ -108,7 +108,7 @@
                                            (select-keys usr/User [:firstName :lastName]))
    :filename                             sc/Str             ;; original filename
    :contentType                          sc/Str             ;; MIME type of the file
-   :size                                 (sc/maybe sc/Int)  ;; file size
+   :size                                 sc/Int             ;; file size
    (sc/optional-key :stamped)            sc/Bool
    (sc/optional-key :archivable)         (sc/maybe sc/Bool)
    (sc/optional-key :archivabilityError) (sc/maybe (apply sc/enum conversion/archivability-errors))
@@ -119,6 +119,8 @@
   "Attachment type"
   {:type-id                              (apply sc/enum att-type/all-attachment-type-ids)
    :type-group                           (apply sc/enum att-type/all-attachment-type-groups)})
+
+(def GroupType (apply sc/enum att-tags/attachment-groups))
 
 (defschema Attachment
   {:id                                   AttachmentId
@@ -137,7 +139,7 @@
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
    :op                                   (sc/maybe Operation)
-   (sc/optional-key :groupType)          (sc/maybe (apply sc/enum att-tags/attachment-groups))
+   (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
@@ -154,6 +156,7 @@
 
 (def attachment-type-coercer (ssc/json-coercer Type))
 (def attachment-target-coercer (ssc/json-coercer Target))
+(def group-type-coercer (ssc/json-coercer GroupType))
 
 
 (defn if-not-authority-state-must-not-be [state-set {user :user {:keys [state]} :application}]
@@ -263,14 +266,14 @@
            ;:approvals {}
            :auth []
            :contents contents}
-          (:groupType group) (assoc :groupType (:groupType group))
+          (:groupType group) (assoc :groupType (group-type-coercer (:groupType group)))
           (map? source) (assoc :source source)
           (seq metadata) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
-  [created application-state attachment-types-with-metadata locked? required? requested-by-authority?]
-  (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) nil (:type %) (:metadata %)) attachment-types-with-metadata))
+  [created application-state attachment-types-with-metadata group locked? required? requested-by-authority?]
+  (map #(make-attachment created nil required? requested-by-authority? locked? (keyword application-state) group (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-tos-metadata-for-attachment-type [type {:keys [organization tosFunction verdicts]}]
   (let [metadata (-> (tos/metadata-for-document organization tosFunction type)
@@ -283,7 +286,7 @@
   (and (map?    (:attachment-type options-map))
        (number? (:created options-map))))
 
-(defn- resolve-group-name [{documents :documents} {op-id :id op-name :name :as group}]
+(defn- resolve-group-name [{op-id :id op-name :name :as group} {documents :documents}]
   (if (or (ss/blank? op-id) (ss/not-blank? op-name))
     group
     (->> (map (comp :op :schema-info) documents)
@@ -303,7 +306,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     (resolve-group-name application group)
+                     (resolve-group-name group application)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
@@ -311,7 +314,7 @@
                      read-only
                      source)))
 
-(defn- create-attachment!
+(defn create-attachment!
   "Creates attachment data and $pushes attachment to application. Updates TOS process metadata retention period, if needed"
   [application {ts :created :as options}]
   {:pre [(map? application)]}
@@ -323,12 +326,12 @@
     (tos/update-process-retention-period (:id application) ts)
     attachment-data))
 
-(defn create-attachments! [application attachment-types created locked? required? requested-by-authority?]
+(defn create-attachments! [application attachment-types group created locked? required? requested-by-authority?]
   {:pre [(map? application)]}
   (let [attachment-types-with-metadata (map (fn [type] {:type     (attachment-type-coercer type)
                                                         :metadata (default-tos-metadata-for-attachment-type type application)})
                                             attachment-types)
-        attachments (make-attachments created (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
+        attachments (make-attachments created (:state application) attachment-types-with-metadata group locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified created}
@@ -398,8 +401,7 @@
    :timestamp timestamp})
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state]
-                               :as   options}]
+                              {:keys [created target stamped replaceable-original-file-id state contents group]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -413,8 +415,11 @@
        {$set {:attachments.$.target target}})
      (when (->> (:versions attachment) butlast (map :originalFileId) (some #{originalFileId}) not)
        {$set {:attachments.$.latestVersion version-model}})
-
-     ;;
+     (when-not (ss/blank? contents)
+       {$set {:attachments.$.contents contents}})
+     (when (not-empty group)
+       {$set {:attachments.$.op (not-empty (select-keys group [:id :name]))
+              :attachments.$.groupType (:groupType group)}})
      (when-let [approval (cond
                            state                                           (->approval state user created )
                            (not (attachment-version-state attachment
@@ -449,7 +454,8 @@
   ([application user {attachment-id :id :as attachment} options]
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
-     (let [version-model (make-version attachment user options)
+     (let [options       (update options :group resolve-group-name application)
+           version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
            mongo-updates (merge (attachment-comment-updates application user attachment options)
@@ -490,18 +496,14 @@
                                    (when set-app-modified? {:modified now})
                                    (when set-attachment-modified? {:attachments.$.modified now}))}))
 
-(defn get-or-create-attachment!
-  "If the attachment-id matches any old attachment, it is returned.
-   Otherwise a new attachment is created."
-  [application user {:keys [attachment-id] :as options}]
-  {:pre [(map? application)]}
-  (let [requested-by-authority? (and (ss/blank? attachment-id) (usr/authority? user))
-        find-application-delay  (delay (mongo/select-one :applications {:_id (:id application) :attachments.id attachment-id} [:attachments]))
-        attachment-options (assoc options :requested-by-authority requested-by-authority?)]
-    (cond
-      (ss/blank? attachment-id) (create-attachment! application attachment-options)
-      @find-application-delay   (get-attachment-info @find-application-delay attachment-id)
-      :else (create-attachment! application attachment-options)))) ; if given attachment-id didn't match, create new
+(defn type-match? [type {att-type :type}]
+  (= type att-type))
+
+(defn get-empty-attachment-placeholder-id [attachments type exclude-ids-set]
+  (->> (filter (comp empty? :versions) attachments)
+       (remove (comp exclude-ids-set :id))
+       (util/find-first (partial type-match? type))
+       :id))
 
 (defn- attachment-file-ids
   "Gets all file-ids from attachment."
@@ -586,15 +588,18 @@
                  :headers {"Content-Type" "text/plain"}
                  :body "404"})
 
+(defn- attachment-200-response [attachment filename]
+  {:status 200
+   :body ((:content attachment))
+   :headers {"Content-Type" (:contentType attachment)
+             "Content-Length" (str (:size attachment))
+             "Content-Disposition" (format "filename=\"%s\"" filename)}})
+
 (defn output-attachment
   ([attachment download?]
   (if attachment
-    (let [filename (ss/encode-filename (:file-name attachment))
-          response {:status 200
-                    :body ((:content attachment))
-                    :headers {"Content-Type" (:content-type attachment)
-                              "Content-Length" (str (:size attachment))
-                              "Content-Disposition" (format "filename=\"%s\"" filename)}}]
+    (let [filename (ss/encode-filename (:filename attachment))
+          response (attachment-200-response attachment filename)]
       (if download?
         (assoc-in response [:headers "Content-Disposition"] (format "attachment;filename=\"%s\"" filename))
         (update response :headers merge http/no-cache-headers)))
@@ -602,23 +607,60 @@
   ([file-id download? attachment-fn]
    (output-attachment (attachment-fn file-id) download?)))
 
+(defn output-file
+  [file-id session-id]
+  (if-let [attachment-file (mongo/download-find {:_id file-id :metadata.sessionId session-id})]
+    (update (attachment-200-response attachment-file (ss/encode-filename (:filename attachment-file)))
+            :headers
+            http/no-cache-headers)
+    not-found))
+
 (defn output-attachment-preview!
   "Outputs attachment preview creating it if is it does not already exist"
   [file-id attachment-fn]
   (let [preview-id (str file-id "-preview")]
-    (if-let [attachment (attachment-fn file-id)]
+    (if-let [{:keys [filename contentType application]} (attachment-fn file-id)]
       (do
         (when (zero? (mongo/count :fs.files {:_id preview-id}))
-          (let [file-name (:file-name attachment)
-                content-type (:content-type attachment)
-                application-id (:application attachment)]
-            (preview/create-preview! file-id file-name content-type application-id mongo/*db-name*)))
+          (preview/create-preview! file-id filename contentType application mongo/*db-name*))
         (output-attachment preview-id false attachment-fn))
       not-found)))
 
-(defn- cleanup-temp-file [conversion-result]
+(defn cleanup-temp-file [conversion-result]
   (if (and (:content conversion-result) (not (instance? InputStream (:content conversion-result))))
     (io/delete-file (:content conversion-result) :silently)))
+
+(defn conversion
+  "Does archivability conversion, if required, for given file.
+   If file was converted, uploads converted file to mongo.
+   Returns map with conversion result and :file if conversion was made."
+  [application filedata]
+  (let [conversion-result  (conversion/archivability-conversion application filedata)
+        converted-filedata (when (:autoConversion conversion-result)
+                             ; upload and return new fileId for converted file
+                             (file-upload/save-file (select-keys conversion-result [:content :filename])
+                                                    {:application (:id application) :linked false}))]
+    {:result conversion-result
+     :file converted-filedata}))
+
+(defn attach!
+  [{:keys [application user]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
+  (let [options            (merge attachment-options
+                                  original-filedata
+                                  (:result conversion-data)
+                                  {:original-file-id (or (:original-file-id attachment-options)
+                                                         (:fileId original-filedata))}
+                                  (:file conversion-data))
+        attachment         (or (get-attachment-info application attachment-id)
+                               (create-attachment! application
+                                                   (assoc attachment-options
+                                                     :requested-by-authority
+                                                     (usr/authority? user))))
+        linked-version     (set-attachment-version! application user attachment options)]
+    (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
+    (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
+    (cleanup-temp-file (:result conversion-data))
+    linked-version))
 
 (defn upload-and-attach!
   "1) Uploads original file to GridFS
@@ -627,31 +669,16 @@
    4) Creates preview image in separate thread
    5) Links file as new version to attachment. If conversion was made, converted file is used (originalFileId points to original file)
    Returns attached version."
-  [{:keys [application user]} attachment-options file-options]
-  (let [initial-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
+  [{:keys [application] :as command} attachment-options file-options]
+  (let [original-filedata   (file-upload/save-file file-options {:application (:id application) :linked false})
         content            (if (instance? File (:content file-options))
                              (:content file-options)
-                             ; stream is consumed at this point, load from mongo
-                             ((-> initial-filedata :fileId mongo/download :content)))
-        conversion-result  (conversion/archivability-conversion application (assoc initial-filedata
-                                                                              :attachment-type (:attachment-type attachment-options)
-                                                                              :content content))
-        converted-filedata (when (:autoConversion conversion-result)
-                                 ;; when conversion was made, upload is needed, initial-filedata's fileId will be overwritten
-                                 (file-upload/save-file (select-keys conversion-result [:content :filename])
-                                                        {:application (:id application) :linked false}))
-        options            (merge attachment-options
-                                  initial-filedata
-                                  conversion-result
-                                  {:original-file-id (or (:original-file-id attachment-options)
-                                                         (:fileId initial-filedata))}
-                                  converted-filedata)
-        attachment         (get-or-create-attachment! application user attachment-options)
-        linked-version     (set-attachment-version! application user attachment options)]
-    (preview/preview-image! (:id application) (:fileId options) (:filename options) (:contentType options))
-    (link-files-to-application (:id application) ((juxt :fileId :originalFileId) linked-version))
-    (cleanup-temp-file conversion-result)
-    linked-version))
+                             ;; stream is consumed at this point, load from mongo
+                             ((-> original-filedata :fileId mongo/download :content)))
+        conversion-data    (conversion application (assoc original-filedata
+                                                     :content content
+                                                     :attachment-type (:attachment-type attachment-options)))]
+    (attach! command attachment-options original-filedata conversion-data)))
 
 (defn- append-stream [zip file-name in]
   (when in

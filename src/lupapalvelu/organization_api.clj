@@ -636,14 +636,16 @@
   (let [org-id (usr/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
         content-type (mime/mime-type filename)
-        file-info {:file-name    filename
-                   :content-type content-type
+        file-info {:filename    filename
+                   :contentType  content-type
                    :size         size
                    :organization org-id
                    :created      created}
         tmpdir (fs/temp-dir "area")]
     (try+
-      (let [areas (org/parse-shapefile-to-organization-areas org-id tempfile tmpdir file-info)]
+      (when-not (= (:contentType file-info) "application/zip")
+        (fail! :error.illegal-shapefile))
+      (let [areas (org/parse-shapefile-to-organization-areas org-id tempfile tmpdir)]
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")

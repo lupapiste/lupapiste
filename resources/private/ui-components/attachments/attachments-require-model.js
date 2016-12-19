@@ -1,4 +1,4 @@
-LUPAPISTE.AttachmentsRequireModel = function() {
+LUPAPISTE.AttachmentsRequireModel = function(params) {
   "use strict";
   var self = this;
 
@@ -6,10 +6,11 @@ LUPAPISTE.AttachmentsRequireModel = function() {
 
   var service = lupapisteApp.services.attachmentsService;
 
+  self.selectedTypes = params.selectedTypes;
+  self.selectedGroup = params.selectedGroup;
+
   self.selectedTypeGroup = ko.observable();
   self.selectedType = ko.observable();
-
-  self.selectedTypes = ko.observableArray();
 
   self.disposedSubscribe(self.selectedType, function(type) {
     if (type) {
@@ -18,19 +19,20 @@ LUPAPISTE.AttachmentsRequireModel = function() {
     }
   });
 
+  self.selectableGroups = service.groupTypes;
+
   self.removeSelection = function(ind) {
     self.selectedTypes.splice(ind(),1);
   };
 
-  self.submitEnabled = self.disposedPureComputed(function() {
-    return !_.isEmpty(self.selectedTypes());
+  self.subscribeChanged(self.selectedTypes, function(value, oldValue) {
+    if (_.isEmpty(value)) {
+      // Reset selected group to general when list is emptied
+      self.selectedGroup(null);
+    } else if (_.isEmpty(oldValue)) {
+      // Select default group when first attachment type is added
+      self.selectedGroup(_.find(self.selectableGroups(), ["groupType", util.getIn(value, [0, "metadata", "grouping"])]));
+    }
   });
-
-  self.requireAttachmentTemplates = function() {
-    service.createAttachmentTemplates(_.map(self.selectedTypes(), function(type) {
-      return _.pick(type, ["type-group", "type-id"]);
-    }));
-    hub.send("close-dialog");
-  };
 
 };

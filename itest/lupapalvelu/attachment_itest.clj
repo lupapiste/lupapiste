@@ -37,7 +37,8 @@
                         :create-attachments
                         :id application-id
                         :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                        :group nil)
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -267,7 +268,8 @@
                             :create-attachments
                             :id application-id
                             :attachmentTypes [{:type-group "muut" :type-id "muu"}
-                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]) => ok?
+                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                            :group nil) => ok?
         attachment-ids (:attachmentIds resp)
         hidden-id (first attachment-ids)
         visible-id (second attachment-ids)
@@ -455,7 +457,8 @@
                 resp (command raktark-jarvenpaa
                               :create-attachments
                               :id application-id
-                              :attachmentTypes [type]) => ok?
+                              :attachmentTypes [type]
+                              :group nil) => ok?
                 attachment {:id (first (:attachmentIds resp))
                             :type type}
                 attachment-id (:id attachment)]
@@ -535,7 +538,8 @@
           resp (command raktark-jarvenpaa
                         :create-attachments
                         :id application-id
-                        :attachmentTypes [type]) => ok?
+                        :attachmentTypes [type]
+                        :group nil) => ok?
           attachment {:id (first (:attachmentIds resp))
                       :type type}
           attachment-id (:id attachment)]
@@ -559,13 +563,6 @@
         (fact "Latest version should be 1.0 after conversion"
           (get-in attachment [:latestVersion :version :major]) => 1
           (get-in attachment [:latestVersion :version :minor]) => 0)))))
-
-(defn- poll-job [id version limit]
-  (when (pos? limit)
-    (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
-      (when-not (= (get-in resp [:job :status]) "done")
-        (Thread/sleep 200)
-        (poll-job id (get-in resp [:job :version]) (dec limit))))))
 
 (facts "Stamping"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
@@ -603,7 +600,7 @@
     (fact "FileId is returned" file-id => truthy)
 
     ; Poll for 5 seconds
-    (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+    (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
           comments-after (:comments (query-application sonja application-id))]
@@ -640,7 +637,7 @@
                               :section "")]
           resp => ok?
           ; Poll for 5 seconds
-          (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+          (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
           (fact "Latest version has chaned"
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
@@ -973,7 +970,7 @@
       (fact "Give verdict"
         (command sonja :check-for-verdict :id application-id) => ok?)
       (facts "add attachment"
-        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
+        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}] :group nil)
               post-verdict-attachment-id (-> resp :attachmentIds first)
               attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
           (fact "added"
@@ -1022,5 +1019,4 @@
                :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
       (fact "Not needed can be set after version deletion"
         (command pena :set-attachment-not-needed :id application-id :notNeeded true
-                 :attachmentId (:id updated-attachment)) => ok?))
-    ))
+                 :attachmentId (:id updated-attachment)) => ok?))))

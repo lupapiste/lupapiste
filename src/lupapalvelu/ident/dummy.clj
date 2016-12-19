@@ -33,7 +33,8 @@
      (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :trid trid :paths paths :created-at (java.util.Date.)} :upsert true)
      (core/html [:html
                  [:head [:title "SAML Dev Login"]
-                  [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]]
+                  [:script {:type "text/javascript" :src "https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.3.min.js"}]
+                  [:script {:type "text/javascript" :src "/app/0/common.js?lang=fi"}]]
                  [:body {:style "background-color: #fbc742; padding: 4em; font-size: 14px; font-family: Courier"}
                   [:h3 "SAML Dev Login"]
                   [:div

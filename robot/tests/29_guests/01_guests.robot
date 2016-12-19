@@ -106,8 +106,8 @@ Mikko logs in and can see the application
   Wait test id hidden  application-guest-add
   Wait test id hidden  application-invite-person
   Wait test id hidden  application-invite-company
-  Wait Until Element Is Not Visible  jquery=[id=applicationUnseenComments]
-  Wait Until Element Is Not Visible  jquery=[id=open-conversation-side-panel]
+  Wait Until  Element Should Not Be Visible  jquery=[id=applicationUnseenComments]
+  Wait Until  Element Should Not Be Visible  jquery=[id=open-conversation-side-panel]
   Guest row name  ${mikko}  ${mikko-name}
   Guest row inviter  ${mikko}  Pena Panaani
   Guest row subscribed  ${mikko}
@@ -173,8 +173,8 @@ Veikko logs in and can see the application
   Wait test id hidden  application-guest-add
   Wait test id hidden  application-invite-person
   Wait test id hidden  application-invite-company
-  Wait Until Element Is Not Visible  jquery=[id=applicationUnseenComments]
-  Wait Until Element Is Not Visible  jquery=[id=open-conversation-side-panel]
+  Wait Until  Element Should Not Be Visible  jquery=[id=applicationUnseenComments]
+  Wait Until  Element Should Not Be Visible  jquery=[id=open-conversation-side-panel]
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row unsubscribed  veikko
@@ -201,8 +201,8 @@ Luukas logs in and can see the application
   Wait test id hidden  application-guest-add
   Wait test id hidden  application-invite-person
   Wait test id hidden  application-invite-company
-  Wait Until Element Is Not Visible  jquery=[id=applicationUnseenComments]
-  Wait Until Element Is Not Visible  jquery=[id=open-conversation-side-panel]
+  Wait Until  Element Should Not Be Visible  jquery=[id=applicationUnseenComments]
+  Wait Until  Element Should Not Be Visible  jquery=[id=open-conversation-side-panel]
   Guest row name  veikko  ${veikko-name}
   Guest row inviter  veikko  Sonja Sibbo
   Guest row description  veikko  Saunamajuri

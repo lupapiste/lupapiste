@@ -5,7 +5,7 @@ LUPAPISTE.AttachmentsChangeTypeModel = function(params) {
 
   var attachmentId = params.attachmentId;
 
-  var authModel = params.authModel;
+  var authModel = ko.unwrap(params.authModel) || {};
   var allowedTypes = params.allowedAttachmentTypes;
 
   var valueToType = {};

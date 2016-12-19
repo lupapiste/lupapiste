@@ -367,6 +367,26 @@
     }
   };
 
+  var fileTemplate =
+      _.template( "<a href='/api/raw/view-file?file-id"
+                  + "=<%- fileId %>'><%- filename %></a><br>"
+                  + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
+
+  // Fills the target element with:
+  // <a href="file view url">filename</a><br>
+  // <span>localized content type size string</span>
+  ko.bindingHandlers.file = {
+    update: function( element, valueAccessor) {
+      var v = ko.utils.unwrapObservable( valueAccessor());
+      if( v ) {
+        var data = ko.mapping.toJS( v );
+        $(element).html( fileTemplate( _.merge( data, {contentText: loc( data.contentType),
+                                                       sizeText: sizeString( data.size )})));
+      }
+    }
+  };
+
+
   ko.bindingHandlers.version = {
     update: function(element, valueAccessor) {
       var verValue = ko.utils.unwrapObservable(valueAccessor());
@@ -667,6 +687,10 @@
     this(this() + 1);
   };
 
+  ko.observable.fn.decrement = function () {
+    this(this() - 1);
+  };
+
   ko.extenders.limited = function(target, optionObj) {
     var result = ko.pureComputed({
         read: target,
@@ -682,6 +706,25 @@
     });
     result(target());
     return result;
+  };
+
+  ko.extenders.autoFetch = function(target, optionsObj) {
+    // Observable extender that fetches content automatically when read and not initialized.
+    // fetchFn should write result in autofetching observable array
+    var fetching = false;
+    return ko.pureComputed({
+      read: function() {
+        if (_.isEmpty(target()) && !fetching) {
+          fetching = true;
+          optionsObj.fetchFn(optionsObj.fetchParams);
+        }
+        return target();
+      },
+      write: function(result) {
+        target(result);
+        fetching = false;
+      }
+    });
   };
 
 })(jQuery);

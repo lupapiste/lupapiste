@@ -9,14 +9,19 @@ RESOLUTION=1400x1200
 TIMEOUT=600
 TESTS=
 NOENV=
+BROWSER=firefox
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
 STARTUPTIMEOUT=60
 PERFECT=
 BLACKLIST=
-RETRIES=5
+RETRIES=3
 UPDATE=15
+EXCLUDES="--exclude fail --exclude non-roboto-proof"
+INCLUDE_TAGS=
+INCLUDES=
+PARALLEL=files
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
@@ -43,10 +48,17 @@ usage() {
   -s | --start          start lupapiste with lein
   -t | --timeout n      timeout for individual robot file [$TIMEOUT]
   -h | --help           show this thing
+  -B | --browser name   'firefox' (default) or 'chrome'
   -S | --server uri     use a specific server [$SERVER]
   -p | --perfect        fail immediately if anything fails
   -b | --blacklist path skip tests in roboto-blacklist.txt
   -r | --retries n      maximum number of failing suite reruns [$RETRIES]
+  -e | --exclude tags   comma separated list of tags to exclude;
+                        fail and non-roboto-proof are always excluded
+  -i | --include tags   comma separated list of tags to include
+  -P | --parallel style 'files': find files under test-dirs and run them in 
+                                 parallel (dafault)  
+                        'args': run test-dirs in parallel
 "
 }
 
@@ -110,6 +122,11 @@ parse_args() {
          NOENV=1
          parse_args $@
          ;;
+      (-B|--browser)
+         BROWSER=$2
+         shift 2
+         parse_args $@
+         ;;
       (-S|--server)
          SERVER=$2
          shift 2
@@ -145,6 +162,27 @@ parse_args() {
          shift 2
          parse_args $@
          ;;
+      (-e|--exclude)
+         local tags=$(echo $2 | tr "," "\n")
+         for tag in $tags; do
+            EXCLUDES="$EXCLUDES --exclude $tag"
+         done
+         shift 2
+         parse_args $@
+         ;;
+      (-i|--include)
+         INCLUDE_TAGS=$(echo $2 | tr "," "\n")
+         for tag in $INCLUDE_TAGS; do
+            INCLUDES="$INCLUDES --include $tag"
+         done
+         shift 2
+         parse_args $@
+         ;;
+      (-P | --parallel)
+         PARALLEL=$2
+         shift 2
+         parse_args $@
+         ;;
       (*)
          TESTS=$@
          echo "Tests are $TESTS"
@@ -168,11 +206,24 @@ check_env() {
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
    echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || fail "Your selenium version '$SELENIUM' may cause tests to fail. Update script or change to 2.53.*."
-   # (lack of) geckodriver
-   echo "Browser: "
-   which geckodriver && fail "Remove geckodriver from path."
-   FF=$(firefox --version)
-   echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
+
+   echo "Browser: $BROWSER"
+   case "$BROWSER" in
+      "firefox" )
+         # (lack of) geckodriver
+         which geckodriver 2> /dev/null && fail "Remove geckodriver from path."
+         FF=$(firefox --version)
+         echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
+         ;;
+      "chrome" )
+         CG=$(google-chrome --version)
+         echo "$CG" | grep "^Google Chrome 55\." || fail "Major version '$CG' of Chrome may not work yet. Update script if it's ok."
+         ;;
+      * )
+         fail "Unsupported browser '$BROWSER'"
+         ;;
+   esac
+
    echo -n "Server: $SERVER "
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
    pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
@@ -236,11 +287,9 @@ run_test() {
    for ROUND in $(seq 0 $RETRIES)
    do
       DISPLAY=:$MYSCREEN timeout $TIMEOUT pybot \
-         --exclude integration \
-         --exclude ajanvaraus \
-         --exclude fail \
-         --exclude non-roboto-proof \
+         $INCLUDES $EXCLUDES \
          --RunEmptySuite \
+         --variable BROWSER:$BROWSER \
          --variable SERVER:$SERVER \
          -d target \
          --exitonfailure \
@@ -253,7 +302,7 @@ run_test() {
       test "0" "=" "$BOT" && break
       # sometimes ff seems to have persistent trouble starting and/or selenium connecting to it
       # ruling out causes by by spreading pybot startups temporally and seeing if the issue persists
-      sleep 5 
+      sleep 5
    done
    # round 0 is first
    ROUND=$(expr $ROUND "+" 1)
@@ -288,6 +337,8 @@ halt() {
       done
       lupapiste_runningp && fail "Failed to shut down lupapiste at end of test run"
    }
+   echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
+   rm -rf /tmp/*/webdriver-py-profilecopy
    echo "Writing report.html"
    rebot --outputdir target --report report.html --name Roboto target/*.xml
 }
@@ -358,7 +409,23 @@ renice $NICENESS $$
 
 # run tests
 echo "Running tests $TESTS"
-for test in $(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
+test -z "$INCLUDES" || echo $INCLUDES
+echo $EXCLUDES
+
+TARGETS=
+case "$PARALLEL" in
+   "files" )
+      TARGETS=$(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
+      ;;
+   "args" )
+      TARGETS=$TESTS
+      ;;
+   * )
+      fail "Unsupported parallel style '$PARALLEL'"
+      ;;
+esac
+
+for test in $TARGETS
 do
    RUNNING=$(jobs | grep run_test | wc -l)
    while [ $RUNNING -ge $MAXTHREADS ]
@@ -371,6 +438,21 @@ do
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
       echo "WARNING: skippin blacklisted test $test";
       continue; }
+   
+   tag_found=
+   if [[ ! -z "$INCLUDE_TAGS" ]]; then
+      for tag in $INCLUDE_TAGS; do
+         grep -q -r "\[Tags]  .*$tag" "$test" && tag_found=1
+      done
+   else
+      tag_found="irrelevant"
+   fi
+   
+   if [[ -z "$tag_found" ]]; then
+      echo "WARNING: tag(s) $INCLUDE_TAGS not found, skipping $test"
+      continue
+   fi
+      
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    echo " - Starting $test"
    run_test $SCREEN "$test" &

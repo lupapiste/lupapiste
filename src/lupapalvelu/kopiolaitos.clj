@@ -82,7 +82,7 @@
 (defn- send-kopiolaitos-email! [lang email-addresses attachments orderInfo]
   (let [zip (attachment/get-all-attachments! attachments)]
     (try
-      (let [email-attachment {:content zip :file-name zip-file-name}
+      (let [email-attachment {:content zip :filename zip-file-name}
             email-subject (str (localize lang :kopiolaitos-email-subject) \space (:ordererOrganization orderInfo))
             orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
                                         :contentsTable (get-kopiolaitos-html-table lang attachments)})

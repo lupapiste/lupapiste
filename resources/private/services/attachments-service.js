@@ -15,8 +15,6 @@ LUPAPISTE.AttachmentsService = function() {
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
 
-  self.groupTypes = ko.observableArray([]);
-
   self.tagGroups = ko.observableArray([]);
   var tagGroupSets = {};
 
@@ -31,6 +29,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
+    self.groupTypes([]);
     self.authModel.refresh({id: self.applicationId()});
   });
 
@@ -65,6 +64,9 @@ LUPAPISTE.AttachmentsService = function() {
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -151,10 +153,6 @@ LUPAPISTE.AttachmentsService = function() {
     });
   };
 
-  self.setGroupTypes = function(data) {
-    self.groupTypes(data);
-  };
-
   self.queryAttachments = function() {
     queryData("attachments", "attachments", self.setAttachments);
   };
@@ -230,28 +228,23 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryGroupTypes = function() {
-    queryData("attachment-groups", "groups", self.setGroupTypes);
+    if (!queryData("attachment-groups", "groups", self.groupTypes)) {
+      self.groupTypes([]);
+    }
   };
+
+  self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
+
+  hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
 
   self.queryAttachmentTypes = function() {
-    queryData("attachment-types", "attachmentTypes", self.attachmentTypes);
+    if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
+      self.attachmentTypes([]);
+    }
   };
 
-  var attachmentTypes = ko.observableArray();
-  var fetchingAttachmentTypes = false;
-  self.attachmentTypes = ko.pureComputed({
-    read: function() {
-      if (_.isEmpty(attachmentTypes()) && !fetchingAttachmentTypes) {
-        fetchingAttachmentTypes = true;
-        self.queryAttachmentTypes();
-      }
-      return attachmentTypes();
-    },
-    write: function(types) {
-      attachmentTypes(types);
-      fetchingAttachmentTypes = false;
-    }
-  });
+  self.attachmentTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryAttachmentTypes}});
+
   self.attachmentTypeGroups = ko.pureComputed(function() {
     return _(self.attachmentTypes()).map("type-group").uniq().value();
   });
@@ -341,7 +334,7 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId,
                           "reject-attachment-note",
                           {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
-                           note: note},
+                           note: note || ""},
                           hubParams);
     self.rejectAttachmentNoteEditorState( null );
   };
@@ -386,8 +379,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, hubParams);
   };
 
-  self.createAttachmentTemplates = function(types, hubParams) {
-    var params =  {id: self.applicationId(), attachmentTypes: types};
+  self.createAttachmentTemplates = function(types, group, hubParams) {
+    var params =  {id: self.applicationId(), attachmentTypes: types, group: group};
     ajax.command("create-attachments", params)
       .success(function(res) {
         self.queryAll();

@@ -35,7 +35,7 @@ Sonja can not submit application
 Sipoo marks required fields obligatory
   Sipoo logs in
   Go to page  applications
-  Wait until Element is visible  required-fields-obligatory-enabled
+  Wait Until  Element Should Be Visible  required-fields-obligatory-enabled
   Focus  required-fields-obligatory-enabled
   Checkbox Should Not Be Selected  required-fields-obligatory-enabled
   Select Checkbox  required-fields-obligatory-enabled
@@ -62,7 +62,7 @@ Mikko can not submit application because there are "missing required" items on t
 Sipoo marks required fields not obligatory
   Sipoo logs in
   Go to page  applications
-  Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
+  Wait Until  Element Should Be Visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
   Focus  xpath=//input[@id='required-fields-obligatory-enabled']
   Checkbox Should Be Selected  id=required-fields-obligatory-enabled
   Sleep  0.5s

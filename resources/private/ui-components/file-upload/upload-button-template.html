@@ -1,0 +1,14 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="upload-button-template">
+  <input type="file" class="hidden" name="files[]"
+         data-bind="attr: {id: upload.fileInputId,
+                    multiple: upload.allowMultiple}">
+  <label data-bind="attr: {'for': labelFor,
+                    'class': options.buttonClass},
+                    css: {waiting: upload.waiting},
+                    visible: !upload.readOnly">
+    <i data-bind="attr: {'class': options.buttonIcon}"></i>
+    <i class="wait spin lupicon-refresh"></i>
+    <span data-bind="ltext: options.buttonText"></span>
+  </label>
+</script>

@@ -143,6 +143,8 @@ jQuery(document).ready(function() {
     {name: "attachment-type-group-autocomplete"},
     {name: "attachment-type-autocomplete"},
     {name: "attachments-require"},
+    {name: "attachments-require-bubble"},
+    {name: "attachment-group-selector"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
@@ -162,7 +164,13 @@ jQuery(document).ready(function() {
     {name: "state-icons"},
     {name: "docgen-calculation"},
     {name: "docgen-footer-sum"},
-    {name: "reject-note"}
+    {name: "reject-note"},
+    {name: "upload-button"},
+    {name: "attachment-batch"},
+    {name: "upload-progress"},
+    {name: "icon-button"},
+    {name: "toggle"},
+    {name: "combobox"}
 ];
 
   ko.registerLupapisteComponents(components);

@@ -139,10 +139,11 @@ Review disabled for applicant
   Wait test id visible  add-targetted-attachment
   No such test id  review-done
   No such test id  delete-task
-  
+
 
 Finalize review
   Click by test id  review-done
+  Confirm yes no dialog
   Confirm  dynamic-ok-confirm-dialog
   Review frozen
   Return from review

@@ -1,6 +1,6 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count remove update distinct])
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]
             [clojure.java.io :as io]
@@ -301,9 +301,9 @@
 (defn- ^{:perfmon-exclude true} gridfs-file-as-map [^GridFSDBFile attachment]
   (let [metadata (from-db-object (.getMetaData attachment) :true)]
     {:content (fn [] (.getInputStream attachment))
-     :content-type (.getContentType attachment)
+     :contentType (.getContentType attachment)
      :size (.getLength attachment)
-     :file-name (.getFilename attachment)
+     :filename (.getFilename attachment)
      :fileId (.getId attachment)
      :metadata metadata
      :application (:application metadata)}))
@@ -416,7 +416,7 @@
   [coll idx]
   (mc/drop-index (get-db) coll idx))
 
-(defn ^{:perfmon-exclude true} ensure-indexes []
+(defn ^{:perfmon-exclude true} ensure-indexes [& {:keys [ts] :or {ts (now)}}]
   (debug "ensure-indexes")
   (ensure-index :users {:username 1} {:unique true})
   (ensure-index :users {:email 1} {:unique true})
@@ -462,7 +462,8 @@
   (ensure-index :buildingCache {:created 1} {:expireAfterSeconds (* 60 60 12)}) ; 12 h
   (ensure-index :buildingCache {:propertyId 1} {:unique true})
   (ensure-index :ssoKeys {:ip 1} {:unique true})
-  (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1}))
+  (ensure-index :assignments {:application.id 1, :recipient.id 1, :states.type 1})
+  (infof "ensure-indexes took %d ms" (- (now) ts)))
 
 (defn clear! []
   (if-let [mode (db-mode)]

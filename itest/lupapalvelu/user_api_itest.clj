@@ -45,6 +45,15 @@
                                   :total 6
                                   :display 1
                                   :echo "123"})})))
+
+(facts "Check passwords"
+       (fact "Good password"
+             (command pena :check-password :password "pena") => ok?)
+       (fact "Bad password"
+             (command pena :check-password :password "bad") => {:ok false :text "error.password"})
+       (fact "Empty password"
+             (command pena :check-password :password "") => fail?))
+
 ;;
 ;; ==============================================================================
 ;; Creating users:
@@ -299,7 +308,7 @@
        login        (http-post
                       (str (server-address) "/api/login")
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
-       csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
+       csrf-token   (get-anti-csrf store) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]

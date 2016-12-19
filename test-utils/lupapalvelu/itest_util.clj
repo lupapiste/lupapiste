@@ -136,6 +136,9 @@
 
 (def test-db-cookie (->cookie "test_db_name" test-db-name))
 
+(defn get-anti-csrf [store-atom]
+  (-> (get @store-atom "anti-csrf-token") .getValue codec/url-decode))
+
 (defn http [verb url options]
   (let [store (atom {})
         cookies (or (:cookie-store options) (->cookie-store store))]
@@ -148,9 +151,10 @@
 (defn raw [apikey action & args]
   (let [params (apply hash-map args)
         options (util/assoc-when {:oauth-token apikey
-                                  :query-params (dissoc params :as)
+                                  :query-params (dissoc params :as :cookie-store)
                                   :throw-exceptions false
-                                  :follow-redirects false}
+                                  :follow-redirects false
+                                  :cookie-store (:cookie-store params)}
                                  :as (:as params))]
     (http-get (str (server-address) "/api/raw/" (name action)) options)))
 
@@ -711,7 +715,7 @@
 
 (defn generate-construction-time-attachment [{id :id :as application} authority-apikey password]
   (let [attachment-type {:type-group "muut" :type-id "muu"}
-        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type])
+        resp (command authority-apikey :create-attachments :id id :attachmentTypes [attachment-type] :group nil)
         attachment-id (-> resp :attachmentIds first)]
     (fact "attachment created"
       resp => ok?)
@@ -724,7 +728,7 @@
 
 (defn upload-file
   "Upload file to raw upload-file endpoint."
-  [apikey filename]
+  [apikey filename & {:keys [cookie-store]}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/raw/upload-file")]
     (:body
@@ -732,7 +736,18 @@
         (http-post uri
                    {:oauth-token apikey
                     :multipart [{:name "files[]" :content uploadfile}]
-                    :throw-exceptions false})))))
+                    :throw-exceptions false
+                    :cookie-store cookie-store})))))
+
+(defn poll-job [apikey command id version limit]
+  (if (pos? limit)
+    (let [resp (query apikey (keyword command) :jobId id :version version)]
+      (if-not (= (get-in resp [:job :status]) "done")
+        (do
+          (Thread/sleep 200)
+          (poll-job apikey command id (get-in resp [:job :version]) (dec limit)))
+        true))
+    false))
 
 ;; statements
 
@@ -809,12 +824,13 @@
 
 
 (defn get-local-filename [directory file-prefix]
-  (let [filename (->> (file-seq (io/file directory))
-                      (filter #(and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml")))
-                      (sort-by #(.getName %))
-                      last
-                      (.getName))]
-    (str directory filename)))
+  (if-let [filename (some->> (file-seq (io/file directory))
+                             (filter #(and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml")))
+                             (sort-by #(.getName %))
+                             last
+                             (.getName))]
+    (str directory filename)
+    (throw (AssertionError. (str "File not found: " directory file-prefix ".xml")))))
 
 (def dev-password "Lupapiste")
 

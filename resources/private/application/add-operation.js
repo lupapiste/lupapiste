@@ -32,15 +32,17 @@
 
       lupapisteApp.setTitle(lupapisteApp.models.application.title());
 
-      ajax
-        .query("addable-operations", {id: lupapisteApp.models.application.id()})
-        .pending(self.waitingOperations)
-        .success(function(data) {
-          if (lupapisteApp.models.application.id() === getVisibleApplicationId()) {
-            self.operations(data.operations);
-          }
-        })
-        .call();
+      if (lupapisteApp.models.applicationAuthModel.ok("addable-operations")) {
+        ajax
+          .query("addable-operations", {id: lupapisteApp.models.application.id()})
+          .pending(self.waitingOperations)
+          .success(function(data) {
+            if (lupapisteApp.models.application.id() === getVisibleApplicationId()) {
+              self.operations(data.operations);
+            }
+          })
+          .call();
+      }
       return self;
     };
 

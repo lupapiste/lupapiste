@@ -363,16 +363,19 @@
 (defcommand create-attachments
   {:description      "Authority can set a placeholder for an attachment"
    :parameters       [id attachmentTypes]
+   :optional-parameters [group]
    :pre-checks       [(fn [{{attachment-types :attachmentTypes} :data application :application}]
                         (when (and attachment-types
                                    (not-every? #(att-type/allowed-attachment-type-for-application? % application) attachment-types))
                           (fail :error.unknown-attachment-type)))
                       app/validate-authority-in-drafts]
-   :input-validators [(partial action/vector-parameters [:attachmentTypes])]
+   :input-validators [(partial action/vector-parameters [:attachmentTypes])
+                      (fn-> (get-in [:data :group]) validate-group-op)
+                      (fn-> (get-in [:data :group]) validate-group-type)]
    :user-roles       #{:authority :oirAuthority}
    :states           (states/all-states-but (conj states/terminal-states :answered :sent))}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes created false true true)]
+  (if-let [attachment-ids (attachment/create-attachments! application attachmentTypes group created false true true)]
     (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
@@ -470,6 +473,17 @@
    :org-authz-roles auth/reader-org-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-file-as! user)))
+
+(defraw view-file
+  {:description      "Fetch uploaded file from MongoDB. Fetching is session bound."
+   :parameters       [fileId]
+   :categories       #{:attachments}
+   :input-validators [(partial action/non-blank-parameters [:fileId])]
+   :user-roles #{:applicant :authority :oirAuthority}
+   :user-authz-roles auth/all-authz-roles
+   :org-authz-roles auth/reader-org-authz-roles}
+  [{{:keys [fileId]} :data session :session}]
+  (attachment/output-file fileId (:id session)))
 
 (defraw "download-attachment"
   {:parameters       [:attachment-id]  ; Note that this is actually file id
@@ -667,12 +681,12 @@
     (ok :job job)))
 
 (defquery stamp-attachments-job
-  {:parameters [:job-id :version]
+  {:parameters [:jobId :version]
    :categories #{:attachments}
-   :input-validators [(partial action/non-blank-parameters [:job-id :version])]
+   :input-validators [(partial action/non-blank-parameters [:jobId :version])]
    :user-roles #{:authority}
    :description "Returns state of stamping job"}
-  [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
+  [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (stamping/status job-id version timeout)))
 
 (defcommand sign-attachments

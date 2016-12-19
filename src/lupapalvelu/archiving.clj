@@ -69,7 +69,7 @@
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly true}}))
+           :attachments.$.readOnly (contains? #{:arkistoidaan :arkistoitu} next-state)}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
@@ -285,9 +285,9 @@
             (upload-and-set-state case-file-archive-id pdf-is "application/pdf" metadata application created set-process-state)
             (upload-and-set-state case-file-xml-id xml-is "text/xml" xml-metadata application created set-process-state))))
       (doseq [attachment selected-attachments]
-        (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
+        (let [{:keys [content contentType]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
-          (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
+          (upload-and-set-state (:id attachment) (content) contentType metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

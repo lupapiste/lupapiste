@@ -463,6 +463,23 @@ span + .waiting.wait {
   padding-right: $icon-pad;
 }
 
+// icon-button spin
+.icon-spin {
+  @include rotate( spin );
+  vertical-align: middle;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-block;
+}
+
+button > .icon-spin {
+  display: table-cell;
+}
+
+.icon-spin + span {
+  padding-left: $icon-pad;
+}
+
 // Toggle support
 // Very similar to waiting.
 
@@ -525,6 +542,7 @@ i.toggle {
   display: inline-table;
   vertical-align: top;
 }
+
 
 // Only inner margins
 .inner-margins {
@@ -618,11 +636,16 @@ button {
 
 // Mixin for a button row that wraps
 @mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
-  .btn-base, .btn, button, div, a {
+  > .btn-base,
+  > .btn,
+  > button,
+  > div,
+  > a,
+  > .operation-button {
     margin: {
-    right: $margin-right;
-    bottom: $margin-bottom;
-  }
+      right: $margin-right;
+      bottom: $margin-bottom;
+    }
   }
   :last-child {
     margin-right: 0;
@@ -633,4 +656,9 @@ button {
 // http://caniuse.com/#feat=pointer-events
 .no-events {
    pointer-events: none;
+}
+
+.operation-button-row {
+  @include button-row( $margin-bottom: 0);
+  display: inline-block;
 }
