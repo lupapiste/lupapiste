@@ -19,6 +19,7 @@ BLACKLIST=
 RETRIES=3
 UPDATE=15
 EXCLUDES="--exclude fail --exclude non-roboto-proof"
+INCLUDE_TAGS=
 INCLUDES=
 PARALLEL=files
 
@@ -170,8 +171,8 @@ parse_args() {
          parse_args $@
          ;;
       (-i|--include)
-         local tags=$(echo $2 | tr "," "\n")
-         for tag in $tags; do
+         INCLUDE_TAGS=$(echo $2 | tr "," "\n")
+         for tag in $INCLUDE_TAGS; do
             INCLUDES="$INCLUDES --include $tag"
          done
          shift 2
@@ -437,6 +438,21 @@ do
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
       echo "WARNING: skippin blacklisted test $test";
       continue; }
+   
+   tag_found=
+   if [[ ! -z "$INCLUDE_TAGS" ]]; then
+      for tag in $INCLUDE_TAGS; do
+         grep -q -r "\[Tags]  .*$tag" "$test" && tag_found=1
+      done
+   else
+      tag_found="irrelevant"
+   fi
+   
+   if [[ -z "$tag_found" ]]; then
+      echo "WARNING: tag(s) $INCLUDE_TAGS not found, skipping $test"
+      continue
+   fi
+      
    TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    echo " - Starting $test"
    run_test $SCREEN "$test" &
