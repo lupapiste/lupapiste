@@ -14,13 +14,13 @@
                   data-bind="ltext:'application.attachmentContents'"></span></th>
         <th><span data-bind="ltext:'attachment.drawing-number'"></span></th>
         <th><span data-bind="ltext:'attachment.label.operation'"></span></th>
+        <!-- ko if: showSign -->
         <th class="td-center"  data-bind="ltext:'signAttachment.select'"></th>
+        <!-- /ko -->
         <!-- ko if: showConstruction -->
         <th class="td-center" data-bind="ltext:'attachment.batch-construction'"></th>
         <!-- /ko -->
-        <!-- ko if: showSign -->
         <th class="td-center" data-bind="ltext:'remove'"></th>
-        <!-- /ko -->
       </thead>
       <tbody data-bind="foreach: upload.files">
         <td data-bind="file: $data"></td>
@@ -83,14 +83,14 @@
                          class="fill-down"></icon-button>
           </div>
         </td>
-        <!-- ko if: $parent.showSign -->
+        <!-- ko if: $component.showSign -->
         <td class="td-center">
           <toggle params="prefix: 'signbox',
                           value: $parent.cell( $data, 'sign' ).value,
                           disable: $parent.rowDisabled( $data )"></toggle>
         </td>
         <!-- /ko -->
-        <!-- ko if: $parent.showConstruction -->
+        <!-- ko if: $component.showConstruction -->
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'construction' ).value,
                           disable: $parent.rowDisabled( $data )"></toggle>
@@ -103,7 +103,7 @@
           <!-- /ko -->
           <!-- ko if: $parent.rowDisabled( $data ) -->
           <i class="icon-spin lupicon-refresh"></i>
-          <!-- /ko -->          
+          <!-- /ko -->
         </td>
       </tbody>
       <tfoot data-bind="if: fileCount() > 1">
