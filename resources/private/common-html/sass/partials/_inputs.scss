@@ -307,8 +307,31 @@ input.grid-style-input--wide {
 }
 }
 
-.drop-zone--highlight {
-  border: 4px dashed $primary !important;
+drop-zone {
+  display: none;
+  .drop-zone-placeholder {
+    border: 4px dashed $primary !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    color: $primary;
+    z-index: 200;
+    text-align: center;
+    background-color: rgba( 255, 255, 255, 0.8);
+    padding-top: 2em;
+    > div {
+      font-size: 20px;
+    }
+    > i {
+      font-size: 60px;
+    }
+  }
+}
+
+.drop-zone--highlight drop-zone {
+  display: block;
 }
 
 .combobox-container {

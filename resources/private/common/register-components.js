@@ -170,7 +170,8 @@ jQuery(document).ready(function() {
     {name: "upload-progress"},
     {name: "icon-button"},
     {name: "toggle"},
-    {name: "combobox"}
+    {name: "combobox"},
+    {name: "drop-zone"}
 ];
 
   ko.registerLupapisteComponents(components);

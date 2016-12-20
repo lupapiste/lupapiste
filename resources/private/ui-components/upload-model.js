@@ -6,7 +6,9 @@
 //  [allowMultiple]: Whether multiple files can be uploaded at the
 //  same time (false).
 //  [readOnly]: If true only the file listing is shown (false).
-//  [dropZone]: Dropzone selector as string (default null, no dropzone).
+//  [dropZone]: Dropzone selector as string (default null, no
+//  dropzone). The dropzone highlight is done with drop-zone
+//  component.
 //  [badFileHandler]. Function to be called on bad files (size,
 //  type). If not given, errors are displayed with indicators. Event
 //  argument contains (localized) message and file.
