@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1481988361746');
+@import url('main-blessed1.css?z=1482239943727');
 
 /* line 916, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
@@ -8268,24 +8268,26 @@ td.comment-text {
 /* line 375, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag {
   position: relative;
+  background-color: #f6f6f6;
   border: 1px solid #bbbbbb;
   min-height: 40px;
   width: 100%;
   display: inline-block;
 }
-/* line 381, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 382, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag span.tag-label {
   display: inline-block;
   margin: 6px;
+  font-weight: bold;
 }
-/* line 385, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 387, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove {
   position: absolute;
   top: 8px;
   right: 8px;
   color: #f39129;
 }
-/* line 390, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 392, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove:hover {
   color: #f7ac2e;
 }
