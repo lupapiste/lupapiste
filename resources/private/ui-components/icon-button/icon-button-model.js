@@ -6,6 +6,7 @@
 //  [buttonClass]. Default positive.
 //  click: Similar to KO binding
 //  right: If true, the icon is on the right side (default false)
+//  [testId]: Button test id (icon-button)
 //  [enable]: Similar to kO binding (default true)
 //  [disable]: Similar to binding (false)
 //  [waiting]: Waiting observable (false)
@@ -18,6 +19,7 @@ LUPAPISTE.IconButtonModel = function( params ) {
 
   self.right = params.right || false;
   self.waiting = params.waiting || false;
+  self.testId = params.testId || "icon-button";
 
   self.buttonClass = params.buttonClass || "positive";
 

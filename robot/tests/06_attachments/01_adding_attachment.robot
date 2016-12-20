@@ -53,14 +53,7 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds png attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  #Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
-
-Mikko returns to application
-  [Tags]  attachments
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  First  Asuinkerrostalon tai rivitalon rakentaminen  
 
 Download all buttons are now visible
   Wait test id visible  download-all
@@ -77,9 +70,10 @@ Download all buttons are gone again
 
 Mikko adds png attachment without comment again
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Second  Asuinkerrostalon tai rivitalon rakentaminen  
+
+Mikko opens attachment details
+  Open attachment details  muut.muu
 
 Mikko deletes attachment version
   [Tags]  attachments
@@ -91,19 +85,15 @@ Mikko deletes also the attachment template
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
-Mikko adds again png attachment with comment
+Mikko adds png attachment one more time
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
-  Return to application
-  Wait Until  Comment count is  1
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Third  Asuinkerrostalon tai rivitalon rakentaminen
 
 Download all buttons are again visible
   Wait test id visible  download-all
   Wait test id visible  download-all-attachments-button
 
-Mikko opens attachment details
+Mikko opens attachment details again
   [Tags]  attachments
   Open attachment details  muut.muu
 
@@ -189,16 +179,15 @@ Mikko deletes attachment
   Wait Until Page Contains  ${propertyId}
   Wait Until  Page Should Not Contain  jquery=tr[data-test-type='muut.muu'] a[data-test-id='open-attachment']
 
-Comment is present after delete
-  [Tags]  attachments
-  Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
-  Close side panel  conversation
+# Comment is present after delete
+#   [Tags]  attachments
+#   Open side panel  conversation
+#   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
+#   Close side panel  conversation
 
 Mikko adds png attachment with comment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  ${PNG_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   [Tags]  attachments

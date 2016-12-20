@@ -4,13 +4,6 @@
     <span class="operation-button"
           data-bind="component: { name: 'upload-button',
                                   params: uploadOptions }"></span>
-    <button class="positive caps"
-            data-bind="click: $data.newAttachment,
-                       visible: $data.authModel.ok('upload-attachment')"
-            data-test-id="add-attachment">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.attachmentsAdd' "></span>
-    </button>
     <div class="stacked--inline">
       <button class="positive caps"
               data-bind="click: $data.attachmentTemplatesAdd,
