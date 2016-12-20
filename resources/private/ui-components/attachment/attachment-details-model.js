@@ -44,12 +44,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
   self.upload.init();
-  self.disposedComputed(function() {
-    var file = _.first(self.upload.files());
-    if (file) {
+  self.disposedSubscribe(self.upload.files, function(files) {
+    if (!_.isEmpty(files)) {
       ajax.command("bind-attachments", {id: self.applicationId,
                                         filedatas: [{attachmentId: self.id,
-                                                    fileId: file.fileId,
+                                                    fileId: _.first(files).fileId,
                                                     type: self.attachment.peek().type,
                                                     group: {groupType: util.getIn(self.attachment.peek(), ["groupType"]),
                                                             id: util.getIn(self.attachment.peek(), ["op", "id"])}}]})
