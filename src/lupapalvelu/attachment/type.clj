@@ -57,15 +57,21 @@
 (def- default-grouping (util/read-edn-resource "attachments/default-grouping.edn"))
 
 (def- type-grouping ; Force array-map to ensure fixed order of the type groups
-  (array-map {:type-id :asemapiirros       :type-group :paapiirustus}        :paapiirustus
-             {:type-id :aitapiirustus      :type-group :paapiirustus}        :paapiirustus
-             {:type-id :pohjapiirustus     :type-group :paapiirustus}        :paapiirustus
-             {:type-id :leikkauspiirustus  :type-group :paapiirustus}        :paapiirustus
-             {:type-id :julkisivupiirustus :type-group :paapiirustus}        :paapiirustus
-             {:type-id :muu_paapiirustus   :type-group :paapiirustus}        :paapiirustus
-             {:type-id :iv_suunnitelma     :type-group :erityissuunnitelmat} :iv_suunnitelma
-             {:type-id :kvv_suunnitelma    :type-group :erityissuunnitelmat} :kvv_suunnitelma
-             {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma))
+  (array-map {:type-id :aitapiirustus            :type-group :paapiirustus}        :paapiirustus
+             {:type-id :pohjapiirustus           :type-group :paapiirustus}        :paapiirustus
+             {:type-id :leikkauspiirustus        :type-group :paapiirustus}        :paapiirustus
+             {:type-id :julkisivupiirustus       :type-group :paapiirustus}        :paapiirustus
+             {:type-id :muu_paapiirustus         :type-group :paapiirustus}        :paapiirustus
+
+             {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} :iv_suunnitelma
+
+             {:type-id :kvv_suunnitelma          :type-group :erityissuunnitelmat} :kvv_suunnitelma
+             {:type-id :lammityslaitesuunnitelma :type-group :erityissuunnitelmat} :kvv_suunnitelma
+
+             {:type-id :rakennesuunnitelma                   :type-group :erityissuunnitelmat} :rakennesuunnitelma
+             {:type-id :kalliorakentamistekninen_suunnitelma :type-group :erityissuunnitelmat} :rakennesuunnitelma
+             {:type-id :pohjarakennesuunnitelma              :type-group :erityissuunnitelmat} :rakennesuunnitelma
+             {:type-id :pohjaveden_hallintasuunnitelma       :type-group :erityissuunnitelmat} :rakennesuunnitelma))
 
 (def content-mapping (util/read-edn-resource "attachments/contents.edn"))
 
