@@ -7140,16 +7140,43 @@ input.grid-style-input--wide:disabled {
 }
 
 /* line 310, ../../../private/common-html/sass/partials/_inputs.scss */
-.drop-zone--highlight {
+drop-zone {
+  display: none;
+}
+/* line 312, ../../../private/common-html/sass/partials/_inputs.scss */
+drop-zone .drop-zone-placeholder {
   border: 4px dashed #f39129 !important;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  color: #f39129;
+  z-index: 200;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding-top: 2em;
+}
+/* line 324, ../../../private/common-html/sass/partials/_inputs.scss */
+drop-zone .drop-zone-placeholder > div {
+  font-size: 20px;
+}
+/* line 327, ../../../private/common-html/sass/partials/_inputs.scss */
+drop-zone .drop-zone-placeholder > i {
+  font-size: 60px;
 }
 
-/* line 314, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 333, ../../../private/common-html/sass/partials/_inputs.scss */
+.drop-zone--highlight drop-zone {
+  display: block;
+}
+
+/* line 337, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container {
   position: relative;
   display: inline-block;
 }
-/* line 317, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 340, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list {
   position: absolute;
   left: 0;
@@ -7164,11 +7191,11 @@ input.grid-style-input--wide:disabled {
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 330, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 353, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li {
   padding-left: 6px;
 }
-/* line 333, ../../../private/common-html/sass/partials/_inputs.scss */
+/* line 356, ../../../private/common-html/sass/partials/_inputs.scss */
 .combobox-container ul.combobox__list li.combobox--selected {
   background-color: #f39129;
   color: white;
@@ -8347,8 +8374,4 @@ div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky
   padding-top: 4px;
   min-height: initial;
   line-height: initial;
-}
-/* line 913, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
-  color: #999999;
 }

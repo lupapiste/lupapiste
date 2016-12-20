@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1482239943727');
+@import url('main-blessed1.css?z=1482245050802');
 
+/* line 913, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
+  color: #999999;
+}
 /* line 916, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
   color: #e34319;

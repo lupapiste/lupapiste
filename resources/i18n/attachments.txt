@@ -501,3 +501,6 @@
 "progress.ready.many" "sv" "{0} filer har laddats upp."
 "progress.ready.one" "fi" "Tiedosto lisätty."
 "progress.ready.one" "sv" "Filen har laddats upp."
+"dropzone.placeholder" "fi" "Pudota tiedosto(t) tähän"
+"dropzone.placeholder" "en" "Drop file(s) here"
+"dropzone.placeholder" "sv" "Släpp filer här"
