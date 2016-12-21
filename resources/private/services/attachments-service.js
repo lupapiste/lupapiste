@@ -283,6 +283,20 @@ LUPAPISTE.AttachmentsService = function() {
     return !_.includes([self.JOB_RUNNING, self.JOB_PENDING, self.JOB_WORKING], ko.unwrap(status));
   };
 
+  self.contentsData = function( attachmentType ) {
+    var metadata = attachmentType.metadata || {};
+    var list  = _.map( metadata.contents,
+                       function( id ) {
+                         return loc( "attachments.contents." + id);
+                       });
+    return {
+      defaultValue: _.size( list ) <= 1
+        ? _.first( list ) || attachmentType.title
+        : "",
+      list: list
+    };
+  };
+
   function pollBindJob(statuses, attachments, response) {
     var job = response.job;
     _.forEach( _.values(job.value), function(fileData) {

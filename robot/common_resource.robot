@@ -1472,6 +1472,11 @@ Click label
   Scroll to  label[for=${for}]
   Click element  jquery=label[for=${for}]
 
+Click label by test id
+  [Arguments]  ${tid}
+  Scroll to  label[data-test-id=${tid}]
+  Click element  jquery=label[data-test-id=${tid}]
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1

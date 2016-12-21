@@ -69,21 +69,23 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function newRow() {
     var type = ko.observable();
-    var contentsList = ko.observableArray();
     var grouping = ko.observable({});
+    var contentsValue = ko.observable();
+    var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( data ) {
       var metadata = data.metadata || {};
-      contentsList(_.map( metadata.contents,
-                          function( id ) {
-                            return loc( "attachments.contents." + id);
-                          }));
 
+      var contents = service.contentsData( data );
+      contentsList( contents.list );
+      if( !_.trim( contentsValue())) {
+        contentsValue( contents.defaultValue);
+      }
       grouping({groupType: metadata.grouping === "operation"
                 ? "operation-" + _.find (service.groupTypes(),
                                          {groupType: "operation"}).id
                 : metadata.grouping});
     } );
-    var contentsCell = new Cell( ko.observable(), true );
+    var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
                 type: new Cell( type, true ),
