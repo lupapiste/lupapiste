@@ -25,7 +25,7 @@
 
 (defn- bind-attachments! [{:keys [application user created]} file-infos job-id]
   (reduce
-    (fn [results {:keys [fileId type attachmentId] :as filedata}]
+    (fn [results {:keys [fileId type attachmentId contents] :as filedata}]
       (job/update job-id assoc fileId {:status :working :fileId fileId})
       (if-let [mongo-file (mongo/download fileId)]
         (let [conversion-data    (att/conversion application (assoc mongo-file :attachment-type type :content ((:content mongo-file))))
@@ -41,8 +41,9 @@
               version-options (merge
                                 (select-keys mongo-file [:fileId :filename :contentType :size])
                                 (select-keys filedata [:contents :group :constructionTime :sign])
-                                {:created          created
-                                 :original-file-id fileId}
+                                (util/assoc-when {:created          created
+                                                  :original-file-id fileId}
+                                                 :comment-text contents)
                                 (:result conversion-data)
                                 (:file conversion-data))
               linked-version (att/set-attachment-version! application user attachment version-options)]

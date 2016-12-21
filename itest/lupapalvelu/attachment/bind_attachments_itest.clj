@@ -58,7 +58,8 @@
         (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
 
       (facts "attachments status"
-        (let [attachments (:attachments (query-application pena application-id))
+        (let [app (query-application pena application-id)
+              attachments (:attachments app)
               att1 (first attachments)
               att2 (second attachments)]
           (fact "now new attachments created, as placeholders were empty"
@@ -69,6 +70,13 @@
           (fact "contents are set"
             (:contents att1) => "eka"
             (:contents att2) => "toka")
+          (fact "contents = comment for attachment"
+            (first (:comments app)) => (contains {:target {:type "attachment" :id (:id att1)}
+                                                  :text (:contents att1)
+                                                  :user (contains {:username "pena"})})
+            (second (:comments app)) => (contains {:target {:type "attachment" :id (:id att2)}
+                                                   :text (:contents att2)
+                                                   :user (contains {:username "pena"})}))
           (when libre/enabled?
             (fact "txt converted"
               (:autoConversion (:latestVersion att1)) => true
