@@ -354,6 +354,12 @@
     {$set   {:attachments.$.applicationState originalApplicationState}
      $unset {:attachments.$.originalApplicationState true}}))
 
+(defn signature-updates [{:keys [fileId version]} user ts]
+  {$push {:attachments.$.signatures {:user (usr/summary user)
+                                     :created (or ts (now))
+                                     :version version
+                                     :fileId fileId}}})
+
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
   the user is not authority."
@@ -476,6 +482,8 @@
            mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
                                           (when (:constructionTime options)
                                             (construction-time-state-updates attachment true))
+                                          (when (:sign options)
+                                            (signature-updates version-model user (:created options)))
                                           (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
