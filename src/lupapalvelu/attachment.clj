@@ -199,6 +199,13 @@
                                                :latestVersion
                                                :originalFileId)))
 
+(defn attachment-array-updates
+  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
+  [app-id pred & kvs]
+  (as-> app-id $
+        (get-application-no-access-checking $ {:attachments true})
+        (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
+
 ;;
 ;; Api
 ;;
@@ -337,6 +344,14 @@
        $push {:attachments {$each attachments}}})
     (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
+
+(defn construction-time-state-updates
+  "Returns updates for 'setting' construction time flag. Value is true or false."
+  [app {:keys [applicationState originalApplicationState] attachment-id :id} value]
+  (if value
+    {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or originalApplicationState applicationState) :applicationState :verdictGiven)}
+    {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState originalApplicationState)
+     $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)}))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -740,12 +755,6 @@
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
 
-(defn attachment-array-updates
-  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
-  [app-id pred & kvs]
-  (as-> app-id $
-    (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
-    (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 (defn set-attachment-state!
   "Updates attachment's approvals."
@@ -809,12 +818,8 @@
     (fail :error.attachment-not-manually-set-construction-time)))
 
 (defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
-  (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (get-attachment-info app attachment-id))]
-    (->> (if value
-           {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or orig-app-state app-state) :applicationState :verdictGiven)}
-           {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState orig-app-state)
-            $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)})
-         (update-application command))))
+  (->> (construction-time-state-updates app (get-attachment-info app attachment-id) value)
+       (update-application command)))
 
 (defn enrich-attachment [attachment]
   (assoc attachment
