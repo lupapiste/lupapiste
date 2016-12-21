@@ -89,12 +89,15 @@
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
 
+(defschema Approval
+  {:state                       (apply sc/enum attachment-states)
+   (sc/optional-key :timestamp) ssc/Timestamp
+   (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
+   (sc/optional-key :note)      sc/Str})
+
 (defschema VersionApprovals
   "An approvals are version-specific. Keys are originalFileIds."
-  {sc/Keyword {:state                       (apply sc/enum attachment-states)
-               (sc/optional-key :timestamp) ssc/Timestamp
-               (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
-               (sc/optional-key :note)      sc/Str}})
+  {sc/Keyword Approval})
 
 (defschema Version
   "Attachment version"
@@ -417,9 +420,10 @@
         :autoConversion autoConversion))))
 
 (defn- ->approval [state user timestamp]
-  {:state state
-   :user (select-keys user [:id :firstName :lastName])
-   :timestamp timestamp})
+  (sc/validate Approval
+    {:state state
+     :user (select-keys user [:id :firstName :lastName])
+     :timestamp timestamp}))
 
 (defn- build-version-updates [user attachment version-model
                               {:keys [created target stamped replaceable-original-file-id state contents group]}]

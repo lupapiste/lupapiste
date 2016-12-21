@@ -48,7 +48,9 @@
                                 (select-keys filedata [:contents :group :constructionTime :sign])
                                 (util/assoc-when {:created          created
                                                   :original-file-id fileId}
-                                                 :comment-text contents)
+                                                 :comment-text contents
+                                                 :state (when (usr/user-is-authority-in-organization? user (:organization application))
+                                                          :ok))
                                 (:result conversion-data)
                                 (:file conversion-data))
               linked-version (att/set-attachment-version! application user attachment version-options)]

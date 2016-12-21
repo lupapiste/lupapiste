@@ -55,7 +55,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
 
       (facts "attachments status"
         (let [app (query-application pena application-id)
@@ -90,10 +90,8 @@
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
         application-id (:id application)
         attachments    (:attachments application)
-        resp1 (upload-file pena "dev-resources/test-attachment.txt")
-        file-id-1 (get-in resp1 [:files 0 :fileId])
-        resp2 (upload-file pena "dev-resources/invalid-pdfa.pdf")
-        file-id-2 (get-in resp2 [:files 0 :fileId])]
+        file-id-1 (get-in (upload-file pena "dev-resources/test-attachment.txt") [:files 0 :fileId])
+        file-id-2 (get-in (upload-file pena "dev-resources/invalid-pdfa.pdf") [:files 0 :fileId])]
     (fact "attachment types - for clarity"
       (map :type attachments) => (just [{:type-group "paapiirustus", :type-id "asemapiirros"}
                                         {:type-group "paapiirustus", :type-id "pohjapiirustus"}
@@ -113,7 +111,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
@@ -128,7 +126,30 @@
             (:contents todistus) => "todistus")
           (fact "groups are set"
             (:groupType hakija) => "parties"
-            (:groupType todistus) => nil))))))
+            (:groupType todistus) => nil)
+          (fact "requires authority action"
+            (get-in hakija [:approvals (keyword file-id-1) :state]) => "requires_authority_action"
+            (get-in todistus [:approvals (keyword file-id-2) :state]) => "requires_authority_action"))))
+    ; Authority
+    (let [file-id (get-in (upload-file sonja "dev-resources/test-attachment.txt") [:files 0 :fileId])
+          {job :job} (command sonja :bind-attachments
+                              :id application-id
+                              :filedatas [{:fileId file-id :type (:type (get attachments 2)) ; hakija
+                                           :group {:groupType "parties"}
+                                           :contents "hakija authority"}])
+          ]
+      (when-not (= "done" (:status job))
+        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+      (let [attachments        (:attachments (query-application pena application-id))
+            hakija-attachments (filter #(= "hakija" (-> % :type :type-group)) attachments)
+            target-attachment  (second hakija-attachments)]
+        (fact "new hakija attachment was created" (count hakija-attachments) => 2)
+        (fact "groups are set"
+          (:groupType target-attachment) => "parties")
+        (fact "attachment approval state is 'ok' for authority"
+          (get-in target-attachment [:approvals (keyword file-id)]) => (contains {:state "ok"
+                                                                                  :timestamp number?
+                                                                                  :user (contains {:firstName "Sonja"})}))))))
 
 (facts "construction-time attachments bind"
   (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
@@ -159,7 +180,7 @@
       resp => ok?
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
@@ -217,7 +238,7 @@
       (fact "with correct password resp is ok" resp => ok?)
       (fact "Job id is returned" (:id job) => truthy)
       (when-not (= "done" (:status job))
-        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+        (poll-job pena :bind-attachments-job (:id job) (:version job) 25) => truthy)
 
       (facts "attachments status"
         (let [attachments (:attachments (query-application pena application-id))
