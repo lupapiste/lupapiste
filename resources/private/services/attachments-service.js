@@ -10,6 +10,10 @@ LUPAPISTE.AttachmentsService = function() {
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
   self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
+  self.JOB_RUNNING = "running";
+  self.JOB_DONE = "done";
+  self.JOB_ERROR = "error";
+  self.JOB_TIMEOUT = "timeout";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
@@ -271,6 +275,50 @@ LUPAPISTE.AttachmentsService = function() {
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  function pollBindJob(statuses, response) {
+    var job = response.job;
+    _.forEach( _.values(job.value), function(fileData) {
+      if ( statuses[fileData.fileId] ) {
+        statuses[fileData.fileId](fileData.status);
+      }
+    });
+    if ( job.status === self.JOB_RUNNING ) {
+      ajax.query( "bind-attachments-job", { jobId: job.id,
+                                            version: job.version })
+        .success( _.partial(pollBindJob, statuses) )
+        .call();
+    } else {
+      _.forEach(statuses, function(status) {
+        if (status === self.JOB_RUNNING) {
+          status(self.JOB_TIMEOUT);
+        }
+      });
+      self.queryAll();
+    }
+  }
+
+  self.bindAttachments = function(attachments, password) {
+    var jobStatuses = _(attachments).map(function(attachment) { return [attachment.fileId, ko.observable(self.JOB_RUNNING)]; }).fromPairs().value();
+    ajax.command( "bind-attachments",
+                  _.merge( { id: self.applicationId() },
+                           _.some(attachments, "sign")  ? {password: password} : {},
+                           { filedatas: _.map( attachments, function( attachment ) {
+                             return { attachmentId: attachment.id,
+                                      fileId: attachment.fileId,
+                                      type:_.pick( attachment.type, ["type-group", "type-id"]),
+                                      group: attachment.group,
+                                      contents: attachment.contents,
+                                      sign: attachment.sign,
+                                      constructionTime: attachment.constructionTime };
+                           })}))
+
+      .processing( self.processing )
+      .success( _.partial(pollBindJob, jobStatuses) )
+      .call();
+
+    return jobStatuses;
   };
 
   hub.subscribe("upload-done", function(data) {

@@ -84,17 +84,17 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   }
 
   // Removes file from files but from server.
-  self.clearFile = function( data ) {
-    if( self.files.remove( function( file ) {
-      return file.fileId === data.fileId;
-    })) {
-      notifyService( "fileCleared", {fileId: data.fileId});
+  self.clearFile = function( fileId ) {
+    if (!_.isEmpty( self.files.remove( function( file ) {
+      return file.fileId === fileId;
+    }))) {
+      notifyService( "fileCleared", {fileId: fileId});
     }
   };
 
   // Remove file from files and server.
   self.removeFile = function( data ) {
-    self.clearFile( data );
+    self.clearFile( data.fileId );
     notifyService( "removeFile", {attachmentId: data.fileId});
   };
 

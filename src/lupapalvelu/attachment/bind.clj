@@ -57,7 +57,7 @@
                          :type type
                          :status :done}))
         (do
-          (warnf "no file with file-id %s in mongo" (:fileId))
+          (warnf "no file with file-id %s in mongo" fileId)
           (job/update job-id assoc fileId {:status :error :fileId fileId})
           {:fileId fileId :type type :status :error})))
     []
