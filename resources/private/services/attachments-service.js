@@ -307,18 +307,9 @@ LUPAPISTE.AttachmentsService = function() {
   self.bindAttachments = function(attachments, password) {
     var jobStatuses = _(attachments).map(function(attachment) { return [attachment.fileId, ko.observable(self.JOB_RUNNING)]; }).fromPairs().value();
     ajax.command( "bind-attachments",
-                  _.merge( { id: self.applicationId() },
-                           _.some(attachments, "sign")  ? {password: password} : {},
-                           { filedatas: _.map( attachments, function( attachment ) {
-                             return { attachmentId: attachment.id,
-                                      fileId: attachment.fileId,
-                                      type:_.pick( attachment.type, ["type-group", "type-id"]),
-                                      group: attachment.group,
-                                      contents: attachment.contents,
-                                      sign: attachment.sign,
-                                      constructionTime: attachment.constructionTime };
-                           })}))
-
+                  _.merge( { id: self.applicationId(),
+                             filedatas: attachments },
+                           _.some(attachments, "sign")  ? {password: password} : {} ))
       .processing( self.processing )
       .success( _.partial(pollBindJob, jobStatuses, attachments) )
       .call();

@@ -262,7 +262,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     self.badFiles.removeAll();
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
       return { fileId: fileId,
-               type: data.type.value(),
+               type: _.pick( data.type.value(), ["type-group", "type-id"] ),
                group: groupParam(data.grouping.value()),
                contents: data.contents.value(),
                sign: data.sign.value(),
