@@ -12,50 +12,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
-
-  function poll() {
-    ajax
-      .query("bind-attachments-job")
-      .param("jobId", self.jobId)
-      .param("version", self.jobVersion)
-      .success(self.update)
-      .call();
-  }
-
-  self.update = function(data) {
-    if (data.result === "update") {
-      var update = data.job;
-      self.jobVersion = update.version;
-
-      if (update.status === "done") {
-        querySelf();
-      } else {
-        poll();
-      }
-    }
-  };
-
-  function startPoll(data) {
-    self.jobId = data.job.id;
-    self.jobVersion = 0;
-    poll();
-    return false;
-  }
-
   self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
   self.upload.init();
-  self.disposedSubscribe(self.upload.files, function(files) {
-    if (!_.isEmpty(files)) {
-      ajax.command("bind-attachments", {id: self.applicationId,
-                                        filedatas: [{attachmentId: self.id,
-                                                    fileId: _.first(files).fileId,
-                                                    type: self.attachment.peek().type,
-                                                    group: {groupType: util.getIn(self.attachment.peek(), ["groupType"]),
-                                                            id: util.getIn(self.attachment.peek(), ["op", "id"])}}]})
-      .success(startPoll)
-      .call();
-    }
-  });
 
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
@@ -65,6 +23,23 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
+
+  var jobStatus = ko.observable();
+
+  self.disposedComputed(function() {
+    if ( util.getIn(jobStatus, ["status"]) && jobStatus().status() !== service.JOB_RUNNING ) {
+      self.upload.clearFile( jobStatus().fileId );
+      jobStatus({});
+    }
+  });
+
+  self.disposedSubscribe(self.upload.files, function(files) {
+    if (!_.isEmpty(files)) {
+      var statuses = service.bindAttachments([{ attachmentId: self.id,
+                                                fileId: _.first(files).fileId }]);
+      jobStatus({fileId: _.first(_.keys(statuses)), status: _.first(_.values(statuses))});
+    }
+  });
 
   self.name = self.disposedComputed(function() {
     return "attachmentType." + self.attachment().typeString();

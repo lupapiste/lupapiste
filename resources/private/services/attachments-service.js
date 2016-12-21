@@ -277,7 +277,7 @@ LUPAPISTE.AttachmentsService = function() {
     return false;
   };
 
-  function pollBindJob(statuses, response) {
+  function pollBindJob(statuses, attachments, response) {
     var job = response.job;
     _.forEach( _.values(job.value), function(fileData) {
       if ( statuses[fileData.fileId] ) {
@@ -287,7 +287,7 @@ LUPAPISTE.AttachmentsService = function() {
     if ( job.status === self.JOB_RUNNING ) {
       ajax.query( "bind-attachments-job", { jobId: job.id,
                                             version: job.version })
-        .success( _.partial(pollBindJob, statuses) )
+        .success( _.partial(pollBindJob, statuses, attachments) )
         .call();
     } else {
       _.forEach(statuses, function(status) {
@@ -295,7 +295,12 @@ LUPAPISTE.AttachmentsService = function() {
           status(self.JOB_TIMEOUT);
         }
       });
-      self.queryAll();
+      if ( attachments.length === 1 && attachments[0].attachmentId ) {
+        self.queryOne(attachments[0].attachmentId);
+        self.queryTagGroupsAndFilters();
+      } else {
+        self.queryAll();
+      }
     }
   }
 
@@ -315,7 +320,7 @@ LUPAPISTE.AttachmentsService = function() {
                            })}))
 
       .processing( self.processing )
-      .success( _.partial(pollBindJob, jobStatuses) )
+      .success( _.partial(pollBindJob, jobStatuses, attachments) )
       .call();
 
     return jobStatuses;
