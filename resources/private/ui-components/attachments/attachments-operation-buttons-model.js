@@ -52,7 +52,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   };
 
   self.canSign = function() {
-    return self.authModel.ok("sign-attachments");
+    return self.authModel.ok("signing-possible");
   };
 
   self.markVerdictAttachments = function() {

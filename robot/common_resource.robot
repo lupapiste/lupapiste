@@ -722,6 +722,7 @@ Upload batch file
 
 Upload attachment
   [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  add-attachments-label
   Scroll to top
   Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
   Click enabled by test id  batch-ready

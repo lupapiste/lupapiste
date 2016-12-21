@@ -20,11 +20,11 @@ Pena creates application
 
 Pena adds attachment
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  type=erityissuunnitelmat.hulevesisuunnitelma  operation=Rakennuspaikka
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Hulevesisuunnitelma  Hulabaloo  Rakennuspaikka
 
 Pena add another attachment with contents
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  type=paapiirustus.julkisivupiirustus  operation=Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
+  Upload attachment  ${TXT_TESTFILE_PATH}  Julkisivupiirustus  Facade  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen
+  Open attachment details  paapiirustus.julkisivupiirustus  
   Wait test id visible  attachment-contents-input
   Input text by test id  attachment-contents-input  this is julkisivu
   Return to application
@@ -94,8 +94,7 @@ There is 4 attachments visible
 
 Hannu adds attachment
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
 
 Hannu goes back to archival tab and sees added attachment there
   Open tab  archival

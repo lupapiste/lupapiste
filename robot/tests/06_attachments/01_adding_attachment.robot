@@ -185,7 +185,7 @@ Mikko deletes attachment
 #   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
 #   Close side panel  conversation
 
-Mikko adds png attachment with comment
+Mikko adds png attachment one more time again
   [Tags]  attachments
   Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  ${PNG_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
@@ -225,7 +225,8 @@ Signature icon is not visible
 
 Mikko adds another attachment and signs it as single attachment
   [Tags]  attachments
-  Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  type=hakija.valtakirja  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PDF_TESTFILE_PATH}  Valtakirja  Valtakirja  Asuinkerrostalon tai rivitalon rakentaminen
+  Open attachment details  hakija.valtakirja
   Click enabled by test id  signLatestAttachmentVersion
   Wait Until   Element should be visible  signSingleAttachmentPassword
   Input text by test id  signSingleAttachmentPassword  mikko123
@@ -387,7 +388,7 @@ Sign attachments button should not be visible
 
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Fourth  Asuinkerrostalon tai rivitalon rakentaminen
 
 Create new application
   [Tags]  attachments
@@ -397,10 +398,9 @@ Create new application
   Create application the fast way  ${appname2}  ${propertyId2}  kerrostalo-rivitalo
   Open tab  attachments
 
-Authority adds png attachment without comment
+Authority adds png attachment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Fifth  Asuinkerrostalon tai rivitalon rakentaminen
 
 Signature icon is not visible to authority
   [Tags]  attachments
