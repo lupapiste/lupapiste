@@ -122,4 +122,50 @@
             (:groupType hakija) => "parties"
             (:groupType todistus) => nil))))))
 
+(facts "construction-time attachments bind"
+  (let [application    (create-and-submit-application pena :propertyId sipoo-property-id)
+        application-id (:id application)
+        attachments    (:attachments application)
+        resp1 (upload-file pena "dev-resources/test-attachment.txt")
+        file-id-1 (get-in resp1 [:files 0 :fileId])
+        resp2 (upload-file pena "dev-resources/invalid-pdfa.pdf")
+        file-id-2 (get-in resp2 [:files 0 :fileId])]
+    (fact "attachment types - for clarity"
+      (map :type attachments) => (just [{:type-group "paapiirustus", :type-id "asemapiirros"}
+                                        {:type-group "paapiirustus", :type-id "pohjapiirustus"}
+                                        {:type-group "hakija", :type-id "valtakirja"}
+                                        {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat", :type-id "vaestonsuojasuunnitelma"}]))
+
+    (let [{job :job :as resp} (command
+                                pena
+                                :bind-attachments
+                                :id application-id
+                                :filedatas [{:fileId file-id-1 :type (:type (get attachments 2)) ; hakija
+                                             :group {:groupType "parties"}
+                                             :contents "hakija"
+                                             :constructionTime true}
+                                            {:fileId file-id-2 :type {:type-group "erityissuunnitelmat" :type-id "kalliorakentamistekninen_suunnitelma"}
+                                             :group {:groupType nil}
+                                             :contents "esuunnitelma"
+                                             :constructionTime true}])]
+      resp => ok?
+      (fact "Job id is returned" (:id job) => truthy)
+      (when-not (= "done" (:status job))
+        (poll-job sonja :bind-attachments-job (:id job) (:version job) 25) => truthy)
+
+      (facts "attachments status"
+        (let [attachments (:attachments (query-application pena application-id))
+              hakija      (util/find-first #(= "hakija" (-> % :type :type-group)) attachments)
+              suunnitelma (util/find-first #(= "erityissuunnitelmat" (-> % :type :type-group)) attachments)]
+          suunnitelma => truthy
+          (fact "contents are set"
+            (:contents hakija) => "hakija"
+            (:contents suunnitelma) => "esuunnitelma")
+          (fact "construction time"
+            (:originalApplicationState hakija) => "draft"
+            (:applicationState hakija) => "verdictGiven"
+            (:originalApplicationState suunnitelma) => "submitted"
+            (:applicationState suunnitelma) => "verdictGiven")
+          )))))
+
 #_(facts "inforequest bind")

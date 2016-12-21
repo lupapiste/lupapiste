@@ -40,7 +40,7 @@
                                                              :attachment-type type)))
               version-options (merge
                                 (select-keys mongo-file [:fileId :filename :contentType :size])
-                                (select-keys filedata [:contents :group])
+                                (select-keys filedata [:contents :group :constructionTime])
                                 {:created          created
                                  :original-file-id fileId}
                                 (:result conversion-data)
