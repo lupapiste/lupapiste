@@ -11,6 +11,8 @@ LUPAPISTE.AttachmentsService = function() {
   self.REJECTED = "requires_user_action";
   self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
   self.JOB_RUNNING = "running";
+  self.JOB_PENDING = "pending";
+  self.JOB_WORKING = "working";
   self.JOB_DONE = "done";
   self.JOB_ERROR = "error";
   self.JOB_TIMEOUT = "timeout";
@@ -275,6 +277,10 @@ LUPAPISTE.AttachmentsService = function() {
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  self.pollJobStatusFinished = function(status) {
+    return !_.includes([self.JOB_RUNNING, self.JOB_PENDING, self.JOB_WORKING], ko.unwrap(status));
   };
 
   function pollBindJob(statuses, attachments, response) {

@@ -119,6 +119,15 @@ label.batch-required {
   }
 }
 
+.batch-bind-failed {
+  .like-btn {
+    color: $negative;
+    span {
+      font-size: 20px;
+    }
+  }
+}
+
 .batch-password {
   i {
     vertical-align: middle;

@@ -143,6 +143,15 @@
     </div>
     <!-- /ko -->
 
+    <!-- ko if: bindFailed -->
+    <div class="batch-bind-failed">
+      <div class="like-btn">
+        <i class="lupicon-warning negative"></i>
+        <span data-bind="ltext: 'attachment.bind-failed'"></span>
+      </div>
+    </div>
+    <!-- /ko -->
+
     <!-- ko if: signingSelected -->
     <div class="batch-password">
       <label class="batch-required"

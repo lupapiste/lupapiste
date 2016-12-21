@@ -27,8 +27,9 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   var jobStatus = ko.observable();
 
   self.disposedComputed(function() {
-    if ( util.getIn(jobStatus, ["status"]) && jobStatus().status() !== service.JOB_RUNNING ) {
+    if ( util.getIn(jobStatus, ["status"]) && service.pollJobStatusFinished(jobStatus().status) ) {
       self.upload.clearFile( jobStatus().fileId );
+      util.showSavedIndicator({ok: jobStatus().status() === service.JOB_DONE});
       jobStatus({});
     }
   });

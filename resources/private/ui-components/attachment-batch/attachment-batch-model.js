@@ -112,6 +112,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   });
 
   self.badFiles = ko.observableArray();
+  self.bindFailed = ko.observable(false);
 
   self.fileCount = self.disposedPureComputed( _.flow( self.upload.files,
                                                       _.size ));
@@ -247,11 +248,12 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     _.forEach(jobStatuses(), function(status, fileId) {
       if (status() === service.JOB_DONE) {
         self.upload.clearFile( fileId );
-      } else if (status() !== service.JOB_RUNNING) {
+      } else if ( service.pollJobStatusFinished(status) ) {
+        self.bindFailed(true);
         rows()[fileId].disabled(false);
       }
     });
-    ajaxWaiting( _.some(jobStatuses(), function(status) { return status() === service.JOB_RUNNING; }) );
+    ajaxWaiting( _.some(jobStatuses(), function(status) { return !service.pollJobStatusFinished(status); }) );
   });
 
   function groupParam( value ) {
@@ -261,6 +263,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.bind = function() {
     disableRows( true );
+    self.bindFailed(false);
     self.badFiles.removeAll();
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
       return { fileId: fileId,

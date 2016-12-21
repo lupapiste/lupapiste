@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1482245050802');
+@import url('main-blessed1.css?z=1482324376212');
 
 /* line 913, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
@@ -10478,18 +10478,27 @@ label.batch-required {
 }
 
 /* line 123, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bind-failed .like-btn, .batch-bind-failed a.link-btn, .batch-bind-failed a.link-btn-julkipano {
+  color: #df3215;
+}
+/* line 125, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bind-failed .like-btn span, .batch-bind-failed a.link-btn span, .batch-bind-failed a.link-btn-julkipano span {
+  font-size: 20px;
+}
+
+/* line 132, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i {
   vertical-align: middle;
 }
-/* line 126, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 135, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-check {
   color: #2ca92c;
 }
-/* line 129, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 138, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-warning {
   color: #df3215;
 }
-/* line 132, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 141, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-flag {
   color: #f39129;
 }
