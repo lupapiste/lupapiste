@@ -346,12 +346,13 @@
     (map :id attachments)))
 
 (defn construction-time-state-updates
-  "Returns updates for 'setting' construction time flag. Value is true or false."
-  [app {:keys [applicationState originalApplicationState] attachment-id :id} value]
+  "Returns updates for 'setting' construction time flag. Updates are for elemMatch query. Value is true or false."
+  [{:keys [applicationState originalApplicationState]} value]
   (if value
-    {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or originalApplicationState applicationState) :applicationState :verdictGiven)}
-    {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState originalApplicationState)
-     $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)}))
+    {$set {:attachments.$.originalApplicationState (or originalApplicationState applicationState)
+           :attachments.$.applicationState :verdictGiven}}
+    {$set   {:attachments.$.applicationState originalApplicationState}
+     $unset {:attachments.$.originalApplicationState true}}))
 
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
@@ -818,8 +819,8 @@
     (fail :error.attachment-not-manually-set-construction-time)))
 
 (defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
-  (->> (construction-time-state-updates app (get-attachment-info app attachment-id) value)
-       (update-application command)))
+  (->> (construction-time-state-updates (get-attachment-info app attachment-id) value)
+       (update-application command {:attachments {$elemMatch {:id attachment-id}}})))
 
 (defn enrich-attachment [attachment]
   (assoc attachment
