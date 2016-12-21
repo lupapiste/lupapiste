@@ -59,15 +59,24 @@
           (filter-tag-groups (filter (partial for-operation? op-id) attachments)
                              hierarchy)))
 
+(defn- partition-by-tag
+  "Return [pre tagged post], where pre is all groups before one with
+  tag, tagged is the group with tag, and post is all subsequent
+  groups. Assume tags are unique."
+  [tag hierarchy]
+  (let [[pre [tagged & post]] (split-with #(not= (first %) tag) hierarchy)]
+    [pre
+     tagged
+     (or post [])]))
+
 (defn- add-operation-tag-groups
   "replace the operation hierarchy template with the actual hierarchies"
   [attachments hierarchy]
-  (let [[pre operation post] (partition-by #(= (first %) :operation)
-                                           hierarchy)
+  (let [[pre operation post] (partition-by-tag :operation hierarchy)
         op-ids               (attachments-operation-ids attachments)]
-    (if-let [operation-template (first operation)]
+    (if operation
       (concat pre
-              (map (partial operation-tag-group attachments (rest operation-template))
+              (map (partial operation-tag-group attachments (rest operation))
                    op-ids)
               post)
       hierarchy)))

@@ -12,6 +12,9 @@
                    group-and-type-filters
                    not-needed-filters)
 
+(testable-privates lupapalvelu.attachment.tag-groups
+                   add-operation-tag-groups)
+
 (facts attachment-tags
 
   (fact "submitted - not-needed"
@@ -39,42 +42,62 @@
   (fact "verdictGiven - RAM"
         (attachment-tags {:applicationState "verdictGiven" :ramLink "foobar"}) => (just #{:ram :application :general :needed} :in-any-order :gaps-ok)))
 
-(fact "attachment-tag-groups"
-  (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
-        operation-id2 (ssg/generate ssc/ObjectIdStr)
-        operation-id3 (ssg/generate ssc/ObjectIdStr)
-        attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
-                      {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
-        application {:primaryOperation {:id operation-id1}
-                     :secondaryOperations [{:id operation-id2} {:id operation-id3}]
-                     :attachments attachments}
-        test-hierarchy [[:application
-                         [:general]
-                         [:parties]]
-                        [:operation
-                         [:somegroup]
-                         [:anothergroup]
-                         [:other]]]]
-    (attachment-tag-groups application test-hierarchy) => [[:application
-                                                            [:general]
-                                                            [:parties]]
-                                                           [(str "op-id-" operation-id1) [:somegroup]]
-                                                           [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
-                                                           [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
-    (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
-    (provided (tag-by-application-group-types (as-checker (comp boolean #{"parties" "unknown"} :groupType)))  => :application)
-    (provided (tag-by-application-group-types (as-checker (comp nil? :groupType)))  => nil)
-    (provided (att-type/tag-by-type anything) => nil)))
+(fact "add-operation-tag-groups"
+  (add-operation-tag-groups [] []) => []
+  (add-operation-tag-groups [] [[:some] [:fancy] [:hierarchy]]) => [[:some] [:fancy] [:hierarchy]]
+  (add-operation-tag-groups [{:no :operation}] [[:drop] [:operation] [:if] [:no] [:operation-attachments]]) => [[:drop] [:if] [:no] [:operation-attachments]]
+  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:operation [:tag] [:wrong-tag]]]) => [["op-id-foo" [:tag]]]
+  (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:pre] [:operation [:tag] [:wrong-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag]] [:post]])
+
+(facts "attachment-tag-groups"
+  (fact "default hierarchy"
+    (let [attachments [{:groupType :technical-reports}]
+          application {:attachments attachments}]
+      (attachment-tag-groups application) => [[:application [:technical-reports]]])
+    (let [attachments [{:groupType :reports}]
+          application {:attachments attachments}]
+      (attachment-tag-groups application) => [[:application [:reports]]])
+    (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
+          attachments [{:op {:id operation-id1} :type {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat}}
+                       {:op {:id operation-id1} :type {:type-id :aitapiirustus :type-group :paapiirustus}}]
+          application {:attachments attachments}]
+      (attachment-tag-groups application) => [[(str "op-id-" operation-id1) [:paapiirustus] [:iv_suunnitelma]]]))
+  (fact "custom hierarchy with many attachments"
+    (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
+          operation-id2 (ssg/generate ssc/ObjectIdStr)
+          operation-id3 (ssg/generate ssc/ObjectIdStr)
+          attachments  [{:groupType "parties" :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:groupType "unknown" :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
+                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "other-type"}}]
+          application {:primaryOperation {:id operation-id1}
+                       :secondaryOperations [{:id operation-id2} {:id operation-id3}]
+                       :attachments attachments}
+          test-hierarchy [[:application
+                           [:general]
+                           [:parties]]
+                          [:operation
+                           [:somegroup]
+                           [:anothergroup]
+                           [:other]]]]
+      (attachment-tag-groups application test-hierarchy) => [[:application
+                                                              [:general]
+                                                              [:parties]]
+                                                             [(str "op-id-" operation-id1) [:somegroup]]
+                                                             [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
+                                                             [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
+      (provided (tag-by-application-group-types (as-checker (comp boolean #{"parties" "unknown"} :groupType)))  => :application)
+      (provided (tag-by-application-group-types (as-checker (comp nil? :groupType)))  => nil)
+      (provided (att-type/tag-by-type anything) => nil))))
 
 
 (facts "attachments-filters"
@@ -233,7 +256,7 @@
                                               [{:tag :needed :default true}
                                                {:tag :notNeeded :default false}]]
 
-      ;; Correct type group tag namess must be used, since function ensures the order of the tags by names
+      ;; Correct type group tag names must be used, since function ensures the order of the tags by names
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :iv_suunnitelma)
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :paapiirustus)
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "othertype"}))) => :other)
