@@ -245,8 +245,10 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.disposedComputed(function() {
     _.forEach(jobStatuses(), function(status, fileId) {
-      if (status() !== service.JOB_RUNNING) {
+      if (status() === service.JOB_DONE) {
         self.upload.clearFile( fileId );
+      } else if (status() !== service.JOB_RUNNING) {
+        rows()[fileId].disabled(false);
       }
     });
     ajaxWaiting( _.some(jobStatuses(), function(status) { return status() === service.JOB_RUNNING; }) );
