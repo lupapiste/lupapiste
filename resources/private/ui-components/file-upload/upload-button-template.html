@@ -2,11 +2,13 @@
         id="upload-button-template">
   <input type="file" class="hidden" name="files[]"
          data-bind="attr: {id: upload.fileInputId,
-                    multiple: upload.allowMultiple}">
+                    multiple: upload.allowMultiple},
+                    testId: options.testId + '-input'">
   <label data-bind="attr: {'for': labelFor,
                     'class': options.buttonClass},
                     css: {waiting: upload.waiting},
-                    visible: !upload.readOnly">
+                    visible: !upload.readOnly,
+                    testId: options.testId + '-label'">
     <i data-bind="attr: {'class': options.buttonIcon}"></i>
     <i class="wait spin lupicon-refresh"></i>
     <span data-bind="ltext: options.buttonText"></span>

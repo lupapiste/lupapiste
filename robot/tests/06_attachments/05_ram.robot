@@ -285,7 +285,8 @@ Sonja rejects shelter
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja adds CV. It does not support RAMs
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
+  Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet
+  Open attachment details  osapuolet.cv
   Wait Until  Click button  id=test-attachment-approve
   Wait Until  Element should be disabled  test-attachment-approve
   No such test id  add-ram-attachment

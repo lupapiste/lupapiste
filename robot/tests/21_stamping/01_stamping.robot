@@ -25,12 +25,9 @@ Mikko creates & submits application and goes to empty attachments tab
   Open tab  attachments
 
 Mikko adds PDF attachment without comment
-  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Uusi asuinrakennus
-  Return to application  
-  Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  operation=Uusi asuinrakennus
-  Return to application  
-  Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  operation=Yleisesti hankkeeseen
-  Return to application  
+  Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH2}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH3}  Muu liite  Muu  Yleisesti hankkeeseen
 
 Mikko does not see stamping button
   Wait until  Element should not be visible  jquery=button[data-test-id=stamp-attachments]

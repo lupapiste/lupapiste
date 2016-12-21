@@ -15,7 +15,7 @@ Pena logs in, creates and submits application
   Pena logs in
   Create application with state  ${appname}  ${propertyid}  pientalo  submitted
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  oma piirustus  paapiirustus.asemapiirros
+  Upload attachment  ${TXT_TESTFILE_PATH}  Asemapiirros  oma piirustus  Yleisesti hankkeeseen
   Logout
 
 Sonja logs in and opens application

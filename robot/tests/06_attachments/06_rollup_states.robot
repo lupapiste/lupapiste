@@ -30,8 +30,7 @@ Accordion with only not needed is neutral
   Click not needed  paapiirustus.pohjapiirustus
 
 Sonja adds another Pääpiirustus
-  Add attachment  application  ${PNG_TESTFILE_PATH}  Hello  paapiirustus.julkisivupiirustus  Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Julkisivupiirustus  Hello  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja approves Julkisivupiirustus
   Wait Until  Element should be visible  jquery=tr[data-test-type='paapiirustus.julkisivupiirustus']

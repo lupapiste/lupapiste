@@ -14,11 +14,11 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.password = ko.observable();
 
-  var authModel = lupapisteApp.models.applicationAuthModel;
+  //var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
-                                                             authModel.ok));
+                                                             service.authModel.ok));
   self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
-                                                     authModel.ok));
+                                                     service.authModel.ok));
 
   var currentHover = ko.observable();
 

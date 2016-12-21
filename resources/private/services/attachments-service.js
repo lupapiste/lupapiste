@@ -36,7 +36,6 @@ LUPAPISTE.AttachmentsService = function() {
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
     self.groupTypes([]);
-    self.authModel.refresh({id: self.applicationId()});
   });
 
   hub.subscribe( "contextService::leave", function() {
@@ -88,6 +87,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Refresh all authModels at once.
   function refreshAllAuthModels() {
+    self.authModel.refresh({id: self.applicationId()});
     authorization.refreshModelsForCategory(self.authModels(), self.applicationId(), "attachments");
   }
 

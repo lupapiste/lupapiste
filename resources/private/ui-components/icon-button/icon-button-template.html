@@ -2,7 +2,8 @@
         id="icon-button-template">
 <button data-bind="attr: {'class': buttonClass},
                    disable: isDisabled,
-                   click: click">
+                   click: click,
+                   testId: testId">
   <!-- ko ifnot:  right -->
   <i data-bind="attr: {'class': iconClass}" ></i>
   <!-- /ko -->
