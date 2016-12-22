@@ -36,7 +36,8 @@
                                  ltext: 'attachment.batch-copy-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'type', $data)"
+                         data-bind="visible: $parent.canFillDown( 'type', $data),
+                                    testId: 'fill-type-' + $index()"
                          class="fill-down"></icon-button>
           </div>
         </td>
@@ -52,7 +53,8 @@
                                  ltext: 'attachment.batch-copy-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'contents', $data)"
+                         data-bind="visible: $parent.canFillDown( 'contents', $data),
+                                    testId: 'fill-contents-' + $index()"
                          class="fill-down"></icon-button>
           </div>
         </td>
@@ -68,7 +70,8 @@
                                  ltext: 'attachment.batch-fill-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'drawing', $data)"
+                         data-bind="visible: $parent.canFillDown( 'drawing', $data),
+                                    testId: 'fill-drawing-' + $index()"
                          class="fill-down"></icon-button>
           </div>
         </td>
@@ -83,7 +86,8 @@
                                  ltext: 'attachment.batch-copy-down',
                                  icon: 'arrow-down',
                                  right: true"
-                         data-bind="visible: $parent.canFillDown( 'grouping', $data)"
+                         data-bind="visible: $parent.canFillDown( 'grouping', $data),
+                                    testId: 'fill-grouping-' + $index()"
                          class="fill-down"></icon-button>
           </div>
         </td>
@@ -91,19 +95,22 @@
         <td class="td-center">
           <toggle params="prefix: 'signbox',
                           value: $parent.cell( $data, 'sign' ).value,
-                          disable: $parent.rowDisabled( $data )"></toggle>
+                          disable: $parent.rowDisabled( $data ),
+                          testId: 'batch-sign-' + $index()"></toggle>
         </td>
         <!-- /ko -->
         <!-- ko if: $component.showConstruction -->
         <td class="td-center">
           <toggle params="value: $parent.cell( $data, 'construction' ).value,
-                          disable: $parent.rowDisabled( $data )"></toggle>
+                          disable: $parent.rowDisabled( $data ),
+                          testId: 'batch-construction-' + $index()"></toggle>
         </td>
         <!-- /ko -->
         <td class="td-center">
           <!-- ko ifnot: $parent.rowDisabled( $data ) -->
           <i class="lupicon-remove primary"
-             data-bind="click: $parent.upload.removeFile"></i>
+             data-bind="click: $parent.upload.removeFile,
+                        testId: 'batch-remove-' + $index()"></i>
           <!-- /ko -->
           <!-- ko if: $parent.rowDisabled( $data ) -->
           <i class="icon-spin lupicon-refresh"></i>
@@ -117,14 +124,16 @@
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'sign', footClick ),
-                          ltext: footText( 'sign')"></a>
+                          ltext: footText( 'sign')"
+               data-test-id="sign-all"></a>
           </td>
           <!-- /ko -->
           <!-- ko if: showConstruction -->
           <td class="td-center">
             <a class="link-btn"
                data-bind="click: _.wrap( 'construction', footClick ),
-                          ltext: footText( 'construction')"></a>
+                          ltext: footText( 'construction')"
+               data-test-id="construction-all"></a>
           </td>
           <!-- /ko -->
           <td></td>

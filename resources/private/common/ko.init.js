@@ -368,12 +368,12 @@
   };
 
   var fileTemplate =
-      _.template( "<a href='/api/raw/view-file?file-id"
-                  + "=<%- fileId %>'><%- filename %></a><br>"
+      _.template( "<a href='/api/raw/view-file?fileId"
+                  + "=<%- fileId %>' target='_blank'><%- filename %></a><br>"
                   + "<span class='fileinfo'><%- contentText %> <%- sizeText %></span>");
 
   // Fills the target element with:
-  // <a href="file view url">filename</a><br>
+  // <a href="file view url" target="_blank">filename</a><br>
   // <span>localized content type size string</span>
   ko.bindingHandlers.file = {
     update: function( element, valueAccessor) {

@@ -69,21 +69,23 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   function newRow() {
     var type = ko.observable();
-    var contentsList = ko.observableArray();
     var grouping = ko.observable({});
+    var contentsValue = ko.observable();
+    var contentsList = ko.observableArray();
     self.disposedSubscribe( type, function( data ) {
       var metadata = data.metadata || {};
-      contentsList(_.map( metadata.contents,
-                          function( id ) {
-                            return loc( "attachments.contents." + id);
-                          }));
 
+      var contents = service.contentsData( data );
+      contentsList( contents.list );
+      if( !_.trim( contentsValue())) {
+        contentsValue( contents.defaultValue);
+      }
       grouping({groupType: metadata.grouping === "operation"
                 ? "operation-" + _.find (service.groupTypes(),
                                          {groupType: "operation"}).id
                 : metadata.grouping});
     } );
-    var contentsCell = new Cell( ko.observable(), true );
+    var contentsCell = new Cell( contentsValue, true );
     contentsCell.list = contentsList;
     var row = { disabled: ko.observable(),
                 type: new Cell( type, true ),
@@ -172,7 +174,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
          _.isEqual( currentHover(), {fileId: file.fileId,
                                      column: column })) {
         var index = fileIndex( file );
-        return _.trim( self.cell( file, column ).value())
+        // Null value is accepted for grouping.
+        return (column === "grouping" || _.trim( self.cell( file, column ).value()))
           && (index < _.size( self.upload.files()) - 1);
       }
     });
@@ -268,7 +271,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
       return { fileId: fileId,
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),
-               group: groupParam(data.grouping.value()),
+               group: groupParam(data.grouping.value() || {groupType: null} ),
                contents: data.contents.value(),
                sign: data.sign.value(),
                constructionTime: data.construction.value() };

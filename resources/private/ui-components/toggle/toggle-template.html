@@ -4,10 +4,12 @@
     <input type="checkbox"
            data-bind="attr: {id: id},
                       checked: value,
-                      disable: isDisabled">
+                      disable: isDisabled,
+                      testId: testId + '-input'">
     <label data-bind="attr: {'for': id,
                       'class': labelClass},
                       text: text,
-                      css: {'no-label-text': !_.size( ko.unwrap(text) )}"></label>
+                      css: {'no-label-text': !_.size( ko.unwrap(text) )},
+                      testId: testId + '-label'"></label>
   </div>
 </script>
