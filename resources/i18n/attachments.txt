@@ -519,8 +519,8 @@
 "uploadzone.text-one" "fi" "Pudota tiedosto(t) tähän tai"
 "uploadzone.label" "fi" "valitse tiedostot"
 "uploadzone.text-two" "fi" "omalta koneeltasi."
-"uploadzone.text-one" "en" "Drop file(s) here or""
+"uploadzone.text-one" "en" "Drop file(s) here or"
 "uploadzone.label" "en" "browse files"
 "uploadzone.text-two" "en" "on your computer."
-"uploadzone.text-one" "sv" "Släpp filer här eller
+"uploadzone.text-one" "sv" "Släpp filer här eller"
 "uploadzone.label" "sv" "välj filer"
