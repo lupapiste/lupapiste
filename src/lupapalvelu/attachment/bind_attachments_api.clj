@@ -34,7 +34,7 @@
    :input-validators    [(partial action/vector-parameters-with-map-items-with-required-keys [:filedatas] [:fileId])]
    :user-roles          #{:applicant :authority :oirAuthority}
    :user-authz-roles    (conj auth/all-authz-writer-roles :foreman)
-   :pre-checks          [(partial app/validate-authority-in-drafts)
+   :pre-checks          [app/validate-authority-in-drafts
                          validate-attachment-ids
                          check-password-for-sign]
    :states              bind-states}

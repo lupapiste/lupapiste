@@ -126,19 +126,23 @@
           upload-threadpool
           (fn []
             (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
-              (if (= 200 status)
+              (cond
+                (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
                   (info "Archived attachment id" id "from application" app-id)
                   (mark-application-archived-if-done application now))
+
+                (and (= status 409) (string/includes? body "already exists"))
+                (do
+                  (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
+                  (state-update-fn :arkistoitu application now id)
+                  (mark-application-archived-if-done application now))
+
+                :else
                 (do
                   (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                  (if (and (= status 409) (string/includes? body "already exists"))
-                    (do
-                      (info "Response indicates that" id "is already in archive. Updating state.")
-                      (state-update-fn :arkistoitu application now id)
-                      (mark-application-archived-if-done application now))
-                    (state-update-fn :valmis application now id))))))))
+                  (state-update-fn :valmis application now id)))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
