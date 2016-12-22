@@ -359,3 +359,33 @@ drop-zone {
     }
   }
 }
+
+.upload-zone {
+  @include btn-height;
+  vertical-align: middle;
+  padding: {
+    left: 10px;
+    right: 10px;
+  }
+  border: 2px dashed $primary;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: auto;
+  display: block;
+  i, label {
+    color: $orange-link;
+  }
+  i {
+    margin-right: 10px;
+  }
+  label {
+    font-size: 16px;
+  }
+  label:hover {
+    color: $orange-hover;
+    cursor: pointer;
+  }
+  label:active {
+    color: $orange-active;
+  }
+}

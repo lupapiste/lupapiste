@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachment-batch-template">
-  <div>
+  <div data-bind="css: {'batch-container': fileCount}">
     <upload-progress params="upload: upload"></upload-progress>
 
     <!-- ko if: fileCount -->

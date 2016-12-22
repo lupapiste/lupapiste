@@ -658,7 +658,11 @@ button {
    pointer-events: none;
 }
 
+// Attachments tab operation buttons.
 .operation-button-row {
   @include button-row( $margin-bottom: 0);
-  display: inline-block;
+  display: block;
+  .stacked--inline {
+    float: left;
+  }
 }

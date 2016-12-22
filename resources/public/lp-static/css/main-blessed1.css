@@ -6064,9 +6064,9 @@ button:focus {
   pointer-events: none;
 }
 
-/* line 661, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 662, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row {
-  display: inline-block;
+  display: block;
 }
 /* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row > .btn-base, .operation-button-row > [type=submit], .operation-button-row > .btn, .dataTables_paginate .operation-button-row > .paginate_disabled_previous, .dataTables_paginate .operation-button-row > .paginate_disabled_next, .operation-button-row > button, .operation-button-row > .like-btn, .operation-button-row > a.link-btn, .operation-button-row > a.link-btn-julkipano, .operation-button-row > .check-string,
@@ -6083,6 +6083,10 @@ button:focus {
 /* line 650, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row :last-child {
   margin-right: 0;
+}
+/* line 665, ../../../private/common-html/sass/partials/_buttons.scss */
+.operation-button-row .stacked--inline {
+  float: left;
 }
 
 /* line 56, ../../../private/common-html/sass/partials/_inputs.scss */
@@ -7199,6 +7203,42 @@ drop-zone .drop-zone-placeholder > i {
 .combobox-container ul.combobox__list li.combobox--selected {
   background-color: #f39129;
   color: white;
+}
+
+/* line 363, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone {
+  min-height: 40px;
+  max-height: 40px;
+  line-height: 40px;
+  vertical-align: middle;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 2px dashed #f39129;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: auto;
+  display: block;
+}
+/* line 375, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone i, .upload-zone label {
+  color: #f39129;
+}
+/* line 378, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone i {
+  margin-right: 10px;
+}
+/* line 381, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone label {
+  font-size: 16px;
+}
+/* line 384, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone label:hover {
+  color: #f7ac2e;
+  cursor: pointer;
+}
+/* line 388, ../../../private/common-html/sass/partials/_inputs.scss */
+.upload-zone label:active {
+  color: #fbc732;
 }
 
 /* line 1, ../../../private/common-html/sass/partials/_forms.scss */
@@ -8354,24 +8394,4 @@ div.sticky .form-approval-status.no-border-bottom .like-btn, div.sticky .form-ap
 /* line 891, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn span, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span {
   color: #999999;
-}
-/* line 894, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span.is-details--rejected {
-  color: #e34319;
-}
-
-/* line 900, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom {
-  border-bottom: none;
-}
-
-/* line 904, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom.own-line {
-  width: 100%;
-}
-/* line 906, ../../../private/common-html/sass/partials/_forms.scss */
-div.sticky .form-approval-status.no-border-bottom.own-line .like-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano {
-  padding-top: 4px;
-  min-height: initial;
-  line-height: initial;
 }

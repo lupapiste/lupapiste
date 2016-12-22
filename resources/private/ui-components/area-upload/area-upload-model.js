@@ -1,4 +1,4 @@
-LUPAPISTE.UploadModel = function(params) {
+LUPAPISTE.AreaUploadModel = function(params) {
   "use strict";
 
   var self = this;

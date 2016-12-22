@@ -1,9 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-operation-buttons-template">
   <div class="operation-button-row">
-    <span class="operation-button"
-          data-bind="component: { name: 'upload-button',
-                                  params: uploadOptions }"></span>
     <div class="stacked--inline">
       <button class="positive caps"
               data-bind="click: $data.attachmentTemplatesAdd,
@@ -15,10 +12,14 @@
       <div class="bubble-dialog-arrow"
            data-bind="visible: requireAttachmentsBubbleVisible">
       </div>
-  </div>
+    </div>
+    <upload-zone params="upload: upload,
+                         testId: 'add-attachments'"></upload-zone>
+    </div>
 
   <div data-bind="component: { name: 'attachments-require-bubble',
-                               params: { bubbleVisible: requireAttachmentsBubbleVisible } }"></div>
+                  params: { bubbleVisible: requireAttachmentsBubbleVisible } }"
+       class="operation-bubble"></div>
 
   <div class="attachment-operations"
        data-test-id="attachment-operation-buttons">

@@ -1,0 +1,16 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="upload-zone-template">
+  <input type="file" class="hidden" name="files[]"
+         data-bind="attr: {id: upload.fileInputId,
+                    multiple: upload.allowMultiple},
+                    testId: testId + '-input'">
+  <div class="upload-zone"
+       data-bind="visible: labelFor">
+    <i class="lupicon-upload"></i>
+    <span data-bind="ltext:'uploadzone.text-one'"></span>
+    <label data-bind="attr: {'for': labelFor},
+                      ltext: 'uploadzone.label',
+                      testId: testId + '-label'"></label>
+    <span data-bind="ltext:'uploadzone.text-two'"></span>
+  </div>
+</script>

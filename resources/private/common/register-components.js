@@ -47,7 +47,7 @@ jQuery(document).ready(function() {
     {name: "company-edit"},
     {name: "organization-name-editor"},
     {name: "tags-editor"},
-    {name: "upload"},
+    {name: "area-upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
     {name: "vetuma-status"},
@@ -171,7 +171,8 @@ jQuery(document).ready(function() {
     {name: "icon-button"},
     {name: "toggle"},
     {name: "combobox"},
-    {name: "drop-zone"}
+    {name: "drop-zone"},
+    {name: "upload-zone"}
 ];
 
   ko.registerLupapisteComponents(components);
