@@ -174,7 +174,8 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
          _.isEqual( currentHover(), {fileId: file.fileId,
                                      column: column })) {
         var index = fileIndex( file );
-        return _.trim( self.cell( file, column ).value())
+        // Null value is accepted for grouping.
+        return (column === "grouping" || _.trim( self.cell( file, column ).value()))
           && (index < _.size( self.upload.files()) - 1);
       }
     });
@@ -270,7 +271,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
       return { fileId: fileId,
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),
-               group: groupParam(data.grouping.value()),
+               group: groupParam(data.grouping.value() || {groupType: null} ),
                contents: data.contents.value(),
                sign: data.sign.value(),
                constructionTime: data.construction.value() };
