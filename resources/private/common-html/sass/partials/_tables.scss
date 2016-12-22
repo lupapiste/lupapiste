@@ -485,6 +485,14 @@ select.waste-unit-select {
   width: 5em;
 }
 
+.batch-container {
+  border: 1px solid $grid-border-color;
+  .upload-progress, .batch-bad-files, .batch-password, .batch-buttons {
+    margin-left: 10px;
+  }
+  margin-bottom: 10px;
+}
+
 .attachment-batch-table {
   @include no-row-hover;
   td {

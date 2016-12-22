@@ -12,6 +12,8 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
 
   var attachments = service.attachments;
 
+  self.upload = params.upload;
+
   self.uploadOptions = { buttonClass: "positive caps",
                          buttonText: "attachment.add-multiple",
                          upload: params.upload,
