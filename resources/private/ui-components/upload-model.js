@@ -6,7 +6,9 @@
 //  [allowMultiple]: Whether multiple files can be uploaded at the
 //  same time (false).
 //  [readOnly]: If true only the file listing is shown (false).
-//  [dropZone]: Dropzone selector as string (default null, no dropzone).
+//  [dropZone]: Dropzone selector as string (default null, no
+//  dropzone). The dropzone highlight is done with drop-zone
+//  component.
 //  [badFileHandler]. Function to be called on bad files (size,
 //  type). If not given, errors are displayed with indicators. Event
 //  argument contains (localized) message and file.
@@ -82,17 +84,17 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   }
 
   // Removes file from files but from server.
-  self.clearFile = function( data ) {
-    if( self.files.remove( function( file ) {
-      return file.fileId === data.fileId;
-    })) {
-      notifyService( "fileCleared", {fileId: data.fileId});
+  self.clearFile = function( fileId ) {
+    if (!_.isEmpty( self.files.remove( function( file ) {
+      return file.fileId === fileId;
+    }))) {
+      notifyService( "fileCleared", {fileId: fileId});
     }
   };
 
   // Remove file from files and server.
   self.removeFile = function( data ) {
-    self.clearFile( data );
+    self.clearFile( data.fileId );
     notifyService( "removeFile", {attachmentId: data.fileId});
   };
 

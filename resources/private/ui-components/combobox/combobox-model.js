@@ -1,8 +1,9 @@
 // Combobx is a textinput with a list of predefined values.
-// Parameters:
+// Parameters [optional]:
 //   value: textinput value observable.
 //   list: predefined value list. Can be either array or observable
 //   array.
+//   [testId: Text input test id (combobox-input)]
 LUPAPISTE.ComboboxModel = function( params ) {
   "use strict";
   var self = this;
@@ -12,6 +13,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
   self.value = params.value;
   self.list  = params.list;
   self.selectedIndex = ko.observable(-1);
+  self.testId = params.testId || "combobox-input";
 
   // Textinput focus
   self.hasFocus = ko.observable();

@@ -90,12 +90,15 @@
    :fileId                               sc/Str             ;; used as 'foreign key' to attachment version
    :version                              VersionNumber})    ;; version number of the signed attachment version
 
+(defschema Approval
+  {:state                       (apply sc/enum attachment-states)
+   (sc/optional-key :timestamp) ssc/Timestamp
+   (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
+   (sc/optional-key :note)      sc/Str})
+
 (defschema VersionApprovals
   "An approvals are version-specific. Keys are originalFileIds."
-  {sc/Keyword {:state                       (apply sc/enum attachment-states)
-               (sc/optional-key :timestamp) ssc/Timestamp
-               (sc/optional-key :user)      {:id sc/Str, :firstName sc/Str, :lastName sc/Str}
-               (sc/optional-key :note)      sc/Str}})
+  {sc/Keyword Approval})
 
 (defschema Version
   "Attachment version"
@@ -199,6 +202,13 @@
   (attachment-version-state attachment (some-> attachment
                                                :latestVersion
                                                :originalFileId)))
+
+(defn attachment-array-updates
+  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
+  [app-id pred & kvs]
+  (as-> app-id $
+        (get-application-no-access-checking $ {:attachments true})
+        (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 ;;
 ;; Api
@@ -339,6 +349,21 @@
     (tos/update-process-retention-period (:id application) created)
     (map :id attachments)))
 
+(defn construction-time-state-updates
+  "Returns updates for 'setting' construction time flag. Updates are for elemMatch query. Value is true or false."
+  [{:keys [applicationState originalApplicationState]} value]
+  (if value
+    {$set {:attachments.$.originalApplicationState (or originalApplicationState applicationState)
+           :attachments.$.applicationState :verdictGiven}}
+    {$set   {:attachments.$.applicationState originalApplicationState}
+     $unset {:attachments.$.originalApplicationState true}}))
+
+(defn signature-updates [{:keys [fileId version]} user ts]
+  {$push {:attachments.$.signatures {:user (usr/summary user)
+                                     :created (or ts (now))
+                                     :version version
+                                     :fileId fileId}}})
+
 (defn can-delete-version?
   "False if the attachment version is a) rejected or approved and b)
   the user is not authority."
@@ -396,9 +421,10 @@
         :autoConversion autoConversion))))
 
 (defn- ->approval [state user timestamp]
-  {:state state
-   :user (select-keys user [:id :firstName :lastName])
-   :timestamp timestamp})
+  (sc/validate Approval
+    {:state state
+     :user (select-keys user [:id :firstName :lastName])
+     :timestamp timestamp}))
 
 (defn- build-version-updates [user attachment version-model
                               {:keys [created target stamped replaceable-original-file-id state contents group]}]
@@ -458,8 +484,12 @@
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
-           mongo-updates (merge (attachment-comment-updates application user attachment options)
-                                (build-version-updates user attachment version-model options))
+           mongo-updates (util/deep-merge (attachment-comment-updates application user attachment options)
+                                          (when (:constructionTime options)
+                                            (construction-time-state-updates attachment true))
+                                          (when (:sign options)
+                                            (signature-updates version-model user (:created options)))
+                                          (build-version-updates user attachment version-model options))
            update-result (update-application (application->command application) mongo-query mongo-updates :return-count? true)]
 
        (cond (pos? update-result)
@@ -502,6 +532,7 @@
 (defn get-empty-attachment-placeholder-id [attachments type exclude-ids-set]
   (->> (filter (comp empty? :versions) attachments)
        (remove (comp exclude-ids-set :id))
+       (remove :notNeeded)
        (util/find-first (partial type-match? type))
        :id))
 
@@ -741,12 +772,6 @@
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
 
-(defn attachment-array-updates
-  "Generates mongo updates for application attachment array. Gets all attachments from db to ensure proper indexing."
-  [app-id pred & kvs]
-  (as-> app-id $
-    (lupapalvelu.domain/get-application-no-access-checking $ {:attachments true})
-    (apply mongo/generate-array-updates :attachments (:attachments $) pred kvs)))
 
 (defn set-attachment-state!
   "Updates attachment's approvals."
@@ -810,12 +835,8 @@
     (fail :error.attachment-not-manually-set-construction-time)))
 
 (defn set-attachment-construction-time! [{app :application :as command} attachment-id value]
-  (let [{app-state :applicationState orig-app-state :originalApplicationState} (-> (get-attachment-info app attachment-id))]
-    (->> (if value
-           {$set (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState (or orig-app-state app-state) :applicationState :verdictGiven)}
-           {$set   (attachment-array-updates (:id app) (comp #{attachment-id} :id) :applicationState orig-app-state)
-            $unset (attachment-array-updates (:id app) (comp #{attachment-id} :id) :originalApplicationState true)})
-         (update-application command))))
+  (->> (construction-time-state-updates (get-attachment-info app attachment-id) value)
+       (update-application command {:attachments {$elemMatch {:id attachment-id}}})))
 
 (defn enrich-attachment [attachment]
   (assoc attachment

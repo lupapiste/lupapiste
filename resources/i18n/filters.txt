@@ -1,4 +1,4 @@
-"filter.application" "en" ""
+"filter.application" "en" "Attachments to the application"
 "filter.application" "fi" "Hakemuksen liitteet"
 "filter.application" "sv" "Bilagor till ansökan"
 "filter.building-site" "en" "Construction site attachments"

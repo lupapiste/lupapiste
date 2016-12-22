@@ -174,7 +174,7 @@
 "areyousure.message" "en" "Are you sure you want to delete the item?"
 "areyousure.message" "fi" "Oletko varma, että haluat poistaa kohteen?"
 "areyousure.message" "sv" "Är du säker att du vill radera objektet?"
-"areyousure.review-done" "en" ""
+"areyousure.review-done" "en" "Are you sure you want to mark the review as conducted and transfer the data to the background system?"
 "areyousure.review-done" "fi" "Oletko varma, että haluat merkitä katselmuksen pidetyksi ja siirtää tiedot taustajärjestelmään?"
 "areyousure.review-done" "sv" "Är du säker på att du vill markera besiktningen som utförd och överföra uppgifterna till bakgrundssystemet?"
 "arkistoidaan" "en" "To be archived"

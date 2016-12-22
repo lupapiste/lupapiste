@@ -23,10 +23,8 @@ Pena logs in and creates application
 
 Pena adds attachments
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}
-  Return to application
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  paatoksenteko.muistio
-  Return to application
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muistio  Muistio  Yleisesti hankkeeseen
 
 Pena submits application
   Submit application

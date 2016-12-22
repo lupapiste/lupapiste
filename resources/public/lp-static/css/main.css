@@ -1,5 +1,9 @@
-@import url('main-blessed1.css?z=1481988361746');
+@import url('main-blessed1.css?z=1482324376212');
 
+/* line 913, ../../../private/common-html/sass/partials/_forms.scss */
+div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span {
+  color: #999999;
+}
 /* line 916, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom.own-line .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom.own-line a.link-btn-julkipano span.is-details--rejected {
   color: #e34319;
@@ -8268,24 +8272,26 @@ td.comment-text {
 /* line 375, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag {
   position: relative;
+  background-color: #f6f6f6;
   border: 1px solid #bbbbbb;
   min-height: 40px;
   width: 100%;
   display: inline-block;
 }
-/* line 381, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 382, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag span.tag-label {
   display: inline-block;
   margin: 6px;
+  font-weight: bold;
 }
-/* line 385, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 387, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove {
   position: absolute;
   top: 8px;
   right: 8px;
   color: #f39129;
 }
-/* line 390, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 392, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove:hover {
   color: #f7ac2e;
 }
@@ -10472,18 +10478,27 @@ label.batch-required {
 }
 
 /* line 123, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bind-failed .like-btn, .batch-bind-failed a.link-btn, .batch-bind-failed a.link-btn-julkipano {
+  color: #df3215;
+}
+/* line 125, ../../../private/common-html/sass/views/_attachments.scss */
+.batch-bind-failed .like-btn span, .batch-bind-failed a.link-btn span, .batch-bind-failed a.link-btn-julkipano span {
+  font-size: 20px;
+}
+
+/* line 132, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i {
   vertical-align: middle;
 }
-/* line 126, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 135, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-check {
   color: #2ca92c;
 }
-/* line 129, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 138, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-warning {
   color: #df3215;
 }
-/* line 132, ../../../private/common-html/sass/views/_attachments.scss */
+/* line 141, ../../../private/common-html/sass/views/_attachments.scss */
 .batch-password i.lupicon-flag {
   color: #f39129;
 }

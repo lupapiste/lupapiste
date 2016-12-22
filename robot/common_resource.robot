@@ -710,9 +710,27 @@ Add empty attachment template
   Wait Until  Element Should Not Be Visible  jquery=div.selected-attachment-types-container
   Wait Until  Element Should Be Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
+Upload batch file
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
+  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "block").toggleClass( "hidden", false )
+  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
+  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "none").toggleClass( "hidden", true )
+  Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
+  Fill test id  batch-contents-${index}  ${contents}
+  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+
+Upload attachment
+  [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  add-attachments-label
+  Scroll to top
+  Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
+
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
-  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
+  Run Keyword If  '${kind}' == 'application'  Fail  Use Upload Attachment instead
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
   Run Keyword If  '${kind}' == 'statement'  Click enabled by test id  add-statement-attachment

@@ -14,11 +14,11 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.password = ko.observable();
 
-  var authModel = lupapisteApp.models.applicationAuthModel;
+  //var authModel = lupapisteApp.models.applicationAuthModel;
   self.showConstruction = self.disposedPureComputed( _.wrap( "set-attachment-as-construction-time",
-                                                             authModel.ok));
+                                                             service.authModel.ok));
   self.showSign = self.disposedPureComputed( _.wrap( "sign-attachments",
-                                                     authModel.ok));
+                                                     service.authModel.ok));
 
   var currentHover = ko.observable();
 
@@ -90,10 +90,9 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                 contents: contentsCell,
                 drawing: new Cell( ko.observable()),
                 grouping: new Cell( grouping ),
-                sign: new Cell( ko.observable())};
-    return self.showConstruction
-      ? _.set( row, "construction", new Cell( ko.observable()))
-      : row;
+                sign: new Cell( ko.observable()),
+                construction: new Cell( ko.observable() )};
+    return row;
   }
 
   self.disposedSubscribe( self.upload.files, function( files ) {
@@ -113,6 +112,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
   });
 
   self.badFiles = ko.observableArray();
+  self.bindFailed = ko.observable(false);
 
   self.fileCount = self.disposedPureComputed( _.flow( self.upload.files,
                                                       _.size ));
@@ -242,26 +242,19 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                        : true );
   });
 
-  function pollJob( response ) {
-    var job = response.job;
-    _.each( _.values( job.value ),
-            function( fileData ) {
-              if( fileData.status === "done"
-                && rows()[fileData.fileId]) {
-                self.upload.clearFile( fileData );
-              }
-            });
-    if( job.status !== "done" ) {
-      ajax.query( "bind-attachments-job",
-                  {jobId: job.id,
-                   version: job.version})
-        .success( pollJob)
-        .call();
-    } else {
-      ajaxWaiting( false );
-      service.queryAll();
-    }
-  }
+  var jobStatuses = ko.observable({});
+
+  self.disposedComputed(function() {
+    _.forEach(jobStatuses(), function(status, fileId) {
+      if (status() === service.JOB_DONE) {
+        self.upload.clearFile( fileId );
+      } else if ( service.pollJobStatusFinished(status) ) {
+        self.bindFailed(true);
+        rows()[fileId].disabled(false);
+      }
+    });
+    ajaxWaiting( _.some(jobStatuses(), function(status) { return !service.pollJobStatusFinished(status); }) );
+  });
 
   function groupParam( value ) {
     var g = /operation-(.+)/.exec( value.groupType );
@@ -270,28 +263,18 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
   self.bind = function() {
     disableRows( true );
+    self.bindFailed(false);
     self.badFiles.removeAll();
-    var signing = self.signingSelected();
-    ajax.command( "bind-attachments",
-                  _.merge( {id: lupapisteApp.models.application.id()},
-                           signing ? {password: self.password()} : {},
-                           {filedatas: _.map( rows(),
-                                              function( data, fileId ) {
-                                                return _.merge({
-                                                  fileId: fileId ,
-                                                  type:_.pick( data.type.value(),
-                                                               ["type-group", "type-id"]),
-                                                  group: groupParam( data.grouping.value() ),
-                                                  contents: data.contents.value()},
-                                                               signing ? {sign: data.sign.value()} : {},
-                                                               data.construction
-                                                               ? {constructionTime: data.construction.value()}
-                                                               : {});
-                                              })}))
-      .fuse( ajaxWaiting )
-      .success( pollJob )
-      .call();
+    var statuses = service.bindAttachments( _.map(rows(), function(data, fileId) {
+      return { fileId: fileId,
+               type: _.pick( data.type.value(), ["type-group", "type-id"] ),
+               group: groupParam(data.grouping.value()),
+               contents: data.contents.value(),
+               sign: data.sign.value(),
+               constructionTime: data.construction.value() };
+    }), self.password() );
 
+    jobStatuses(statuses);
   };
 
   self.cancel = function() {

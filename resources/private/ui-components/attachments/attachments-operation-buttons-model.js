@@ -14,7 +14,8 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
 
   self.uploadOptions = { buttonClass: "positive caps",
                          buttonText: "attachment.add-multiple",
-                         upload: params.upload };
+                         upload: params.upload,
+                         testId: "add-attachments"};
 
   self.newAttachment = function() {
     hub.send( "add-attachment-file", {} );
@@ -51,7 +52,7 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
   };
 
   self.canSign = function() {
-    return self.authModel.ok("sign-attachments");
+    return self.authModel.ok("signing-possible");
   };
 
   self.markVerdictAttachments = function() {

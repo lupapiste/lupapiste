@@ -10,7 +10,7 @@ Ty&ouml;njohtajien nime&auml;minen tehd&auml;&auml;n t&auml;st&auml; hetkest&aum
 
 Ellet ole aikaisemmin k&auml;ytt&auml;nyt Lupapistett&auml; {{recipient-email}} s&auml;hk&ouml;postiosoitteesta, on sinun ensin rekister&ouml;idytt&auml;v&auml; Lupapisteen k&auml;ytt&auml;j&auml;ksi. Rekister&ouml;ityminen tehd&auml;&auml;n henkil&ouml;kohtaisten pankkitunnusten tai mobiilivarmenteen avulla.
 
-Ohjeet ty&ouml;njohtajan nime&auml;miseen l&ouml;ytyv&auml;t t&auml;&auml;lt&auml;: https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen
+Ohjeet ty&ouml;njohtajan nime&auml;miseen l&ouml;ytyv&auml;t t&auml;&auml;lt&auml;: [https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen](https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen).
 
 Jos olet aikaisemmin ilmoittanut ty&ouml;njohtajat lupaasi liittyen, n&auml;m&auml; eiv&auml;t n&auml;y Lupapisteess&auml;. Jo tehtyj&auml; ty&ouml;njohtajien ilmoituksia tai hakemuksia ei tarvitse tehd&auml; uudelleen.
 

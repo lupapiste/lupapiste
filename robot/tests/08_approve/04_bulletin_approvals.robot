@@ -26,7 +26,8 @@ Olli rejects period with note
 
 Olli adds and approves attachment
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
+  Open attachment details  muut.muu
   Wait Until  Element Should Be Visible  test-attachment-approve
   Click button  test-attachment-approve
   Return to application

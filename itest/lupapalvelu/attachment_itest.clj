@@ -17,6 +17,8 @@
 
     (comment-application pena application-id true) => ok?
 
+    (fact "Signing not possible"
+          (query pena :signing-possible :id application-id) => fail?)
     (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
             op-id (-> application :primaryOperation :id)]
@@ -68,7 +70,9 @@
             (let [p-id pena-id]
               (doseq [{auth :auth} (:attachments application)]
                 (fact "Pena as uploader"
-                  (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
+                      (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
+          (fact "Signing id possible"
+          (query pena :signing-possible :id application-id) => ok?)
 
           (fact "download all"
             (let [resp (raw pena "download-all-attachments" :id application-id)]

@@ -8,10 +8,10 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.vetuma :as vetuma]))
 
-(def bulletin-file-upload-max-size 15000000)
+(def file-upload-max-size 100000000)
 
 (defn- file-size-legal [{{files :files} :data}]
-  (when-not (every? #(< % bulletin-file-upload-max-size) (map :size files))
+  (when-not (every? #(< % file-upload-max-size) (map :size files))
     (fail :error.file-upload.illegal-upload-size)))
 
 (defn- file-mime-type-accepted [{{files :files} :data}]

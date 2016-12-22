@@ -109,7 +109,7 @@
 "application.attachments" "en" "Attachments"
 "application.attachments" "fi" "Liitteet"
 "application.attachments" "sv" "Bilagor"
-"application.attachments.application" "en" ""
+"application.attachments.application" "en" "Attachments to the application"
 "application.attachments.application" "fi" "Hakemuksen liitteet"
 "application.attachments.application" "sv" "Bilagor till ansökan"
 "application.attachments.building-site" "en" "Construction site attachments"

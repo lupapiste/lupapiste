@@ -10,6 +10,12 @@ LUPAPISTE.AttachmentsService = function() {
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
   self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
+  self.JOB_RUNNING = "running";
+  self.JOB_PENDING = "pending";
+  self.JOB_WORKING = "working";
+  self.JOB_DONE = "done";
+  self.JOB_ERROR = "error";
+  self.JOB_TIMEOUT = "timeout";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
@@ -30,7 +36,6 @@ LUPAPISTE.AttachmentsService = function() {
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
     self.groupTypes([]);
-    self.authModel.refresh({id: self.applicationId()});
   });
 
   hub.subscribe( "contextService::leave", function() {
@@ -82,6 +87,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Refresh all authModels at once.
   function refreshAllAuthModels() {
+    self.authModel.refresh({id: self.applicationId()});
     authorization.refreshModelsForCategory(self.authModels(), self.applicationId(), "attachments");
   }
 
@@ -271,6 +277,50 @@ LUPAPISTE.AttachmentsService = function() {
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  self.pollJobStatusFinished = function(status) {
+    return !_.includes([self.JOB_RUNNING, self.JOB_PENDING, self.JOB_WORKING], ko.unwrap(status));
+  };
+
+  function pollBindJob(statuses, attachments, response) {
+    var job = response.job;
+    _.forEach( _.values(job.value), function(fileData) {
+      if ( statuses[fileData.fileId] ) {
+        statuses[fileData.fileId](fileData.status);
+      }
+    });
+    if ( job.status === self.JOB_RUNNING ) {
+      ajax.query( "bind-attachments-job", { jobId: job.id,
+                                            version: job.version })
+        .success( _.partial(pollBindJob, statuses, attachments) )
+        .call();
+    } else {
+      _.forEach(statuses, function(status) {
+        if (status === self.JOB_RUNNING) {
+          status(self.JOB_TIMEOUT);
+        }
+      });
+      if ( attachments.length === 1 && attachments[0].attachmentId ) {
+        self.queryOne(attachments[0].attachmentId);
+        self.queryTagGroupsAndFilters();
+      } else {
+        self.queryAll();
+      }
+    }
+  }
+
+  self.bindAttachments = function(attachments, password) {
+    var jobStatuses = _(attachments).map(function(attachment) { return [attachment.fileId, ko.observable(self.JOB_RUNNING)]; }).fromPairs().value();
+    ajax.command( "bind-attachments",
+                  _.merge( { id: self.applicationId(),
+                             filedatas: attachments },
+                           _.some(attachments, "sign")  ? {password: password} : {} ))
+      .processing( self.processing )
+      .success( _.partial(pollBindJob, jobStatuses, attachments) )
+      .call();
+
+    return jobStatuses;
   };
 
   hub.subscribe("upload-done", function(data) {

@@ -5,6 +5,7 @@
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.job :as job]
             [lupapalvelu.states :as states]
+            [lupapalvelu.user :as usr]
             [sade.core :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]))
@@ -15,6 +16,17 @@
   (when-not (or (ss/blank? attachmentId) (some #(= (:id %) attachmentId) attachments))
     (fail :error.attachment.id)))
 
+(defn- validate-attachment-ids [command]
+  (reduce
+    (fn [res id] (or res (attachment-id-is-present-in-application-or-not-set command id)))
+    nil
+    (remove nil? (map :attachmentId (get-in command [:data :filedatas])))))
+
+(def check-password-for-sign
+  (fn [{{:keys [filedatas]} :data :as command}]
+    (when ((complement not-any?) :sign filedatas)
+      (usr/check-password-pre-check command))))
+
 (defcommand bind-attachments
   {:description         "API to bind files to attachments, returns job that can be polled for status per file."
    :parameters          [id filedatas]
@@ -22,11 +34,9 @@
    :input-validators    [(partial action/vector-parameters-with-map-items-with-required-keys [:filedatas] [:fileId])]
    :user-roles          #{:applicant :authority :oirAuthority}
    :user-authz-roles    (conj auth/all-authz-writer-roles :foreman)
-   :pre-checks          [(partial app/validate-authority-in-drafts)
-                         #(reduce
-                            (fn [res id] (or res (attachment-id-is-present-in-application-or-not-set % id)))
-                            nil
-                            (remove nil? (map :attachmentId (get-in % [:data :filedatas]))))]
+   :pre-checks          [app/validate-authority-in-drafts
+                         validate-attachment-ids
+                         check-password-for-sign]
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command filedatas)))

@@ -689,6 +689,21 @@
   [{{job-id :jobId version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (ok (stamping/status job-id version timeout)))
 
+(defquery signing-possible
+  {:description "Pseudo-query that succeeds
+  if the user is allowed to sign and there are signable
+  attachments."
+   :user-roles  #{:applicant :authority}
+   :pre-checks  [domain/validate-owner-or-write-access
+                 (fn [{application :application}]
+                   (when-not (pos? (count (:attachments application)))
+                     (fail :application.attachmentsEmpty)))
+                 app/validate-authority-in-drafts
+                 any-attachment-has-version]
+   :states      (states/all-application-states-but states/terminal-states)
+   :categories  #{:attachments}}
+  [_])
+
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
@@ -697,11 +712,7 @@
                       (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states     (states/all-application-states-but states/terminal-states)
    :pre-checks [domain/validate-owner-or-write-access
-                (fn [{application :application}]
-                  (when-not (pos? (count (:attachments application)))
-                    (fail :application.attachmentsEmpty)))
-                app/validate-authority-in-drafts
-                any-attachment-has-version]
+                app/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)

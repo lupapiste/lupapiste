@@ -374,6 +374,7 @@ td.comment-text {
   min-height: $grid-input-height;
   .selected-attachment-type-tag {
     position: relative;
+    background-color: $gray246;
     border: 1px solid $input-border-color;
     min-height: $grid-input-height;
     width: 100%;
@@ -381,6 +382,7 @@ td.comment-text {
     span.tag-label {
       display: inline-block;
       margin: $marginS;
+      font-weight: bold;
     }
     .tag-remove {
       position: absolute;
