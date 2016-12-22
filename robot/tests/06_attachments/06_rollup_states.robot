@@ -32,10 +32,6 @@ Accordion with only not needed is neutral
 Sonja adds another Pääpiirustus
   Upload attachment  ${PNG_TESTFILE_PATH}  Julkisivupiirustus  Hello  Asuinkerrostalon tai rivitalon rakentaminen
 
-Sonja approves Julkisivupiirustus
-  Wait Until  Element should be visible  jquery=tr[data-test-type='paapiirustus.julkisivupiirustus']
-  Approve row  tr[data-test-type='paapiirustus.julkisivupiirustus']
-
 Pääpiirrustukset accordion still rejected since Pohjapiirustus not uploaded
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
   Rollup rejected  Pääpiirustukset
