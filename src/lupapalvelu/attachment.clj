@@ -23,6 +23,7 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.operations :as op]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
@@ -771,35 +772,25 @@
 (defn post-process-attachments [application]
   (update-in application [:attachments] (partial map post-process-attachment)))
 
-
 (defn set-attachment-state!
   "Updates attachment's approvals."
   [{:keys [created user application] :as command} file-id new-state]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id) (#{:ok :requires_user_action} new-state)]}
-  (if-let [attachment (get-attachment-info-by-file-id application file-id)]
-    (let [data (into {}
-                     (map (fn [[k v]] [(->> [(get-original-file-id attachment file-id) k]
-                                            (map name)
-                                            (cons "approvals")
-                                            (ss/join ".")
-                                            keyword)
-                                       v])
-                          (->approval new-state user created)))]
-      (update-attachment-data! command (:id attachment) data created :set-app-modified? true :set-attachment-modified? false))
-    (fail :error.attachment.id)))
+  (let [attachment       (get-attachment-info-by-file-id application file-id)
+        original-file-id (get-original-file-id attachment file-id)
+        data             (->> (->approval new-state user created)
+                              (util/map-keys (partial util/kw-path "approvals" original-file-id)))]
+    (update-attachment-data! command (:id attachment) data created :set-app-modified? true :set-attachment-modified? false)))
 
 (defn set-attachment-reject-note! [{:keys [created user application] :as command} file-id note]
   {:pre [(number? created) (map? user) (map? application) (ss/not-blank? file-id)]}
-  (if-let [attachment (get-attachment-info-by-file-id application file-id)]
+  (let [attachment (get-attachment-info-by-file-id application file-id)]
     (update-attachment-data! command
                              (:id attachment)
-                             {(keyword (str "approvals."
-                                            (get-original-file-id attachment file-id)
-                                            ".note")) note}
+                             {(util/kw-path "approvals" (get-original-file-id attachment file-id) "note") note}
                              created
                              :set-app-modified? true
-                             :set-attachment-modified? false)
-    (fail :error.attachment.id)))
+                             :set-attachment-modified? false)))
 
 (defn convert-existing-to-pdfa! [application user attachment]
   {:pre [(map? application) (:id application) (:attachments application)]}
@@ -855,3 +846,76 @@
          (map attachment-assignment-info))))
 
 (assignment/register-assignment-target! :attachments describe-assignment-targets)
+
+;;
+;; Pre-checks
+;;
+
+(defn- get-target-type [{{attachment-id :attachmentId} :data application :application}]
+  (-> (get-attachment-info application attachment-id) :target :type keyword))
+
+(defmulti upload-to-target-allowed
+  {:arglists '([command])}
+  (fn [{{:keys [target]} :data}] (-> target :type keyword)))
+
+(defmethod upload-to-target-allowed :default [_] nil)
+
+(defmulti edit-allowed-by-target
+  {:arglists '([command])}
+  get-target-type)
+
+(defmethod edit-allowed-by-target :default [_] nil)
+
+(defmulti delete-allowed-by-target
+  {:arglists '([command])}
+  get-target-type)
+
+(defmethod delete-allowed-by-target :default [{:keys [state] :as application}]
+  (when (= :sent (keyword state))
+    (fail :error.illegal-state)))
+
+(defn attachment-is-needed [{{:keys [attachmentId]} :data application :application}]
+  (when (and attachmentId (:notNeeded (get-attachment-info application attachmentId)))
+    (fail :error.attachment.not-needed)))
+
+(defn attachment-not-locked [{{:keys [attachmentId]} :data application :application}]
+  (when (-> (get-attachment-info application attachmentId) attachment-is-locked?)
+    (fail :error.attachment-is-locked)))
+
+(defn attachment-not-readOnly [{{attachmentId :attachmentId} :data :keys [application user]}]
+  (let [attachment (get-attachment-info application attachmentId)
+        readonly-after-sent? (op/get-primary-operation-metadata application :attachments-readonly-after-sent)]
+    (when (or (attachment-is-readOnly? attachment)
+              (and readonly-after-sent?
+                   (not (states/pre-sent-application-states (-> application :state keyword)))
+                   (not (auth/application-authority? application user))))
+      (fail :error.unauthorized
+            :desc "Attachment is read only."))))
+
+(defn attachment-matches-application
+  ([{{:keys [attachmentId]} :data :as command}]
+   (attachment-matches-application command attachmentId))
+  ([{{:keys [attachments]} :application} attachmentId]
+   (when-not (or (ss/blank? attachmentId) (some (comp #{attachmentId} :id) attachments))
+     (fail :error.attachment.id))))
+
+(defn foreman-must-be-uploader [{:keys [user application data] :as command}]
+  (when (and (auth/has-auth-role? application (:id user) :foreman)
+             (ss/not-blank? (:attachmentId data)))
+    (access/has-attachment-auth-role :uploader command)))
+
+(defn allowed-only-for-authority-when-application-sent [{{state :state} :application user :user}]
+  (when (and (= :sent (keyword state))
+             (not (usr/authority? user)))
+    (fail :error.unauthorized)))
+
+(defn attachment-editable-by-application-state
+  [{{attachmentId :attachmentId} :data user :user {current-state :state organization :organization :as application} :application}]
+  (when-not (ss/blank? attachmentId)
+    (let [{create-state :applicationState} (get-attachment-info application attachmentId)]
+      (when-not (if (states/terminal-states (keyword current-state))
+                  (usr/user-is-archivist? user organization)
+                  (or (not (states/post-verdict-states (keyword current-state)))
+                      (states/post-verdict-states (keyword create-state))
+                      (usr/authority? user)))
+        (fail :error.pre-verdict-attachment)))))

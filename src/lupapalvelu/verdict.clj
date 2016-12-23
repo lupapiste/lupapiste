@@ -1,4 +1,3 @@
-
 (ns lupapalvelu.verdict
   (:require [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.java.io :as io]
@@ -20,6 +19,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.appeal-common :as appeal-common]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.building :as building]
             [lupapalvelu.document.transformations :as doc-transformations]
             [lupapalvelu.document.schemas :as schemas]
@@ -578,3 +578,7 @@
         updated-application (domain/get-application-no-access-checking (:id application))] ;; TODO: mongo projection
     (doseq [added-task added-tasks-with-updated-buildings]
       (tasks/generate-task-pdfa updated-application added-task user "fi"))))
+
+(defmethod attachment/edit-allowed-by-target :verdict [{user :user application :application}]
+  (when-not (auth/application-authority? application user)
+    (fail :error.unauthorized)))
