@@ -231,7 +231,7 @@
                              :type :group
                              :validator :address
                              :blacklist [turvakielto]
-                             :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
+                             :body [{:name "katu" :type :string :subtype :vrk-address :size :l :required true :i18nkey "osoite.katu"}
                                     postinumero
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true :i18nkey "osoite.postitoimipaikannimi"}
                                     country]}])
