@@ -90,17 +90,8 @@
       <div class="col1">
         <div class="attachment-file-versions">
           <div>
-            <button id="add-new-attachment-version"
-                    class="positive"
-                    data-bind="click: $data.newAttachmentVersion,
-                               visible: $data.uploadingAllowed()">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addVersion',
-                               visible: $data.hasVersion()"></span>
-              <span data-bind="ltext: 'attachment.addFile',
-                               visible: !$data.hasVersion()"></span>
-            </button>
-            <upload-button params="upload:upload"></upload-button>
+            <upload-button params="upload: upload, buttonText: 'attachment.addVersion'"
+                           data-bind="visible: $data.uploadingAllowed()"></upload-button>
             <button data-test-id="add-ram-attachment"
                     class="positive"
                     data-bind="click: $data.newRamAttachment,

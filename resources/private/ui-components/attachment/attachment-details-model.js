@@ -24,21 +24,17 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
 
-  var jobStatus = ko.observable();
-
-  self.disposedComputed(function() {
-    if ( util.getIn(jobStatus, ["status"]) && service.pollJobStatusFinished(jobStatus().status) ) {
-      self.upload.clearFile( jobStatus().fileId );
-      util.showSavedIndicator({ok: jobStatus().status() === service.JOB_DONE});
-      jobStatus({});
-    }
-  });
-
   self.disposedSubscribe(self.upload.files, function(files) {
     if (!_.isEmpty(files)) {
-      var statuses = service.bindAttachments([{ attachmentId: self.id,
-                                                fileId: _.first(files).fileId }]);
-      jobStatus({fileId: _.first(_.keys(statuses)), status: _.first(_.values(statuses))});
+      var fileId = _.last(files).fileId;
+      var status = service.bindAttachment( self.id, fileId );
+      var statusSubscription = self.disposedSubscribe(status, function(status) {
+        if ( service.pollJobStatusFinished(status) ) {
+          self.upload.clearFile( fileId );
+          util.showSavedIndicator({ok: ko.unwrap(status) === service.JOB_DONE});
+          self.unsubscribe(statusSubscription);
+        }
+      });
     }
   });
 
@@ -163,22 +159,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
 
   // Versions - add
-  self.newAttachmentVersion = function() {
-    self.disablePreview(true);
-    attachment.initFileUpload({
-      applicationId: self.applicationId,
-      attachmentId: self.id,
-      attachmentType: self.attachment().typeString(),
-      group: util.getIn(self.attachment(), ["groupType"]),
-      operationId: util.getIn(self.attachment(), ["op", "id"]),
-      typeSelector: false,
-      archiveEnabled: authModel.ok("permanent-archive-enabled")
-    });
-    // Upload dialog is opened manually here, because click event binding to
-    // dynamic content rendered by Knockout is not possible
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
-  self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
+  self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
 
   // Versions - delete
   self.deleteVersion = function(fileModel) {

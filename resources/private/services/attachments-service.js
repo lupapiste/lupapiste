@@ -337,6 +337,18 @@ LUPAPISTE.AttachmentsService = function() {
     return jobStatuses;
   };
 
+  self.bindAttachment = function(attachmentId, fileId) {
+    var jobStatuses = _.set({}, fileId, ko.observable(self.JOB_RUNNING));
+    ajax.command( "bind-attachment", { id: self.applicationId(),
+                                       attachmentId: attachmentId,
+                                       fileId: fileId })
+      .processing( self.processing )
+      .success( _.partial(pollBindJob, jobStatuses, [{attachmentId: attachmentId}]) )
+      .call();
+
+    return jobStatuses[fileId];
+  };
+
   hub.subscribe("upload-done", function(data) {
     self.authModel.refresh({id: self.applicationId()});
     if (data.attachmentId) {
