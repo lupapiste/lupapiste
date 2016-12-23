@@ -22,10 +22,8 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   });
 
   self.externalApi = {
-    enabled: ko.pureComputed(function() {
-      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
-    }),
+    enabled: ko.pureComputed(function() { return lupapisteApp.models.rootVMO.externalApi.enabled(); }),
+    ok: function(fnName) { return lupapisteApp.models.rootVMO.externalApi.ok(fnName); },
     showPermitsOnMap: function() {
       var data = _.map(self.dataProvider.results(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);

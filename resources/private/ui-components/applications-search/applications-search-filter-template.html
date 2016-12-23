@@ -89,7 +89,7 @@
         <span data-bind="component: {name: 'help-toggle', params: {lhtml: 'applications.missing.no-application.desc' }}"></span>
       </div>
       <!-- ko if: externalApi && externalApi.enabled() -->
-      <button data-bind="click: externalApi.showPermitsOnMap, visible: gotResults"
+      <button data-bind="click: externalApi.showPermitsOnMap, visible: gotResults() && externalApi.ok('showPermitsOnMap')"
               data-test-id="external-show-permits-on-map">
         <i class="lupicon-location"></i>
         <span data-bind="text: 'N\u00E4yt\u00E4 hankkeet kartalla'"></span>

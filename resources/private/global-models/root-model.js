@@ -15,8 +15,10 @@ LUPAPISTE.RootViewModel = function() {
     return page === self.currentPage();
   };
 
-  self.externalApiEnabled = ko.pureComputed(function() {
-    return lupapisteApp.services.externalApiService &&
-           lupapisteApp.services.externalApiService.enabled;
-  });
+  var apiService = lupapisteApp.services.externalApiService;
+  self.externalApi =
+    {enabled:  ko.pureComputed(function() { return apiService
+                                                   && apiService.enabled
+                                                   && lupapisteApp.models.globalAuthModel.ok("external-api-enabled"); }),
+     ok: function(functionName) { return _.includes(_.functionsIn(apiService.apiObject), functionName); }};
 };

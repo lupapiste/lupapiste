@@ -27,7 +27,9 @@ LUPAPISTE.ExternalApiService = function() {
    */
   hub.subscribe("external-api::show-on-map", function(data) {
     var permit = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.showPermitOnMap(permit);
+    if (window.parent.LupapisteApi.showPermitOnMap) {
+      window.parent.LupapisteApi.showPermitOnMap(permit);
+    }
   });
 
   /*
@@ -37,7 +39,9 @@ LUPAPISTE.ExternalApiService = function() {
    */
   hub.subscribe("external-api::open-application", function(data) {
     var permit = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.openPermit(permit);
+    if (window.parent.LupapisteApi.openPermit) {
+      window.parent.LupapisteApi.openPermit(permit);
+    }
   });
 
   /*
@@ -48,7 +52,9 @@ LUPAPISTE.ExternalApiService = function() {
   hub.subscribe("external-api::filtered-permits", function(data) {
     var eventData = _.omit(data, "eventType"); // drop event type
     var permits = _.values(eventData);
-    window.parent.LupapisteApi.showPermitsOnMap(permits);
+    if (window.parent.LupapisteApi.showPermitsOnMap) {
+      window.parent.LupapisteApi.showPermitsOnMap(permits);
+    }
   });
 
   /*
@@ -58,11 +64,15 @@ LUPAPISTE.ExternalApiService = function() {
    */
   hub.subscribe("external-api::integration-sent", function(data) {
     var permit = _.omit(data, "eventType"); // drop event type
-    window.parent.LupapisteApi.integrationSent(permit);
+    if (window.parent.LupapisteApi.integrationSent) {
+      window.parent.LupapisteApi.integrationSent(permit);
+    }
   });
 
-  var enabled = _.isFunction(window.parent.LupapisteApi);
-  return { enabled: enabled};
+  var api = window.parent.LupapisteApi;
+  var enabled = _.isFunction(api);
+  return { enabled: enabled,
+           apiObject: api};
 };
 
 lupapisteApp.services.externalApiService = new LUPAPISTE.ExternalApiService();
