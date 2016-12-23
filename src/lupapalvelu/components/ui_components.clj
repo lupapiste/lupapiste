@@ -257,11 +257,10 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
-   :external-api {:js (apply
-                        conj
-                        ["external-api-service.js" "external-api-tools.js"]
-                        (when (env/dev-mode?)
-                          ["dummy-api-client.js"]))}
+   :external-api {:js (remove nil?
+                              (cons (when (env/dev-mode?)
+                                      "dummy-api-client.js")
+                                    ["external-api-service.js" "external-api-tools.js"]))}
 
    :verdict-attachment-prints {:depends [:common-html :ui-components]
                                :html ["verdict-attachment-prints-order-template.html"
