@@ -111,6 +111,7 @@
 
 // Checkboxes
 @include toggle-helper ( checkbox, "\e604", "\e603" ) {}
+@include toggle-helper ( blockbox, "\e604", "\e603", $wrapper-display: block ) {}
 @include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
 .docgen-checkbox-wrapper.form-input {
   height: auto;
