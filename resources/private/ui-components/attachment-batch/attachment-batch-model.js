@@ -123,17 +123,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
     self.badFiles.push( _.pick( event, ["message", "file"]));
   });
 
-  // We call init when the authmodel has been updated.
-  function initIfUpdated() {
-    if( _.isEmpty(service.authModel.getData()) ) {
-      _.delay( initIfUpdated, 100 );
-    } else {
-      self.upload.readOnly = !service.authModel.ok("upload-attachment");
-      self.upload.init();
-    }
-  }
-  initIfUpdated();
-
+   self.upload.init();
 
   // The fill/copy down functionality works as follows:
   // 1. The filling is possible if the file is not the last one, the

@@ -360,7 +360,7 @@
 
                     <!-- Attachments tab -->
 
-                    <!-- ko if: selectedTabName() === 'attachments' -->
+                    <!-- ko if: selectedTabName() === 'attachments' && $root.authorization.ok( "attachments" ) -->
                     <div id="application-attachments-tab" class="tab-content">
                       <drop-zone></drop-zone>
                       <attachments-listing/>
