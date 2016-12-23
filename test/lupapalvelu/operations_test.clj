@@ -3,7 +3,8 @@
             [lupapalvelu.test-util :refer :all]
             [midje.sweet :refer :all]
             [lupapalvelu.document.schemas :as schemas]
-            [sade.env :as env]))
+            [lupapiste-commons.operations :as commons-operations]
+            [clojure.set :as set]))
 
 (facts "check that every operation refers to existing schema"
   (doseq [[op {:keys [schema required]}] operations
@@ -112,3 +113,14 @@
                                                                                         ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
                                                                                         ["toiminnan-muutos" :yl-toiminnan-muutos]]]
                                                      ["puiden-kaataminen" [["ilmoitus-puiden-kaatamisesta-asemakaava-alueella" :yl-puiden-kaataminen]]]]]])))
+
+(facts "operation definitions in lupapalvelu.operations should match lupapiste-commons.operations"
+  (fact "R-operations match"
+    (let [lp-ops (set (keys r-operations))
+          commons-ops (set commons-operations/r-operations)]
+      (set/difference lp-ops commons-ops) => #{:asuinrakennus}))
+
+  (fact "YA-operations match"
+    (let [lp-ops (set (keys ya-operations))
+          commons-ops (set commons-operations/ya-operations)]
+      (= lp-ops commons-ops) => true)))

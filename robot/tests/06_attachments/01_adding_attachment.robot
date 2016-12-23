@@ -53,7 +53,7 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds png attachment without comment
   [Tags]  attachments
-  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  First  Asuinkerrostalon tai rivitalon rakentaminen  
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  First  Asuinkerrostalon tai rivitalon rakentaminen
 
 Download all buttons are now visible
   Wait test id visible  download-all
@@ -70,7 +70,7 @@ Download all buttons are gone again
 
 Mikko adds png attachment without comment again
   [Tags]  attachments
-  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Second  Asuinkerrostalon tai rivitalon rakentaminen  
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Second  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens attachment details
   Open attachment details  muut.muu
@@ -427,6 +427,9 @@ Mikko signs everything blindly
   Sign all attachments  mikko123
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
 
+No frontend errors
+  [Tags]  non-roboto-proof
+  There are no frontend errors
 
 
 *** Keywords ***

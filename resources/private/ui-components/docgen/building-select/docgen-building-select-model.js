@@ -46,14 +46,27 @@ LUPAPISTE.DocgenBuildingSelectModel = function( params ) {
                overwrite: overwrite});
   }
 
+  function emitAccordionUpdates(updates) {
+    _.forEach(updates, function(update) {
+      hub.send("accordionUpdate", {path: update[0], value: update[1], docId: params.documentId});
+    });
+  }
+
   self.disposedSubscribe( self.value, function( value) {
-    if( value && value !== OTHER) {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("overwrite.confirm"),
-        loc("application.building.merge"),
-        {title: loc("yes"), fn: _.partial(merge, true)},
-        {title: loc("no"), fn: _.partial(merge, false)}
-      );
+    var documentDataService = lupapisteApp.services.documentDataService;
+    if (value) {
+      if (value === OTHER) {
+        var accordionFields = _.get(documentDataService.findDocumentById(params.documentId), "schema.accordion-fields");
+        var updates = _.map(accordionFields, function(path) { return [path, ""]; });
+        documentDataService.updateDoc(params.documentId, updates, emitAccordionUpdates(updates));
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
+          loc("overwrite.confirm"),
+          loc("application.building.merge"),
+          {title: loc("yes"), fn: _.partial(merge, true)},
+          {title: loc("no"), fn: _.partial(merge, false)}
+        );
+      }
     }
   });
 };

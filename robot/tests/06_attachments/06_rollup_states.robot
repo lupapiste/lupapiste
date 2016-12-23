@@ -35,7 +35,6 @@ Sonja adds another Pääpiirustus
 Pääpiirrustukset accordion still rejected since Pohjapiirustus not uploaded
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
   Rollup rejected  Pääpiirustukset
-  Rollup neutral  Muut suunnitelmat
 
 Hiding not needed does not affect states
   Scroll and click test id  needed-filter-label

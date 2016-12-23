@@ -474,7 +474,7 @@
    ; Prechecks one parameter: the command, which has :application associated.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
-   (sc/optional-key :pre-checks)  [(sc/cond-pre util/Fn sc/Symbol)]
+   (sc/optional-key :pre-checks)  [(sc/cond-pre util/IFn sc/Symbol)]
    ; Input validators take one parameter, the command. Application is not yet available.
    (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords

@@ -10,7 +10,7 @@
             <!-- ko if: organization.features -->
             <div class="organization-areas-map" data-bind="component: {name: 'openlayers-map', params: {geoJsonFeatures: organization.features}}"></div>
             <!-- /ko -->
-            <div data-bind="component: {name: 'upload', params: {onSuccess: function(res) {organization.features(res.areas);}}}"></div>
+            <div data-bind="component: {name: 'area-upload', params: {onSuccess: function(res) {organization.features(res.areas);}}}"></div>
           </div>
         </section>
       </div>

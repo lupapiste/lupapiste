@@ -304,27 +304,6 @@ td.comment-text {
   max-width: $attachment-modal-width;
 }
 
-.upload-zone.drop-zone {
-  display: table-cell;
-  vertical-align: middle;
-  color: #fff;
-  width: 320px;
-  height: 240px;
-  text-align: center;
-  background-color: $green-dark;
-  h1 {
-    float: none;
-    display: block;
-    color: #fff;
-  }
-  &.active {
-    background-color: $green;
-  }
-  i {
-    font-size: 50px;
-  }
-}
-
 // Used when editing tasks, for example
 .targetted-attachments {
   margin: {

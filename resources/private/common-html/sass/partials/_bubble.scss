@@ -120,3 +120,8 @@
 
 // Bubble dialog arrow
 @include bubble-arrow( bubble-dialog-arrow, $grid-border-color, white, 20px);
+
+.operation-bubble {
+  margin-top: 24px;
+  max-width: 50%;
+}

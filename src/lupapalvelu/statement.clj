@@ -12,6 +12,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.authorization :as auth]
             [lupapalvelu.user :as usr]))
 
 ;;
@@ -77,8 +78,8 @@
 (defn get-statement [{:keys [statements]} id]
   (util/find-by-id id statements))
 
-(defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user application :application}]
-  (let [{{statement-email :email} :person} (get-statement application statementId)]
+(defn statement-owner [{{:keys [statementId target]} :data {user-email :email} :user application :application}]
+  (let [{{statement-email :email} :person} (get-statement application (or statementId (:id target)))]
     (when-not (= (usr/canonize-email statement-email) (usr/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
@@ -123,18 +124,23 @@
   (when (= (keyword (:state application)) :sent)
     (permit/valid-permit-types {:YI :all :YL :all :YM :all :VVVL :all :MAL :all} command)))
 
-(defn upload-attachment-allowed [{{:keys [target]} :data {:keys [state]} :application :as command}]
-  (if (and (= (-> target :type keyword) :statement) (= (keyword state) :sent))
-    (statement-in-sent-state-allowed command)
-    (att/if-not-authority-state-must-not-be #{:sent} command)))
+(defmethod att/upload-to-target-allowed :statement [{{:keys [state]} :application :as command}]
+  (or (if (= (keyword state) :sent)
+        (statement-in-sent-state-allowed command)
+        (att/if-not-authority-state-must-not-be #{:sent} command))
+      (statement-owner command)))
 
-(defn delete-attachment-allowed? [attachment-id {:keys [state statements] :as application}]
-  (when (and (= (keyword state) :sent) (not (statement-in-sent-state-allowed {:application application})))
-    (let [{target :target} (att/get-attachment-info application attachment-id)]
-      (when (= (-> target :type keyword) :statement)
-        (some (fn [{stat-id :id stat-state :state}]
-                (and (= stat-id (:id target))
-                     (not= (keyword stat-state) :given))) statements)))))
+(defmethod att/edit-allowed-by-target :statement [{{attachment-id :attachmentId} :data user :user {:keys [statements] :as application} :application}]
+  (cond (not (or (auth/application-authority? application user)
+                 (auth/has-auth-role? application (:id user) :statementGiver)))
+        (fail :error.unauthorized)
+
+        (-> (att/get-attachment-info application attachment-id) (get-in [:target :id]) (util/find-by-id statements) :state #{:given})
+        (fail :error.statement-already-given)))
+
+(defmethod att/delete-allowed-by-target :statement [{{attachment-id :attachmentId} :data :keys [state statements] :as application}]
+  (when (-> (att/get-attachment-info application attachment-id) (get-in [:target :id]) (util/find-by-id statements) :state #{:given})
+    (fail :error.statement-already-given)))
 
 (defn update-draft [statement text status modify-id editor-id]
   (update-statement statement modify-id :state :draft :text text :status status :editor-id editor-id))
