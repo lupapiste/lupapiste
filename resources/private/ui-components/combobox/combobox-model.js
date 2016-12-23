@@ -1,6 +1,8 @@
 // Combobx is a textinput with a list of predefined values.
 // Parameters [optional]:
-//   value: textinput value observable.
+//   value: Value observable. Note that the observable updates when
+//   combobox loses focus. However, changes to the observable are
+//   immediately reflected in the combobox.
 //   list: predefined value list. Can be either array or observable
 //   array.
 //   [testId: Text input test id (combobox-input)]
@@ -10,13 +12,27 @@ LUPAPISTE.ComboboxModel = function( params ) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  self.value = params.value;
+  var outsideValue = params.value;
   self.list  = params.list;
+  self.textInput = ko.observable( outsideValue() );
   self.selectedIndex = ko.observable(-1);
   self.testId = params.testId || "combobox-input";
 
   // Textinput focus
   self.hasFocus = ko.observable();
+
+  var hadFocus = false;
+  self.disposedSubscribe( self.hasFocus, function( flag ) {
+    if( hadFocus && !flag ) {
+      params.value( self.textInput());
+    }
+    hadFocus = flag;
+  });
+
+  self.disposedSubscribe( outsideValue, function( value ) {
+    self.textInput( value );
+  });
+
   // Linger is true if the user can still interact with the list even
   // if the textinput no longer has focus.
   var linger = ko.observable();
@@ -26,10 +42,10 @@ LUPAPISTE.ComboboxModel = function( params ) {
     var result = _.filter( ko.unwrap( self.list ),
                            function( item ) {
                              return _.includes( _.toLower(item),
-                                                _.toLower(_.trim( self.value())));
+                                                _.toLower(_.trim( self.textInput())));
                            });
     // List is not shown if it has only one item and it is exact match.
-    return _.size( result ) && _.first( result )  === _.trim(self.value())
+    return _.size( result ) && _.first( result )  === _.trim(self.textInput())
       ? []
       : result;
   });
@@ -58,7 +74,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
     switch( event.keyCode ) {
     case 13: // Enter
       if( index >= 0 ) {
-        self.value( self.shortList()[index]);
+        self.textInput( self.shortList()[index]);
       }
       self.selectedIndex( -1 );
       break;
@@ -91,6 +107,6 @@ LUPAPISTE.ComboboxModel = function( params ) {
   });
 
   self.select = function( data ) {
-    self.value( data );
+    self.textInput( data );
   };
 };

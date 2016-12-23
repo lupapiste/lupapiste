@@ -58,6 +58,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     };
   }
 
+  self.contentsList = self.disposedPureComputed( function() {
+    var fullType = _.find( service.attachmentTypes(),
+                           self.attachment().type());
+
+    return fullType ? service.contentsData( fullType ).list : [];
+  });
+
   function addUpdateListener(commandName, params, fn) {
     self.addEventListener(service.serviceName, _.merge({eventType: "update", attachmentId: self.id, commandName: commandName}, params), fn);
   }

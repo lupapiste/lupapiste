@@ -118,6 +118,7 @@ $previewHeight: 500px;
     padding-left: $marginM;
     width: 49%;
     vertical-align: top;
+    float: right;
   }
   @media (max-width: $narrow-breakpoint) {
     .col1, .col2 {
@@ -373,4 +374,13 @@ td.comment-text {
       }
     }
   }
+}
+
+.attachment-details-toggles {
+  margin-top: $marginL;
+  margin-bottom: $marginL;
+}
+
+.attachment-info-field .combobox-container {
+  width: 100%;
 }
