@@ -18,13 +18,6 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   self.groups = self.service.getInDocument(params.documentId, self.path).model;
 
   self.indicator = ko.observable().extend({notify: "always"});
-  self.result = ko.observable().extend({notify: "always"});
-  self.errorMessage = ko.observable();
-
-  self.result.subscribe(function(val) {
-    var resultMsg = val ? loc(["error", val[1]]) : "";
-    self.errorMessage(resultMsg);
-  });
 
   self.groupsRemovable = function(schema) {
     return !_.some(schema.body, "readonly") &&
@@ -38,7 +31,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
 
   self.removeGroup = function(group) {
     var removeFn = function () {
-      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, self.result);
+      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator);
     };
     var message = "document.delete." + params.schema.type + ".subGroup.message";
     hub.send("show-dialog", {ltitle: "remove",
@@ -54,7 +47,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
 
   self.duplicateLastGroup = function() {
     var sourceIndex = _(self.groups()).map("index").map(_.parseInt).max();
-    self.service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator, self.result);
+    self.service.copyRepeatingGroup(params.documentId, params.path, sourceIndex, self.indicator);
   };
 
   var addOneIfEmpty = function(groups) {
