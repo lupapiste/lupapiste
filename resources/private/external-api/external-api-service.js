@@ -69,8 +69,10 @@ LUPAPISTE.ExternalApiService = function() {
     }
   });
 
-  var enabled = _.isFunction(window.parent.LupapisteApi);
-  return { enabled: enabled};
+  var api = window.parent.LupapisteApi;
+  var enabled = _.isFunction(api);
+  return { enabled: enabled,
+           apiObject: api};
 };
 
 lupapisteApp.services.externalApiService = new LUPAPISTE.ExternalApiService();

@@ -841,10 +841,8 @@ var checkDesigners = function(yesFn) {
   };
 
   self.externalApi = {
-    enabled: ko.pureComputed(function() {
-      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.applicationAuthModel.ok("external-api-enabled");
-    }),
+    enabled: ko.pureComputed(function() { return lupapisteApp.models.rootVMO.externalApi.enabled(); }),
+    ok: function(fnName) { return lupapisteApp.models.rootVMO.externalApi.ok(fnName); },
     showOnMap: function(model) {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::show-on-map", permit);
