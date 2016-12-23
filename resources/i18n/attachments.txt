@@ -524,3 +524,4 @@
 "uploadzone.text-two" "en" "on your computer."
 "uploadzone.text-one" "sv" "Släpp filer här eller"
 "uploadzone.label" "sv" "välj filer"
+"uploadzone.text-two" "sv" "från din dator."
