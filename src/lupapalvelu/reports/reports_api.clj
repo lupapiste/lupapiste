@@ -1,16 +1,21 @@
 (ns lupapalvelu.reports.reports-api
-  (:require [lupapalvelu.action :refer [defraw]]
+  (:require [taoensso.timbre :refer [error]]
+            [sade.core :refer :all]
+            [sade.util :as util]
+            [lupapalvelu.action :refer [defraw]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
-            [lupapalvelu.reports.applications :as app-reports]
-            [taoensso.timbre :refer [error]]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.reports.applications :as app-reports]))
 
 (defraw open-applications-xlsx
   {:user-roles #{:authorityAdmin}}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
-        resulting-file-name (i18n/localize lang "applications.report.file-name")]
+        resulting-file-name (str (i18n/localize lang "applications.report.file-name")
+                                 "_"
+                                 (util/to-xml-date (now))
+                                 ".xlsx")]
     (try
       {:status  200
        :headers {"Content-Type"        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
