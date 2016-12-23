@@ -3,6 +3,7 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
   var self = this;
 
   self.service = params.service || lupapisteApp.services.documentDataService;
+  self.docModel = params.docModel;
 
   self.documentId = params.documentId;
   self.applicationId = params.applicationId;
@@ -29,9 +30,15 @@ LUPAPISTE.DocgenRepeatingGroupModel = function(params) {
     return self.authModel.ok(self.service.getUpdateCommand(params.documentId));
   };
 
+  function afterRemove(result) {
+    if (self.docModel && result.results) {
+      self.docModel.showValidationResults(result.results);
+    }
+  }
+
   self.removeGroup = function(group) {
     var removeFn = function () {
-      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator);
+      self.service.removeRepeatingGroup(params.documentId, params.path, group.index, self.indicator, afterRemove);
     };
     var message = "document.delete." + params.schema.type + ".subGroup.message";
     hub.send("show-dialog", {ltitle: "remove",
