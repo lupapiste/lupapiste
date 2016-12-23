@@ -216,15 +216,30 @@
                                   (zipmap (repeat "")))}}
       {})))
 
+(defn- apply-removals [document paths]
+  (reduce (fn [document path]
+            (->> (vec (flatten [:data path]))
+                 (map (fn [key]
+                        (cond
+                          (number? key) key
+                          (keyword? key) key
+                          :else (keyword key))))
+                 (util/dissoc-in document)))
+          document paths))
+
 (defn remove-document-data [{application :application {role :role} :user :as command} doc-id paths collection]
   (let [document (by-id application collection doc-id)
+        updated-doc (apply-removals document paths)
+        _ (println paths (get-in updated-doc [:data :huoneistot]))
+        post-results (model/validate application updated-doc)
         paths (map (partial map util/->keyword) paths)]
     (when-not document (fail! :error.document-not-found))
     (validate-against-whitelist! document paths role)
     (validate-readonly-removes! document paths)
     (->> (removing-updates-by-path collection doc-id paths)
          ((juxt :mongo-query :mongo-updates))
-         (apply update-application command))))
+         (apply update-application command))
+    {:ok true :results post-results}))
 
 (defn new-doc
   ([application schema created] (new-doc application schema created []))
