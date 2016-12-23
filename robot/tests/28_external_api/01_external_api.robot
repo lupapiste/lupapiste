@@ -104,6 +104,19 @@ Transfering task emits LupapisteApi.integrationSent function call
   Confirm  dynamic-ok-confirm-dialog
   Permit properties should be visible in dialog
 
+Button not visible if parent function isnt implemented
+  Go to page  applications
+  Open search tab  all
+  Wait until  Element should be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+  Execute Javascript  window.LupapisteApi.showPermitsOnMap = null
+  Open search tab  application
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  0
+  Wait until  Element should not be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+  Open search tab  all
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
+  Wait until  Element should not be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+
+
 *** Keywords ***
 
 Permit properties should be visible in dialog
