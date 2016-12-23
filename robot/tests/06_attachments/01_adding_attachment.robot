@@ -146,12 +146,12 @@ Remove version, not needed selectable
   Delete attachment version  1.0
   Wait until  Element should be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
   Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Wait until  Element should be visible  xpath=//section[@id='attachment']//button[@id='add-new-attachment-version']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
 
 Checking not needed in attachment page affects attachment listing
   [Tags]  attachments
   Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Wait until  Element should not be visible  xpath=//section[@id='attachment']//button[@data-test-id='add-new-attachment-version']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
   Return to application
   Wait until  Not needed should be visible  muut.muu
   Not needed should be selected  muut.muu

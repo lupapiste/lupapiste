@@ -818,9 +818,9 @@ Attachment file upload
 # Add file version from attachment details
 Add attachment version
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
-  Click Element  xpath=//button[@id="add-new-attachment-version"]
-  Attachment file upload  ${path}
+  Wait Until  Element should be visible  jquery=label[data-test-id=upload-button-label]
+  Scroll and click test id  upload-button-label
+  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
 
 # Add the first file to template from attachments view
 Add attachment file
