@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1482503303685');
+@import url('main-blessed1.css?z=1482574254237');
 
 /* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .table-reject-note-editor:after {
@@ -8144,56 +8144,55 @@ td.comment-text {
 /* line 200, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label {
   margin-bottom: 12px;
-  overflow: hidden;
 }
-/* line 205, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 203, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label #attachment-latest-version-info {
   margin-bottom: 24px;
 }
-/* line 209, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 207, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 215, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 213, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
   font-weight: bold;
 }
-/* line 220, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 218, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-label-info-item {
   margin-right: 24px;
 }
-/* line 224, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 222, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 100%;
   height: 26px;
 }
-/* line 231, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 229, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label input[type="checkbox"] {
   display: inline-block;
   width: 3.75em;
 }
-/* line 236, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 234, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 100%;
 }
-/* line 241, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 239, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
   position: relative;
 }
 
-/* line 247, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 245, ../../../private/common-html/sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 251, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 249, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -8201,7 +8200,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 258, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 256, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -8210,64 +8209,64 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 266, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 264, ../../../private/common-html/sass/views/_attachment.scss */
 .signature-cell {
   display: table-cell;
   width: 200px;
 }
 
-/* line 271, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 269, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content {
   margin-top: 12px;
 }
-/* line 274, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 272, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable {
   margin: 0;
 }
-/* line 276, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 274, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable tr {
   background: transparent;
   border: none;
 }
-/* line 280, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 278, ../../../private/common-html/sass/views/_attachment.scss */
 .tos-metadata-content .subtable th, .tos-metadata-content .subtable td {
   background: transparent;
   padding: 0;
 }
 
-/* line 287, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 285, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions {
   margin-bottom: 24px;
 }
-/* line 288, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 286, ../../../private/common-html/sass/views/_attachment.scss */
 .upload-instructions p {
   line-height: normal;
   margin-bottom: 12px;
 }
 
-/* line 295, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 293, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid {
   margin-top: 12px;
 }
-/* line 297, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 295, ../../../private/common-html/sass/views/_attachment.scss */
 .archive-valid [class^="lupicon-"] {
   vertical-align: middle;
   margin-left: 2px;
   font-size: 18px;
 }
 
-/* line 304, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 302, ../../../private/common-html/sass/views/_attachment.scss */
 .modal-body p {
   max-width: 600px;
 }
 
-/* line 309, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 307, ../../../private/common-html/sass/views/_attachment.scss */
 .targetted-attachments {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-/* line 316, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 314, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-operations {
   margin-top: 1em;
   margin-bottom: 2em;
@@ -8289,41 +8288,41 @@ td.comment-text {
   margin-right: 0;
 }
 
-/* line 324, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 322, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-assignment-row {
   border-top: none;
   border-bottom: none;
 }
-/* line 329, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 327, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-assignment-row td {
   padding: 0px;
   margin: 0px;
 }
 
-/* line 335, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 333, ../../../private/common-html/sass/views/_attachment.scss */
 .hidden-row {
   height: 0px;
   border-top: none;
   border-bottom: none;
 }
-/* line 341, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 339, ../../../private/common-html/sass/views/_attachment.scss */
 .hidden-row td {
   height: 0px;
   padding: 0px;
   margin: 0px;
 }
 
-/* line 348, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 346, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types {
   margin-top: 12px;
   margin-bottom: 12px;
 }
 
-/* line 353, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 351, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container {
   min-height: 40px;
 }
-/* line 355, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 353, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag {
   position: relative;
   background-color: #f6f6f6;
@@ -8332,31 +8331,32 @@ td.comment-text {
   width: 100%;
   display: inline-block;
 }
-/* line 362, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 360, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag span.tag-label {
   display: inline-block;
   margin: 6px;
   font-weight: bold;
 }
-/* line 367, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 365, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove {
   position: absolute;
   top: 8px;
   right: 8px;
   color: #f39129;
 }
-/* line 372, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 370, ../../../private/common-html/sass/views/_attachment.scss */
 .selected-attachment-types-container .selected-attachment-type-tag .tag-remove:hover {
   color: #f7ac2e;
 }
 
-/* line 379, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 377, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-details-toggles {
-  margin-top: 24px;
-  margin-bottom: 24px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  clear: both;
 }
 
-/* line 384, ../../../private/common-html/sass/views/_attachment.scss */
+/* line 383, ../../../private/common-html/sass/views/_attachment.scss */
 .attachment-info-field .combobox-container {
   width: 100%;
 }

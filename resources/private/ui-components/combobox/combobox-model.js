@@ -74,7 +74,7 @@ LUPAPISTE.ComboboxModel = function( params ) {
     switch( event.keyCode ) {
     case 13: // Enter
       if( index >= 0 ) {
-        self.textInput( self.shortList()[index]);
+        outsideValue( self.shortList()[index]);
       }
       self.selectedIndex( -1 );
       break;
@@ -107,6 +107,6 @@ LUPAPISTE.ComboboxModel = function( params ) {
   });
 
   self.select = function( data ) {
-    self.textInput( data );
+    outsideValue( data );
   };
 };

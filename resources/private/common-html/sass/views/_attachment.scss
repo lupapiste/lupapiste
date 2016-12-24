@@ -199,8 +199,6 @@ td.comment-text {
 
 .attachment-label {
   margin-bottom: $marginM;
-  overflow: hidden;
-
 
   #attachment-latest-version-info {
     margin-bottom: $marginL;
@@ -377,8 +375,9 @@ td.comment-text {
 }
 
 .attachment-details-toggles {
-  margin-top: $marginL;
-  margin-bottom: $marginL;
+  padding-top: $marginL;
+  padding-bottom: $marginL;
+  clear: both;
 }
 
 .attachment-info-field .combobox-container {
