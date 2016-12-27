@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-operation-buttons-template">
   <div class="operation-button-row">
-    <div class="stacked--inline">
+    <div class="stacked--inline" data-bind="visible: upload.batchListHidden">
       <button class="positive caps"
               data-bind="click: $data.attachmentTemplatesAdd,
                          visible: $data.authModel.ok('create-attachments')"
@@ -15,8 +15,9 @@
     </div>
     <upload-zone params="upload: upload,
                          testId: 'add-attachments'"></upload-zone>
-    </div>
+  </div>
 
+  <!-- ko if: upload.batchListHidden -->
   <div data-bind="component: { name: 'attachments-require-bubble',
                   params: { bubbleVisible: requireAttachmentsBubbleVisible } }"
        class="operation-bubble"></div>
@@ -68,4 +69,5 @@
       <span data-bind="ltext: 'download-all-short'"></span>
     </button>
   </div>
+  <!-- /ko -->
 </script>
