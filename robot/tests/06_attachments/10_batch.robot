@@ -201,7 +201,7 @@ Upload attachments results: signed
 Upload attachments results: hakija.valtakirja
   jQuery should match X times  tr[data-test-type='hakija.valtakirja']  1
   Open attachment details  hakija.valtakirja
-  Test id input is  attachment-contents-input  CV
+  Test id input is  attachment-contents-input  My contents
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
   Test id select is  attachment-operation-select  parties
   [Teardown]  Logout
