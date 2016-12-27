@@ -90,8 +90,8 @@
       <div class="col1">
         <div class="attachment-file-versions">
           <div>
-            <attachment-upload params="id: id"
-                           data-bind="visible: $data.uploadingAllowed()"></attachment-upload>
+            <attachment-upload params="id: id, ltext: 'attachment.addVersion'"
+                               data-bind="visible: $data.uploadingAllowed()"></attachment-upload>
 
             <button data-test-id="add-ram-attachment"
                     class="positive"

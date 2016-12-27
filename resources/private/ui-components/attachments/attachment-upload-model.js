@@ -4,8 +4,10 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
 
   var service = lupapisteApp.services.attachmentsService;
 
-  self.componentTemplate = "attachment-upload-link-template";
+  self.componentTemplate = params.template || "attachment-upload-link-template";
+
   self.id = params.id;
+  self.ltext = params.ltext;
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
