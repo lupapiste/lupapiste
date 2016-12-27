@@ -34,7 +34,7 @@ Bad batch
 
 Add good one and cancel
   Add to batch
-  Test id text is  upload-progress-title  TIEDOSTO LISÄTTY.
+  Test id text is  upload-progress-title  1 tiedosto lisätty
   Scroll and click test id  batch-cancel
   No such test id  upload-progress-title
   Wait until  Element should not be visible  jquery=table.attachment-batch-table  
@@ -43,15 +43,15 @@ Add good one and cancel
 Batch of four files
   No such test id  upload-progress-title
   Add to batch
-  Test id text is  upload-progress-title  TIEDOSTO LISÄTTY.
+  Test id text is  upload-progress-title  1 tiedosto lisätty
   No such test id  sign-all
   Add to batch
-  Test id text is  upload-progress-title  2 TIEDOSTOA LISÄTTY.
+  Test id text is  upload-progress-title  2 tiedostoa lisätty
   Wait test id visible  sign-all            
   Add to batch                              
-  Test id text is  upload-progress-title  3 TIEDOSTOA LISÄTTY.
+  Test id text is  upload-progress-title  3 tiedostoa lisätty
   Add to batch                              
-  Test id text is  upload-progress-title  4 TIEDOSTOA LISÄTTY.
+  Test id text is  upload-progress-title  4 tiedostoa lisätty
   Test id disabled  batch-ready
 
 Default contents: type
@@ -171,7 +171,7 @@ Password checking
 Remove the second file
   Scroll and click test id  batch-remove-1
   No such test id  batch-type-3  
-  Test id text is  upload-progress-title  3 TIEDOSTOA LISÄTTY.
+  Test id text is  upload-progress-title  3 tiedostoa lisätty
 
 Bad file
   Add bad

@@ -6066,6 +6066,7 @@ button:focus {
 
 /* line 662, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row {
+  margin-bottom: 20px;
   display: block;
 }
 /* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
@@ -6084,7 +6085,7 @@ button:focus {
 .operation-button-row :last-child {
   margin-right: 0;
 }
-/* line 665, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 666, ../../../private/common-html/sass/partials/_buttons.scss */
 .operation-button-row .stacked--inline {
   float: left;
 }
