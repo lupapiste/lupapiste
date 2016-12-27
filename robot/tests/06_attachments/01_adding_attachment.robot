@@ -19,7 +19,7 @@ Mikko goes to empty attachments tab
 
 Mikko sees all "not needed" checkboxes as enabled and not selected
   [Tags]  attachments
-  Wait until  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
+  Wait until  Attachment group should be visible  0  HAKEMUKSEN LIITTEET
   Wait until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
   Not needed should not be selected  hakija.valtakirja
   Not needed should not be selected  paapiirustus.asemapiirros
