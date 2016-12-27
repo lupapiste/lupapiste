@@ -524,4 +524,4 @@
 "uploadzone.text-two" "en" "on your computer. You can add multiple files at once."
 "uploadzone.text-one" "sv" "<b>Lägg till bilaga:</b> Släpp filer här eller"
 "uploadzone.label" "sv" "välj filer"
-"uploadzone.text-two" "sv" "från din dator. Du kan tillägga flera bilaga samtidigt."
+"uploadzone.text-two" "sv" "från din dator. Du kan lägga till flera bilagor."
