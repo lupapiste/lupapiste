@@ -1,7 +1,12 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="required-fields-summary-tab-template">
   <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
       <div>
+          <!-- ko if: $root.authorization.ok('approve-application') -->
+          <h1 data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></h1>
+          <!-- /ko -->
+          <!-- ko ifnot: $root.authorization.ok('approve-application') -->
           <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
+          <!-- /ko -->
 
           <div class="clear spacerM"></div>
           <!-- ko if: municipalityHearsNeighborsVisible -->
