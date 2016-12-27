@@ -377,20 +377,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.nonApprovedDesigners = ko.observableArray([]);
 
-  var checkDesigners = function(yesFn) {
-    var nonApprovedDesigners = self.nonApprovedDesigners();
-    // All designers have not been approved?
-    if (!_.isEmpty(nonApprovedDesigners)) {
-      var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
-      hub.send("show-dialog", {ltitle: "application.designers-not-approved",
-        size: "medium",
-        component: "yes-no-dialog",
-        componentParams: {text: text, yesFn: yesFn, lyesTitle: "continue", lnoTitle: "cancel"}});
-    } else {
-      yesFn();
-    }
-  };
-
   function checkForNonApprovedDesigners() {
     var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
         return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
@@ -404,8 +390,8 @@ LUPAPISTE.ApplicationModel = function() {
         var docData = accordionService.getDocumentData(docModel.docId); // The current data
         var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
         var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
-        // Escape HTML special chars
-        return "<li>" + _.escape(title + headerDescription) + "</li>";
+
+        return title + headerDescription;
       })
       .value();
     self.nonApprovedDesigners(nonApproved);
@@ -450,7 +436,7 @@ LUPAPISTE.ApplicationModel = function() {
         componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
           yesFn: _.partial(checkDesigners, approve)}});
     } else {
-      checkDesigners(approve);
+      approve();
     }
     return false;
   };
