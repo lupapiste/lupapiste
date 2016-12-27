@@ -952,7 +952,6 @@ Submit application error should be
 
 Approve application ok
   Click enabled by test id  approve-application
-  Confirm ok dialog
   Wait until  Application state should be  sent
 
 Approve application yes
