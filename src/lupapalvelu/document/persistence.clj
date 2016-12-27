@@ -230,7 +230,6 @@
 (defn remove-document-data [{application :application {role :role} :user :as command} doc-id paths collection]
   (let [document (by-id application collection doc-id)
         updated-doc (apply-removals document paths)
-        _ (println paths (get-in updated-doc [:data :huoneistot]))
         post-results (model/validate application updated-doc)
         paths (map (partial map util/->keyword) paths)]
     (when-not document (fail! :error.document-not-found))
