@@ -52,13 +52,9 @@
             <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
           <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('upload-attachment')">
-            <a class="link-btn link-btn--link"
-               data-bind="click: $parent.addFile"
-               data-test-id="add-attachment-file">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addFile'"
-                    data-test-id="add-file-link"></span>
-            </a>
+            <attachment-upload params="id: $data.id,
+                                       ltext: 'attachment.addFile',
+                                       template: 'attachment-upload-link-template'"></attachment-upload>
           </td>
           <td data-bind="if: $data.authModel.ok('set-attachment-not-needed')">
             <div class="checkbox-wrapper">
