@@ -31,7 +31,7 @@
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <!-- /ko -->
 
-          <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear">
+          <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
             <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
             <span data-bind="ltext: 'application.designers-not-approved-help'"></span>
             <ul data-bind="foreach: nonApprovedDesigners">
