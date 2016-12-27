@@ -12,10 +12,11 @@ LUPAPISTE.UploadButtonModel = function( params ) {
 
   self.upload = params.upload;
 
+  self.waiting = params.waiting || self.upload.waiting;
+
   // Setting for attribute to "" effectively disables file selection.
   self.labelFor = self.disposedComputed( function() {
-    return self.upload.waiting()
-      || self.upload.readOnly ? "" : self.upload.fileInputId;
+    return self.waiting() || self.upload.readOnly ? "" : self.upload.fileInputId;
   });
 
   self.options = _.defaults( _.pick( params,
