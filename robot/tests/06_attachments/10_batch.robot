@@ -62,7 +62,7 @@ Default contents: type
 Default contents: only item
   Select type  1  Muu pelastusviranomaisen suunnitelma
   Contents is  1  Paloturvallisuuden perustietolomake
-  Grouping is  1  Asuinkerrostalon tai rivitalon rakentaminen
+  Grouping is  1  Tekniset selvitykset
 
 Default contents: empty
   Select type  2  KVV-suunnitelma
@@ -201,7 +201,7 @@ Upload attachments results: signed
 Upload attachments results: hakija.valtakirja
   jQuery should match X times  tr[data-test-type='hakija.valtakirja']  1
   Open attachment details  hakija.valtakirja
-  Test id input is  attachment-contents-input  My contents
+  Test id input is  attachment-contents-input  CV
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
   Test id select is  attachment-operation-select  parties
   [Teardown]  Logout
@@ -245,7 +245,7 @@ Check the attachment details just in case
   Open attachment details  rakennuspaikan_hallinta.rasitesopimus
   Test id input is  attachment-contents-input  Rasitesopimus
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
-  Test id select is  attachment-operation-select  Rakennuspaikka
+  Test id select is  attachment-operation-select  Yleisesti hankkeeseen
   [Teardown]  Logout
 
 # ------------------------------
