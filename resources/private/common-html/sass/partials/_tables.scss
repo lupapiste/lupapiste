@@ -492,7 +492,7 @@ select.waste-unit-select {
 .attachment-batch-table {
   @include no-row-hover;
   td {
-    white-space: nowrap;
+    word-break: break-all;
   }
   .td-center {
     text-align: center;
