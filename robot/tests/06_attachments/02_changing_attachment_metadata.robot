@@ -61,17 +61,11 @@ Mikko can change related operation
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
 
-Mikko can change size
-  Element should be visible  xpath=//select[@data-test-id='attachment-size-select']
-  Select From List  xpath=//select[@data-test-id='attachment-size-select']  B0
-  Sleep  1
-  Negative indicator icon should not be visible
-
-Mikko can change scale
-  Element should be visible  xpath=//select[@data-test-id='attachment-scale-select']
-  Select From List  xpath=//select[@data-test-id='attachment-scale-select']  1:200
-  Sleep  1
-  Negative indicator icon should not be visible
+Mikko can change drawing number
+  Element should be visible  xpath=//input[@data-test-id='attachment-drawing-number']
+  Input text by test id  attachment-drawing-number  piir1.0
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
 
 Mikko can change contents
   Element should be visible  xpath=//input[@data-test-id='attachment-contents-input']
@@ -94,9 +88,8 @@ Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
-  Page should contain  B0
+  Page should contain  piir1.0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
-  Page should contain  1:200
   Go Back
   Tab should be visible  attachments
 
