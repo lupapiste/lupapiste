@@ -213,6 +213,7 @@ Change attachment type
   Select from list  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
+  Positive indicator should be visible
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
   Scroll to test id  back-to-application-from-attachment
   Click element  jquery=[data-test-id=back-to-application-from-attachment]
@@ -303,7 +304,7 @@ Sonja adds new attachment template
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
   Logout
 
 Mikko logs back in and browses to the Attachments tab
@@ -327,7 +328,7 @@ Sonja logs back in and browses to the Attachments tab
 Sonja deletes the newly created attachment template
   [Tags]  attachments
   Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
