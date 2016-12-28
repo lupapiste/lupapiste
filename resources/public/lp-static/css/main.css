@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1482421160660');
+@import url('main-blessed1.css?z=1482845170867');
 
 /* line 894, ../../../private/common-html/sass/partials/_forms.scss */
 div.sticky .form-approval-status.no-border-bottom .like-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn span.is-details--rejected, div.sticky .form-approval-status.no-border-bottom a.link-btn-julkipano span.is-details--rejected {
@@ -8229,7 +8229,7 @@ td.comment-text {
   margin-top: 1em;
   margin-bottom: 2em;
 }
-/* line 639, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 638, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations > .btn-base, .attachment-operations > [type=submit], .attachment-operations > .btn, .dataTables_paginate .attachment-operations > .paginate_disabled_previous, .dataTables_paginate .attachment-operations > .paginate_disabled_next, .attachment-operations > button, .attachment-operations > .like-btn, .attachment-operations > a.link-btn, .attachment-operations > a.link-btn-julkipano, .attachment-operations > .check-string,
 .attachment-operations > .btn,
 .dataTables_paginate .attachment-operations > .paginate_disabled_previous,
@@ -8241,7 +8241,7 @@ td.comment-text {
   margin-right: 12px;
   margin-bottom: 12px;
 }
-/* line 650, ../../../private/common-html/sass/partials/_buttons.scss */
+/* line 649, ../../../private/common-html/sass/partials/_buttons.scss */
 .attachment-operations :last-child {
   margin-right: 0;
 }
@@ -9461,13 +9461,13 @@ ul.appeals-files li span.appeals-files__size {
   #side-panel .message-buttons {
     display: table;
   }
-  /* line 526, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 525, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons .btn-base, #side-panel .message-buttons [type=submit], #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button, #side-panel .message-buttons .like-btn, #side-panel .message-buttons a.link-btn, #side-panel .message-buttons a.link-btn-julkipano, #side-panel .message-buttons .check-string, #side-panel .message-buttons .btn, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_previous, #side-panel .message-buttons .dataTables_paginate .paginate_disabled_next, .dataTables_paginate #side-panel .message-buttons .paginate_disabled_next, #side-panel .message-buttons button {
     width: 100%;
     display: block;
     margin: 0;
   }
-  /* line 531, ../../../private/common-html/sass/partials/_buttons.scss */
+  /* line 530, ../../../private/common-html/sass/partials/_buttons.scss */
   #side-panel .message-buttons div {
     overflow-y: hidden;
   }

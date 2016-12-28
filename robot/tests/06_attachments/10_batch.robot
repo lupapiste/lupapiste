@@ -30,15 +30,15 @@ Bad batch
   No such test id  upload-progress-title
   Add bad
   No such test id  upload-progress-title
-  Element should not be visible  jquery=table.attachment-batch-table  
+  Element should not be visible  jquery=table.attachment-batch-table
 
 Add good one and cancel
   Add to batch
   Test id text is  upload-progress-title  TIEDOSTO LISÄTTY.
   Scroll and click test id  batch-cancel
   No such test id  upload-progress-title
-  Wait until  Element should not be visible  jquery=table.attachment-batch-table  
-  
+  Wait until  Element should not be visible  jquery=table.attachment-batch-table
+
 
 Batch of four files
   No such test id  upload-progress-title
@@ -47,10 +47,10 @@ Batch of four files
   No such test id  sign-all
   Add to batch
   Test id text is  upload-progress-title  2 TIEDOSTOA LISÄTTY.
-  Wait test id visible  sign-all            
-  Add to batch                              
+  Wait test id visible  sign-all
+  Add to batch
   Test id text is  upload-progress-title  3 TIEDOSTOA LISÄTTY.
-  Add to batch                              
+  Add to batch
   Test id text is  upload-progress-title  4 TIEDOSTOA LISÄTTY.
   Test id disabled  batch-ready
 
@@ -101,37 +101,37 @@ Fill grouping
   Grouping is  1  Osapuolet
   Grouping is  2  Yleisesti hankkeeseen
   Grouping is  3  Yleisesti hankkeeseen
-  
+
 Fill drawing: integers
   Fill test id  batch-drawing-0  1
   Fill down  drawing-0
-  Test id input is  batch-drawing-0  1  
-  Test id input is  batch-drawing-1  2  
-  Test id input is  batch-drawing-2  3  
-  Test id input is  batch-drawing-3  4  
+  Test id input is  batch-drawing-0  1
+  Test id input is  batch-drawing-1  2
+  Test id input is  batch-drawing-2  3
+  Test id input is  batch-drawing-3  4
 
 Fill drawing: decimals with comma
   Fill test id  batch-drawing-1  0,19
   Fill down  drawing-1
-  Test id input is  batch-drawing-0  1  
-  Test id input is  batch-drawing-1  0,19  
-  Test id input is  batch-drawing-2  0.20  
-  Test id input is  batch-drawing-3  0.21  
+  Test id input is  batch-drawing-0  1
+  Test id input is  batch-drawing-1  0,19
+  Test id input is  batch-drawing-2  0.20
+  Test id input is  batch-drawing-3  0.21
 
 Fill drawing: decimals with period
   Fill test id  batch-drawing-2  7.88
   Fill down  drawing-2
-  Test id input is  batch-drawing-0  1  
-  Test id input is  batch-drawing-1  0,19  
-  Test id input is  batch-drawing-2  7.88  
+  Test id input is  batch-drawing-0  1
+  Test id input is  batch-drawing-1  0,19
+  Test id input is  batch-drawing-2  7.88
   Test id input is  batch-drawing-3  7.89
 
 Fill drawing: no numbers
   Fill test id  batch-drawing-0  88foo
   Fill down  drawing-0
   Test id input is  batch-drawing-0  88foo
-  Test id input is  batch-drawing-1  88foo  
-  Test id input is  batch-drawing-2  88foo  
+  Test id input is  batch-drawing-1  88foo
+  Test id input is  batch-drawing-2  88foo
   Test id input is  batch-drawing-3  88foo
 
 Applicant cannot mark attachments as construction time
@@ -159,7 +159,7 @@ Checking one signbox reveals password field
   Checkbox wrapper selected by test id  batch-sign-3-input
 
 Password checking
-  Element should be visible  jquery=div.batch-password i.lupicon-flag  
+  Element should be visible  jquery=div.batch-password i.lupicon-flag
   Test id disabled  batch-ready
   Input text with jQuery  input#batch-password  foobar
   Wait until  Element should be visible  jquery=div.batch-password i.lupicon-warning
@@ -170,12 +170,12 @@ Password checking
 
 Remove the second file
   Scroll and click test id  batch-remove-1
-  No such test id  batch-type-3  
+  No such test id  batch-type-3
   Test id text is  upload-progress-title  3 TIEDOSTOA LISÄTTY.
 
 Bad file
   Add bad
-  
+
 Make the first batch row to match an empty template
   Select type  0  Valtakirja
   Fill test id  batch-contents-0  My contents
@@ -213,7 +213,7 @@ Upload attachments results: hakija.valtakirja
 Sonja logs in
   Sonja logs in
   Open application attachments
-  
+
 Sonja sees construction column
   Add to batch
   Wait test id visible  batch-construction-0-label
@@ -263,7 +263,7 @@ Luukas logs in but cannot add attachments
 
 Empty attachment
   [Arguments]  ${type}
-  Wait until  Element should be visible  jquery=tr[data-test-type='${type}'] span[data-test-id=add-file-link]
+  Wait until  Element should be visible  jquery=tr[data-test-type='${type}'] label[data-test-id=add-attachment-file-label]
 
 Add to batch
   [Arguments]  ${path}=${PNG_TESTFILE_PATH}  ${good}=True
@@ -292,11 +292,11 @@ Grouping is
   [Arguments]  ${index}  ${value}
   Wait Until  List selection should be  jquery=div[data-test-id=batch-grouping-${index}] select[data-test-id=attachment-operation-select]  ${value}
 
-Fill down 
+Fill down
   [Arguments]  ${cell}
   ${icon-button}=  Set Variable  icon-button[data-test-id=fill-${cell}]
   Execute Javascript  $("${icon-button}").css( "display", "block")
-  Click button  jquery=${icon-button} button    
+  Click button  jquery=${icon-button} button
   Execute Javascript  $("${icon-button}").css( "display", "none")
 
 Open application attachments
