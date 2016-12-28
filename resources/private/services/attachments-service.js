@@ -297,31 +297,70 @@ LUPAPISTE.AttachmentsService = function() {
     };
   };
 
-  function pollBindJob(statuses, attachments, response) {
-    var job = response.job;
-    _.forEach( _.values(job.value), function(fileData) {
-      if ( statuses[fileData.fileId] ) {
-        statuses[fileData.fileId](fileData.status);
-      }
+  var retryTimeouts = [7*1000, 7*1000, 7*1000, 7*1000,
+                       7*1000, 7*1000, 7*1000, 7*1000,
+                       10*1000, 10*1000]; // total 76 secs
+
+  function pollTimeout(statuses) {
+    warn("Timeout from bind-attachment(s), fileIds: " + _.join(_.keys(statuses), ","));
+    _.forEach(statuses, function(status) {
+      status(self.JOB_TIMEOUT);
     });
-    if ( job.status === self.JOB_RUNNING ) {
-      ajax.query( "bind-attachments-job", { jobId: job.id,
-                                            version: job.version })
-        .success( _.partial(pollBindJob, statuses, attachments) )
-        .call();
-    } else {
-      _.forEach(statuses, function(status) {
-        if (status === self.JOB_RUNNING) {
-          status(self.JOB_TIMEOUT);
+  }
+
+  function pollBindJob(statuses, attachments, previousJob, timeouts , response) {
+    var timeout = _.head(timeouts);
+    if (response.result === "update") {
+      var job = response.job;
+      _.forEach( _.values(job.value), function(fileData) {
+        if ( statuses[fileData.fileId] ) {
+          statuses[fileData.fileId](fileData.status);
         }
       });
-      if ( attachments.length === 1 && attachments[0].attachmentId ) {
-        self.queryOne(attachments[0].attachmentId);
-        self.queryTagGroupsAndFilters();
+      if ( job.status === self.JOB_RUNNING ) {
+        var jobData = {jobId: job.id,
+                       version: job.version,
+                       timeout: timeout};
+        ajax.query("bind-attachments-job", jobData)
+          .success(_.partial(pollBindJob, statuses, attachments, jobData, _.clone(retryTimeouts)))
+          .call();
+      } else { // self.JOB_DONE
+        _.forEach(statuses, function(status) {
+          if (status === self.JOB_RUNNING) {
+            status(self.JOB_TIMEOUT);
+          }
+        });
+        self.authModel.refresh({id: self.applicationId()});
+        if ( attachments.length === 1 && attachments[0].attachmentId ) {
+          self.queryOne(attachments[0].attachmentId, {triggerCommand: "upload-attachment"});
+          self.queryTagGroupsAndFilters();
+        } else {
+          self.queryAll();
+        }
+      }
+    } else { // timeout
+      if (timeout) { // timeouts left, retry and decrease amount of retries
+        var timeoutedJob = {jobId: previousJob.jobId,
+                            version: previousJob.version,
+                            timeout: timeout};
+        _.delay(function() {
+          ajax.query( "bind-attachments-job", timeoutedJob)
+          .success(_.partial(pollBindJob, statuses, attachments, timeoutedJob, _.tail(timeouts)))
+          .call();
+        }, 1000);
+
       } else {
-        self.queryAll();
+        pollTimeout(statuses);
       }
     }
+
+  }
+
+  function startBindPolling(statuses, attachments, response) {
+    var jobData = { jobId: response.job.id, version: response.job.version};
+    ajax.query( "bind-attachments-job", jobData)
+      .success( _.partial(pollBindJob, statuses, attachments, jobData, _.clone(retryTimeouts)) )
+      .call();
   }
 
   self.bindAttachments = function(attachments, password) {
@@ -331,7 +370,7 @@ LUPAPISTE.AttachmentsService = function() {
                              filedatas: attachments },
                            _.some(attachments, "sign")  ? {password: password} : {} ))
       .processing( self.processing )
-      .success( _.partial(pollBindJob, jobStatuses, attachments) )
+      .success( _.partial(startBindPolling, jobStatuses, attachments) )
       .call();
 
     return jobStatuses;
@@ -343,7 +382,7 @@ LUPAPISTE.AttachmentsService = function() {
                                        attachmentId: attachmentId,
                                        fileId: fileId })
       .processing( self.processing )
-      .success( _.partial(pollBindJob, jobStatuses, [{attachmentId: attachmentId}]) )
+      .success( _.partial(startBindPolling, jobStatuses, [{attachmentId: attachmentId}]) )
       .call();
 
     return jobStatuses[fileId];

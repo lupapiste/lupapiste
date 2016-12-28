@@ -61,7 +61,7 @@
         </button>
       </div>
 
-      <div data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
+      <div data-test-id="approval-component" data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
       <div data-bind="component: {name: 'reject-note',
                       params: {attachmentId: id,
                       editorCss: 'attachment-reject-note-editor',
@@ -90,8 +90,9 @@
       <div class="col1">
         <div class="attachment-file-versions">
           <div>
-            <upload-button params="upload: upload, buttonText: 'attachment.addVersion'"
-                           data-bind="visible: $data.uploadingAllowed()"></upload-button>
+            <attachment-upload params="id: id, ltext: 'attachment.addVersion'"
+                               data-bind="visible: $data.uploadingAllowed()"></attachment-upload>
+
             <button data-test-id="add-ram-attachment"
                     class="positive"
                     data-bind="click: $data.newRamAttachment,
@@ -113,7 +114,7 @@
           <div class="attachment-file-versions-content"
                data-bind="if: $data.showAttachmentVersionHistory">
             <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-            <table class="table table-even-odd">
+            <table data-test-id="attachment-versions-table" class="table table-even-odd">
               <thead>
                 <tr>
                   <th data-bind="ltext: 'application.attachmentState'"></th>
@@ -204,9 +205,15 @@
                 <combobox params="value: $data.attachment().contents,
                                   list: contentsList,
                                   enable: $data.metaUpdateAllowed(),
-                                  testId: 'attachment-contents-input'"></combobox>                
+                                  testId: 'attachment-contents-input'"></combobox>
               </div>
               <div class="col2 attachment-info-field">
+                <label data-bind="ltext: 'attachment.drawing-number'"></label>
+                <input class="grid-style-input" data-bind="value: $data.attachment().drawingNumber,
+                                                           enable: $data.metaUpdateAllowed(),
+                                                           testId: 'attachment-drawing-number'">
+              </div>
+              <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
                 <div data-bind="component: {name: 'attachment-group-selector',
                                             params: { legacy: false,
@@ -214,26 +221,7 @@
                                                       editable: operationSelectorEditable,
                                                       currentGroup: attachment().group }}"></div>
               </div>
-              <div class="col1 attachment-info-field">
-                <label data-bind="ltext: 'attachment.label.scale'"></label>
-                <select class="dropdown" data-test-id="attachment-scale-select"
-                        data-bind="options: $data.scales,
-                                   optionsText: $data.getScaleOptionsText,
-                                   optionsCaption: loc('choose'),
-                                   value: $data.attachment().scale,
-                                   enable: $data.metaUpdateAllowed()"></select>
-              </div>
-              <div class="col2 attachment-info-field">
-                <label data-bind="ltext: 'attachment.label.size'"></label>
-                <select class="dropdown"
-                        data-test-id="attachment-size-select"
-                        data-bind="options: $data.sizes,
-                                   optionsText: loc,
-                                   optionsCaption: loc('choose'),
-                                   value: $data.attachment().size,
-                                   enable: $data.metaUpdateAllowed()"></select>
-              </div>
-              
+
               <div class="attachment-details-toggles">
                 <div class="attachment-info-field"
                      data-bind="if: $data.setConstructionTimeVisible()">
@@ -250,7 +238,7 @@
                                   ltext: 'attachment.label.verdictAttachment',
                                   prefix: 'blockbox',
                                   testId: 'is-verdict-attachment'"></toggle>
-                  
+
                 </div>
 
                 <div class="attachment-info-field"

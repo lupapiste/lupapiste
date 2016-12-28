@@ -14,11 +14,6 @@ LUPAPISTE.AttachmentsOperationButtonsModel = function(params) {
 
   self.upload = params.upload;
 
-  self.uploadOptions = { buttonClass: "positive caps",
-                         buttonText: "attachment.add-multiple",
-                         upload: params.upload,
-                         testId: "add-attachments"};
-
   self.newAttachment = function() {
     hub.send( "add-attachment-file", {} );
   };

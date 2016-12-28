@@ -273,6 +273,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
                type: _.pick( data.type.value(), ["type-group", "type-id"] ),
                group: groupParam(data.grouping.value() || {groupType: null} ),
                contents: data.contents.value(),
+               drawingNumber: data.drawing.value(),
                sign: data.sign.value(),
                constructionTime: data.construction.value() };
     }), self.password() );

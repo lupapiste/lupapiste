@@ -23,6 +23,7 @@
                                         (sc/optional-key :id)   ssc/ObjectIdStr
                                         (sc/optional-key :name) sc/Str}
    (sc/optional-key :contents)         (sc/maybe sc/Str)
+   (sc/optional-key :drawingNumber)    sc/Str
    (sc/optional-key :sign)             sc/Bool
    (sc/optional-key :constructionTime) sc/Bool})
 
@@ -41,7 +42,7 @@
                                                        :attachment-type type)))
         version-options (merge
                           (select-keys mongo-file [:fileId :filename :contentType :size])
-                          (select-keys filedata [:contents :group :constructionTime :sign])
+                          (select-keys filedata [:contents :drawingNumber :group :constructionTime :sign])
                           (util/assoc-when {:created          created
                                             :original-file-id fileId}
                                            :comment-text contents

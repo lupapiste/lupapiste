@@ -8,21 +8,12 @@ LUPAPISTE.UploadButtonModel = function( params ) {
   "use strict";
   var self = this;
 
-  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
-
-  self.upload = params.upload;
-
-  // Setting for attribute to "" effectively disables file selection.
-  self.labelFor = self.disposedComputed( function() {
-    return self.upload.waiting()
-      || self.upload.readOnly ? "" : self.upload.fileInputId;
-  });
+  ko.utils.extend( self, new LUPAPISTE.BaseUploadModel(params));
 
   self.options = _.defaults( _.pick( params,
-                                     ["buttonIcon", "buttonText", "testId"]),
+                                     ["buttonIcon", "buttonText", "buttonClass", "testId"]),
                              {buttonIcon: "lupicon-circle-plus",
                               buttonText: "application.attachmentsAdd",
-                              buttonClass: "btn "
-                              + _.get(params, "buttonClass", "positive"),
+                              buttonClass: "btn positive",
                               testId: "upload-button"});
 };

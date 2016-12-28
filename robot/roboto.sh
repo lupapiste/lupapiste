@@ -13,7 +13,7 @@ BROWSER=firefox
 SERVER=http://localhost:8000
 LUPISPID=
 NICENESS=+15
-STARTUPTIMEOUT=60
+STARTUPTIMEOUT=300 
 PERFECT=
 BLACKLIST=
 RETRIES=3
@@ -22,10 +22,19 @@ EXCLUDES="--exclude fail --exclude non-roboto-proof"
 INCLUDE_TAGS=
 INCLUDES=
 PARALLEL=files
+LOWMEMMB=512
+MAXCOREUNDERFLOW=3
+
+RED='\033[0;31m'
+LIGHTRED='\033[1;31m'
+DEFAULT='\033[0m'
+BRIGHT='\033[1m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
-   SUBS=$(pgrep -P $2)
+   local SUBS=$(pgrep -P $2)
    echo "${3}Killing $2 ($SUBS)"
    for SUB in $SUBS; do
       recursive_kill $1 $SUB "  $3"
@@ -34,8 +43,29 @@ recursive_kill() { # sig pid indent
    kill $1 $2
 }
 
+load_warning() {
+   # 1 min fully loaded cores
+   local LOADED=$(cat /proc/loadavg | sed -e 's/\..*//')
+   # available cores
+   local CORES=$(grep bogomips /proc/cpuinfo | wc -l)
+   test "$LOADED" -gt $(expr "$CORES" "+" "$MAXCOREUNDERFLOW") \
+      && echo -e "${YELLOW}Warning: heavy load. $LOADED/$CORES cores at work.$DEFAULT"
+}
+
+mem_warning() {
+   local AVAILKB=$(grep MemAvailable /proc/meminfo | sed -e 's/[^0-9]//g')
+   local AVAILMB=$(expr "$AVAILKB" "/" "1024")
+   test "$AVAILMB" -gt $LOWMEMMB \
+      || echo -e "${YELLOW}Warning: only ${AVAILMB}MB memory free$DEFAULT"
+}
+
+load_warnings() {
+   mem_warning
+   load_warning
+}
+
 fail() {
-   echo "Roboto fail: $@"
+   echo -e "${RED}Roboto fail:$YELLOW $@$NORMAL"
    exit 1
 }
 
@@ -56,8 +86,9 @@ usage() {
   -e | --exclude tags   comma separated list of tags to exclude;
                         fail and non-roboto-proof are always excluded
   -i | --include tags   comma separated list of tags to include
+  -E | --no-env-check   skip version and environment startup sanity checks
   -P | --parallel style 'files': find files under test-dirs and run them in 
-                                 parallel (dafault)  
+                                 parallel (default)  
                         'args': run test-dirs in parallel
 "
 }
@@ -120,6 +151,7 @@ parse_args() {
          ;;
       (-E|--no-env-check)
          NOENV=1
+         shift
          parse_args $@
          ;;
       (-B|--browser)
@@ -194,18 +226,22 @@ lupapiste_runningp() {
    curl -s "$SERVER/api/alive" | grep -q unauthorized || return 1
 }
 
+versionfail() {
+   fail "$@ Version tests can be skipped with -E flag."
+}
+
 check_env() {
    test -z "$NOENV" || return
    # routes
-   echo -n "Checkign routes: "
-   /sbin/route -n | grep -q "^172.17.*docker0" && fail "Docker is using axe.lupapiste.fi IP route." || echo ok
+   #echo -n "Checkign routes: "
+   #/sbin/route -n | grep -q "^172.17.*docker0" && fail "Docker is using axe.lupapiste.fi IP route." || echo ok
    # connectivity
    #echo -n "Checking axe: "
    #lynx -dump http://172.17.125.102:8080 | grep -q Jenkins && echo OK || fail "No Jenkins at http://172.17.125.102:8080. You may have forgotten VPN or need also sudo route add 172.17.125.102 dev tun0."
    # selenium version
    echo -n "Checking selenium version: "
    SELENIUM=$(pip list | grep "^selenium ")
-   echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || fail "Your selenium version '$SELENIUM' may cause tests to fail. Update script or change to 2.53.*."
+   echo "$SELENIUM" | grep "selenium (2\.53\.[0-9]*)" || versionfail "Your selenium version '$SELENIUM' may cause tests to fail. Update ${BASH_SOURCE}:${LINENO} to match the current selenium version if it is fine, or change to 2.53.*."
 
    echo "Browser: $BROWSER"
    case "$BROWSER" in
@@ -213,22 +249,24 @@ check_env() {
          # (lack of) geckodriver
          which geckodriver 2> /dev/null && fail "Remove geckodriver from path."
          FF=$(firefox --version)
-         echo "$FF" | grep "^Mozilla Firefox 45\." || fail "Major version '$FF' of Firefox may not work yet. Update script if it's ok."
+         echo "$FF" | grep -q "^Mozilla Firefox 45\." || versionfail "Major version '$FF' of Firefox may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          ;;
       "chrome" )
          CG=$(google-chrome --version)
-         echo "$CG" | grep "^Google Chrome 55\." || fail "Major version '$CG' of Chrome may not work yet. Update script if it's ok."
+         echo "$CG" | grep -q "^Google Chrome 55\." || versionfail "Major version '$CG' of Chrome may not work yet. Update ${BASH_SOURCE}:${LINENO} if this is fine."
          ;;
       * )
          fail "Unsupported browser '$BROWSER'"
          ;;
    esac
 
-   echo -n "Server: $SERVER "
+   echo "Server: $SERVER"
    lupapiste_runningp || fail "A web server does not appear to be running at '$SERVER'"
-   pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for me already"
+   pgrep -u $(whoami) Xvfb && fail "There are Xvfbs running for $(whoami) already"
 }
 
+test -d target && rm -rf target
+mkdir target
 
 parse_args $@
 
@@ -279,8 +317,6 @@ run_test() {
       WMPID=$!
    }
 
-   sleep 2 # wait for window manager to start
-
    mkdir -p target # make log directory if necessary
 
    # -L TRACE
@@ -300,25 +336,16 @@ run_test() {
             common/setup "$test" common/teardown &> target/$TEST.out
       BOT=$?
       test "0" "=" "$BOT" && break
-      # sometimes ff seems to have persistent trouble starting and/or selenium connecting to it
-      # ruling out causes by by spreading pybot startups temporally and seeing if the issue persists
-      sleep 5
    done
    # round 0 is first
    ROUND=$(expr $ROUND "+" 1)
    LASTROUND=$(expr $RETRIES "+" 1)
+   # exit value is the number of failing testcases OR 124 after timeout
    echo "NOTE: pybot exited with $BOT after round $ROUND/$LASTROUND" >> target/$TEST.out;
    # shut down X and WM if they were started
    test -z "$WMPID" || { kill -9 $WMPID; wait $WMPID; } &>/dev/null; sleep 1
    test -z "$XPID" || { kill -9 $XPID; wait $XPID; } &>/dev/null; sleep 1
 }
-
-RED='\033[0;31m'
-LIGHTRED='\033[1;31m'
-DEFAULT='\033[0m'
-BRIGHT='\033[1m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
 
 halt() {
    echo "Cleaning up..."
@@ -339,6 +366,9 @@ halt() {
    }
    echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
    rm -rf /tmp/*/webdriver-py-profilecopy
+   echo "Removing stray X lock files"
+   rm -rf /tmp/.X[1-9][0-9][0-9]-lock
+
    echo "Writing report.html"
    rebot --outputdir target --report report.html --name Roboto target/*.xml
 }
@@ -388,6 +418,7 @@ show_stats() {
    NOW=$(date +'%H:%M:%S %d.%m.%Y')
    test -z "$MSG" && MSG="Waiting for $(jobs | grep run_test | wc -l) threads"
    echo -e "${BRIGHT}$NOW: ${MSG}${DEFAULT}"
+   load_warnings
    ls target | grep -q "\.out" || { echo "No results yet."; return; }
    for log in target/*.out
    do
@@ -400,12 +431,8 @@ show_stats() {
    done
 }
 
-# clear results
-test -d target && rm -rf target
-mkdir target
-
 # lower priority
-renice $NICENESS $$
+renice $NICENESS $$ &>/dev/null
 
 # run tests
 echo "Running tests $TESTS"

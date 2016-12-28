@@ -415,7 +415,7 @@
 
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir nil nil "review")))
 
 (defn- bad-building?
   "Building can be bad either by choice (no state selected) or by
