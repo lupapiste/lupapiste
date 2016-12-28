@@ -68,7 +68,7 @@ Foreman can not add parties to foreman application
 
 Foreman could add attachment to foreman application
   Open tab  attachments
-  Element should be visible by test id  add-attachment
+  Element should be visible by test id  add-attachments-label
 
 Foreman only read comments on project application
   Open project application
@@ -87,7 +87,7 @@ Foreman can not add parties to the project application
 
 Foreman could add attachment to project application
   Open tab  attachments
-  Element should be visible by test id  add-attachment
+  Element should be visible by test id  add-attachments-label
   [Teardown]  Logout
 
 Sonja logs in and gets verdict for the first foreman application
