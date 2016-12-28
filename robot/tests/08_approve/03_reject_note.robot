@@ -89,6 +89,34 @@ Sonja rejects but cancels attachment
 
 Sonja approves attachment again
   Click button  test-attachment-approve
+  Attachment is  approved
+  Logout
+
+# Pena adds new version, so that we have a neutral version in version history
+Pena logs in and adds new version
+  As Pena
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
+  Open attachment details  muut.muu
+  Attachment is  approved
+  Add attachment version  ${PNG_TESTFILE_PATH}
+  Wait until  No such test id  details-reject-note
+  Click button  show-attachment-versions
+  Wait until  Xpath Should Match X Times  //table[@data-test-id='attachment-versions-table']/tbody/tr[contains(@data-test-id,'version-row')]  2
+  Neutral version  0-2-0-neutral
+  Wait test id visible  1-1-0-approved
+  Logout
+
+Sonja logs back in and sees Pena's neutral version
+  As Sonja
+  Open application  ${appname}  ${propertyId}
+  Open tab  attachments
+  Open attachment details  muut.muu
+  Click button  show-attachment-versions
+  Wait until  Xpath Should Match X Times  //table[@data-test-id='attachment-versions-table']/tbody/tr[contains(@data-test-id,'version-row')]  2
+  Neutral version  0-2-0-neutral
+  Wait test id visible  1-1-0-approved
+  Reject note is  1-1-0  Worse attachment
 
 Sonja adds two new versions
   Add attachment version  ${PNG_TESTFILE_PATH}
@@ -97,23 +125,27 @@ Sonja adds two new versions
   Wait until  No such test id  details-reject-note
 
 Sonja checks versions
-  Click button  show-attachment-versions
-  No such test id  0-1-2-note
-  No such test id  1-1-1-note
-  Reject note is  2-1-0  Worse attachment
+  Wait until  Xpath Should Match X Times  //table[@data-test-id='attachment-versions-table']/tbody/tr[contains(@data-test-id,'version-row')]  4
+  No such test id  0-2-2-note
+  No such test id  1-2-1-note
+  No such test id  2-2-0-note
+  Reject note is  3-1-0  Worse attachment
 
 Sonja rejects new version with note
   Reject attachment with note  test-attachment-reject  details-reject  Bad version
-  Reject note is  0-1-2  Bad version
+  Reject note is  0-2-2  Bad version
 
-There is now one approved, one rejected and one neutral version
-  Wait test id visible  0-1-2-rejected
-  Neutral version  1-1-1-neutral
-  Wait test id visible  2-1-0-approved
+There is two approved, one neutral, one rejected
+  # WHen authority uploads, versions are automatically approved since LPK-2572
+  Wait test id visible  0-2-2-rejected
+  Wait test id visible  1-2-1-approved
+  Neutral version  2-2-0-neutral
+  Wait test id visible  3-1-0-approved
 
 Sonja could delete every version
-  Can delete version  1.2
-  Can delete version  1.1
+  Can delete version  2.2
+  Can delete version  2.1
+  Can delete version  2.0
   Can delete version  1.0
 
 Sonja returns the attachments tab and opens the other attachment
@@ -154,20 +186,23 @@ Pena opens attachment details
   Attachment rejected  Bad version
   #Reject note is  details-reject  Bad version
 
-Pena sees only the rejected version notes
+Pena sees only the rejected version notes (not old rejection note in 3-1-0)
   Click button  show-attachment-versions
-  Reject note is  0-1-2  Bad version
-  No such test id  1-1-1-note
-  No such test id  1-1-0-note
+  Reject note is  0-2-2  Bad version
+  No such test id  1-2-1-note
+  No such test id  2-2-0-note
+  No such test id  3-1-0-note
 
 Pena checks versions' approval states
-  Wait test id visible  0-1-2-rejected
-  Neutral version  1-1-1-neutral
-  Wait test id visible  2-1-0-approved
+  Wait test id visible  0-2-2-rejected
+  Wait test id visible  1-2-1-approved
+  Neutral version  2-2-0-neutral
+  Wait test id visible  3-1-0-approved
 
 Pena could delete only the neutral version
-  Cannot delete version  1.2
-  Can delete version  1.1
+  Cannot delete version  2.2
+  Cannot delete version  2.1
+  Can delete version  2.0
   Cannot delete version  1.0
   Return to application
 
@@ -200,15 +235,17 @@ Attachment state is changed when the latest version is deleted
 
 ... from rejected to neutral
   Attachment rejected  Bad version
-  Delete version  1.2
+  Delete version  2.2
+  Delete version  2.1
   Attachment neutral
-  Neutral version  0-1-1-neutral
+  Neutral version  0-2-0-neutral
   Wait test id visible  1-1-0-approved
 
-... from neutral to approved
-  Delete version  1.1
+... from neutral to approved (old note still in places)
+  Delete version  2.0
   Attachment approved
   Wait test id visible  0-1-0-approved
+  Reject note is  0-1-0  Worse attachment
   [Teardown]  Logout
 
 # --------------------------

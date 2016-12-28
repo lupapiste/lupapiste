@@ -61,7 +61,7 @@
         </button>
       </div>
 
-      <div data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
+      <div data-test-id="approval-component" data-bind="component: { name:'approval', params: {attachment: $data.attachment} }"></div>
       <div data-bind="component: {name: 'reject-note',
                       params: {attachmentId: id,
                       editorCss: 'attachment-reject-note-editor',
@@ -114,7 +114,7 @@
           <div class="attachment-file-versions-content"
                data-bind="if: $data.showAttachmentVersionHistory">
             <h3 data-bind="ltext: 'attachment.versionHistory'">Versiohistoria:</h3>
-            <table class="table table-even-odd">
+            <table data-test-id="attachment-versions-table" class="table table-even-odd">
               <thead>
                 <tr>
                   <th data-bind="ltext: 'application.attachmentState'"></th>

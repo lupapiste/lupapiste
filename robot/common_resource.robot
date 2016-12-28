@@ -718,6 +718,12 @@ Hide file input
   [Arguments]  ${jQuerySelector}
   Execute Javascript  $("${jQuerySelector}").css( "display", "none").toggleClass( "hidden", true )
 
+Upload via button or link
+  [Arguments]  ${uploadContainer}  ${path}
+  Expose file input  input[data-test-id=${uploadContainer}-input]
+  Choose file  jquery=input[data-test-id=${uploadContainer}-input]  ${path}
+  Positive indicator should be visible
+  Hide file input  input[data-test-id=${uploadContainer}-input]
 
 Upload batch file
   [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
@@ -827,8 +833,7 @@ Attachment file upload
 Add attachment version
   [Arguments]  ${path}
   Wait Until  Element should be visible  jquery=label[data-test-id=upload-button-label]
-  Expose file input  input[data-test-id=upload-button-input]
-  Choose file  jquery=input[data-test-id=upload-button-input]  ${path}
+  Upload via button or link  upload-button  ${path}
 
 # Add the first file to template from attachments view
 Add attachment file
@@ -836,6 +841,10 @@ Add attachment file
   Wait Until     Element should be visible  jquery=${row}
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
+
+Attachment is
+  [Arguments]  ${approvalStatus}
+  Wait until  Element should be visible  xpath=//div[@data-test-id='approval-component']//i[contains(@class, '${approvalStatus}')]
 
 Select operation path by permit type
   [Arguments]  ${permitType}
