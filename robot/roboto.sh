@@ -22,6 +22,8 @@ EXCLUDES="--exclude fail --exclude non-roboto-proof"
 INCLUDE_TAGS=
 INCLUDES=
 PARALLEL=files
+LOWMEMMB=512
+MAXCOREUNDERFLOW=3
 
 RED='\033[0;31m'
 LIGHTRED='\033[1;31m'
@@ -32,13 +34,34 @@ YELLOW='\033[0;33m'
 
 # kill recursive all leaf processes and the given one
 recursive_kill() { # sig pid indent
-   SUBS=$(pgrep -P $2)
+   local SUBS=$(pgrep -P $2)
    echo "${3}Killing $2 ($SUBS)"
    for SUB in $SUBS; do
       recursive_kill $1 $SUB "  $3"
    done
    echo "${3}Closing $2"
    kill $1 $2
+}
+
+load_warning() {
+   # 1 min fully loaded cores
+   local LOADED=$(cat /proc/loadavg | sed -e 's/\..*//')
+   # available cores
+   local CORES=$(grep bogomips /proc/cpuinfo | wc -l)
+   test "$LOADED" -gt $(expr "$CORES" "+" "$MAXCOREUNDERFLOW") \
+      && echo -e "${YELLOW}Warning: heavy load. $LOADED/$CORES cores at work.$DEFAULT"
+}
+
+mem_warning() {
+   local AVAILKB=$(grep MemAvailable /proc/meminfo | sed -e 's/[^0-9]//g')
+   local AVAILMB=$(expr "$AVAILKB" "/" "1024")
+   test "$AVAILMB" -gt $LOWMEMMB \
+      || echo -e "${YELLOW}Warning: only ${AVAILMB}MB memory free$DEFAULT"
+}
+
+load_warnings() {
+   mem_warning
+   load_warning
 }
 
 fail() {
@@ -392,6 +415,7 @@ show_stats() {
    NOW=$(date +'%H:%M:%S %d.%m.%Y')
    test -z "$MSG" && MSG="Waiting for $(jobs | grep run_test | wc -l) threads"
    echo -e "${BRIGHT}$NOW: ${MSG}${DEFAULT}"
+   load_warnings
    ls target | grep -q "\.out" || { echo "No results yet."; return; }
    for log in target/*.out
    do
