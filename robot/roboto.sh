@@ -366,6 +366,9 @@ halt() {
    }
    echo "Cleaning up /tmp/*/webdriver-py-profilecopy"
    rm -rf /tmp/*/webdriver-py-profilecopy
+   echo "Removing stray X lock files"
+   rm -rf /tmp/.X[1-9][0-9][0-9]-lock
+
    echo "Writing report.html"
    rebot --outputdir target --report report.html --name Roboto target/*.xml
 }
