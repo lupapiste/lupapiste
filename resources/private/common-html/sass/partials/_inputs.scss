@@ -91,6 +91,10 @@
     color: $disabled;
   }
 
+  .no-label-text.#{$cls}-label:before {
+    margin-right: 0;
+  }
+
   .#{$cls}-wrapper {
     display: $wrapper-display;
     box-sizing: border-box;
@@ -107,6 +111,7 @@
 
 // Checkboxes
 @include toggle-helper ( checkbox, "\e604", "\e603" ) {}
+@include toggle-helper ( blockbox, "\e604", "\e603", $wrapper-display: block ) {}
 @include toggle-helper ( docgen-checkbox, "\e604", "\e603", $wrapper-display: block ) {}
 .docgen-checkbox-wrapper.form-input {
   height: auto;
@@ -118,6 +123,12 @@
 .stampbox-wrapper {
   border: none;
 }
+
+@include toggle-helper ( signbox, "\e619", "\e620" ) {}
+.signbox-wrapper {
+  border: none;
+}
+
 
 // Radio buttons
 @include toggle-helper (radio, "\e635", "\e634", $wrapper-display: inline-block, $input-display: block) {}
@@ -295,4 +306,87 @@ input.grid-style-input--wide {
     }
   }
 }
+}
+
+drop-zone {
+  display: none;
+  .drop-zone-placeholder {
+    border: 4px dashed $primary !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    color: $primary;
+    z-index: 200;
+    text-align: center;
+    background-color: rgba( 255, 255, 255, 0.8);
+    padding-top: 2em;
+    > div {
+      font-size: 20px;
+    }
+    > i {
+      font-size: 60px;
+    }
+  }
+}
+
+.drop-zone--highlight drop-zone {
+  display: block;
+}
+
+.combobox-container {
+  position: relative;
+  display: inline-block;
+  ul.combobox__list {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 888;
+    min-width: 100%;
+    max-width: 200%;
+    list-style: none;
+    background-color: white;
+    border: 1px solid $input-focus-border-color;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    li {
+      padding-left: $marginS;
+    }
+    li.combobox--selected {
+      background-color: $primary;
+      color: white;
+    }
+  }
+}
+
+.upload-zone {
+  @include btn-height;
+  vertical-align: middle;
+  padding: {
+    left: 10px;
+    right: 10px;
+  }
+  border: 2px dashed $primary;
+  box-sizing: border-box;
+  overflow: hidden;
+  width: auto;
+  display: block;
+  i, label {
+    color: $orange-link;
+  }
+  i {
+    margin-right: 10px;
+  }
+  label {
+    font-size: 16px;
+  }
+  label:hover {
+    color: $orange-hover;
+    cursor: pointer;
+  }
+  label:active {
+    color: $orange-active;
+  }
 }

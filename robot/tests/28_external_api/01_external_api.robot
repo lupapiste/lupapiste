@@ -71,8 +71,7 @@ Add post verdict attachment
 
   Open tab  attachments
   Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
-  Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PDF_TESTFILE_PATH}  Muu liite  Muu  Asuinkerrostalon tai rivitalon rakentaminen
 
 Transfering attachments emits LupapisteApi.integrationSent function call
   Scroll to top
@@ -101,8 +100,22 @@ Fill review info
 
 Transfering task emits LupapisteApi.integrationSent function call
   Click enabled by test id  review-done
+  Confirm yes no dialog
   Confirm  dynamic-ok-confirm-dialog
   Permit properties should be visible in dialog
+
+Button not visible if parent function isnt implemented
+  Go to page  applications
+  Open search tab  all
+  Wait until  Element should be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+  Execute Javascript  window.LupapisteApi.showPermitsOnMap = null
+  Open search tab  application
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  0
+  Wait until  Element should not be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+  Open search tab  all
+  Wait until  Xpath Should Match X Times  //table[@id="applications-list"]//tbody/tr[@class="application-row"]  1
+  Wait until  Element should not be visible  xpath=//section[@id='applications']//button[@data-test-id='external-show-permits-on-map']
+
 
 *** Keywords ***
 

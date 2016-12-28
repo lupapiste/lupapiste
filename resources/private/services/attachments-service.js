@@ -10,12 +10,16 @@ LUPAPISTE.AttachmentsService = function() {
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
   self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
+  self.JOB_RUNNING = "running";
+  self.JOB_PENDING = "pending";
+  self.JOB_WORKING = "working";
+  self.JOB_DONE = "done";
+  self.JOB_ERROR = "error";
+  self.JOB_TIMEOUT = "timeout";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
-
-  self.groupTypes = ko.observableArray([]);
 
   self.tagGroups = ko.observableArray([]);
   var tagGroupSets = {};
@@ -31,7 +35,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
-    self.authModel.refresh({id: self.applicationId()});
+    self.groupTypes([]);
   });
 
   hub.subscribe( "contextService::leave", function() {
@@ -45,6 +49,7 @@ LUPAPISTE.AttachmentsService = function() {
     disposeItems(tagGroupSets);
     disposeItems(filterSets);
     self.attachments([]);
+    self.attachmentTypes([]);
     filterSets = {};
     self.tagGroups([]);
     tagGroupSets = {};
@@ -64,6 +69,9 @@ LUPAPISTE.AttachmentsService = function() {
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -79,6 +87,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Refresh all authModels at once.
   function refreshAllAuthModels() {
+    self.authModel.refresh({id: self.applicationId()});
     authorization.refreshModelsForCategory(self.authModels(), self.applicationId(), "attachments");
   }
 
@@ -148,10 +157,6 @@ LUPAPISTE.AttachmentsService = function() {
     _.forEach(filterSets, function(filterSet) {
       filterSet.setFilters(data);
     });
-  };
-
-  self.setGroupTypes = function(data) {
-    self.groupTypes(data);
   };
 
   self.queryAttachments = function() {
@@ -229,9 +234,26 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryGroupTypes = function() {
-    queryData("attachment-groups", "groups", self.setGroupTypes);
+    if (!queryData("attachment-groups", "groups", self.groupTypes)) {
+      self.groupTypes([]);
+    }
   };
 
+  self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
+
+  hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
+
+  self.queryAttachmentTypes = function() {
+    if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
+      self.attachmentTypes([]);
+    }
+  };
+
+  self.attachmentTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryAttachmentTypes}});
+
+  self.attachmentTypeGroups = ko.pureComputed(function() {
+    return _(self.attachmentTypes()).map("type-group").uniq().value();
+  });
 
   function sendHubNotification(eventType, commandName, params, response) {
     hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
@@ -255,6 +277,76 @@ LUPAPISTE.AttachmentsService = function() {
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  self.pollJobStatusFinished = function(status) {
+    return !_.includes([self.JOB_RUNNING, self.JOB_PENDING, self.JOB_WORKING], ko.unwrap(status));
+  };
+
+  self.contentsData = function( attachmentType ) {
+    var metadata = attachmentType.metadata || {};
+    var list  = _.map( metadata.contents,
+                       function( id ) {
+                         return loc( "attachments.contents." + id);
+                       });
+    return {
+      defaultValue: _.size( list ) <= 1
+        ? _.first( list ) || attachmentType.title
+        : "",
+      list: list
+    };
+  };
+
+  function pollBindJob(statuses, attachments, response) {
+    var job = response.job;
+    _.forEach( _.values(job.value), function(fileData) {
+      if ( statuses[fileData.fileId] ) {
+        statuses[fileData.fileId](fileData.status);
+      }
+    });
+    if ( job.status === self.JOB_RUNNING ) {
+      ajax.query( "bind-attachments-job", { jobId: job.id,
+                                            version: job.version })
+        .success( _.partial(pollBindJob, statuses, attachments) )
+        .call();
+    } else {
+      _.forEach(statuses, function(status) {
+        if (status === self.JOB_RUNNING) {
+          status(self.JOB_TIMEOUT);
+        }
+      });
+      if ( attachments.length === 1 && attachments[0].attachmentId ) {
+        self.queryOne(attachments[0].attachmentId);
+        self.queryTagGroupsAndFilters();
+      } else {
+        self.queryAll();
+      }
+    }
+  }
+
+  self.bindAttachments = function(attachments, password) {
+    var jobStatuses = _(attachments).map(function(attachment) { return [attachment.fileId, ko.observable(self.JOB_RUNNING)]; }).fromPairs().value();
+    ajax.command( "bind-attachments",
+                  _.merge( { id: self.applicationId(),
+                             filedatas: attachments },
+                           _.some(attachments, "sign")  ? {password: password} : {} ))
+      .processing( self.processing )
+      .success( _.partial(pollBindJob, jobStatuses, attachments) )
+      .call();
+
+    return jobStatuses;
+  };
+
+  self.bindAttachment = function(attachmentId, fileId) {
+    var jobStatuses = _.set({}, fileId, ko.observable(self.JOB_RUNNING));
+    ajax.command( "bind-attachment", { id: self.applicationId(),
+                                       attachmentId: attachmentId,
+                                       fileId: fileId })
+      .processing( self.processing )
+      .success( _.partial(pollBindJob, jobStatuses, [{attachmentId: attachmentId}]) )
+      .call();
+
+    return jobStatuses[fileId];
   };
 
   hub.subscribe("upload-done", function(data) {
@@ -363,8 +455,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, hubParams);
   };
 
-  self.createAttachmentTemplates = function(types, hubParams) {
-    var params =  {id: self.applicationId(), attachmentTypes: types};
+  self.createAttachmentTemplates = function(types, group, hubParams) {
+    var params =  {id: self.applicationId(), attachmentTypes: types, group: group};
     ajax.command("create-attachments", params)
       .success(function(res) {
         self.queryAll();

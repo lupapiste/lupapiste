@@ -26,8 +26,9 @@ Olli rejects period with note
 
 Olli adds and approves attachment
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}
-  Wait until element is visible  test-attachment-approve
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
+  Open attachment details  muut.muu
+  Wait Until  Element Should Be Visible  test-attachment-approve
   Click button  test-attachment-approve
   Return to application
 
@@ -43,6 +44,7 @@ Olli opens bulletin and checks that not icons are visible
   No icons  attachments
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***

@@ -11,7 +11,7 @@ Authority admin enables attachment links
   Toggle links
 
 Authority admin sees attachment links enabled
-  Reload page
+  Reload page and kill dev-box
   Go to page  backends
   Checkbox wrapper selected  attachments-as-links-enabled
 
@@ -20,7 +20,7 @@ Authority admin disables attachment links
   Toggle links
 
 Authority admin sees attachment links disabled
-  Reload page
+  Reload page and kill dev-box
   Go to page  backends
   Checkbox wrapper not selected  attachments-as-links-enabled
   Logout

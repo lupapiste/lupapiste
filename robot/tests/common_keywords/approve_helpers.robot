@@ -14,7 +14,7 @@ Approve application
 Accordion approved
   [Arguments]  ${name}  ${idx}=0
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) div.sticky button.positive i.approved
-  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
+  Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status i.approved
   Wait Until  Element should be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) .sticky .form-approval-status span:contains('Sibbo Sonja')
   # Every group is approved or neutral
   Wait Until  Element should not be visible  jquery=section[data-doc-type=${name}]:eq(${idx}) i.rejected
@@ -110,14 +110,14 @@ Sonja group rejected
 
 Click reject
   [Arguments]  ${name}  ${idx}=0
-  ${selector}=  Set variable  button[data-test-id=reject-doc-${name}]:visible:eq(${idx})
-  Wait Until  Element should be visible  jquery=${selector}  
+  ${selector}=  Set variable  button[data-test-id=reject-doc-${name}]:eq(${idx})
+  Wait Until  Element should be visible  jquery=${selector}
   Scroll and click   ${selector}
 
 Click approve
   [Arguments]  ${name}  ${idx}=0
-  ${selector}=  Set variable  button[data-test-id=approve-doc-${name}]:visible:eq(${idx})
-  Wait Until  Element should be visible  jquery=${selector}  
+  ${selector}=  Set variable  button[data-test-id=approve-doc-${name}]:eq(${idx})
+  Wait Until  Element should be visible  jquery=${selector}
   Scroll and click   ${selector}
 
 Approve accordion
@@ -152,10 +152,10 @@ Reject note is
   Scroll to test id  ${prefix}-note
   Wait test id visible  ${prefix}-note
   Test id text is  ${prefix}-note  ${text}
-  
-Reject and fill note  
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
-  Run Keyword if  ${doc-style}  Click reject  ${button}
+
+Reject and fill note
+  [Arguments]  ${button}  ${prefix}  ${text}  ${idx}=0  ${doc-style}=True
+  Run Keyword if  ${doc-style}  Click reject  ${button}  ${idx}
   Run Keyword unless  ${doc-style}  Click button  ${button}
   Scroll by  100
   Wait test id visible  ${prefix}-editor
@@ -163,8 +163,8 @@ Reject and fill note
   Input text by test id  ${prefix}-editor  ${text}  True
 
 Reject with note
-  [Arguments]  ${button}  ${prefix}  ${text}
-  Reject and fill note  ${button}  ${prefix}  ${text}
+  [Arguments]  ${button}  ${prefix}  ${text}  ${idx}=0
+  Reject and fill note  ${button}  ${prefix}  ${text}  ${idx}
   Press Key test id  ${prefix}-editor  \\13
   Run keyword if  "${text}"  Reject note is  ${prefix}  ${text}
   RUN keyword unless  "${text}"  No such test id  ${prefix}-note
@@ -177,16 +177,15 @@ Reject with note and save
 
 
 Reject with note but cancel
-  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True
+  [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True  ${idx}=0
   ${old}=  Execute Javascript  return $("[data-test-id=${prefix}-note]").text()
-  Reject and fill note  ${button}  ${prefix}  ${text}  ${doc-style}
-  Press Key test id  ${prefix}-editor  \\27  
+  Reject and fill note  ${button}  ${prefix}  ${text}  ${idx}  ${doc-style}
+  Press Key test id  ${prefix}-editor  \\27
   No such test id  ${prefix}-editor
   Reject note is  ${prefix}  ${old}
 
 Reject attachment with note
-  [Arguments]  ${selector}  ${prefix}  ${text}
-  Reject and fill note  ${selector}  ${prefix}  ${text}  False
+  [Arguments]  ${selector}  ${prefix}  ${text}  ${idx}=0
+  Reject and fill note  ${selector}  ${prefix}  ${text}  ${idx}  False
   Press Key test id  ${prefix}-editor  \\13
   Reject note is  ${prefix}  ${text}
-  

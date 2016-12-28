@@ -32,6 +32,8 @@ on_stylesheet_saved do |path|
   # http://stackoverflow.com/questions/7173000/slash-and-backslash-in-ruby
   using_windows = !!((RUBY_PLATFORM =~ /(win|w)(32|64)$/) || (RUBY_PLATFORM=~ /mswin|mingw/))
   p = (using_windows ? relativepath.gsub('/', '\\') : relativepath)
-
+  puts "Blessc compiling path: #{p}"
   system("blessc --force " + p) unless path[/\d+$/]
+  status = $?.exitstatus
+  exit status if status > 0
 end

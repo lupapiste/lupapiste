@@ -23,10 +23,8 @@ Pena logs in and creates application
 
 Pena adds attachments
   Open tab  attachments
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}
-  Return to application
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  paatoksenteko.muistio
-  Return to application
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Yleisesti hankkeeseen
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muistio  Muistio  Yleisesti hankkeeseen
 
 Pena submits application
   Submit application
@@ -37,8 +35,8 @@ Pena submits application
 # --------------------------
 
 Sonja logs in
-  Sonja logs in  
-  Open application  ${appname}  ${propertyId} 
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
   Open accordions  info
 
 Sonja rejects Hankkeen kuvaus with note
@@ -47,7 +45,7 @@ Sonja rejects Hankkeen kuvaus with note
 Sonja rejects Rakennuspaikka with note
   Reject with note  rakennuspaikka  rakennuspaikka  Bad place
 
-Sonja approves Rakennuspaikka 
+Sonja approves Rakennuspaikka
   Click approve  rakennuspaikka
   Reject note is  rakennuspaikka  Bad place
 
@@ -84,6 +82,7 @@ Sonja opens attachment details
 
 Sonja approves attachment
   Click button  test-attachment-approve
+  Wait until  Element should be enabled  test-attachment-reject
 
 Sonja rejects but cancels attachment
   Reject with note but cancel  test-attachment-reject  details-reject  Dum dum  False
@@ -116,7 +115,7 @@ Sonja could delete every version
   Can delete version  1.2
   Can delete version  1.1
   Can delete version  1.0
-  
+
 Sonja returns the attachments tab and opens the other attachment
   Return to application
   Reject note is  muut-muu  Bad version
@@ -126,7 +125,7 @@ Sonja returns the attachments tab and opens the other attachment
   Wait until  Element should be enabled  test-attachment-reject
   Reject note is  details-reject  Bad memorandum
   Return to application
-  No such test id  paatoksenteko-muistio-note  
+  No such test id  paatoksenteko-muistio-note
   [Teardown]  Logout
 
 # --------------------------
@@ -152,7 +151,7 @@ Pena goes to attachments tab
 
 Pena opens attachment details
   Open attachment details  muut.muu
-  Attachment rejected  Bad version  
+  Attachment rejected  Bad version
   #Reject note is  details-reject  Bad version
 
 Pena sees only the rejected version notes
@@ -175,7 +174,7 @@ Pena could delete only the neutral version
 Pena does not see approved attachment's note
   No such test id  paatoksenteko-muistio-note
   Open attachment details  paatoksenteko.muistio
-  No such test id  reject-attachment-note 
+  No such test id  reject-attachment-note
   [Teardown]  Logout
 
 # --------------------------
@@ -183,8 +182,8 @@ Pena does not see approved attachment's note
 # --------------------------
 
 Sonja logs in again
-  Sonja logs in  
-  Open application  ${appname}  ${propertyId} 
+  Sonja logs in
+  Open application  ${appname}  ${propertyId}
   Open accordions  info
 
 Sonja rejects with note and approves osoite
@@ -239,7 +238,7 @@ Sonja logs in and invites neighbor
   Wait test id visible  neighbors-sendemail-send
   Scroll and click test id  neighbors-sendemail-send
   Wait until  Element should not be visible  dialog-send-neighbor-email
-  [Teardown]  Logout  
+  [Teardown]  Logout
 
 Neighbor reads email
   Open last email
@@ -278,7 +277,7 @@ Attachment approved
   Wait Until  Element should be disabled  test-attachment-approve
   Wait Until  Element should be enabled   test-attachment-reject
   Wait until  Element should be visible  jquery=span.form-approval-status.approved
-  
+
 Attachment rejected
   [Arguments]  ${note}
   Wait Until  Element should be disabled  test-attachment-reject

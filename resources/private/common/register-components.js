@@ -47,7 +47,7 @@ jQuery(document).ready(function() {
     {name: "company-edit"},
     {name: "organization-name-editor"},
     {name: "tags-editor"},
-    {name: "upload"},
+    {name: "area-upload"},
     {name: "openlayers-map"},
     {name: "vetuma-init"},
     {name: "vetuma-status"},
@@ -140,6 +140,11 @@ jQuery(document).ready(function() {
     {name: "attachments-listing-accordion"},
     {name: "attachments-table"},
     {name: "attachments-operation-buttons"},
+    {name: "attachment-type-group-autocomplete"},
+    {name: "attachment-type-autocomplete"},
+    {name: "attachments-require"},
+    {name: "attachments-require-bubble"},
+    {name: "attachment-group-selector"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
@@ -159,7 +164,15 @@ jQuery(document).ready(function() {
     {name: "state-icons"},
     {name: "docgen-calculation"},
     {name: "docgen-footer-sum"},
-    {name: "reject-note"}
+    {name: "reject-note"},
+    {name: "upload-button"},
+    {name: "attachment-batch"},
+    {name: "upload-progress"},
+    {name: "icon-button"},
+    {name: "toggle"},
+    {name: "combobox"},
+    {name: "drop-zone"},
+    {name: "upload-zone"}
 ];
 
   ko.registerLupapisteComponents(components);

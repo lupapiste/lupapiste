@@ -90,10 +90,13 @@ LUPAPISTE.DocumentDataService = function(params) {
     return doc && doc.collection || "documents";
   };
 
-  self.removeRepeatingGroup = function(documentId, path, index, indicator) {
+  self.removeRepeatingGroup = function(documentId, path, index, indicator, extCallback) {
     var repeatingModel = self.getInDocument(documentId, path);
-    var cb = function() {
+    var cb = function(e) {
       removeByIndex(repeatingModel, index);
+      if (extCallback) {
+        extCallback(e);
+      }
     };
     var params = {
       path: path.concat(index)

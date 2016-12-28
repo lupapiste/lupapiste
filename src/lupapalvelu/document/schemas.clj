@@ -231,7 +231,7 @@
                              :type :group
                              :validator :address
                              :blacklist [turvakielto]
-                             :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
+                             :body [{:name "katu" :type :string :subtype :vrk-address :size :l :required true :i18nkey "osoite.katu"}
                                     postinumero
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true :i18nkey "osoite.postitoimipaikannimi"}
                                     country]}])
@@ -878,6 +878,11 @@
                               rakennuksen-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-ilman-rakennustietoja (body
+                                                    rakennuksen-valitsin
+                                                    rakennuksen-omistajat
+                                                    rakennuksen-osoite))
+
 (def olemassaoleva-rakennus-muutos (body
                                      rakennuksen-valitsin
                                      rakennuksen-omistajat
@@ -956,11 +961,17 @@
                                                     {:name "muuta huoneistoalaan kuuluvaa tilaa"}
                                                     ei-tiedossa]}]}]}]}])
 
-(def rakennuksen-laajentaminen (body laajentaminen
-                                     olemassaoleva-rakennus))
+(def rakennuksen-laajentaminen-ilman-rakennustietoja (body
+                                                        olemassaoleva-rakennus-ilman-rakennustietoja
+                                                        laajentaminen))
 
-(def rakennuksen-laajentaminen-ei-huoneistoja (body laajentaminen
-                                                    olemassaoleva-rakennus-ei-huoneistoja))
+(def rakennuksen-laajentaminen (body
+                                  rakennuksen-laajentaminen-ilman-rakennustietoja
+                                  rakennuksen-tiedot))
+
+(def rakennuksen-laajentaminen-ei-huoneistoja (body
+                                                rakennuksen-laajentaminen-ilman-rakennustietoja
+                                                rakennuksen-tiedot-ilman-huoneistoa))
 
 (def purku (body
              {:name "poistumanSyy" :type :select :sortBy :displayname

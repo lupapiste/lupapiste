@@ -1,21 +1,26 @@
 <script class="ko-template" type="text/x-jquery-tmpl"
         id="attachments-operation-buttons-template">
-  <div class="inner-margins">
-    <button class="positive caps"
-            data-bind="click: $data.newAttachment,
-                       visible: $data.authModel.ok('upload-attachment')"
-            data-test-id="add-attachment">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.attachmentsAdd' "></span>
-    </button>
-    <button class="positive caps"
-            data-bind="click: $data.attachmentTemplatesAdd,
-                       visible: $data.authModel.ok('create-attachments')"
-            data-test-id="add-attachment-templates">
-      <i class="lupicon-circle-plus"></i>
-      <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
-    </button>
+  <div class="operation-button-row">
+    <div class="stacked--inline" data-bind="visible: upload.batchListHidden">
+      <button class="positive caps"
+              data-bind="click: $data.attachmentTemplatesAdd,
+                         visible: $data.authModel.ok('create-attachments')"
+              data-test-id="add-attachment-templates">
+        <i class="lupicon-circle-plus"></i>
+        <span data-bind="ltext: 'application.newAttachmentTemplates'"></span>
+      </button>
+      <div class="bubble-dialog-arrow"
+           data-bind="visible: requireAttachmentsBubbleVisible">
+      </div>
+    </div>
+    <upload-zone params="upload: upload,
+                         testId: 'add-attachments'"></upload-zone>
   </div>
+
+  <!-- ko if: upload.batchListHidden -->
+  <div data-bind="component: { name: 'attachments-require-bubble',
+                  params: { bubbleVisible: requireAttachmentsBubbleVisible } }"
+       class="operation-bubble"></div>
 
   <div class="attachment-operations"
        data-test-id="attachment-operation-buttons">
@@ -64,4 +69,5 @@
       <span data-bind="ltext: 'download-all-short'"></span>
     </button>
   </div>
+  <!-- /ko -->
 </script>

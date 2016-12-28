@@ -132,7 +132,7 @@
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
+   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout-3.4.1.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
@@ -257,11 +257,10 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
-   :external-api {:js (apply
-                        conj
-                        ["external-api-service.js" "external-api-tools.js"]
-                        (when (env/dev-mode?)
-                          ["dummy-api-client.js"]))}
+   :external-api {:js (remove nil?
+                              (cons (when (env/dev-mode?)
+                                      "dummy-api-client.js")
+                                    ["external-api-service.js" "external-api-tools.js"]))}
 
    :verdict-attachment-prints {:depends [:common-html :ui-components]
                                :html ["verdict-attachment-prints-order-template.html"

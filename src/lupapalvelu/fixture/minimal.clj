@@ -869,7 +869,7 @@
                                (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                      "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030")]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
-                       :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "109.204.231.126"]
+                       :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "172.17.144.220" "109.204.231.126"]
                        :permanent-archive-enabled false
                        :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}}
 
@@ -1104,6 +1104,7 @@
 (deffixture "minimal" {}
   (mongo/clear!)
   (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
+                                {:_id "12342424c26b7342d92a4322" :ip "172.17.144.220" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
                                 {:_id "12342424c26b7342d92a9876" :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)

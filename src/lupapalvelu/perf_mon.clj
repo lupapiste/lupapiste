@@ -105,7 +105,7 @@
     (mongo/find-maps :perf-mon-timing {$and [{:ts {$gte start}}
                                              {:ts {$lte end}}]})))
 
-(defn to-long [v]
+(defn to-long ^Long [v]
   (when v
     (if (string? v) (Long/parseLong v) (long v))))
 

@@ -1,13 +1,9 @@
 (ns lupapalvelu.ya-extension-api
   "YA extension (jatkoaika) application related."
   (:require [sade.core :refer :all]
-            [sade.strings :as ss]
-            [sade.property :as prop]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.authorization :as auth]
-            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.user :as usr]
             [lupapalvelu.application :as app]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.ya-extension :as yax]))

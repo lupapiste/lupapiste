@@ -117,7 +117,6 @@
       (when-not (empty? organizations)
         {:organization {$in organizations}})
       (when (event-search event)
-        (println "start")
         (case (first (:eventType event))
           "warranty-period-end"                 {$and [{:warrantyEnd {"$gte" (or (:start event) 0)
                                                                      "$lt" (or (:end event) max-date)}}]}
@@ -130,7 +129,8 @@
           "license-ended-not-ready"             {$and [{:documents.data.tyoaika-paattyy-ms.value {"$lt" (now)}},
                                                        {:state {$ne "closed"}}]}
           "announced-to-ready-state-not-ready"  {$and [{:closed {"$lt" (now)}},
-                                                       {:state {$ne "closed"}}]}))
+                                                       {:state {$ne "closed"}},
+                                                       {:permitType "YA"}]}))
       (cond
         (seq operations) {:primaryOperation.name {$in operations}}
         (and (user/authority? user) (not= applicationType "unlimited"))

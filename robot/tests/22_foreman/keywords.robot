@@ -100,7 +100,7 @@ Open application by id
   [Arguments]  ${appId}
   ${user-role} =  Get role
   Go to  ${SERVER}/app/fi/${user-role}#!/application/${appId}
-  Reload page
+  Reload page and kill dev-box
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-id']  ${appId}
 
 Project application is open

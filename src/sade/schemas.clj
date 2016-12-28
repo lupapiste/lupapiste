@@ -197,9 +197,9 @@
                   (str "Hex-string, minimum length of " min-len)))
 
 (defdynamicschema min-max-valued-integer-string [min max]
-  (sc/constrained IntString (every-pred #(if min (<= min (util/->int %)) true) #(if max (>= (util/->int %)) true))
+  (sc/constrained IntString (every-pred #(if min (<= min (util/->int %)) true) #(if max (>= max (util/->int %)) true))
                   (format "Min max valued integer string with values [%d-%d]" min max)))
 
 (defdynamicschema min-max-valued-decimal-string [min max]
-  (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= (util/->double %)) true))
+  (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= max (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))

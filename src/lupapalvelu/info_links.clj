@@ -18,8 +18,9 @@
 
 ;; info-link = {linkId mongoid, :text text, :url url, :modified timestamp, :owner user-id}
 
-(defn can-add-links? [app user]
+(defn can-add-links?
   "Check if the user can add new info links"
+  [app user]
   (or (usr/user-is-authority-in-organization? user (:organization app))
       (let [statement-givers
             (filter (fn [auth] (= (:role auth) "statementGiver")) (:auth app))]
@@ -44,8 +45,9 @@
 (defn- pick-link [app link-id]
   (take-first (fn [x] (= (:linkId x) link-id)) (info-links app) {}))
 
-(defn can-edit-link? [app linkid user]
+(defn can-edit-link?
   "Check if user can edit a specific info link"
+  [app linkid user]
   (or (usr/user-is-authority-in-organization? user (:organization app))
       (= (:id user) (:owner (pick-link app linkid)))))
 

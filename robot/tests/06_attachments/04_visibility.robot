@@ -15,9 +15,10 @@ Mikko uploads attachment
   Mikko logs in
   Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
+  Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet
 
 Mikko sets CV to be visible only to himself and authorities
+  Open attachment details  osapuolet.cv
   # By default attachment is public
   List selection should be  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  Julkinen
   Select From List By Value  xpath=//section[@id='attachment']//select[@data-test-id='attachment-visibility']  viranomainen

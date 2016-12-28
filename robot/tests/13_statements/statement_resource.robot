@@ -17,12 +17,11 @@ Invite read-only statement giver
   Scroll to test id  table-application-statements-givers
   Wait until  Select Checkbox  xpath=//table[@data-test-id='table-application-statements-givers']//tr[@data-test-email='${email}']//input[@type='checkbox']
   Set maaraaika-datepicker field value  add-statement-giver-maaraaika  ${date}
-  Wait until  Element should be enabled  xpath=//*[@data-test-id='add-statement-giver']
-  Wait and click  xpath=//*[@data-test-id='add-statement-giver']
-  Element should be visible  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Element should be enabled  xpath=//button[@data-test-id='add-statement-giver']
+  Click element  xpath=//button[@data-test-id='add-statement-giver']
   Wait until  Positive indicator should be visible
-  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
-  Wait Until  Positive indicator should not be visible
+  Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
+  Wait until  Positive indicator should not be visible
 
 Return from statement
   Scroll to test id  statement-return

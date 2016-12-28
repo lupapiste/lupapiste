@@ -106,8 +106,9 @@ Sonja could approve/reject/remove new suunnittelija docs
 
 Sonja adds fifth suunnittelija, but removes it instantly
   Add suunnittelija  Ronja  Piippo  4
+  Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  5
   Scroll and click  section[data-doc-type='suunnittelija']:eq(4) button[data-test-class='delete-schemas.suunnittelija']
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath should match X times  //section[@data-doc-type="suunnittelija"]  4
 
 Sonja approves Herkko, but rejects Huge
@@ -141,14 +142,3 @@ Add suunnittelija
   Open docgen accordion  suunnittelija  ${idx}
   Input text with jQuery  section[data-doc-type="suunnittelija"]:eq(${idx}) input[data-docgen-path="henkilotiedot.etunimi"]  ${firstname}
   Input text with jQuery  section[data-doc-type="suunnittelija"]:eq(${idx}) input[data-docgen-path="henkilotiedot.sukunimi"]  ${lastname}
-
-Document status is disabled
-  [Arguments]  ${docType}  ${xpathIdx}
-  Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
-  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
-
-Document status is enabled
-  [Arguments]  ${docType}  ${xpathIdx}
-  Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
-  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
-

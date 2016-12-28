@@ -61,7 +61,7 @@ Sonja asks for the cv
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
   Add empty attachment template  CV  osapuolet  cv
-  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']
+  Wait Until  Element Should Be Visible  jquery=div#application-attachments-tab tr[data-test-type='osapuolet.cv']
   ${trCount}=   Get Matching Xpath Count  //div[@id='application-attachments-tab']//tr[@data-test-type='osapuolet.cv']/preceding-sibling::tr
   ${index}=  Evaluate  ${trCount}+${1}
   Set Suite Variable  ${cvIndex}  ${index}

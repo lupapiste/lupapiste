@@ -69,7 +69,7 @@
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly true}}))
+           :attachments.$.readOnly (contains? #{:arkistoidaan :arkistoitu} next-state)}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
@@ -126,19 +126,23 @@
           upload-threadpool
           (fn []
             (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
-              (if (= 200 status)
+              (cond
+                (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
                   (info "Archived attachment id" id "from application" app-id)
                   (mark-application-archived-if-done application now))
+
+                (and (= status 409) (string/includes? body "already exists"))
+                (do
+                  (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
+                  (state-update-fn :arkistoitu application now id)
+                  (mark-application-archived-if-done application now))
+
+                :else
                 (do
                   (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                  (if (and (= status 409) (string/includes? body "already exists"))
-                    (do
-                      (info "Response indicates that" id "is already in archive. Updating state.")
-                      (state-update-fn :arkistoitu application now id)
-                      (mark-application-archived-if-done application now))
-                    (state-update-fn :valmis application now id))))))))
+                  (state-update-fn :valmis application now id)))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -285,9 +289,9 @@
             (upload-and-set-state case-file-archive-id pdf-is "application/pdf" metadata application created set-process-state)
             (upload-and-set-state case-file-xml-id xml-is "text/xml" xml-metadata application created set-process-state))))
       (doseq [attachment selected-attachments]
-        (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
+        (let [{:keys [content contentType]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
-          (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
+          (upload-and-set-state (:id attachment) (content) contentType metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

@@ -12,15 +12,31 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
+  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
+  self.upload.init();
+
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.groupTypes   = service.groupTypes;
   self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
   self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
+
+  self.disposedSubscribe(self.upload.files, function(files) {
+    if (!_.isEmpty(files)) {
+      var fileId = _.last(files).fileId;
+      var status = service.bindAttachment( self.id, fileId );
+      var statusSubscription = self.disposedSubscribe(status, function(status) {
+        if ( service.pollJobStatusFinished(status) ) {
+          self.upload.clearFile( fileId );
+          util.showSavedIndicator({ok: ko.unwrap(status) === service.JOB_DONE});
+          self.unsubscribe(statusSubscription);
+        }
+      });
+    }
+  });
 
   self.name = self.disposedComputed(function() {
     return "attachmentType." + self.attachment().typeString();
@@ -41,6 +57,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
       _.spread(fn)(args);
     };
   }
+
+  self.contentsList = self.disposedPureComputed( function() {
+    var fullType = _.find( service.attachmentTypes(),
+                           self.attachment().type());
+
+    return fullType ? service.contentsData( fullType ).list : [];
+  });
 
   function addUpdateListener(commandName, params, fn) {
     self.addEventListener(service.serviceName, _.merge({eventType: "update", attachmentId: self.id, commandName: commandName}, params), fn);
@@ -143,22 +166,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
 
   // Versions - add
-  self.newAttachmentVersion = function() {
-    self.disablePreview(true);
-    attachment.initFileUpload({
-      applicationId: self.applicationId,
-      attachmentId: self.id,
-      attachmentType: self.attachment().typeString(),
-      group: util.getIn(self.attachment(), ["groupType"]),
-      operationId: util.getIn(self.attachment(), ["op", "id"]),
-      typeSelector: false,
-      archiveEnabled: authModel.ok("permanent-archive-enabled")
-    });
-    // Upload dialog is opened manually here, because click event binding to
-    // dynamic content rendered by Knockout is not possible
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
-  };
-  self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
+  self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
 
   // Versions - delete
   self.deleteVersion = function(fileModel) {
@@ -181,28 +189,10 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  function groupToString(group) {
-    return _.filter([_.get(group, "id") ? "operation" : _.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
-  }
-  var groupMapping = {};
-  self.selectableGroups = self.disposedComputed(function() {
-    // Use group strings in group selector
-    groupMapping = _.keyBy(self.groupTypes(), groupToString);
-    return _.keys(groupMapping);
+  self.operationSelectorEditable = self.disposedPureComputed(function() {
+    return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
   });
-  self.selectedGroup = ko.observable(groupToString(self.attachment().group()));
-  self.disposedSubscribe(self.selectedGroup, function(groupString) {
-    self.attachment().group(_.get(groupMapping, groupString));
-  });
-  self.hasOperationSelector = _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
-  self.getGroupOptionsText = function(itemStr) {
-    var item = _.get(groupMapping, itemStr);
-    if (_.get(item, "groupType") === "operation") {
-      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
-    } else if (_.get(item, "groupType")) {
-      return loc([item.groupType, "_group_label"]);
-    }
-  };
+
   self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 

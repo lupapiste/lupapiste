@@ -201,7 +201,7 @@ LUPAPISTE.StampModel = function(params) {
   self.queryUpdate = function() {
     ajax
       .query("stamp-attachments-job")
-      .param("job-id", self.jobId)
+      .param("jobId", self.jobId)
       .param("version", self.jobVersion)
       .success(self.update)
       .call();

@@ -1,10 +1,13 @@
 (ns lupapalvelu.attachment.conversion-itest
   (:require [midje.sweet :refer :all]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment.conversion :refer :all]
             [lupapalvelu.pdf.pdfa-conversion :as pdfa]
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [clojure.java.io :as io])
   (:import (java.io InputStream)))
+
+(mongo/connect!)
 
 (facts "Conversion"
   ;; TODO remove attachemnt-type specific keys when convert-all-attachments feature is in PROD

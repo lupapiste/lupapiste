@@ -6,7 +6,7 @@
                    name: 'help-toggle',
                    params: {lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc' }
                    }"></span>
-  <!-- ko if: authModel.ok("create-assignment") -->
+  <!-- ko if: authModel.ok("create-assignment") && upload.batchListHidden() -->
   <create-assignment data-test-id="create-assignment-component"
                      params="authorities: $root.authorities,
                              applicationId: applicationId,
@@ -14,41 +14,39 @@
                              targets: lupapisteApp.services.assignmentService.targets"></create-assignment>
   <!-- /ko -->
   <div class="clear"></div>
-  <div data-bind="component: { name: 'attachments-operation-buttons' }"></div>
 
-  <suti-display></suti-display>
+  <attachments-operation-buttons params="upload: upload"></attachments-operation-buttons>
 
-  <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
-  <filters params="pageName: $data.pageName"></filters>
-  <!-- /ko -->
+  <attachment-batch params="upload: upload"></attachment-batch>
 
-  <!-- ko if: $data.hasFilteredAttachments() -->
-  <help-toggle params="html: legendHtml,
-                       lbutton: 'attachment.legend.help'"></help-toggle>
+  <!-- ko if: upload.batchListHidden -->
 
-  <div data-bind="component: { name: 'attachments-accordions',
-                               params: { pageName: $data.pageName} }"></div>
-  <!-- /ko -->
-  <div id="dialog-add-attachment-templates-v2" class="window autosized selectm-dialog">
-    <div class="dialog-header">
-      <p data-bind="ltext: 'application.newAttachmentTemplates'"></p>
-      <p class="dialog-close close lupicon-remove"></p>
+    <suti-display></suti-display>
+
+    <!-- ko if: $data.hasUnfilteredAttachments() && $data.hasFilters() -->
+    <filters params="pageName: $data.pageName"></filters>
+    <!-- /ko -->
+
+    <!-- ko if: $data.hasFilteredAttachments() -->
+    <help-toggle params="html: legendHtml,
+                         lbutton: 'attachment.legend.help'"></help-toggle>
+
+    <div data-bind="component: { name: 'attachments-accordions',
+                                 params: { pageName: $data.pageName} }"></div>
+    <!-- /ko -->
+
+    <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
+    <div data-test-id="no-filtered-attachments-info">
+      <i class="lupicon-circle-attention negative"></i>
+      <span data-bind="ltext: 'attachment.listing.no-filtered-attachments'"></span>
     </div>
-    <div class="dialog-content">
-      <div class="attachment-templates"></div>
+    <!-- /ko -->
+    <!-- ko if: !$data.hasUnfilteredAttachments() -->
+    <div data-test-id="no-unfiltered-attachments-info">
+      <i class="lupicon-circle-attention negative"></i>
+      <span data-bind="ltext: 'attachment.listing.no-attachments'"></span>
     </div>
-  </div>
+    <!-- /ko -->
 
-  <!-- ko if: $data.hasUnfilteredAttachments() && !$data.hasFilteredAttachments() -->
-  <div data-test-id="no-filtered-attachments-info">
-    <i class="lupicon-circle-attention negative"></i>
-    <span data-bind="ltext: 'attachment.listing.no-filtered-attachments'"></span>
-  </div>
-  <!-- /ko -->
-  <!-- ko if: !$data.hasUnfilteredAttachments() -->
-  <div data-test-id="no-unfiltered-attachments-info">
-    <i class="lupicon-circle-attention negative"></i>
-    <span data-bind="ltext: 'attachment.listing.no-attachments'"></span>
-  </div>
   <!-- /ko -->
 </script>

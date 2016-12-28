@@ -26,7 +26,7 @@
 (defn ok? [m] (true? (:ok m)))
 (defn fail? [m] (false? (:ok m)))
 
-(defn now [] (System/currentTimeMillis))
+(defn now ^Long [] (System/currentTimeMillis))
 
 (defmacro def- [item value]
   `(def ^{:private true} ~item ~value))

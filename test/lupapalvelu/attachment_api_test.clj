@@ -10,7 +10,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as att]))
 
 (facts "attachment-not-readOnly"
 
@@ -26,7 +26,7 @@
                                     :attachmentId "5234"}}]
 
     (fact "pre-check on its own"
-      (api/attachment-not-readOnly base-command) => itest/fail?)
+      (att/attachment-not-readOnly base-command) => itest/fail?)
 
     (fact "attachment data cannot be modified if the attachment is read-only"
       (let [command (util/deep-merge base-command {:action "set-attachment-meta"
@@ -55,16 +55,16 @@
             applicant-tj-command (assoc-in authority-tj-command [:user :role] :applicant)]
 
         (fact "initially not read only"
-          (api/attachment-not-readOnly applicant-tj-command) => nil)
+          (att/attachment-not-readOnly applicant-tj-command) => nil)
 
         (fact "read only in sent state"
-          (api/attachment-not-readOnly (assoc-in applicant-tj-command [:application :state] "sent")) => itest/fail?)
+          (att/attachment-not-readOnly (assoc-in applicant-tj-command [:application :state] "sent")) => itest/fail?)
 
         (fact "read only in verdict given state"
-          (api/attachment-not-readOnly (assoc-in applicant-tj-command [:application :state] "foremanVerdictGiven")) => itest/fail?)
+          (att/attachment-not-readOnly (assoc-in applicant-tj-command [:application :state] "foremanVerdictGiven")) => itest/fail?)
 
         (fact "not read only in verdict given state for authority"
-          (api/attachment-not-readOnly (assoc-in authority-tj-command [:application :state] "foremanVerdictGiven")) => nil)))))
+          (att/attachment-not-readOnly (assoc-in authority-tj-command [:application :state] "foremanVerdictGiven")) => nil)))))
 
 (facts "readonly pre-checks are in place"
   (->> (action/get-actions)
@@ -101,7 +101,7 @@
 
     (provided
       (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
-      (attachment/update-attachment-data! anything "5234" anything 1000) => {:ok true})
+      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true})
 
     (execute type-command) => {:ok   false
                                :text "error.pre-verdict-attachment"}
@@ -109,4 +109,4 @@
 
     (provided
       (organization/some-organization-has-archive-enabled? #{"753-R"}) => true
-      (attachment/update-attachment-data! anything "5234" anything 1000) => {:ok true})))
+      (att/update-attachment-data! anything "5234" anything 1000) => {:ok true})))

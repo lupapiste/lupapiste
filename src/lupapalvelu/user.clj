@@ -1,6 +1,6 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
-            [swiss.arrows :refer [-<>]]
+            [swiss.arrows :refer [-<> some-<>> -<>>]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
             [camel-snake-kebab.core :as csk]
@@ -250,6 +250,15 @@
   (let [archive-orgs (organization-ids-by-roles user #{:archivist})
         org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
     (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
+
+(defn check-password-pre-check [{{:keys [password]} :data user :user}]
+  (when-not (security/check-password password
+                                     (some-<>> user
+                                               :id
+                                               (mongo/by-id :users <> {:private.password true})
+                                               :private
+                                               :password))
+    (fail :error.password)))
 
 ;;
 ;; ==============================================================================

@@ -2,6 +2,7 @@
         id="attachment-details-template">
 
   <div class="attachment-info">
+    <drop-zone></drop-zone>
     <div class="container">
 
       <div class="inner-margins">
@@ -89,16 +90,8 @@
       <div class="col1">
         <div class="attachment-file-versions">
           <div>
-            <button id="add-new-attachment-version"
-                    class="positive"
-                    data-bind="click: $data.newAttachmentVersion,
-                               visible: $data.uploadingAllowed()">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addVersion',
-                               visible: $data.hasVersion()"></span>
-              <span data-bind="ltext: 'attachment.addFile',
-                               visible: !$data.hasVersion()"></span>
-            </button>
+            <upload-button params="upload: upload, buttonText: 'attachment.addVersion'"
+                           data-bind="visible: $data.uploadingAllowed()"></upload-button>
             <button data-test-id="add-ram-attachment"
                     class="positive"
                     data-bind="click: $data.newRamAttachment,
@@ -137,7 +130,7 @@
                                css: {'even-row': util.isEven( $index() ),
                                'odd-row': util.isOdd( $index() ),
                                'version-row--noted': $data.note}">
-                  <td>                    
+                  <td>
                     <i  data-bind="css: {'lupicon-circle-check positive': $data.approved,
                                    'lupicon-circle-attention negative': $data.rejected},
                                    testId: $parent.versionTestId( $index, $data )"></i>
@@ -208,24 +201,22 @@
             <div>
               <div class="col1 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.contents'"></label>
-                <input class="form-input" type="text"
-                       data-test-id="attachment-contents-input"
-                       data-bind="value: $data.attachment().contents,
-                                  enable: $data.metaUpdateAllowed()" />
+                <combobox params="value: $data.attachment().contents,
+                                  list: contentsList,
+                                  enable: $data.metaUpdateAllowed(),
+                                  testId: 'attachment-contents-input'"></combobox>                
               </div>
               <div class="col2 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
-                <select data-test-id="attachment-operation-select"
-                        data-bind="options: $data.selectableGroups,
-                                   optionsText: $data.getGroupOptionsText,
-                                   optionsCaption: loc('attachment.label.operation.choose'),
-                                   value: $data.selectedGroup,
-                                   valueAllowUnset: true,
-                                   enable: $data.metaUpdateAllowed() && $data.hasOperationSelector"></select>
+                <div data-bind="component: {name: 'attachment-group-selector',
+                                            params: { legacy: false,
+                                                      authModel: attachment().authModel,
+                                                      editable: operationSelectorEditable,
+                                                      currentGroup: attachment().group }}"></div>
               </div>
               <div class="col1 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.scale'"></label>
-                <select data-test-id="attachment-scale-select"
+                <select class="dropdown" data-test-id="attachment-scale-select"
                         data-bind="options: $data.scales,
                                    optionsText: $data.getScaleOptionsText,
                                    optionsCaption: loc('choose'),
@@ -234,58 +225,50 @@
               </div>
               <div class="col2 attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.size'"></label>
-                <select data-test-id="attachment-size-select"
+                <select class="dropdown"
+                        data-test-id="attachment-size-select"
                         data-bind="options: $data.sizes,
                                    optionsText: loc,
                                    optionsCaption: loc('choose'),
                                    value: $data.attachment().size,
                                    enable: $data.metaUpdateAllowed()"></select>
               </div>
+              
+              <div class="attachment-details-toggles">
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setConstructionTimeVisible()">
+                  <toggle params="value: $data.attachment().manuallySetConstructionTime,
+                                  prefix: 'blockbox',
+                                  ltext: 'attachment.label.manuallySetConstructionTime',
+                                  testId: 'attachment-is-manually-set-construction-time',
+                                  enable: $data.setConstructionTimeEnabled()"></toggle>
+                </div>
 
-              <div class="clear attachment-info-field"
-                   data-bind="if: $data.setConstructionTimeVisible()">
-                <label for="attachment-is-manually-set-construction-time"
-                       class="form-label"
-                       data-bind="ltext: 'attachment.label.manuallySetConstructionTime'"></label>
-                <input type="checkbox"
-                       id="attachment-is-manually-set-construction-time"
-                       class="form-input"
-                       data-bind="checked: $data.attachment().manuallySetConstructionTime,
-                                  enable: $data.setConstructionTimeEnabled(),
-                                  testId: 'attachment-is-manually-set-construction-time'"/>
-              </div>
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setForPrintingAllowed()">
+                  <toggle params="value: $data.attachment().forPrinting,
+                                  ltext: 'attachment.label.verdictAttachment',
+                                  prefix: 'blockbox',
+                                  testId: 'is-verdict-attachment'"></toggle>
+                  
+                </div>
 
-              <div class="clear attachment-info-field"
-                   data-bind="if: $data.setForPrintingAllowed()">
-                <label for="attachment-is-verdict-attachment"
-                       class="form-label"
-                       data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
-                <input type="checkbox"
-                       id="attachment-is-verdict-attachment"
-                       class="form-input"
-                       data-test-id="is-verdict-attachment"
-                       data-bind="checked: $data.attachment().forPrinting"/>
-              </div>
-
-              <div class="clear"></div>
-              <div class="col1 attachment-info-field"
-                   data-bind="if: $data.setNotNeededAllowed()">
-                <label for="attachment-is-not-needed"
-                       class="form-label"
-                       data-bind="ltext: 'application.attachmentNotNeeded'"></label>
-                <input type="checkbox"
-                       id="attachment-is-not-needed"
-                       class="form-input"
-                       data-test-id="is-not-needed"
-                       data-bind="checked: $data.attachment().notNeeded,
-                                  enable: $data.setNotNeededEnabled"/>
+                <div class="attachment-info-field"
+                     data-bind="if: $data.setNotNeededAllowed()">
+                  <toggle params="value: $data.attachment().notNeeded,
+                                  ltext: 'application.attachmentNotNeeded',
+                                  prefix: 'blockbox',
+                                  enable: $data.setNotNeededEnabled,
+                                  testId: 'is-not-needed'"></toggle>
+                </div>
               </div>
 
               <div class="clear">
                 <h3 class="left" data-bind="ltext: 'attachment.visibility'"></h3>
                 <span data-bind="component: {name: 'help-toggle',
                                  params: {lhtml: 'help.attachment.visibility'}}"></span>
-                <select data-test-id="attachment-visibility"
+                <select class="dropdown"
+                        data-test-id="attachment-visibility"
                         data-bind="options: $data.visibilities,
                                    optionsText: $data.getVibilityOptionsText,
                                    value: $data.attachment().visibility,
@@ -426,10 +409,11 @@
     </div>
   </div>
 
-  <attachments-change-type params="attachmentType: $data.attachment().type,
-                                   authModel: $data.attachment().authModel,
-                                   attachmentId: $data.attachment().id,
-                                   allowedAttachmentTypes: $data.allowedAttachmentTypes">
-  </attachments-change-type>
+  <div data-bind="component: { name: 'attachments-change-type',
+                               params: { attachmentType: $data.attachment().type,
+                                         authModel: $data.attachment().authModel,
+                                         attachmentId: $data.attachment().id,
+                                         allowedAttachmentTypes: $data.allowedAttachmentTypes}}">
+  </div>
 
 </script>

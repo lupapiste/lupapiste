@@ -463,6 +463,23 @@ span + .waiting.wait {
   padding-right: $icon-pad;
 }
 
+// icon-button spin
+.icon-spin {
+  @include rotate( spin );
+  vertical-align: middle;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-block;
+}
+
+button > .icon-spin {
+  display: table-cell;
+}
+
+.icon-spin + span {
+  padding-left: $icon-pad;
+}
+
 // Toggle support
 // Very similar to waiting.
 
@@ -526,6 +543,7 @@ i.toggle {
   vertical-align: top;
 }
 
+
 // Only inner margins
 .inner-margins {
   .btn-base, .btn, button, div, a {
@@ -567,7 +585,7 @@ i.toggle {
 
 // Buttons between docgen sections
 div.docgen-content > section + button {
-  margin-bottom: $marginS;
+  margin-bottom: $marginL;
 }
 
 #login-button span {
@@ -618,11 +636,16 @@ button {
 
 // Mixin for a button row that wraps
 @mixin button-row ($margin-right: $btn-spacer, $margin-bottom: $btn-spacer ){
-  .btn-base, .btn, button, div, a {
+  > .btn-base,
+  > .btn,
+  > button,
+  > div,
+  > a,
+  > .operation-button {
     margin: {
-    right: $margin-right;
-    bottom: $margin-bottom;
-  }
+      right: $margin-right;
+      bottom: $margin-bottom;
+    }
   }
   :last-child {
     margin-right: 0;
@@ -633,4 +656,14 @@ button {
 // http://caniuse.com/#feat=pointer-events
 .no-events {
    pointer-events: none;
+}
+
+// Attachments tab operation buttons.
+.operation-button-row {
+  @include button-row( $margin-bottom: 0);
+  margin-bottom: 20px;
+  display: block;
+  .stacked--inline {
+    float: left;
+  }
 }

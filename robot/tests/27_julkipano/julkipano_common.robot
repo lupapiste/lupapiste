@@ -88,10 +88,8 @@ Create application with attachment and publish it as bulletin
   [Arguments]  ${address}=Vaalantie 540  ${propertyId}=564-404-26-102
   Create application with state  ${address}  ${propertyId}  koeluontoinen-toiminta  sent
   Open tab  attachments
-  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Koeluontoinen toiminta
-  Return to application
-  Add attachment  application  ${TXT_TESTFILE_PATH}  ${EMPTY}  operation=Koeluontoinen toiminta
-  Return to application
+  Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Koeluontoinen toiminta
+  Upload attachment  ${TXT_TESTFILE_PATH}  Muu liite  Muu  Koeluontoinen toiminta
   Publish bulletin
   Logout
 

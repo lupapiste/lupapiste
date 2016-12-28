@@ -114,15 +114,15 @@
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.showInBackingSystem'"></span>
             </button>
-            <!-- ko if: externalApi.enabled -->
+            <!-- ko if: externalApi.enabled() -->
             <button class="function"
-                    data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                    data-bind="click: externalApi.openApplication, visible: externalApi.ok('openPermit')"
                     data-test-id="external-open-permit">
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.showInBackingSystem'"></span>
             </button>
             <button class="function"
-                    data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                    data-bind="click: externalApi.showOnMap, visible: externalApi.ok('showPermitOnMap')"
                     data-test-id="external-show-on-map">
               <i class="lupicon-location"></i>
               <span data-bind="text: 'Siirry kartalle'"></span>

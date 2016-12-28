@@ -1,0 +1,20 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="combobox-template">
+  <div class="combobox-container"
+       data-bind="event: {keydown: keyDown,
+                  mouseout: doNotLinger}">
+    <input type="text" class="grid-style-input"
+           data-bind="textInput: textInput,
+                      disable: isDisabled,
+                      hasFocus: hasFocus,
+                      testId: testId">
+    <ul class="combobox__list"
+        data-bind="foreach: shortList,
+                   visible: showList">
+      <li data-bind="text: $data,
+                     event: {mouseover: $parent.hover},
+                     css: {'combobox--selected': $parent.isSelected( $index )},
+                     click: $parent.select"></li>      
+    </ul>
+  </div>
+</script>

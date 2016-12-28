@@ -93,5 +93,6 @@ Only one assignment has been created
   Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  1
 
 No frontend errors
+  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors

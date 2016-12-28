@@ -120,14 +120,14 @@
 (defn save-review-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application organization task user lang]
-  (let [permit-type   (permit/permit-type application)
-        krysp-version (resolve-krysp-version organization permit-type)
-        output-dir    (resolve-output-directory organization permit-type)
-        begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
-        filtered-app  (remove-unsupported-attachments application)]
+  (let [permit-type (permit/permit-type application)]
     (when (org/krysp-integration? organization permit-type)
-      (or (permit/review-krysp-mapper filtered-app task user lang krysp-version output-dir begin-of-link)
-          (fail! :error.unknown)))))
+      (let [krysp-version (resolve-krysp-version organization permit-type)
+            output-dir    (resolve-output-directory organization permit-type)
+            begin-of-link (get-begin-of-link permit-type (:use-attachment-links-integration organization))
+            filtered-app  (remove-unsupported-attachments application)]
+        (or (permit/review-krysp-mapper filtered-app task user lang krysp-version output-dir begin-of-link)
+            (fail! :error.unknown))))))
 
 
 (defn save-unsent-attachments-as-krysp

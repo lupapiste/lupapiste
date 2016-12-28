@@ -292,8 +292,9 @@
                             translation-map
                             lang)))
 
-(defn merge-translations-from-excels-into-source-files [translation-files-dir-path paths]
+(defn merge-translations-from-excels-into-source-files
   "Merges translation excel files into the current translation source files."
+  [translation-files-dir-path paths]
   (let [translation-txt-files (util/get-files-by-regex translation-files-dir-path
                                                        #".+\.txt$")
         current-loc-map (-> translation-txt-files (txt-files->map))

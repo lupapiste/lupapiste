@@ -205,12 +205,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                 + loc("removeDoc.message1")
                 + " <strong>" + documentName + ".</strong></div><div>"
                 + loc("removeDoc.message2") + "</div>";
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"),
-                                           message,
-                                           { title: loc("removeDoc.ok"),
-                                             fn: onRemovalConfirmed },
-                                           {title: loc("removeDoc.cancel") },
-                                           {html: true });
+    hub.send("show-dialog", {ltitle: "removeDoc.sure",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: message,
+                                               yesFn: onRemovalConfirmed,
+                                               lyesTitle: "removeDoc.ok",
+                                               lnoTitle: "removeDoc.cancel"} });
   };
 
   function getUpdateCommand() {
@@ -802,9 +803,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if(subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
       opts = {
         fun: function () {
-          LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                                                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
-                                                 { title: loc("no") });
+          hub.send("show-dialog", {ltitle: "document.delete.header",
+                                   size: "medium",
+                                   component: "yes-no-dialog",
+                                   componentParams: {ltext: "document.delete.message",
+                                                     yesFn: function () { removeData(self.appId, self.docId, path); } }});
         }
       };
       if( options && options.dataTestSpecifiers ) {
@@ -870,7 +873,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model: model[subSchema.name],
       isDisabled: self.isDisabled,
       authModel: self.authorizationModel,
-      propertyId: self.propertyId
+      propertyId: self.propertyId,
+      docModel: self
     };
 
     return createComponent(name, params);

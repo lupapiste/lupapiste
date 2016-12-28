@@ -1,14 +1,14 @@
 *** Settings ***
 
 Documentation  Common stuff for the Lupapiste Functional Tests.
-Library        Selenium2Library   timeout=10  run_on_failure=Nothing
+Library        Selenium2Library   timeout=12  run_on_failure=Nothing
 Library        String
 Library        OperatingSystem
 
 *** Variables ***
 
 ${SERVER}                       http://localhost:8000
-${WAIT_DELAY}                   10
+${WAIT_DELAY}                   12
 ${BROWSER}                      firefox
 ${DEFAULT_SPEED}                0
 ${OP_TREE_SPEED}                0.1
@@ -34,7 +34,8 @@ ${DB PREFIX}                    test_
 
 Set DB cookie
   ${timestamp}=  Get Time  epoch
-  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}
+  ${random post fix}=  Evaluate  random.randint(0, sys.maxint)  modules=random, sys
+  ${dbname}=  Set Variable  ${DB PREFIX}${timestamp}_${random post fix}
   Add Cookie  ${DB COOKIE}  ${dbname}
   Log To Console  \n Cookie: ${DB COOKIE} = ${dbname} \n
   Log  Cookie: ${DB COOKIE} = ${dbname}
@@ -47,6 +48,10 @@ Browser
   # Open a static HTML page and set cookie there
   Open browser  ${SERVER}/dev-pages/init.html  ${BROWSER}   remote_url=${SELENIUM}
   Set DB cookie
+
+Reload page and kill dev-box
+  Reload page
+  Kill dev-box
 
 Open browser to login page
   Browser
@@ -114,6 +119,7 @@ Wait for jQuery
   Wait For Condition  return (typeof jQuery !== "undefined") && jQuery.active===0;  15
 
 Kill dev-box
+  Wait until  Element should be visible  jquery=.dev-debug
   Execute Javascript  $(".dev-debug").hide();
 
 Resurrect dev-box
@@ -451,20 +457,20 @@ Select From List by id
 
 Select From Autocomplete
   [Arguments]  ${container}  ${value}
-  Wait until  Element should be visible  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  Wait until  Element should be visible  jquery=${container} span.autocomplete-selection
 
-  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  xpath=//${container}//div[@class="autocomplete-dropdown"]
-  Run Keyword If  ${autocompleteListNotOpen}  Click Element  xpath=//${container}//span[contains(@class, "autocomplete-selection")]
+  ${autocompleteListNotOpen} =  Run Keyword And Return Status  Element should not be visible  jquery=${container} div.autocomplete-dropdown
+  Run Keyword If  ${autocompleteListNotOpen}  Scroll and click  ${container} span.autocomplete-selection
 
-  Input text  xpath=//${container}//input[@data-test-id="autocomplete-input"]  ${value}
-  Wait until  Element should be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Click Element  xpath=//${container}//ul[contains(@class, "autocomplete-result")]//li/span[contains(text(), '${value}')]
-  Wait until  Element should not be visible  xpath=//${container}//ul[contains(@class, "autocomplete-result")]
+  Input text  jquery=${container} input[data-test-id="autocomplete-input"]  ${value}
+  Wait until  Element should be visible  jquery=${container} ul.autocomplete-result li span:contains('${value}')
+  Scroll and click  ${container} ul.autocomplete-result li span:contains('${value}')
+  Wait until  Element should not be visible  jquery=${container} ul.autocomplete-result
   Wait for jQuery
 
 Select From Autocomplete By Test Id
   [Arguments]  ${data-test-id}  ${value}
-  Select From Autocomplete  *[@data-test-id="${data-test-id}"]  ${value}
+  Select From Autocomplete  [data-test-id="${data-test-id}"]  ${value}
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
@@ -546,7 +552,7 @@ Edit operation description
   Run keyword If  ${identifiersClosed}  Click element  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
   ${opDescriptionXpath}=  Set Variable  //div[@id='application-info-tab']//section[@data-doc-id='${docId}']//input[@data-test-id='op-description-editor-${doc}']
   ${opDescriptionjQueryPath}=  Set Variable  div[id='application-info-tab'] section[data-doc-id='${docId}'] input[data-test-id='op-description-editor-${doc}']
-  Wait until element is visible  ${opDescriptionXpath}
+  Wait Until  Element Should Be Visible  ${opDescriptionXpath}
   Input text with jQuery  ${opDescriptionjQueryPath}  ${text}
   # Close the input
   Scroll and click  div#application-info-tab [data-test-id=toggle-identifiers-${doc}]:eq(${jQueryIdx})
@@ -564,11 +570,23 @@ Input building identifier
   ${identifiersClosed} =  Get identifiers closed  ${docId}
   # for jQuery ${idx}-1 because xpath indeces start from 1!
   Run keyword If  ${identifiersClosed}  Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Wait Until  Element Should Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
   Input text by test id  ${docId}-identifier-input  ${text}
   # Close the input
   Execute Javascript  $('div#application-info-tab [data-test-id=toggle-identifiers-${doc}]')[${idx}-1].click();
-  Wait until element is not visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+  Wait Until  Element Should Not Be Visible  jquery=div#application-info-tab input[data-test-id=${docId}-identifier-input]
+
+
+Document status is disabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Palauta aktiiviseksi
+
+Document status is enabled
+  [Arguments]  ${docType}  ${xpathIdx}
+  Wait until  Element should not be visible  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//div[contains(@class, 'accordion-toggle')]/button[contains(@class,'disabled')]
+  Wait until  Element text should be  xpath=(//section[@data-doc-type='${docType}'])[${xpathIdx}]//button[@data-test-id='toggle-document-status']/span  Merkitse poistuneeksi
+
 
 Table with id should have rowcount
   [Arguments]  ${id}  ${expectedRowcount}
@@ -686,18 +704,33 @@ Do prepare new request
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Click enabled by test id  add-attachment-templates
-  Wait Until Element Is Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Input Text  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]  ${templateName}
-  List Should Have No Selections  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 select[data-test-id=selectm-source-list] option:contains('${templateName}')
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-add]
-  Click Element  jquery=div#dialog-add-attachment-templates-v2 button[data-test-id=selectm-ok]
-  Wait Until  Element Should Not Be Visible  jquery=div#dialog-add-attachment-templates-v2 input[data-test-id=selectm-filter-input]
-  Wait Until Element Is Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
+  Select From Autocomplete  div[data-test-id="attachment-type-autocomplete"]  ${templateName}
+  Wait Until  Element Should Be Visible  jquery=div.selected-attachment-types-container div[data-test-id=selected-attachment-${topCategory}-${subCategory}]
+  Click by test id  require-attachments-bubble-dialog-ok
+  Wait Until  Element Should Not Be Visible  jquery=div.selected-attachment-types-container
+  Wait Until  Element Should Be Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
+
+Upload batch file
+  [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
+  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "block").toggleClass( "hidden", false )
+  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
+  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "none").toggleClass( "hidden", true )
+  Wait Until  Element should be visible  jquery=div.upload-progress--finished
+  Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
+  Fill test id  batch-contents-${index}  ${contents}
+  Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
+
+Upload attachment
+  [Arguments]  ${path}  ${type}  ${contents}  ${grouping}
+  Test id visible  add-attachments-label
+  Scroll to top
+  Upload batch file  0  ${path}  ${type}  ${contents}  ${grouping}
+  Click enabled by test id  batch-ready
+  Wait until  No such test id  batch-ready
 
 Add attachment
   [Arguments]  ${kind}  ${path}  ${description}  ${type}=muut.muu  ${operation}=
-  Run Keyword If  '${kind}' == 'application'  Click enabled by test id  add-attachment
+  Run Keyword If  '${kind}' == 'application'  Fail  Use Upload Attachment instead
   Run Keyword If  '${kind}' == 'inforequest'  Click enabled by test id  add-inforequest-attachment
   Run Keyword If  '${kind}' == 'verdict'  Click enabled by test id  add-targetted-attachment
   Run Keyword If  '${kind}' == 'statement'  Click enabled by test id  add-statement-attachment
@@ -785,9 +818,9 @@ Attachment file upload
 # Add file version from attachment details
 Add attachment version
   [Arguments]  ${path}
-  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
-  Click Element  xpath=//button[@id="add-new-attachment-version"]
-  Attachment file upload  ${path}
+  Wait Until  Element should be visible  jquery=label[data-test-id=upload-button-label]
+  Scroll and click test id  upload-button-label
+  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
 
 # Add the first file to template from attachments view
 Add attachment file
@@ -795,12 +828,6 @@ Add attachment file
   Wait Until     Element should be visible  jquery=${row}
   Scroll and click  ${row} a[data-test-id=add-attachment-file]
   Attachment file upload  ${path}
-
-
-Open attachments tab and unselect post verdict filter
-  Open tab  attachments
-  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
-  Scroll and click test id  postVerdict-filter-label
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -1087,7 +1114,7 @@ Invite ${email} to application
   ${invites_count}=  Get Matching Xpath Count  //div[@class='parties-list']/table//tr[@class='party']
   Fill application person invite bubble  ${email}  Tervetuloa muokkaamaan hakemusta
   Scroll and click test id  person-invite-bubble-dialog-ok
-  Wait test id hidden  person-invite-bubble-dialog-ok
+  Wait until  Element should not be visible  jquery=[data-test-id=person-invite-bubble-dialog-ok]
   Wait Until  Element Should Be Visible  xpath=//div[@class='parties-list']//tr[@class='party'][${invites_count} + 1]
   ${email_found}=  Run Keyword And Return Status  Is authorized party  ${email}
   # If specified email was not found from auths, try to parse username from the email and test if username exists (case of pena)
@@ -1107,7 +1134,7 @@ Invite company to application
   Open tab  parties
   Scroll and click test id  application-invite-company
   Wait test id visible  company-invite-bubble-dialog-ok
-  Select From Autocomplete  div[@data-test-id="company-invite-companies"]  ${company}
+  Select From Autocomplete  div[data-test-id="company-invite-companies"]  ${company}
   Scroll and click test id  company-invite-bubble-dialog-ok
   Is authorized party  ${company}
 
@@ -1284,6 +1311,7 @@ Fill in new password
 
 Open company user listing
   Click Element  user-name
+  Wait until  Element should be visible  xpath=//div[@data-test-id="mypage-company-accordion"]
   Open accordion by test id  mypage-company-accordion
   Wait Until  Element should be visible  //div[@data-test-id='my-company']
   Click by test id  company-edit-users
@@ -1378,12 +1406,11 @@ Scroll and click test id
 Wait test id visible
   [Arguments]  ${id}
   Scroll to test id  ${id}
-  Wait Until Element Is Visible  jquery=[data-test-id=${id}]:visible
+  Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
 Wait test id hidden
   [Arguments]  ${id}
-  Scroll to test id  ${id}
-  Wait Until Element Is Not Visible  jquery=[data-test-id=${id}]
+  Wait Until  Element should not be visible  jquery=[data-test-id=${id}]
 
 Test id empty
   [Arguments]  ${id}
@@ -1408,7 +1435,7 @@ Fill test id
 
 Focus test id
   [Arguments]  ${id}
-  Focus  jquery=[data-test-id=${id}]
+  Wait until  Focus  jquery=[data-test-id=${id}]
 
 No such test id
   [Arguments]  ${id}
@@ -1440,6 +1467,16 @@ Test id visible
   [Arguments]  ${id}
   Wait Until  Element should be visible  jquery=[data-test-id=${id}]:visible
 
+Click label
+  [Arguments]  ${for}
+  Scroll to  label[for=${for}]
+  Click element  jquery=label[for=${for}]
+
+Click label by test id
+  [Arguments]  ${tid}
+  Scroll to  label[data-test-id=${tid}]
+  Click element  jquery=label[data-test-id=${tid}]
+
 Checkbox wrapper selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 1
@@ -1447,11 +1484,6 @@ Checkbox wrapper selected by test id
 Checkbox wrapper not selected by test id
   [Arguments]  ${data-test-id}
   Javascript?  $("input[data-test-id=${data-test-id}]:checked").length === 0
-
-Click label
-  [Arguments]  ${for}
-  Scroll to  label[for=${for}]
-  Click element  jquery=label[for=${for}]
 
 Checkbox wrapper selected
   [Arguments]  ${id}

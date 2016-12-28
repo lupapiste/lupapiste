@@ -2257,7 +2257,7 @@
                            {:processMetadata.sailytysaika.arkistointi "toistaiseksi"
                             :processMetadata.sailytysaika.laskentaperuste {$exists false}}
                            {$set {:processMetadata.sailytysaika.laskentaperuste "rakennuksen_purkamisp\u00e4iv\u00e4"}}))
-  (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
+  (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi            "toistaiseksi"
                                                                                                           :metadata.sailytysaika.laskentaperuste {$exists false}}}}))
 
 (defmigration paasuunnittelija-is-removable
@@ -2606,6 +2606,44 @@
   (update-applications-array :attachments
                              build-approvals
                              {:attachments.0 {$exists true}}))
+
+(def al-retention-ruling "AL/17413/07.01.01.03.01/2016")
+
+(defn change-retention-to-permanent [{:keys [metadata] :as attachment}]
+  (if (and (#{"toistaiseksi" "m\u00e4\u00e4r\u00e4ajan"} (get-in metadata [:sailytysaika :arkistointi]))
+           (not= "arkistoitu" (:tila metadata)))
+    (assoc-in attachment [:metadata :sailytysaika] {:arkistointi "ikuisesti"
+                                                    :perustelu al-retention-ruling})
+    attachment))
+
+(def in-non-perm-retention {$in ["toistaiseksi" "m\u00e4\u00e4r\u00e4ajan"]})
+
+(defmigration change-retention-to-permanent-for-archived-R-docs
+  {:apply-when (pos? (mongo/count :applications {:organization {"$regex" ".*-R"}
+                                                 $or [{:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                       :metadata.tila {$ne "arkistoitu"}}
+                                                      {:processMetadata.sailytysaika.arkistointi in-non-perm-retention
+                                                       :processMetadata.tila {$ne "arkistoitu"}}
+                                                      {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                                                 :metadata.tila {$ne "arkistoitu"}}}}]}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (mongo/update-by-query collection
+                           {:organization {"$regex" ".*-R"}
+                            :metadata.sailytysaika.arkistointi in-non-perm-retention
+                            :metadata.tila {$ne "arkistoitu"}}
+                           {$set {:metadata.sailytysaika.arkistointi "ikuisesti"
+                                  :metadata.sailytysaika.perustelu al-retention-ruling}})
+    (mongo/update-by-query collection
+                           {:organization {"$regex" ".*-R"}
+                            :processMetadata.sailytysaika.arkistointi in-non-perm-retention
+                            :processMetadata.tila {$ne "arkistoitu"}}
+                           {$set {:processMetadata.sailytysaika.arkistointi "ikuisesti"
+                                  :processMetadata.sailytysaika.perustelu al-retention-ruling}}))
+  (update-applications-array :attachments
+                             change-retention-to-permanent
+                             {:organization {"$regex" ".*-R"}
+                              :attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                        :metadata.tila {$ne "arkistoitu"}}}}))
 
 ;;
 ;; ****** NOTE! ******
