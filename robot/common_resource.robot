@@ -710,11 +710,20 @@ Add empty attachment template
   Wait Until  Element Should Not Be Visible  jquery=div.selected-attachment-types-container
   Wait Until  Element Should Be Visible  jquery=div#application-attachments-tab tr[data-test-type="${topCategory}.${subCategory}"]
 
+Expose file input
+  [Arguments]  ${jQuerySelector}
+  Execute Javascript  $("${jQuerySelector}").css( "display", "block").toggleClass( "hidden", false )
+
+Hide file input
+  [Arguments]  ${jQuerySelector}
+  Execute Javascript  $("${jQuerySelector}").css( "display", "none").toggleClass( "hidden", true )
+
+
 Upload batch file
   [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
-  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "block").toggleClass( "hidden", false )
+  Expose file input  input[data-test-id=add-attachments-input]
   Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
-  Execute Javascript  $("input[data-test-id=add-attachments-input]").css( "display", "none").toggleClass( "hidden", true )
+  Hide file input  input[data-test-id=add-attachments-input]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
   Fill test id  batch-contents-${index}  ${contents}
@@ -771,10 +780,9 @@ Set attachment type for upload
 Open attachment details
   [Arguments]  ${type}  ${nth}=0
   Open tab  attachments
-  ${selector} =  Set Variable  $("div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible")
-  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
-  Wait For Condition  return ${selector}.length>0;  10
-  Execute Javascript  ${selector}[${nth}].click();
+  ${selector} =  Set Variable  div#application-attachments-tab tr[data-test-type='${type}'] a[data-test-id=open-attachment]:visible
+  Wait until  Element should be visible  jquery=${selector}
+  Scroll and click  ${selector}:eq(${nth})
   Wait Until  Element Should Be Visible  jquery=section[id=attachment] a[data-test-id=back-to-application-from-attachment]
 
 Click not needed
@@ -819,8 +827,8 @@ Attachment file upload
 Add attachment version
   [Arguments]  ${path}
   Wait Until  Element should be visible  jquery=label[data-test-id=upload-button-label]
-  Scroll and click test id  upload-button-label
-  Choose file  jquery=input[data-test-id=add-attachments-input]  ${path}
+  Expose file input  input[data-test-id=upload-button-input]
+  Choose file  jquery=input[data-test-id=upload-button-input]  ${path}
 
 # Add the first file to template from attachments view
 Add attachment file

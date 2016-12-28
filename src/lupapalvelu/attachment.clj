@@ -148,6 +148,7 @@
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
    (sc/optional-key :contents)           (sc/maybe sc/Str)  ;; content description
+   (sc/optional-key :drawingNumber)      sc/Str             ;;
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
@@ -428,7 +429,7 @@
      :timestamp timestamp}))
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state contents group]}]
+                              {:keys [created target stamped replaceable-original-file-id state contents drawingNumber group]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -444,6 +445,8 @@
        {$set {:attachments.$.latestVersion version-model}})
      (when-not (ss/blank? contents)
        {$set {:attachments.$.contents contents}})
+     (when-not (ss/blank? drawingNumber)
+       {$set {:attachments.$.drawingNumber drawingNumber}})
      (when (not-empty group)
        {$set {:attachments.$.op (not-empty (select-keys group [:id :name]))
               :attachments.$.groupType (:groupType group)}})
