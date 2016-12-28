@@ -17,7 +17,11 @@
 
 (def buildinfo (read-string (slurp (io/resource "buildid.edn"))))
 
-(defn- parse-target-env [buildinfo] (or (second (re-find #"-\s*([PRODEVTSQAprodevtsqa]+)" (str buildinfo))) "local"))
+(defn- parse-target-env [buildinfo]
+  (or (second (re-find #"-\s*([PRODEVTSQAprodevtsqa]{2,10})" (str buildinfo)))
+      (when (re-find #"instant-smokes" (str buildinfo)) "prod")
+      "local"))
+
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
 (def file-separator (System/getProperty "file.separator"))
