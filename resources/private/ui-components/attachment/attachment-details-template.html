@@ -210,6 +210,7 @@
               <div class="col2 attachment-info-field">
                 <label data-bind="ltext: 'attachment.drawing-number'"></label>
                 <input class="grid-style-input" data-bind="value: $data.attachment().drawingNumber,
+                                                           enable: $data.metaUpdateAllowed(),
                                                            testId: 'attachment-drawing-number'">
               </div>
               <div class="attachment-info-field">
