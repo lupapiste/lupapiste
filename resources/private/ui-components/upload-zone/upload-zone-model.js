@@ -7,15 +7,7 @@ LUPAPISTE.UploadZoneModel = function( params ) {
   "use strict";
   var self = this;
 
-  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
-
-  self.upload = params.upload;
-
-  // Setting for attribute to "" effectively disables file selection.
-  self.labelFor = self.disposedComputed( function() {
-    return self.upload.waiting()
-      || self.upload.readOnly ? "" : self.upload.fileInputId;
-  });
+  ko.utils.extend( self, new LUPAPISTE.BaseUploadModel(params));
 
   self.testId = params.testId || "upload-zone";
 

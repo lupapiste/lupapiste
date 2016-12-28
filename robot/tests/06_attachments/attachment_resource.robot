@@ -51,3 +51,19 @@ Unselect post verdict filter
 Total attachments row count is
   [Arguments]  ${count}
   Xpath Should Match X Times  //div[contains(@class, 'attachments-accordions')]//table[contains(@class,'attachments-table')]/tbody/tr[not(contains(@class, 'reject-note-row'))]  ${count}
+
+Attachment group should be visible
+  [Arguments]  ${nth}  ${group}
+  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:eq(${nth}) span.rollup-status__text  ${group}
+
+Attachment group should not be visible
+  [Arguments]  ${nth}
+  Element Should Not Be Visible  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:eq(${nth})
+
+Attachment subgroup should be visible
+  [Arguments]  ${nth}  ${sub-nth}  ${group}
+  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:eq(${nth}) rollup[data-test-level=accordion-level-1]:eq(${sub-nth}) span.rollup-status__text  ${group}
+
+Attachment subgroup should not be visible
+  [Arguments]  ${nth}  ${sub-nth}
+  Element Should Not Be Visible  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:eq(${nth}) rollup[data-test-level=accordion-level-1]:eq(${sub-nth})

@@ -440,18 +440,17 @@ a.link-btn-julkipano {
   @include rotate( spin );
   vertical-align: middle;
 }
-
 i.wait {
-  display: none;
+  display: none !important;
   padding: 0 !important;
 }
 
 .waiting {
   i {
-    display: none;
+    display: none !important;
   }
   i.wait {
-    display: table-cell;
+    display: table-cell !important;
   }
 }
 
@@ -661,6 +660,7 @@ button {
 // Attachments tab operation buttons.
 .operation-button-row {
   @include button-row( $margin-bottom: 0);
+  margin-bottom: 20px;
   display: block;
   .stacked--inline {
     float: left;

@@ -317,6 +317,9 @@ td.comment-text {
     top: 1em;
     bottom: 2em;
   }
+  export-attachments {
+    @include button-row;
+  }
 }
 
 .attachment-assignment-row {

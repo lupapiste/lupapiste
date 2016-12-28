@@ -878,6 +878,11 @@
                               rakennuksen-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-ilman-rakennustietoja (body
+                                                    rakennuksen-valitsin
+                                                    rakennuksen-omistajat
+                                                    rakennuksen-osoite))
+
 (def olemassaoleva-rakennus-muutos (body
                                      rakennuksen-valitsin
                                      rakennuksen-omistajat
@@ -956,11 +961,17 @@
                                                     {:name "muuta huoneistoalaan kuuluvaa tilaa"}
                                                     ei-tiedossa]}]}]}]}])
 
-(def rakennuksen-laajentaminen (body laajentaminen
-                                     olemassaoleva-rakennus))
+(def rakennuksen-laajentaminen-ilman-rakennustietoja (body
+                                                        olemassaoleva-rakennus-ilman-rakennustietoja
+                                                        laajentaminen))
 
-(def rakennuksen-laajentaminen-ei-huoneistoja (body laajentaminen
-                                                    olemassaoleva-rakennus-ei-huoneistoja))
+(def rakennuksen-laajentaminen (body
+                                  rakennuksen-laajentaminen-ilman-rakennustietoja
+                                  rakennuksen-tiedot))
+
+(def rakennuksen-laajentaminen-ei-huoneistoja (body
+                                                rakennuksen-laajentaminen-ilman-rakennustietoja
+                                                rakennuksen-tiedot-ilman-huoneistoa))
 
 (def purku (body
              {:name "poistumanSyy" :type :select :sortBy :displayname

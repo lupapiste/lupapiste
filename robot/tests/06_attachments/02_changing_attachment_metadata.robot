@@ -85,7 +85,7 @@ Mikko sees that contents metadata is visible in attachments list
   Wait Until  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
 
 Mikko sees that attachments are grouped by operations
-  Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  4
+  Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  3
 
 Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
   Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"])[last()]//span[@class="rollup-status__text"]  MUUN RAKENNUKSEN RAKENTAMINEN - TALO B

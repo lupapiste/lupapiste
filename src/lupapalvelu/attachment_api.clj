@@ -16,6 +16,7 @@
             [lupapalvelu.attachment :as att]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.tags :as att-tags]
+            [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [lupapalvelu.attachment.metadata :as attachment-meta]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.ram :as ram]
@@ -186,7 +187,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states states/all-application-states}
   [{application :application}]
-  (ok :tagGroups (att-tags/attachment-tag-groups application)))
+  (ok :tagGroups (att-tag-groups/attachment-tag-groups application)))
 
 ;;
 ;; Types

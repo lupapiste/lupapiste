@@ -14,6 +14,7 @@
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
             [lupapalvelu.attachment.tags :as att-tags]
+            [lupapalvelu.attachment.tag-groups :as att-tag-groups]
             [lupapalvelu.attachment.type :as att-type]
             [lupapalvelu.attachment.accessibility :as access]
             [lupapalvelu.attachment.metadata :as metadata]
@@ -841,7 +842,7 @@
 
 (defn- describe-assignment-targets [application]
   (let [attachments (map enrich-attachment (:attachments application))]
-    (->> (att-tags/attachment-tag-groups (assoc application :attachments attachments))
+    (->> (att-tag-groups/attachment-tag-groups application)
          (att-tags/sort-by-tags attachments)
          (map attachment-assignment-info))))
 
