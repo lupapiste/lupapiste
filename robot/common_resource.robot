@@ -718,12 +718,15 @@ Hide file input
   [Arguments]  ${jQuerySelector}
   Execute Javascript  $("${jQuerySelector}").css( "display", "none").toggleClass( "hidden", true )
 
+Upload with hidden input
+  [Arguments]  ${jquerySelector}  ${path}
+  Expose file input  ${jquerySelector}
+  Choose file  jquery=${jquerySelector}  ${path}
+  Hide file input  ${jquerySelector}
+
 Upload via button or link
   [Arguments]  ${uploadContainer}  ${path}
-  Expose file input  input[data-test-id=${uploadContainer}-input]
-  Choose file  jquery=input[data-test-id=${uploadContainer}-input]  ${path}
-  Positive indicator should be visible
-  Hide file input  input[data-test-id=${uploadContainer}-input]
+  Upload with hidden input  input[data-test-id=${uploadContainer}-input]  ${path}
 
 Upload batch file
   [Arguments]  ${index}  ${path}  ${type}  ${contents}  ${grouping}
@@ -834,13 +837,15 @@ Add attachment version
   [Arguments]  ${path}
   Wait Until  Element should be visible  jquery=label[data-test-id=upload-button-label]
   Upload via button or link  upload-button  ${path}
+  Positive indicator should be visible
 
 # Add the first file to template from attachments view
 Add attachment file
   [Arguments]  ${row}  ${path}
-  Wait Until     Element should be visible  jquery=${row}
-  Scroll and click  ${row} a[data-test-id=add-attachment-file]
-  Attachment file upload  ${path}
+  Wait Until     Element should be visible  jquery=${row} label[data-test-id=add-attachment-file-label]
+  Scroll to  ${row} label[data-test-id=add-attachment-file-label]
+  Upload with hidden input  ${row} input[data-test-id=add-attachment-file-input]  ${path}
+  Wait Until     Element should not be visible  jquery=${row} label[data-test-id=add-attachment-file-label]
 
 Attachment is
   [Arguments]  ${approvalStatus}

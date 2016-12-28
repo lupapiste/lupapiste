@@ -139,18 +139,18 @@ Mikko does not see Reject nor Approve buttons
 
 Not needed not visible as attachment contains file
   [Tags]  attachments
-  Wait until  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Remove version, not needed selectable
   [Tags]  attachments
   Delete attachment version  1.0
-  Wait until  Element should be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
+  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
   Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
 
 Checking not needed in attachment page affects attachment listing
   [Tags]  attachments
-  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
   Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
   Return to application
   Wait until  Not needed should be visible  muut.muu
@@ -158,19 +158,19 @@ Checking not needed in attachment page affects attachment listing
 
 Upload is not possible for notNeeded attachment
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Set attachment back to needed
   [Tags]  attachments
   Click not needed  muut.muu
   Wait until  Not needed should not be selected  muut.muu
-  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments
   Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}
   # Not needed not visible when file is present
-  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Mikko deletes attachment
   [Tags]  attachments
