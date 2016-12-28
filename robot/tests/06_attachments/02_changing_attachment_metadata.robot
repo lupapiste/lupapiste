@@ -88,7 +88,7 @@ Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
-  Page should contain  piir1.0
+  Textfield value should be  xpath=//input[@data-test-id='attachment-drawing-number']  piir1.0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
   Go Back
   Tab should be visible  attachments
