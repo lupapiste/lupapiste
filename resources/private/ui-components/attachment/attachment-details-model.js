@@ -20,8 +20,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
-  self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
 
   self.name = self.disposedComputed(function() {
@@ -181,7 +179,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
   });
 
-  self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
