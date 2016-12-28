@@ -208,6 +208,10 @@
                                   testId: 'attachment-contents-input'"></combobox>
               </div>
               <div class="col2 attachment-info-field">
+                <label data-bind="ltext: 'attachment.drawing-number'"></label>
+                <input class="grid-style-input" data-bind="value: $data.attachment().drawingNumber">
+              </div>
+              <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
                 <div data-bind="component: {name: 'attachment-group-selector',
                                             params: { legacy: false,

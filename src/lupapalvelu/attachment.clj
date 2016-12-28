@@ -37,7 +37,7 @@
 ;; Metadata
 ;;
 
-(def attachment-meta-types [:size :scale :group :op :contents])
+(def attachment-meta-types [:size :scale :group :op :contents :drawingNumber])
 
 (def attachment-scales
   [:1:20 :1:50 :1:100 :1:200 :1:500
@@ -514,7 +514,7 @@
                  nil))))))
 
 (defn meta->attachment-data [meta]
-  (merge (select-keys meta [:contents :size :scale])
+  (merge (dissoc meta :op :group)
          (when (contains? meta :group)
            {:op (not-empty (select-keys (:group meta) [:id :name]))
             :groupType (get-in meta [:group :groupType])})))

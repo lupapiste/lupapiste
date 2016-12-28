@@ -10,7 +10,7 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   var data = attachmentData;
 
   // Attachment data fields that are mapped as observables
-  var observableFields = ["notNeeded", "contents", "scale", "size", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
+  var observableFields = ["notNeeded", "contents", "drawingNumber", "scale", "size", "forPrinting", "type", "op", "groupType", "manuallySetConstructionTime"];
 
   self.authModel = authModel;
 
@@ -121,6 +121,10 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   self.registerApplyableSubscription(self.contents, function(val) {
     service.setMeta(self.id, {contents: val}, {field: "contents"});
+  });
+
+  self.registerApplyableSubscription(self.drawingNumber, function(val) {
+    service.setMeta(self.id, {drawingNumber: val}, {field: "drawingNumber"});
   });
 
   self.registerApplyableSubscription(self.scale, function(val) {
