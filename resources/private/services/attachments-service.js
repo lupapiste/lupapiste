@@ -330,8 +330,9 @@ LUPAPISTE.AttachmentsService = function() {
             status(self.JOB_TIMEOUT);
           }
         });
+        self.authModel.refresh({id: self.applicationId()});
         if ( attachments.length === 1 && attachments[0].attachmentId ) {
-          self.queryOne(attachments[0].attachmentId);
+          self.queryOne(attachments[0].attachmentId, {triggerCommand: "upload-attachment"});
           self.queryTagGroupsAndFilters();
         } else {
           self.queryAll();
