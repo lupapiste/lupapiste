@@ -495,7 +495,8 @@
       organization:        organizationModel
     });
     $("#reports").applyBindings({
-      organization:        organizationModel
+      organization: organizationModel,
+      reportsModel: new LUPAPISTE.OrganizationReportsModel()
     });
     if (features.enabled("ajanvaraus")) {
       $("#organization-calendars").applyBindings({
