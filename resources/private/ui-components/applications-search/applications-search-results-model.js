@@ -42,7 +42,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("fifth",   "applications.applicant",  {sortField: "applicant",
                                                                      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("sixth",   "applications.sent",       {sortField: "submitted",
+    util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted",
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("seventh", "applications.updated",    {sortField: "modified",
                                                                      currentSort: self.dataProvider.sort}),
