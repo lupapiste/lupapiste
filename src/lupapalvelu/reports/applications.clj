@@ -40,34 +40,15 @@
   (when (seq secondaryOperations)
     (ss/join "\n" (map (partial localized-operation lang) secondaryOperations))))
 
-(defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
-  ;; Create a spreadsheet and save it
-  (let [data               (open-applications-for-organization organizationId excluded-operations)
-        sheet-name         (str (i18n/localize lang "applications.report.sheet-name-prefix") " " (util/to-local-date (now)))
-        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
-                                                              "applications.authority"
-                                                              "applications.status"
-                                                              "applications.opened"
-                                                              "applications.sent"
-                                                              "applications.lastModified"
-                                                              "operations.primary"
-                                                              "application.operations.secondary"])
-        column-count       (count header-row-content)
-        row-fn (juxt :id
-                     authority
-                     (partial localized-state lang)
-                     (partial date-value :opened)
-                     (partial date-value :submitted)
-                     (partial date-value :modified)
-                     (partial localized-primary-operation lang)
-                     (partial localized-secondary-operations lang))
-        wb     (spreadsheet/create-workbook
-                 sheet-name
-                 (concat [header-row-content] (map row-fn data)))
-        sheet  (first (spreadsheet/sheet-seq wb))
-        header-row (-> sheet spreadsheet/row-seq first)]
+(defn ^OutputStream xlsx-stream
+  [data sheet-name header-row-content row-fn]
+  (let [wb           (spreadsheet/create-workbook
+                       sheet-name
+                       (concat [header-row-content] (map row-fn data)))
+        sheet        (first (spreadsheet/sheet-seq wb))
+        header-row   (-> sheet spreadsheet/row-seq first)
+        column-count (count header-row-content)]
     (spreadsheet/set-row-style! header-row (spreadsheet/create-cell-style! wb {:font {:bold true}}))
-
     ; Expand columns to fit all their contents
     (doseq [i (range column-count)]
       (.autoSizeColumn sheet i))
@@ -75,4 +56,28 @@
     (with-open [out (ByteArrayOutputStream.)]
       (spreadsheet/save-workbook-into-stream! out wb)
       (ByteArrayInputStream. (.toByteArray out)))))
+
+(defn ^OutputStream open-applications-for-organization-in-excel! [organizationId lang excluded-operations]
+  ;; Create a spreadsheet and save it
+  (let [data               (open-applications-for-organization organizationId excluded-operations)
+        sheet-name         (str (i18n/localize lang "applications.report.open-applications.sheet-name-prefix")
+                                " "
+                                (util/to-local-date (now)))
+        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
+                                                              "applications.authority"
+                                                              "applications.status"
+                                                              "applications.opened"
+                                                              "applications.submitted"
+                                                              "applications.lastModified"
+                                                              "operations.primary"
+                                                              "application.operations.secondary"])
+        row-fn (juxt :id
+                     authority
+                     (partial localized-state lang)
+                     (partial date-value :opened)
+                     (partial date-value :submitted)
+                     (partial date-value :modified)
+                     (partial localized-primary-operation lang)
+                     (partial localized-secondary-operations lang))]
+    (xlsx-stream data sheet-name header-row-content row-fn)))
 

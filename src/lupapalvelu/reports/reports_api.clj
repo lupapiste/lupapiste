@@ -12,7 +12,7 @@
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
         excluded-operations [:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2]
-        resulting-file-name (str (i18n/localize lang "applications.report.file-name")
+        resulting-file-name (str (i18n/localize lang "applications.report.open-applications.file-name")
                                  "_"
                                  (util/to-xml-date (now))
                                  ".xlsx")]
