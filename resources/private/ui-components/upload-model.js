@@ -25,7 +25,7 @@ LUPAPISTE.UploadModel = function( owner, params ) {
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
 
-  if( owner ) {
+  if( owner && _.isFunction(owner.addToDisposeQueue)) {
     owner.addToDisposeQueue( self );
   }
   var originalFiles;

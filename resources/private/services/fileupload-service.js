@@ -129,6 +129,11 @@ LUPAPISTE.FileuploadService = function() {
                                            loaded: data.loaded,
                                            total: data.total,
                                            file: _.get(data, "files.0")});
+      },
+      drop: function(e) {
+        if (!options.dropZone) {
+          e.preventDefault();
+        }
       }
     });
 
