@@ -285,6 +285,11 @@ LUPAPISTE.ApplicationModel = function() {
     repository.load(self.id());
   };
 
+  self.reloadToTab = function(tabName) {
+    self.submitErrors([]);
+    repository.load(self.id(), undefined, _.partial(self.open, tabName));
+  };
+
   self.lightReload = function() {
     repository.load(self.id(), undefined, undefined, true);
   };
@@ -408,7 +413,7 @@ LUPAPISTE.ApplicationModel = function() {
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
-          self.reload();
+          self.reloadToTab("info");
           if (!resp.integrationAvailable) {
             hub.send("show-dialog", {ltitle: "integration.title",
                                      size: "medium",
