@@ -28,7 +28,10 @@ LUPAPISTE.UploadModel = function( owner, params ) {
   if( owner ) {
     owner.addToDisposeQueue( self );
   }
-
+  var originalFiles;
+  if (params.files) {
+    originalFiles = _.clone(ko.unwrap(params.files));
+  }
   self.files = params.files || ko.observableArray();
   self.fileInputId = _.uniqueId( "file-input-id-" );
   self.waiting = ko.observable();
@@ -104,7 +107,11 @@ LUPAPISTE.UploadModel = function( owner, params ) {
 
   self.cancel = function() {
     notifyService( "cancel" );
-    self.files.removeAll();
+    if (originalFiles) {
+      self.files(originalFiles);
+    } else {
+      self.files.removeAll();
+    }
   };
 
   self.init = function() {
