@@ -31,7 +31,7 @@
                       excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
     (mongo/select :applications
                   query
-                  [:_id :submitted :modified :state
+                  [:_id :submitted :modified :state :authority.firstName :authority.lastName
                    :primaryOperation :secondaryOperations]
                   {:submitted 1})))
 
@@ -101,13 +101,15 @@
                                 " "
                                 (util/to-local-date (now)))
         header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
-                                                              "applications.submitted"
+                                                              "applications.authority"
                                                               "applications.status"
+                                                              "applications.submitted"
                                                               "operations.primary"
                                                               "application.operations.secondary"])
         row-fn (juxt :id
-                     (partial date-value :submitted)
+                     authority
                      (partial localized-state lang)
+                     (partial date-value :submitted)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
 
