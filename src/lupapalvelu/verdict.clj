@@ -484,7 +484,7 @@
     (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
-(defn- merge-review-tasks
+(defn merge-review-tasks
   "Add review tasks with new IDs to existing tasks map"
   [from-update existing]
 

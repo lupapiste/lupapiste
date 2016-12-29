@@ -33,11 +33,14 @@
 
           <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
             <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
-            <span data-bind="ltext: 'application.designers-not-approved-help'"></span>
-            <ul data-bind="foreach: nonApprovedDesigners">
-              <li data-bind="text: $data"></li>
-            </ul>
+            <div class="info-line">
+              <div data-bind="ltext: 'application.designers-not-approved-help'" class="non-approved-designers"></div>
+              <ul data-bind="foreach: nonApprovedDesigners" class="non-approved-designers">
+                <li data-bind="text: $data"></li>
+              </ul>
+            </div>
           </div>
+          <div class="clear spacerM"></div>
 
           <button class="positive top-marginM"
                   data-test-id="application-submit-btn"

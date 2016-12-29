@@ -825,6 +825,10 @@ $app-gray-darkest: $gray187;
   a {
     padding-left: $marginM;
   }
+  .non-approved-designers {
+    font-size: $font-size;
+    margin: $marginS 0 $marginS;
+  }
   .required-field-error-element-name {
     padding-left: $marginS;
   }
