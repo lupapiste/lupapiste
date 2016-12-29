@@ -21,6 +21,20 @@
                    :primaryOperation :secondaryOperations]
                   {:authority.lastName 1})))
 
+(defn submitted-applications-between [orgId startTs endTs excluded-operations]
+  (let [now (now)
+        query (cond-> {:organization orgId
+                       ;:state {$in ["submitted" "open" "draft"]
+                       :submitted {$gte startTs
+                                   $lte (if (< now endTs) now endTs)}
+                       :infoRequest false}
+                      excluded-operations (assoc :primaryOperation.name {$nin excluded-operations}))]
+    (mongo/select :applications
+                  query
+                  [:_id :submitted :modified :state
+                   :primaryOperation :secondaryOperations]
+                  {:submitted 1})))
+
 (defn- authority [app]
   (->> app :authority ((juxt :firstName :lastName)) (ss/join " ")))
 
@@ -79,5 +93,23 @@
                      (partial date-value :modified)
                      (partial localized-primary-operation lang)
                      (partial localized-secondary-operations lang))]
+    (xlsx-stream data sheet-name header-row-content row-fn)))
+
+(defn applications-between-excel [organizationId startTs endTs lang excluded-operations]
+  (let [data               (submitted-applications-between organizationId startTs endTs excluded-operations)
+        sheet-name         (str (i18n/localize lang "applications.report.applications-between.sheet-name-prefix")
+                                " "
+                                (util/to-local-date (now)))
+        header-row-content (map (partial i18n/localize lang) ["applications.id.longtitle"
+                                                              "applications.submitted"
+                                                              "applications.status"
+                                                              "operations.primary"
+                                                              "application.operations.secondary"])
+        row-fn (juxt :id
+                     (partial date-value :submitted)
+                     (partial localized-state lang)
+                     (partial localized-primary-operation lang)
+                     (partial localized-secondary-operations lang))]
+
     (xlsx-stream data sheet-name header-row-content row-fn)))
 
