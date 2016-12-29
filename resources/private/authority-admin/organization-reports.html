@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="reports">
+      <div class="container">
+        <section class="authority-admin-reports">
+          <h2 data-bind="ltext: 'auth-admin.reports'"></h2>
+
+          <section>
+            <h2 data-bind="ltext: 'authorityAdmin.openApplicationsReport.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.openApplicationsReport.caption'"></span>
+            <form action="/api/raw/open-applications-xlsx" method="get">
+              <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="submit" data-bind="attr: { value: loc('authorityAdmin.openApplicationsReport.buttonText')}"/>
+            </form>
+          </section>
+
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

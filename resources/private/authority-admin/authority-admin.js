@@ -494,6 +494,9 @@
     $("#areas").applyBindings({
       organization:        organizationModel
     });
+    $("#reports").applyBindings({
+      organization:        organizationModel
+    });
     if (features.enabled("ajanvaraus")) {
       $("#organization-calendars").applyBindings({
         calendars:           calendarsModel,
