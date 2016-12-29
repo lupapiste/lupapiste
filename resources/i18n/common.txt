@@ -216,7 +216,7 @@
 "authorityAdmin.applicationsReportTimeperiod.buttonText" "en" "Download (XLSX)"
 "authorityAdmin.applicationsReportTimeperiod.buttonText" "fi" "Lataa (XLSX)"
 "authorityAdmin.applicationsReportTimeperiod.buttonText" "sv" "Ladda ner (XLSX)"
-"authorityAdmin.applicationsReportTimeperiod.caption" "en" "This Excel report consists of all applications that have been submitted between the given timeperiod."
+"authorityAdmin.applicationsReportTimeperiod.caption" "en" "This Excel report consists of all applications that have been submitted within the given time period."
 "authorityAdmin.applicationsReportTimeperiod.caption" "fi" "Organisaation hakemukset, jotka on jätetty annetulla aikavälillä"
 "authorityAdmin.applicationsReportTimeperiod.caption" "sv" "Organisationens ansökningar, som har lämnats in mellan tidsperioden."
 "authorityAdmin.applicationsReportTimeperiod.startTs" "en" "Application submited earliest"
