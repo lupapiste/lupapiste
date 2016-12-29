@@ -247,8 +247,8 @@ Unselects filters
 
 Add shelter file and approve it
   Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}
+  Attachment is  approved
   Return to application
-  Approve row  tr[data-test-type='${shelter}']
 
 Two pohjapiirrustus rows exist
   Xpath Should Match X Times  //tr[@data-test-type='${type}']  2

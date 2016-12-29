@@ -218,7 +218,7 @@ Sonja sees construction column
   Add to batch
   Wait test id visible  batch-construction-0-label
   Click label by test id  batch-construction-0-label
-  Select type  0  Rasitesopimus
+  Select type  0  Ote alueen peruskartasta
   No such test id  construction-all
 
 Sonja adds and removes files
@@ -235,17 +235,17 @@ Sonja is readey
   Wait until  Element should not be visible  jquery=table.attachment-batch-table
 
 New attachment is not yet visible
-  Element should not be visible  jquery=tr[data-test-type='rakennuspaikan_hallinta.rasitesopimus']
+  Element should not be visible  jquery=tr[data-test-type='rakennuspaikka.ote_alueen_peruskartasta']
 
 New attachment is a post-verdict attachment and automatically approved
   Click label by test id  postVerdict-filter-label
   Rollup approved  Rakennuspaikan liitteet
 
 Check the attachment details just in case
-  Open attachment details  rakennuspaikan_hallinta.rasitesopimus
-  Test id input is  attachment-contents-input  Rasitesopimus
+  Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
+  Test id input is  attachment-contents-input  Ote alueen peruskartasta
   Element text should be  test-attachment-file-name  ${PNG_TESTFILE_NAME}
-  Test id select is  attachment-operation-select  Yleisesti hankkeeseen
+  Test id select is  attachment-operation-select  Rakennuspaikka
   [Teardown]  Logout
 
 # ------------------------------
