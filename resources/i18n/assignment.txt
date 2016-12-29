@@ -49,3 +49,6 @@
 "application.assignment.type.parties" "en" "Parties"
 "application.assignment.type.parties" "fi" "Osapuolet"
 "application.assignment.type.parties" "sv" "Parter"
+"application.incomplete-assignments" "en" ""
+"application.incomplete-assignments" "fi" "Tehtäviä kuittaamatta valmiiksi"
+"application.incomplete-assignments" "sv" ""

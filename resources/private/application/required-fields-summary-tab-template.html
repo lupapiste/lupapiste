@@ -31,6 +31,7 @@
           <h2 data-bind="ltext: 'application.allRequiredDataFilled'" class="missing-info-title"></h2>
           <!-- /ko -->
 
+          <!-- ko if: $root.authorization.ok('approve-application') -->
           <div data-bind="visible: !_.isEmpty(nonApprovedDesigners())" class="clear" data-test-id="non-approved-designers-list">
             <h2 data-bind="ltext: 'application.designers-not-approved'" class="missing-info-title"></h2>
             <div class="info-line">
@@ -39,8 +40,34 @@
                 <li data-bind="text: $data"></li>
               </ul>
             </div>
+            <div class="clear spacerM"></div>
           </div>
-          <div class="clear spacerM"></div>
+
+          <div data-bind="visible: !_.isEmpty(lupapisteApp.services.assignmentService.assignments())">
+            <h2 data-bind="ltext: 'application.incomplete-assignments'" class="missing-info-title"></h2>
+            <table class="assignments-search-result__table">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.assignment.subject'"></th>
+                  <th data-bind="ltext: 'application.assignment.type'"></th>
+                  <th data-bind="ltext: 'application.assignment.recipient.label'"></th>
+                  <th data-bind="ltext: 'application.assignment.description.placeholder'"></th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: lupapisteApp.services.assignmentService.assignments()">
+              <tr>
+                <td data-bind="ltext: 'application.assignment.type.' + $data.target['group'], testId: 'target-group'"></td>
+                <td data-bind="ltext: $data.target['type-key'], testId: 'target-type'"></td>
+                <td data-bind="text: util.partyFullName($data.recipient), testId: 'recipient'"></td>
+                <td data-bind="text: $data.description, testId: 'description'"></td>
+                <td><a data-bind="ltext: 'view', click: _.partial($root.application.open, $data.targetTab)" href="#"></a></td>
+              </tr>
+              </tbody>
+            </table>
+            <div class="clear spacerM"></div>
+          </div>
+          <!-- /ko -->
 
           <button class="positive top-marginM"
                   data-test-id="application-submit-btn"

@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1483006367170');
+@import url('main-blessed1.css?z=1483007477458');
 
 /* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .table-reject-note-editor:after {
@@ -7560,7 +7560,7 @@ span.icon_clear:before {
   padding-left: 12px;
 }
 /* line 828, ../../../private/common-html/sass/views/_application.scss */
-.info-line .non-approved-designers {
+.info-line .non-approved-designers, .info-line .incomplete-assignment {
   font-size: 16px;
   margin: 6px 0 6px;
 }
