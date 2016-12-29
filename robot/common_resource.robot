@@ -735,7 +735,7 @@ Upload batch file
   Hide file input  input[data-test-id=add-attachments-input]
   Wait Until  Element should be visible  jquery=div.upload-progress--finished
   Select From Autocomplete  div.batch-autocomplete[data-test-id=batch-type-${index}]  ${type}
-  Fill test id  batch-contents-${index}  ${contents}
+  Run keyword unless  '${contents}' == '${EMPTY}'  Fill test id  batch-contents-${index}  ${contents}
   Select from list by label  jquery=[data-test-id=batch-grouping-${index}] select  ${grouping}
 
 Upload attachment
