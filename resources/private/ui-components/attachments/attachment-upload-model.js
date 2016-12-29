@@ -8,11 +8,14 @@ LUPAPISTE.AttachmentUploadModel = function( params ) {
 
   self.id = params.id;
   self.ltext = params.ltext;
+  if (params.uploadModel) {
+    self.upload = params.uploadModel;
+  } else {
+    self.upload = new LUPAPISTE.UploadModel(self, { allowMultiple:false });
+    self.upload.init();
+  }
 
   ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
-
-  self.upload = new LUPAPISTE.UploadModel(self, { allowMultiple:false });
-  self.upload.init();
 
   self.bindWaiting = ko.observable();
 
