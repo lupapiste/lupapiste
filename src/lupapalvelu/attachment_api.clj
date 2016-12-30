@@ -1,6 +1,6 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
-            [clojure.set :refer [intersection union]]
+            [clojure.set :refer [intersection union difference]]
             [taoensso.timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
@@ -334,7 +334,7 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles       #{:applicant :authority :oirAuthority}
    :user-authz-roles (conj auth/default-authz-writer-roles :foreman)
-   :states           states/post-verdict-states}
+   :states           (difference states/post-verdict-states states/terminal-states #{:foremanVerdictGiven})}
   [{application :application {attachment-id :attachmentId} :data created :created}]
   (if-let [attachment-id (ram/create-ram-attachment! application attachment-id created)]
     (do (ram/notify-new-ram-attachment! application attachment-id created)
