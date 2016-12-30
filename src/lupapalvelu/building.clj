@@ -1,5 +1,6 @@
 (ns lupapalvelu.building
   (:require [monger.operators :refer :all]
+            [taoensso.timbre :refer [info]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]
@@ -61,4 +62,6 @@
   (when (seq buildings)
     (let [operation-buildings        (filter :operationId buildings)
           op-documents-array-updates (operation-building-updates operation-buildings application)]
+      (when-not (empty? op-documents-array-updates)
+        (info "operation building updates from verdict" (pr-str op-documents-array-updates)))
       {$set (apply merge (conj op-documents-array-updates {:buildings buildings}))})))
