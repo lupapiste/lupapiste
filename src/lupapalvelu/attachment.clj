@@ -569,13 +569,14 @@
    Deletes also assignments that are targets of attachments in question.
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
-  (info "1/4 deleting assignments regarding attachments" attachment-ids)
-  (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
-  (info "2/4 deleting files of attachments" attachment-ids)
-  (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
-  (info "3/4 deleted files of attachments" attachment-ids)
-  (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
-  (info "4/4 deleted meta-data of attachments" attachment-ids))
+  (let [ids-str (pr-str attachment-ids)]
+    (info "1/4 deleting assignments regarding attachments" ids-str)
+    (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+    (info "2/4 deleting files of attachments" ids-str)
+    (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+    (info "3/4 deleted files of attachments" ids-str)
+    (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
+    (info "4/4 deleted meta-data of attachments" ids-str)))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
