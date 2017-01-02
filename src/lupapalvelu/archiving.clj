@@ -8,7 +8,6 @@
             [clj-time.format :as f]
             [cheshire.core :as json]
             [monger.operators :refer :all]
-            [schema.core :as s]
             [sade.env :as env]
             [sade.files :as files]
             [sade.http :as http]
@@ -83,28 +82,33 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
+(defn- metadata-query [md-key]
+  (let [tila-key (str md-key ".tila")
+        arkistointi-key (str md-key ".sailytysaika.arkistointi")]
+    {tila-key {$ne :arkistoitu}
+     arkistointi-key {$ne :ei
+                      $exists true}}))
+
 (defn- mark-application-archived-if-done [{:keys [id] :as application} now]
   ; If these queries return 0 results, we mark the corresponding phase as archived
-  (let [pre-verdict-query {:_id id
+  (let [attachment-or-app-md (metadata-query "metadata")
+        pre-verdict-query {:_id id
                            ; Look for pre-verdict attachments that have versions, are not yet archived, but need to be
-                           $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
-                                                            :applicationState                  {$nin [states/post-verdict-states]}
-                                                            :versions                          {$gt  []}
-                                                            :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                           $or  [{:archived.application {$ne nil}}
+                                 {:attachments {$elemMatch (merge {:applicationState {$nin [states/post-verdict-states]}
+                                                                   :versions         {$gt []}}
+                                                                  attachment-or-app-md)}}
                                  ; Check if the application itself is not yet archived, but needs to be
-                                 {:metadata.tila                     {$ne :arkistoitu}
-                                  :metadata.sailytysaika.arkistointi {$ne :ei}}]}
+                                 attachment-or-app-md]}
         post-verdict-query {:_id id
                             ; Look for any attachments that have versions, are not yet arcvhived, but need to be
-                            $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
-                                                             :versions                          {$gt  []}
-                                                             :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                            $or  [{:archived.completed {$ne nil}}
+                                  {:attachments {$elemMatch (merge {:versions {$gt []}}
+                                                                   attachment-or-app-md)}}
                                   ; Check if the application itself is not yet archived, but needs to be
-                                  {:metadata.tila                     {$ne :arkistoitu}
-                                   :metadata.sailytysaika.arkistointi {$ne :ei}}
+                                  attachment-or-app-md
                                   ; Check if the case file is not yet archived, but needs to be
-                                  {:processMetadata.tila                     {$ne :arkistoitu}
-                                   :processMetadata.sailytysaika.arkistointi {$ne :ei}}
+                                  (metadata-query "processMetadata")
                                   ; Check if the application is not in a final state
                                   {:state {$nin [:closed :extinct :foremanVerdictGiven :acknowledged]}}]}]
 
