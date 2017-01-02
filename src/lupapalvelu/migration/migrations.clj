@@ -2645,6 +2645,22 @@
                               :attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
                                                         :metadata.tila {$ne "arkistoitu"}}}}))
 
+(def archival-completed-query
+  {:archived.completed nil
+   :processMetadata.tila :arkistoitu
+   :metadata.tila :arkistoitu
+   :attachments {$not {$elemMatch {:versions {$gt []}
+                                   :metadata.sailytysaika.arkistointi {$exists true
+                                                                       $ne :ei}
+                                   :metadata.tila {$ne :arkistoitu}}}}
+   :state {$in [:closed :extinct :foremanVerdictGiven :acknowledged]}})
+
+(defmigration mark-applications-with-attachments-missing-metadata-but-otherwise-archived-as-archived
+  {:apply-when (pos? (mongo/count :applications archival-completed-query))}
+  (mongo/update-by-query :applications
+                         archival-completed-query
+                         {$set {:archived.completed (System/currentTimeMillis)}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections
