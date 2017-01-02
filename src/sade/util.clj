@@ -6,7 +6,7 @@
             [sade.core :refer [fail!]]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [hours days weeks months years ago from-now]]
+            [clj-time.core :as t :refer [hours days weeks months years ago from-now]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]]
@@ -268,6 +268,11 @@
          (fn [missing k] (if (nil? (get src-map k)) (cons k missing) missing))
          ()
          required-keys)))
+
+(defn to-datetime-with-timezone ^org.joda.time.DateTime [ts & [zone]]
+  (-> ts
+      (tc/from-long)
+      (t/to-time-zone (or zone (t/default-time-zone)))))
 
 (defn- format-utc-timestamp [^Long timestamp ^String fmt]
   (when timestamp
