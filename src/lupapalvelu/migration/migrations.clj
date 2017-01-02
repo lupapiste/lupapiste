@@ -29,7 +29,8 @@
             [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
-            [sade.coordinate :as coord])
+            [sade.coordinate :as coord]
+            [lupapalvelu.drawing :as draw])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -2644,6 +2645,23 @@
                              {:organization {"$regex" ".*-R"}
                               :attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
                                                         :metadata.tila {$ne "arkistoitu"}}}}))
+
+(defn- add-wgs84-coordinates [drawing]
+  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+
+(defmigration add-wgs84-coordinates-for-drawings
+  {:apply-when (pos? (mongo/count :applications
+                                  {:drawings
+                                   {$elemMatch {$and
+                                                [{:geometry {$exists true, $ne ""}},
+                                                 {:geometry-wgs84 {$exists false}}]}}}))}
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings
+                              {$elemMatch {$and
+                                           [{:geometry {$exists true, $ne ""}},
+                                            {:geometry-wgs84 {$exists false}}]}}}))
+
 
 ;;
 ;; ****** NOTE! ******
