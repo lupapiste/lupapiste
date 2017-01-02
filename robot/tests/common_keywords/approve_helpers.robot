@@ -149,8 +149,8 @@ Press Key Test Id
 
 Reject note is
   [Arguments]  ${prefix}  ${text}
-  Scroll to test id  ${prefix}-note
   Wait test id visible  ${prefix}-note
+  Scroll to test id  ${prefix}-note
   Test id text is  ${prefix}-note  ${text}
 
 Reject and fill note

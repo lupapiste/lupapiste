@@ -15,8 +15,6 @@
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.foreman :as foreman]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.link-permit :as link-permit]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]

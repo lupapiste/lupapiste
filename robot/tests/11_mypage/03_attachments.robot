@@ -46,8 +46,8 @@ Copy own attachments button is not shown to non-architect
   Wait until  Click Label  architect
   Save User Data
   Click by test id  back-button
-  Wait until  Page should contain element  jquery=button[data-test-id=add-attachment]
-  Page should not contain element  jquery=button[data-test-id=copy-own-attachments]
+  Wait until  Page should contain element  jquery=label[data-test-id=add-attachments-label]
+  Wait until  Element should not be visible  jquery=button[data-test-id=copy-user-attachments]
 
 Mikko deletes own attachment from application
   Open application  ${appname}  753-416-25-30
@@ -71,7 +71,7 @@ Mikko can't copy own attachments yet
   As Mikko
   Open application  ${appname}  753-416-25-30
   Open tab  attachments
-  Element should not be visible by test id  copy-own-attachments
+  Element should not be visible by test id  copy-user-attachments
 
 Mikko sets himself architect
   Click Element  user-name

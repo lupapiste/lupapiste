@@ -37,7 +37,7 @@
 ;; Metadata
 ;;
 
-(def attachment-meta-types [:size :scale :group :op :contents])
+(def attachment-meta-types [:size :scale :group :op :contents :drawingNumber])
 
 (def attachment-scales
   [:1:20 :1:50 :1:100 :1:200 :1:500
@@ -148,6 +148,7 @@
    :versions                             [Version]
    (sc/optional-key :latestVersion)      (sc/maybe Version) ;; last item of the versions array
    (sc/optional-key :contents)           (sc/maybe sc/Str)  ;; content description
+   (sc/optional-key :drawingNumber)      sc/Str             ;;
    (sc/optional-key :scale)              (apply sc/enum attachment-scales)
    (sc/optional-key :size)               (apply sc/enum attachment-sizes)
    :auth                                 [AttachmentAuthUser]
@@ -428,7 +429,7 @@
      :timestamp timestamp}))
 
 (defn- build-version-updates [user attachment version-model
-                              {:keys [created target stamped replaceable-original-file-id state contents group]}]
+                              {:keys [created target stamped replaceable-original-file-id state contents drawingNumber group]}]
   {:pre [(map? attachment) (map? version-model) (number? created) (map? user)]}
 
   (let [{:keys [originalFileId]} version-model
@@ -444,6 +445,8 @@
        {$set {:attachments.$.latestVersion version-model}})
      (when-not (ss/blank? contents)
        {$set {:attachments.$.contents contents}})
+     (when-not (ss/blank? drawingNumber)
+       {$set {:attachments.$.drawingNumber drawingNumber}})
      (when (not-empty group)
        {$set {:attachments.$.op (not-empty (select-keys group [:id :name]))
               :attachments.$.groupType (:groupType group)}})
@@ -511,7 +514,7 @@
                  nil))))))
 
 (defn meta->attachment-data [meta]
-  (merge (select-keys meta [:contents :size :scale])
+  (merge (dissoc meta :op :group)
          (when (contains? meta :group)
            {:op (not-empty (select-keys (:group meta) [:id :name]))
             :groupType (get-in meta [:group :groupType])})))
@@ -566,13 +569,15 @@
    Deletes also assignments that are targets of attachments in question.
    Non-atomic operation: first deletes files, then updates document."
   [application attachment-ids]
-  (info "1/4 deleting assignments regarding attachments" attachment-ids)
-  (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
-  (info "2/4 deleting files of attachments" attachment-ids)
-  (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
-  (info "3/4 deleted files of attachments" attachment-ids)
-  (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
-  (info "4/4 deleted meta-data of attachments" attachment-ids))
+  (when (seq attachment-ids)
+    (let [ids-str (pr-str attachment-ids)]
+      (info "1/4 deleting assignments regarding attachments" ids-str)
+      (run! (partial assignment/remove-assignments-by-target (:id application)) attachment-ids)
+      (info "2/4 deleting files of attachments" ids-str)
+      (run! delete-attachment-file-and-preview! (get-file-ids-for-attachments-ids application attachment-ids))
+      (info "3/4 deleted files of attachments" ids-str)
+      (update-application (application->command application) {$pull {:attachments {:id {$in attachment-ids}}}})
+      (info "4/4 deleted meta-data of attachments" ids-str))))
 
 (defn delete-attachment-version!
   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."

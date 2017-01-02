@@ -6,32 +6,20 @@
             [lupapiste-commons.preview :as commons-preview]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.file-upload :as file-upload])
-  (:import (com.netflix.hystrix HystrixCommandProperties)
-           (java.util.concurrent ThreadFactory Executors)))
-
-(defn thread-factory []
-  (let [security-manager (System/getSecurityManager)
-        thread-group (if security-manager
-                       (.getThreadGroup security-manager)
-                       (.getThreadGroup (Thread/currentThread)))]
-    (reify
-      ThreadFactory
-      (newThread [this runnable]
-        (doto (Thread. thread-group runnable "preview-worker")
-          (.setDaemon true)
-          (.setPriority Thread/NORM_PRIORITY))))))
-
-(defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
+  (:import (com.netflix.hystrix HystrixCommandProperties HystrixThreadPoolProperties HystrixCommand$Setter)))
 
 (hystrix/defcommand create-preview!
   {:hystrix/group-key   "Attachment"
    :hystrix/command-key "Create preview"
-   :hystrix/init-fn     (fn fetch-request-init [_ setter]
-                          (.andCommandPropertiesDefaults setter
-                                                         (.withExecutionTimeoutInMilliseconds
-                                                           (HystrixCommandProperties/Setter)
-                                                           (* 2 60 1000)))
-                          setter)
+   :hystrix/thread-pool-key :preview-generation-thread-pool
+   :hystrix/init-fn     (fn fetch-request-init [_ ^HystrixCommand$Setter setter]
+                          (doto setter
+                            (.andCommandPropertiesDefaults
+                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 2 60 1000)))
+                            (.andThreadPoolPropertiesDefaults
+                              (doto (HystrixThreadPoolProperties/Setter)
+                                (.withCoreSize 1)
+                                (.withMaxQueueSize Integer/MAX_VALUE)))))
    :hystrix/fallback-fn (constantly nil)}
   [file-id filename content-type application-id & [db-name]]
   (try
@@ -61,4 +49,5 @@
 (defn preview-image!
   "Creates a preview image in own thread pool."
   [application-id fileId filename contentType]
-  (.submit preview-threadpool (bound-fn [] (create-preview! fileId filename contentType application-id mongo/*db-name*))))
+  (let [db-name mongo/*db-name*]
+    (hystrix/queue #'create-preview! fileId filename contentType application-id db-name)))

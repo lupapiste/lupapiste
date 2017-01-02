@@ -11,7 +11,7 @@
             [lupapalvelu.organization :as organization])
   (:import [java.io File IOException FileNotFoundException InputStream]
            [com.lowagie.text.pdf PdfReader]
-           [com.netflix.hystrix HystrixCommandProperties]))
+           [com.netflix.hystrix HystrixCommandProperties HystrixCommand$Setter HystrixThreadPoolProperties]))
 
 (defn- executable-exists? [executable]
   (try
@@ -175,10 +175,13 @@
    :filename         \"Original filename for logging purposes\"}"
   {:hystrix/group-key   "Attachment"
    :hystrix/command-key "Convert to PDF/A with PDF Tools utility"
-   :hystrix/init-fn     (fn [_ setter]
+   :hystrix/thread-pool-key :pdf-tools-thread-pool
+   :hystrix/init-fn     (fn [_ ^HystrixCommand$Setter setter]
                           (doto setter
                             (.andCommandPropertiesDefaults
-                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))))}
+                              (.withExecutionTimeoutInMilliseconds (HystrixCommandProperties/Setter) (* 5 60 1000)))
+                            (.andThreadPoolPropertiesDefaults
+                              (.withMaxQueueSize (HystrixThreadPoolProperties/Setter) Integer/MAX_VALUE))))}
   [pdf-file output-file & [opts]]
   (analyze-and-convert-to-pdf-a pdf-file output-file opts))
 

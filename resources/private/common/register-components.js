@@ -166,6 +166,8 @@ jQuery(document).ready(function() {
     {name: "docgen-footer-sum"},
     {name: "reject-note"},
     {name: "upload-button"},
+    {name: "upload-link"},
+    {name: "attachment-upload"},
     {name: "attachment-batch"},
     {name: "upload-progress"},
     {name: "icon-button"},

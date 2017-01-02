@@ -68,15 +68,11 @@ Sonja adds new RAM attachment
 
 Sonja adds file to RAM
   Add attachment version  ${PNG_TESTFILE_PATH}
-  Delete allowed  False
-  Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  -
+  Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
 
-Sonja can now approve the attachment
-  Wait Until  Click button  id=test-attachment-approve
-  # Approved icon in version history
+Attachment get automatically approved since it is uploaded by authority
   Wait until  Element should be visible  xpath=//i[@data-test-id='0-0-1-approved']
   Delete disallowed  True
-  Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
 
 Sonja clicks RAM link and opens old attachment details
   Follow ram link  0
@@ -251,8 +247,8 @@ Unselects filters
 
 Add shelter file and approve it
   Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}
+  Attachment is  approved
   Return to application
-  Approve row  tr[data-test-type='${shelter}']
 
 Two pohjapiirrustus rows exist
   Xpath Should Match X Times  //tr[@data-test-type='${type}']  2

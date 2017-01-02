@@ -68,6 +68,7 @@
     (->> (filter (comp recipient-roles keyword :role) auth)
          (remove :invite)
          (remove :unsubscribed)
+         (remove (comp (partial = "company") :type))
          (map (comp usr/non-private usr/get-user-by-id :id)))))
 
 ;;

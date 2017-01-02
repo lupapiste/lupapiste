@@ -29,6 +29,7 @@
       ajax.command("frontend-log", {level: levelName[level],
                                     page: page,
                                     message: message,
+                                    id: pageutil.hashApplicationId(),
                                     build: LUPAPISTE.config.build})
         .success(function(resp) {
           if (resp.expired) { reloadNotice(); }

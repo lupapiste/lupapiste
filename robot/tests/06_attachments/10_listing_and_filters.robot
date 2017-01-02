@@ -67,9 +67,7 @@ Sonja deselects all filters
   Wait until  Attachment subgroup should be visible  1  1  MUUT SUUNNITELMAT
 
 Sonja adds a technical report, and it appears in the attachments listing
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  type=selvitykset.selvitys_rakennuksen_kunnosta  operation=Tekniset selvitykset
-  Click by test id  back-to-application-from-attachment
-  Wait until  Total attachments row count is  4
+  Upload attachment  ${PNG_TESTFILE_PATH}  Selvitys rakennuksen kunnosta  ${EMPTY}  Tekniset selvitykset
   Wait until  Attachment group should be visible  0  HAKEMUKSEN LIITTEET
   Wait until  Attachment subgroup should be visible  0  0  YLEISET HANKKEEN LIITTEET
   Wait until  Attachment subgroup should be visible  0  1  TEKNISET SELVITYKSET

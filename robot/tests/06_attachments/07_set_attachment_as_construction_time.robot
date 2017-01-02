@@ -11,7 +11,7 @@ Variables      variables.py
 
 Mikko creates application and goes to attachments tab
   [Tags]  attachments
-  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Set Suite Variable  ${propertyId}  753-416-6-1

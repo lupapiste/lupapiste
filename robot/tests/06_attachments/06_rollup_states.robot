@@ -60,7 +60,6 @@ Sonja adds and approves Väestonsuojasuunnitelma
   Click not needed  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Add attachment file  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']  ${PNG_TESTFILE_PATH}
   Return to application
-  Approve row  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']
 
 Operation rollups are now approved
   Rollup approved  Pääpiirustukset

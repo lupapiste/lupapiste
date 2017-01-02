@@ -139,18 +139,18 @@ Mikko does not see Reject nor Approve buttons
 
 Not needed not visible as attachment contains file
   [Tags]  attachments
-  Wait until  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Remove version, not needed selectable
   [Tags]  attachments
   Delete attachment version  1.0
-  Wait until  Element should be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
+  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
   Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
 
 Checking not needed in attachment page affects attachment listing
   [Tags]  attachments
-  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
   Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
   Return to application
   Wait until  Not needed should be visible  muut.muu
@@ -158,19 +158,19 @@ Checking not needed in attachment page affects attachment listing
 
 Upload is not possible for notNeeded attachment
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Set attachment back to needed
   [Tags]  attachments
   Click not needed  muut.muu
   Wait until  Not needed should not be selected  muut.muu
-  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments
   Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}
   # Not needed not visible when file is present
-  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Mikko deletes attachment
   [Tags]  attachments
@@ -213,6 +213,7 @@ Change attachment type
   Select from list  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
+  Positive indicator should be visible
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
   Scroll to test id  back-to-application-from-attachment
   Click element  jquery=[data-test-id=back-to-application-from-attachment]
@@ -303,7 +304,7 @@ Sonja adds new attachment template
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
   Logout
 
 Mikko logs back in and browses to the Attachments tab
@@ -327,7 +328,7 @@ Sonja logs back in and browses to the Attachments tab
 Sonja deletes the newly created attachment template
   [Tags]  attachments
   Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments

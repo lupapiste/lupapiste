@@ -20,23 +20,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
-  self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
-
-  self.disposedSubscribe(self.upload.files, function(files) {
-    if (!_.isEmpty(files)) {
-      var fileId = _.last(files).fileId;
-      var status = service.bindAttachment( self.id, fileId );
-      var statusSubscription = self.disposedSubscribe(status, function(status) {
-        if ( service.pollJobStatusFinished(status) ) {
-          self.upload.clearFile( fileId );
-          util.showSavedIndicator({ok: ko.unwrap(status) === service.JOB_DONE});
-          self.unsubscribe(statusSubscription);
-        }
-      });
-    }
-  });
 
   self.name = self.disposedComputed(function() {
     return "attachmentType." + self.attachment().typeString();
@@ -166,6 +150,8 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   };
 
   // Versions - add
+  self.addEventListener("attachment-upload", { eventType: "finished", attachmentId: self.id }, util.showSavedIndicator);
+
   self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
 
   // Versions - delete
@@ -193,7 +179,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
   });
 
-  self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);

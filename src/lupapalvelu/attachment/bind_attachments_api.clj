@@ -27,6 +27,7 @@
   {:description         "API to bind file to attachment, returns job that can be polled for status."
    :parameters          [id attachmentId fileId]
    :user-roles          #{:applicant :authority :oirAuthority}
+   :categories          #{:attachments}
    :user-authz-roles    (conj auth/all-authz-writer-roles :foreman)
    :pre-checks          [app/validate-authority-in-drafts
                          att/attachment-matches-application
