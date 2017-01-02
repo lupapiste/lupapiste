@@ -18,6 +18,7 @@ Sonja goes to empty attachments tab
   Open tab  attachments
 
 Sonja sees the attachments grouped into accordions
+  Wait until  Total attachments row count is  4
   Wait until  Attachment group should be visible  0  HAKEMUKSEN LIITTEET
   Wait until  Attachment subgroup should be visible  0  0  OSAPUOLET
   Wait until  Attachment subgroup should be visible  0  1  YLEISET HANKKEEN LIITTEET
@@ -27,6 +28,7 @@ Sonja sees the attachments grouped into accordions
 
 Sonja removes Valtakirja attachment
   Wait until  Delete attachment  hakija.valtakirja
+  Wait until  Total attachments row count is  3
 
 The Osapuolet accordion disappears
   Wait until  Attachment group should be visible  0  HAKEMUKSEN LIITTEET
