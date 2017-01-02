@@ -2,8 +2,8 @@
   (:require [taoensso.timbre :refer [error]]
             [sade.core :refer :all]
             [sade.util :as util]
-            [clj-time.core :as ctime]
-            [clj-time.coerce :as ccoerce]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]
             [lupapalvelu.action :as action :refer [defraw]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.user :as usr]
@@ -27,20 +27,24 @@
         (error "Exception while compiling open applications excel:" e#)
         {:status 500}))))
 
-(defn validate-startTs [{{:keys [startTs]} :data}]
-  (let [month-last-year (->> (util/get-timestamp-ago :year 1)
-                             ccoerce/from-long
-                             ctime/first-day-of-the-month
-                             ctime/with-time-at-start-of-day
-                             ccoerce/to-long)]
-    (when (< (util/to-long startTs) month-last-year)
-      (fail :error.too-long-in-past))))
+
+(defn max-month-window [{{:keys [startTs endTs]} :data}]
+  (let [start-time (.withTimeAtStartOfDay (util/to-datetime-with-timezone (util/to-long startTs)))
+        end-time   (.withTimeAtStartOfDay (util/to-datetime-with-timezone (util/to-long endTs)))]
+    (when (t/before? start-time (t/minus end-time (t/years 1)))
+      (fail :error.max-12-months-window))))
+
+(defn start-gt-end [{{:keys [startTs endTs]} :data}]
+  (when-not (< (util/to-long startTs) (util/to-long endTs))
+    (fail :error.start-greater-than-end)))
 
 (defraw applications-between-xlsx
-  {:description "Excel with applications that have been submitted between given timeperiod"
+  {:description "Excel with applications that have been submitted between given timeperiod.
+                 Period can be max one year window."
    :parameters       [startTs endTs]
    :input-validators [(partial action/numeric-parameters [:startTs :endTs])
-                      validate-startTs]
+                      start-gt-end
+                      max-month-window]
    :user-roles       #{:authorityAdmin}}
   [{user :user {lang :lang} :data}]
   (let [orgId               (usr/authority-admins-organization-id user)
