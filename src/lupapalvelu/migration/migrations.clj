@@ -2662,6 +2662,19 @@
                                            [{:geometry {$exists true, $ne ""}},
                                             {:geometry-wgs84 {$exists false}}]}}}))
 
+(defn- change-attachment-type [attachment]
+  (if (= (get-in attachment [:type :type-id]) "lupaehto")
+    (assoc-in attachment [:type :type-id] "muu")
+    attachment))
+
+(defmigration change-attachment-type-lupaehto-to-muu
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                  :attachments {$elemMatch {:type.type-id "lupaehto"}}}))}
+  (update-applications-array :attachments
+                             change-attachment-type
+                             {:permitType "YA"
+                              :attachments {$elemMatch {:type.type-id "lupaehto"}}}))
+
 
 ;;
 ;; ****** NOTE! ******
