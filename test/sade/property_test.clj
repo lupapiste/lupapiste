@@ -23,4 +23,8 @@
   (fact "Maaninka -> Kuopio"
     (municipality-id-by-property-id "47641100030051") => "297"
     (municipality-id-by-property-id "476-411-30-85") => "297"
-    (municipality-id-by-property-id "476-405-7-58") => "297"))
+    (municipality-id-by-property-id "476-405-7-58") => "297")
+  (fact "Juankoski -> Kuopio"
+    (municipality-id-by-property-id "17441000180007") => "297")
+  (fact "Luvia -> Eurajoki"
+    (municipality-id-by-property-id "44289500002640") => "051"))
