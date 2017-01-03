@@ -87,6 +87,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenComments = ko.observable();
   self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
+  self.fullyArchived = ko.observable();
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);

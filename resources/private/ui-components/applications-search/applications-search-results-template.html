@@ -66,6 +66,14 @@
                 </div>
               </td>
 
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.fullyArchived"
+                  data-test-col-name="fullyArchived">
+                <div data-bind="attr: {title: loc('fullyArchived.title')}">
+                  <i class="lupicon-archives enabled"></i>
+                </div>
+              </td>
+
               <td data-bind="ltext: $data.kind" data-test-col-name="type"></td>
               <td data-bind="text: $data.address + ', ' + loc(['municipality', $data.municipality])" data-test-col-name="location"></td>
               <td data-bind="text: $data.primaryOperation ? loc('operations.' + $data.primaryOperation.name) : ''" data-test-col-name="operation"></td>

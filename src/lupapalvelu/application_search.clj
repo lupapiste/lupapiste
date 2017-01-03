@@ -151,7 +151,7 @@
    :foreman :foremanRole :infoRequest :location :modified :municipality
    :neighbors :permitType :permitSubtype :primaryOperation :state :statements
    :organization ; required for authorization checks
-   :submitted :tasks :urgency :verdicts])
+   :submitted :tasks :urgency :verdicts :archived])
 
 (def- indicator-fields
   (map :field meta-fields/indicator-meta-fields))
