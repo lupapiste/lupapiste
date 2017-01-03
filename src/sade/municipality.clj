@@ -10,6 +10,8 @@
      "283" "098" ; Hameenkoski -> Hollola (2016)
      "532" "398" ; Nastola -> Lahti (2016)
      "164" "301" ; Jalasjarvi -> Kurikka (2016)
+     "174" "297" ; Juankoski -> Kuopio (2017)
+     "442" "051" ; Luvia -> Eurajoki (2017)
      })
 
 (def municipality-codes-2015
@@ -335,6 +337,9 @@
 (def municipality-codes-2016
   (disj municipality-codes-2015 "319" "283" "532" "164"))
 
+(def municipality-codes-2017
+  (disj municipality-codes-2016 "174" "442"))
+
 (def municipality-codes
      "Ajantasaiset kuntanumerot"
-     municipality-codes-2016)
+     municipality-codes-2017)
