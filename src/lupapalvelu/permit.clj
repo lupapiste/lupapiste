@@ -45,7 +45,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :state-graph      states/full-application-state-graph
-   :allow-state-change ["tyonjohtaja-hakemus" :empty]
+   :allow-state-change ["tyonjohtaja-hakemus" "muutoslupa" :empty]
    :sftp-directory   "/rakennus"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
