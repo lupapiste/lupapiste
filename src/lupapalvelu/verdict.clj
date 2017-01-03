@@ -181,10 +181,10 @@
      {:type-group "paatoksenteko" :type-id type}
      {:type-group "muut" :type-id type})))
 
-(defn- attachment-type-from-krysp-type [type]
+(defn- attachment-type-from-krysp-type [{permit-type :permitType :as application} type]
   (case (ss/lower-case type)
     "paatos" "paatos"
-    "lupaehto" "muu"
+    "lupaehto" (if (#{:P :R} (keyword permit-type)) "lupaehto" "muu")
     "paatosote"))
 
 (defn- content-disposition-filename
@@ -228,7 +228,7 @@
                    content-length  (util/->int (get-in resp [:headers "content-length"] 0))
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
-                   attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
+                   attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type application type))
                    contents           (or description "Lupaehto")
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
