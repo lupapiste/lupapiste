@@ -9,7 +9,7 @@
             [sade.http :as http]
             [sade.schemas :as ssc]
             [sade.strings :as ss]
-            [sade.util :refer [=as-kw not=as-kw] :as util]
+            [sade.util :refer [=as-kw not=as-kw fn->] :as util]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.assignment :as assignment]
             [lupapalvelu.attachment.conversion :as conversion]
@@ -142,7 +142,7 @@
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
-   :op                                   (sc/maybe Operation)
+   :op                                   (sc/conditional vector? [Operation] map? Operation :else nil)
    (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
@@ -239,9 +239,14 @@
   [{:keys [attachments]} file-id]
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
+(defn get-operation-ids [{op :op :as attachment}]
+  (if (vector? op)
+    (map :id op)
+    [(:id op)]))
+
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
-  (filter #(= (:id (:op %)) op-id) attachments))
+  (filter (fn-> get-operation-ids (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
   [{:keys [attachments]} type]
