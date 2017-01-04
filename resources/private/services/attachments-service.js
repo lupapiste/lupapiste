@@ -235,7 +235,9 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.queryGroupTypes = function() {
     if (!queryData("attachment-groups", "groups", self.groupTypes)) {
-      self.groupTypes([]);
+      hub.subscribe("application-model-updated", function() {
+        self.groupTypes([]);
+      }, true);
     }
   };
 
@@ -245,7 +247,9 @@ LUPAPISTE.AttachmentsService = function() {
 
   self.queryAttachmentTypes = function() {
     if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
-      self.attachmentTypes([]);
+      hub.subscribe("application-model-updated", function() {
+        self.attachmentTypes([]);
+      }, true);
     }
   };
 
