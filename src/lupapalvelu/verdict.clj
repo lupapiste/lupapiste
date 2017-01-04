@@ -229,7 +229,7 @@
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type application type))
-                   contents           (or description "Lupaehto")
+                   contents           (or description (if (= type "lupaehto") "Lupaehto"))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
@@ -477,7 +477,7 @@
        (map (partial tasks/task-attachments application))
        flatten))
 
-(defn- empty-review-task? [t]
+(defn- empty-review-task? [t]F
   ;; (debugf "empty-review-task? - tila is %s" (-> t :data :katselmus :tila))
   (let [katselmus-data (-> t :data :katselmus)
         top-keys [:tila :pitoPvm :pitaja]
