@@ -477,7 +477,7 @@
        (map (partial tasks/task-attachments application))
        flatten))
 
-(defn- empty-review-task? [t]F
+(defn- empty-review-task? [t]
   ;; (debugf "empty-review-task? - tila is %s" (-> t :data :katselmus :tila))
   (let [katselmus-data (-> t :data :katselmus)
         top-keys [:tila :pitoPvm :pitaja]
