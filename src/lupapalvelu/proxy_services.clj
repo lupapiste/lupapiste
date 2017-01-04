@@ -95,9 +95,16 @@
       (catch Exception e
         (error e (str "Unable to resolve municipality by " x \/ y))))))
 
-(defn- respond-nls-address [features x y lang municipality-code]
+(defn- respond-nls-address
+  "Given municipality code defines the municipality and is returned, other address details are returned from NLS feature."
+  [features x y lang municipality-code]
   (cond
-    (seq features) (resp/json (wfs/feature-to-address-details (or lang "fi") (first features)))
+    (seq features) (-> (wfs/feature-to-address-details (or lang "fi") (first features))
+                       (util/assoc-when :municipality municipality-code)
+                       (update :name util/assoc-when
+                               :fi (i18n/localize :fi :municipality municipality-code)
+                               :sv (i18n/localize :sv :municipality municipality-code))
+                       (resp/json))
     ; Fallback: return only the municipality if code is given
     (not (nil? municipality-code)) (resp/json {:street ""
                                                :number ""
