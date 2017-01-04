@@ -82,7 +82,9 @@
         (resp/status 503 "Service temporarily unavailable")))
     (resp/status 400 "Bad Request")))
 
-(defn municipality-by-point [x y]
+(defn municipality-by-point
+  "Requests municipality number for given point from geoserver REST endpoint"
+  [x y]
   (let [url (str (env/value :geoserver :host) (env/value :geoserver :kunta))
         query {:query-params {:x x, :y y}
                :conn-timeout 10000, :socket-timeout 10000
