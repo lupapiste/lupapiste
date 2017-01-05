@@ -71,6 +71,7 @@
             <div class="form-part">
               <label for="tos-function-correction-function" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.select'"></label><br>
               <select class="dropdown" id="tos-function-correction-function"
+                      data-test-id="tos-function-correction-select"
                       data-bind="options: $root.tosFunctions,
                                  optionsText: function(item) { return item.code + ' - ' + item.name; },
                                  optionsValue: 'code',
@@ -80,10 +81,10 @@
              </div>
              <div class="form-part">
                <label for="tos-function-correction-reason" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.reason'"></label><br>
-               <input type="text" id="tos-function-correction-reason" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
+               <input type="text" id="tos-function-correction-reason" data-test-id="tos-function-correction-input" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
              </div>
              <div class="form-part">
-               <button class="btn-primary" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
+               <button class="btn-primary" data-test-id="tos-function-correction-button" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
              </div>
            </div>
         </div>
