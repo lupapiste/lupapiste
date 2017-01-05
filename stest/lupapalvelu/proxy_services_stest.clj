@@ -378,6 +378,7 @@
       )))
 
 (facts "Municipality number with address from kunta rest"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (fact "Jarvenpaa, in border of Mantsala"
     (let [x "399309.136" y "6709508.629"
           response (address-by-point-proxy {:params {:lang "fi" :x x :y y}})
