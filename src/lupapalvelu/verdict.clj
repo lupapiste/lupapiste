@@ -507,54 +507,39 @@
 (defn- non-empty-review-task-with-bg-id? [task]
   (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? (bg-id task)))))
 
-(defn- merge-review-tasks-v2
-  ([from-update from-mongo]
-   (debugf "merge-review-tasks recursion starts: existing %s from-update %s" (count from-mongo) (count from-update))
-   (merge-review-tasks-v2 from-update from-mongo [] []))
-  ([from-update from-mongo unchanged added-or-updated]
-   (let [current (first from-mongo)
-         remaining (rest from-mongo)
-         updated-id-match (util/find-first #(= (bg-id current) (bg-id %)) from-update)
-         updated-match (or updated-id-match
-                           (first (filter #(or (reviews-have-same-name-and-type? current %)
-                                               (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
-     (cond
-       (= current nil) ; Recursion end condition
-         (let [added-or-updated (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
-           (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
-           [unchanged added-or-updated])
-       (or (not (tasks/task-is-review? current)) (not (empty-review-task? current))) ;non-empty review tasks and other than review tasks are left unchanged
-         (merge-review-tasks-v2 (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated)
-       (and updated-match (not (empty-review-task? updated-match)))
-         (merge-review-tasks-v2 (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
-       :else
-         (merge-review-tasks-v2 from-update remaining (conj unchanged current) added-or-updated)))))
-
 (defn- merge-review-tasks
-  "Add review tasks with new IDs to existing tasks map"
-  [from-update existing]
-  (let [bg-id #(get-in % [:data :muuTunnus :value])
-        tasks->backend-ids (fn [tasks]
-                             (set (remove ss/blank?
-                                          (map bg-id tasks))))
-        ids-existing (tasks->backend-ids (filter tasks/task-is-review? existing))
-        ids-from-update (tasks->backend-ids from-update)
-        has-new-id? #(let [i (bg-id %)] (and (contains? ids-from-update i)
-                                             (not (contains? ids-existing i))))
-        from-update-with-new-id (filter has-new-id? from-update) ;; näillä on uusi ennestään tuntematon background-id
-        matches-update-by-name-and-type? #(some (partial reviews-have-same-name-and-type? %)
-                                                from-update-with-new-id)
-        ; poistetaan tyhjät duplikaatit
-        empty-matching-update? #(and (empty-review-task? %)
-                                     (matches-update-by-name-and-type? %))
-        existing-without-empties-matching-updates (remove empty-matching-update? existing)]
+  ; Paluuarvona kaksialkoinen vektori:
+  ; [0]: Ne olemassa olevat taskit, joille ei löydy päivitetty versiota taustajärjestelmäsanomasta
+  ; [1]: Ne katselmukset taustajärjestelmäsanomasta, jotka ovat kokonaan uusia tai ylikirjoittavat olemassaolevia katselmustietoja
+  [from-update from-mongo]
+  (loop [from-update from-update
+         from-mongo from-mongo
+         unchanged []
+         added-or-updated []]
+    (let [current (first from-mongo)
+          remaining (rest from-mongo)
+          updated-id-match (util/find-first #(= (bg-id current) (bg-id %)) from-update)
+          updated-match (or updated-id-match
+                            (first (filter #(or (reviews-have-same-name-and-type? current %)
+                                                (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
+      (cond
+        (= current nil)
+          ; Recursion end condition
+          (let [added-or-updated (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
+            (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
+            [unchanged added-or-updated])
 
-    (debugf "merge-review-tasks: existing %s/%s + from-update %s/%s"
-            (count existing) (count existing-without-empties-matching-updates)
-            (count from-update) (count from-update-with-new-id))
-    ; [0]: Ne olemassa olevat taskit, joille ei löydy päivitetty versiota taustajärjestelmäsanomasta
-    ; [1]: Ne katselmukset taustajärjestelmäsanomasta, jotka ovat kokonaan uusia tai ylikirjoittavat olemassaolevia katselmustietoja
-    [existing-without-empties-matching-updates from-update-with-new-id]))
+        (or (not (tasks/task-is-review? current)) (not (empty-review-task? current)))
+          ;non-empty review tasks and all non-review tasks are left unchanged
+          (recur (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated)
+
+        (and updated-match (not (empty-review-task? updated-match)))
+          ; matching review found from backend system update => it replaces the existing one
+          (recur (remove #{updated-match} from-update) remaining unchanged (conj added-or-updated updated-match))
+
+        :else
+          ; this existing review is left unchanged
+          (recur from-update remaining (conj unchanged current) added-or-updated)))))
 
 (defn get-state-updates [user created {current-state :state :as application} app-xml]
   (let [new-state (->> (krysp-reader/application-state app-xml)
@@ -578,7 +563,7 @@
         historical-timestamp-present? (fn [{pvm :pitoPvm}] (and (number? pvm)
                                                             (< pvm (now))))
         review-tasks (map review-to-task (filter historical-timestamp-present? reviews))
-        updated-existing-and-added-tasks (merge-review-tasks-v2 review-tasks (:tasks application))
+        updated-existing-and-added-tasks (merge-review-tasks review-tasks (:tasks application))
         updated-tasks (apply concat updated-existing-and-added-tasks)
         update-buildings-with-context (partial tasks/update-task-buildings buildings-summary)
         added-tasks-with-updated-buildings (map update-buildings-with-context (second updated-existing-and-added-tasks)) ;; for pdf generation
