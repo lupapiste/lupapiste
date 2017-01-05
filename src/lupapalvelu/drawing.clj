@@ -24,5 +24,5 @@
   (let [type (parse-type drawing)
         coordinates (parse-geometry drawing)]
     (if (and (some? type) (some? coordinates))
-      {:type (sstr/capitalize type)
+      {:type (if (= type "LINESTRING") "LineString" (sstr/capitalize type))
        :coordinates (mapv (fn [c] (coord/convert "EPSG:3067" "WGS84" 5 c)) coordinates)})))
