@@ -142,7 +142,7 @@
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
-   :op                                   (sc/conditional vector? [Operation] map? Operation :else nil)
+   :op                                   (sc/conditional vector? [Operation] map? Operation :else (sc/enum nil))
    (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
@@ -261,10 +261,10 @@
 
 (defn make-attachment
   [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
-  {:pre  [(sc/validate Type attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
+  {:pre  [(sc/validate att-type/AttachmentType attachment-type) (keyword? application-state) (or (nil? target) (sc/validate Target target))]
    :post [(sc/validate Attachment %)]}
   (cond-> {:id (if (ss/blank? attachment-id) (mongo/create-id) attachment-id)
-           :type attachment-type
+           :type (select-keys attachment-type [:type-id :type-group])
            :modified created
            :locked locked?
            :readOnly (boolean read-only?)
@@ -277,7 +277,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op (not-empty (select-keys group [:id :name]))
+           :op (not-empty (:operations group))
            :signatures []
            :versions []
            ;:approvals {}

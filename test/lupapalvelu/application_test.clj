@@ -12,7 +12,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.attachment.type :as att-type]))
 
 
 (fact "update-document"
@@ -173,3 +175,80 @@
                ((reject-primary-operations #{:foobar}) app) => err
                ((reject-primary-operations #{:hii}) app) => nil?
                ((reject-primary-operations #{}) app) => nil?)))
+
+
+(facts multioperation-attachment-updates
+  (fact "multioperation attachment update with op array"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
+    => {"$push" {:attachments.0.op {:id ..op-id.., :name ..op-name..}}, "$set" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"]]))
+
+  (fact "multioperation attachment update with nil valued op"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op nil}])
+    => {"$set" {:attachments.0.op [{:id ..op-id.., :name ..op-name..}]}, "$push" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"]]))
+
+  (fact "multioperation attachment update with legacy op"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op {:id ..old-op-id.. :name ..old-op-name..}}])
+    => {"$set" {:attachments.0.op [{:id ..old-op-id.. :name ..old-op-name..} {:id ..op-id.., :name ..op-name..}]}, "$push" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"]]))
+
+  (fact "multioperation attachment update without new op provided"
+    (multioperation-attachment-updates nil ..org.. [{:type ..att-type.. :op []}])
+    => nil)
+
+  (fact "no existing multioperation attachment"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "pohjapiirustus"} :op []}])
+    => {"$set" {}, "$push" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "no multioperation attachment required for operation"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
+    => {"$set" {}, "$push" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "pohjapiirustus"]]))
+
+  (fact "multioperation attachment update - multiple attachments"
+    (multioperation-attachment-updates {:id ..op-id.. :name ..op-name..} ..org.. [{:type {:type-group "paapiirustus" :type-id "pohjapiirustus"} :op []}
+                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}
+                                                                                  {:type {:type-group "hakija" :type-id "valtakirja"} :op []}
+                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"} :op []}])
+    => {"$push" {:attachments.1.op {:id ..op-id.., :name ..op-name..}
+                 :attachments.3.op {:id ..op-id.., :name ..op-name..}},
+        "$set" {}}
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id ..op-id.. :name ..op-name..})
+              => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"]])))
+
+
+(facts make-attachments
+  (fact "no overlapping attachments"
+    (->> (make-attachments (now) {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"} ..org.. :sent nil)
+         (map #(select-keys % [:op :groupType :type])))
+       => [{:op [{:id "2d97ac643ef3b9683c89f60b", :name "some-operation"}], :groupType :operation, :type {:type-group :paapiirustus, :type-id :asemapiirros}}
+           {:op [{:id "2d97ac643ef3b9683c89f60b", :name "some-operation"}], :groupType :operation, :type {:type-group :paapiirustus, :type-id :pohjapiirustus}}
+           {:op nil,                                                         :groupType :parties,   :type {:type-group :hakija, :type-id :valtakirja}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"})
+              => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
+
+  (fact "existing operation specific attachment - all required attachments are created"
+    (->> (make-attachments (now) {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"} ..org.. :sent nil :existing-attachments-types [{:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+         (map #(select-keys % [:op :groupType :type])))
+       => [{:op [{:id "2d97ac643ef3b9683c89f60b", :name "some-operation"}], :groupType :operation, :type {:type-group :paapiirustus, :type-id :asemapiirros}}
+           {:op [{:id "2d97ac643ef3b9683c89f60b", :name "some-operation"}], :groupType :operation, :type {:type-group :paapiirustus, :type-id :pohjapiirustus}}
+           {:op nil,                                                        :groupType :parties,   :type {:type-group :hakija, :type-id :valtakirja}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"})
+              => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
+
+  (fact "existing non-operation-specific attachment - existing type not created"
+    (->> (make-attachments (now) {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"} ..org.. :sent nil :existing-attachments-types [{:type-group "paapiirustus" :type-id "asemapiirros"}])
+         (map #(select-keys % [:op :groupType :type])))
+       => [{:op [{:id "2d97ac643ef3b9683c89f60b", :name "some-operation"}], :groupType :operation, :type {:type-group :paapiirustus, :type-id :pohjapiirustus}}
+           {:op nil,                                                        :groupType :parties,   :type {:type-group :hakija, :type-id :valtakirja}}]
+    (provided (org/get-organization-attachments-for-operation ..org.. {:id "2d97ac643ef3b9683c89f60b" :name "some-operation"})
+              => [["paapiirustus" "asemapiirros"] ["paapiirustus" "pohjapiirustus"] ["hakija" "valtakirja"]]))
+
+)

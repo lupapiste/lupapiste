@@ -319,14 +319,28 @@
 
 (defn make-attachments
   [created operation organization applicationState tos-function & {:keys [target existing-attachments-types]}]
-  (let [existing-types (->> existing-attachments-types (map (ssc/json-coercer att/Type)) set)
+  (let [existing-types (->> (map att/attachment-type-coercer existing-attachments-types) set)
         types          (->> (org/get-organization-attachments-for-operation organization operation)
                             (map (partial apply att-type/attachment-type))
-                            (filter #(or (get-in % [:metadata :grouping]) (not (att-type/contains? existing-types %)))))
-        groups         (map #(when-let [group (get-in % [:metadata :grouping])] (assoc (when (= :operation group) operation) :groupType group)) types)
-        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)
-        stripped-types (map #(select-keys % [:type-id :type-group]) types)] ; attachments contain metadata, but it's not saved to db. Thus select only type information.
-    (map (partial att/make-attachment created target true false false (keyword applicationState)) groups stripped-types metadatas)))
+                            (filter #(or (att-type/operation-specific? %) (not (att-type/contains? existing-types %)))))
+        groups         (map #(let [group-type (get-in % [:metadata :grouping])]
+                               (util/assoc-when nil :groupType group-type :operations (when (and operation (= group-type :operation)) [operation])))
+                            types)
+        metadatas      (map (partial tos/metadata-for-document (:id organization) tos-function) types)]
+    (map (partial att/make-attachment created target true false false (keyword applicationState)) groups types metadatas)))
+
+(defn multioperation-attachment-updates [operation organization attachments]
+  (when-let [added-op (not-empty (select-keys operation [:id :name]))]
+    (let [required-types (->> (org/get-organization-attachments-for-operation organization operation)
+                              (map (partial apply att-type/attachment-type)))
+          ops-to-update (keep-indexed (fn [ind att]
+                                        (when (and (att-type/multioperation? (:type att)) (att-type/contains? required-types (:type att)))
+                                          [(util/kw-path "attachments" ind "op") (:op att)]))
+                                      attachments)]
+      {$set  (->> (remove (comp vector? second) ops-to-update) ; Update legacy and nil valued op
+                  (util/map-values #(->> [% added-op] (remove nil?))))
+       $push (->> (filter (comp vector? second) ops-to-update) ; Update op array
+                  (util/map-values (constantly added-op)))})))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
