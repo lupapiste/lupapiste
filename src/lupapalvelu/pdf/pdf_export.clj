@@ -55,7 +55,7 @@
 (def- printable-group-types #{:group :table})
 (defn- is-printable-group-type [schema] (printable-group-types (:type schema)))
 
-(def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup})
+(def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup :time})
 (defn- is-field-type [schema] (and (not (:hidden schema)) (field-types (:type schema))))
 
 (declare collect-groups)
