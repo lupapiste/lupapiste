@@ -476,7 +476,6 @@
        flatten))
 
 (defn- empty-review-task? [t]
-  ;; (debugf "empty-review-task? - tila is %s" (-> t :data :katselmus :tila))
   (let [katselmus-data (-> t :data :katselmus)
         top-keys [:tila :pitoPvm :pitaja]
         h-keys [:kuvaus :maaraAika :toteaja :toteamisHetki]
@@ -502,24 +501,28 @@
         lb (laji b)]
     (and na (= na (or nb lb)) la (= la lb))))
 
+(defn- bg-id [task]
+  (get-in task [:data :muuTunnus :value]))
+
 (defn- non-empty-review-task-with-bg-id? [task]
-  (let [bg-id (get-in task [:data :muuTunnus :value])]
-    (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? bg-id)))))
+  (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? (bg-id task)))))
 
 (defn- merge-review-tasks-v2
   ([from-update from-mongo]
-   (clojure.pprint/pprint (map #(select-keys % [:taskname :data :schema-info]) from-update))
+   (debugf "merge-review-tasks recursion starts: existing %s from-update %s" (count from-mongo) (count from-update))
    (merge-review-tasks-v2 from-update from-mongo [] []))
   ([from-update from-mongo unchanged added-or-updated]
-   (println "###" (count from-update) (count from-mongo) (count unchanged) (count added-or-updated))
    (let [current (first from-mongo)
          remaining (rest from-mongo)
-         updated-match (first (filter #(or (reviews-have-same-name-and-type? current %)
-                                           (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update))]
-     (println (:taskname current) (:taskname updated-match) (-> current :data :katselmuksenLaji :value))
+         updated-id-match (util/find-first #(= (bg-id current) (bg-id %)) from-update)
+         updated-match (or updated-id-match
+                           (first (filter #(or (reviews-have-same-name-and-type? current %)
+                                               (reviews-have-same-type-other-than-muu-katselmus? current %)) from-update)))]
      (cond
-       (= current nil) ; Recursion end condition - TODO certain items from remaining from-update must still be included into return values
-         [unchanged (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
+       (= current nil) ; Recursion end condition
+         (let [added-or-updated (concat added-or-updated (filter non-empty-review-task-with-bg-id? from-update))]
+           (debugf "merge-review-tasks recursion ends: unchanged %s added-or-updated %s" (count unchanged) (count added-or-updated))
+           [unchanged added-or-updated])
        (or (not (tasks/task-is-review? current)) (not (empty-review-task? current))) ;non-empty review tasks and other than review tasks are left unchanged
          (merge-review-tasks-v2 (remove #{updated-match} from-update) remaining (conj unchanged current) added-or-updated)
        (and updated-match (not (empty-review-task? updated-match)))
