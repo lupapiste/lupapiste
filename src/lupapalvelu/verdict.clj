@@ -512,6 +512,7 @@
   ; [0]: Ne olemassa olevat taskit, joille ei löydy päivitetty versiota taustajärjestelmäsanomasta
   ; [1]: Ne katselmukset taustajärjestelmäsanomasta, jotka ovat kokonaan uusia tai ylikirjoittavat olemassaolevia katselmustietoja
   [from-update from-mongo]
+  (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s" (count from-update) (count from-mongo))
   (loop [from-update from-update
          from-mongo from-mongo
          unchanged []
