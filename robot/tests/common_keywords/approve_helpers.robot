@@ -175,6 +175,12 @@ Reject with note and save
   Scroll and click test id  ${prefix}-save
   Reject note is  ${prefix}  ${text}
 
+Reject with note and lose focus
+  [Arguments]  ${button}  ${prefix}  ${text}
+  Reject and fill note  ${button}  ${prefix}  ${text}
+  Press Key test id  ${prefix}-editor  \\9
+  Reject note is  ${prefix}  ${text}  
+
 
 Reject with note but cancel
   [Arguments]  ${button}  ${prefix}  ${text}  ${doc-style}=True  ${idx}=0

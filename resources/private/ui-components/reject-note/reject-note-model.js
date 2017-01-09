@@ -112,8 +112,12 @@ LUPAPISTE.RejectNoteModel = function( params ) {
 
       self.addHubListener( "document-approval-" + docModel.docId,
                            docEventHandler );
-      docEventHandler( docModel.redrawnDocumentApprovalState() || {});
-      docModel.redrawnDocumentApprovalState({});
+      // Sometimes the redrawnDocumentApprovalState is not defined.
+      // The root cause is still mystery, but let's circumvent the problem.
+      if( ko.isObservable( docModel.redrawnDocumentApprovalState )) {
+        docEventHandler( docModel.redrawnDocumentApprovalState() || {});
+        docModel.redrawnDocumentApprovalState({});
+      }
     }
   }
 
