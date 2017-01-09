@@ -126,7 +126,7 @@ At least one message is displayed in the monitor
   Close message monitor
 
 Sonja cant re-approve application
-  User should not be able to approve application
+  Wait Until  Element should not be visible by test id  approve-application
 
 Party tab indicators have been reset
   Wait Until  Element should not be visible  applicationPartyDocumentIndicator
@@ -156,7 +156,6 @@ Mikko comes back, fills in missing parts and no submit button enabled
 *** Keywords ***
 
 User should not be able to approve application
-  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
   Open tab  requiredFieldSummary
   Element should not be visible by test id  approve-application-summaryTab
 
