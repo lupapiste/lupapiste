@@ -440,7 +440,7 @@ LUPAPISTE.ApplicationModel = function() {
         size: "medium",
         component: "yes-no-dialog",
         componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
-          yesFn: _.partial(checkDesigners, approve)}});
+          yesFn: approve}});
     } else {
       approve();
     }
@@ -459,8 +459,17 @@ LUPAPISTE.ApplicationModel = function() {
         .processing(self.processing)
         .call();
     };
-    checkDesigners(sendParties);
 
+    // All designers have not been approved?
+    if (!_.isEmpty(self.nonApprovedDesigners())) {
+      var text = loc("application.designers-not-approved-help") + "<ul><li>" + self.nonApprovedDesigners().join("</li><li>") + "</li></ul>";
+      hub.send("show-dialog", {ltitle: "application.designers-not-approved",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {text: text, yesFn: sendParties, lyesTitle: "continue", lnoTitle: "cancel"}});
+    } else {
+      sendParties();
+    }
   };
 
   self.approveExtension = function() {
