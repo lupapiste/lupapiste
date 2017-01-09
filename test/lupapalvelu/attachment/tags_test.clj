@@ -29,8 +29,11 @@
   (fact "parties"
     (attachment-tags {:groupType "parties"}) => (just #{:preVerdict :application :parties :needed} :in-any-order :gaps-ok))
 
-  (fact "operation"
+  (fact "legacy operation"
     (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
+
+  (fact "multiple operations"
+    (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation "op-id-someOpId" "op-id-otherOpId" :other} :in-any-order :gaps-ok))
 
   (fact "file"
     (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :application :general :needed :hasFile} :in-any-order :gaps-ok))
@@ -50,18 +53,30 @@
   (add-operation-tag-groups [{:op {:id "foo"} :tags [:tag]}] [[:pre] [:operation [:tag] [:wrong-tag]] [:post]]) => [[:pre] ["op-id-foo" [:tag]] [:post]])
 
 (facts "attachment-tag-groups"
-  (fact "default hierarchy"
+  (fact "technical reports"
     (let [attachments [{:groupType :technical-reports}]
           application {:attachments attachments}]
-      (attachment-tag-groups application) => [[:application [:technical-reports]]])
+      (attachment-tag-groups application) => [[:application [:technical-reports]]]))
+
+  (fact "reports"
     (let [attachments [{:groupType :reports}]
           application {:attachments attachments}]
-      (attachment-tag-groups application) => [[:application [:reports]]])
+      (attachment-tag-groups application) => [[:application [:reports]]]))
+
+  (fact "multioperation"
+    (let [attachments [{:groupType :operations
+                        :op [{:id (ssg/generate ssc/ObjectIdStr)} {:id (ssg/generate ssc/ObjectIdStr)}]
+                        :type {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat}}]
+          application {:attachments attachments}]
+      (attachment-tag-groups application) => [[:multioperation [:iv_suunnitelma]]]))
+
+  (fact "operation"
     (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
           attachments [{:op {:id operation-id1} :type {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat}}
                        {:op {:id operation-id1} :type {:type-id :aitapiirustus :type-group :paapiirustus}}]
           application {:attachments attachments}]
       (attachment-tag-groups application) => [[(str "op-id-" operation-id1) [:paapiirustus] [:iv_suunnitelma]]]))
+
   (fact "custom hierarchy with many attachments"
     (let [operation-id1 (ssg/generate ssc/ObjectIdStr)
           operation-id2 (ssg/generate ssc/ObjectIdStr)
@@ -72,7 +87,7 @@
                         {:op {:id operation-id1} :type {:type-group "somegroup" :type-id "sometype"}}
                         {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "sometype"}}
                         {:op {:id operation-id2} :type {:type-group "somegroup" :type-id "anothertype"}}
-                        {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
+                        {:op [{:id operation-id3} {:id operation-id2}] :type {:type-group "somegroup" :type-id "multitype"}}
                         {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "sometype"}}
                         {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
                         {:op {:id operation-id3} :type {:type-group "somegroup" :type-id "anothertype"}}
@@ -86,18 +101,25 @@
                           [:operation
                            [:somegroup]
                            [:anothergroup]
-                           [:other]]]]
+                           [:other]]
+                          [:multioperation
+                           [:multigroup]
+                           [:othermultigroup]]]]
       (attachment-tag-groups application test-hierarchy) => [[:application
                                                               [:general]
                                                               [:parties]]
                                                              [(str "op-id-" operation-id1) [:somegroup]]
                                                              [(str "op-id-" operation-id2) [:somegroup] [:anothergroup]]
-                                                             [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]]
+                                                             [(str "op-id-" operation-id3) [:somegroup] [:anothergroup] [:other]]
+                                                             [:multioperation [:multigroup]]]
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "sometype"}))) => :somegroup)
       (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "anothertype"}))) => :anothergroup)
+      (provided (att-type/tag-by-type (as-checker #(= (:type %) {:type-group "somegroup" :type-id "multitype"}))) => :multigroup)
       (provided (tag-by-application-group-types (as-checker (comp boolean #{"parties" "unknown"} :groupType)))  => :application)
       (provided (tag-by-application-group-types (as-checker (comp nil? :groupType)))  => nil)
-      (provided (att-type/tag-by-type anything) => nil))))
+      (provided (att-type/tag-by-type anything) => nil)))
+
+)
 
 
 (facts "attachments-filters"

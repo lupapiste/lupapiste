@@ -40,9 +40,10 @@
   (when op-id
     (str op-id-prefix op-id)))
 
-(defn tag-by-group-type [{group-type :groupType {op-id :id} :op}]
+(defn tag-by-group-type [{group-type :groupType op :op}]
   (or (some-> group-type keyword ((set (remove #{:operation} all-group-tags))))
-      (when op-id :operation)
+      (when (and (sequential? op) (> (count op) 1)) :multioperation)
+      (when (not-empty op) :operation)
       general-group-tag))
 
 (def application-group-types [:parties :general :reports :technical-reports])
@@ -55,12 +56,14 @@
   (when ((set application-group-types) (tag-by-group-type attachment))
     application-group-type-tag))
 
-(defn- tag-by-operation [{{op-id :id} :op :as attachment}]
-  (op-id->tag op-id))
+(defn- tag-by-operations [{op :op :as attachment}]
+  (->> (if (map? op) [op] op)
+       (map (comp op-id->tag :id))
+       not-empty))
 
-(defn tag-by-type [{{op-id :id} :op :as attachment}]
+(defn tag-by-type [{op :op :as attachment}]
   (or (att-type/tag-by-type attachment)
-      (when op-id att-type/other-type-group)))
+      (when (not-empty op) att-type/other-type-group)))
 
 (defn attachment-tags
   "Returns tags for a single attachment for filtering and grouping attachments of an application"
@@ -68,11 +71,12 @@
   (->> ((juxt tag-by-applicationState
               tag-by-group-type
               tag-by-application-group-types
-              tag-by-operation
+              tag-by-operations
               tag-by-notNeeded
               tag-by-type
               tag-by-file-status)
         attachment)
+       (reduce #((if (sequential? %2) concat conj) %1 %2) [])
        (remove nil?)))
 
 (defn- filter-tag-group-attachments [attachments [tag & _]]
