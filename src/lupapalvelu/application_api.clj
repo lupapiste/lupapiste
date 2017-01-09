@@ -468,7 +468,7 @@
         new-docs (app/make-documents nil created @organization op application)
         attachments (:attachments (domain/get-application-no-access-checking id {:attachments true}))
         new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types (map :type attachments))
-        attachment-updates (app/multioperation-attachment-updates op attachments)]
+        attachment-updates (app/multioperation-attachment-updates op @organization attachments)]
     (update-application command (util/deep-merge {$push {:secondaryOperations  op
                                                          :documents   {$each new-docs}
                                                          :attachments {$each new-attachments}}

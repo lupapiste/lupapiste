@@ -142,7 +142,7 @@
    :requestedByAuthority                 sc/Bool            ;;
    :notNeeded                            sc/Bool            ;;
    :forPrinting                          sc/Bool            ;; see kopiolaitos.clj
-   :op                                   (sc/conditional vector? [Operation] map? Operation :else (sc/enum nil))
+   :op                                   (sc/conditional sequential? [Operation] map? Operation :else (sc/enum nil))
    (sc/optional-key :groupType)          (sc/maybe GroupType)
    :signatures                           [Signature]
    :versions                             [Version]
@@ -240,13 +240,13 @@
   (first (filter (partial by-file-ids #{file-id}) attachments)))
 
 (defn get-operation-ids [{op :op :as attachment}]
-  (if (vector? op)
-    (map :id op)
+  (if (sequential? op)
+    (mapv :id op)
     [(:id op)]))
 
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
-  (filter (fn-> get-operation-ids (contains? op-id)) attachments))
+  (filter (fn-> get-operation-ids set (contains? op-id)) attachments))
 
 (defn get-attachments-by-type
   [{:keys [attachments]} type]
@@ -258,6 +258,13 @@
 
 (defn create-read-only-update-statements [attachments file-ids]
   (mongo/generate-array-updates :attachments attachments (partial by-file-ids file-ids) :readOnly true))
+
+(defn remove-operation-updates [{op :op :as attachment} removed-op-id]
+  (when (-> (get-operation-ids attachment) set (contains? removed-op-id))
+    (let [updated-op (->> (if (map? op) [op] op)
+                          (remove (comp #{removed-op-id} :id))
+                          not-empty)]
+      {:op updated-op :groupType (when updated-op :operation)})))
 
 (defn make-attachment
   [created target required? requested-by-authority? locked? application-state group attachment-type metadata & [attachment-id contents read-only? source]]
@@ -277,7 +284,7 @@
            :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
            :notNeeded false
            :forPrinting false
-           :op (not-empty (:operations group))
+           :op (->> (:operations group) (map #(select-keys % [:id :name])) not-empty)
            :signatures []
            :versions []
            ;:approvals {}
@@ -303,13 +310,15 @@
   (and (map?    (:attachment-type options-map))
        (number? (:created options-map))))
 
-(defn- resolve-group-name [{op-id :id op-name :name :as group} {documents :documents}]
-  (if (or (ss/blank? op-id) (ss/not-blank? op-name))
-    group
-    (->> (map (comp :op :schema-info) documents)
-         (util/find-by-id op-id)
-         :name
-         (util/assoc-when group :name))))
+(defn- resolve-operation-names [operations {documents :documents}]
+  (let [application-operations (map (comp :op :schema-info) documents)]
+    (->> operations
+         (map (fn [op] (if (or (ss/blank? (:id op)) (ss/not-blank? (:name op)))
+                         op
+                         (->> (util/find-by-id (:id op) application-operations)
+                              :name
+                              (util/assoc-when op :name)))))
+         not-empty)))
 
 (defn create-attachment-data
   "Returns the attachment data model as map. This attachment data can be pushed to mongo (no versions included)."
@@ -323,7 +332,7 @@
                      requested-by-authority
                      locked
                      (-> application :state keyword)
-                     (resolve-group-name group application)
+                     (update group :operations resolve-operation-names application)
                      (attachment-type-coercer attachment-type)
                      metadata
                      attachment-id
@@ -453,7 +462,7 @@
      (when-not (ss/blank? drawingNumber)
        {$set {:attachments.$.drawingNumber drawingNumber}})
      (when (not-empty group)
-       {$set {:attachments.$.op (not-empty (select-keys group [:id :name]))
+       {$set {:attachments.$.op (not-empty (:operations group))
               :attachments.$.groupType (:groupType group)}})
      (when-let [approval (cond
                            state                                           (->approval state user created )
@@ -489,7 +498,7 @@
   ([application user {attachment-id :id :as attachment} options]
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
-     (let [options       (update options :group resolve-group-name application)
+     (let [options       (update-in options [:group :operations] resolve-operation-names application)
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
@@ -519,19 +528,15 @@
                  nil))))))
 
 (defn meta->attachment-data [meta]
-  (merge (dissoc meta :op :group)
+  (merge (dissoc meta :group)
          (when (contains? meta :group)
-           {:op (not-empty (select-keys (:group meta) [:id :name]))
+           {:op (not-empty (get-in meta [:group :operations]))
             :groupType (get-in meta [:group :groupType])})))
 
 (defn update-attachment-data! [command attachmentId data now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set (merge (zipmap (->> (keys data)
-                                                (map name)
-                                                (map (partial str "attachments.$."))
-                                                (map keyword))
-                                           (vals data))
+                      {$set (merge (util/map-keys (partial util/kw-path "attachments" "$") data)
                                    (when set-app-modified? {:modified now})
                                    (when set-attachment-modified? {:attachments.$.modified now}))}))
 
@@ -685,7 +690,7 @@
     {:result conversion-result
      :file converted-filedata}))
 
-(defn attach!
+(defn- attach!
   [{:keys [application user]} {attachment-id :attachment-id :as attachment-options} original-filedata conversion-data]
   (let [options            (merge attachment-options
                                   original-filedata

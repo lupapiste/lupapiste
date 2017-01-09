@@ -87,8 +87,8 @@
       (fail :error.illegal-meta-type :parameters k))))
 
 (defn- validate-group-op [group]
-  (when-let [op (not-empty (select-keys group [:id :name]))]
-    (when (sc/check att/Operation op)
+  (when-let [operations (:operations group)]
+    (when (sc/check [att/Operation] operations)
       (fail :error.illegal-attachment-operation))))
 
 (defn- validate-group-type [group]

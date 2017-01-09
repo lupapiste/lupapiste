@@ -79,8 +79,6 @@
 (def other-type-group :other)
 (def type-groups (-> (vals type-grouping) distinct (concat [other-type-group])))
 
-(some-> (util/find-first (fn-> val (contains? attachment-type)) default-grouping) key)
-
 (defn attachment-type
   ([{type-group :type-group type-id :type-id}]
    (let [attachment-type {:type-group (keyword type-group) :type-id (keyword type-id)}

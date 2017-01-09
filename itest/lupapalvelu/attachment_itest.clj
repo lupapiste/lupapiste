@@ -24,8 +24,8 @@
             op-id (-> application :primaryOperation :id)]
         (fact "counting all attachments"
           (count (:attachments application)) => 4)
-        (fact "pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
-          (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
+        (fact "asemapiirros, pohjapiirustus and vastonsuojasuunnitelma are related to operation 'kerrostalo-rivitalo'"
+          (map :type (get-attachments-by-operation application op-id)) => (just #{{:type-group "paapiirustus" :type-id "asemapiirros"} {:type-group "paapiirustus" :type-id "pohjapiirustus"} {:type-group "pelastusviranomaiselle_esitettavat_suunnitelmat" :type-id "vaestonsuojasuunnitelma"}} :in-any-order))
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
                     (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
@@ -102,7 +102,7 @@
           (fact "operation info"
                 (upload-attachment pena application-id {:type {:type-id "muu" :type-group "muut"}
                                                         :op-id (-> application :primaryOperation :id)} true)
-                (-> (query-application pena application-id) :attachments last :op :name) => "kerrostalo-rivitalo")))
+                (->> (query-application pena application-id) :attachments last :op (map :name)) => ["kerrostalo-rivitalo"])))
 
       (fact "Pena submits the application"
         (command pena :submit-application :id application-id) => ok?
@@ -136,7 +136,7 @@
               op-id (:id primaryOperation)]
 
           (fact "Pena can change operation"
-            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :id op-id}}) => ok?)
+            (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:group {:groupType :operation :operations [{:id op-id}]}}) => ok?)
           (fact "Pena can change contents"
             (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
           (fact "Pena can change size"
@@ -147,7 +147,7 @@
           (fact "Metadata is set"
             (let [application (query-application pena application-id)
                   {:keys [op groupType contents size scale]} (get-attachment-info application (first attachment-ids))]
-              (:id op) => op-id
+              (map :id op) => [op-id]
               groupType => "operation"
               contents => "foobart"
               size => "A4"
