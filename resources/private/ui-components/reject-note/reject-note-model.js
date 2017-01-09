@@ -57,8 +57,10 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   };
 
   self.closeEditor = function( data, event ) {
-    // Enter closes editor and saves note.
-    if( event.keyCode === 13) {
+    // Enter or losing focus closes editor and saves note. In order
+    // to avoid saving on Esc, we make sure that editor is open.
+    if( self.showEditor() &&
+        (event.keyCode === 13 || event.type === "focusout") ) {
       self.saveNote();
     }
     return true;
@@ -75,7 +77,6 @@ LUPAPISTE.RejectNoteModel = function( params ) {
   function docModelInit() {
     // Editor is shown after the group has been rejected
     // There are different events for documents (no path) and groups.
-
     var docModel = ko.unwrap(params.docModel);
     var path = params.path;
     var meta = docModel.getMeta( path );
