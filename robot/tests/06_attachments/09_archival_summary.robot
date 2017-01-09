@@ -42,50 +42,50 @@ Hannu logs in and gives verdict
 
 Hannu goes to archival tab
   Open tab  archival
-  Toggle additional controls  not-archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+  Toggle additional controls  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
 Archival tab contain three top level groups
   Wait until  Element should be visible  jquery=div.archival-summary-table
   Javascript?  $("div.archival-summary-table").length === 3
 
 Main application documents are not archived
-  Group header is  not-archived-application-documents  application-documents  Hankkeen pääasiakirjat
+  Group header is  archived-application-documents  application-documents  Hankkeen pääasiakirjat
 
 Main application documents contains one row
-  Group row count is  not-archived-application-documents  application-documents  1
+  Group row count is  archived-application-documents  application-documents  1
 
 Pre verdict attachments group contains two sub groups
-  Section group count is  not-archived-pre-groups  2
+  Section group count is  archived-pre-groups  2
 
 No archived pre verdict attachments
   Section group count is  archived-pre-groups  0
 
 Pre verdict general attachments are in not archived group
-  Group header is  not-archived-pre-groups  attachments.general  Yleiset hankkeen liitteet
+  Group header is  archived-pre-groups  attachments.general  Yleiset hankkeen liitteet
 
 Pre verdict operation attachments are in not archived group
-  Group header is  not-archived-pre-groups  masto-tms  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen tai muun erillislaitteen sijoittaminen (esim. markiisi, aurinkokeräin)
+  Group header is  archived-pre-groups  masto-tms  Maston, piipun, säiliön, laiturin tai vastaavan rakentaminen tai muun erillislaitteen sijoittaminen (esim. markiisi, aurinkokeräin)
 
 Julkisivupiirustus contents is visible
-  Attachment content is  not-archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  this is julkisivu
+  Attachment content is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  this is julkisivu
 
 Pre verdict general group contains one attachment
-  Group row count is  not-archived-pre-groups  attachments.general  1
+  Group row count is  archived-pre-groups  attachments.general  1
 
 Pre verdict operation group contains one attachment
-  Group row count is  not-archived-pre-groups  masto-tms  1
+  Group row count is  archived-pre-groups  masto-tms  1
 
 No archived post verdict attachments
   Section group count is  archived-post-groups  0
 
 Post verdict attachments group contains one sub group
-  Section group count is  not-archived-post-groups  1
+  Section group count is  archived-post-groups  1
 
 Post verdict not archived group header
-  Group header is  not-archived-post-groups  attachments.general  Yleiset hankkeen liitteet
+  Group header is  archived-post-groups  attachments.general  Yleiset hankkeen liitteet
 
 Post verdict general group contains one attachment
-  Group row count is  not-archived-post-groups  attachments.general  1
+  Group row count is  archived-post-groups  attachments.general  1
 
 There is 4 attachments visible
   Total document count is  4
