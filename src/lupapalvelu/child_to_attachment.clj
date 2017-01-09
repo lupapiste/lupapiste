@@ -16,14 +16,14 @@
 (defn- get-child [application type id]
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
-(defn- child-attachment-type [type source-document]
+(defn- child-attachment-type [permit-type type source-document]
   (->> (case type
          :neighbors  {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
          :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
          :tasks      (if (.equalsIgnoreCase "aloituskokous" (get-in source-document [:data :katselmuksenLaji :value]))
                        {:type-group "katselmukset_ja_tarkastukset" :type-id "aloituskokouksen_poytakirja"}
                        {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"})
-         :verdicts   {:type-group (if (= permitType "R") "paatoksenteko" "muut")
+         :verdicts   {:type-group (if (= permit-type "R") "paatoksenteko" "muut")
                       :type-id "paatos"}
          {:type-group "muut" :type-id "muu"})
        att-type/attachment-type))
@@ -45,7 +45,7 @@
                     :neighbors (i18n/localize lang "application.MM.neighbors")
                     :verdicts (i18n/localize lang (if (:sopimus child) "userInfo.company.contract" "application.verdict.title"))
                     :tasks (i18n/localize lang "task-katselmus.rakennus.tila._group_label"))
-        attachment-type      (child-attachment-type type child)
+        attachment-type      (child-attachment-type (:permitType application) type child)
         base-attachment-opts {:application        application
                               :filename           (-> type-name (ss/replace " " "_") (str ".pdf"))
                               :size               (.length file)
