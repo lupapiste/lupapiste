@@ -40,10 +40,6 @@ Hannu logs in and gives verdict
   Open application  ${appname}  ${propertyId}
   Submit empty verdict
 
-Hannu fix tos function
-  Open tab  archival
-  Fix tos function
-
 Hannu goes to archival tab
   Open tab  archival
   Toggle additional controls  not-archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
@@ -311,9 +307,3 @@ Select attachment to be archived
   Element should be visible  jquery=${selector}
   Scroll to  ${selector}
   Select checkbox  jquery=${selector}
-
-Fix tos function
-  Select From List by test id and index  tos-function-correction-select  0
-  Input text by test id  tos-function-correction-input  Fixi
-  Click by test id  tos-function-correction-button
-  Confirm  dynamic-ok-confirm-dialog
