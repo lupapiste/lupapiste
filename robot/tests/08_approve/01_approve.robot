@@ -41,13 +41,13 @@ Mikko decides to submit application
   Submit application
 
 Mikko still can't approve application
-  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
+  User should not be able to approve application
   [Teardown]  Kill session
 
 Ronja tries to approve application without permission
   Ronja logs in
   Open application  ${appname}  753-416-25-30
-  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
+  User should not be able to approve application
   Kill session
 
 Sonja logs in for approval
@@ -126,7 +126,7 @@ At least one message is displayed in the monitor
   Close message monitor
 
 Sonja cant re-approve application
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  User should not be able to approve application
 
 Party tab indicators have been reset
   Wait Until  Element should not be visible  applicationPartyDocumentIndicator
@@ -150,11 +150,15 @@ Mikko comes back, fills in missing parts and no submit button enabled
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open accordions  info
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
+  User should not be able to approve application
   Kill session
 
 *** Keywords ***
 
+User should not be able to approve application
+  Wait Until  Element should be disabled  jquery=[data-test-id='approve-application']
+  Open tab  requiredFieldSummary
+  Element should not be visible by test id  approve-application-summaryTab
 
 Close message monitor
   Click Element  jquery=div.integration-message-monitor span.close

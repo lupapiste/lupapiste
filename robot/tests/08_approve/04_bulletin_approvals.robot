@@ -6,7 +6,7 @@ Resource       ../../common_resource.robot
 Resource       ../common_keywords/approve_helpers.robot
 Resource       ../27_julkipano/julkipano_common.robot  
 Variables      ../06_attachments/variables.py
-  
+
 *** Test Cases ***
 
 # --------------------------
@@ -33,12 +33,12 @@ Olli adds and approves attachment
   Return to application
 
 Olli publishes bulletin
-  Open tab  bulletin
   Approve application ok
+  Open tab  bulletin
   Publish bulletin
 
 Olli opens bulletin and checks that not icons are visible
-  Wait until  Click link  jquery=td.actions a[target=_blank]  
+  Wait until  Click link  jquery=td.actions a[target=_blank]
   Select window  new
   No icons  info
   No icons  attachments
