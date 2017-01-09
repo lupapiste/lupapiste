@@ -24,6 +24,7 @@ INCLUDES=
 PARALLEL=files
 LOWMEMMB=512
 MAXCOREUNDERFLOW=3
+ORDER=modified
 
 RED='\033[0;31m'
 LIGHTRED='\033[1;31m'
@@ -89,7 +90,8 @@ usage() {
   -E | --no-env-check   skip version and environment startup sanity checks
   -P | --parallel style 'files': find files under test-dirs and run them in 
                                  parallel (default)  
-                        'args': run test-dirs in parallel
+                        'args':  run test-dirs in parallel
+  -o | --order          testsuite order (modified,numeric,random) [$ORDER]
 "
 }
 
@@ -189,8 +191,8 @@ parse_args() {
          parse_args $@
          ;;
       (-r|--retries)
-         RERUNS=$2
-         check_integer "$RERUNS" "Reruns must be an integer"
+         RETRIES=$2
+         check_integer "$RETRIES" "Reruns must be an integer"
          shift 2
          parse_args $@
          ;;
@@ -212,6 +214,11 @@ parse_args() {
          ;;
       (-P | --parallel)
          PARALLEL=$2
+         shift 2
+         parse_args $@
+         ;;
+      (-o | --order)
+         ORDER=$2
          shift 2
          parse_args $@
          ;;
@@ -279,22 +286,23 @@ run_test() {
    local TEST=$(echo $test | sed -e 's/[/ ]/_/g')
    local BOT=
    local MYSCREEN=$1
+   local DISPLAY=$DISPLAY
    case $OUTPUT in
       xvfb)
          MYSCREEN=$1
-         Xvfb :$MYSCREEN -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
+         Xvfb :$MYSCREEN -dpi 75 -screen 0 ${RESOLUTION}x24 -pixdepths 16,24 2>&1 &
          XPID=$!
          DISPLAY=:$MYSCREEN
          ;;
       xnest)
          MYSCREEN=$1
-         Xnest :$MYSCREEN -geometry ${RESOLUTION}+0+0 &>/dev/null &
+         Xnest :$MYSCREEN -dpi 75 -geometry ${RESOLUTION}+0+0 &>/dev/null &
          DISPLAY=:$MYSCREEN
          XPID=$!
          ;;
       local)
          # use current DISPLAY
-         MYSCREEN=$DISPLAY
+         MYSCREEN=$(echo $DISPLAY | sed -e 's/^://')
          XPID=""
          ;;
       *)
@@ -314,6 +322,8 @@ run_test() {
    # start openbox to handle window maximize if we're running in a non-local X
    test -z "$XPID" || {
       DISPLAY=:$MYSCREEN openbox &>/dev/null &
+      sleep 1
+      echo "Xft.dpi: 75" | DISPLAY=:$MYSCREEN xrdb -merge 
       WMPID=$!
    }
 
@@ -412,6 +422,14 @@ show_running() {
   maybe_finish $NFAIL
 }
 
+map() {
+   OP=$1
+   shift
+   for ARG in $@; do
+      $OP "$ARG"
+   done
+}
+
 show_stats() {
    echo "---------------------- 8< ----------------------"
    MSG="$@"
@@ -431,6 +449,13 @@ show_stats() {
    done
 }
 
+git_modification_order() {
+   for file in "$@"
+   do
+      echo $(git log -1 --format="%at" -- "$file") " $file"
+   done | sort -n -r | sed -e 's/^[0-9]* *//'
+}
+
 # lower priority
 renice $NICENESS $$ &>/dev/null
 
@@ -439,16 +464,38 @@ echo "Running tests $TESTS"
 test -z "$INCLUDES" || echo $INCLUDES
 echo $EXCLUDES
 
+# find test cases to pass over to robot
 TARGETS=
 case "$PARALLEL" in
    "files" )
+      # find all number-prefixed robot files
       TARGETS=$(find $TESTS | grep "\/[0-9][^/]*\.robot$" | sort -r)
       ;;
    "args" )
-      TARGETS=$TESTS
+      # files/directories as given, just split them to separate lines
+      TARGETS=$(map echo "$TESTS")
       ;;
    * )
       fail "Unsupported parallel style '$PARALLEL'"
+      ;;
+esac
+
+# sort the test suites numerically or by modification date 
+case "$ORDER" in 
+   "numeric")
+      TARGETS=$(for TARGET in "$TARGETS"; do echo $TARGET; done | sort);
+      ;;
+   "modified")
+      # run last modified tests first
+      TARGETS=$(git_modification_order $TARGETS)
+      #TARGETS=$(echo "$TARGETS" | xargs ls -1 -t)
+      ;;
+   "random")
+      # tests in random order
+      TARGETS=$(echo "$TARGETS" | sort -R)
+      ;;
+   *)
+      fail "Unknown test order '$ORDER'. Expected numeric, modified or random."
       ;;
 esac
 
@@ -457,10 +504,17 @@ do
    RUNNING=$(jobs | grep run_test | wc -l)
    while [ $RUNNING -ge $MAXTHREADS ]
    do
-      RUNNING=$(jobs | grep run_test | wc -l)
       show_stats "$RUNNING/$MAXTHREADS threads running"
-      sleep $UPDATE
-      jobs > /dev/null
+      for foo in $(seq $UPDATE)
+      do
+         # echo test $(jobs | grep run_test | wc -l) "=" "$RUNNING"
+         #jobs
+         test $(jobs | grep run_test | wc -l) "=" "$RUNNING" || break
+         #echo -n x
+         sleep 1
+      done
+      #jobs
+      RUNNING=$(jobs | grep run_test | wc -l)
    done
    test -n "$BLACKLIST" && grep -q "$test" "$BLACKLIST" && {
       echo "WARNING: skippin blacklisted test $test";
@@ -492,7 +546,12 @@ while true
 do
    jobs | grep -q run_test || break
    show_stats
-   sleep $UPDATE
+   for foo in $(seq $UPDATE)
+   do
+      #echo -n o
+      jobs | grep -q run_test || break;
+      sleep 1
+   done
    jobs > /dev/null
 done
 
