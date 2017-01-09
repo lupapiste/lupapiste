@@ -1,6 +1,6 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-actions-template">
     <div class="stacked" data-bind="with: application">
-        <!-- ko if: !hasInvites() -->
+        <!-- ko ifnot: hasInvites -->
             <button data-bind="click: $root.openRequiredFieldSummaryTab,
                            visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),

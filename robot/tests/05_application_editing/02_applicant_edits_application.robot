@@ -198,13 +198,13 @@ Mikko still sees the submitted app in applications list
 
 Hakemuksen jattaminen tab title shown to applicant
   Open application  ${newName}  ${propertyId}
-  Test id text is  application-open-requiredFieldSummary-tab  Hakemuksen j\u00e4tt\u00e4minen
+  Test id text is  application-open-requiredFieldSummary-tab  Hakemuksen jättäminen
   [Teardown]  Logout
 
 Siirra kasittelyyn tab title shown to authority
   Sonja logs in
   Open application  ${newName}  ${propertyId}
-  Test id text is  application-open-requiredFieldSummary-tab  Siirr\u00e4 k\u00e4sittelyyn
+  Test id text is  application-open-requiredFieldSummary-tab  Siirrä käsittelyyn
 
 Authority deletes paasuunnittelija
   Open tab  parties
