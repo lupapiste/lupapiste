@@ -415,7 +415,7 @@
 "attachments.contents.paloturvallisuuden_perustietolomake" "fi" "Paloturvallisuuden perustietolomake"
 "attachments.contents.paloturvallisuuden_perustietolomake" "sv" "Blankett för grundläggande uppgifter om brandsäkerheten"
 "attachments.contents.perustus" "en" "Foundation (plan drawing and details)"
-"attachments.contents.perustus" "fi" "Perustus (tasokuva ja detaenit)"
+"attachments.contents.perustus" "fi" "Perustus (tasokuva ja detaljit)"
 "attachments.contents.perustus" "sv" "Husgrund (ritning och detaljer)"
 "attachments.contents.perustusten_kuivaussuunnitelma" "en" "Foundation seasoning plan"
 "attachments.contents.perustusten_kuivaussuunnitelma" "fi" "Perustusten kuivaussuunnitelma"

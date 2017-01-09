@@ -12,8 +12,11 @@
             [lupapalvelu.ya-extension :as yax]
             [clj-time.core :as time]
             [clj-time.format :as fmt]
+            [clj-time.local :as local]
             [net.cgrand.enlive-html :as enlive]
-            [sade.util :as util]))
+            [sade.util :as util]
+            [clojure.java.io :as io]
+            [sade.strings :as str]))
 
 (apply-remote-minimal)
 
@@ -143,7 +146,9 @@
          (let [{app-id :id}     (create-and-submit-local-application pena
                                                                      :propertyId sipoo-property-id
                                                                      :operation "ya-katulupa-vesi-ja-viemarityot")
-               krysp            (-> "resources/krysp/dev/jatkoaika-ya.xml"
+               krysp            (-> (io/resource "krysp/dev/jatkoaika-ya.xml")
+                                    slurp
+                                    (str/replace "[YEAR]" (str (time/year (local/local-now))))
                                     xml/parse
                                     strip-xml-namespaces)
                krysp-start-date "04.10.2016"

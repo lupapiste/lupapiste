@@ -58,7 +58,9 @@
             [lupapalvelu.ident.dummy]
             [lupapalvelu.ya-extension :as yax]
             [lupapalvelu.reports.reports-api]
-            [lupapalvelu.rest.rest-api])
+            [lupapalvelu.rest.rest-api]
+            [clj-time.core :as time]
+            [clj-time.local :as local])
   (:import (java.io OutputStreamWriter BufferedWriter)
            (java.nio.charset StandardCharsets)))
 
@@ -796,6 +798,7 @@
     (-> "krysp/dev/jatkoaika-ya.xml"
         io/resource
         slurp
+        (s/replace "[YEAR]" (str (time/year (local/local-now))))
         xml/parse
         strip-xml-namespaces
         yax/update-application-extensions)

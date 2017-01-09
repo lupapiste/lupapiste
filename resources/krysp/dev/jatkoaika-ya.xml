@@ -22,7 +22,7 @@
       xmlns:gml="http://www.opengis.net/gml"
       xsi:schemaLocation="http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus/2.1.2/YleisenAlueenKaytonLupahakemus.xsd">
       <yak:toimituksenTiedot>
-        <yht:aineistonnimi>LP-753-2016-90001</yht:aineistonnimi>
+        <yht:aineistonnimi>LP-753-[YEAR]-90001</yht:aineistonnimi>
         <yht:aineistotoimittaja />
         <yht:toimitusPvm>2014-02-13</yht:toimitusPvm>
         <yht:kuntakoodi />
@@ -34,7 +34,7 @@
             <yak:Kasittelytieto>
               <yht:muutosHetki>2014-01-29T13:57:15</yht:muutosHetki>
               <yht:hakemuksenTila>Hyväksytty</yht:hakemuksenTila>
-              <yht:asiatunnus>LP-753-2016-90001</yht:asiatunnus>
+              <yht:asiatunnus>LP-753-[YEAR]-90001</yht:asiatunnus>
               <yht:paivaysPvm>2014-02-13</yht:paivaysPvm>
               <yak:kasittelija>
                 <yak:henkilotieto>
@@ -53,7 +53,7 @@
               <yht:kuntalupatunnus>523</yht:kuntalupatunnus>
               <yht:muuTunnustieto>
                 <yht:MuuTunnus>
-                  <yht:tunnus>LP-753-2016-90001</yht:tunnus>
+                  <yht:tunnus>LP-753-[YEAR]-90001</yht:tunnus>
                   <yht:sovellus>lupapiste</yht:sovellus>
                 </yht:MuuTunnus>
               </yht:muuTunnustieto>
@@ -64,7 +64,7 @@
           <yak:sijaintitieto>
             <yak:Sijainti>
               <yht:osoite>
-                <yht:yksilointitieto>LP-753-2016-90001</yht:yksilointitieto>
+                <yht:yksilointitieto>LP-753-[YEAR]-90001</yht:yksilointitieto>
                 <yht:alkuHetki>2014-02-13T16:04:00</yht:alkuHetki>
                 <yht:osoitenimi>
                   <yht:teksti>Kuopionlahdenkatu 1</yht:teksti>

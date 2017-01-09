@@ -12,7 +12,7 @@
    :length 150})
 
 (facts "Should create wgs84 geometry block from map drawing data"
-  (fact (wgs84-geometry drawing) => {:type "Linestring"
+  (fact (wgs84-geometry drawing) => {:type "LineString"
                                      :coordinates [[25.26441 60.37108]
                                                    [25.26395 60.37142]
                                                    [25.26322 60.37193]

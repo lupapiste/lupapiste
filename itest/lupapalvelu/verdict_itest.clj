@@ -7,7 +7,8 @@
             [lupapalvelu.domain :as domain]
             [sade.util :as util]
             [sade.env :as env]
-            [sade.strings :as s]))
+            [sade.strings :as s]
+            [lupapalvelu.pdf.libreoffice-conversion-client :as libreclient]))
 
 (apply-remote-minimal)
 
@@ -160,7 +161,7 @@
     (fact "There are two new attachments, see krysp/dev/verdict.xml"
       (-> app-with-verdict :attachments count) => (+ attachment-count 2))
 
-    (when (and (env/feature? :libreoffice) (not (s/blank? (env/value :libreoffice :host))))
+    (when (libreclient/enabled?)
       (facts "RTF attachment gets converted to PDF with the original file stored as well"
         (let [{:keys [latestVersion] :as attachment} (->> (:attachments app-with-verdict)
                                                           (filter (fn [{:keys [latestVersion]}] (= (:filename latestVersion) "sample-rtf-verdict.pdf")))

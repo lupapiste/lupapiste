@@ -59,6 +59,7 @@
 
 (def- type-grouping ; Force array-map to ensure fixed order of the type groups
   (array-map {:type-id :aitapiirustus            :type-group :paapiirustus}        :paapiirustus
+             {:type-id :asemapiirros             :type-group :paapiirustus}        :paapiirustus
              {:type-id :pohjapiirustus           :type-group :paapiirustus}        :paapiirustus
              {:type-id :leikkauspiirustus        :type-group :paapiirustus}        :paapiirustus
              {:type-id :julkisivupiirustus       :type-group :paapiirustus}        :paapiirustus

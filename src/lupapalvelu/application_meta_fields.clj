@@ -157,6 +157,10 @@
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
+(defn- archived? [_ app]
+  (and (some? (get-in app [:archived :completed]))
+       (> (get-in app [:archived :completed]) 1)))
+
 (def indicator-meta-fields [{:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                             {:field :documentModifications :fn count-document-modifications}
                             {:field :unseenComments :fn count-unseen-comments}
@@ -164,6 +168,7 @@
                             {:field :unseenVerdicts :fn count-unseen-verdicts}
                             {:field :unseenAuthorityNotice :fn unseen-notice?}
                             {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
+                            {:field :fullyArchived :fn archived?}
                             {:field :indicators :fn indicator-sum}])
 
 (def meta-fields (conj indicator-meta-fields
