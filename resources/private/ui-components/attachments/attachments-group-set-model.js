@@ -29,6 +29,12 @@ LUPAPISTE.AttachmentsGroupSetModel = function(tagGroups) {
     return groupsByPath[id];
   }
 
+  function allOpen( groups ) {
+    return _.every( groups, function( g ) {
+      return g.accordionOpen() && allOpen( g.subGroups());
+    });
+  }
+
   function toggle(group, value) {
     group.accordionOpen(_.isNil(value) ? !group.accordionOpen() : Boolean(value));
   }
@@ -39,7 +45,10 @@ LUPAPISTE.AttachmentsGroupSetModel = function(tagGroups) {
   }
 
   self.toggleAll = function(value) {
-    _.map(groups(), function(subGroup) { toggleAll(subGroup, value); });
+    var flag = _.isBoolean( value ) ? value : !allOpen( groups());
+    _.map(groups(), function(subGroup) {
+      toggleAll(subGroup, flag );
+    });
   };
 
   function initTagGroups(path, tagGroups, defaultOpen) {
