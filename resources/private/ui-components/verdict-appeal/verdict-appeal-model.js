@@ -132,4 +132,8 @@ LUPAPISTE.VerdictAppealModel = function( params ) {
   self.deleteAppeal = function( appeal ) {
     self.sendEvent( service.serviceName, "delete-appeal", {message: backAppeal(appeal)});
   };
+
+  self.showTitle = self.disposedPureComputed( function() {
+    return _.size( self.appeals()) || self.canEdit();
+  });
 };
