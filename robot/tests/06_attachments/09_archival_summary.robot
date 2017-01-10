@@ -58,7 +58,7 @@ Pre verdict attachments group contains two sub groups
   Section group count is  archived-pre-groups  2
 
 No archived pre verdict attachments
-  Section group count is  archived-pre-groups  0
+  Section group count is  not-archived-pre-groups  0
 
 Pre verdict general attachments are in not archived group
   Group header is  archived-pre-groups  attachments.general  Yleiset hankkeen liitteet
@@ -76,7 +76,7 @@ Pre verdict operation group contains one attachment
   Group row count is  archived-pre-groups  masto-tms  1
 
 No archived post verdict attachments
-  Section group count is  archived-post-groups  0
+  Section group count is  not-archived-post-groups  0
 
 Post verdict attachments group contains one sub group
   Section group count is  archived-post-groups  1
@@ -99,9 +99,9 @@ Hannu goes back to archival tab and sees added attachment there
   Open tab  archival
   Total document count is  5
 
-Added attachment is in not archived post verdict general attachments group
-  Section group count is  not-archived-post-groups  1
-  Group row count is  not-archived-post-groups  attachments.general  2
+Added attachment is in archived post verdict general attachments group
+  Section group count is  archived-post-groups  1
+  Group row count is  archived-post-groups  attachments.general  1
 
 
 Hannu removes hulevesisuunnitelma file
@@ -116,7 +116,7 @@ Hannu goes back to archival tab and does not see removed file anymore
   Total document count is  4
 
 Not archived general attachments group is hidden
-  Section group count is  not-archived-pre-groups  1
+  Section group count is  not-archived-pre-groups  0
   Group row count is  not-archived-pre-groups  attachments.general  0
 
 
@@ -140,11 +140,11 @@ Type is changed
 
 
 Edit rakennesuunnitelma metadata
-  Fill in archival metadata  myyntipalvelu=True
+  Fill in archival metadata  julkisuusluokka=julkinen  myyntipalvelu=True
 
 Rakennesuunnitelma group is changed
-  Wait until  Group row count is  not-archived-post-groups  attachments.general  1
-  Group row count is  archived-post-groups  attachments.general  1
+  Wait until  Group row count is  archived-post-groups  attachments.general  2
+  Group row count is  archived-post-groups  attachments.general  2
 
 Close additional controls, rakennesuunnitelma section is changed to archived
   Toggle additional controls  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma
@@ -166,8 +166,7 @@ Rakennesuunnitelma is marked as will publish
 
 
 Edit julkisivupiirustus metadata
-  Toggle additional controls  not-archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
-  Fill in archival metadata  julkisuusluokka=julkinen  henkilotiedot=sisaltaa-arkaluonteisia  arkistointi=määräajan  nakyvyys=viranomainen  pituus=5
+  Toggle additional controls  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
 Julkisivupiirustus group is changed
   Wait until  Group row count is  not-archived-pre-groups  masto-tms  0
@@ -176,25 +175,25 @@ Julkisivupiirustus group is changed
 Close additional controls, julkisivupiirustus section is changed to archived
   Toggle additional controls  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
-Julkisivupiirustus is archivable
+Julkisivupiirustus is not archivable
   [Tags]  pdfa
-  Attachment is archivable  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+  Attachment archivability error icon is visible  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
 Julkisivupiirustus retention perioid is entered
-  Attachment retention perioid is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Määräajan, 5 vuotta
+  Attachment retention perioid is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Pysyvästi
 
 Julkisivupiirustus personal data is entered
-  Attachment personal data is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Sisältää arkaluontoisia henkilötietoja
+  Attachment personal data is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Sisältää henkilötietoja
 
 Julkisivupiirustus is not stamped
   Attachment is stamped  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  False
 
 Julkisivu is marked as will publish
-  Attachment will be published  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  False
+  Attachment will be published  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  True
 
 
 Edit application document metadata
-  Toggle additional controls  not-archived-application-documents  application-documents  application-document
+  Toggle additional controls  archived-application-documents  application-documents  application-document
   Fill in archival metadata
 
 Application document group is changed
@@ -204,12 +203,6 @@ Application document group is changed
 Close application document additional controls
   Toggle additional controls  archived-application-documents  application-documents  application-document
 
-
-Select julkissivupiirustus to be archived
-  Element should be disabled  jquery=button[data-test-id=archive-selected]
-  Select attachment to be archived  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
-  # Documents cannot be archived since there is no TOJ in dev environment
-  Element should be enabled  jquery=button[data-test-id=archive-selected]
 
 
 *** Keywords ***
