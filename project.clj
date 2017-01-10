@@ -143,7 +143,6 @@
                              [lupapiste/lein-nitpicker "0.5.1"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :test-paths   ["test" "itest" "stest"]
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G" "-Dfile.encoding=UTF-8"]
                    :eastwood {:continue-on-exception true
                               :source-paths ["src"]
@@ -151,9 +150,9 @@
              :uberjar  {:main lupapalvelu.main}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
-
              :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
+             :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :java-source-paths ["java-src"]
