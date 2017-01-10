@@ -176,7 +176,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   });
 
   self.metaUpdateAllowed = function() {
-    return authModel.ok("set-attachment-meta");
+    return Boolean(authModel.ok("set-attachment-meta"));
   };
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
