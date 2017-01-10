@@ -978,9 +978,7 @@
     </table:table-row>
     <table:table-row>
      <table:table-cell table:style-name="Table2.B2" table:number-columns-spanned="2" office:value-type="string">
-      <text:h text:style-name="P22" text:outline-level="3">LPTITLE_TEXT</text:h>
-      <text:p text:style-name="P16">LPVALUE_TEXT</text:p>
-     </table:table-cell>
+      <text:h text:style-name="P22" text:outline-level="3">LPTITLE_TEXT</text:h>LPVALUE_TEXT</table:table-cell>
      <table:covered-table-cell/>
     </table:table-row>
     <table:table-row>
