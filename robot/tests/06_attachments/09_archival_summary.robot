@@ -135,8 +135,8 @@ Change attachment type
   Change type  erityissuunnitelmat.rakennesuunnitelma
 
 Type is changed
-  Attachment type group is  not-archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Erityissuunnitelmat
-  Attachment type id is  not-archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Rakennesuunnitelma
+  Attachment type group is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Erityissuunnitelmat
+  Attachment type id is  archived-post-groups  attachments.general  erityissuunnitelmat.rakennesuunnitelma  Rakennesuunnitelma
 
 
 Edit rakennesuunnitelma metadata
