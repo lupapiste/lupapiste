@@ -107,6 +107,7 @@ LUPAPISTE.AssignmentsDataProvider = function(params) {
         .success(function(response) {
           self.assignmentsCount(response.assignmentCount);
         })
+        .error(_.noop)
         .call();
     }
   }
