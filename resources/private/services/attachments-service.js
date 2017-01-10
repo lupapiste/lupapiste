@@ -35,7 +35,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
-    self.groupTypes([]);
+    self.groupTypes.reset();
   });
 
   hub.subscribe( "contextService::leave", function() {
@@ -50,10 +50,12 @@ LUPAPISTE.AttachmentsService = function() {
     disposeItems(filterSets);
     self.attachments([]);
     self.attachmentTypes([]);
+    self.attachmentTypes.reset();
     filterSets = {};
     self.tagGroups([]);
     tagGroupSets = {};
     self.groupTypes([]);
+    self.groupTypes.reset();
   }
 
   function queryData(queryName, responseJsonKey, dataSetter, params, hubParams) {
@@ -236,19 +238,19 @@ LUPAPISTE.AttachmentsService = function() {
   self.queryGroupTypes = function() {
     if (!queryData("attachment-groups", "groups", self.groupTypes)) {
       hub.subscribe("application-model-updated", function() {
-        self.groupTypes([]);
+        self.groupTypes.reset();
       }, true);
     }
   };
 
   self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
 
-  hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
+  hub.subscribe("op-description-changed", self.groupTypes.reset);
 
   self.queryAttachmentTypes = function() {
     if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
       hub.subscribe("application-model-updated", function() {
-        self.attachmentTypes([]);
+        self.attachmentTypes.reset();
       }, true);
     }
   };
