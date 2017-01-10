@@ -175,9 +175,9 @@ Julkisivupiirustus group is changed
 Close additional controls, julkisivupiirustus section is changed to archived
   Toggle additional controls  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
-Julkisivupiirustus is not archivable
+Julkisivupiirustus is archivable
   [Tags]  pdfa
-  Attachment archivability error icon is visible  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
+  Attachment is archivable  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus
 
 Julkisivupiirustus retention perioid is entered
   Attachment retention perioid is  archived-pre-groups  masto-tms  paapiirustus.julkisivupiirustus  Pysyvästi
