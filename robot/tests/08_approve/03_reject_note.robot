@@ -57,7 +57,7 @@ Sonja approves Rakennuspaikka again
   Reject note is  rakennuspaikka  Bad place
 
 Sonja rejects primary operation with note
-  Reject with note  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
+  Reject with note and lose focus  rakennuksen-muuttaminen  rakennuksen-muuttaminen  Bad operation
 
 Sonja rejects kaytto with note
   Reject with note and save  kaytto  rakennuksen-muuttaminen-kaytto  Bad usage

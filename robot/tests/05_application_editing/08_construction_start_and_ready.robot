@@ -22,6 +22,8 @@ Sonja fills in the application fields required by krysp
 Sonja submits the application, approves it and gives it a verdict
   Submit application
   Click enabled by test id  approve-application
+  Tab should be visible  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Open tab  verdict
   Submit empty verdict  verdictGiven  1
 

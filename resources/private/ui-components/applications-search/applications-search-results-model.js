@@ -31,7 +31,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   });
 
   self.columns = [
-    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "4" : "3",
+    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
                                                                      sortable: false,
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("second",  "applications.type",       {sortField: "type",

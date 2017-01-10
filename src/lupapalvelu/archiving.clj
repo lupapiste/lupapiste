@@ -268,6 +268,7 @@
             (:scale attachment) (conj {:scale (:scale attachment)})
             (tyomaasta-vastaava application) (conj {:tyomaasta-vastaava (tyomaasta-vastaava application)})
             (:closed application) (conj {:closed (ts->iso-8601-date (:closed application))})
+            (map :geometry-wgs84 (:drawings application)) (conj {:drawing-wgs84 (mapv (fn [drawing] (get-in drawing [:geometry-wgs84])) (:drawings application))})
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]

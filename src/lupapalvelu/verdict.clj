@@ -184,7 +184,7 @@
 (defn- attachment-type-from-krysp-type [type]
   (case (ss/lower-case type)
     "paatos" "paatos"
-    "lupaehto" "lupaehto"
+    "lupaehto" "muu"
     "paatosote"))
 
 (defn- content-disposition-filename
@@ -219,7 +219,7 @@
         (warnf "no valid attachment links in poytakirja, verdict-id: %s" verdict-id))
       (doall
        (for [att  attachments
-             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi} att
+             :let [{url :linkkiliitteeseen attachment-time :muokkausHetki type :tyyppi description :kuvaus} att
                    _ (debug "Download " url)
                    url-filename    (-> url (URL.) (.getPath) (ss/suffix "/"))
                    resp            (http/get url :as :stream :throw-exceptions false)
@@ -229,6 +229,7 @@
                    urlhash         (pandect/sha1 url)
                    attachment-id      urlhash
                    attachment-type    (verdict-attachment-type application (attachment-type-from-krysp-type type))
+                   contents           (or description (if (= type "lupaehto") "Lupaehto"))
                    target             {:type "verdict" :id verdict-id :urlHash pk-urlhash}
                    ;; Reload application from DB, attachments have changed
                    ;; if verdict has several attachments.
@@ -244,6 +245,7 @@
                (attachment/upload-and-attach! {:application current-application :user user}
                                               {:attachment-id attachment-id
                                                :attachment-type attachment-type
+                                               :contents contents
                                                :target target
                                                :required false
                                                :locked true
@@ -484,7 +486,7 @@
     (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
-(defn- merge-review-tasks
+(defn merge-review-tasks
   "Add review tasks with new IDs to existing tasks map"
   [from-update existing]
 

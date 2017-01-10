@@ -247,10 +247,14 @@
                     "BBOX"   "358400,6758400,409600,6809600"}
                    {"LAYERS" "lupapiste:109_kantakartta"
                     "BBOX"   "358400,6758400,409600,6809600"}
-                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
+                   #_{"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
                     "BBOX"   "208384,6715136,208640,6715392"}
-                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
-                    "BBOX"   "226816,6713856,227328,6714368"}]]
+                   #_{"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
+                    "BBOX"   "226816,6713856,227328,6714368"}
+                   {"LAYERS" "lupapiste:837_asemakaava"
+                    "BBOX" "328064,6822656,328192,6822784"}
+                   {"LAYERS" "lupapiste:837_kantakartta"
+                    "BBOX" "329088,6823552,329216,6823680"}]]
       (fact {:midje/description (get layer "LAYERS")}
         (let [request {:query-params (merge base-params layer)
                        :headers {"accept-encoding" "gzip, deflate"}
@@ -378,6 +382,7 @@
       )))
 
 (facts "Municipality number with address from kunta rest"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
   (fact "Jarvenpaa, in border of Mantsala"
     (let [x "399309.136" y "6709508.629"
           response (address-by-point-proxy {:params {:lang "fi" :x x :y y}})

@@ -29,7 +29,8 @@
             [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
-            [sade.coordinate :as coord])
+            [sade.coordinate :as coord]
+            [lupapalvelu.drawing :as draw])
   (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
@@ -2660,6 +2661,36 @@
   (mongo/update-by-query :applications
                          archival-completed-query
                          {$set {:archived.completed (System/currentTimeMillis)}}))
+
+(defn- add-wgs84-coordinates [drawing]
+  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+
+(defmigration add-wgs84-coordinates-for-drawings
+  {:apply-when (pos? (mongo/count :applications
+                                  {:drawings
+                                   {$elemMatch {$and
+                                                [{:geometry {$exists true, $ne ""}},
+                                                 {:geometry-wgs84 {$exists false}}]}}}))}
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings
+                              {$elemMatch {$and
+                                           [{:geometry {$exists true, $ne ""}},
+                                            {:geometry-wgs84 {$exists false}}]}}}))
+
+(defn- change-attachment-type [attachment]
+  (if (= (get-in attachment [:type :type-id]) "lupaehto")
+    (assoc-in attachment [:type :type-id] "muu")
+    attachment))
+
+(defmigration change-attachment-type-lupaehto-to-muu
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                  :attachments {$elemMatch {:type.type-id "lupaehto"}}}))}
+  (update-applications-array :attachments
+                             change-attachment-type
+                             {:permitType "YA"
+                              :attachments {$elemMatch {:type.type-id "lupaehto"}}}))
+
 
 ;;
 ;; ****** NOTE! ******

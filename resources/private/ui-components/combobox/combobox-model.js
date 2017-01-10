@@ -6,6 +6,10 @@
 //   list: predefined value list. Can be either array or observable
 //   array.
 //   [testId: Text input test id (combobox-input)]
+//   [enable]: Boolean or Boolean observable.
+//   [disable]: Boolean or Boolean observable.
+//   Combobox editable state is calculated from enable and disable
+//   params (default editable.)
 LUPAPISTE.ComboboxModel = function( params ) {
   "use strict";
   var self = this;

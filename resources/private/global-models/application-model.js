@@ -87,6 +87,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenComments = ko.observable();
   self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
+  self.fullyArchived = ko.observable();
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
@@ -285,6 +286,11 @@ LUPAPISTE.ApplicationModel = function() {
     repository.load(self.id());
   };
 
+  self.reloadToTab = function(tabName) {
+    self.submitErrors([]);
+    repository.load(self.id(), undefined, _.partial(self.open, tabName));
+  };
+
   self.lightReload = function() {
     repository.load(self.id(), undefined, undefined, true);
   };
@@ -375,35 +381,30 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-var checkDesigners = function(yesFn) {
-  var nonApprovedDesigners = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
-      return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
-    })
-    .map(function(docModel) {
-      var title = loc([docModel.schemaName, "_group_label"]);
-      var accordionService = lupapisteApp.services.accordionService;
-      var identifierField = accordionService.getIdentifier(docModel.docId);
-      var identifier = identifierField && identifierField.value();
-      var operation = null; // We'll assume designer is never attached to operation
-      var docData = accordionService.getDocumentData(docModel.docId); // The current data
-      var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
-      var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
-      // Escape HTML special chars
-      return "<li>" + _.escape(title + headerDescription) + "</li>";
-    })
-    .value();
+  self.nonApprovedDesigners = ko.observableArray([]);
 
-  // All designers have not been approved?
-  if (!_.isEmpty(nonApprovedDesigners)) {
-    var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
-    hub.send("show-dialog", {ltitle: "application.designers-not-approved",
-      size: "medium",
-      component: "yes-no-dialog",
-      componentParams: {text: text, yesFn: yesFn, lyesTitle: "continue", lnoTitle: "cancel"}});
-  } else {
-    yesFn();
+  function checkForNonApprovedDesigners() {
+    var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+        return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
+      })
+      .map(function(docModel) {
+        var title = loc([docModel.schemaName, "_group_label"]);
+        var accordionService = lupapisteApp.services.accordionService;
+        var identifierField = accordionService.getIdentifier(docModel.docId);
+        var identifier = identifierField && identifierField.value();
+        var operation = null; // We'll assume designer is never attached to operation
+        var docData = accordionService.getDocumentData(docModel.docId); // The current data
+        var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
+        var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
+
+        return title + headerDescription;
+      })
+      .value();
+    self.nonApprovedDesigners(nonApproved);
   }
-};
+
+  hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
+  hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
 
   self.approveApplication = function() {
     if (self.stateChanged()) {
@@ -413,7 +414,7 @@ var checkDesigners = function(yesFn) {
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
-          self.reload();
+          self.reloadToTab("info");
           if (!resp.integrationAvailable) {
             hub.send("show-dialog", {ltitle: "integration.title",
                                      size: "medium",
@@ -439,9 +440,9 @@ var checkDesigners = function(yesFn) {
         size: "medium",
         component: "yes-no-dialog",
         componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
-          yesFn: _.partial(checkDesigners, approve)}});
+          yesFn: approve}});
     } else {
-      checkDesigners(approve);
+      approve();
     }
     return false;
   };
@@ -458,8 +459,17 @@ var checkDesigners = function(yesFn) {
         .processing(self.processing)
         .call();
     };
-    checkDesigners(sendParties);
 
+    // All designers have not been approved?
+    if (!_.isEmpty(self.nonApprovedDesigners())) {
+      var text = loc("application.designers-not-approved-help") + "<ul><li>" + self.nonApprovedDesigners().join("</li><li>") + "</li></ul>";
+      hub.send("show-dialog", {ltitle: "application.designers-not-approved",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {text: text, yesFn: sendParties, lyesTitle: "continue", lnoTitle: "cancel"}});
+    } else {
+      sendParties();
+    }
   };
 
   self.approveExtension = function() {

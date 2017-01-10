@@ -279,6 +279,11 @@
         _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
+    self.tosFunctionExists = self.disposedPureComputed(function() {
+      return lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
+        _.some(params.application.tosFunction());
+    });
+
     self.selectAll = function() {
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);

@@ -1,8 +1,20 @@
-*** Settings ***
+d*** Settings ***
 
 Documentation  Attachment related resources
 
 *** Keywords ***
+
+Rollup open
+  [Arguments]  ${name}
+  jQuery should match X times  rollup-status-button[data-test-name='${name}'] button.rollup-button.toggled  1
+
+Rollup closed
+  [Arguments]  ${name}
+  jQuery should match X times  rollup-status-button[data-test-name='${name}'] button.rollup-button.toggled  0
+
+Toggle rollup
+  [Arguments]  ${name}
+  Scroll and click  rollup-status-button[data-test-name='${name}'] button.rollup-button
 
 Rollup approved
   [Arguments]  ${name}

@@ -33,7 +33,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.drawing :as draw]))
 
 ;; Notifications
 
@@ -348,7 +349,7 @@
   (when (sequential? drawings)
     (update-application command
                         {$set {:modified created
-                               :drawings drawings}})))
+                               :drawings (map (fn [drawing] (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing))) drawings)}})))
 
 (defn- make-marker-contents [id lang {:keys [location] :as app}]
   (merge

@@ -972,8 +972,14 @@ Submit application error should be
   ${attrValue}=  Get Element Attribute  xpath=(//div[@data-test-id='submit-errors-container']//span)@data-submit-error
   Should Be Equal As Strings  ${errorText}  ${attrValue}
 
+Approve application no dialogs
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
+  Wait until  Application state should be  sent
+
 Approve application ok
-  Click enabled by test id  approve-application
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
   Confirm ok dialog
   Wait until  Application state should be  sent
 

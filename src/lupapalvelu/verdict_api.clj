@@ -165,7 +165,7 @@
                                  :tasks {:id {$in task-ids}}}}
                     (when step-back? {$set {:state (if (and sent (sm/valid-state? application :sent)) :sent :submitted)}}))]
       (update-application command updates)
-      (attachment/delete-attachments! application (map :id attachments))
+      (attachment/delete-attachments! application (remove nil? (map :id attachments)))
       (appeal-common/delete-by-verdict command verdictId)
       (child-to-attachment/delete-child-attachment application :verdicts verdictId)
       (when step-back?

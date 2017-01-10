@@ -6,7 +6,7 @@
                                                                      :korjausrakentamisen_energiaselvitys
                                                                      :lampohavioiden_tasauslaskelma
                                                                      :tiiveysmittausraportti]
- {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} [:iv_semapiirustus
+ {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} [:iv_asemapiirustus
                                                               :iv_koneen_energiatehokkuuslaskelmat
                                                               :iv_laiteluettelo
                                                               :iv_leikkauspiirustus
