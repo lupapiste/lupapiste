@@ -3,7 +3,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.attachment.type :as att-type]))
 
-(def attachment-groups [:parties :building-site :operation :reports :technical-reports])
+(def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
 (def all-group-tags (cons general-group-tag attachment-groups))
 
