@@ -483,23 +483,20 @@
     (and (every? empty? (map #(get-in katselmus-data [% :value]) top-keys))
          (every? empty? (map #(get-in katselmus-data [:huomautukset % :value]) h-keys)))))
 
-(defn- reviews-have-same-type-other-than-muu-katselmus? [wrapped-a wrapped-b]
-  (let [a (tools/unwrapped wrapped-a)
-        b (tools/unwrapped wrapped-b)
-        laji #(-> % :data :katselmuksenLaji)
-        la (laji a)
-        lb (laji b)]
-    (and la (= la lb) (not= laji "muu katselmus"))))
+(defn- katselmuksen-laji [t]
+  (-> t tools/unwrapped :data :katselmuksenLaji))
 
-(defn- reviews-have-same-name-and-type? [wrapped-a wrapped-b]
-  (let [a (tools/unwrapped wrapped-a)
-        b (tools/unwrapped wrapped-b)
-        na (:taskname a)
-        nb (:taskname b)
-        laji #(-> % :data :katselmuksenLaji)
-        la (laji a)
-        lb (laji b)]
-    (and na (= na (or nb lb)) la (= la lb))))
+(defn- reviews-have-same-type-other-than-muu-katselmus? [a b]
+  (let [la (katselmuksen-laji a)
+        lb (katselmuksen-laji b)]
+    (and la (= la lb) (not= la "muu katselmus"))))
+
+(defn- reviews-have-same-name-and-type? [a b]
+  (let [name-a (:taskname a)
+        name-b (:taskname b)
+        la (katselmuksen-laji a)
+        lb (katselmuksen-laji a)]
+    (and name-a (= name-b (or name-b lb)) la (= la lb))))
 
 (defn- bg-id [task]
   (get-in task [:data :muuTunnus :value]))

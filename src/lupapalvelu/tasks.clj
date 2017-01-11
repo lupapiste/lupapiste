@@ -209,7 +209,6 @@
 
 
 (defn task-doc-validation [schema-name doc]
-  (println "schema-name" schema-name doc)
   (let [schema (schemas/get-schema task-schemas-version schema-name)
         info   (model/document-info doc schema)]
     (model/validate-fields nil info nil (:data doc) [])))
