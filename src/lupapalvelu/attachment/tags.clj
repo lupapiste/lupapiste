@@ -56,10 +56,11 @@
   (when ((set application-group-types) (tag-by-group-type attachment))
     application-group-type-tag))
 
-(defn- tag-by-operations [{op :op :as attachment}]
-  (->> (if (map? op) [op] op)
-       (map (comp op-id->tag :id))
-       not-empty))
+(defn- tag-by-operation [{op :op :as attachment}]
+  (->> (cond (map? op) (:id op)
+             (= (count op) 1) (get-in op [0 :id])
+             :else nil)
+       op-id->tag))
 
 (defn tag-by-type [{op :op :as attachment}]
   (or (att-type/tag-by-type attachment)
@@ -71,12 +72,11 @@
   (->> ((juxt tag-by-applicationState
               tag-by-group-type
               tag-by-application-group-types
-              tag-by-operations
+              tag-by-operation
               tag-by-notNeeded
               tag-by-type
               tag-by-file-status)
         attachment)
-       (reduce #((if (sequential? %2) concat conj) %1 %2) [])
        (remove nil?)))
 
 (defn- filter-tag-group-attachments [attachments [tag & _]]

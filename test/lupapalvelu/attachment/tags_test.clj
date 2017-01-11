@@ -33,7 +33,7 @@
     (attachment-tags {:groupType "operation" :op {:id "someOpId"}}) => (just #{:preVerdict :needed :operation "op-id-someOpId" :other} :in-any-order :gaps-ok))
 
   (fact "multiple operations"
-    (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation "op-id-someOpId" "op-id-otherOpId" :other} :in-any-order :gaps-ok))
+    (attachment-tags {:groupType "operation" :op [{:id "someOpId"} {:id "otherOpId"}]}) => (just #{:preVerdict :needed :multioperation :other} :in-any-order :gaps-ok))
 
   (fact "file"
     (attachment-tags {:latestVersion {:fileId "someFileId"}}) => (just #{:preVerdict :application :general :needed :hasFile} :in-any-order :gaps-ok))
