@@ -95,3 +95,13 @@
         [unchanged added-or-updated] (merge-review-tasks mutated reviews-fixture)]
     unchanged => (just (util/drop-nth 2 mutated) :in-any-order)
     added-or-updated => (just (nth mutated 2))))
+
+(fact "illegal review type causes failure"
+      (let [mutated (-> (into [] reviews-fixture)
+                        (assoc-in [2 :data :katselmus :pitoPvm :value] "2")
+                        (assoc-in [2 :data :katselmuksenLaji :value] "13.05.2016"))
+            [_ added-or-updated] (merge-review-tasks mutated reviews-fixture)
+            errors (doall (map #(tasks/task-doc-validation (-> % :schema-info :name) %) added-or-updated))]
+        added-or-updated => (just (nth mutated 2))
+        (count errors) => 1
+        (-> errors flatten first) => (contains {:result [:warn "illegal-value:select"]})))
