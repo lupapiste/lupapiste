@@ -77,9 +77,7 @@ LUPAPISTE.AttachmentBatchModel = function(params) {
 
       var contents = service.contentsData( data );
       contentsList( contents.list );
-      if( !_.trim( contentsValue())) {
-        contentsValue( contents.defaultValue);
-      }
+      contentsValue( contents.defaultValue);
       grouping({groupType: metadata.grouping === "operation"
                 ? "operation-" + _.find (service.groupTypes(),
                                          {groupType: "operation"}).id
