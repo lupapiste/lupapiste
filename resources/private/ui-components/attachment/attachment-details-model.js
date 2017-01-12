@@ -175,11 +175,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  self.operationSelectorEditable = self.disposedPureComputed(function() {
-    return _.get(self.application, ["primaryOperation", "attachment-op-selector"]) && editable();
-  });
-
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
+
+  self.operationSelectorDisabled = self.disposedPureComputed(function() {
+    return !self.metaUpdateAllowed() || !_.get(self.application, ["primaryOperation", "attachment-op-selector"]);
+  });
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
 

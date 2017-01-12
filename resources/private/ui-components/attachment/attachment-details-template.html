@@ -215,11 +215,9 @@
               </div>
               <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.operation'"></label>
-                <div data-bind="component: {name: 'attachment-group-selector',
-                                            params: { legacy: false,
-                                                      authModel: attachment().authModel,
-                                                      editable: operationSelectorEditable,
-                                                      currentGroup: attachment().group }}"></div>
+                <div data-bind="component: { name: 'attachment-group-autocomplete',
+                                             params: { disable: operationSelectorDisabled,
+                                                       group: attachment().group } }"></div>
               </div>
 
               <div class="attachment-details-toggles">

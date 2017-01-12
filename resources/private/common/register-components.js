@@ -142,6 +142,7 @@ jQuery(document).ready(function() {
     {name: "attachments-operation-buttons"},
     {name: "attachment-type-group-autocomplete"},
     {name: "attachment-type-autocomplete"},
+    {name: "attachment-group-autocomplete"},
     {name: "attachments-require"},
     {name: "attachments-require-bubble"},
     {name: "attachment-group-selector"},

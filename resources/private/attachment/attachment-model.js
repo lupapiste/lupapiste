@@ -47,10 +47,9 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
   };
 
   function buildGroup(data) {
-    var group = {groupType: _.get(data, "op.id") ? "operation" : data.groupType,
-                 id: _.get(data, "op.id"),
-                 name: _.get(data, "op.name")};
-    return _.isEmpty(_.filter(group)) ? null : group;
+    var group = { groupType: _.isEmpty(data.op) ? data.groupType : "operation",
+                  operations: _.isPlainObject(data.op) ? [data.op] : data.op };
+    return group.groupType ? group : null;
   }
 
   function buildVisibility(data) {
@@ -90,13 +89,13 @@ LUPAPISTE.AttachmentModel = function(attachmentData, authModel) {
 
   // Helper string to subscribe changes in op and groupType
   self.groupString = self.disposedComputed(function() {
-    return _.filter([util.getIn(self.group(), ["groupType"]), util.getIn(self.group(), ["id"])], _.isString).join("-");
+    return _(util.getIn(self.group, ["operations"])).map("id").unshift(util.getIn(self.group, ["groupType"])).filter().join("-");
   });
 
   self.registerApplyableSubscription(self.groupString, function(val) {
     self.processing(true);
-    self.op(_.omit(val, "groupType"));
-    self.groupType(_.get(val, "groupType"));
+    self.op(util.getIn(self.group, "operations"));
+    self.groupType(util.getIn(self.group, "groupType"));
     service.setMeta(self.id, {group: !_.isEmpty(val) ? self.group() : null}, {field: "group"});
   });
 
