@@ -608,8 +608,7 @@
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions,
       sidePanelService: lupapisteApp.services.sidePanelService,
-      calendarConfig: calendarConfigModel,
-      openRequiredFieldSummaryTab: function() { selectTab("requiredFieldSummary");}
+      calendarConfig: calendarConfigModel
     };
 
     $("#application").applyBindings(bindings);

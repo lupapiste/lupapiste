@@ -753,6 +753,11 @@ LUPAPISTE.ApplicationModel = function() {
     hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"nextTab"});
   };
 
+  // called from application actions
+  self.goToApplicationApproval = function() {
+    self.targetTab({tab:"requiredFieldSummary",id:"applicationTabs"});
+  };
+
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
     AccordionState.set( fieldInfo.document.id, true );
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
