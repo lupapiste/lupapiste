@@ -3,6 +3,10 @@ LUPAPISTE.InspectionSummaryTemplatesListModel = function() {
 
   var self = this;
 
-  self.addInspectionSummary = function() {
+  self.newTemplateBubbleVisible = ko.observable(false);
+
+  self.toggleNewTemplateBubble = function() {
+    var old = self.newTemplateBubbleVisible();
+    self.newTemplateBubbleVisible(!old);
   };
 };

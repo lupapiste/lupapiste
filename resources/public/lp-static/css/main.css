@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1483990265660');
+@import url('main-blessed1.css?z=1484321055397');
 
 /* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .table-reject-note-editor:after {
@@ -4465,6 +4465,11 @@ ul.tabs {
 /* line 124, ../../../private/common-html/sass/partials/_bubble.scss */
 .operation-bubble {
   margin-top: 24px;
+  max-width: 50%;
+}
+
+/* line 129, ../../../private/common-html/sass/partials/_bubble.scss */
+.inspection-template-bubble {
   max-width: 50%;
 }
 
