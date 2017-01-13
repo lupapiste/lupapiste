@@ -25,6 +25,10 @@ LUPAPISTE.AttachmentsRequireModel = function(params) {
     self.selectedTypes.splice(ind(),1);
   };
 
+  self.groupSelectorDisabled = self.disposedPureComputed(function() {
+    return !lupapisteApp.models.applicationAuthModel.ok("set-attachment-group-enabled");
+  });
+
   self.subscribeChanged(self.selectedTypes, function(value, oldValue) {
     if (_.isEmpty(value)) {
       // Reset selected group to general when list is emptied

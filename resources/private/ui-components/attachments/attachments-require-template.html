@@ -26,7 +26,8 @@
     <div>
       <label data-bind="ltext: 'attachment.label.operation'"></label>
       <div data-bind="component: { name: 'attachment-group-autocomplete',
-                                   params: { group: selectedGroup } }"></div>
+                                   params: { disable: groupSelectorDisabled,
+                                             group: selectedGroup } }"></div>
     </div>
 
   </div>
