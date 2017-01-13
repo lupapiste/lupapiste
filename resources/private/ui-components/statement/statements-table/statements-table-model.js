@@ -7,6 +7,7 @@ LUPAPISTE.StatementsTableModel = function(params) {
   self.authorization = params.authModel;
   self.localisationKeys = params.localisationKeys;
 
+  var user = lupapisteApp.models.currentUser;
 
   self.statementIdsWithAttachments = ko.pureComputed(function() {
     var statementIdsWithAttachments = [];
@@ -28,18 +29,16 @@ LUPAPISTE.StatementsTableModel = function(params) {
     return _.includes(["given", "replyable", "replied"], util.getIn(statement, ["state"]));
   };
 
-  var isAuthorityOrStatementOwner = function(statement) {
-    var currentUser = lupapisteApp.models.currentUser;
-    return _.includes(util.getIn(currentUser, ["orgAuthz", self.application.organization()]), "authority")
-      || util.getIn(statement, ["person", "userId"]) === currentUser.id();
+  var isStatementOwner = function(statement) {
+    return util.getIn(statement, ["person", "userId"]) === user.id();
   };
 
   self.isRemovable = function(statement) {
-    return isAuthorityOrStatementOwner(statement) && !self.isGiven(statement);
+    return user.isAuthority()  && !self.isGiven(statement);
   };
 
   self.canAccessStatement = function(statement) {
-    return self.isGiven(statement) || isAuthorityOrStatementOwner(statement);
+    return self.isGiven(statement) || user.isAuthority() || isStatementOwner(statement);
   };
 
   self.isStatementOverDue = function(statement) {
