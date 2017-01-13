@@ -507,9 +507,7 @@
   (and (tasks/task-is-review? task) (not (empty-review-task? task)) (not (ss/blank? (bg-id task)))))
 
 (defn- merge-review-tasks
-  ; Paluuarvona kaksialkoinen vektori:
-  ; [0]: Ne olemassa olevat taskit, joille ei löydy päivitetty versiota taustajärjestelmäsanomasta
-  ; [1]: Ne katselmukset taustajärjestelmäsanomasta, jotka ovat kokonaan uusia tai ylikirjoittavat olemassaolevia katselmustietoja
+  "Returns a vector with two values: 0: Existing tasks left unchanged, 1: Completely new and updated existing review tasks."
   [from-update from-mongo]
   (debugf "merge-review-tasks loop starts: from-update %s from-mongo %s" (count from-update) (count from-mongo))
   (loop [from-update from-update

@@ -44,21 +44,21 @@
          :pitoPvm 1466467200000}
         {:vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "muu katselmus",
-         :huomautukset [{:huomautus {:kuvaus "Oli vähän vielä kesken."}}],
+         :huomautukset [{:huomautus {:kuvaus "Oli kesken."}}],
          :osittainen "pidetty",
-         :tarkastuksenTaiKatselmuksenNimi "Vesi- ja viemärilaitteiden katselmus",
+         :tarkastuksenTaiKatselmuksenNimi "Vesi- ja viem\u00e4rilaitteiden katselmus",
          :pitoPvm 1476748800000}
         {:vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "muu katselmus",
-         :huomautukset [{:huomautus {:kuvaus "Ulkoviemärit ok."}}],
+         :huomautukset [{:huomautus {:kuvaus "Ulkoviem\u00e4rit ok."}}],
          :osittainen "pidetty",
-         :tarkastuksenTaiKatselmuksenNimi "Vesi- ja viemärilaitteiden katselmus",
+         :tarkastuksenTaiKatselmuksenNimi "Vesi- ja viem\u00e4rilaitteiden katselmus",
          :pitoPvm 1463011200000}
         {:vaadittuLupaehtonaKytkin true,
          :katselmuksenLaji "osittainen loppukatselmus",
          :huomautukset [{:huomautus {:kuvaus "kiukaan kaide"}}],
          :osittainen "osittainen",
-         :tarkastuksenTaiKatselmuksenNimi "Käyttöönottokatselmus",
+         :tarkastuksenTaiKatselmuksenNimi "K\u00e4ytt\u00f6\u00f6nottokatselmus",
          :pitoPvm 1477526400000}
         {:vaadittuLupaehtonaKytkin true,
          :katselmuksenLaji "loppukatselmus",
@@ -66,19 +66,19 @@
          :tarkastuksenTaiKatselmuksenNimi "Loppukatselmus"}
         {:vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "muu katselmus",
-         :huomautukset [{:huomautus {:kuvaus "Rakennustyön aikana on pidettävä rakennustyön tarkastusasiakirjaa sekä laadittava rakennuksen käyttö- ja huolto-ohje"}}],
+         :huomautukset [{:huomautus {:kuvaus "Rakennusty\u00f6n aikana on pidett\u00e4v\u00e4 rakennusty\u00f6n tarkastusasiakirjaa sek\u00e4 laadittava rakennuksen k\u00e4ytt\u00f6- ja huolto-ohje"}}],
          :osittainen "pidetty",
          :tarkastuksenTaiKatselmuksenNimi "Lupaehdon valvonta"}
         {:pitaja "E",
          :vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "muu katselmus",
-         :huomautukset [{:huomautus {:kuvaus "Sähkötarkastuspöytäkirja esitettävä rakennusvalvontaviranomaiselle ennen käyttöönottoa"}}],
+         :huomautukset [{:huomautus {:kuvaus "S\u00e4hk\u00f6tarkastusp\u00f6yt\u00e4kirja esitett\u00e4v\u00e4 rakennusvalvontaviranomaiselle ennen k\u00e4ytt\u00f6\u00f6nottoa"}}],
          :osittainen "pidetty",
          :tarkastuksenTaiKatselmuksenNimi "Lupaehdon valvonta"}
         {:pitaja "T",
          :vaadittuLupaehtonaKytkin false,
          :katselmuksenLaji "muu katselmus",
-         :huomautukset [{:huomautus {:kuvaus "päivitetty energiaselvitys"}}],
+         :huomautukset [{:huomautus {:kuvaus "p\u00e4ivitetty energiaselvitys"}}],
          :osittainen "pidetty",
          :tarkastuksenTaiKatselmuksenNimi "Lupaehdon valvonta",
          :pitoPvm 1463097600000}]))
