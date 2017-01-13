@@ -6,8 +6,8 @@
             [sade.util :refer [future* to-local-date fn->]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.email :as email]
             [sade.util :as util]
+            [lupapalvelu.email :as email]
             [lupapalvelu.i18n :refer [loc] :as i18n]
             [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]))

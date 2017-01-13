@@ -5,11 +5,11 @@
             [clojure.string :as s]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
-            [sade.email :as email]
             [sade.util :as util]
             [sade.validators :as v]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
+            [lupapalvelu.email :as email]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc localize]]))
 
