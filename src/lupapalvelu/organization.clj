@@ -187,7 +187,6 @@
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([organization permit-type]
    (let [krysp-config (get-in organization [:krysp (keyword permit-type)])
-         crypto-key   (-> (env/value :backing-system :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
          crypto-iv    (:crypto-iv krysp-config)
          password     (when-let [password (and crypto-iv (:password krysp-config))]
                         (decode-credentials password crypto-iv))

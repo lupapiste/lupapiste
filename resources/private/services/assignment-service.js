@@ -8,10 +8,23 @@ LUPAPISTE.AssignmentService = function(applicationAuthModel) {
 
   var _data = ko.observableArray([]);
 
+  function targetTab(assignment) {
+    switch (assignment.target.group) {
+      case "parties":
+        return "parties";
+      case "attachments":
+        return "attachments";
+      case "documents":
+        return "info";
+    }
+    return "info";
+  }
+
   function enrichAssignment(assignment) {
     return _.merge(assignment,
                    {createdState: _.find(assignment.states, function(state) { return state.type === "created"; }),
                     currentState: _.maxBy(assignment.states, "timestamp"),
+                    targetTab: targetTab(assignment),
                     edit: ko.observable(false)});
   }
 

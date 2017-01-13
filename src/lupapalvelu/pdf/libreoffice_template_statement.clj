@@ -27,14 +27,12 @@
                                  "LPVALUE_STATUS" (if (s/blank? (:status statement)) empty-text (xml-escape (:status statement)))
 
                                  "LPTITLE_TEXT" (i18n/localize lang "statement.statement.text")
-                                 "LPVALUE_TEXT" (if (s/blank? (:text statement)) empty-text (xml-escape (:text statement)))
+                                 "LPVALUE_TEXT" (->> (if (s/blank? (:text statement)) empty-text (:text statement))
+                                                     (template/text->libre-paragraphs))
 
                                  "LPTITLE_CONTENT" (i18n/localize lang "application.statement.desc")
                                  "LPVALUE_CONTENT" (xml-escape (get-in statement [:person :text]))
 
                                  "LPTITLE_ATTACHMENTS" (i18n/localize lang "verdict.attachments")
-                                 "LPVALUE_ATTACHMENTS" (xml-escape (str (count (child-attachments application :statements id)) " " (i18n/localize lang "unit.kpl")))
-
-                                 ;;(i18n/localize "add-statement-giver-maaraaika") (str "" (or (util/to-local-date dueDate) "-"))
-                                 ;; (i18n/localize "statement.reply.text") (if (:nothing-to-add reply) (loc "statement.nothing-to-add.label") (:text reply))
-                                 ))))
+                                 "LPVALUE_ATTACHMENTS" (xml-escape (str (count (child-attachments application :statements id)) " " (i18n/localize lang "unit.kpl"))))
+                               :pre-escaped)))

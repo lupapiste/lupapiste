@@ -2678,7 +2678,33 @@
                                            [{:geometry {$exists true, $ne ""}},
                                             {:geometry-wgs84 {$exists false}}]}}}))
 
+(defn- change-attachment-type [attachment]
+  (if (= (get-in attachment [:type :type-id]) "lupaehto")
+    (assoc-in attachment [:type :type-id] "muu")
+    attachment))
 
+(defmigration change-attachment-type-lupaehto-to-muu
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                  :attachments {$elemMatch {:type.type-id "lupaehto"}}}))}
+  (update-applications-array :attachments
+                             change-attachment-type
+                             {:permitType "YA"
+                              :attachments {$elemMatch {:type.type-id "lupaehto"}}}))
+
+(defn- set-attachment-groupType-and-op-nil [attachment]
+  (assoc attachment
+         :groupType nil
+         :op nil))
+
+(let [attachments-with-groupType-or-op-match
+      {$and [{:permitType "YA"}
+             {$or [{:attachments {$elemMatch {:groupType {$ne nil}}}}
+                   {:attachments {$elemMatch {:op {$ne nil}}}}]}]}]
+  (defmigration remove-groupType-and-op-from-YA-applications
+    {:apply-when (pos? (mongo/count :applications attachments-with-groupType-or-op-match))}
+    (update-applications-array :attachments
+                               set-attachment-groupType-and-op-nil
+                               attachments-with-groupType-or-op-match)))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

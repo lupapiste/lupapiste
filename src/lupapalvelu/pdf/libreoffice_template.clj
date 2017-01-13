@@ -11,18 +11,19 @@
             [lupapalvelu.i18n :as i18n]
             [clojure.xml :as xml]
             [clojure.java.io :as io]
-            [clojure.string :as s]))
+            [clojure.string :as s])
+  (:import [java.io Writer]))
 
 (defn xml-escape [text]
   (sx/escape-xml (str text)))
-;;(s/escape (str text) {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
-(defn replace-user-field [line data]
-  (let [match (re-find (re-matcher #"(\s*?)<text:user-field-decl office:value-type=\"(.*?)\" office:(.*?)value=\"(.*?)\" text:name=\"(.*?)\"\/>" line))
-        key (nth match 5)]
-    (if (and match (contains? data key))
-      (str (nth match 1) "<text:user-field-decl office:value-type=\"" (nth match 2) "\" office:" (nth match 3) "value=\"" (xml-escape (get data key)) "\" text:name=\"" key "\"/>")
-      line)))
+(defn text->libre-paragraphs [text]
+  (-> (xml-escape text)
+      (s/split #"\n")
+      (->> (map s/trim)
+           (remove s/blank?)
+           (map #(str "<text:p text:style-name=\"P16\">" % "</text:p>")))
+      (s/join)))
 
 (defn xml-table-row [& cols]
   (with-out-str (xml/emit-element {:tag     :table:table-row
@@ -31,8 +32,17 @@
                                                             :content (map (fn [p] {:tag     :text:p
                                                                                    :content [(xml-escape p)]}) (s/split val #"\n"))}) cols)})))
 ;; Deprecated, use User Fields in templates
-(defn- replace-text [line field value]
-  (s/replace line field (xml-escape (str value))))
+(defn- replace-text [line field value pre-escaped?]
+  (->> (if pre-escaped?
+         (str value)
+         (xml-escape (str value)))
+       (s/replace line field)))
+
+(defn replace-user-field [line data]
+  (let [match (re-find (re-matcher #"(\s*?)<text:user-field-decl office:value-type=\"(.*?)\" office:(.*?)value=\"(.*?)\" text:name=\"(.*?)\"\/>" line))
+        key (nth match 5)]
+    (when (and match (contains? data key))
+      (str (nth match 1) "<text:user-field-decl office:value-type=\"" (nth match 2) "\" office:" (nth match 3) "value=\"" (xml-escape (get data key)) "\" text:name=\"" key "\"/>"))))
 
 (defn- localized-text [lang value]
   (if (nil? value) "" (xml-escape (i18n/localize lang value))))
@@ -78,23 +88,32 @@
    "LPATITLE_STATE"        (localized-text lang "application.export.state")
    "LPAVALUE_STATE"        (localized-text lang (:state application))})
 
-(defn- write-line [line data ^java.io.Writer wrtr]
-  (.write wrtr (str (reduce (fn [s [k v]] (if (s/includes? s (str ">" k "<")) (replace-text s k v) (replace-user-field s data))) line data) "\n")))
+(defn- write-line [template-line data ^Writer writer pre-escaped?]
+  (-> (or (replace-user-field template-line data)
+          (reduce
+            (fn [modified-line [k v]]
+              (if (s/includes? modified-line (str ">" k "<"))
+                (replace-text modified-line k v pre-escaped?)
+                modified-line))
+            template-line
+            data))
+      (str "\n")
+      (->> (.write writer))))
 
 (defn- get-table-name [line] (nth (re-find #"<table:table table:name=\"(.*?)\"" line) 1))
 
-(defn- write-table! [^java.io.Reader rdr ^java.io.Writer wrtr table-rows fields]
+(defn- write-table! [^java.io.Reader rdr ^Writer wrtr table-rows fields]
   (doseq [line (take-while (fn [line] (not (s/includes? line "</table:table-header-rows>"))) (line-seq rdr))]
-    (write-line line fields wrtr)
+    (write-line line fields wrtr false)
     (when-let [table-rows2 (get fields (get-table-name line))]
       (write-table! rdr wrtr table-rows2 fields)))
-  (write-line "      </table:table-header-rows>" fields wrtr)
+  (write-line "      </table:table-header-rows>" fields wrtr false)
   (doseq [row table-rows]
     (.write wrtr (str (apply xml-table-row row) "\n")))
 
   ;; advance reader past rows we want to skip
   (doseq [_ (take-while (fn [line] (not (s/includes? line "</table:table>"))) (line-seq rdr))])
-  (write-line "</table:table>" fields wrtr))
+  (write-line "</table:table>" fields wrtr false))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
@@ -142,10 +161,10 @@
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
         (s/trim (str (:value first-name) " " (:value last-name)))))))
 
-(defn create-libre-doc [template file fields]
+(defn create-libre-doc [template file fields & [pre-escaped?]]
   (with-open [wrtr (io/writer file :encoding "UTF-8" :append true)
               rdr (io/reader template)]
     (doseq [line (line-seq rdr)]
-      (write-line line fields wrtr)
+      (write-line line fields wrtr pre-escaped?)
       (when-let [table-rows (get fields (get-table-name line))]
         (write-table! rdr wrtr table-rows fields)))))

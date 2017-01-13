@@ -80,19 +80,20 @@ Fill type
   Grouping is  2  Osapuolet
   Grouping is  3  Osapuolet
 
-Contents have not changed for non-empties
+Contents have changed too
   Contents is  0  CV
-  Contents is  1  Paloturvallisuuden perustietolomake
+  Contents is  1  CV
   Contents is  2  CV
   Contents is  3  CV
   Test id enabled  batch-ready
 
 Fill contents
+  Set contents  1  New contents
   Fill down  contents-1
   Contents is  0  CV
-  Contents is  1  Paloturvallisuuden perustietolomake
-  Contents is  2  Paloturvallisuuden perustietolomake
-  Contents is  3  Paloturvallisuuden perustietolomake
+  Contents is  1  New contents
+  Contents is  2  New contents
+  Contents is  3  New contents
 
 Fill grouping
   Select grouping  2  Yleisesti hankkeeseen
@@ -279,6 +280,10 @@ Select type
 Type is
   [Arguments]  ${index}  ${type}
   Wait until  Element text should be  jquery=div.batch-autocomplete[data-test-id=batch-type-${index}] span.caption  ${type}
+
+Set contents
+  [Arguments]  ${index}  ${value}
+  Fill test id  batch-contents-${index}  ${value}
 
 Contents is
   [Arguments]  ${index}  ${value}

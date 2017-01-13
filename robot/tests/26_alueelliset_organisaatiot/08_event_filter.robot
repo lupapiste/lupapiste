@@ -28,8 +28,9 @@ Olli-ya prepares warranty application
   Go to page  applications
   Open application  ${appname1}  564-423-2-162
   Submit application
-  Click enabled by test id  approve-application
-  Confirm notification dialog
+  Open tab  requiredFieldSummary
+  Click enabled by test id  approve-application-summaryTab
+  Confirm notification dialog  # taustajärjestelmäsiirto ei ole käytettävissä -dialogi
   Open tab  verdict
   Submit empty verdict  verdictGiven  1
 

@@ -55,7 +55,7 @@
 (def- printable-group-types #{:group :table})
 (defn- is-printable-group-type [schema] (printable-group-types (:type schema)))
 
-(def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup})
+(def- field-types #{:string :checkbox :select :date :text :hetu :radioGroup :time})
 (defn- is-field-type [schema] (and (not (:hidden schema)) (field-types (:type schema))))
 
 (declare collect-groups)
@@ -254,7 +254,7 @@
         (loc "task-katselmus.rakennus.tila.kayttoonottava") (if (get-in v [:tila :kayttoonottava :value]) (loc "yes") (loc "no"))
         (loc "task-katselmus.rakennus.tila.tila._group_label") (get-in v [:tila :tila :value]))) rakennus))
 
-(defn collect-task-fields [tasks attachment-count]
+(defn collect-task-fields [tasks attachment-count app]
   (map
     (fn [{:keys [duedate taskname closed created state schema-info source assignee data]}]
       (let [i18n-prefix (:i18nprefix schema-info)
@@ -283,7 +283,8 @@
           (loc "task-katselmus.katselmus.poikkeamat") poikkeamat
           (loc "task-katselmus.katselmus.tila._group_label") tila
           (loc "osapuoli.patevyys.Liiteet") (str attachment-count)
-          :rakennus (collect-rakennus rakennus))))
+          :rakennus (collect-rakennus rakennus)
+          :permit-type (:permitType app))))
     tasks))
 
 (defn- collect-export-data
@@ -490,18 +491,22 @@
 (defn- render-tasks [fields]
   (let [title (loc "application.building")
         empty (loc "ei-tiedossa")
-        buildings (:rakennus fields)]
-    `[~@(render-fields (take 12 fields))
-      [:pagebreak]
-      ~@(document-section-header (loc "application.building"))
-      [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
-       ~@(map (fn [rak] `[[:pdf-cell
-                           [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
-                            [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~title]]]
-                            [[:pdf-cell {:border false}
-                              ~@(render-fields rak)]]]]]) buildings)
-       [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~(if (empty? buildings) empty "")]]]
-       ]]))
+        buildings (:rakennus fields)
+        permit-type (:permit-type fields)]
+    (if (not (#{:YA} (keyword permit-type)))
+      `[~@(render-fields (take 12 fields))
+        [:pagebreak]
+          ~@(document-section-header (loc "application.building"))
+          [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
+           ~@(map (fn [rak] `[[:pdf-cell
+                               [:pdf-table {:border false :bounding-box [1 1] :cell-border false} [1]
+                                [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~title]]]
+                                [[:pdf-cell {:border false}
+                                  ~@(render-fields rak)]]]]]) buildings)
+           [[:pdf-cell {:border false} [:paragraph {:style :bold :size 9} ~(if (empty? buildings) empty "")]]]]
+        ]
+      `[~@(render-fields (take 12 fields))]
+    )))
 
 (defn- child-renderer [type]
   (cond
@@ -532,9 +537,10 @@
           child-data (cond
                        (= child-type :statements) (collect-statement-fields child)
                        (= child-type :neighbors) (collect-neighbour-fields child)
-                       (= child-type :tasks) (collect-task-fields child (task-attachment-count app (first child)))
+                       (= child-type :tasks) (collect-task-fields child (task-attachment-count app (first child)) app)
                        (= child-type :verdicts) nil
-                       :else (collect-documents app))]
+                       :else (collect-documents app))
+          permit-type (:permitType app)]
       ; Below, the quote - splice-unquote -syntax (i.e. `[~@(f x y)]) "unwraps" the vector returned by each helper
       ; function into the body of the literal vector defined here.
       ; E.g. if (defn x [] [3 4]) then:

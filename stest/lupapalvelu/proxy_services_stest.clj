@@ -247,10 +247,14 @@
                     "BBOX"   "358400,6758400,409600,6809600"}
                    {"LAYERS" "lupapiste:109_kantakartta"
                     "BBOX"   "358400,6758400,409600,6809600"}
-                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
+                   #_{"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Velkua"
                     "BBOX"   "208384,6715136,208640,6715392"}
-                   {"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
-                    "BBOX"   "226816,6713856,227328,6714368"}]]
+                   #_{"LAYERS" "lupapiste:Naantali_Asemakaavayhdistelma_Naantali"
+                    "BBOX"   "226816,6713856,227328,6714368"}
+                   {"LAYERS" "lupapiste:837_asemakaava"
+                    "BBOX" "328064,6822656,328192,6822784"}
+                   {"LAYERS" "lupapiste:837_kantakartta"
+                    "BBOX" "329088,6823552,329216,6823680"}]]
       (fact {:midje/description (get layer "LAYERS")}
         (let [request {:query-params (merge base-params layer)
                        :headers {"accept-encoding" "gzip, deflate"}
@@ -315,10 +319,10 @@
                  :headers {"accept-encoding" "gzip, deflate"}}]
     (wfs/raster-images request "plandocument") => http200?))
 
-#_(facts "Get address from Turku"
-  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://kartta.kuopio.fi/TeklaOGCWeb/wfs.ashx"})
+(facts "Get address from Turku"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => {:url "http://opaskartta.turku.fi/TeklaOGCWeb/WFS.ashx"})
   (fact "get-addresses-proxy"
-    (let [response (get-addresses-proxy {:params {:query "Isokaari 10, Kuopio" :lang "fi"}})
+    (let [response (get-addresses-proxy {:params {:query "Linnankatu 80, Turku" :lang "fi"}})
           body (json/decode (:body response) true)]
       (fact (:suggestions body) =contains=> "Linnankatu 80, Turku")
       (fact (first (:data body)) => (contains {:street "Linnankatu",
@@ -376,3 +380,21 @@
       (fact (:number body) => "33")
       (fact (:fi (:name body)) => "Salo")
       )))
+
+(facts "Municipality number with address from kunta rest"
+  (against-background (org/get-krysp-wfs anything :osoitteet) => nil)
+  (fact "Jarvenpaa, in border of Mantsala"
+    (let [x "399309.136" y "6709508.629"
+          response (address-by-point-proxy {:params {:lang "fi" :x x :y y}})
+          body (json/decode (:body response) true)]
+      (fact (:street body) => "Kulmapolku")
+      (fact (:number body) => "35")
+      (fact (:municipality body) => "186")                  ; MML would return Mantsala's code, see below
+      (fact (:fi (:name body)) => "J\u00e4rvenp\u00e4\u00e4")
+
+      (fact "municipality from NLS address WFS is wrong"
+        (let [details (->> (wfs/address-by-point x y)
+                           first
+                           (wfs/feature-to-address-details "fi"))]
+          (:municipality details) => "505"
+          (get-in details [:name :fi]) => "M\u00e4nts\u00e4l\u00e4")))))

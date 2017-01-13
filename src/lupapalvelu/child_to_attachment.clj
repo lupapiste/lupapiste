@@ -28,6 +28,10 @@
       ; Add taskname to contents only if it's not equal to the localized review type
       (when (and taskname (not (.equalsIgnoreCase text taskname))) (str " - " taskname)))))
 
+(defn- verdict-attachment-type [{:keys [permitType]}]
+  {:type-group (if (= permitType "R") "paatoksenteko" "muut")
+   :type-id "paatos"})
+
 (defn- build-attachment-options [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
@@ -46,7 +50,7 @@
                                                     :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
                                                     :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
                                                     :tasks (review-attachment-type child)
-                                                    :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
+                                                    :verdicts (verdict-attachment-type application)
                                                     {:type-group "muut" :type-id "muu"})
                               :contents           (case type
                                                     :statements (get-in child [:person :text])
