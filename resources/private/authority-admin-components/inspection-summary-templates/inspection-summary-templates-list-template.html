@@ -1,0 +1,19 @@
+<script type="text/x-jquery-tmpl" id="inspection-summary-templates-list-template" class="ko-template">
+  <div>
+    <p data-bind="visible: true, ltext: 'auth-admin.inspection-summary-templates.none'"></p>
+    <!-- ko if: false -->
+    <table class="admin-settings">
+      <thead>
+      <tr>
+        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.name'"></th>
+        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.modified'"></th>
+        <th data-bind="ltext: 'auth-admin.inspection-summary-templates.actions'"></th>
+      </tr>
+      </thead>
+    </table>
+    <!-- /ko -->
+    <div>
+      <button class="btn btn-primary" data-test-id="add-tag-button" data-bind="ltext: 'auth-admin.inspection-summary-templates.add', click: addInspectionSummary"></button>
+    </div>
+  </div>
+</script>

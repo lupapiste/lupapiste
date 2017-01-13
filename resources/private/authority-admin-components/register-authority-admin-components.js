@@ -6,7 +6,8 @@ jQuery(document).ready(function() {
                     {name: "suti-admin"},
                     {name: "municipality-maps"},
                     {name: "municipality-maps-layers"},
-                    {name: "municipality-maps-map"}];
+                    {name: "municipality-maps-map"},
+                    {name: "inspection-summary-templates-list"}];
 
   ko.registerLupapisteComponents(components);
 });
