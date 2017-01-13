@@ -55,6 +55,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.allowedRoles = ko.observable([]);
   self.permitTypes = ko.observable([]);
   self.useAttachmentLinksIntegration = ko.observable(false);
+  self.inspectionSummariesEnabled = ko.observable(false);
 
   self.sectionOperations = ko.observableArray();
 
@@ -207,6 +208,8 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
     self.permanentArchiveInUseSince(new Date(organization["permanent-archive-in-use-since"] || 0));
+
+    self.inspectionSummariesEnabled(organization["inspection-summaries-enabled"] || false);
 
     self.useAttachmentLinksIntegration(organization["use-attachment-links-integration"] === true);
 
