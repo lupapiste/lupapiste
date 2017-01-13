@@ -82,7 +82,7 @@
     (fail :error.attachment.no-versions)))
 
 (defn- validate-meta [{{meta :meta} :data :as command}]
-  (some->> (not-empty (remove att/attachment-meta-types (keys meta)))
+  (some->> (not-empty (remove (set att/attachment-meta-types) (keys meta)))
            (fail :error.illegal-meta-type :parameters)))
 
 (defn- validate-scale [{{meta :meta} :data}]
