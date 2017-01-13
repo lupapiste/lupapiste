@@ -37,7 +37,7 @@
 ;; Metadata
 ;;
 
-(def attachment-meta-types [:size :scale :group :op :contents :drawingNumber])
+(def attachment-meta-types [:size :scale :group :contents :drawingNumber])
 
 (def attachment-scales
   [:1:20 :1:50 :1:100 :1:200 :1:500
@@ -935,3 +935,25 @@
                       (states/post-verdict-states (keyword create-state))
                       (usr/authority? user)))
         (fail :error.pre-verdict-attachment)))))
+
+(defn validate-group-is-selectable [{application :application}]
+  (when (false? (op/get-primary-operation-metadata application :attachment-op-selector))
+    (fail :error.illegal-meta-type)))
+
+(defn- validate-group-op [group]
+  (when-let [operations (:operations group)]
+    (when (sc/check [Operation] (map #(select-keys % [:id :name]) operations))
+      (fail :error.illegal-attachment-operation))))
+
+(defn- validate-group-type [group]
+  (when-let [group-type (keyword (:groupType group))]
+    (when-not ((set att-tags/attachment-groups) group-type)
+      (fail :error.illegal-attachment-group-type))))
+
+(defn validate-group
+  ([command]
+   (validate-group [:group] command))
+  ([group-path command]
+   (when-let [group (get-in command (cons :data group-path))]
+     (or ((some-fn validate-group-op validate-group-type) group)
+         (validate-group-is-selectable command)))))

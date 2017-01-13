@@ -18,10 +18,13 @@
        (map :attachmentId)
        (some (partial att/attachment-matches-application command))))
 
-(def check-password-for-sign
-  (fn [{{:keys [filedatas]} :data :as command}]
-    (when ((complement not-any?) :sign filedatas)
-      (usr/check-password-pre-check command))))
+(defn- validate-attachment-groups [{{filedatas :filedatas} :data :as command}]
+  (->> (range (count filedatas))
+       (some #(att/validate-group [:filedatas % :group] command))))
+
+(defn- check-password-for-sign [{{:keys [filedatas]} :data :as command}]
+  (when (some :sign filedatas)
+    (usr/check-password-pre-check command)))
 
 (defcommand bind-attachment
   {:description         "API to bind file to attachment, returns job that can be polled for status."
@@ -38,7 +41,7 @@
                          att/attachment-editable-by-application-state
                          att/allowed-only-for-authority-when-application-sent
                          att/foreman-must-be-uploader]
-   :input-validators [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
+   :input-validators    [(partial action/non-blank-parameters [:id :attachmentId :fileId])]
    :states              bind-states}
   [command]
   (ok :job (bind/make-bind-job command [{:attachmentId attachmentId :fileId fileId}])))
@@ -54,6 +57,7 @@
                          att/allowed-only-for-authority-when-application-sent
                          att/foreman-must-be-uploader
                          validate-attachment-ids
+                         validate-attachment-groups
                          check-password-for-sign]
    :states              bind-states}
   [command]
