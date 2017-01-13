@@ -498,7 +498,9 @@
   ([application user {attachment-id :id :as attachment} options]
     {:pre [(map? application) (map? attachment) (map? options)]}
    (loop [application application attachment attachment retries-left 5]
-     (let [options       (update-in options [:group :operations] resolve-operation-names application)
+     (let [options       (if (contains? options :group)
+                           (update-in options [:group :operations] resolve-operation-names application)
+                           options)
            version-model (make-version attachment user options)
            mongo-query   {:attachments {$elemMatch {:id attachment-id
                                                     :latestVersion.version.fileId (get-in attachment [:latestVersion :version :fileId])}}}
