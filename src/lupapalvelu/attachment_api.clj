@@ -622,6 +622,14 @@
    :categories  #{:attachments}}
   [_])
 
+(defquery set-attachment-group-enabled
+  {:description "Pseudo-query for checking that attachment group can selected for application."
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles (conj auth/all-authz-writer-roles :foreman)
+   :pre-checks       [att/validate-group-is-selectable]
+   :states           (states/all-application-states-but states/terminal-states)
+   :categories       #{:attachments}})
+
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]

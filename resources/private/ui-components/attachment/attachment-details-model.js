@@ -178,7 +178,7 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 
   self.operationSelectorDisabled = self.disposedPureComputed(function() {
-    return !self.metaUpdateAllowed() || !_.get(self.application, ["primaryOperation", "attachment-op-selector"]);
+    return !self.metaUpdateAllowed() || authModel.ok("set-attachment-group-enabled");
   });
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
