@@ -31,7 +31,7 @@ LUPAPISTE.AttachmentsRequireModel = function(params) {
       self.selectedGroup(null);
     } else if (_.isEmpty(oldValue)) {
       // Select default group when first attachment type is added
-      self.selectedGroup(_.find(self.selectableGroups(), ["groupType", util.getIn(value, [0, "metadata", "grouping"])]));
+      self.selectedGroup(service.getDefaultGroupingForType(_.first(value)));
     }
   });
 
