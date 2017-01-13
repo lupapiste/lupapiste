@@ -1,7 +1,8 @@
 (ns lupapalvelu.attachment.tags
   (:require [sade.util :refer [fn->>]]
             [lupapalvelu.states :as states]
-            [lupapalvelu.attachment.type :as att-type]))
+            [lupapalvelu.attachment.type :as att-type]
+            [lupapalvelu.operations :as op]))
 
 (def attachment-groups [:parties :building-site :reports :technical-reports :operation])
 (def general-group-tag :general)
@@ -17,7 +18,9 @@
        (map (partial merge {:groupType :operation}))))
 
 (defn attachment-groups-for-application [application]
-  (mapcat (partial groups-for-attachment-group-type application) attachment-groups))
+  (if (false? (op/get-primary-operation-metadata application :attachment-op-selector))
+    []
+    (mapcat (partial groups-for-attachment-group-type application) attachment-groups)))
 
 (defn- tag-by-applicationState [{ram :ramLink app-state :applicationState :as attachment}]
   (cond
