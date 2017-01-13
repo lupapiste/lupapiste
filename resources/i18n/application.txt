@@ -1048,3 +1048,6 @@
 "integration.parties.sent" "en" "Number of parties transferred to the background system: {0}"
 "integration.parties.sent" "fi" "Taustajärjestelmään lähetettyjen osapuolten määrä: {0}"
 "integration.parties.sent" "sv" "Antal parter som sänts till backup systemet: {0}"
+"application.attachments.multioperation" "en" ""
+"application.attachments.multioperation" "fi" "Usean toimenpiteen liitteet"
+"application.attachments.multioperation" "sv" ""
