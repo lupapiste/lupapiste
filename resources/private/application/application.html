@@ -1147,7 +1147,10 @@
                                 <input data-bind="textInput: email,
                                                   attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
                                        id="neighbors-sendemail-email"
-                                       class="form-input text long" />
+                                       class="form-input text long" >
+                                <div class="neighbor-error"
+                                     data-bind="visible: error,
+                                                ltext: error"></div>
                             </form>
 
                             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"
