@@ -145,7 +145,6 @@ jQuery(document).ready(function() {
     {name: "attachment-group-autocomplete"},
     {name: "attachments-require"},
     {name: "attachments-require-bubble"},
-    {name: "attachment-group-selector"},
     {name: "rollup"},
     {name: "rollup-button"},
     {name: "rollup-status-button"},
