@@ -6,14 +6,11 @@
 //  [prefix]: Wrapper prefix (e.g, checkbox, signbox, sectionbox, ... ). (default checkbox)
 //  ltext: Label ltext (cannot be observable). Ltext overrides text if both are given.
 //  [testId]  Test id prefix for input and label (toggle -> toggle-input, toggle-label)
-//  [enable]: Similar to kO binding (default true)
-//  [disable]: Similar to binding (false)
-//  Toggle is enabled when disable is false and enable is true.
 LUPAPISTE.ToggleModel = function( params ) {
   "use strict";
   var self = this;
 
-  ko.utils.extend( self, new LUPAPISTE.ComponentBaseModel());
+  ko.utils.extend( self, new LUPAPISTE.EnableComponentModel( params ));
 
   var prefix = params.prefix || "checkbox";
 
@@ -21,11 +18,6 @@ LUPAPISTE.ToggleModel = function( params ) {
   self.value = params.value;
   // Unwrapping just in case (custom elements and implicit computeds)
   self.testId = ko.unwrap(params.testId) || "toggle";
-
-  self.isDisabled = self.disposedPureComputed( function() {
-    return ko.unwrap( params.disable )
-      || (!_.isUndefined( params.enable ) && !ko.unwrap( params.enable ));
-  });
 
   self.text = params.ltext ? loc( params.ltext ) : params.text || "";
 

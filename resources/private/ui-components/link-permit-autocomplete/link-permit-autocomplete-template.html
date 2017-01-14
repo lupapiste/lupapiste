@@ -1,0 +1,22 @@
+<script class="ko-template" type="text/x-jquery-tmpl"
+        id="link-permit-autocomplete-template">
+  <div data-bind="ltext: 'linkPermit.dialog.choosePermit'"
+       class="top-marginM"></div>
+  <toggle params="value: sameProperty,
+                  ltext: 'link-permit.same-property',
+                  testId: 'link-permit-same-property',
+                  prefix: 'blockbox',
+                  disable: isDisabled">
+  </toggle>
+  <div data-bind="component: {name: 'base-autocomplete',
+                   params: {options: data,
+                             optionsText: 'text',
+                             query: query,
+                             selectedOption: selected,
+                             optionsCaption: loc('linkPermit.dialog.choosePermitPlaceholder'),
+                             nullable: true,
+                             disable: isDisabled,
+                             maxHeight: '10em'}}" 
+       class="top-marginM"
+       data-test-id="link-permit-select"></div>
+</script>
