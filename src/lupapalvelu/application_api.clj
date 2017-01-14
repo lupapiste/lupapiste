@@ -666,7 +666,7 @@
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-        final-results (map #(select-keys % [:id :text]) organized-results)]
+        final-results (map #(select-keys % [:id :text :propertyId]) organized-results)]
     (ok :app-links final-results)))
 
 (defn- validate-linking [{app :application :as command}]

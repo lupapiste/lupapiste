@@ -1051,3 +1051,4 @@
 "integration.parties.sent" "en" "Number of parties transferred to the background system: {0}"
 "integration.parties.sent" "fi" "Taustajärjestelmään lähetettyjen osapuolten määrä: {0}"
 "integration.parties.sent" "sv" "Antal parter som sänts till backup systemet: {0}"
+"link-permit.same-property" "fi" "Rajaa hakemuksen kiinteistötunnuksella"

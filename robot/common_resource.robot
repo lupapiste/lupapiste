@@ -474,7 +474,11 @@ Select From Autocomplete By Test Id
 
 Autocomplete selection is
   [Arguments]  ${container}  ${value}
-  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+  Wait Until  Element should contain  xpath=//${container}//span[contains(@class, "autocomplete-selection")]/span[contains(@class, 'caption')]  ${value}
+
+Autocomplete selection by test id is
+  [Arguments]  ${tid}  ${value}
+  Element should contain  jquery=div[data-test-id=${tid}] span.autocomplete-selection span.caption  ${value}
 
 Autocomplete selectable values should not contain
   [Arguments]  ${container}  ${value}
