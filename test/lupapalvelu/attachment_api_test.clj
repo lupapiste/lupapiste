@@ -30,7 +30,7 @@
 
     (fact "attachment data cannot be modified if the attachment is read-only"
       (let [command (util/deep-merge base-command {:action "set-attachment-meta"
-                                                   :data   {:meta {"contents" "foobar"}}})]
+                                                   :data   {:meta {:contents "foobar"}}})]
         (execute command) => {:ok   false
                               :text "error.unauthorized"
                               :desc "Attachment is read only."}))
@@ -90,7 +90,7 @@
                       :data        {:id           "ABC123"
                                     :attachmentId "5234"}}
         meta-command (util/deep-merge base-command {:action "set-attachment-meta"
-                                                    :data   {:meta {"contents" "foobar"}}})
+                                                    :data   {:meta {:contents "foobar"}}})
         type-command (util/deep-merge base-command {:action "set-attachment-type"
                                                     :data   {:attachmentType "paapiirustus.asemapiirros"}})
         archivist-user {:orgAuthz      {:753-R #{:authority :archivist}}
