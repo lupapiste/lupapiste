@@ -13,15 +13,13 @@
     </table>
     <!-- /ko -->
     <div class="stacked--inline">
-      <button class="btn btn-primary" data-test-id="add-tag-button"
-              data-bind="ltext: 'auth-admin.inspection-summary-templates.add', click: toggleNewTemplateBubble"></button>
-      <div class="bubble-dialog-arrow"
-           data-bind="visible: newTemplateBubbleVisible">
-      </div>
+      <button class="btn btn-primary"
+              data-bind="ltext: 'auth-admin.inspection-summary-templates.add',
+                         click: toggleNewTemplateBubble,
+                         disable: newTemplateBubbleVisible"></button>
     </div>
-    <div class="inspection-template-bubble">
-      <div data-bind="component: { name: 'inspection-summary-template-bubble',
-                                   params: { bubbleVisible: newTemplateBubbleVisible } }"></div>
-    </div>
+    <div class="inspection-summary-template-new-container"
+         data-bind="component: { name: 'inspection-summary-template-bubble',
+                                 params: { bubbleVisible: newTemplateBubbleVisible } }"></div>
   </div>
 </script>

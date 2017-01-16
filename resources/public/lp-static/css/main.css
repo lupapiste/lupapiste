@@ -1,4 +1,4 @@
-@import url('main-blessed1.css?z=1484321055397');
+@import url('main-blessed1.css?z=1484646440715');
 
 /* line 786, ../../../private/common-html/sass/partials/_forms.scss */
 .table-reject-note-editor:after {
@@ -4465,11 +4465,6 @@ ul.tabs {
 /* line 124, ../../../private/common-html/sass/partials/_bubble.scss */
 .operation-bubble {
   margin-top: 24px;
-  max-width: 50%;
-}
-
-/* line 129, ../../../private/common-html/sass/partials/_bubble.scss */
-.inspection-template-bubble {
   max-width: 50%;
 }
 
@@ -10591,6 +10586,58 @@ label.batch-required {
   color: #f39129;
 }
 
+/* line 1, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-new-container {
+  width: 50%;
+  display: table;
+}
+
+/* line 6, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor {
+  margin-bottom: 24px;
+  width: 100%;
+}
+/* line 10, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor input[type=text], .inspection-summary-template-editor input[type=password], .inspection-summary-template-editor select, .inspection-summary-template-editor textarea {
+  min-height: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #333333;
+  border: 1px solid #bbbbbb;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+  -moz-appearance: none;
+  display: block;
+  width: 100%;
+}
+/* line 23, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor input[type=text].required, .inspection-summary-template-editor input[type=password].required, .inspection-summary-template-editor select.required, .inspection-summary-template-editor textarea.required {
+  border-color: #f6aa59;
+}
+/* line 26, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor input[type=text]:focus, .inspection-summary-template-editor input[type=password]:focus, .inspection-summary-template-editor select:focus, .inspection-summary-template-editor textarea:focus {
+  color: #333333;
+  border-color: #fbc732;
+}
+/* line 31, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor > div {
+  margin: 12px 12px;
+}
+/* line 34, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor button {
+  margin: 0 12px;
+}
+/* line 37, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor label.required {
+  color: #f39129;
+}
+/* line 39, ../../../private/common-html/sass/views/_inspection_summary.scss */
+.inspection-summary-template-editor label.required:after {
+  content: "*";
+  display: inline;
+}
+
 /* line 3, ../../../private/common-html/sass/partials/_bulletins.scss */
 #bulletins {
   font-family: "Source Sans Pro", sans-serif;
@@ -11109,50 +11156,50 @@ label.batch-required {
 /*
   Lupapalvelu CSS:
 */
-/* line 163, ../../../private/common-html/sass/main.scss */
+/* line 164, ../../../private/common-html/sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 169, ../../../private/common-html/sass/main.scss */
+/* line 170, ../../../private/common-html/sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 173, ../../../private/common-html/sass/main.scss */
+/* line 174, ../../../private/common-html/sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 177, ../../../private/common-html/sass/main.scss */
+/* line 178, ../../../private/common-html/sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 181, ../../../private/common-html/sass/main.scss */
+/* line 182, ../../../private/common-html/sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 185, ../../../private/common-html/sass/main.scss */
+/* line 186, ../../../private/common-html/sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 189, ../../../private/common-html/sass/main.scss */
+/* line 190, ../../../private/common-html/sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 194, ../../../private/common-html/sass/main.scss */
+/* line 195, ../../../private/common-html/sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 198, ../../../private/common-html/sass/main.scss */
+/* line 199, ../../../private/common-html/sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -11164,27 +11211,27 @@ label.batch-required {
   display: table-cell;
 }
 
-/* line 209, ../../../private/common-html/sass/main.scss */
+/* line 210, ../../../private/common-html/sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 217, ../../../private/common-html/sass/main.scss */
+/* line 218, ../../../private/common-html/sass/main.scss */
 .table, .reviews-table, table.review-buildings-table, .company-users-table, .appeals-table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 223, ../../../private/common-html/sass/main.scss */
+/* line 224, ../../../private/common-html/sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 228, ../../../private/common-html/sass/main.scss */
+/* line 229, ../../../private/common-html/sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -11198,47 +11245,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 241, ../../../private/common-html/sass/main.scss */
+/* line 242, ../../../private/common-html/sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 243, ../../../private/common-html/sass/main.scss */
+/* line 244, ../../../private/common-html/sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 249, ../../../private/common-html/sass/main.scss */
+/* line 250, ../../../private/common-html/sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 254, ../../../private/common-html/sass/main.scss */
+/* line 255, ../../../private/common-html/sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 256, ../../../private/common-html/sass/main.scss */
+/* line 257, ../../../private/common-html/sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 259, ../../../private/common-html/sass/main.scss */
+/* line 260, ../../../private/common-html/sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 260, ../../../private/common-html/sass/main.scss */
+/* line 261, ../../../private/common-html/sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 263, ../../../private/common-html/sass/main.scss */
+/* line 264, ../../../private/common-html/sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 265, ../../../private/common-html/sass/main.scss */
+/* line 266, ../../../private/common-html/sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 267, ../../../private/common-html/sass/main.scss */
+/* line 268, ../../../private/common-html/sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
