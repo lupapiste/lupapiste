@@ -163,24 +163,18 @@
             (command pena :set-attachment-meta
                      :id application-id
                      :attachmentId (first attachment-ids)
-                     :meta {:op {:id "aaabbbcccdddeeefff000111"}}) => (partial expected-failure? :error.illegal-attachment-operation))
-
-          (fact "Metadata for op is validated against schema"
-            (command pena :set-attachment-meta
-                     :id application-id
-                     :attachmentId (first attachment-ids)
-                     :meta {:op {:id op-id :unknown "foofaa"}}) => (partial expected-failure? :error.illegal-attachment-operation))
+                     :meta {:group {:groupType :operation :operations [{:id "aaabbbcccdddeeefff000111"}]}}) => (partial expected-failure? :error.illegal-attachment-operation))
 
           (fact "Operation metadata can be set to null"
             (fact "but id can't be nil"
               (command pena :set-attachment-meta
                        :id application-id
                        :attachmentId (first attachment-ids)
-                       :meta {:op {:id nil}}) => (partial expected-failure? :error.illegal-attachment-operation))
+                       :meta {:group {:groupType :operation :operations [{:id nil}]}}) => (partial expected-failure? :error.illegal-attachment-operation))
             (command pena :set-attachment-meta
                      :id application-id
                      :attachmentId (first attachment-ids)
-                     :meta {:op nil}) => ok?)))
+                     :meta {:group {:groupType nil}}) => ok?)))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero

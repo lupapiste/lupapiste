@@ -106,10 +106,12 @@
       (when-not ((set allowed-mime-types) (:contentType version))
         (fail :error.illegal-file-type)))))
 
-(defn- validate-operation-in-application [{data :data application :application}]
-  (when-let [op-id (or (get-in data [:meta :op :id]) (get-in data [:group :id]))]
-    (when-not (util/find-by-id op-id (app/get-operations application))
-      (fail :error.illegal-attachment-operation))))
+(defn- validate-operation-in-application
+  ([command] (validate-operation-in-application [:group] command))
+  ([group-path {data :data application :application}]
+   (when-let [op-ids (->> (get-in data group-path) :operations not-empty (map :id))]
+     (when (not-every? #(util/find-by-id % (app/get-operations application)) op-ids)
+       (fail :error.illegal-attachment-operation)))))
 
 ;;
 ;; Attachments
@@ -683,7 +685,7 @@
                 att/attachment-editable-by-application-state
                 att/attachment-not-readOnly
                 att/edit-allowed-by-target
-                validate-operation-in-application
+                (partial validate-operation-in-application [:meta :group])
                 (partial att/validate-group [:meta :group])]}
   [{:keys [created] :as command}]
   (let [data (att/meta->attachment-data meta)]
