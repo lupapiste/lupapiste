@@ -2,6 +2,7 @@ LUPAPISTE.SearchSectionModel = function(params) {
   "use strict";
   var self = this;
   self.type = params.type;
+  self.label = params.label;
   self.lLabel = params.lLabel;
   self.dataProvider = params.dataProvider;
 

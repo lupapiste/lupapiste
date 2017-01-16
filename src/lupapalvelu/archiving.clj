@@ -8,12 +8,10 @@
             [clj-time.format :as f]
             [cheshire.core :as json]
             [monger.operators :refer :all]
-            [schema.core :as s]
             [sade.env :as env]
             [sade.files :as files]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapiste-commons.tos-metadata-schema :as tms]
             [lupapalvelu.tiedonohjaus :as tiedonohjaus]
             [lupapalvelu.pdf.pdf-export :as pdf-export]
             [lupapalvelu.attachment :as att]
@@ -22,9 +20,10 @@
             [lupapalvelu.pdf.libreoffice-conversion-client :as libre]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.states :as states]
-            [lupapalvelu.foreman :as foreman])
-  (:import (java.util.concurrent ThreadFactory Executors)
-           (java.io File)))
+            [lupapalvelu.foreman :as foreman]
+            [lupapalvelu.domain :as domain])
+  (:import [java.util.concurrent ThreadFactory Executors]
+           [java.io InputStream]))
 
 (defn thread-factory []
   (let [security-manager (System/getSecurityManager)
@@ -45,17 +44,22 @@
         app-id (env/value :arkisto :app-id)
         app-key (env/value :arkisto :app-key)
         encoded-id (codec/url-encode id)
-        url (str host "/documents/" encoded-id)]
-    (http/put url {:basic-auth [app-id app-key]
-                   :throw-exceptions false
-                   :quiet true
-                   :multipart  [{:name      "metadata"
-                                 :mime-type "application/json"
-                                 :encoding  "UTF-8"
-                                 :content   (json/generate-string metadata)}
-                                {:name      "file"
-                                 :content   is-or-file
-                                 :mime-type content-type}]})))
+        url (str host "/documents/" encoded-id)
+        result (http/put url {:basic-auth [app-id app-key]
+                              :throw-exceptions false
+                              :quiet true
+                              :multipart  [{:name      "metadata"
+                                            :mime-type "application/json"
+                                            :encoding  "UTF-8"
+                                            :content   (json/generate-string metadata)}
+                                           {:name      "file"
+                                            :content   is-or-file
+                                            :mime-type content-type}]})]
+    (when (instance? InputStream is-or-file)
+      (try
+        (.close is-or-file)
+        (catch Exception _)))
+    result))
 
 (defn- set-attachment-state [next-state application now id]
   (action/update-application
@@ -64,7 +68,7 @@
     {$set {:modified now
            :attachments.$.modified now
            :attachments.$.metadata.tila next-state
-           :attachments.$.readOnly true}}))
+           :attachments.$.readOnly (contains? #{:arkistoidaan :arkistoitu} next-state)}}))
 
 (defn- set-application-state [next-state application now _]
   (action/update-application
@@ -78,30 +82,35 @@
     {$set {:modified now
            :processMetadata.tila next-state}}))
 
+(defn- metadata-query [md-key]
+  (let [tila-key (str md-key ".tila")
+        arkistointi-key (str md-key ".sailytysaika.arkistointi")]
+    {tila-key {$ne :arkistoitu}
+     arkistointi-key {$ne :ei
+                      $exists true}}))
+
 (defn- mark-application-archived-if-done [{:keys [id] :as application} now]
   ; If these queries return 0 results, we mark the corresponding phase as archived
-  (let [pre-verdict-query {:_id id
+  (let [attachment-or-app-md (metadata-query "metadata")
+        pre-verdict-query {:_id id
                            ; Look for pre-verdict attachments that have versions, are not yet archived, but need to be
-                           $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
-                                                            :applicationState                  {$nin [states/post-verdict-states]}
-                                                            :versions                          {$gt  []}
-                                                            :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                           $or  [{:archived.application {$ne nil}}
+                                 {:attachments {$elemMatch (merge {:applicationState {$nin [states/post-verdict-states]}
+                                                                   :versions         {$gt []}}
+                                                                  attachment-or-app-md)}}
                                  ; Check if the application itself is not yet archived, but needs to be
-                                 {:metadata.tila                     {$ne :arkistoitu}
-                                  :metadata.sailytysaika.arkistointi {$ne :ei}}]}
+                                 attachment-or-app-md]}
         post-verdict-query {:_id id
                             ; Look for any attachments that have versions, are not yet arcvhived, but need to be
-                            $or  [{:attachments {$elemMatch {:metadata.tila                     {$nin [:arkistoitu]}
-                                                             :versions                          {$gt  []}
-                                                             :metadata.sailytysaika.arkistointi {$ne  :ei}}}}
+                            $or  [{:archived.completed {$ne nil}}
+                                  {:attachments {$elemMatch (merge {:versions {$gt []}}
+                                                                   attachment-or-app-md)}}
                                   ; Check if the application itself is not yet archived, but needs to be
-                                  {:metadata.tila                     {$ne :arkistoitu}
-                                   :metadata.sailytysaika.arkistointi {$ne :ei}}
+                                  attachment-or-app-md
                                   ; Check if the case file is not yet archived, but needs to be
-                                  {:processMetadata.tila                     {$ne :arkistoitu}
-                                   :processMetadata.sailytysaika.arkistointi {$ne :ei}}
+                                  (metadata-query "processMetadata")
                                   ; Check if the application is not in a final state
-                                  {:state {$nin [:closed :extinct :foremanVerdictGiven]}}]}]
+                                  {:state {$nin [:closed :extinct :foremanVerdictGiven :acknowledged]}}]}]
 
     (when (zero? (mongo/count :applications pre-verdict-query))
       (action/update-application
@@ -121,19 +130,23 @@
           upload-threadpool
           (fn []
             (let [{:keys [status body]} (upload-file id is-or-file content-type (assoc metadata :tila :arkistoitu))]
-              (if (= 200 status)
+              (cond
+                (= 200 status)
                 (do
                   (state-update-fn :arkistoitu application now id)
                   (info "Archived attachment id" id "from application" app-id)
                   (mark-application-archived-if-done application now))
+
+                (and (= status 409) (string/includes? body "already exists"))
+                (do
+                  (warn "Onkalo response indicates that" id "is already in archive. Updating state to match.")
+                  (state-update-fn :arkistoitu application now id)
+                  (mark-application-archived-if-done application now))
+
+                :else
                 (do
                   (error "Failed to archive attachment id" id "from application" app-id "status:" status "message:" body)
-                  (if (and (= status 409) (string/includes? body "already exists"))
-                    (do
-                      (info "Response indicates that" id "is already in archive. Updating state.")
-                      (state-update-fn :arkistoitu application now id)
-                      (mark-application-archived-if-done application now))
-                    (state-update-fn :valmis application now id))))))))
+                  (state-update-fn :valmis application now id)))))))
     (warn "Tried to archive attachment id" id "from application" app-id "again while it is still marked unfinished")))
 
 (defn- find-op [{:keys [primaryOperation secondaryOperations]} op-id]
@@ -145,6 +158,10 @@
 (defn- ->iso-8601-date [date]
   (f/unparse (f/with-zone (:date-time-no-ms f/formatters) (t/time-zone-for-id "Europe/Helsinki")) date))
 
+(defn- ts->iso-8601-date [ts]
+  (when (number? ts)
+    (->iso-8601-date (c/from-long (long ts)))))
+
 (defn- get-verdict-date [{:keys [verdicts]} type]
   (let [ts (->> verdicts
                 (map (fn [{:keys [paatokset]}]
@@ -153,8 +170,7 @@
                             (first))))
                 (remove nil?)
                 (first))]
-    (when (number? ts)
-      (->iso-8601-date (c/from-long (long ts))))))
+    (ts->iso-8601-date ts)))
 
 (defn- get-from-verdict-minutes [{:keys [verdicts]} key]
   (->> verdicts
@@ -172,8 +188,7 @@
                 (remove nil?)
                 (sort)
                 (last))]
-    (when (number? ts)
-      (->iso-8601-date (c/from-long (long ts))))))
+    (ts->iso-8601-date ts)))
 
 (defn- get-usages [{:keys [documents]} op-id]
   (let [op-docs (remove #(nil? (get-in % [:schema-info :op :id])) documents)
@@ -199,16 +214,22 @@
 (defn- make-attachment-type [{{:keys [type-group type-id]} :type}]
   (str type-group "." type-id))
 
-(defn- foreman-name [document]
-  (ss/trim (str (get-in document [:data :henkilotiedot :sukunimi :value]) \space (get-in document [:data :henkilotiedot :etunimi :value]))))
+(defn- person-name [person-data]
+  (ss/trim (str (get-in person-data [:henkilotiedot :sukunimi :value]) \space (get-in person-data [:henkilotiedot :etunimi :value]))))
 
 (defn- foremen [application]
   (if (empty? (:foreman application))
     (let [foreman-applications (foreman/get-linked-foreman-applications (:id application))
           foreman-documents (mapv foreman/get-foreman-documents foreman-applications)
-          foremen (mapv foreman-name foreman-documents)]
+          foremen (mapv (fn [document] (person-name (:data document))) foreman-documents)]
       (apply str (interpose ", " foremen)))
     (:foreman application)))
+
+(defn- tyomaasta-vastaava [application]
+  (when-let [document (domain/get-document-by-name application "tyomaastaVastaava")]
+    (if (empty? (get-in document [:data :henkilo :henkilotiedot :sukunimi :value]))
+      (get-in document [:data :yritys :yritysnimi :value])
+      (person-name (get-in document [:data :henkilo])))))
 
 (defn- generate-archive-metadata
   [{:keys [id propertyId _applicantIndex address organization municipality location location-wgs84] :as application}
@@ -245,6 +266,9 @@
             (:contents attachment) (conj {:contents (:contents attachment)})
             (:size attachment) (conj {:size (:size attachment)})
             (:scale attachment) (conj {:scale (:scale attachment)})
+            (tyomaasta-vastaava application) (conj {:tyomaasta-vastaava (tyomaasta-vastaava application)})
+            (:closed application) (conj {:closed (ts->iso-8601-date (:closed application))})
+            (map :geometry-wgs84 (:drawings application)) (conj {:drawing-wgs84 (mapv (fn [drawing] (get-in drawing [:geometry-wgs84])) (:drawings application))})
             true (merge s2-metadata))))
 
 (defn send-to-archive [{:keys [user created] {:keys [attachments id] :as application} :application} attachment-ids document-ids]
@@ -261,19 +285,18 @@
           (upload-and-set-state application-archive-id application-file-stream "application/pdf" metadata application created set-application-state)))
       (when (document-ids case-file-archive-id)
         (files/with-temp-file libre-file
-          (files/with-temp-file xml-tmp-file
-            (let [case-file-file (libre/generate-casefile-pdfa application :fi libre-file)
-                  case-file-xml (tiedonohjaus/xml-case-file application :fi)
-                  metadata (-> (generate-archive-metadata application user)
+          (let [pdf-is (libre/generate-casefile-pdfa application :fi libre-file)
+                case-file-xml (tiedonohjaus/xml-case-file application :fi)
+                xml-is (-> (.getBytes case-file-xml "UTF-8") io/input-stream)
+                metadata (-> (generate-archive-metadata application user)
                              (assoc :type :case-file :tiedostonimi (str case-file-archive-id ".pdf")))
-                  xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
-              (spit xml-tmp-file case-file-xml)
-              (upload-and-set-state case-file-archive-id case-file-file "application/pdf" metadata application created set-process-state)
-              (upload-and-set-state case-file-xml-id xml-tmp-file "text/xml" xml-metadata application created set-process-state)))))
+                xml-metadata (assoc metadata :tiedostonimi (str case-file-archive-id ".xml"))]
+            (upload-and-set-state case-file-archive-id pdf-is "application/pdf" metadata application created set-process-state)
+            (upload-and-set-state case-file-xml-id xml-is "text/xml" xml-metadata application created set-process-state))))
       (doseq [attachment selected-attachments]
-        (let [{:keys [content content-type]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
+        (let [{:keys [content contentType]} (att/get-attachment-file! (get-in attachment [:latestVersion :fileId]))
               metadata (generate-archive-metadata application user attachment)]
-          (upload-and-set-state (:id attachment) (content) content-type metadata application created set-attachment-state))))
+          (upload-and-set-state (:id attachment) (content) contentType metadata application created set-attachment-state))))
     {:error :error.invalid-metadata-for-archive}))
 
 (defn mark-application-archived [application now archived-ts-key]

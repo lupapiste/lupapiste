@@ -9,7 +9,9 @@
                          buttonText: 'save',
                          waiting: waiting,
                          error: error,
-                         prefix: 'appeal-' + test">
+                         prefix: 'appeal-' + test"
+                 data-bind="attr: {'class': dropZone}">
+    <drop-zone></drop-zone>
     <div class="form-grid form-grid--no-border">
       <div class="row">
         <span class="col-4"
@@ -70,8 +72,10 @@
       <div class="row">
         <div class="col-4"
              data-bind="component: {name: 'file-upload',
-                        params: {files: $parent.model.files}},
-                        attr: {'data-test-id': 'appeal-files-' + $parent.test}">
+                        params: {files: $parent.model.files,
+                        dropZone: sprintf( '.%s .bubble-dialog', $parent.dropZone),
+                        allowMultiple: true}},
+                        testId: 'appeal-files-' + $parent.test">
         </div>
       </div>
     </div>

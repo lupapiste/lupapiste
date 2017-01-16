@@ -31,6 +31,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as org]
+            [lupapalvelu.waste-ads :as waste-ads]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.i18n :as i18n]))
 ;;
@@ -353,6 +354,15 @@
   (org/update-organization (usr/authority-admins-organization-id user) {$set {:assignments-enabled enabled}})
   (ok))
 
+(defcommand set-organization-extended-construction-waste-report
+  {:parameters [enabled]
+   :user-roles #{:authorityAdmin}
+   :pre-checks [(org/permit-type-validator :R)]
+   :input-validators  [(partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (org/update-organization (usr/authority-admins-organization-id user) {$set {:extended-construction-waste-report-enabled enabled}})
+  (ok))
+
 (defcommand set-organization-validate-verdict-given-date
   {:parameters [enabled]
    :user-roles #{:authorityAdmin}
@@ -626,14 +636,16 @@
   (let [org-id (usr/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
         content-type (mime/mime-type filename)
-        file-info {:file-name    filename
-                   :content-type content-type
+        file-info {:filename    filename
+                   :contentType  content-type
                    :size         size
                    :organization org-id
                    :created      created}
         tmpdir (fs/temp-dir "area")]
     (try+
-      (let [areas (org/parse-shapefile-to-organization-areas org-id tempfile tmpdir file-info)]
+      (when-not (= (:contentType file-info) "application/zip")
+        (fail! :error.illegal-shapefile))
+      (let [areas (org/parse-shapefile-to-organization-areas org-id tempfile tmpdir)]
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")
@@ -698,7 +710,7 @@
    :optional-parameters [org lang]
    :input-validators [org/valid-feed-format org/valid-org i18n/valid-language]
    :user-roles #{:anonymous}}
-  ((memo/ttl org/waste-ads :ttl/threshold 900000)             ; 15 min
+  ((memo/ttl waste-ads/waste-ads :ttl/threshold 900000)             ; 15 min
     (ss/upper-case org)
     (-> fmt ss/lower-case keyword)
     (-> (or lang :fi) ss/lower-case keyword)))

@@ -38,19 +38,19 @@ Sonja selects application sorting
   Sorting Should Be Set As Ascending  Tyyppi
 
 ...selects handler
-  Select From Autocomplete  div[@data-test-id="handlers-filter-component"]  ${sonja name}
+  Select from autocomplete by test id  handlers-filter-component  ${sonja name}
 
 ...adds item into areas filter
-  Select From Autocomplete  div[@data-test-id="areas-filter-component"]  Keskusta
+  Select from autocomplete by test id  areas-filter-component  Keskusta
 
 ...adds item into organizations filter
-  Select From Autocomplete  div[@data-test-id="organization-filter-component"]  Sipoon yleisten alueiden rakentaminen
+  Select from autocomplete by test id  organization-filter-component  Sipoon yleisten alueiden rakentaminen
 
 ...adds item into operations filter
-  Select From Autocomplete  div[@data-test-id="operations-filter-component"]  Asuinkerrostalon tai rivitalon rakentaminen
+  Select from autocomplete by test id  operations-filter-component  Asuinkerrostalon tai rivitalon rakentaminen
 
 ...adds item into tags filter
-  Select From Autocomplete  div[@data-test-id="tags-filter-component"]  ylämaa
+  Select from autocomplete by test id  tags-filter-component  ylämaa
 
 ...saves MEGA filter
   Save advanced filter  MEGA
@@ -59,7 +59,7 @@ Sonja selects application sorting
   Click by test id  set-MEGA-as-default-filter
 
 Sonja reloads the page and expects that saved filter is applied as default
-  Reload Page
+  Reload page and kill dev-box
   Show all applications
   Click by test id  toggle-advanced-filters
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "MEGA")]
@@ -78,10 +78,10 @@ Sonja reloads the page and expects that saved filter is applied as default
   Element should not be visible  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
 
 Sonja removes all but operations filter
-  Select From Autocomplete  div[@data-test-id="handlers-filter-component"]  ${all handlers}
-  Wait until  Click Element  xpath=//div[@data-test-id="areas-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
-  Wait until  Click Element  xpath=//div[@data-test-id="tags-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
-  Wait until  Click Element  xpath=//div[@data-test-id="organization-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
+  Select from autocomplete by test id  handlers-filter-component  ${all handlers}
+  Wait until  Scroll and click  div[data-test-id=areas-filter-component] ul.tags li.tag i
+  Wait until  Scroll and click  div[data-test-id=tags-filter-component] ul.tags li.tag i
+  Wait until  Scroll and click  div[data-test-id=organization-filter-component] ul.tags li.tag i
   Handler filter should contain text  ${all handlers}
   Filter item should contain X number of tags  areas  0
   Filter item should contain X number of tags  tags  0
@@ -101,7 +101,7 @@ Sonja closes and opens advanced filters
   Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja opens an application and returns to applications page
-  Wait Until  Click Element  xpath=//table[@id="applications-list"]/tbody//tr[@data-test-address="${appname}"]
+  Wait Until  Scroll and click  table#applications-list tr[data-test-address="${appname}"]
   Go to page  applications
 
 Filter should be set as before visiting application
@@ -115,7 +115,7 @@ Filter should be set as before visiting application
   Sorting Should Be Set As Ascending  Tyyppi
 
 Sonja removes the operations filter
-  Wait until  Click Element  xpath=//div[@data-test-id="operations-filter-component"]//ul[@class="tags"]//li[@class="tag"]//i
+  Wait until  Scroll and click  div[data-test-id=operations-filter-component] ul.tags li.tag i
   Filter item should contain X number of tags  operations  0
 
 Sonja sets sorting by location
@@ -136,11 +136,11 @@ Sonja sets sort-by-location filter as default
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
 Sonja closes saved filters
-  Wait Until  Click Element  //div[@data-test-id="advanced-filters"]//button[@data-test-id="toggle-saved-filters"]
+  Wait Until  Scroll and click  div[data-test-id=advanced-filters] button[data-test-id=toggle-saved-filters]
   Wait Until  Element Should Not Be Visible  //div[@data-test-id="saved-filter-row-MEGA"]
 
 Default filter should be sort-by-location filter
-  Reload page
+  Reload page and kill dev-box
   Show all applications
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(@class,"autocomplete-selection")]//span[contains(text(), "sort-by-location")]
 
@@ -158,7 +158,7 @@ Default filter should be sort-by-location filter
   Sorting Should Be Set As Ascending  Sijainti
 
 Sonja selects MEGA filter
-  Select From Autocomplete  div[@data-test-id="select-advanced-filter"]  MEGA
+  Select from autocomplete by test id  select-advanced-filter  MEGA
   Wait Until  Handler filter should contain text  ${sonja name}
   Filter item should contain X number of tags  areas  1
   Filter item should contain X number of tags  tags  1
@@ -170,12 +170,12 @@ Sonja trys to overwrite MEGA filter
   Wait Until  Element Should Be Visible  //div[@data-test-id="new-filter-submit-button"]//span[contains(text(), "Nimi on jo käytössä")]
 
 Sonja removes sort-by-location filter
-  Wait Until  Click Element  //div[@data-test-id="advanced-filters"]//button[@data-test-id="toggle-saved-filters"]
+  Wait Until  Scroll and click  div[data-test-id=advanced-filters] button[data-test-id=toggle-saved-filters]
   Wait Until  Element should be visible  xpath=//div[@data-test-id="advanced-filters"]
-  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="remove-button"]
-  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="cancel-remove-button"]
-  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="remove-button"]
-  Wait Until  Click Element  //div[@data-test-id="remove-filter-sort-by-location"]//button[@data-test-id="confirm-remove-button"]
+  Wait Until  Scroll and click  div[data-test-id=remove-filter-sort-by-location] button[data-test-id=remove-button]
+  Wait Until  Scroll and click  div[data-test-id=remove-filter-sort-by-location] button[data-test-id=cancel-remove-button]
+  Wait Until  Scroll and click  div[data-test-id=remove-filter-sort-by-location] button[data-test-id=remove-button]
+  Wait Until  Scroll and click  div[data-test-id=remove-filter-sort-by-location] button[data-test-id=confirm-remove-button]
   Wait Until  Element should not be visible  //div[@data-test-id="saved-filter-row-sort-by-location"]
 
 Sonja saves foobar filter
@@ -208,10 +208,10 @@ Sorting Should Be Set As Descending
 Click sorting field
   [Arguments]  ${field name}
   Wait Until  Element should be visible  xpath=//table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]
-  Wait Until  Click Element  xpath=//table[@id="applications-list"]//th[@data-test-id="search-column-${field name}"]
+  Wait Until  Scroll and click  table#applications-list th[data-test-id=search-column-${field name}]
 
 Save advanced filter
   [Arguments]  ${filter-name}
   Input text  new-filter-name  ${filter-name}
-  Wait Until  Click Element  //div[@data-test-id="new-filter-submit-button"]//button
+  Wait Until  Scroll and click  div[data-test-id=new-filter-submit-button] button
   Wait Until  Element Should Be Visible  //div[@data-test-id="select-advanced-filter"]//span[contains(text(), "${filter-name}")]

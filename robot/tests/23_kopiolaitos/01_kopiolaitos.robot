@@ -17,8 +17,7 @@ Mikko creates an application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko submits application
   Submit application
@@ -35,16 +34,21 @@ Sonja goes to attachments tab
 
 Sonja sets attachment to be a verdict attachment
   Open attachment details  muut.muu
-  Checkbox should not be selected  jquery=section#attachment input[data-test-id=is-verdict-attachment]
-  Select checkbox  jquery=section#attachment input[data-test-id=is-verdict-attachment]
+  Checkbox should not be selected  jquery=section#attachment input[data-test-id=is-verdict-attachment-input]
+  Select checkbox  jquery=section#attachment input[data-test-id=is-verdict-attachment-input]
+  Positive indicator icon should be visible
+  Positive indicator icon should not be visible
 
 Sonja sets contents description for the attachment
+  Wait until  Element should be enabled  xpath=//input[@data-test-id='attachment-contents-input']
   Input text by test id  attachment-contents-input  Muu muu muu liite
+  Positive indicator icon should be visible
+  Positive indicator icon should not be visible
   Click by test id  back-to-application-from-attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=mark-verdict-attachments]
   Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=order-attachment-prints]
 
-Sonja disables verdict attachment using multiselect view
+Sonja disables verdict attachment using multiselect view, one is selected
   Click by test id  mark-verdict-attachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
@@ -60,12 +64,8 @@ Sonja marks one attachment as verdict attachment using multiselect view
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
   Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Element should be visible  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
-  ${passed} =   Run Keyword And Return Status  Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
-
-  # Fallback. Not sure why the checkbox is not checked by default when CI runs the test...???
-  Run Keyword Unless  ${passed}  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
-
-  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
+  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Wait until  Checkbox Should Be Selected  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]//input
   Click by test id  multiselect-action-button
   Wait for jQuery
 

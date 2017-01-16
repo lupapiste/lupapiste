@@ -62,7 +62,12 @@ var docgen = (function () {
                 var newDocId = resp.doc;
                 var newDocSchema = _.cloneDeep(schema);
                 newDocSchema.info.op = null;
-
+                var newAuthModel = authorizationModel.clone();
+                authorization.refreshModelsForCategory( _.set( _.set({}, doc.id, authorizationModel),
+                                                               newDocId,
+                                                               newAuthModel ),
+                                                        application.id,
+                                                        "documents");
                 // The new document might contain some default values, get them from backend
                 ajax.query("document", {id: application.id, doc: newDocId, collection: docModel.getCollection()})
                   .success(function(data) {
@@ -70,15 +75,9 @@ var docgen = (function () {
                     newDoc.schema = newDocSchema;
 
                     lupapisteApp.services.accordionService.addDocument(newDoc);
-                    var newAuthModel = authorization.create({});
 
-                    var newDocModel = new DocModel(newDocSchema, newDoc, application, newAuthModel );
+                    var newDocModel = new DocModel(newDocSchema, newDoc, application, newAuthModel, options);
                     newDocModel.triggerEvents();
-                    authorization.refreshModelsForCategory( _.set( _.set({}, doc.id, authorizationModel),
-                                                                   newDocId,
-                                                                   newAuthModel ),
-                                                            application.id,
-                                                            "documents");
 
                     $(self).before(newDocModel.element);
                     $(".sticky", newDocModel.element).Stickyfill();

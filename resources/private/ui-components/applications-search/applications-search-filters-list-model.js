@@ -27,6 +27,7 @@ LUPAPISTE.ApplicationsSearchFiltersListModel = function(params) {
       tags:          _.map(ko.unwrap(lupapisteApp.services.tagFilterService.selected), "id"),
       operations:    _.map(ko.unwrap(lupapisteApp.services.operationFilterService.selected), "id"),
       organizations: _.map(ko.unwrap(lupapisteApp.services.organizationFilterService.selected), "id"),
+      event:         _.map(ko.unwrap(lupapisteApp.services.eventFilterService.selected), "id"),
       areas:         _.map(ko.unwrap(lupapisteApp.services.areaFilterService.selected), "id")
     };
 

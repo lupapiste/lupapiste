@@ -102,6 +102,7 @@
     self.archivabilityError = ko.observable();
 
     self.sendToArchive = ko.observable(false);
+    self.archived = ko.observable(false);
 
     self.convertableToPdfA = self.disposedPureComputed(function() {
       return self.authModel.ok("convert-to-pdfa");
@@ -145,6 +146,10 @@
       self.state = self.disposedPureComputed(_.partial( getState, doc ));
     }
 
+    if (self.state() === "arkistoitu") {
+      self.archived(true);
+    }
+
     self.reset = function(doc) {
       self.metadata(ko.unwrap(doc.metadata));
       self.attachmentType(ko.unwrap(doc.typeString));
@@ -185,7 +190,7 @@
                                  previewAction: "pdf-export",
                                  documentType: "application" }) ];
 
-    if (applicationState === "extinct" || applicationState === "closed") {
+    if (["extinct", "closed", "foremanVerdictGiven", "acknowledged"].indexOf(applicationState) !== -1) {
       docs.push( ko.observable({ documentNameKey: "caseFile.heading",
                                  metadata: application.processMetadata,
                                  id: caseFileDocId,
@@ -274,6 +279,11 @@
         _.some(postAttachments(), isSelectedForArchive) || _.some(mainDocuments(), isSelectedForArchive));
     });
 
+    self.tosFunctionExists = self.disposedPureComputed(function() {
+      return lupapisteApp.models.applicationAuthModel.ok("archive-documents") &&
+        _.some(params.application.tosFunction());
+    });
+
     self.selectAll = function() {
       _.forEach(archivedPreAttachments(), selectIfArchivable);
       _.forEach(archivedPostAttachments(), selectIfArchivable);
@@ -305,6 +315,7 @@
             metadata.tila = ko.observable(newState);
           }
           if (newState === "arkistoitu") {
+            doc.archived(true);
             doc.sendToArchive(false);
           }
           if (newState !== "arkistoidaan") {

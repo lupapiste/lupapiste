@@ -12,14 +12,14 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.applicationTitle = self.application.title;
   self.allowedAttachmentTypes = self.application.allowedAttachmentTypes;
 
+  self.upload = new LUPAPISTE.UploadModel(self, {allowMultiple:false, dropZone: "section#attachment"});
+  self.upload.init();
+
   var service = lupapisteApp.services.attachmentsService;
   var authModel = self.attachment().authModel; // No need to be computed since does not change for attachment
 
   var filterSet = service.getFilters( "attachments-listing" );
 
-  self.groupTypes   = service.groupTypes;
-  self.scales       = ko.observableArray(LUPAPISTE.config.attachmentScales);
-  self.sizes        = ko.observableArray(LUPAPISTE.config.attachmentSizes);
   self.visibilities = ko.observableArray(LUPAPISTE.config.attachmentVisibilities);
 
   self.name = self.disposedComputed(function() {
@@ -41,6 +41,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
       _.spread(fn)(args);
     };
   }
+
+  self.contentsList = self.disposedPureComputed( function() {
+    var fullType = _.find( service.attachmentTypes(),
+                           self.attachment().type());
+
+    return fullType ? service.contentsData( fullType ).list : [];
+  });
 
   function addUpdateListener(commandName, params, fn) {
     self.addEventListener(service.serviceName, _.merge({eventType: "update", attachmentId: self.id, commandName: commandName}, params), fn);
@@ -65,17 +72,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.rejectAttachment  = trackClickWrap("rejectAttachment",  service.rejectAttachment,  self.id);
   addUpdateListener("approve-attachment", {ok: true}, _.ary(querySelf, 0));
   addUpdateListener("reject-attachment",  {ok: true}, _.ary(querySelf, 0));
-  self.isApproved   = function() { return self.attachment().state === service.APPROVED; };
+  self.isApproved   = _.wrap( self.attachment, service.isApproved );
   self.isApprovable = function() { return authModel.ok("approve-attachment"); };
-  self.isRejected   = function() { return self.attachment().state === service.REJECTED; };
+  self.isRejected   = _.wrap( self.attachment, service.isRejected );
   self.isRejectable = function() { return authModel.ok("reject-attachment"); };
 
   self.approval = self.disposedPureComputed(function () {
-    return self.attachment().approved;
-  });
-
-  var editable = self.disposedComputed(function() {
-    return !service.processing() && !self.attachment().processing();
+    return  service.attachmentApproval( self.attachment ) ;
   });
 
   // Type
@@ -109,26 +112,45 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
     self.showAttachmentVersionHistory(val);
   });
 
-  // Versions - add
-  self.newAttachmentVersion = function() {
-    self.disablePreview(true);
-    attachment.initFileUpload({
-      applicationId: self.applicationId,
-      attachmentId: self.id,
-      attachmentType: self.attachment().typeString(),
-      group: util.getIn(self.attachment(), ["groupType"]),
-      operationId: util.getIn(self.attachment(), ["op", "id"]),
-      typeSelector: false,
-      archiveEnabled: authModel.ok("permanent-archive-enabled")
-    });
-    // Upload dialog is opened manually here, because click event binding to
-    // dynamic content rendered by Knockout is not possible
-    LUPAPISTE.ModalDialog.open("#upload-dialog");
+  self.versions = self.disposedPureComputed( function() {
+    return _( self.attachment().versions)
+      .map( function( v ) {
+        var approval = service.attachmentApproval( self.attachment, v.fileId ) || {};
+        var authority = lupapisteApp.models.currentUser.isAuthority();
+        var rejected = approval.state === service.REJECTED;
+        var approved = approval.state === service.APPROVED;
+        // Authority sees every version note, applicant only the rejected.
+        return _.merge( {note: (authority || rejected) && approval.note,
+                         approved: approved,
+                         rejected: rejected,
+                         // Applicant can only delete version without approval status.
+                         canDelete: authModel.ok( "delete-attachment-version")
+                         && (authority || !(approved || rejected))},
+                        v);
+      })
+      .reverse()
+      .value();
+  });
+
+  // If postfix is not given, we use approved/rejected
+  self.versionTestId = function( prefix, version, postfix ) {
+    var nums = version.version;
+    if( !postfix) {
+      postfix = (version.approved && "approved")
+        || (version.rejected && "rejected")
+        || "neutral";
+    }
+    return _( [prefix, nums.major, nums.minor, postfix])
+      .map( ko.unwrap )
+      .join(  "-" );
   };
-  self.uploadingAllowed = function() { return authModel.ok("upload-attachment"); };
+
+  // Versions - add
+  self.addEventListener("attachment-upload", { eventType: "finished", attachmentId: self.id }, util.showSavedIndicator);
+
+  self.uploadingAllowed = function() { return authModel.ok("bind-attachment"); };
 
   // Versions - delete
-  self.deleteAttachmentVersionAllowed = function() { return authModel.ok("delete-attachment-version"); };
   self.deleteVersion = function(fileModel) {
     var fileId = fileModel.fileId;
     var originalFileId = fileModel.originalFileId;
@@ -149,30 +171,13 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.creatingRamAllowed = function() { return authModel.ok("create-ram-attachment"); };
 
   // Meta
-  function groupToString(group) {
-    return _.filter([_.get(group, "id") ? "operation" : _.get(group, "groupType"), _.get(group, "id")], _.isString).join("-");
-  }
-  var groupMapping = {};
-  self.selectableGroups = self.disposedComputed(function() {
-    // Use group strings in group selector
-    groupMapping = _.keyBy(self.groupTypes(), groupToString);
-    return _.keys(groupMapping);
+  self.operationSelectorEditable = self.disposedPureComputed(function() {
+    return _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
   });
-  self.selectedGroup = ko.observable(groupToString(self.attachment().group()));
-  self.disposedSubscribe(self.selectedGroup, function(groupString) {
-    self.attachment().group(_.get(groupMapping, groupString));
-  });
-  self.hasOperationSelector = _.get(self.application, ["primaryOperation", "attachment-op-selector"]);
-  self.getGroupOptionsText = function(itemStr) {
-    var item = _.get(groupMapping, itemStr);
-    if (_.get(item, "groupType") === "operation") {
-      return _.filter([loc([item.name, "_group_label"]), item.description]).join(" - ");
-    } else if (_.get(item, "groupType")) {
-      return loc([item.groupType, "_group_label"]);
-    }
+
+  self.metaUpdateAllowed = function() {
+    return Boolean(authModel.ok("set-attachment-meta"));
   };
-  self.getScaleOptionsText = function(item) { return item === "muu" ? loc("select-other") : item; };
-  self.metaUpdateAllowed = function() { return authModel.ok("set-attachment-meta") && editable(); };
 
   addUpdateListener("set-attachment-meta", {ok: true}, util.showSavedIndicatorIcon);
 
@@ -182,12 +187,11 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
 
   // Not needed
   self.setNotNeededAllowed = function() { return authModel.ok("set-attachment-not-needed"); };
-  self.setNotNeededEnabled = editable;
   addUpdateListener("set-attachment-not-needed", {ok: true}, util.showSavedIndicatorIcon);
 
   // Visibility
   self.getVibilityOptionsText = function(val) { return loc("attachment.visibility." + val); };
-  self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility") && editable(); };
+  self.setVisibilityAllowed = function() { return authModel.ok("set-attachment-visibility"); };
   addUpdateListener("set-attachment-visibility", {ok: true}, util.showSavedIndicatorIcon);
 
   // Manual construction time toggle
@@ -263,4 +267,6 @@ LUPAPISTE.AttachmentDetailsModel = function(params) {
   self.addHubListener("side-panel-open", _.partial(self.disablePreview, true));
   self.addHubListener("side-panel-close", _.partial(self.disablePreview, false));
 
+  // Initial refresh just in case
+  querySelf();
 };

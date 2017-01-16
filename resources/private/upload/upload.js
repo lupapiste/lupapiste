@@ -39,9 +39,11 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
     ajax
       .query("attachment-types", {id: applicationId})
       .success(function(d) {
-        LUPAPISTE.Upload.attachmentTypeGroups(_.map(attachmentUtils.sortAttachmentTypes(d.attachmentTypes), function(v) {
-          return {group: v[0], types: _.map(v[1], function(t) {return {name: t};})};
-        }));
+        LUPAPISTE.Upload.attachmentTypeGroups(
+          _(d.attachmentTypes)
+            .groupBy("type-group")
+            .map(function(types, group) { return  { group: group, types: types }; })
+            .value());
         var uploadForm$ = $("#attachmentUploadForm");
         uploadForm$.applyBindings(LUPAPISTE.Upload);
         $("#initLoader").hide();

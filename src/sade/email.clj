@@ -1,14 +1,14 @@
 (ns sade.email
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as s]
             [postal.core :as postal]
             [sade.env :as env]
             [sade.strings :as ss]
             [net.cgrand.enlive-html :as enlive]
             [endophile.core :as endophile]
-            [clostache.parser :as clostache]
-            [net.cgrand.enlive-html :as html]))
+            [clostache.parser :as clostache]))
 
 ;;
 ;; Configuration:
@@ -68,7 +68,9 @@
                      (vec body))
         attachments (when attachments
                       (for [attachment attachments]
-                        (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
+                        (-> (set/rename-keys attachment {:filename :file-name})
+                            (select-keys [:content :file-name])
+                            (assoc :type :attachment))))
         body       (if attachments
                      (into body attachments)
                      body)]

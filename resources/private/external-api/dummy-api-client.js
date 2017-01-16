@@ -56,14 +56,3 @@ LupapisteApi.integrationSent = function (permit) {
                            component: "ok-dialog",
                            componentParams: {text: JSON.stringify(permit, null, 2)}});
 };
-
-/**
-* Queries SitoGis if the permit is there
-* @static
-* @param {string} id Permit id (asiointitunnus)
-* @returns {boolean} is the permit in SitoGis?
-*/
-LupapisteApi.isInSitoGis = function (id) {
-  "use strict";
-  return id === "";
-};

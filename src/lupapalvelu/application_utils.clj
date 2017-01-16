@@ -16,10 +16,20 @@
         (s/replace #"\p{Punct}" "")
         (s/replace #"\s{2,}"    " "))))
 
+(defn operation-description
+  "obtain the name of application's primary operation, taking into
+  account that some legacy applications may not have a primary
+  operation"
+  [application lang]
+  (let [primary-operation (-> application :primaryOperation :name)]
+    (if primary-operation
+      (i18n/localize lang "operations" primary-operation)
+      "")))
+
 (def operation-index
   (reduce
     (fn [ops k]
-      (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
+      (let [localizations (map #(i18n/localize % "operations" (name k)) i18n/supported-langs)
             normalized (map normalize-operation-name localizations)]
         (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
     []
@@ -34,8 +44,9 @@
 
 (defn with-application-kind [{:keys [permitSubtype infoRequest] :as app}]
   (assoc app :kind (cond
-                     (not (ss/blank? permitSubtype)) (str "permitSubtype." permitSubtype)
                      infoRequest "applications.inforequest"
+                     (not (ss/blank? permitSubtype))
+                                 (str "permitSubtype." permitSubtype)
                      :else       "applications.application")))
 
 (defn enrich-applications-with-organization-name [applications]

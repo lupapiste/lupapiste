@@ -6,7 +6,17 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.applicationId = params.applicationId;
   self.documentId = params.documentId;
   self.service = params.service || lupapisteApp.services.documentDataService;
-  self.schemaRows = params.schema.rows;
+  self.schemaRows = _.map(params.schema.rows,
+                          function( row ) {
+                            if( _.isArray( row )) {
+                              return {row: row};
+                            }
+                            if( row.row ) {
+                              return {row: row.row,
+                                      rowCss: util.arrayToObject( row.css )};
+                            }
+                            return row;
+                          });
   self.authModel = params.authModel || lupapisteApp.models.applicationAuthModel;
   self.componentTemplate = (params.template || params.schema.template) || "default-docgen-group-template";
 
@@ -74,27 +84,28 @@ LUPAPISTE.DocgenGroupModel = function(params) {
   self.rowSchemas = ko.pureComputed(function() {
     return _(self.schemaRows)
       .map(function(row) {
-        if ( _.isArray(row)) {
-          return _(row)
-            .map(function(schemaName) {
-              var cols = parsePart( schemaName, /::([\d+])/, 1);
-              var colClass = ["col-" + cols, parsePart( schemaName, /\[([^\]]+)\]/)].join( " ");
-              var pathString = parsePart( schemaName, /^[^[:]+/ );
-              var path = self.path.concat(pathString.split("/"));
-              var schema = getInSchema(params.schema, self.path, pathString);
-              return schema && _.extend({}, schema, {
-                path: path,
-                uicomponent: schema.uicomponent || "docgen-" + schema.type,
-                schemaI18name: params.schemaI18name,
-                i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(pathString.split("/")),
-                applicationId: params.applicationId,
-                documentId: params.documentId,
-                service: self.service,
-                colClass: colClass
-              });
-            })
-            .filter()
-            .value();
+        if ( row.row) {
+          return {row: _(row.row )
+                  .map(function(schemaName) {
+                    var cols = parsePart( schemaName, /::([\d+])/, 1);
+                    var colClass = ["col-" + cols, parsePart( schemaName, /\[([^\]]+)\]/)].join( " ");
+                    var pathString = parsePart( schemaName, /^[^[:]+/ );
+                    var path = self.path.concat(pathString.split("/"));
+                    var schema = getInSchema(params.schema, self.path, pathString);
+                    return schema && _.extend({}, schema, {
+                      path: path,
+                      uicomponent: schema.uicomponent || "docgen-" + schema.type,
+                      schemaI18name: params.schemaI18name,
+                      i18npath: schema.i18nkey ? [schema.i18nkey] : params.i18npath.concat(pathString.split("/")),
+                      applicationId: params.applicationId,
+                      documentId: params.documentId,
+                      service: self.service,
+                      colClass: colClass
+                    });
+                  })
+                  .filter()
+                  .value(),
+                  rowCss: row.rowCss};
         } else {
           var headerTag = _.head(_.keys(row));
           var ltext = row[headerTag];

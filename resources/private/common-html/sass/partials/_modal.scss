@@ -301,3 +301,11 @@
     right: $marginS;
   }
 }
+
+.neighbor-error {
+  color: $negative;
+  margin: {
+    top: $marginS;
+    bottom: $marginS
+  }
+}

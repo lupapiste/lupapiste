@@ -16,12 +16,15 @@
            (java.io ByteArrayOutputStream ByteArrayInputStream)))
 
 
-(def- url (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001)))
+(def- url (cond
+            (ss/not-blank? (env/value :libreoffice :url)) (env/value :libreoffice :url)
+            (ss/not-blank? (env/value :libreoffice :host)) (str "http://" (env/value :libreoffice :host) ":" (or (env/value :libreoffice :port) 8001))))
 
 (defn enabled? []
-  (boolean (if (or (not (env/feature? :libreoffice)) (ss/blank? (env/value :libreoffice :host)))
-             (info "Danger: Libreoffice PDF/A conversion feature disabled or service host not configured")
-             true)))
+  (if-not url
+    (do (warn "Danger: Libreoffice PDF/A conversion feature disabled or service host not configured")
+        false)
+    true))
 
 (defn- convert-to-pdfa-request [filename content]
   (http/post url

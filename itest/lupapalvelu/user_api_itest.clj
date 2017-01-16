@@ -29,22 +29,31 @@
 
   ; It's not nice to test the number of users, but... well, this is relly easy:
   (fact (-> (query admin :users :role "admin") :users count) => 1)
-  (fact (-> (query admin :users :organization "753-R") :users count) => 5)
+  (fact (-> (query admin :users :organization "753-R") :users count) => 6)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 4))
 
 (facts users-for-datatables
- (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 5) count)
-                                  :total 5
-                                  :display 5
+                 :data (contains {:rows (comp (partial = 6) count)
+                                  :total 6
+                                  :display 6
                                   :echo "123"})}))
- (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 6 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
-                                  :total 5
+                                  :total 6
                                   :display 1
                                   :echo "123"})})))
+
+(facts "Check passwords"
+       (fact "Good password"
+             (command pena :check-password :password "pena") => ok?)
+       (fact "Bad password"
+             (command pena :check-password :password "bad") => {:ok false :text "error.password"})
+       (fact "Empty password"
+             (command pena :check-password :password "") => fail?))
+
 ;;
 ;; ==============================================================================
 ;; Creating users:
@@ -299,7 +308,7 @@
        login        (http-post
                       (str (server-address) "/api/login")
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
-       csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
+       csrf-token   (get-anti-csrf store) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
        sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]

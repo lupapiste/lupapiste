@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="reports">
+      <div class="container">
+        <section class="authority-admin-reports">
+          <h2 data-bind="ltext: 'auth-admin.reports'"></h2>
+
+          <section>
+            <h2 data-bind="ltext: 'authorityAdmin.openApplicationsReport.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.openApplicationsReport.caption'"></span>
+            <form action="/api/raw/open-applications-xlsx" method="get">
+              <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="submit" data-bind="attr: { value: loc('authorityAdmin.openApplicationsReport.buttonText')}"/>
+            </form>
+          </section>
+
+          <section>
+            <h2 data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.title'"></h2>
+            <span data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.caption'"></span>
+            <form action="/api/raw/applications-between-xlsx" method="get">
+              <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+              <input type="hidden" name="lang" data-bind="value: loc.currentLanguage">
+              <input type="hidden" name="startTs" data-bind="value: reportsModel.startComputed">
+              <input type="hidden" name="endTs" data-bind="value: reportsModel.endComputed">
+              <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.startTs'"></label>
+              <input type="text" data-bind="datepicker: reportsModel.startDate" class="form-input">
+              <label data-bind="ltext: 'authorityAdmin.applicationsReportTimeperiod.endTs'"></label>
+              <input type="text" data-bind="datepicker: reportsModel.endDate" class="form-input">
+              <input type="submit" data-bind="attr: { value: loc('authorityAdmin.applicationsReportTimeperiod.buttonText')}"/>
+            </form>
+          </section>
+
+        </section>
+      </div>
+    </section>
+  </body>
+</html>

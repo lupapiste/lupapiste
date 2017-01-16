@@ -10,8 +10,7 @@ Variables      variables.py
 *** Test Cases ***
 
 Sonja logs in and creates application
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  Rock'n'Roll${secs}
+  Set Suite Variable  ${appname}  Rock'n'Rollup
   Sonja logs in
   Create application with state   ${appname}  753-416-25-30  kerrostalo-rivitalo  open
 
@@ -20,6 +19,59 @@ Sonja goes to attachments tab
   Rollup rejected  Pääpiirustukset
   Rollup rejected  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
+  
+Every accordion is open
+  Rollup open  Hakemuksen liitteet
+  Rollup open  Osapuolet
+  Rollup open  Yleiset hankkeen liitteet
+  Rollup open  Pääpiirustukset
+  Rollup open  Muut suunnitelmat
+  Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
+
+Close Muut suunnitelmat
+  Toggle rollup  Muut suunnitelmat
+  Rollup closed  Muut suunnitelmat
+
+Toggle all opens all
+  Scroll and click test id  toggle-all-accordions
+  Rollup open  Hakemuksen liitteet
+  Rollup open  Osapuolet
+  Rollup open  Yleiset hankkeen liitteet
+  Rollup open  Pääpiirustukset
+  Rollup open  Muut suunnitelmat
+  Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
+
+Toggle all closes all
+  Scroll and click test id  toggle-all-accordions
+  Rollup closed  Hakemuksen liitteet
+  Rollup closed  Osapuolet
+  Rollup closed  Yleiset hankkeen liitteet
+  Rollup closed  Pääpiirustukset
+  Rollup closed  Muut suunnitelmat
+  Rollup closed  Asuinkerrostalon tai rivitalon rakentaminen
+  Scroll and click test id  toggle-all-accordions
+
+Close Osapuolet and toggle all
+  Toggle rollup  Muut suunnitelmat
+  Rollup closed  Muut suunnitelmat
+  Scroll and click test id  toggle-all-accordions
+  Rollup open  Hakemuksen liitteet
+  Rollup open  Osapuolet
+  Rollup open  Yleiset hankkeen liitteet
+  Rollup open  Pääpiirustukset
+  Rollup open  Muut suunnitelmat
+  Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
+
+Close Hakemuksen liitteet and toggle all
+  Toggle rollup  Hakemuksen liitteet
+  Rollup closed  Hakemuksen liitteet
+  Scroll and click test id  toggle-all-accordions
+  Rollup open  Hakemuksen liitteet
+  Rollup open  Osapuolet
+  Rollup open  Yleiset hankkeen liitteet
+  Rollup open  Pääpiirustukset
+  Rollup open  Muut suunnitelmat
+  Rollup open  Asuinkerrostalon tai rivitalon rakentaminen
 
 Accordion with only not needed is neutral
   Click not needed  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
@@ -30,17 +82,11 @@ Accordion with only not needed is neutral
   Click not needed  paapiirustus.pohjapiirustus
 
 Sonja adds another Pääpiirustus
-  Add attachment  application  ${PNG_TESTFILE_PATH}  Hello  paapiirustus.julkisivupiirustus  Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
-
-Sonja approves Julkisivupiirustus
-  Wait Until  Element should be visible  jquery=tr[data-test-type='paapiirustus.julkisivupiirustus']
-  Approve row  tr[data-test-type='paapiirustus.julkisivupiirustus']
+  Upload attachment  ${PNG_TESTFILE_PATH}  Julkisivupiirustus  Hello  Asuinkerrostalon tai rivitalon rakentaminen
 
 Pääpiirrustukset accordion still rejected since Pohjapiirustus not uploaded
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
   Rollup rejected  Pääpiirustukset
-  Rollup neutral  Muut suunnitelmat
 
 Hiding not needed does not affect states
   Scroll and click test id  needed-filter-label
@@ -66,7 +112,6 @@ Sonja adds and approves Väestonsuojasuunnitelma
   Click not needed  pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma
   Add attachment file  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']  ${PNG_TESTFILE_PATH}
   Return to application
-  Approve row  tr[data-test-type='pelastusviranomaiselle_esitettavat_suunnitelmat.vaestonsuojasuunnitelma']
 
 Operation rollups are now approved
   Rollup approved  Pääpiirustukset

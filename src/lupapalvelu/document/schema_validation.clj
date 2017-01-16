@@ -1,5 +1,7 @@
 (ns lupapalvelu.document.schema-validation
   (:require [schema.core :refer [defschema] :as sc]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.authorization :as auth]))
 
 (def opt sc/optional-key)
@@ -24,7 +26,7 @@
 (defschema GenInput
   "General leaf element schema. Base element for input elements."
   {:name              sc/Str         ;; Element name
-   :type              (sc/enum :text :string :select :checkbox :radioGroup :date)
+   :type              (sc/enum :text :string :select :checkbox :radioGroup :date :time)
    (opt :uicomponent) sc/Keyword     ;; Component name for special components
    (opt :inputType)   (sc/enum :string :checkbox :localized-string :inline-string
                                :check-string :checkbox-wrapper
@@ -49,11 +51,10 @@
    (opt :css)         [sc/Keyword]   ;; CSS classes. Even an empty vector overrides default classes.
    (opt :auth)        Auth
    (opt :transform)   sc/Keyword     ;; Value transform. See persistence/transform-value
-   (opt :pre-values)  [single-value] ;; Used inside pre-selector element to toggle element visibility
    (opt :hide-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values [single-value]}
+                       :values #{single-value}}
    (opt :show-when)   {:path  sc/Str ;; Toggle element visibility by values of another element
-                       :values [single-value]}
+                       :values #{single-value}}
 })
 
 (defschema Text
@@ -152,6 +153,15 @@
   (merge GenInput
          {:type       (sc/eq :date)}))
 
+(defschema TimeString
+  "Time string hh:mm:ss.s"
+  (merge GenInput
+         {:type       (sc/eq :time)}))
+
+(defschema MsDate
+  (merge GenInput
+         {:type       (sc/eq :msDate)}))
+
 (defschema Checkbox
   (merge GenInput
          {:type       (sc/eq :checkbox)}))
@@ -224,40 +234,60 @@
                   (type-pred :select)     Select
                   (type-pred :radioGroup) RadioGroup
                   (type-pred :date)       Date
+                  (type-pred :time)       TimeString
+                  (type-pred :msDate)     MsDate
                   (type-pred :linkPermitSelector) LinkPermitSelector
                   (apply type-pred special-types) Special
                   :else                   {:type (sc/eq nil)})) ; For better error messages
 
-(declare Group)
+(declare Element)
+
+(defschema Calculation
+  "Calculated column for Table."
+  {:name    sc/Str
+   :type    (sc/eq :calculation)
+   :columns [sc/Str]})
 
 (defschema Table
   "Table element. Represented as html table. Not recursive group type."
-  {:name                       sc/Str       ;;
+  {:name                       sc/Str     ;;
    :type                       (sc/eq :table)
-   ;; TODO: each body item could be either Input or Group, but the
-   ;; most obvious definitions do not compile.
-   :body                       [(sc/if (type-pred :group) (sc/recursive #'Group) Input)]      ;;
-   (opt :i18nkey)              sc/Str       ;; Absolute localization key
-   (opt :group-help)           sc/Str       ;;
-   (opt :uicomponent)          sc/Keyword   ;; Component name for special components
-   (opt :approvable)           sc/Bool      ;;
-   (opt :repeating)            sc/Bool      ;; Should be  always repeating -> default true
-   (opt :repeating-init-empty) sc/Bool      ;;
-   (opt :copybutton)           sc/Bool      ;;
+   :body                       [(sc/recursive #'Element)] ;;
+   (opt :i18nkey)              sc/Str     ;; Absolute localization key
+   (opt :group-help)           sc/Str     ;;
+   (opt :uicomponent)          sc/Keyword ;; Component name for special components
+   (opt :approvable)           sc/Bool    ;;
+   (opt :repeating)            sc/Bool    ;; Should be  always repeating -> default true
+   (opt :repeating-init-empty) sc/Bool    ;;
+   (opt :exclude-from-pdf)     sc/Bool    ;;
+   (opt :copybutton)           sc/Bool    ;;
    (opt :validator)            sc/Keyword
+   ;; CSS classes apply either to the whole component (keywords) or
+   ;; individual columns {columnName class}
    (opt :css)                  [sc/Keyword]
-   (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
-   (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}})
+   (opt :columnCss)            {sc/Str [sc/Keyword]}
+   (opt :hide-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
+                                :values #{single-value}}
+   (opt :show-when)            {:path   sc/Str ;; Toggle element visibility by values of another element
+                                :values #{single-value}}
+   ;; Just column names -> no units
+   ;; Map item fields:
+   ;; :amount the column name for data
+   ;; :unit column for unit information
+   ;; :unitKey fixed unit (supported values are :t and :kg).
+   ;; :unit and :unitKey are mutually exclusive.
+   (opt :footer-sums)          [(sc/conditional
+                                 string? sc/Str
+                                 :unitKey {:amount sc/Str
+                                           :unitKey sc/Keyword}
+                                 :unit  {:amount sc/Str
+                                         :unit   sc/Str})]})
 
 (defschema Group
   "Group type that groups any doc elements."
   {:name                       sc/Str       ;;
    :type                       (sc/eq :group)
-   :body                       [(sc/conditional (type-pred :group) (sc/recursive #'Group)
-                                                (type-pred :table) Table
-                                                :else              Input)]
+   :body                       [(sc/recursive #'Element)]
    (opt :subtype)              sc/Keyword
    (opt :i18nkey)              sc/Str       ;;
    (opt :group-help)           sc/Str       ;; Localization key for help text displayd right after group label
@@ -274,23 +304,26 @@
    (opt :blacklist)            [(sc/if string? (sc/eq "turvakieltoKytkin") sc/Keyword)] ;; WTF turvakieltoKytkin
    (opt :listen)               [sc/Keyword] ;; Events to listen
    (opt :hide-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
+                                :values #{single-value}}
    (opt :show-when)            {:path  sc/Str ;; Toggle element visibility by values of another element
-                                :values [single-value]}
+                                :values #{single-value}}
    (opt :template)             sc/Str       ;; Component template to use
-   ;; Row item format: "<path><cols><css>"
+   ;; Row text item format: "<path><cols><css>"
    ;; <path>  path1/path2/...
    ;; <cols>  ::n  where n is 1-4 (default 1)
    ;; <css>   [class1 class2 ...]
    ;; <cols> and <css> are optional, either or both can be omitted.
-   (opt :rows)                 [(sc/if map?
-                                  {sc/Keyword sc/Str}
-                                  [sc/Str])]})
+   (opt :rows)                 [(sc/conditional
+                                 :row {:css [sc/Keyword]
+                                       :row [sc/Str]}
+                                 map?  {sc/Keyword sc/Str}
+                                 :else [sc/Str])]})
 
 (defschema Element
   "Any doc element."
   (sc/conditional (type-pred :table) Table
                   (type-pred :group) Group
+                  (type-pred :calculation) Calculation
                   :else              Input))
 
 (defschema Doc
@@ -305,11 +338,15 @@
           (opt :approvable)                  sc/Bool    ;;
           (opt :repeating)                   sc/Bool    ;;
           (opt :removable)                   sc/Bool    ;;
+          (opt :disableable)                 sc/Bool    ;;
+          (opt :redraw-on-approval)          sc/Bool    ;;
+          (opt :post-verdict-party)          sc/Bool    ;;
           (opt :removable-only-by-authority) sc/Bool    ;; Deny removing document by user role
           (opt :deny-removing-last-document) sc/Bool    ;; Deny removing last repeating doc
           (opt :user-authz-roles)            #{(apply sc/enum auth/all-authz-roles)}
           (opt :no-repeat-button)            sc/Bool    ;;
-          (opt :construction-time)           sc/Bool    ;; Is a construction time doc
+          (opt :addable-in-states)           #{sc/Keyword} ;; States where document can be added
+          (opt :editable-in-states)          #{sc/Keyword} ;;
           (opt :exclude-from-pdf)            sc/Bool    ;;
           (opt :after-update)                sc/Symbol  ;; Function, triggered on update
           (opt :accordion-fields)            [[sc/Str]] ;; Paths to display in accordion summary
@@ -318,8 +355,45 @@
    (opt :template) sc/Str
    :body  [Element]})
 
+(defn get-in-schema [schema path]
+  (reduce #(util/find-by-key :name (name %2) (:body %1)) schema path))
+
+(defn- build-absolute-path [path target-path-string]
+  (let [target-path (-> (re-matches #"([^\[:]+)+(\[.+\])?(::\d+)?" target-path-string) second (ss/split #"/"))]
+    (if (ss/blank? (first target-path))
+      (vec (rest target-path))
+      (vec (concat path target-path)))))
+
+(defn validate-rows [{name :name rows :rows :as schema}]
+  (let [invalid-paths (->> (map #(if (vector? %) % (:row %)) rows)
+                           (apply concat)
+                           (map #(vector % (build-absolute-path [] %)))
+                           (util/map-values (partial get-in-schema schema))
+                           (filter (comp nil? val))
+                           keys)]
+    (when (not-empty invalid-paths) {:description "Invalid rows definition" :schema name :errors invalid-paths})))
+
+(defn validate-value-reference [key doc-schema {:keys [path] :as schema}]
+  (when (and (key schema) (->> (build-absolute-path (butlast path) (get-in schema [key :path]))
+                               (get-in-schema doc-schema)
+                               nil?))
+    {:description (str "Invalid " (name key) " path") :schema (:name schema) :path path :errors (get-in schema [key :path])}))
+
+(defn validate-references [doc-schema]
+  (loop [schemas [(assoc doc-schema :path [])]  errors []]
+    (let [errors (concat errors
+                         (map validate-rows schemas)
+                         (map (partial validate-value-reference :hide-when doc-schema) schemas)
+                         (map (partial validate-value-reference :show-when doc-schema) schemas))
+          subschemas (mapcat (fn [{:keys [body path]}]
+                               (map #(assoc % :path (conj path (keyword (:name %)))) body))
+                             schemas)]
+      (if (not-empty subschemas)
+        (recur subschemas errors)
+        (not-empty (remove nil? errors))))))
+
 (defn validate-doc-schema [doc-schema]
-  (sc/check Doc doc-schema))
+  (util/assoc-when (sc/check Doc doc-schema) :reference-errors (validate-references doc-schema)))
 
 (defn validate-elem-schema [elem-schema]
   (sc/check Element elem-schema))

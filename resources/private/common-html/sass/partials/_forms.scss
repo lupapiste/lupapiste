@@ -414,14 +414,22 @@ input.form-input.inline {
 }
 
 .form-input-and-unit {
-  display: block;
+  display: table;
   margin-right: $marginM;
+  white-space: nowrap;
+  input {
+    display: table-cell
+  }
 }
+
 .form-input-and-unit .form-input {
-  display: inline-block;
   margin-right: $marginM;
 }
+
 .form-string-unit {
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 2px;
 }
 
 .form-input.tiny {
@@ -563,6 +571,9 @@ input.form-input.inline {
     .form-input .text {
       height: 25px;
     }
+    .form-input.warn {
+      border: 1px solid $red-dark;
+    }
   }
 
   .form-table .form-input.combobox, select {
@@ -570,7 +581,6 @@ input.form-input.inline {
   }
 
   .form-table .form-indicator {
-    right: auto;
     top: 0;
     height: 28px;
     width: 28px;
@@ -708,7 +718,7 @@ div.sticky {
     //display:inline-block;
     text-align: right;
     float: right;
-    min-width: 200px;
+     min-width: 200px;
   }
   i.approved, i.rejected  {
     display: none;
@@ -737,6 +747,9 @@ div.sticky {
   span {
     color: $gray187;
   }
+  span.is-details--rejected {
+    color: $red;
+  }
   .lupicon-circle-attention {
     color: $red;
   }
@@ -748,67 +761,20 @@ div.sticky {
   }
 }
 
-
-// Top-level form-approval-status
-
-div.sticky .form-approval-status.no-border-bottom {
-  border-bottom: 1px solid $gray221;
-  float: left;
-  .like-btn {
-    padding: {
-      left: 10px;
-    }
-    span {
-      color: $gray153;
-    }
-  }
-}
-
-div.sticky .form-approval-status.no-border-bottom {
-  border-bottom: none;
-}
-
-div.sticky .form-approval-status.no-border-bottom.own-line {
-  width: 100%;
-  .like-btn {
-    padding: {
-//      left: 10px;
-      top: 4px;
-    }
-    min-height: initial;
-    line-height: initial;
-    span {
-      color: $gray153;
-    }
-  }
-}
-
-// Top-level reject button should be invisible
-// when the bar is in rejected mode.
-/* button.rejected ~ .group-buttons .is-top.rejected { */
-/*   display: none; */
-/* } */
-
-.is-middle {
-  vertical-align: middle;
-}
-
-.description-bubble {
-  //display: none;
+@mixin description-bubble-mixin( $width: 100%, $margin-top: 15px, $arrow-left: 5%, $padding: $marginS) {
   display: block;
-  //overflow-y: visible;
   position: relative;
   float: left;
   box-sizing: border-box;
   background-color: white;
-  width: 100%;
+  width: $width;
   border-radius: 2px;
   border: 1px solid $orange-light;
-  padding: $marginS $marginS $marginS $marginS;
-  margin-top: 15px;
+  padding: $padding;
+  margin-top: $margin-top;
   &:after, &:before {
              bottom: 100%;
-             left: 5%;
+             left: $arrow-left;
              border: solid transparent;
              content: " ";
              height: 0;
@@ -841,6 +807,131 @@ div.sticky .form-approval-status.no-border-bottom.own-line {
       box-shadow: none;
     }
   }
+}
+
+@include input-and-button( reject-edits ) {}
+
+@mixin reject( $margin-left: 34px,
+               $margin-top: -10px,
+               $color: inherit) {
+  margin: {
+    left: $margin-left;
+    top: $margin-top;
+  }
+  font-size: 16px;
+  color: $color;
+}
+
+.reject-note {
+  @include reject( $color: $gray187);
+  padding-right: 1em;
+}
+
+.reject-note--rejected {
+  color: $red;
+}
+
+.reject-note-editor {
+  @include reject;
+  @include description-bubble-mixin( initial, $padding: 0);
+  display: inline-block;
+}
+
+.accordion-reject-note {
+  @include reject( $margin-left: 44px, $color: $gray153 );
+}
+
+.accordion-reject-note-editor {
+  @include reject( 45px );
+  @include description-bubble-mixin( initial, 0, $padding: 0);
+  margin-left: 45px;
+}
+
+.toolbar-reject-note {
+  @include reject( $margin-left: 44px, $color: $gray153 );
+  color: $gray153;
+  min-height: 40px;
+  line-height: 40px;
+}
+
+.toolbar-reject-note-editor {
+  @include reject( 45px );
+  @include description-bubble-mixin( initial, 10px, $padding: 0);
+  //min-height: 40px;
+  margin-left: 45px;
+  margin-bottom: 10px;
+}
+
+.attachment-reject-note-editor {
+  @include reject;
+  @include description-bubble-mixin( initial, 0, $padding: 0 );
+  margin-bottom: 10px;
+  //float: none;
+}
+
+.table-reject-note {
+  @include reject( 0, 0 );
+}
+
+.table-reject-note-editor {
+  @include reject( 0 );
+  @include description-bubble-mixin( initial, 0, 18px, $padding: 0 );
+  //float: none;
+}
+
+// Top-level form-approval-status
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: 1px solid $gray221;
+  float: left;
+  .like-btn {
+    padding: {
+      left: 10px;
+    }
+    span {
+      color: $gray153;
+    }
+    span.is-details--rejected {
+      color: $red;
+    }
+  }
+}
+
+div.sticky .form-approval-status.no-border-bottom {
+  border-bottom: none;
+}
+
+div.sticky .form-approval-status.no-border-bottom.own-line {
+  width: 100%;
+  .like-btn {
+    padding: {
+//      left: 10px;
+      top: 4px;
+    }
+    min-height: initial;
+    line-height: initial;
+    span {
+      color: $gray153;
+    }
+    span.is-details--rejected {
+      color: $red;
+    }
+  }
+}
+
+// Top-level reject button should be invisible
+// when the bar is in rejected mode.
+/* button.rejected ~ .group-buttons .is-top.rejected { */
+/*   display: none; */
+/* } */
+
+.is-middle {
+  vertical-align: middle;
+}
+
+
+.description-bubble {
+  @include description-bubble-mixin;
 }
 
 .container-bubble {
@@ -1037,30 +1128,6 @@ $max-columns: 12;
     label {
       display: block;
     }
-  }
-}
-
-
-
-@mixin input-fields() {
-  padding: 0 $marginM;
-  box-sizing: border-box;
-  min-height: $grid-input-height;
-  height: $grid-input-height;
-  font-size: $grid-font-size;
-  color: $input-color;
-  border: 1px solid $input-border-color;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-  -moz-appearance:none;
-
-  &:focus {
-    color: $input-focus-color;
-    border-color: $input-focus-border-color;
-  }
-  &:disabled {
-    border-color: $input-disabled-border-color;
-    background-color: $input-disabled-background-color;
   }
 }
 
@@ -1551,11 +1618,53 @@ div.review-done {
   }
 }
 
-.col-fixed .inline {
-  display: table-cell;
-  vertical-align: bottom;
-  height: 120px;
-  .form-input {
-    margin-bottom: 0;
+@mixin row-label-x ($n, $row-margin: 10px) {
+  margin: {
+    top: $row-margin;
+    bottom: $row-margin;
   }
+  .inline {
+    display: inherit;
+  }
+  .form-label {
+    display: table-cell;
+    vertical-align: bottom;
+    height: $n * 24 + 1px;
+    padding-bottom: 1px;
+  }
+  .form-input {
+    margin: 0;
+  }
+}
+
+.row.label-x-2 {
+  @include row-label-x( 2 );
+}
+
+.row.label-x-3 {
+  @include row-label-x( 3, 5 );
+}
+
+.row.row--tight {
+  margin: {
+    top: 10px;
+    bottom: 10px;
+  }
+}
+
+
+.calculation-result {
+  font-size: 16px;
+  text-align: center;
+  display: block;
+  min-height: $btn-height;
+  line-height: $btn-height;
+}
+
+.calculation-error {
+  color: $red-darkest;
+  line-height: $btn-height;
+  text-align: center;
+  display: inherit;
+  margin-bottom: 0;
 }

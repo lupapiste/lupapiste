@@ -6,6 +6,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+ try+]]
             [monger.operators :refer :all]
+            [swiss.arrows :refer :all]
             [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
@@ -373,7 +374,6 @@
   {:parameters [email roles]
    :input-validators [(partial action/non-blank-parameters [:email])
                       (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
-                      action/email-validator
                       (partial allowed-roles organization/authority-roles)]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
@@ -392,6 +392,20 @@
 ;;
 ;; Change and reset password:
 ;;
+
+(defcommand check-password
+  {:parameters [password]
+   :user-roles #{:applicant :authority}
+   :input-validators [(partial action/non-blank-parameters [:password])]}
+  [{user :user}]
+  (if (security/check-password password
+                               (some-<>> user
+                                        :id
+                                        (mongo/by-id :users <> {:private.password true})
+                                        :private
+                                        :password))
+    (ok)
+    (fail :error.password)))
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
@@ -657,7 +671,7 @@
   (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
     {:status 200
      :body ((:content attachment))
-     :headers {"Content-Type" (:content-type attachment)
+     :headers {"Content-Type" (:contentType attachment)
                "Content-Length" (str (:size attachment))
                "Content-Disposition" (format "attachment;filename=\"%s\"" (ss/encode-filename (:file-name attachment)))}}
     {:status 404

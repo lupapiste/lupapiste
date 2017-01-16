@@ -100,13 +100,11 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.hashChanged = function () {
-      if (lupapisteApp.services.scrollService) {
-        // Service might not be initialized yet
-        lupapisteApp.services.scrollService.push({hash: "#!/" + self.currentHash,
-                                                   followed: true,
-                                                   override: true});
-        self.previousHash = self.currentHash;
-      }
+      hub.send("scrollService::push", {hash: "#!/" + self.currentHash,
+                                       followed: true,
+                                       override: true});
+      self.previousHash = self.currentHash;
+
       self.currentHash = (location.hash || "").substr(3);
 
       var q = self.currentHash.indexOf("?");

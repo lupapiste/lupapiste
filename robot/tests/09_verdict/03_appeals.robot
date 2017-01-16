@@ -8,12 +8,20 @@ Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
+# ---------------------
+# Mikko
+# ---------------------
+
 Mikko wants to build Skyscraper
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Skyscraper${secs}
   Create application with state  ${appname}  753-416-25-30  kerrostalo-rivitalo  submitted
   [Teardown]  logout
+
+# ---------------------
+# Sonja
+# ---------------------
 
 Sonja logs in
   Sonja logs in
@@ -29,6 +37,7 @@ Sonja fetches verdict from municipality KRYSP service
 
 There are no appeals yet
   Element should not be visible  jquery=table.appeals-table
+  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
 
 Sonja adds appeal to the first verdict
   Add to verdict  0-0  appeal  Veijo  1.4.2016  Hello world
@@ -136,6 +145,28 @@ Making appeal date earlier than appealVerdict makes the latter editable
   OK bubble 0-0-3
   Wait test id visible  edit-appeal-0-0-3
   Appeals row check  0-0  3  appealVerdict  Phong  1.6.2016
+  [Teardown]  Logout
+
+# ---------------------
+# Mikko
+# ---------------------
+
+Mikko logs in and sees only one appeal title
+  Mikko logs in
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  1
+  [Teardown]  Logout  
+
+# ---------------------
+# Sonja
+# ---------------------
+
+Sonja logs in and adds more appeals
+  Sonja logs in
+  Open application  ${appname}  753-416-25-30
+  Open tab  verdict
+  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
 
 The first appeal cannot be appealVerdict
   Add to verdict  1-0  appealVerdict  Megabyte  29.3.2016
@@ -163,10 +194,15 @@ Fetching verdict for Meishuguan should not show confirmation
   Fetch verdict
   [Teardown]  Logout
 
+# ---------------------
+# Mikko
+# ---------------------
+
 Mikko logs in. He can see the appeals but not edit them.
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
+  jQuery should match X times  h2[data-test-id=verdict-appeal-title]  3
   Scroll to test id  show-appeal-0-0-3
   No such test id  add-appeal-0-0
   Wait test id visible  show-appeal-0-0-3
@@ -277,6 +313,7 @@ Appeals row file check
   Wait Until  Element should contain  ${selector} li[data-test-id=appeals-files-${index}] a  ${filename}
 
 No frontend errors
+  [Tags]  non-roboto-proof
   Logout
   There are no frontend errors
 

@@ -45,7 +45,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :state-graph      states/full-application-state-graph
-   :allow-state-change ["tyonjohtaja-hakemus" :empty]
+   :allow-state-change ["tyonjohtaja-hakemus" "muutoslupa" :empty]
    :sftp-directory   "/rakennus"
    :allowed-task-schemas #{"task-katselmus" "task-vaadittu-tyonjohtaja" "task-lupamaarays"}
    :multiple-parties-allowed true
@@ -239,6 +239,18 @@
   (error "No fetch method for permit type: " permit-type)
   nil)
 
+(defmulti parties-krysp-mapper
+  "Maps application into KRYSP XML and saves the XML to disk."
+  {:arglists '([application lang krysp-version output-dir])}
+  (fn [{permit-type :permitType} & _]
+    (keyword permit-type)))
+
+(defmethod application-krysp-mapper :default
+  [{permit-type :permitType} & _]
+  (error "KRYSP 'parties mapper' method not defined for permit type: " permit-type)
+  nil)
+
+
 (defn multiple-parties-allowed? [permit-type]
   (get-metadata permit-type :multiple-parties-allowed))
 
@@ -266,10 +278,10 @@
         (fail :error.invalid-application-parameter)))))
 
 (defn validate-permit-type-is [& validator-permit-types]
-  (let [valid-permit-types (set (map name validator-permit-types))]
+  (let [valid-types (set (map name validator-permit-types))]
     (fn [{:keys [application]}]
       (if application
-        (when-not (valid-permit-types (permit-type application))
+        (when-not (valid-types (permit-type application))
           (fail :error.invalid-permit-type :permit-type validator-permit-types))
         (fail :error.invalid-application-parameter)))))
 

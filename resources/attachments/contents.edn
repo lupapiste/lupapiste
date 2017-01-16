@@ -1,0 +1,61 @@
+{{:type-id :muu_paapiirustus :type-group :paapiirustus} []
+ {:type-id :julkisivujen_varityssuunnitelma :type-group :suunnitelmat} [:varitetty_julkisivu
+                                                                        :varityssuunnitelma]
+ {:type-id :muu_pelastusviranomaisen_suunnitelma :type-group :pelastusviranomaiselle_esitettavat_suunnitelmat} [:paloturvallisuuden_perustietolomake]
+ {:type-id :energiataloudellinen_selvitys :type-group :selvitykset} [:energiaselvitys
+                                                                     :korjausrakentamisen_energiaselvitys
+                                                                     :lampohavioiden_tasauslaskelma
+                                                                     :tiiveysmittausraportti]
+ {:type-id :iv_suunnitelma :type-group :erityissuunnitelmat} [:iv_asemapiirustus
+                                                              :iv_koneen_energiatehokkuuslaskelmat
+                                                              :iv_laiteluettelo
+                                                              :iv_leikkauspiirustus
+                                                              :iv_periaatekaavio
+                                                              :iv_suunnitelmaselvitys
+                                                              :iv_tasopiirustus
+                                                              :iv_yksityiskohtapiirustukset
+                                                              :toiminta_ja_saatokaaviot
+                                                              :tuotteiden_kelpoisuus_ja_testausasiakirjat
+                                                              :muu_iv_suunnitelma]
+ {:type-id :kvv_suunnitelma :type-group :erityissuunnitelmat} [:hulevesisuunnitelma
+                                                               :jatevesijarjestelman_rakennustapaseloste
+                                                               :kaivokuvat
+                                                               :kalusteluettelo
+                                                               :kvv_asemapiirustus
+                                                               :kvv_detaljit
+                                                               :kvv_laitteistoselvitys
+                                                               :kvv_leikkauspiirustus
+                                                               :kvv_tasopiirustus
+                                                               :kvv_tyoselitys
+                                                               :linjakaavio
+                                                               :lammityslaitesuunnitelma
+                                                               :painehaviolaskelma
+                                                               :tuotteiden_kelpoisuus_ja_testausasiakirja
+                                                               :muu_kkv_suunnitelma]
+ {:type-id :rakennesuunnitelma :type-group :erityissuunnitelmat} [:perustus
+                                                                  :alapohja
+                                                                  :valipohjat
+                                                                  :ylapohja
+                                                                  :vesikatto
+                                                                  :elementtisuunnitelma_perustuselementit
+                                                                  :elementtisuunnitelma_alapohjaelementit
+                                                                  :elementtisuunnitelma_seinaelementit_ja_valipohjaelementit
+                                                                  :elementtisuunnitelma_seinaelementit_ja_ylapohjaelementit
+                                                                  :elementtisuunnitelma_vesikattoelementit
+                                                                  :kokonaisvakavuus_ja_lujuusselvitys
+                                                                  :perustusten_kuivaussuunnitelma
+                                                                  :rakennelaskelma
+                                                                  :rakennetyypit
+                                                                  :tuotteiden_kelpoisuus_ja_testausasiakirja
+                                                                  :muut_rakennesuunnitelma]
+ {:type-id :todistus_hallintaoikeudesta :type-group :rakennuspaikan_hallinta} [:hallinnanjakosopimus
+                                                                               :jaljennos_kauppakirjasta_tai_muusta_luovutuskirjasta
+                                                                               :jaljennos_myonnetyistalainhuudoista
+                                                                               :jaljennos_perunkirjasta
+                                                                               :jaljennos_vuokrasopimuksesta]
+ {:type-id :muu_suunnitelma :type-group :suunnitelmat} [:rakennusautomaatiosuunnitelma]
+ {:type-id :tarkastusasiakirja :type-group :katselmukset_ja_tarkastukset} [:asiantuntijatarkastuksen_lausunto
+                                                                           :asiantuntijatarkastuksen_poytakirja
+                                                                           :rakennuspaikkakohtainen_rakennustuotteiden_hyvaksynta
+                                                                           :rakennustuotteiden_kelpoisuuden_toteamisen_asiakirja
+                                                                           :ulkopuolisen_tarkastajan_lausunto]}

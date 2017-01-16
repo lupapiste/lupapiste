@@ -49,7 +49,7 @@ Mikko adds three owners to the Uusirakennus document
   Wait for jQuery
 
 Owners are visible after page refresh
-  Reload Page
+  Reload page and kill dev-box
   Application address should be  ${appname}
   Open accordions  info
   Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
@@ -82,7 +82,7 @@ Huoneistot info for Uusirakennus is correct
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  1
   Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]  1
   Sleep  0.5s
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Element should be visible  //div[@id="application-info-tab"]
   Open accordions  info
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id='huoneistot.1.muutostapa']
@@ -135,21 +135,21 @@ Mikko can't delete maksaja, as it's only removable by authority
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  maksaja
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
 
 Mikko adds party hakijan-asiamies using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  hakijan-asiamies
-  Click enabled by test id  add-party-button
-  Wait Until  Element Should Not Be Visible  dialog-add-party
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='dialog-add-party']//select
+  Wait Until  Select From List By Value  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  List Selection Should Be  xpath=//div[@data-test-id='dialog-add-party']//select  hakijan-asiamies
+  Confirm yes no dialog
+  Wait Until  Element Should Not Be Visible  xpath=//div[@data-test-id='dialog-add-party']
   Open accordions  parties
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.hakijan-asiamies']
   Wait until  Xpath Should Match X Times  ${asiamiesXpath}  1
@@ -157,6 +157,7 @@ Mikko adds party hakijan-asiamies using dialog
 
 Mikko adds party hakija-r using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']
+  Set Suite Variable  ${hakijajQueryPath}  section[id='application'] div[id='application-parties-tab'] section[data-doc-type='hakija-r']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1
   Click enabled by test id  hakija-r_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
@@ -164,20 +165,18 @@ Mikko adds party hakija-r using button
 Mikko fills his name as applicant, accordion text is updated
   # Ensure elements are visible:
   Scroll to top
-  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
-  Input text  ${hakijaXpath}//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
-  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='henkilo.henkilotiedot.etunimi']  Mikko
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='henkilo.henkilotiedot.sukunimi']  Intonen
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
 
 Mikko toggles applicant to company, company's name is updated to accordion
-  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='yritys']
+  Scroll and click  ${hakijajQueryPath} input[data-docgen-path='_selected'][value='yritys']
   Wait until  Element should be visible  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']
   Wait until  Element should not contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
-  Input text  ${hakijaXpath}//input[@data-docgen-path='yritys.yritysnimi']  Mikon Firma
-  Focus  ${hakijaXpath}//input[@data-docgen-path='_selected']
+  Input text with jQuery  ${hakijajQueryPath} input[data-docgen-path='yritys.yritysnimi']  Mikon Firma
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikon Firma
   # Toggle applicant back to 'person'
-  Click element  ${hakijaXpath}//input[@data-docgen-path='_selected' and @value='henkilo']
+  Scroll and click  ${hakijajQueryPath} input[data-docgen-path='_selected'][value='henkilo']
   Wait until  Element should contain  ${hakijaXpath}//span[@data-test-id='hakija-r-accordion-description-text']  Mikko Intonen
 
 Mikko changes application address
@@ -196,26 +195,34 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
+
+Hakemuksen jattaminen tab title shown to applicant
+  Open application  ${newName}  ${propertyId}
+  Test id text is  application-open-requiredFieldSummary-tab  Hakemuksen jättäminen
   [Teardown]  Logout
 
-Authority deletes paasuunnittelija
+Siirra kasittelyyn tab title shown to authority
   Sonja logs in
   Open application  ${newName}  ${propertyId}
+  Test id text is  application-open-requiredFieldSummary-tab  Siirrä käsittelyyn
+
+Authority deletes paasuunnittelija
   Open tab  parties
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  1
   Wait Until  Element Should Be Visible  xpath=//section[@data-doc-type='paasuunnittelija']//button[@data-test-class='delete-schemas.paasuunnittelija']
   Execute Javascript  $("button[data-test-class='delete-schemas.paasuunnittelija']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${paasuunnittelijaXpath}  0
 
 Authority deletes maksaja
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  2
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//button[@data-test-class='delete-schemas.maksaja']
   Execute Javascript  $("button[data-test-class='delete-schemas.maksaja']").click();
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
 No errors logged in editing
+  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***

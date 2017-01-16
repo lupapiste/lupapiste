@@ -1,7 +1,7 @@
 <script class="ko-template" type="text/x-jquery-tmpl" id="application-actions-template">
     <div class="stacked" data-bind="with: application">
-        <!-- ko if: !hasInvites() -->
-            <button data-bind="click: approveApplication,
+        <!-- ko ifnot: hasInvites -->
+            <button data-bind="click: goToApplicationApproval,
                            visible: $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            enable: !stateChanged() && !processing() && $root.authorization.ok('approve-application') && !$root.authorization.ok('approve-ya-extension'),
                            attr: {'title': loc('tooltip.approveApplication')}"
@@ -32,7 +32,7 @@
             <button class="function"
                     data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !stateChanged() && !processing() && $root.authorization.ok('request-for-complement')"
                     data-test-id="request-for-complement">
-                <i class="lupicon-circle-plus"></i>
+                <i class="lupicon-circle-arrow-left"></i>
                 <span data-bind="ltext: 'application.requestForComplement'"></span>
             </button>
             <button class="function"
@@ -114,15 +114,15 @@
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.showInBackingSystem'"></span>
             </button>
-            <!-- ko if: externalApi.enabled -->
+            <!-- ko if: externalApi.enabled() -->
             <button class="function"
-                    data-bind="click: externalApi.openApplication, visible: externalApi.enabled"
+                    data-bind="click: externalApi.openApplication, visible: externalApi.ok('openPermit')"
                     data-test-id="external-open-permit">
                 <i class="lupicon-circle-arrow-right"></i>
                 <span data-bind="ltext: 'application.showInBackingSystem'"></span>
             </button>
             <button class="function"
-                    data-bind="click: externalApi.showOnMap, visible: externalApi.enabled"
+                    data-bind="click: externalApi.showOnMap, visible: externalApi.ok('showPermitOnMap')"
                     data-test-id="external-show-on-map">
               <i class="lupicon-location"></i>
               <span data-bind="text: 'Siirry kartalle'"></span>

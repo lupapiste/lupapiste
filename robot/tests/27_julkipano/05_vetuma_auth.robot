@@ -4,7 +4,7 @@ Documentation   User authenticates to Julkipano.fi via Vetuma
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ./27_common.robot
+Resource        ./julkipano_common.robot
 Resource        ../common_keywords/ident_helpers.robot
 
 

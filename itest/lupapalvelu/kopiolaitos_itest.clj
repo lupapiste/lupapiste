@@ -6,14 +6,16 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.kopiolaitos :refer :all]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.i18n :as i18n]
             [sade.util :as util]
-            [sade.crypt :as crypt])
+            [sade.crypt :as crypt]
+            [sade.strings :as ss])
   (:import  [java.util.zip ZipInputStream]))
 
 (testable-privates lupapalvelu.kopiolaitos
   get-kopiolaitos-html-table
   get-kopiolaitos-email-addresses)
+
+(apply-remote-minimal)
 
 
 (fact "Setting invalid kopiolaitos email fails"
@@ -119,8 +121,9 @@
             (fact "check attachment contents of both sent emails"
               (doseq [email sent-emails
                       :let [attachment (get-in email [:body :attachment])
-                            bytes (-> attachment (crypt/str->bytes) (crypt/base64-decode))]]
+                            bytes (-> attachment :content (crypt/str->bytes) (crypt/base64-decode))]]
                 (fact "has attachment" attachment => truthy)
+                (fact "has .zip suffix" (ss/suffix (:file-name attachment) ".") => "zip")
 
                 (with-open [zip-stream (ZipInputStream. (io/input-stream bytes))]
                   (let [to-zip-entries (fn [s result]

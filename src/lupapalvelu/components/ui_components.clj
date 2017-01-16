@@ -85,6 +85,12 @@
                  :supportedLangs        i18n/supported-langs
                  :urgencyStates         ["normal" "urgent" "pending"]
                  :calendars             (cal/ui-params)
+                 :identMethods          (into {}
+                                          (remove nil?
+                                            [(when (env/feature? :suomifi-ident)
+                                               {:logoutUrl (str (env/value :host) "/Shibboleth.sso/Logout")})
+                                             (when (env/feature? :dummy-ident)
+                                               {:logoutUrl (str (env/value :host) "/dev/saml-logout")})]))
                  :convertableTypes      (conj conversion/libre-conversion-file-types :image/jpeg)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -121,22 +127,17 @@
       (read-component-list-from-jar jar (str "private/" (name component)) pattern)
       (read-component-list-from-fs (str "resources/private/" (name component)) pattern))))
 
-(defn main-css-count []
-  (let [jar (util/this-jar lupapalvelu.main)
-        file-list (if (in-jar? jar)
-                    (read-component-list-from-jar jar "public/lp-static/css" "main.*css$")
-                    (read-component-list-from-fs "resources/public/lp-static/css" "main.*css$"))]
-    (count file-list)))
 
 (def ui-components
   {;; 3rd party libs
    :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
-   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js" "jquery.xdr-transport.js"]}
-   :knockout       {:js ["knockout-3.4.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
+   :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
+   :knockout       {:js ["knockout-3.4.1.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js" "knockout.dragdrop.js""register-lupapiste-components.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
+   :sprintf        {:js ["sprintf.min.js"]}
    :moment         {:js ["moment.min.js" "moment-timezone-with-data-2010-2020.min.js"]}
    :open-layers    {:js ["openlayers-2.13.1.min.lupapiste_1.js" "LupapisteEditingToolbar-2.13.1.js"]}
    ;:open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
@@ -148,7 +149,7 @@
    :waypoints      {:js ["jquery.waypoints.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
-   :init         {:depends [:underscore]
+   :init         {:depends [:underscore :sprintf]
                   :js [conf "hub.js" "notify.js" "ajax.js" "log.js"]}
 
    ;; Common components
@@ -167,7 +168,7 @@
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
 
-   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
+   :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :sprintf :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers :stickyfill :waypoints]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "app.js" "nav.js" "window.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
@@ -205,7 +206,8 @@
                    "building-service.js"
                    "assignment-service.js"
                    "assignment-recipient-filter-service.js"
-                   "assignment-target-filter-service.js"]}
+                   "assignment-target-filter-service.js"
+                   "event-filter-service.js"]}
 
    :global-models {:depends [:services]
                    :js ["root-model.js" "application-model.js" "register-models.js" "register-services.js"]}
@@ -255,11 +257,10 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
-   :external-api {:js (apply
-                        conj
-                        ["external-api-service.js" "external-api-tools.js"]
-                        (when (env/dev-mode?)
-                          ["dummy-api-client.js"]))}
+   :external-api {:js (remove nil?
+                              (cons (when (env/dev-mode?)
+                                      "dummy-api-client.js")
+                                    ["external-api-service.js" "external-api-tools.js"]))}
 
    :verdict-attachment-prints {:depends [:common-html :ui-components]
                                :html ["verdict-attachment-prints-order-template.html"
@@ -430,11 +431,13 @@
    :authority-admin     {:depends [:authority-admin-app :global-models :common-html :authenticated :admins
                                    :accordion :mypage :calendar-view :header :debug :analytics :proj4 :ol :footer
                                    :ui-components :authority-admin-components]
-                         :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js" "edit-roles-dialog-model.js"
-                              "calendars-model.js" "organization-reservation-types-model.js" "organization-reservation-properties-model.js"
+                         :js [schema-versions-by-permit-type "organization-model.js" "wfsmodel.js" "organization-user.js"
+                              "organization-reports.js" "edit-roles-dialog-model.js"
+                              "calendars-model.js" "organization-reservation-types-model.js"
+                              "organization-reservation-properties-model.js"
                               "municipality-maps-service.js" "authority-admin.js"]
                          :html ["index.html" "organization-users.html" "applications-settings.html" "selected-attachments.html" "selected-operations.html" "organization-areas.html" "organization-backends.html"
-                                "organization-calendars.html" "calendar-admin.html"]}
+                                "organization-reports.html" "organization-calendars.html" "calendar-admin.html"]}
 
    :admin-app {:depends []
                :js ["admin.js"]}

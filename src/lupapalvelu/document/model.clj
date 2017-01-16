@@ -87,6 +87,11 @@
     nil
     (catch Exception e [:warn "illegal-value:date"])))
 
+(defmethod validate-field :msDate [_ _ v]
+  (if (not (nil? v))
+    (if (not (util/->long v))
+      [:err "illegal-value:msDate-NotValidDate"])))
+
 (defmethod validate-field :time [_ _ v]
   (when-not (ss/blank? v)
     (if-let [matches (seq (rest (re-matches util/time-pattern v)))]
@@ -143,6 +148,8 @@
     (ss/blank? v) nil
     (re-matches v/maara-alatunnus-pattern v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
+
+(defmethod validate-field :calculation [_ _ _] nil)
 
 (def illegal-key [:err "illegal-key"])
 

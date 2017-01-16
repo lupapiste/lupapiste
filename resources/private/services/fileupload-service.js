@@ -4,13 +4,55 @@ LUPAPISTE.FileuploadService = function() {
 
   self.serviceName = "fileuploadService";
 
+  function prepareDropZone( dropZone ) {
+    return (function () {
+      var latest = 0;
+      if( dropZone ) {
+        var sel = $( dropZone );
+        var clear = function( count ) {
+          if( count === latest ) {
+            sel.removeClass( "drop-zone--highlight");
+            latest = 0;
+          } else {
+            _.delay( clear, 100, latest );
+          }
+        };
+
+        sel.on( "dragover",
+                function()  {
+                  sel.addClass( "drop-zone--highlight");
+                  if( !latest ) {
+                    clear( -1 );
+                  }
+                  latest++;
+                });
+        return sel;
+      }
+    })();
+  }
+
   self.bindFileInput = function( options ) {
 
     options = _.defaults( options, {
-      maximumUploadSize: 15000000 // 15 MB
+      maximumUploadSize: 15000000, // 15 MB
+      id: util.randomElementId("fileupload-input"),
+      allowMultiple: true
     });
 
-    var fileInputId = options.id || util.randomElementId("fileupload-input");
+    var fileInputId = options.id;
+    var hubscriptions = [];
+    var connections = [];  // jqXHRs
+
+    function hubscribe( message, fun ) {
+      hubscriptions.push( hub.subscribe( sprintf( "%s::%s",
+                                                  self.serviceName,
+                                                  message),
+                                         function( event ) {
+                                           if( event.input === fileInputId ) {
+                                             fun( event );
+                                           }
+                                         }));
+    }
 
     if (!document.getElementById(self.fileInputId)) {
       var input = document.createElement("input");
@@ -34,6 +76,8 @@ LUPAPISTE.FileuploadService = function() {
                 _.defaults( event, {input: fileInputId}));
     }
 
+    var $dropZone = prepareDropZone( options.dropZone );
+
     $("#" + fileInputId).fileupload({
       url: "/api/raw/upload-file",
       type: "POST",
@@ -41,22 +85,26 @@ LUPAPISTE.FileuploadService = function() {
       formData: [
         { name: "__anti-forgery-token", value: $.cookie("anti-csrf-token") }
       ],
+      dropZone: $dropZone,
       add: function(e, data) {
-        var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions, getFileExtension(data.files[0].name));
-
-        // IE9 doesn't have size, submit data and check files in server
-        var size = util.getIn(data, ["files", 0, "size"], 0);
-        if(acceptedFile && size <= options.maximumUploadSize) {
-          data.submit();
-        } else {
-          var message = !acceptedFile ?
-                "error.file-upload.illegal-file-type" :
-                "error.file-upload.illegal-upload-size";
-
-          hub.send("indicator", {
-            style: "negative",
-            message: message
-          });
+        var file = _.get( data, "files.0", {});
+        // if allowMultiple is false, accept only first of the given files (in case of drag and dropping multiple files)
+        if (options.allowMultiple || _.indexOf(data.originalFiles, file) === 0) {
+          var acceptedFile = _.includes(LUPAPISTE.config.fileExtensions,
+                                        getFileExtension(file.name));
+          // IE9 doesn't have size, submit data and check files in server
+          var size = file.size || 0;
+          if(acceptedFile && size <= options.maximumUploadSize) {
+            hubSend( "fileAdded", {file: file});
+            connections.push( data.submit() );
+          } else {
+            hubSend( "badFile",
+                     {message: loc(acceptedFile
+                                   ? "error.file-upload.illegal-upload-size"
+                                   : "error.file-upload.illegal-file-type"),
+                      file: file}
+                   );
+          }
         }
       },
       start: function() {
@@ -72,22 +120,49 @@ LUPAPISTE.FileuploadService = function() {
       fail: function(e, data) {
         hubSend("filesUploaded", {
           status: "failed",
-          message: data.jqXHR.responseJSON.text
+          message: data.textStatus || data.jqXHR.responseJSON.text
         });
       },
       progress: function (e, data) {
         var progress = parseInt(data.loaded / data.total * 100, 10);
-        hubSend("filesUploadingProgress", {progress: progress});
+        hubSend("filesUploadingProgress", {progress: progress,
+                                           loaded: data.loaded,
+                                           total: data.total,
+                                           file: _.get(data, "files.0")});
+      },
+      drop: function(e) {
+        if (!options.dropZone) {
+          e.preventDefault();
+        }
       }
     });
+
+    hubscribe( "destroy", function()  {
+      $("#" + fileInputId ).fileupload( "destroy");
+      if( $dropZone ) {
+        $dropZone.off();
+      }
+      _.each( hubscriptions, hub.unsubscribe );
+      hubscriptions = [];
+    } );
+
+    hubscribe( "cancel", function() {
+      _.filter( connections, function( conn ) {
+        conn.abort();
+        return false;
+      });
+    });
+
     return fileInputId;
   };
 
-  hub.subscribe("fileuploadService::removeFile", function(event) {
+  hub.subscribe( self.serviceName + "::removeFile", function(event) {
     ajax
       .command("remove-uploaded-file", {attachmentId: event.attachmentId})
       .success(function(res) {
-        hub.send("fileuploadService::fileRemoved", {attachmentId: res.attachmentId});
+        hub.send("fileuploadService::fileRemoved",
+                 {attachmentId: res.attachmentId,
+                  input: event.input});
       })
       .call();
   });

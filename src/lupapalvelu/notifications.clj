@@ -9,7 +9,7 @@
             [sade.email :as email]
             [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.user :as u]
+            [lupapalvelu.user :as usr]
             [lupapalvelu.authorization :as auth]))
 
 ;;
@@ -20,14 +20,14 @@
   (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
   (assert (#{"attachment" "statement" "neighbors"} subpage) (str "Unsupported subpage"))
   (let [full-path (ss/join "/" (remove nil? [subpage id subpage-id]))]
-    (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!/" full-path)))
+    (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!/" full-path)))
 
 (defn get-application-link [{:keys [infoRequest id]} tab lang {role :role :or {role "applicant"}}]
   (assert (#{"applicant" "authority" "dummy"} role) (str "Unsupported role " role))
   (let [suffix (if (and (not (ss/blank? tab)) (not (ss/starts-with tab "/"))) (str "/" tab) tab)
         permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
-    (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!" full-path)))
+    (str (env/value :host) "/app/" lang "/" (usr/applicationpage-for role) "#!" full-path)))
 
 (defn- ->to [{:keys [email firstName lastName]}]
   (letfn [(sanit [s] (s/replace s #"[<>]"  ""))]
@@ -61,14 +61,15 @@
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except those who haven't accepted invite or have unsubscribed emails.
    More specific set recipients can be defined by user roles."
-  [{:keys [auth statements]} included-roles excluded-roles]
-  {:post [every? map? %]}
+  [{:keys [auth]} included-roles excluded-roles]
+  {:post [(every? map? %)]}
   (let [recipient-roles (set/difference (set (or (seq included-roles) auth/all-authz-roles))
                                         (set excluded-roles))]
     (->> (filter (comp recipient-roles keyword :role) auth)
          (remove :invite)
          (remove :unsubscribed)
-         (map (comp u/non-private u/get-user-by-id :id)))))
+         (remove (comp (partial = "company") :type))
+         (map (comp usr/non-private usr/get-user-by-id :id)))))
 
 ;;
 ;; Model creation functions
@@ -138,15 +139,25 @@
   {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
+;; roles which do not receive email notifications
 (def non-notified-roles
   #{"rest-api" "trusted-etl"})
 
-(defn invalid-recipient? [rec]
-  "Notifications are not sent to certain roles, users who do not 
-   have a valid email address, or registered but removed users."
-  (or (ss/blank? (:email rec))
-      (not (u/email-recipient? rec))
-      (contains? non-notified-roles (:role rec))))
+ ; email template ids, which are sent regardless of current user state
+(def always-sent-templates
+  #{:invite-company-user :reset-password})
+
+(defn invalid-recipient?
+  "Notifications are not sent to certain roles, users who do not
+   have a valid email address, and registered but removed users
+   receive only specific message types defined above."
+  [for-template]
+  (fn [rec]
+     (or (ss/blank? (:email rec))
+        (if (contains? always-sent-templates for-template)
+          false
+          (not (usr/email-recipient? rec)))
+        (contains? non-notified-roles (:role rec)))))
 
 (defn notify! [template-name command & [result]]
   {:pre [template-name (map? command) (template-name @mail-config)]}
@@ -157,7 +168,7 @@
             command        (assoc command :application application)
             command        (assoc command :result result)
             recipients-fn  (get conf :recipients-fn default-recipients-fn)
-            recipients     (remove invalid-recipient? (recipients-fn command))
+            recipients     (remove (invalid-recipient? template-name) (recipients-fn command))
             model-fn       (get conf :model-fn create-app-model)
             template-file  (get conf :template (str (name template-name) ".md"))
             calendar-fn    (get conf :calendar-fn)]

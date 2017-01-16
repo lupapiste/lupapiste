@@ -2,8 +2,10 @@
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
             [sade.core :refer [def- now]]
+            [sade.util :as util]
             [sade.xml :as xml]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application-api] ; require local endpoints
             [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
@@ -13,7 +15,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.itest-util :as util]))
+            [lupapalvelu.itest-util :as iutil]))
 
 (def local-db-name (str "test_app-from-prev-permit-itest_" (now)))
 
@@ -81,21 +83,17 @@
       (provided
        (krysp-reader/get-app-info-from-message anything anything) => nil))
 
-    ;; 5: kiinteistotunnusta ei tule sanomassa
-
-    (fact "propertyId is missing"
-      (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-no-propertyid")
-      (provided
-       (krysp-reader/get-app-info-from-message anything anything) => (assoc example-app-info :municipality nil)))
-
-    ;; 6: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+    ;; 5: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
 
     (fact "ids of the given and resolved organizations do not match"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-found-from-backend-is-of-different-organization")
       (provided
-       (krysp-reader/get-app-info-from-message anything anything) => {:municipality "753"}))
+       (krysp-reader/get-app-info-from-message anything anything) => {:municipality "753"
+                                                                      :rakennuspaikka {:propertyId "75312312341234"
+                                                                                       :x 444444 :y 6666666
+                                                                                       :address "Virhekuja 12"}}))
 
-    ;; 7: jos sanomassa ei ollut rakennuspaikkaa, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+    ;; 6: jos sanomassa ei ollut rakennuspaikkaa/kiinteistotunnusta, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
 
     (fact "no 'rakennuspaikkatieto' element in the received xml, need more info"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
@@ -104,7 +102,14 @@
       (provided
        (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
 
-    ;; 8: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
+    (fact "propertyId is missing"
+      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
+                                                                    :needMorePrevPermitInfo true
+                                                                    :text "error.more-prev-app-info-needed"})
+      (provided
+        (krysp-reader/get-app-info-from-message anything anything) => (util/dissoc-in example-app-info [:rakennuspaikka :propertyId])))
+
+    ;; 7: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
 
     (facts "authority tests"
       (let [property-id "18600303560005"]
@@ -177,7 +182,7 @@
                             (mongo/with-db local-db-name
                               (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
                                 (let [response (http-get rest-address params)
-                                      resp-body (:body (util/decode-response response))]
+                                      resp-body (:body (iutil/decode-response response))]
                                   response => http200?
                                   resp-body => ok?
                                   (keyword (:text resp-body)) => :created-new-application
@@ -188,7 +193,7 @@
                               (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
                                     verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
                                     response     (http-get rest-address params)
-                                    resp-body    (:body (util/decode-response response))]
+                                    resp-body    (:body (iutil/decode-response response))]
                                 verdict-resp => ok?
                                 response => http200?
                                 resp-body => ok?
@@ -198,7 +203,7 @@
                               (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
                                     verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
                                     response     (http-get rest-address params)
-                                    resp-body    (:body (util/decode-response response))]
+                                    resp-body    (:body (iutil/decode-response response))]
                                 verdict-resp => ok?
                                 response => http200?
                                 resp-body => ok?

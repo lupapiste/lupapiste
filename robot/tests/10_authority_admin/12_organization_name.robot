@@ -24,5 +24,5 @@ Sipoo types new Finnish name
   Wait until  Positive indicator should be visible
 
 Name remains changed after reload
-  Reload page
+  Reload page and kill dev-box
   Wait until  Textfield value should be  //input[@data-test-id='organization-name.fi']  Sipoon uusi nimi

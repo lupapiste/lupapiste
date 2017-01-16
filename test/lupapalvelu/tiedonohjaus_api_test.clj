@@ -6,7 +6,8 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer [execute update-application]]
             [lupapalvelu.tiedonohjaus :as t]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [sade.util :as util]))
 
 (testable-privates lupapalvelu.tiedonohjaus-api store-function-code update-application-child-metadata!)
 
@@ -251,22 +252,48 @@
                                                                                                   :henkilotiedot :sisaltaa}}]}}) => nil
         (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
-  (fact "metadata cannot be set to a read-only attachment"
-    (let [command {:application {:organization    "753-R"
-                                 :id              "ABC123"
-                                 :state           "submitted"
-                                 :attachments [{:id "5234" :readOnly true}]}
-                   :created     1000
-                   :user        {:orgAuthz      {:753-R #{:authority :archivist}}
-                                 :organizations ["753-R"]
-                                 :role          :authority}
-                   :action      "store-tos-metadata-for-attachment"
-                   :data        {:metadata {"julkisuusluokka" "julkinen"}
-                                 :id       "ABC123"
-                                 :attachmentId "5234"}}]
-      (execute command) => {:ok false
-                            :text "error.unauthorized"
-                            :desc "Attachment is read only."}))
+  (fact "metadata can be updated to a read-only attachment"
+        (let [command {:application {:id 1
+                                     :organization "753-R"
+                                     :attachments  [{:id 1 :metadata {"julkisuusluokka" "julkinen"
+                                                                      "henkilotiedot"   "sisaltaa"
+                                                                      "sailytysaika"    {"arkistointi" "ei"
+                                                                                         "perustelu"   "foo"}
+                                                                      "myyntipalvelu"   false
+                                                                      "nakyvyys"        "julkinen"}
+                                                     :readOnly true}]}
+                       :created     1000
+                       :user        {:orgAuthz {:753-R #{:authority :archivist}}}}]
+          (update-application-child-metadata!
+            command
+            :attachments
+            1
+            {"julkisuusluokka" "julkinen"
+             "henkilotiedot"   "ei-sisalla"
+             "sailytysaika"    {"arkistointi" "ikuisesti"
+                                "perustelu"   "foo"}
+             "myyntipalvelu"   false
+             "nakyvyys"        "julkinen"
+             "kieli"           "fi"}) => {:ok true
+                                          :metadata {:julkisuusluokka :julkinen
+                                                     :henkilotiedot   :ei-sisalla
+                                                     :sailytysaika    {:arkistointi :ikuisesti
+                                                                       :perustelu   "foo"}
+                                                     :myyntipalvelu   false
+                                                     :nakyvyys        :julkinen
+                                                     :tila            :luonnos
+                                                     :kieli           :fi}}
+          (provided
+            (lupapalvelu.action/update-application command {$set {:modified 1000 :attachments [{:id 1 :metadata {:julkisuusluokka :julkinen
+                                                                                                                 :henkilotiedot   :ei-sisalla
+                                                                                                                 :sailytysaika    {:arkistointi :ikuisesti
+                                                                                                                                   :perustelu   "foo"}
+                                                                                                                 :myyntipalvelu   false
+                                                                                                                 :nakyvyys        :julkinen
+                                                                                                                 :tila            :luonnos
+                                                                                                                 :kieli           :fi}
+                                                                                                :readOnly true}]}}) => nil
+            (lupapalvelu.tiedonohjaus/update-process-retention-period 1 1000) => nil)))
 
   (fact "a valid function code can be set to application and it is stored in history array"
     (let [fc "10 03 00 01"
@@ -364,4 +391,45 @@
                                  :reason "invalid procedure"}}
           command2 (assoc command :action "set-tos-function-for-application")]
       (execute command) => {:ok false :text "error.unauthorized"}
-      (execute command2) => {:ok false :state :verdictGiven :text "error.command-illegal-state"})))
+      (execute command2) => {:ok false :state :verdictGiven :text "error.command-illegal-state"}))
+
+  (fact "metadata can't be updated after the target has been archived"
+        (let [metadata {:julkisuusluokka :julkinen
+                        :henkilotiedot :sisaltaa
+                        :kieli :fi
+                        :sailytysaika    {:arkistointi :ei
+                                          :perustelu "foo"}
+                        :myyntipalvelu false
+                        :nakyvyys :julkinen
+                        :tila :arkistoitu}
+              application {:id 1
+                           :organization "753-R"
+                           :attachments  [{:id "1" :metadata metadata}]
+                           :processMetadata metadata
+                           :metadata metadata
+                           :state "closed"}
+              base-command {:application application
+                            :data        {:id "1"
+                                          :attachmentId "1"
+                                          :metadata metadata}
+                            :created     1000
+                            :user        {:role :authority
+                                          :organizations ["753-R"]
+                                          :orgAuthz {:753-R #{:authority :archivist}}}}
+              successful-metadata (assoc metadata :tila :valmis :myyntipalvelu true)
+              successful-command (util/deep-merge base-command {:action "store-tos-metadata-for-process"
+                                                                :application {:processMetadata successful-metadata}
+                                                                :data {:metadata successful-metadata}})]
+
+          (execute successful-command) => {:ok true :metadata successful-metadata}
+
+          (provided
+            (lupapalvelu.action/update-application anything {$set {:modified        1000
+                                                                   :processMetadata successful-metadata}}) => nil)
+
+          (execute (assoc base-command :action "store-tos-metadata-for-attachment")) => {:ok false
+                                                                                         :text "error.command-illegal-state"}
+          (execute (assoc base-command :action "store-tos-metadata-for-process")) => {:ok false
+                                                                                      :text "error.command-illegal-state"}
+          (execute (assoc base-command :action "store-tos-metadata-for-application")) => {:ok false
+                                                                                          :text "error.command-illegal-state"})))

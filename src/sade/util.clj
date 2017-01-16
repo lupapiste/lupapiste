@@ -2,10 +2,11 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.java.io :as io]
+            [clojure.edn :as edn]
             [sade.core :refer [fail!]]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [hours days weeks months years ago from-now]]
+            [clj-time.core :as t :refer [hours days weeks months years ago from-now]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]]
@@ -80,10 +81,18 @@
   [f coll]
   (reduce #(assoc %1 (f %2) %2) {} coll))
 
+(defn drop-nth
+  "Drops the nth item from vector, if it exists"
+  [n v]
+  (if (get v n)
+    (into (subvec v 0 n) (subvec v (inc n)))
+    v))
+
 (defn dissoc-in
   "Dissociates an entry from a nested associative structure returning a new
   nested structure. keys is a sequence of keys. Any empty maps that result
-  will not be present in the new structure."
+  will not be present in the new structure.
+  Supports also vector index values among the keys sequence just like clojure.core/update-in does."
   [m [k & ks :as keys]]
   (if ks
     (if-let [nextmap (get m k)]
@@ -92,7 +101,9 @@
           (assoc m k newmap)
           (dissoc m k)))
       m)
-    (dissoc m k)))
+    (if (and (number? k) (sequential? m))
+      (drop-nth k m)
+      (dissoc m k))))
 
 (defn select
   "Takes a map and a vector of keys, returns a vector of values from map."
@@ -258,6 +269,11 @@
          ()
          required-keys)))
 
+(defn to-datetime-with-timezone ^org.joda.time.DateTime [ts & [zone]]
+  (-> ts
+      (tc/from-long)
+      (t/to-time-zone (or zone (t/default-time-zone)))))
+
 (defn- format-utc-timestamp [^Long timestamp ^String fmt]
   (when timestamp
     (let [dt (tc/from-long timestamp)]
@@ -333,8 +349,8 @@
     (tc/to-long (-> amount time-fn ago-from-now-fn))))
 
 (defn get-timestamp-ago
-  [time-key amount]
   "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
+  [time-key amount]
   (get-timestamp-ago-or-from-now ago time-key amount))
 
 (defn get-timestamp-from-now
@@ -550,3 +566,6 @@
         (recur (concat leafs (remove sequential? children)) (apply concat (filter sequential? children)))
         leafs))
     [tree]))
+
+(defn read-edn-resource [file-path]
+  (->> file-path io/resource slurp edn/read-string))

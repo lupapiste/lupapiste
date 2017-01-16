@@ -40,7 +40,7 @@
           (assoc-in [:headers "X-Frame-Options"] "sameorigin"))))))
 
 (defn- copy-id [handler request]
-  (let [session-id (get-in request [:session :id] (str (UUID/randomUUID)))]
+  (let [session-id (or (get-in request [:session :id]) (str (UUID/randomUUID)))]
     (with-logging-context {:session-id session-id}
       (when-let [response (handler (assoc-in request [:session :id] session-id))]
         (if-not (get-in request [:session :id])

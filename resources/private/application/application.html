@@ -236,7 +236,13 @@
                                            css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
                                 <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab"
                                    class="link-btn">
-                                    <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
+                                  <!-- ko if: $root.authorization.ok('approve-application') -->
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary.afterSubmitted'"></span>
+                                  <!-- /ko -->
+                                  <!-- ko ifnot: $root.authorization.ok('approve-application') -->
+                                  <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span>
+                                  <!-- /ko -->
+                                </a></li>
 
                             <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
                                 <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab"
@@ -360,8 +366,9 @@
 
                     <!-- Attachments tab -->
 
-                    <!-- ko if: selectedTabName() === 'attachments' -->
+                    <!-- ko if: selectedTabName() === 'attachments' && $root.authorization.ok( "attachments" ) -->
                     <div id="application-attachments-tab" class="tab-content">
+                      <drop-zone></drop-zone>
                       <attachments-listing/>
                     </div>
                     <!-- /ko -->
@@ -1009,7 +1016,7 @@
                                            enable: $root.authorization.ok('create-task')"></button>
                     </div>
                     <!-- /ko -->
-                    <!-- ko if: $root.hasConstructionTimeDocs -->
+                    <!-- ko if: $root.hasEditableDocs -->
                     <div id="construction-time-documents" data-bind="visible: selectedTabName() === 'tasks' && $root.authorization.ok('tasks-tab-visible')">
                       <p data-bind="lhtml: 'required.field.desc'"></p>
                       <div class="application_section">
@@ -1140,7 +1147,10 @@
                                 <input data-bind="textInput: email,
                                                   attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
                                        id="neighbors-sendemail-email"
-                                       class="form-input text long" />
+                                       class="form-input text long" >
+                                <div class="neighbor-error"
+                                     data-bind="visible: error,
+                                                ltext: error"></div>
                             </form>
 
                             <button data-bind="click: send, ltext: 'neighbors.sendEmail.ok', enable: ok"
@@ -1149,27 +1159,6 @@
                             </button>
                             <button data-bind="ltext: 'neighbors.sendEmail.cancel'"
                                     class="secondary btn-dialog close"></button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="dialog-add-party" class="window autosized">
-                    <div data-bind="with: $root.addPartyModel">
-                        <div class="dialog-header">
-                            <p data-bind="ltext: 'addParty.heading'"></p>
-                            <p class="dialog-close close lupicon-remove"></p>
-                        </div>
-                        <div class="dialog-content">
-                            <div>
-                                <select data-bind="options: partyDocumentNames(),
-                                                   optionsText: function(item) { return loc(['schemas', item]); },
-                                                   optionsValue: function(item) { return item; },
-                                                   value: documentName,
-                                                   optionsCaption: loc('choose')"
-                                        data-test-id="select-party-document">
-                                </select>
-                                <button data-bind="click: addParty, ltext: 'add', enable: addPartyEnabled()" class="btn btn-primary btn-dialog close" data-test-id="add-party-button"></button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1215,23 +1204,6 @@
 
                     </div>
                 </div>
-
-                <div id="dialog-cancel-application" class="window autosized">
-                    <div class="dialog-header">
-                        <p data-bind="ltext: 'application.cancelApplication'"></p>
-                        <p class="dialog-close close lupicon-remove"></p>
-                    </div>
-                    <div class="dialog-content" data-bind="with: application">
-                        <label data-bind="ltext: 'application.canceled.reason'"></label>
-                        <textarea rows=10 class="form-input textarea grid-style-input high"
-                                  data-bind="textInput: cancelText"
-                                  data-test-id="cancel-application-reason"></textarea>
-                        <div class='dialog-user-content application-cancel-text-content'></div>
-                        <button class='positive btn-dialog close' data-test-id='confirm-yes'></button>
-                        <button class='secondary btn-dialog close' data-test-id='confirm-no'></button>
-                    </div>
-                </div>
-
             </div>
 
         </section>

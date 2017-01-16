@@ -4,51 +4,68 @@
 <section class="page" id="archival-summary" style="visibility: hidden; display: block;">
   <script type="text/x-jquery-tmpl" id="archival-summary-template">
 
-    <div data-bind="if: showArchived" class="archival-summary-document-set">
-      <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
-      <div data-bind="ltext: 'archivalSummary.guide'"></div>
-
-      <div data-bind="if: !_.isEmpty(archivedDocuments())" data-test-id="archived-application-documents">
-        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
-      </div>
-
-      <div data-test-id="archived-pre-groups">
-        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
-        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
-      </div>
-      <div data-test-id="archived-post-groups">
-        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
-        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
-      </div>
-
-      <div class="buttons">
-        <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected, testId: 'archive-selected'">
-          <span class="waiting" data-bind="css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
-            <i class="spin lupicon-refresh wait"></i>
-          </span>
-          <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
-          <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
-        </button>
-        <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
-        <a href="#" data-bind="click: selectAllPreAttachments, ltext: 'stamp.preAttachments'"></a>
-        <a href="#" data-bind="click: selectAllPostAttachments, ltext: 'stamp.postAttachments'"></a>
+    <div data-bind="visible: !tosFunctionExists()" data-test-id="tos-function-missing">
+      <h2 data-bind="ltext: 'archivalSummary.tosFunction.missing.title'"></h2>
+      <div class="info-line like-btn">
+          <i class="lupicon-circle-attention"></i>
+          <!-- ko if: $root.tosFunctions().length > 0 -->
+          <span data-bind="ltext: 'archivalSummary.tosFunction.missing.guide'"></span>
+          <!-- /ko -->
+          <!-- ko if: $root.tosFunctions().length <= 0 -->
+          <span data-bind="ltext: 'archivalSummary.tosFunction.not.published'"></span>
+          <a class="tos-function-error" data-bind="attr: {href: loc('toj.url'), 'title': loc('Tiedonohjaus')}">
+          <span data-bind="ltext: 'archivalSummary.tosFunction.link.title'"></span></a>
+          <!-- /ko -->
       </div>
     </div>
 
-    <div data-bind="if: showNotArchived" class="archival-summary-document-set">
-      <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+    <div data-bind="if: tosFunctionExists()">
+      <div data-bind="if: showArchived" class="archival-summary-document-set">
+        <h1><span data-bind="ltext: 'archivalSummary.archivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+        <div data-bind="ltext: 'archivalSummary.guide'"></div>
 
-      <div data-bind="if: !_.isEmpty(notArchivedDocuments())" data-test-id="not-archived-application-documents">
-        <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+        <div data-bind="if: !_.isEmpty(archivedDocuments())" data-test-id="archived-application-documents">
+          <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: archivedDocuments, showWillPublish: true}}"></div>
+        </div>
+
+        <div data-test-id="archived-pre-groups">
+          <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(archivedGroups())"></h2>
+          <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedGroups, showWillPublish: true}}"></div>
+        </div>
+        <div data-test-id="archived-post-groups">
+          <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(archivedPostGroups())"></h2>
+          <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: archivedPostGroups, showWillPublish: true}}"></div>
+        </div>
+
+        <div class="buttons">
+          <button class="btn-primary" data-bind="enable: archiveButtonEnabled, click: archiveSelected, testId: 'archive-selected'">
+            <span class="waiting" data-bind="css: { waiting: !_.isEmpty(archivingInProgressIds()) }">
+              <i class="spin lupicon-refresh wait"></i>
+            </span>
+            <span data-bind="ltext: 'arkistoidaan', visible: !_.isEmpty(archivingInProgressIds())"></span>
+            <span data-bind="ltext: 'archivalSummary.archiveSelected', visible: _.isEmpty(archivingInProgressIds())"></span>
+          </button>
+          <a href="#" data-bind="click: selectAll, ltext: 'stamp.all'"></a>
+          <a href="#" data-bind="click: selectAllPreAttachments, ltext: 'stamp.preAttachments'"></a>
+          <a href="#" data-bind="click: selectAllPostAttachments, ltext: 'stamp.postAttachments'"></a>
+        </div>
       </div>
 
-      <div data-test-id="not-archived-pre-groups">
-        <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
-        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
-      </div>
-      <div data-test-id="not-archived-post-groups">
-        <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
-        <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
+      <div data-bind="if: showNotArchived" class="archival-summary-document-set">
+        <h1><span data-bind="ltext: 'archivalSummary.notArchivedDocuments'"></span><span> - </span><span data-bind="text: $root.application.id"></span></h1>
+
+        <div data-bind="if: !_.isEmpty(notArchivedDocuments())" data-test-id="not-archived-application-documents">
+          <div data-bind="template: {name: 'archival-summary-document-table', data: {documents: notArchivedDocuments, showWillPublish: false}}"></div>
+        </div>
+
+        <div data-test-id="not-archived-pre-groups">
+          <h2 data-bind="ltext: 'application.attachments.pre-verdict', visible: !_.isEmpty(notArchivedGroups())"></h2>
+          <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedGroups, showWillPublish: false}}"></div>
+        </div>
+        <div data-test-id="not-archived-post-groups">
+          <h2 data-bind="ltext: 'application.attachments.post-verdict', visible: !_.isEmpty(notArchivedPostGroups())"></h2>
+          <div data-bind="template: {name: 'archival-summary-attachment-table', data: {groups: notArchivedPostGroups, showWillPublish: false}}"></div>
+        </div>
       </div>
     </div>
 
@@ -61,6 +78,7 @@
             <div class="form-part">
               <label for="tos-function-correction-function" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.select'"></label><br>
               <select class="dropdown" id="tos-function-correction-function"
+                      data-test-id="tos-function-correction-select"
                       data-bind="options: $root.tosFunctions,
                                  optionsText: function(item) { return item.code + ' - ' + item.name; },
                                  optionsValue: 'code',
@@ -70,17 +88,17 @@
              </div>
              <div class="form-part">
                <label for="tos-function-correction-reason" class="form-label form-label-text" data-bind="ltext: 'tos.function.fix.reason'"></label><br>
-               <input type="text" id="tos-function-correction-reason" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
+               <input type="text" id="tos-function-correction-reason" data-test-id="tos-function-correction-input" class="form-input" data-bind="textInput: tosFunctionCorrectionReason">
              </div>
              <div class="form-part">
-               <button class="btn-primary" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
+               <button class="btn-primary" data-test-id="tos-function-correction-button" data-bind="enable: tosFunctionCorrectionEnabled, click: updateTosFunction, ltext: 'korjaa'"></button>
              </div>
            </div>
         </div>
       </div>
     <!-- /ko -->
 
-    <!-- ko if: showMarkArchivedSection -->
+    <!-- ko if: showMarkArchivedSection && !$root.authorization.ok("common-area-application") && tosFunctionExists -->
     <div class="mark-as-archived">
       <h2 data-bind="ltext: 'archivalSummary.markArchived.heading'"></h2>
       <p data-bind="ltext: 'archivalSummary.markArchived.guide'"></p>
@@ -107,9 +125,9 @@
       <!-- ko foreach: attachments -->
       <div class="attachment-row" data-bind="testId: $data.attachmentType(), attr: {'data-test-group': $parent.groupName}">
         <div class="archival-status" data-bind="visible: $parents[1].showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: $data.archivable() && $data.state() !== 'arkistoitu', checked: $data.sendToArchive, testId: 'send-to-archive'">
+           <input type="checkbox" data-bind="visible: $data.archivable() && !$data.archived(), checked: $data.sendToArchive, testId: 'send-to-archive'">
            <i class="lupicon-circle-attention disabled" data-bind="visible: !$data.archivable(), attr: {title: loc($data.archivabilityError())}"></i>
-           <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <i class="lupicon-archives enabled" data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: $data.toggleAdditionalControls">
@@ -117,8 +135,8 @@
             <div class="retention-period" data-bind="text: $data.retentionDescription"></div>
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped">
-              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.stamped, attr: {title: loc('attachment.stamped')}"></i>
-              <span data-bind="visible: !$data.stamped, ltext: 'no'"></span>
+              <i class="lupicon-circle-stamp enabled" data-bind="visible: $data.latestVersion.stamped, attr: {title: loc('attachment.stamped')}"></i>
+              <span data-bind="visible: !$data.latestVersion.stamped, ltext: 'no'"></span>
             </div>
             <div data-bind="if: $parents[1].showWillPublish" class="will-publish">
               <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
@@ -154,15 +172,14 @@
 
         <div data-bind="if: $data.showAdditionalControls" class="additional-controls">
           <div class="left">
-            <!-- ko if: _.isEmpty($data.readOnly) || (_.isFunction($data.readOnly) && !$data.readOnly()) -->
+            <!-- ko if: $data.typeChange.changingTypeAllowed() -->
             <div class="additional-data-container">
               <div class="header" data-bind="ltext: 'attachment.editAdditionalData'"></div>
               <div class="contents">
                 <label class="label" data-bind="ltext: 'attachment.chooseType'"></label><br>
                 <select id="attachment-type-select"
                         class="long"
-                        data-bind="enable: $data.typeChange.changingTypeAllowed,
-                                   value: $data.typeChange.attachmentType,
+                        data-bind="value: $data.typeChange.attachmentType,
                                    foreach: $data.typeChange.selectableAttachmentTypes">
                   <optgroup data-bind="attr: {label: label}, foreach: types">
                     <option data-bind="text: label, value: value"></option>
@@ -196,6 +213,7 @@
             </div>
           </div>
         </div>
+
       </div>
       <!-- /ko -->
     </div>
@@ -219,8 +237,8 @@
       <!-- ko foreach: documents -->
       <div class="attachment-row" data-bind="testId: $data.documentType + '-document', attr: {'data-test-group': 'application-documents'}">
         <div class="archival-status" data-bind="visible: $parent.showWillPublish, css: { waiting: _.includes($component.archivingInProgressIds(), $data.id) }">
-           <input type="checkbox" data-bind="visible: $data.state() !== 'arkistoitu', checked: sendToArchive">
-           <i class="lupicon-archives enabled" data-bind="visible: $data.state() === 'arkistoitu', attr: {title: loc('arkistoitu')}"></i>
+           <input type="checkbox" data-bind="visible: !$data.archived(), checked: sendToArchive">
+           <i class="lupicon-archives enabled" data-bind="visible: $data.archived(), attr: {title: loc('arkistoitu')}"></i>
            <i class="spin lupicon-refresh wait"></i>
         </div>
         <div class="attachment-row-top" data-bind="click: $data.toggleAdditionalControls">
@@ -229,7 +247,7 @@
             <div class="personal-data" data-bind="text: $data.personalDataDescription"></div>
             <div class="stamped"></div>
             <div data-bind="if: $parent.showWillPublish && _.has($data.metadata(), 'myyntipalvelu')" class="will-publish">
-              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu']" class="lupicon-check enabled"></i>
+              <i data-bind="visible: util.getIn($data, ['metadata', 'myyntipalvelu'])" class="lupicon-check enabled"></i>
               <span data-bind="visible: !util.getIn($data, ['metadata', 'myyntipalvelu']), ltext: 'no'"></span>
             </div>
           </div>

@@ -181,7 +181,7 @@
 
 (defn property-is-like [prop-name value]
   (property-filter "PropertyIsLike" prop-name value
-    (merge {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"})))
+                   {"wildCard" "*", "singleChar" "?", "escape" "\\", "matchCase" "false"}))
 
 (defn property-is-equal [prop-name value]
   (property-filter "PropertyIsEqualTo" prop-name value))
@@ -650,10 +650,11 @@
   "checks if the given system is Web Feature Service -enabled. kindof."
   [url username password]
   (when-not (s/blank? url)
-    (let [resp (query-get-capabilities url "WFS" username password false)]
-      (or
-        (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
-        (warn "GetCapabilities Response not OK or did not contain XML. Response was: " (:status resp) (:body resp) ", url: " url)))))
+    (let [{:keys [status body]} (query-get-capabilities url "WFS" username password false)]
+      (cond
+        (not= 200 status) (errorf "error.integration - GetCapabilities from %s returned error %s" url status)
+        (not (ss/contains? body "<?xml ")) (warnf "GetCapabilities response from %s did not contain XML: " (logging/sanitize 1000 body))
+        :else true))))
 
 (defn get-our-capabilities []
   (let [host (env/value :geoserver :host) ; local IP from Chef environment

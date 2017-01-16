@@ -13,6 +13,8 @@
                  [ring "1.5.0" :exclusions [commons-fileupload org.clojure/tools.reader]]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
+                 [metosin/ring-swagger "0.22.12"]
+                 [metosin/ring-swagger-ui "2.2.5-0"]
 
                  ; Namespace finder library
                  [bultitude "0.2.8"] ; noir requires 0.2.0
@@ -121,13 +123,13 @@
                  ; Oskari map (https://github.com/lupapiste/oskari)
                  [lupapiste/oskari "0.9.58"]
                  ; Shared domain code (https://github.com/lupapiste/commons)
-                 [lupapiste/commons "0.7.55"]
+                 [lupapiste/commons "0.7.72"]
                  ; Smoke test lib (https://github.com/lupapiste/mongocheck)
                  [lupapiste/mongocheck "0.1.3"]
                  ; iText fork with bug fixes and upgraded dependencies (https://github.com/lupapiste/OpenPDF)
                  [lupapiste/openpdf "1.0.6"]
                  ; Wrapper for clj-pdf for PDF/A document generation
-                 [lupapiste/pdfa-generator "1.0.1" :exclusions [org.clojure/tools.reader]]
+                 [lupapiste/pdfa-generator "1.0.2" :exclusions [org.clojure/tools.reader xalan]]
                  ; JMX-server with socket reuse
                  [lupapiste/jmx-server "0.1.0"]]
   :profiles {:dev {:dependencies [[midje "1.8.3" :exclusions [org.clojure/tools.namespace]]
@@ -150,6 +152,7 @@
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
                         :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
+             :intellij {:test-paths ["itest" "stest"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :java-source-paths ["java-src"]

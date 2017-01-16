@@ -80,7 +80,7 @@ Ronja logs in and edits draft
   Input text  statement-text  typed in statement text but not gonna submit the statement.
   Wait until  Select From List By Value  statement-type-select  puollettu
   Positive indicator icon should be visible
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
 Ronja can delete and add attachment
@@ -155,4 +155,5 @@ Sonja removes Vainamoinen
   Logout
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors

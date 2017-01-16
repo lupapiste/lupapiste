@@ -37,13 +37,15 @@ LUPAPISTE.AttachmentsListingAccordionModel = function(params) {
 
   // If some of the attachments are approved and the rest not needed -> approved
   // If some of the attachments are rejected -> rejected
+  // If some of the needed attachments are missing files -> rejected
   // Else null
   self.status = self.disposedPureComputed(function() {
     var atts = attachments();
     if ( _.some( atts, service.isApproved ) &&
          _.every( atts, _.overSome([service.isApproved, service.isNotNeeded]) ) ) {
       return service.APPROVED;
-    } else if ( _.some( atts, service.isRejected ) ) {
+    } else if (_.some( atts, service.isRejected )
+               || _.some( atts, service.isMissingFile )) {
       return  service.REJECTED;
     }
     return null;

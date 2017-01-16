@@ -38,7 +38,7 @@ New applications do not have statements
 
   Open tab  statement
   Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
-  [Teardown]  logout
+  Logout
 
 Sonja sees indicators from pre-filled fields
   Sonja logs in
@@ -93,7 +93,7 @@ Sonja can comment on Ronjas statement
   Wait until  Comment count is  0
   Input comment  kas kummaa.
   Wait until  Comment count is  1
-  [Teardown]  Return from statement
+  Return from statement
 
 Sonja types in draft
   Open statement  sonja.sibbo@sipoo.fi
@@ -101,7 +101,7 @@ Sonja types in draft
   Input text  statement-text  typed in statement text but not gonna submit the statement.
   Wait until  Select From List By Value  statement-type-select  puollettu
   Positive indicator icon should be visible
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Text area should contain  statement-text  typed in statement text but not gonna submit the statement.
 
 Sonja adds attachment to statement draft
@@ -117,7 +117,7 @@ Sonja removes attachment from statement draft
   Click element  jquery=table[data-test-id=statement-attachments-table] i.lupicon-remove
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element Should Not Be Visible  jquery=table[data-test-id=statement-attachments-table]
-  [Teardown]  Return from statement
+  Return from statement
 
 Sonja can give statement to own request
   Open statement  sonja.sibbo@sipoo.fi
@@ -135,7 +135,7 @@ Comment is added
 Sonja cannot regive statement to own statement
   Statement is disabled
   Wait until  Element should not be visible  statement-submit
-  [Teardown]  Return from statement
+  Return from statement
 
 Attachment is generated
   Open tab  attachments
@@ -169,7 +169,7 @@ Draft is removable
 
 ...but given statement is not
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-4']
-  [Teardown]  logout
+  Logout
 
 Veikko can see statements as he is being requested a statement to the application
   Veikko logs in
@@ -186,8 +186,8 @@ Statements are visible for Veikko
   Open tab  statement
   Statement count is  5
 
-Veikko can delete his own statement but no others
-  Element should be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
+Veikko cannot delete statement requests
+  Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-1']
   Element should not be visible  xpath=//div[@id='application-statement-tab']//span[@data-test-id='delete-statement-3']
 
 Veikko from Tampere can give statement (and attach something to it as well)
@@ -212,23 +212,23 @@ There is no possibility to delete the generated statement pdf attachment
   Open tab  attachments
   Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto']
   Element should not be visible  jquery=div#application-attachments-tab tr[data-test-type='ennakkoluvat_ja_lausunnot.lausunto'] span[data-test-icon="delete-button"]
-  [Teardown]  Logout
+  Logout
 
 Mikko logs in and submits application
   Mikko logs in
   Open application  ${appname}  ${appPropertyId}
   Submit application
-  [Teardown]  Logout
+  Logout
 
 Sonja logs in and approves application
   Sonja logs in
   Open application  ${appname}  ${appPropertyId}
-  Approve application yes
+  Approve application no dialogs
 
 Sonja cannot invite any more statement givers
   Open tab  statement
   No such test id  add-statement
-  [Teardown]  Logout
+  Logout
 
 Luukas logs in but cannot edit statement
   Luukas logs in
@@ -237,10 +237,10 @@ Luukas logs in but cannot edit statement
   Open statement  luukas.lukija@sipoo.fi
   Wait until  Element should not be visible  statement-submit
   Element should not be visible  jquery=#statement-submit
-  [Teardown]  Return from statement
+  Return from statement
 
 Luukas can still delete (empty) statement
   Scroll and click test id  delete-statement-3
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  jquery=tr.statement-row i.lupicon-remove
-  [Teardown]  Logout
+  Logout

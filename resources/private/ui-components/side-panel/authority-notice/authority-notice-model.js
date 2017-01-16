@@ -11,7 +11,7 @@ LUPAPISTE.AuthorityNoticeModel = function(params) {
   self.authorityNotice = ko.observable();
   self.tags = ko.observableArray([]);
 
-  self.noticeLabel = loc("notice.prompt") + " (" + loc("notice.prompt.info") + ")";
+  self.noticeLabel = loc("notice.prompt") + " (" + loc("notice.prompt.info") + ").";
 
   // Update inner observables when values change and suppress change events going outside
   var updatingObservables = true;

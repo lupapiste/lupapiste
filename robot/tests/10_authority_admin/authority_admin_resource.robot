@@ -25,7 +25,8 @@ Add link
 
 Update link
   [Arguments]  ${name}  ${url}
-  Scroll to test id  organization-links-table
+  Wait test id visible  organization-links-table
+  Scroll to top
   Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='edit']
   Wait Until  Element Should Be Visible  dialog-edit-link
   Input Text  jquery=#dialog-edit-link #link-url-fi  ${url}
@@ -35,8 +36,10 @@ Update link
 
 Remove link
   [Arguments]  ${name}
-  Scroll to test id  organization-links-table
-  Wait and click  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
+  Wait test id visible  organization-links-table
+  # Ugly fix for small roboto screen
+  Execute javascript  window.scrollTo(200,0)
+  Click element  xpath=//table[@data-test-id='organization-links-table']//td/div[text()='${name}']/../..//a[@data-test-id='remove']
 
 User sees link
   [Arguments]  ${name}  ${url}

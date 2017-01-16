@@ -28,12 +28,20 @@ LUPAPISTE.RamLinksModel = function( params ) {
   self.disposedSubscribe(self.attachment, updateLinks);
 
   var approvalTemplate = _.template( "<%- user.firstName %>&nbsp;<%- user.lastName %><br><%- time %>");
+  var attachmentsService = lupapisteApp.services.attachmentsService;
+
+  function approvedText( approval ) {
+    return _.isNumber( approval.timestamp ) && _.isPlainObject( approval.user )
+      ? approvalTemplate( {user: approval.user,
+                           time: moment( approval.timestamp).format( "D.M.YYYY HH:mm")})
+    : loc( "ok");
+  }
 
   self.approvalHtml = function( data ) {
-    var approved = data.approved || {};
-    return approved.value === "approved"
-      ? approvalTemplate( {user: approved.user,
-                           time: moment( approved.timestamp).format( "D.M.YYYY HH:mm")})
+    var attachment = attachmentsService.getAttachment( data.id );
+    var approval = attachmentsService.attachmentApproval( attachment );
+    return attachmentsService.isApproved( attachment )
+      ? approvedText( approval )
       : "-";
   };
 

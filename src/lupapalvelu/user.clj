@@ -1,6 +1,6 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
-            [swiss.arrows :refer [-<>]]
+            [swiss.arrows :refer [-<> some-<>> -<>>]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
             [camel-snake-kebab.core :as csk]
@@ -17,7 +17,8 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.i18n :as i18n]))
+            [lupapalvelu.i18n :as i18n]
+            [clojure.set :as set]))
 
 ;;
 ;; User schema
@@ -41,7 +42,8 @@
               (sc/optional-key :tags)          [sc/Str]
               (sc/optional-key :operations)    [sc/Str]
               (sc/optional-key :organizations) [sc/Str]
-              (sc/optional-key :areas)         [sc/Str]}})
+              (sc/optional-key :areas)         [sc/Str]
+              (sc/optional-key :event)        [sc/Str]}})
 
 (def Id sc/Str) ; Variation of user ids in different environments is too diverse for a simple customized schema.
 
@@ -243,6 +245,20 @@
 (defn batchrun-user [org-ids]
   (let [org-authz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)]
     (assoc batchrun-user-data :orgAuthz org-authz)))
+
+(defn user-is-archivist? [user organization]
+  (let [archive-orgs (organization-ids-by-roles user #{:archivist})
+        org-set (if organization (set/intersection #{organization} archive-orgs) archive-orgs)]
+    (and (seq org-set) (org/some-organization-has-archive-enabled? org-set))))
+
+(defn check-password-pre-check [{{:keys [password]} :data user :user}]
+  (when-not (security/check-password password
+                                     (some-<>> user
+                                               :id
+                                               (mongo/by-id :users <> {:private.password true})
+                                               :private
+                                               :password))
+    (fail :error.password)))
 
 ;;
 ;; ==============================================================================

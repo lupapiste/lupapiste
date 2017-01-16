@@ -143,6 +143,9 @@
 (defn ascii-parameters [params command]
   (filter-params-of-command params command (complement ss/ascii?) "error.illegal-value:not-ascii-string"))
 
+(defn numeric-parameters [params command]
+  (filter-params-of-command params command (complement ss/numeric?) :error.illegal-number))
+
 (defn select-parameters
   "Parameters are valid if each of them belong to the value-set"
   [params value-set command]
@@ -240,7 +243,7 @@
     (let [{:keys [action web]} command
           {:keys [user-agent client-ip]} web]
       (errorf "action '%s' not found. User agent '%s' from %s"
-             (log/sanitize 50 action) (log/sanitize 100 action) client-ip)
+             (log/sanitize 50 action) (log/sanitize 100 user-agent) client-ip)
       (fail :error.invalid-command))))
 
 (defn missing-feature [command]
@@ -471,7 +474,7 @@
    ; Prechecks one parameter: the command, which has :application associated.
    ; Command does not have :data when pre-check is called on validation phase (allowed-actions)
    ; but has :data when pre-check is called during action execution.
-   (sc/optional-key :pre-checks)  [(sc/cond-pre util/Fn sc/Symbol)]
+   (sc/optional-key :pre-checks)  [(sc/cond-pre util/IFn sc/Symbol)]
    ; Input validators take one parameter, the command. Application is not yet available.
    (sc/optional-key :input-validators)  [(sc/cond-pre util/Fn sc/Symbol)]
    ; Application state keywords

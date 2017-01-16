@@ -11,36 +11,20 @@
  *   tags (boolean): tags mode
  *   nullable (boolean): true if selected value can be null (ie. Choose... dropdown)
  *   (lP|p)laholder: search placeholder text, either lockey (lPlaceholder) or text (placeholder)
+ *   maxHeight: If given will override the calculated max height of
+ *   the candidate list. CSS style.
  */
 LUPAPISTE.AutocompleteBaseModel = function(params) {
   "use strict";
 
   var self = this;
 
-  // TODO rethink how we handle single selection in autocomplete component
-  self.selectedOptions = params.selectedOptions || ko.observableArray(_.filter([ko.unwrap(params.selectedOption)]));
+  self.selectedOptions = params.selectedOptions || ko.pureComputed({
+    read: function() { return _.filter([ko.unwrap(params.selectedOption)]); },
+    write: function(values) { params.selectedOption(_.first(values)); }
+  });
 
   self.disable = params.disable || false;
-
-  var pauseUpdatingOption = false;
-
-  var subscriptions = [];
-
-  if (params.selectedOption) {
-    subscriptions.push(params.selectedOption.subscribe(function(val) {
-      pauseUpdatingOption = true;
-      self.selectedOptions(_.filter([val]));
-      pauseUpdatingOption = false;
-    }));
-  }
-
-  subscriptions.push(self.selectedOptions.subscribe(function(val) {
-    if (params.selectedOption && !pauseUpdatingOption) {
-      params.selectedOption(_.head(val));
-    }
-  }));
-  // end TODO
-
 
   // Parameters
   self.tags = params.tags; // tagging support
@@ -230,7 +214,7 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
     self.retainFocus();
   };
 
-  self.maxHeightPx = ko.pureComputed(function() {
+  self.maxHeight = params.maxHeight || ko.pureComputed(function() {
     var windowHeight = lupapisteWindow.windowHeight();
     if ( windowHeight ) {
       return windowHeight / 2 + "px"; // magic number 2, seems to work pretty well with different window sizes (zoom levels)
@@ -239,10 +223,4 @@ LUPAPISTE.AutocompleteBaseModel = function(params) {
     }
   });
 
-  self.dispose = function() {
-    while(subscriptions.length !== 0) {
-      subscriptions.pop().dispose();
-    }
-    self.maxHeightPx.dispose();
-  };
 };

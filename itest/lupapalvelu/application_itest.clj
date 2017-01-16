@@ -574,6 +574,50 @@
           (-> (query sonja :change-application-state-targets :id application-id) :states set (contains? "verdictGiven")) => true
           (command sonja :change-application-state :id application-id :state "verdictGiven") => ok?)))
 
+(defn- return-to-draft [authority application-id]
+  (command authority :return-to-draft :id application-id :text "comment-text" :lang :fi))
+
+(facts "Returning application to draft state after submission"
+  (fact "Only applications in 'submitted' state can be returned to draft"
+    (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+      (return-to-draft sonja application-id) => (partial expected-failure? :error.command-illegal-state)
+      (command pena :submit-application :id application-id)
+      (return-to-draft sonja application-id) => ok?
+      (command pena :submit-application :id application-id) => ok?
+      (command sonja :check-for-verdict :id application-id)
+      (return-to-draft sonja application-id) => (partial expected-failure? :error.command-illegal-state)))
+  (fact "The applicants and owners are notified of the return to draft"
+    (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
+          application    (query-application pena application-id)
+          hakija         (domain/get-applicant-document (:documents application))]
+      (command pena :invite-with-role :id application-id :email (email-for-key mikko) :role "writer" :text "wilkommen" :documentName "" :documentId "" :path "") => ok?
+      (command mikko :approve-invite :id application-id) => ok?
+      (set-and-check-person pena application-id hakija ["henkilo"])
+      (command pena :submit-application :id application-id)
+
+      (last-email) ; Inbox zero
+
+      (return-to-draft sonja application-id)
+      (let [emails (sent-emails)]
+        (count emails) => 2
+        emails => (partial every? (comp (partial re-find #"hankkeen Asuinkerrostalon tai rivitalon rakentaminen osoitteessa") :html :body))
+        emails => (partial every? (comp (partial re-find #"comment-text") :html :body))
+        emails => (partial some (comp (partial re-find (re-pattern (email-for-key pena))) :to))
+        emails => (partial some (comp (partial re-find (re-pattern (email-for-key mikko))) :to)))))
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)]
+    (command pena :submit-application :id application-id)
+    (return-to-draft sonja application-id)
+
+    (let [application (query-application pena application-id)]
+      (fact "The return to draft can be seen in application history"
+        (:state application) => "draft"
+        (-> application :history last :state) => "draft")
+
+      (fact "The authority's comments are also stored in application comments"
+        (-> application :comments last :text) => "comment-text")
+      (fact "Application's submission date is nil"
+        (-> application :submitted) => nil?))))
+
 (facts "Authority can create application in other organisation"
        (let [application-id (create-app-id luukas
                                             :operation "kerrostalo-rivitalo"

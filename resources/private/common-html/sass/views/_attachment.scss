@@ -62,11 +62,33 @@ $previewHeight: 500px;
     th {
       padding: $marginS;
     }
-    td {
+    tr > td {
       padding: $marginS;
       max-width: 130px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    tr.version-row--noted {
+      border-bottom: none;
+      > td {
+        padding-bottom: 0;
+        min-height: 0;
+        height: initial;
+      }
+    }
+    tr.version-reject-note-row {
+      border-top: none;
+      padding: 0;
+      > td {
+        padding: {
+          top: 0;
+          left: 6px;
+          right: 0;
+          bottom: 4px;
+        }
+        min-height: 0;
+        height: auto;
+      }
     }
   }
 }
@@ -96,6 +118,7 @@ $previewHeight: 500px;
     padding-left: $marginM;
     width: 49%;
     vertical-align: top;
+    float: right;
   }
   @media (max-width: $narrow-breakpoint) {
     .col1, .col2 {
@@ -176,8 +199,6 @@ td.comment-text {
 
 .attachment-label {
   margin-bottom: $marginM;
-  overflow: hidden;
-
 
   #attachment-latest-version-info {
     margin-bottom: $marginL;
@@ -282,27 +303,6 @@ td.comment-text {
   max-width: $attachment-modal-width;
 }
 
-.upload-zone.drop-zone {
-  display: table-cell;
-  vertical-align: middle;
-  color: #fff;
-  width: 320px;
-  height: 240px;
-  text-align: center;
-  background-color: $green-dark;
-  h1 {
-    float: none;
-    display: block;
-    color: #fff;
-  }
-  &.active {
-    background-color: $green;
-  }
-  i {
-    font-size: 50px;
-  }
-}
-
 // Used when editing tasks, for example
 .targetted-attachments {
   margin: {
@@ -316,6 +316,9 @@ td.comment-text {
   margin: {
     top: 1em;
     bottom: 2em;
+  }
+  export-attachments {
+    @include button-row;
   }
 }
 
@@ -341,4 +344,45 @@ td.comment-text {
     padding: 0px;
     margin: 0px;
   }
+}
+
+.selected-attachment-types {
+  margin-top: $marginM;
+  margin-bottom: $marginM;
+}
+
+.selected-attachment-types-container {
+  min-height: $grid-input-height;
+  .selected-attachment-type-tag {
+    position: relative;
+    background-color: $gray246;
+    border: 1px solid $input-border-color;
+    min-height: $grid-input-height;
+    width: 100%;
+    display: inline-block;
+    span.tag-label {
+      display: inline-block;
+      margin: $marginS;
+      font-weight: bold;
+    }
+    .tag-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      color: $lp-orange;
+      &:hover {
+        color: $orange-hover;
+      }
+    }
+  }
+}
+
+.attachment-details-toggles {
+  padding-top: $marginL;
+  padding-bottom: $marginL;
+  clear: both;
+}
+
+.attachment-info-field .combobox-container {
+  width: 100%;
 }

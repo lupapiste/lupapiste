@@ -25,12 +25,9 @@ Mikko creates & submits application and goes to empty attachments tab
   Open tab  attachments
 
 Mikko adds PDF attachment without comment
-  Add attachment  application  ${PDF_TESTFILE_PATH1}  ${EMPTY}  operation=Uusi asuinrakennus
-  Return to application  
-  Add attachment  application  ${PDF_TESTFILE_PATH2}  ${EMPTY}  operation=Uusi asuinrakennus
-  Return to application  
-  Add attachment  application  ${PDF_TESTFILE_PATH3}  ${EMPTY}  operation=Yleisesti hankkeeseen
-  Return to application  
+  Upload attachment  ${PDF_TESTFILE_PATH1}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH2}  Muu liite  Muu  Uusi asuinrakennus
+  Upload attachment  ${PDF_TESTFILE_PATH3}  Muu liite  Muu  Yleisesti hankkeeseen
 
 Mikko does not see stamping button
   Wait until  Element should not be visible  jquery=button[data-test-id=stamp-attachments]
@@ -38,17 +35,17 @@ Mikko does not see stamping button
 Mikko previews file
   [Tags]  attachments
   Open attachment details  muut.muu
-  Click by test id  file-preview
+  Scroll and click test id  file-preview
   Wait Until  Element should be visible  file-preview-iframe
 
 Version number is 1.0
-  Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  1.0
+  Wait until  Element text should be  test-attachment-version  1.0
 
 Mikko adds new version
   Add attachment version  ${PDF_TESTFILE_PATH3}
 
 Version number is 2.0
-  Wait until  Element text should be  //section[@id="attachment"]//span[@data-bind="version: $data.version"]  2.0
+  Wait until  Element text should be  test-attachment-version  2.0
 
 Sonja logs in
   Logout
@@ -63,11 +60,14 @@ Sonja sees that attachment is not stamped
 
 Mark attachment as verdict attachment
   Open attachment details  muut.muu
-  Wait until  Select checkbox  attachment-is-verdict-attachment
+  Wait until  Element should be visible  xpath=//label[@data-test-id='is-verdict-attachment-label']
+  Scroll to test id  is-verdict-attachment-input
+  Select checkbox  xpath=//input[@data-test-id='is-verdict-attachment-input']
+  Positive indicator icon should be visible
   Return to application
 
 Sonja sees stamping button
-  Wait until  Page should contain element  jquery=div#application-attachments-tab button[data-test-id=stamp-attachments]
+  Wait until  Element should be visible  jquery=div#application-attachments-tab button[data-test-id=stamp-attachments]
 
 Sonja clicks stamp button, stamping page opens
   Open stamping page
@@ -123,7 +123,7 @@ Sonja can toggle selection of attachments by group/all/none
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
   Scroll and click  div#stamping-container a[data-test-id=stamp-select-none]
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
-  
+
 Status of stamping is ready
   Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
 
@@ -151,7 +151,7 @@ Attachment has stamped icon
 
 Sonja starts stamping again
   Open stamping page
-  
+
 No attachments are selected
   Javascript?  $("div.stampbox-wrapper input:checked").length === 0
 
@@ -178,4 +178,4 @@ Open stamping page
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
-  
+

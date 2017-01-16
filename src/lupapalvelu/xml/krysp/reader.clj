@@ -325,6 +325,7 @@
 
 (defmethod application-state :Rakennusvalvonta [xml-without-ns] (standard-application-state xml-without-ns))
 (defmethod application-state :Popast [xml-without-ns] (standard-application-state xml-without-ns))
+(defmethod application-state :FeatureCollection [xml-without-ns] (standard-application-state xml-without-ns))
 
 (def backend-preverdict-state
   #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})

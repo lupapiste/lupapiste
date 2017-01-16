@@ -23,7 +23,7 @@
               </th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: data">
+          <tbody data-bind="foreach: {data: data, afterRender: scrollPop}">
             <tr class="application-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
               <!-- ko if: lupapisteApp.models.currentUser.isAuthority() -->
               <td class="applications-search-results__indicator"
@@ -63,6 +63,14 @@
                 <div data-test-id="unseen-comments" data-bind="attr: {title: loc('conversation.title')}">
                   <i class="lupicon-conversation"></i>
                   <span data-bind="text: $data.unseenComments"></span>
+                </div>
+              </td>
+
+              <td class="applications-search-results__indicator"
+                  data-bind="if: $data.fullyArchived"
+                  data-test-col-name="fullyArchived">
+                <div data-bind="attr: {title: loc('fullyArchived.title')}">
+                  <i class="lupicon-archives enabled"></i>
                 </div>
               </td>
 

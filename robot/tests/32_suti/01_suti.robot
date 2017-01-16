@@ -35,8 +35,8 @@ Set public www address
   Focus test id  suti-url
   Positive indicator should be visible
 
-Reload page
-  Reload Page
+Reload page and kill dev-box
+  Reload page and kill dev-box
 
 Url and username are set
   Scroll to test id  suti-send
@@ -69,7 +69,7 @@ Select one Suti operation
   Toggle Suti operation  kiinteistonmuodostus
 
 Operation selected after reload
-  Reload page
+  Reload page and kill dev-box
   Wait Until  Checkbox wrapper selected  suti-kiinteistonmuodostus
 
 Disable Suti and logout
@@ -236,5 +236,6 @@ Luukas logs in, sees Suti but cannot edit
   [Teardown]  Logout
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors
 

@@ -1,5 +1,3 @@
-(ns lupapalvelu.xml.krysp.review-reader)
-
 (ns lupapalvelu.xml.krysp.review-reader
   (:require [taoensso.timbre :refer [trace debug info warn error]]
             [lupapalvelu.xml.krysp.common-reader :as common]
@@ -24,7 +22,7 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message. Count:" (count asiat)))
 
       (let [asia (first asiat)
-            katselmukset (map cr/all-of  (select asia [:RakennusvalvontaAsia :> :katselmustieto :Katselmus]))
+            katselmukset (map cr/all-of  (select asia [:RakennusvalvontaAsia :katselmustieto :Katselmus]))
             massage (fn [katselmus]
                       (-> katselmus
                           (util/ensure-sequential :muuTunnustieto)

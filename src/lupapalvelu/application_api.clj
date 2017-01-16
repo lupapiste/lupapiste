@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error errorf]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
-            [clj-time.format :as tf]
             [monger.operators :refer :all]
             [sade.coordinate :as coord]
             [sade.core :refer :all]
@@ -12,12 +11,14 @@
             [sade.property :as prop]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as app]
+            [lupapalvelu.application-utils :as app-utils]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.authorization :as auth]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.company :as company]
             [lupapalvelu.document.document :as doc]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
@@ -32,7 +33,8 @@
             [lupapalvelu.user :as usr]
             [lupapalvelu.suti :as suti]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as krysp-output]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.drawing :as draw]))
 
 ;; Notifications
 
@@ -41,6 +43,36 @@
                    :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
 
 (notifications/defemail :application-state-change state-change)
+
+(defn- return-to-draft-model [{application :application, {:keys [text lang]} :data}
+                              _
+                              recipient]
+  {:operation-fi (app-utils/operation-description application :fi)
+   :operation-sv (app-utils/operation-description application :sv)
+   :address (:address application)
+   :city-fi (i18n/localize :fi "municipality" (:municipality application))
+   :city-sv (i18n/localize :sv "municipality" (:municipality application))
+   :name (:firstName recipient)
+   :text text})
+
+(defn return-to-draft-recipients
+  "the notification is sent to applicants in auth array and application owners"
+  [{{:keys [auth documents] :as application} :application}]
+  (let [applicant-in-auth? (->> auth (remove :invite) (remove :unsubscribed) (map :id) set)
+        applicant-ids (->> (domain/get-applicant-documents documents)
+                           (map (comp :value :userId :henkilo :data))
+                           (filter applicant-in-auth?))
+        owner-ids (->> (auth/get-auths-by-role application :owner)
+                       (remove :invite)
+                       (remove :unsubscribed)
+                       (map :id))]
+    (map (comp usr/non-private usr/get-user-by-id)
+         (distinct (remove nil? (concat applicant-ids owner-ids))))))
+
+(notifications/defemail :application-return-to-draft
+  {:subject-key "return-to-draft"
+   :recipients-fn return-to-draft-recipients
+   :model-fn return-to-draft-model})
 
 ;; Validators
 
@@ -87,15 +119,20 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :states     states/all-application-states}
-  [{{:keys [documents schema-version] :as application} :application}]
+  [{{:keys [documents schema-version state] :as application} :application}]
   (let [op-meta (op/get-primary-operation-metadata application)
         original-schema-names   (->> (select-keys op-meta [:required :optional]) vals (apply concat))
         original-party-schemas  (app/filter-party-docs schema-version original-schema-names false)
         repeating-party-schemas (app/filter-party-docs schema-version original-schema-names true)
         current-schema-name-set (->> documents (filter app/party-document?) (map (comp name :name :schema-info)) set)
-        missing-schema-names    (remove current-schema-name-set original-party-schemas)]
-    (ok :partyDocumentNames (-> (concat missing-schema-names repeating-party-schemas)
-                                (conj (op/get-applicant-doc-schema-name application))
+        missing-schema-names    (remove current-schema-name-set original-party-schemas)
+        candidate-schema-names  (conj
+                                  (concat missing-schema-names repeating-party-schemas)
+                                  (op/get-applicant-doc-schema-name application))
+        remove-by-state-fn      (fn [schemaName]
+                                  (let [schema (schemas/get-schema schema-version schemaName)]
+                                    (doc/state-valid-by-schema? schema :addable-in-states states/create-doc-states state)))]
+    (ok :partyDocumentNames (-> (filter remove-by-state-fn candidate-schema-names)
                                 distinct))))
 
 (defcommand mark-seen
@@ -312,14 +349,14 @@
   (when (sequential? drawings)
     (update-application command
                         {$set {:modified created
-                               :drawings drawings}})))
+                               :drawings (map (fn [drawing] (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing))) drawings)}})))
 
 (defn- make-marker-contents [id lang {:keys [location] :as app}]
   (merge
     {:id        (:id app)
      :title     (:title app)
      :location  {:x (first location) :y (second location)}
-     :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
+     :operation (app-utils/operation-description app lang)
      :authName  (-> app
                     (auth/get-auths-by-role :owner)
                     first
@@ -429,7 +466,7 @@
     organization :organization
     created :created :as command}]
   (let [op (app/make-op operation created)
-        new-docs (app/make-documents nil created op application)
+        new-docs (app/make-documents nil created @organization op application)
         existing-attachment-types (->> attachments (remove (comp #{:operation} :group)) (map :type))
         new-attachments (app/make-attachments created op @organization app-state tos-function :existing-attachments-types existing-attachment-types)]
     (update-application command {$push {:secondaryOperations  op
@@ -535,6 +572,25 @@
                                     {$set (app/warranty-period (:created command))}))
       (update-application command (app/state-transition-update (keyword state) (:created command) application user)))))
 
+(defcommand return-to-draft
+  {:description "Returns the application to draft state."
+   :parameters       [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
+   :user-roles #{:authority}
+   :states #{:submitted}
+   :pre-checks [(partial sm/validate-state-transition :draft)]
+   :on-success (notify :application-return-to-draft)}
+  [{{:keys [role] :as user}         :user
+    {:keys [state] :as application} :application
+    created                         :created
+    :as command}]
+  (->> (util/deep-merge
+        (app/state-transition-update :draft created application user)
+        (when (seq text)
+          (comment/comment-mongo-update state text {:type "application"} role false user nil created))
+        {$set {:submitted nil}})
+       (update-application command)))
+
 (defcommand change-warranty-start-date
   {:description      "Changes warranty start date"
    :parameters       [id startDate]
@@ -610,7 +666,7 @@
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
         organized-results (flatten (conj with-same-property-id without-same-property-id))
-        final-results (map #(select-keys % [:id :text]) organized-results)]
+        final-results (map #(select-keys % [:id :text :propertyId]) organized-results)]
     (ok :app-links final-results)))
 
 (defn- validate-linking [{app :application :as command}]
@@ -731,7 +787,7 @@
     (if (:started app)
       (util/to-local-date (:started app))
       (or
-        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-ms :value (util/to-local-date))
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 
@@ -794,7 +850,7 @@
                        {$set  {:infoRequest            false
                                :openInfoRequest        false
                                :convertedToApplication created
-                               :documents              (app/make-documents user created op app)
+                               :documents              (app/make-documents user created @org op app)
                                :modified               created}
                         $push {:attachments {$each (app/make-attachments created op @org state tos-fn)}}}))
   (try (autofill-rakennuspaikka app created)

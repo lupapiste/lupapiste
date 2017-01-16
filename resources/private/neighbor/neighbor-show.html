@@ -107,14 +107,12 @@
               <tbody data-bind="foreach: attachments">
                 <tr style="cursor: pointer;">
                   <td>
-                    <a>
-                      <span data-bind="if: type">
-                        <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
-                      </span>
-                      <span data-bind="if: !type">
-                        <i data-bind="ltext: 'attachment.noName'"></i>
-                      </span>
-                    </a>
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc('attachmentType.' + type['type-group'] + '.' + type['type-id'])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
                   </td>
                   <td>
                     <span data-bind="if: $data.latestVersion">
@@ -185,8 +183,12 @@
                 </span>
 
                 <h1 data-bind="visible: done, ltext: 'neighbor.show.response.done'" data-test-id="neighbor-response-done"></h1>
-                <p data-bind="visible: done, ltext: 'neighbor.show.response.done.desc'"> <p>
+                <p data-bind="visible: done, ltext: 'neighbor.show.response.done.desc'"> </p>
 
+                <!-- ko if: util.identLogoutUrl() -->
+                <p data-bind="ltext: 'ident.logout.info-text', visible: done"></p>
+                <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect, visible: done" />
+                <!-- /ko -->
 
               </form>
             </div>

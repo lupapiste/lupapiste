@@ -5,7 +5,7 @@
             [lupapalvelu.user-enums :as user-enums]
             [lupapalvelu.document.tools :refer :all]
             [lupapalvelu.document.schema-validation :as schema-validation]
-            [lupapalvelu.document.waste-schemas :as waste-schemas]
+            [lupapalvelu.states :as states]
             [lupapiste-commons.usage-types :as usages]))
 
 
@@ -54,13 +54,17 @@
 (def info-keys #{:name :type :subtype :version
                  :i18name :i18nprefix
                  :approvable :removable :deny-removing-last-document
+                 :disableable
                  :removable-only-by-authority
                  :user-authz-roles
                  :group-help :section-help
                  :after-update
                  :repeating :no-repeat-button :order
+                 :redraw-on-approval
+                 :post-verdict-party
+                 :addable-in-states
                  :exclude-from-pdf
-                 :construction-time
+                 :editable-in-states
                  :accordion-fields})
 
 (def updateable-keys #{:removable})
@@ -103,6 +107,9 @@
 
 
 (def select-one-of-key "_selected")
+
+(defn select-one-of-schema? [{schema-name :name :as schema}]
+  (= select-one-of-key (name schema-name)))
 
 ;;
 ;; helpers
@@ -224,7 +231,7 @@
                              :type :group
                              :validator :address
                              :blacklist [turvakielto]
-                             :body [{:name "katu" :type :string :subtype :vrk-address :required true :i18nkey "osoite.katu"}
+                             :body [{:name "katu" :type :string :subtype :vrk-address :size :l :required true :i18nkey "osoite.katu"}
                                     postinumero
                                     {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size :m :required true :i18nkey "osoite.postitoimipaikannimi"}
                                     country]}])
@@ -234,7 +241,7 @@
                           :validator :address
                           :body [{:name "kunta" :type :string :i18nkey "osoite.kunta"}
                                  {:name "lahiosoite" :type :string :i18nkey "osoite.katu"}
-                                 {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
+                                 {:name "osoitenumero" :type :string}
                                  {:name "osoitenumero2" :type :string}
                                  {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size :s :hidden true :readonly true}
                                  {:name "jakokirjain2" :type :string :size :s :hidden true :readonly true}
@@ -871,6 +878,11 @@
                               rakennuksen-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-ilman-rakennustietoja (body
+                                                    rakennuksen-valitsin
+                                                    rakennuksen-omistajat
+                                                    rakennuksen-osoite))
+
 (def olemassaoleva-rakennus-muutos (body
                                      rakennuksen-valitsin
                                      rakennuksen-omistajat
@@ -949,11 +961,17 @@
                                                     {:name "muuta huoneistoalaan kuuluvaa tilaa"}
                                                     ei-tiedossa]}]}]}]}])
 
-(def rakennuksen-laajentaminen (body laajentaminen
-                                     olemassaoleva-rakennus))
+(def rakennuksen-laajentaminen-ilman-rakennustietoja (body
+                                                        olemassaoleva-rakennus-ilman-rakennustietoja
+                                                        laajentaminen))
 
-(def rakennuksen-laajentaminen-ei-huoneistoja (body laajentaminen
-                                                    olemassaoleva-rakennus-ei-huoneistoja))
+(def rakennuksen-laajentaminen (body
+                                  rakennuksen-laajentaminen-ilman-rakennustietoja
+                                  rakennuksen-tiedot))
+
+(def rakennuksen-laajentaminen-ei-huoneistoja (body
+                                                rakennuksen-laajentaminen-ilman-rakennustietoja
+                                                rakennuksen-tiedot-ilman-huoneistoa))
 
 (def purku (body
              {:name "poistumanSyy" :type :select :sortBy :displayname
@@ -1446,9 +1464,15 @@
            :order 5
            :removable true
            :approvable true
+           :disableable true
+           :redraw-on-approval true
+           :post-verdict-party true
            :accordion-fields designer-accordion-paths
            :type :party
            :subtype :suunnittelija
+           :addable-in-states (set/union #{:draft :answered :open :submitted :complementNeeded}
+                                         (set/difference states/post-verdict-states states/terminal-states))
+           :editable-in-states (set/union states/update-doc-states (set/difference states/post-verdict-states states/terminal-states))
            :after-update 'lupapalvelu.application-meta-fields/designers-index-update
            }
 
@@ -1533,21 +1557,6 @@
     :body [{:name "suoramarkkinointikielto" ;THIS IS DEPRECATED!
             :type :checkbox
             :layout :full-width}]}
-
-   {:info {:name "rakennusjatesuunnitelma"
-           :order 200
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/rakennusjatesuunnitelma)}
-   {:info {:name "rakennusjateselvitys"
-           :order 201
-           :construction-time true
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/rakennusjateselvitys)}
-
-   {:info {:name "laajennettuRakennusjateselvitys"
-           :order 200
-           :section-help "rakennusjate.help"}
-    :body (body waste-schemas/laajennettu-rakennusjateselvitys)}
 
    {:info {:name "paatoksen-toimitus-rakval"
            :removable false

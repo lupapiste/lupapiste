@@ -19,6 +19,8 @@
                        [:fi :sv]))
 (def default-lang (first supported-langs))
 
+(def common-translations-filename "shared_translations.txt")
+
 (defn- read-translations-txt [name-or-file]
   (let [resource (if (instance? java.io.File name-or-file)
                    name-or-file
@@ -41,7 +43,7 @@
 
 (defn- load-translations []
   (apply merge-with conj
-         (read-translations-txt "shared_translations.txt")
+         (read-translations-txt common-translations-filename)
          (i18n-localizations)))
 
 (def- localizations (atom nil))
@@ -64,11 +66,16 @@
 
 (def supported-language-schema (apply sc/enum (map name languages)))
 
+(defn supported-langs-map
+  "Return a map {:a (f :a) :b (f :b) ... } where :a, :b, ... are the supported languages"
+  [f]
+  (into {} (map (juxt identity f)
+                supported-langs)))
+
 (defn localization-schema
   "Return a map {:a value-type :b value-type ... } where :a, :b, ... are the supported languages"
   [value-type]
-  (into {} (map (juxt identity (constantly value-type))
-                supported-langs)))
+  (supported-langs-map (constantly value-type)))
 
 (defn with-default-localization [loc-map default]
   (merge (localization-schema default)
@@ -211,6 +218,17 @@
        (missing-translations lang)
        (commons-resources/write-excel file))))
 
+(defn- all-localizations-excel
+  ([] (all-localizations-excel (default-i18n-files)))
+  ([source-files]
+    (let [date-str (timef/unparse (timef/formatter "yyyyMMdd") (time/now))
+          filename (str (System/getProperty "user.home") "/lupapiste_translations_all_" date-str ".xlsx")]
+      (all-localizations-excel source-files (io/file filename))))
+  ([source-files file]
+   (-> source-files
+       (txt-files->map)
+       (commons-resources/write-excel file))))
+
 (defn- contains-no-translations? [k-new v-new lang]
   (when (= "" (get v-new lang ""))
     (warn (str "No translations for key " k-new))
@@ -274,8 +292,9 @@
                             translation-map
                             lang)))
 
-(defn merge-translations-from-excels-into-source-files [translation-files-dir-path paths]
+(defn merge-translations-from-excels-into-source-files
   "Merges translation excel files into the current translation source files."
+  [translation-files-dir-path paths]
   (let [translation-txt-files (util/get-files-by-regex translation-files-dir-path
                                                        #".+\.txt$")
         current-loc-map (-> translation-txt-files (txt-files->map))

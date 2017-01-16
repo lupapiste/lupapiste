@@ -17,6 +17,8 @@
 
     (comment-application pena application-id true) => ok?
 
+    (fact "Signing not possible"
+          (query pena :signing-possible :id application-id) => fail?)
     (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
             op-id (-> application :primaryOperation :id)]
@@ -37,7 +39,8 @@
                         :create-attachments
                         :id application-id
                         :attachmentTypes [{:type-group "paapiirustus" :type-id "asemapiirros"}
-                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}])
+                                          {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                        :group nil)
           attachment-ids (:attachmentIds resp)]
 
       (fact "Veikko can create an attachment"
@@ -49,12 +52,12 @@
       (fact "attachment has been saved to application"
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
                                                                                  {:type                 {:type-group "paapiirustus" :type-id "asemapiirros"}
-                                                                                  :state                "requires_user_action"
+                                                                                  ;;:state                "requires_user_action"
                                                                                   :requestedByAuthority true
                                                                                   :versions             []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
                                                                                   {:type                 {:type-group "paapiirustus" :type-id "pohjapiirustus"}
-                                                                                   :state                "requires_user_action"
+                                                                                   ;;:state                "requires_user_action"
                                                                                    :requestedByAuthority true
                                                                                    :versions             []}))
 
@@ -67,7 +70,9 @@
             (let [p-id pena-id]
               (doseq [{auth :auth} (:attachments application)]
                 (fact "Pena as uploader"
-                  (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
+                      (some #(when (#{p-id} (:id %)) (:role %)) auth) => "uploader"))))
+          (fact "Signing id possible"
+          (query pena :signing-possible :id application-id) => ok?)
 
           (fact "download all"
             (let [resp (raw pena "download-all-attachments" :id application-id)]
@@ -267,7 +272,8 @@
                             :create-attachments
                             :id application-id
                             :attachmentTypes [{:type-group "muut" :type-id "muu"}
-                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]) => ok?
+                                              {:type-group "paapiirustus" :type-id "pohjapiirustus"}]
+                            :group nil) => ok?
         attachment-ids (:attachmentIds resp)
         hidden-id (first attachment-ids)
         visible-id (second attachment-ids)
@@ -366,21 +372,21 @@
 
     query-resp => ok?
 
-    (fact "Three groups"
-      (count groups) => 3)
+    (fact "Five groups"
+      (count groups) => 5)
 
-    (fact "Three different kind of groups"
-      (map :groupType groups) => (just ["building-site" "parties" "operation"] :in-any-order))
+    (fact "Five different kind of groups"
+      (map :groupType groups) => (just ["building-site" "parties" "operation" "reports" "technical-reports"] :in-any-order))
 
     (fact "Operation groupType has operation specific info fields"
       (keys (util/find-first (comp #{"operation"} :groupType) groups)) => (contains [:groupType :id :name :description] :in-any-order :gaps-ok))
 
     (command sonja :add-operation :id application-id :operation "puun-kaataminen") => ok?
 
-    (fact "Four groups"
+    (fact "Six groups"
       (-> (query sonja :attachment-groups :id application-id)
           :groups
-          count) => 4)))
+          count) => 6)))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
@@ -455,7 +461,8 @@
                 resp (command raktark-jarvenpaa
                               :create-attachments
                               :id application-id
-                              :attachmentTypes [type]) => ok?
+                              :attachmentTypes [type]
+                              :group nil) => ok?
                 attachment {:id (first (:attachmentIds resp))
                             :type type}
                 attachment-id (:id attachment)]
@@ -535,7 +542,8 @@
           resp (command raktark-jarvenpaa
                         :create-attachments
                         :id application-id
-                        :attachmentTypes [type]) => ok?
+                        :attachmentTypes [type]
+                        :group nil) => ok?
           attachment {:id (first (:attachmentIds resp))
                       :type type}
           attachment-id (:id attachment)]
@@ -559,13 +567,6 @@
         (fact "Latest version should be 1.0 after conversion"
           (get-in attachment [:latestVersion :version :major]) => 1
           (get-in attachment [:latestVersion :version :minor]) => 0)))))
-
-(defn- poll-job [id version limit]
-  (when (pos? limit)
-    (let [resp (query sonja :stamp-attachments-job :job-id id :version version)]
-      (when-not (= (get-in resp [:job :status]) "done")
-        (Thread/sleep 200)
-        (poll-job id (get-in resp [:job :version]) (dec limit))))))
 
 (facts "Stamping"
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
@@ -596,14 +597,14 @@
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
 
     (fact "Attachment state is not ok"
-      (:state (get-attachment-info application (:id attachment))) =not=> "ok")
+      (attachment-state (get-attachment-info application (:id attachment))) =not=> :ok)
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
     (fact "FileId is returned" file-id => truthy)
 
     ; Poll for 5 seconds
-    (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+    (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
     (let [attachment (get-attachment-by-id sonja application-id (:id attachment))
           comments-after (:comments (query-application sonja application-id))]
@@ -617,7 +618,7 @@
          (get-in attachment [:auth 1 :role]) => "stamper")
 
       (fact "Attachment state is ok"
-        (:state attachment) => "ok")
+        (attachment-state attachment) => :ok)
 
       (fact "New fileid is in response" (get-in attachment [:latestVersion :fileId]) =not=> file-id)
 
@@ -640,7 +641,7 @@
                               :section "")]
           resp => ok?
           ; Poll for 5 seconds
-          (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
+          (when-not (= "done" (:status job)) (poll-job sonja :stamp-attachments-job (:id job) (:version job) 25))
 
           (fact "Latest version has chaned"
             (let [attachment-after-restamp (get-attachment-by-id sonja application-id (:id attachment))]
@@ -862,7 +863,7 @@
       (fact "Sonja approves RAM attachment"
             (command sonja :approve-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
       (let [{{:keys [fileId originalFileId]} :latestVersion :as ram} (latest-attachment)]
-        (fact "RAM is approved" (:state ram) => "ok")
+        (fact "RAM is approved" (attachment-state ram) => :ok)
         (fact "Sonja cannot delete approved RAM"
               (command sonja :delete-attachment :id application-id :attachmentId ram-id) => (partial expected-failure? :error.ram-approved))
         (fact "Sonja cannot delete approved RAM version"
@@ -875,9 +876,9 @@
                        :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.ram-approved))
         (fact "Sonja rejects RAM attachment"
               (command sonja :reject-attachment :id application-id :fileId (-> (latest-attachment) :latestVersion :fileId)) => ok?)
-        (fact "Pena can delete rejected RAM version"
+        (fact "Pena cannot delete rejected RAM version"
               (command pena :delete-attachment-version :id application-id :attachmentId ram-id
-                       :fileId fileId :originalFileId originalFileId) => ok?)
+                       :fileId fileId :originalFileId originalFileId) => (partial expected-failure? :error.unauthorized))
         (fact "Pena can delete rejected RAM"
               (command pena :delete-attachment :id application-id :attachmentId ram-id) => ok?)
         (let [base (latest-attachment)]
@@ -973,7 +974,7 @@
       (fact "Give verdict"
         (command sonja :check-for-verdict :id application-id) => ok?)
       (facts "add attachment"
-        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}])
+        (let [resp (command sonja :create-attachments :id application-id :attachmentTypes [{:type-group "muut" :type-id "muu"}] :group nil)
               post-verdict-attachment-id (-> resp :attachmentIds first)
               attachment (:attachment (query pena :attachment :id application-id :attachmentId post-verdict-attachment-id))]
           (fact "added"
@@ -1022,5 +1023,4 @@
                :originalFileId (get-in updated-attachment [:latestVersion :originalFileId])) => ok?
       (fact "Not needed can be set after version deletion"
         (command pena :set-attachment-not-needed :id application-id :notNeeded true
-                 :attachmentId (:id updated-attachment)) => ok?))
-    ))
+                 :attachmentId (:id updated-attachment)) => ok?))))

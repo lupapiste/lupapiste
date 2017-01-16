@@ -11,7 +11,7 @@ Variables      variables.py
 
 Mikko creates application and goes to attachments tab
   [Tags]  attachments
-  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time]
+  Set Suite Variable  ${construction-time-checkbox}  jquery=attachment-details input[data-test-id=attachment-is-manually-set-construction-time-input]
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Set Suite Variable  ${propertyId}  753-416-6-1
@@ -21,7 +21,8 @@ Mikko creates application and goes to attachments tab
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Moo  Asuinkerrostalon tai rivitalon rakentaminen
+  Open attachment details  muut.muu
 
 Mikko does not see checkbox for setting attachment as construction time
   [Tags]  attachments

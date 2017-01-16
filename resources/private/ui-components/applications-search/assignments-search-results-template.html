@@ -21,7 +21,7 @@
               </th>
             </tr>
           </thead>
-          <tbody data-bind="foreach: results">
+          <tbody data-bind="foreach: {data: results, afterRender: scrollPop}">
             <tr class="assignment-row" data-bind="click: $parent.openApplication, attr: {'data-id': $data.id, 'data-test-address': $data.address}">
               <td data-bind="css: $data.currentState.type" data-test-col-name="status">
                 <i data-bind="css: $data.statusClass"></i>

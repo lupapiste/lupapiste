@@ -12,12 +12,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.model = doc.data;
   self.meta = doc.meta;
   self.docId = doc.id;
+  self.docDisabled = doc.disabled;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
-  self.isDisabled = options && options.disabled;
+  self.isDisabled = (options && options.disabled) || self.docDisabled;
   self.events = [];
 
   self.subscriptions = [];
@@ -85,23 +86,34 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   // Note: approval arguments are functions.
   //       In practise, they are observables.
 
-  // Updates approval status in the backend.
-  // path: approval path
-  // flag: true is approved, false rejected.
-  // cb: callback function to be called on success.
-  self.updateApproval = function( path, flag, cb ) {
-    var verb = flag ? "approve" : "reject";
-    ajax.command( verb + "-doc",
-                {id: self.appId,
-                 doc: self.docId,
-                 path: path.join("."),
-                 collection: self.getCollection()})
-    .success( function( result ) {
+  function approvalCommand( cmd, path, cb, extraParams ) {
+    cb = cb || _.noop;
+    ajax.command( cmd,
+                  _.merge( {id: self.appId,
+                            doc: self.docId,
+                            path: path.join("."),
+                            collection: self.getCollection()},
+                           extraParams ))
+      .success( function( result ) {
       cb( result.approval );
       self.approvalHubSend( result.approval, path );
       window.Stickyfill.rebuild();
     })
     .call();
+  }
+
+  // Updates approval status in the backend.
+  // path: approval path
+  // flag: true is approved, false rejected.
+  // cb: callback function to be called on success.
+  self.updateApproval = function( path, flag, cb ) {
+    approvalCommand( sprintf( "%s-doc", flag ? "approve" : "reject"),
+                     path,
+                     cb );
+  };
+
+  self.updateRejectNote = function( path, note, cb ) {
+    approvalCommand( "reject-doc-note", path, cb, {note: note || ""});
   };
 
   // Returns the latest modification time of the model or
@@ -193,12 +205,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
                 + loc("removeDoc.message1")
                 + " <strong>" + documentName + ".</strong></div><div>"
                 + loc("removeDoc.message2") + "</div>";
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("removeDoc.sure"),
-                                           message,
-                                           { title: loc("removeDoc.ok"),
-                                             fn: onRemovalConfirmed },
-                                           {title: loc("removeDoc.cancel") },
-                                           {html: true });
+    hub.send("show-dialog", {ltitle: "removeDoc.sure",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: message,
+                                               yesFn: onRemovalConfirmed,
+                                               lyesTitle: "removeDoc.ok",
+                                               lnoTitle: "removeDoc.cancel"} });
   };
 
   function getUpdateCommand() {
@@ -497,7 +510,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function isSubSchemaWhitelisted(schema) {
-    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.includes(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.role());
+    return util.getIn(schema, ["whitelist", "otherwise"]) === "disabled" && !_.includes(util.getIn(schema, ["whitelist", "roles"]), lupapisteApp.models.currentUser.applicationRole());
   }
 
   function buildText(subSchema, model, path) {
@@ -589,6 +602,71 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.datepicker($.datepicker.regional[lang]).change(function(e) {
         sourceValueChanged(input.get(0), input.val(), sourceValue, source);
         save(e);
+      });
+    }
+    input.appendTo(span);
+
+    return span;
+  }
+
+  function parseDateStringToMs(dateString) {
+    var day = dateString.slice(0, 2);
+    var month = dateString.slice(3,5)      ;
+    var year = dateString.slice(6, 10);
+    var date = new Date();
+    date.setUTCFullYear(year, month-1, day);
+    return date.getTime();
+  }
+
+  function parseMsToDateString(ms) {
+    var options = { year: "numeric", month: "2-digit", day: "2-digit" };
+    var lang = loc.getCurrentLanguage();
+    return new Date(Number(ms)).toLocaleString(lang, options);
+  }
+
+  function buildMsDate(subSchema, model, path) {
+    var lang = loc.getCurrentLanguage();
+    var myPath = path.join(".");
+    var validationResult = getValidationResult(model, subSchema.name);
+    var value;
+    if (getModelValue(model, subSchema.name)) {
+      value = parseMsToDateString(getModelValue(model, subSchema.name));
+    }
+
+    var span = makeEntrySpan(subSchema, myPath, validationResult);
+
+    if (subSchema.label) {
+      span.appendChild(makeLabel(subSchema, "date", myPath, validationResult));
+    }
+
+    var className = "form-input text form-date";
+    if (validationResult && validationResult[0]) {
+      var level = validationResult[0];
+      className += " " + level;
+    }
+    // date
+    var input = $("<input>", {
+      id: pathStrToID(myPath),
+      name: self.docId + "." + myPath,
+      type: "text",
+      "class": className,
+      value: value
+    });
+
+    var sourceValue = getModelSourceValue(model, subSchema.name);
+    var source = getModelSource(model, subSchema.name);
+
+    sourceValueChanged(input.get(0), value, sourceValue, source);
+
+    if (isInputReadOnly(doc, subSchema, model)) {
+      input.attr("readonly", true);
+    } else {
+      input.datepicker($.datepicker.regional[lang]).change(function(e) {
+        sourceValueChanged(input.get(0), input.val(), sourceValue, source);
+        var ms = parseDateStringToMs(input.val());
+        e.target.value =  ms;
+        saveValue(e, ms);
+        e.target.value = parseMsToDateString(e.target.value);
       });
     }
     input.appendTo(span);
@@ -725,9 +803,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if(subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
       opts = {
         fun: function () {
-          LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
-                                                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, path); } },
-                                                 { title: loc("no") });
+          hub.send("show-dialog", {ltitle: "document.delete.header",
+                                   size: "medium",
+                                   component: "yes-no-dialog",
+                                   componentParams: {ltext: "document.delete.message",
+                                                     yesFn: function () { removeData(self.appId, self.docId, path); } }});
         }
       };
       if( options && options.dataTestSpecifiers ) {
@@ -793,7 +873,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model: model[subSchema.name],
       isDisabled: self.isDisabled,
       authModel: self.authorizationModel,
-      propertyId: self.propertyId
+      propertyId: self.propertyId,
+      docModel: self
     };
 
     return createComponent(name, params);
@@ -957,8 +1038,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var element = document.createElement(name);
     ko.options.deferUpdates = true; // http://knockoutjs.com/documentation/deferred-updates.html
 
+    var finalParams = _.defaults(params, {documentAuthModel: self.authorizationModel});
+
     $(element)
-      .attr("params", paramsStr(params))
+      .attr("params", paramsStr(finalParams))
       .addClass(classes ? classes + " docgen-component" : "docgen-component")
       .applyBindings(params);
 
@@ -1202,6 +1285,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     radioGroup: buildRadioGroup,
     date: buildDate,
     time: buildTime,
+    msDate: buildMsDate,
     // element: buildElement,
     buildingSelector: buildDocgenBuildingSelect,
     newBuildingSelector: buildNewBuildingSelector,
@@ -1226,7 +1310,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function build(subSchema, model, path) {
     // Do not create hidden whitelisted elements
     var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
-    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.role());
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.includes(whitelistedRoles, lupapisteApp.models.currentUser.applicationRole());
     var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
 
     if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
@@ -1586,6 +1670,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
+  function saveValue(e, value, callback) {
+    var event = getEvent(e);
+    var target = event.target;
+    var indicator = docutils.createIndicator(target);
+
+    var path = target.name;
+    var loader = docutils.loaderImg();
+
+    var label = document.getElementById(pathStrToLabelID(path));
+    if (label) {
+      label.appendChild(loader);
+    }
+    saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
   function saveMany(target, updates, callback) {
     var indicator = docutils.createIndicator(target);
     saveForReal(updates.paths, updates.values, _.partial(afterSave, null, null, indicator, callback));
@@ -1659,7 +1758,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     elements.className = "accordion-fields";
     appendElements(elements, self.schema, self.model, []);
     // Disable fields and hide if the form is not editable
-    if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
+    if (!self.authorizationModel.ok(getUpdateCommand()) || self.isDisabled) {
       $(elements).find("input, textarea").attr("readonly", true).unbind("focus");
       $(elements).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
       // TODO a better way would be to hide each individual button based on authorizationModel.ok
@@ -1684,4 +1783,60 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   if (!doc.validationErrors) {
     validate();
   }
+
+  // Temporary storage for the document approval state after redraw.
+  // The state is read and cleared by the reject-note component.
+  self.redrawnDocumentApprovalState = ko.observable({});
+
+  self.redraw = function() {
+    // Refresh document data from backend
+    ajax.query("document", {id: application.id, doc: doc.id, collection: self.getCollection()})
+      .success(function(data) {
+        var newDoc = data.document;
+        self.model = newDoc.data;
+        self.meta = newDoc.meta;
+        self.docDisabled = newDoc.disabled;
+
+        window.Stickyfill.remove($(".sticky", self.element));
+        var accordionState = AccordionState.get(doc.id);
+        _.set(options, "accordionCollapsed", !accordionState);
+
+        var previous = self.element.prev();
+        var next = self.element.next();
+        var h = self.element.outerHeight();
+        var placeholder = $("<div/>").css({"visibility": "hidden"}).outerHeight(h);
+        self.element.before(placeholder);
+
+        self.element.remove();
+        self.element = buildSection();
+
+        if (_.isEmpty(previous)) {
+          next.before(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        } else {
+          previous.after(self.element);
+          _.delay(function() {
+            placeholder.remove();
+          },200);
+        }
+
+        $(".sticky", self.element).Stickyfill();
+        self.redrawnDocumentApprovalState( {approved: _.get( self.meta, "_approved.value")
+                                            === "approved"});
+      })
+    .call();
+  };
+
+  self.approvalHubSubscribe(function() {
+    authorization.refreshModelsForCategory(_.set({}, doc.id, authorizationModel), application.id, "documents");
+  }, true);
+
+  self.subscriptions.push(hub.subscribe({eventType: "category-auth-model-changed", targetId: doc.id}, function() {
+    if (self.schema.info["redraw-on-approval"] && application.inPostVerdictState) {
+      self.redraw();
+    }
+  }));
+
 };

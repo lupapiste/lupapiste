@@ -1,14 +1,20 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapiste.mongocheck.core :refer [mongocheck]]
             [lupapiste.mongocheck.checks :as checks]
-            [lupapalvelu.states :as states]
-            [lupapalvelu.document.model :as model]
+            [lupapalvelu.server]                            ; ensure all namespaces are loaded
             [lupapalvelu.application :as app]
-            [lupapalvelu.server] ; ensure all namespaces are loaded
             [lupapalvelu.attachment :as att]
             [lupapalvelu.authorization :as auth]
+            [lupapalvelu.document.model :as model]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.rest.applications-data :as rest-application-data]
+            [lupapalvelu.rest.schemas :refer [HakemusTiedot]]
+            [lupapalvelu.state-machine :as sm]
+            [lupapalvelu.states :as states]
+            [clojure.set :refer [difference]]
             [sade.strings :as ss]
-            [sade.schemas :as ssc])
+            [sade.schemas :as ssc]
+            [schema.core :as sc])
   (:import [schema.utils.ErrorContainer]))
 
 (defn- validate-doc [ignored-errors application {:keys [id schema-info data] :as doc}]
@@ -95,9 +101,19 @@
     {:attachment-id id
      :error "Has versions, but marked as not needed"}))
 
-(defn validate-attachments [{attachments :attachments}]
+(defn validate-YA-attachments
+  "YA attachments should not have 'op' or 'groupType' fields"
+  [application-permitType {:keys [id op groupType]}]
+  (when (and (= application-permitType "YA")
+             (or op groupType))
+    {:attachment-id id
+     :error "Not valid YA attachment"
+     :op op
+     :groupType groupType}))
+
+(defn validate-attachments [{attachments :attachments permitType :permitType}]
   (->> attachments
-       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed))
+       (mapcat (juxt validate-attachment-against-schema validate-latest-version validate-not-needed (partial validate-YA-attachments permitType)))
        (remove nil?)
        seq))
 
@@ -128,12 +144,12 @@
 
 (mongocheck :applications (checks/not-null-property :schema-version) :schema-version)
 
-(defn timestamp-is-set [ts-key states]
+(defn some-timestamp-is-set [timestamps states]
   (fn [application]
-    (when (and (states (keyword (:state application))) (nil? (ts-key application)))
-      (format "Timestamp %s is null in state %s" (name ts-key) (:state application)))))
+    (when (and (states (keyword (:state application))) (not-any? #(get application %) timestamps))
+      (format "One of timestamps %s is null in state %s" timestamps (:state application)))))
 
-(mongocheck :applications (timestamp-is-set :opened (states/all-states-but [:draft :canceled])) :state :opened)
+(mongocheck :applications (some-timestamp-is-set #{:opened} (states/all-states-but [:draft :canceled])) :state :opened)
 
 ;;
 ;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
@@ -147,6 +163,30 @@
       "Submitted timestamp is null"))
   :submitted :state :primaryOperation :secondaryOperations)
 
-(mongocheck :applications (timestamp-is-set :sent #{:sent :complementNeeded}) :state :sent)
+(mongocheck :applications (some-timestamp-is-set #{:sent :acknowledged} #{:sent :complementNeeded}) :state :sent :acknowledged)
 
-(mongocheck :applications (timestamp-is-set :closed #{:closed}) :state :closed)
+(mongocheck :applications (some-timestamp-is-set #{:closed} #{:closed}) :state :closed)
+
+(def ignore-states-set #{:closed :acknowledged})
+
+(defn validate-verdict-history-entry [{:keys [state history verdicts] :as application}]
+  (when (contains? (difference states/post-verdict-states ignore-states-set) (keyword state))
+    (let [verdict-state (sm/verdict-given-state application)
+          verdict-history-entries (->> (app/state-history-entries history)
+                                       (filter #(= (:state %) (name verdict-state))))]
+      (when (and (zero? (count verdict-history-entries)) (not (zero? (count verdicts))))
+        (format "Application has verdict, but no verdict history entry ('%s' required, has %d verdicts)" verdict-state (count verdicts))))))
+
+(mongocheck :applications validate-verdict-history-entry :history :verdicts :state :primaryOperation :permitType :permitSubtype)
+
+(def excluded-operations #{:tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :aiemmalla-luvalla-hakeminen})
+
+(defn submitted-rest-interface-schema-check-app [application]
+  (when (and (#{"R" "YA"} (:permitType application))
+             (#{"submitted"} (:state application))
+             (not (excluded-operations (-> application :primaryOperation :name keyword))))
+    (->> (mongo/with-id application)
+         (rest-application-data/process-application)
+         (sc/check HakemusTiedot))))
+
+(apply mongocheck :applications submitted-rest-interface-schema-check-app :state rest-application-data/required-fields-from-db)

@@ -34,10 +34,10 @@
         (crypt/base64-encode)
         (crypt/bytes->str))))
 
-  (defn parse-body [body {content-type :type content :content}]
+  (defn parse-body [body {content-type :type content :content fname :file-name}]
     (if (and content-type content)
       (let [attachment (when (= :attachment content-type)
-                         (attachment-as-base64-str content))
+                         {:file-name fname :content (attachment-as-base64-str content)})
             content (or attachment content)]
         (assoc body (condp = content-type
                       "text/plain; charset=utf-8" :plain

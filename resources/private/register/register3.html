@@ -4,8 +4,21 @@
   <section class="page container" id="register3">
     <div class="container">
       <h1 data-bind="ltext: 'register.header3'"></h1>
+
+      <!-- ko ifnot: canceled -->
       <p><span data-bind="ltext: 'register.activation-email-info1'"></span> <strong id="activation-email" data-bind="text: email"></strong></p>
       <p data-bind="ltext: 'register.activation-email-info2'"></p>
+      <!-- /ko -->
+
+      <!-- ko if: canceled -->
+      <p><span data-bind="ltext: 'register.was-canceled'"></span></p>
+      <!-- /ko -->
+
+      <!-- ko if: util.identLogoutUrl() -->
+      <p data-bind="ltext: 'ident.logout.info-text'"></p>
+      <button class="secondary" data-bind="ltext: 'ident.logout.action', click: util.identLogoutRedirect" />
+      <!-- /ko -->
+
     </div>
   </section>
 </body>

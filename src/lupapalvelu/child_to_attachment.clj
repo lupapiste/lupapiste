@@ -15,6 +15,23 @@
 (defn- get-child [application type id]
   (first (filter #(or (nil? id) (= id (:id %))) (type application))))
 
+(defn- review-attachment-type [document]
+  (if (.equalsIgnoreCase "aloituskokous" (get-in document [:data :katselmuksenLaji :value]))
+    {:type-group "katselmukset_ja_tarkastukset" :type-id "aloituskokouksen_poytakirja"}
+    {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}))
+
+(defn- review-attachment-contents [document lang taskname]
+  (let [loc-key (str (get-in document [:schema-info :i18nprefix]) "." (get-in document [:data :katselmuksenLaji :value]))
+        text (i18n/localize lang loc-key)]
+    (str
+      text
+      ; Add taskname to contents only if it's not equal to the localized review type
+      (when (and taskname (not (.equalsIgnoreCase text taskname))) (str " - " taskname)))))
+
+(defn- verdict-attachment-type [{:keys [permitType]}]
+  {:type-group (if (= permitType "R") "paatoksenteko" "muut")
+   :type-id "paatos"})
+
 (defn- build-attachment-options [user application type id lang file attachment-id]
   {:pre [(map? user) (map? application) (keyword? type) (string? id) (#{:statements :neighbors :verdicts :tasks} type)]}
   (let [is-pdf-a? (pdf-conversion/ensure-pdf-a-by-organization file (:organization application))
@@ -32,14 +49,13 @@
                               :attachment-type    (case type
                                                     :neighbors {:type-group "ennakkoluvat_ja_lausunnot" :type-id "naapurin_kuuleminen"}
                                                     :statements {:type-group "ennakkoluvat_ja_lausunnot" :type-id "lausunto"}
-                                                    :tasks {:type-group "katselmukset_ja_tarkastukset" :type-id "katselmuksen_tai_tarkastuksen_poytakirja"}
-                                                    :verdicts {:type-group "paatoksenteko" :type-id "paatos"}
+                                                    :tasks (review-attachment-type child)
+                                                    :verdicts (verdict-attachment-type application)
                                                     {:type-group "muut" :type-id "muu"})
                               :contents           (case type
                                                     :statements (get-in child [:person :text])
                                                     :neighbors (get-in child [:owner :name])
-                                                    :tasks (str (i18n/localize lang (str (get-in child [:schema-info :i18nprefix]) "." (get-in child [:data :katselmuksenLaji :value])))
-                                                                (when taskname (str " - " taskname)))
+                                                    :tasks (review-attachment-contents child lang taskname)
                                                     type-name)
                               :locked             true
                               :read-only          (contains? #{:neighbors :statements :verdicts} type)
@@ -80,4 +96,5 @@
       (attachment/upload-and-attach! {:application application :user user} attachment-options file-options))))
 
 (defn delete-child-attachment [app child-type id]
-  (attachment/delete-attachments! app [(get-child-attachment-id app child-type id)]))
+  (when-let [id (get-child-attachment-id app child-type id)]
+    (attachment/delete-attachments! app [id])))

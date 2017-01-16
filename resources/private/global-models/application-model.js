@@ -87,6 +87,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.unseenComments = ko.observable();
   self.unseenAuthorityNotice = ko.observable();
   self.attachmentsRequiringAction = ko.observable();
+  self.fullyArchived = ko.observable();
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
@@ -285,6 +286,11 @@ LUPAPISTE.ApplicationModel = function() {
     repository.load(self.id());
   };
 
+  self.reloadToTab = function(tabName) {
+    self.submitErrors([]);
+    repository.load(self.id(), undefined, _.partial(self.open, tabName));
+  };
+
   self.lightReload = function() {
     repository.load(self.id(), undefined, undefined, true);
   };
@@ -375,6 +381,31 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
+  self.nonApprovedDesigners = ko.observableArray([]);
+
+  function checkForNonApprovedDesigners() {
+    var nonApproved = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
+        return docModel.schema.info.subtype === "suunnittelija" && !docModel.docDisabled;
+      })
+      .map(function(docModel) {
+        var title = loc([docModel.schemaName, "_group_label"]);
+        var accordionService = lupapisteApp.services.accordionService;
+        var identifierField = accordionService.getIdentifier(docModel.docId);
+        var identifier = identifierField && identifierField.value();
+        var operation = null; // We'll assume designer is never attached to operation
+        var docData = accordionService.getDocumentData(docModel.docId); // The current data
+        var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
+        var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
+
+        return title + headerDescription;
+      })
+      .value();
+    self.nonApprovedDesigners(nonApproved);
+  }
+
+  hub.subscribe("update-doc-success", checkForNonApprovedDesigners);
+  hub.subscribe("application-model-updated", checkForNonApprovedDesigners);
+
   self.approveApplication = function() {
     if (self.stateChanged()) {
       return false;
@@ -383,7 +414,7 @@ LUPAPISTE.ApplicationModel = function() {
     var approve = function() {
       ajax.command("approve-application", {id: self.id(), lang: loc.getCurrentLanguage()})
         .success(function(resp) {
-          self.reload();
+          self.reloadToTab("info");
           if (!resp.integrationAvailable) {
             hub.send("show-dialog", {ltitle: "integration.title",
                                      size: "medium",
@@ -402,36 +433,6 @@ LUPAPISTE.ApplicationModel = function() {
       hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     };
 
-    var checkDesigners = function() {
-      var nonApprovedDesigners = _(docgen.nonApprovedDocuments()).filter(function(docModel) {
-          return docModel.schema.info.subtype === "suunnittelija";
-        })
-        .map(function(docModel) {
-          var title = loc([docModel.schemaName, "_group_label"]);
-          var accordionService = lupapisteApp.services.accordionService;
-          var identifierField = accordionService.getIdentifier(docModel.docId);
-          var identifier = identifierField && identifierField.value();
-          var operation = null; // We'll assume designer is never attached to operation
-          var docData = accordionService.getDocumentData(docModel.docId); // The current data
-          var accordionText = docutils.accordionText(docData.accordionPaths, docData.data);
-          var headerDescription = docutils.headerDescription(identifier, operation, accordionText);
-          // Escape HTML special chars
-          return "<li>" + _.escape(title + headerDescription) + "</li>";
-        })
-        .value();
-
-      // All designers have not been approved?
-      if (!_.isEmpty(nonApprovedDesigners)) {
-        var text = loc("application.designers-not-approved-help") + "<ul>" + nonApprovedDesigners.join("") + "</ul>";
-        hub.send("show-dialog", {ltitle: "application.designers-not-approved",
-          size: "medium",
-          component: "yes-no-dialog",
-          componentParams: {text: text, yesFn: approve, lyesTitle: "continue", lnoTitle: "cancel"}});
-      } else {
-        approve();
-      }
-    };
-
     if (!( lupapisteApp.models.applicationAuthModel.ok( "statements-after-approve-allowed")
            || _(self._js.statements).reject("given").isEmpty())) {
       // All statements have not been given
@@ -439,11 +440,36 @@ LUPAPISTE.ApplicationModel = function() {
         size: "medium",
         component: "yes-no-dialog",
         componentParams: {ltext: "application.approve.statement-not-requested-warning-text",
-          yesFn: checkDesigners}});
+          yesFn: approve}});
     } else {
-      checkDesigners();
+      approve();
     }
     return false;
+  };
+
+  self.partiesAsKrysp = function() {
+    var sendParties = function() {
+      ajax.command("parties-as-krysp", {id: self.id(), lang: loc.getCurrentLanguage()})
+        .success(function(resp) {
+          hub.send("indicator", {style: "positive", rawMessage: loc("integration.parties.sent", resp.sentDocuments.length), sticky: true});
+          self.lightReload();
+        })
+        .onError("error.command-illegal-state", self.lightReload)
+        .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
+        .processing(self.processing)
+        .call();
+    };
+
+    // All designers have not been approved?
+    if (!_.isEmpty(self.nonApprovedDesigners())) {
+      var text = loc("application.designers-not-approved-help") + "<ul><li>" + self.nonApprovedDesigners().join("</li><li>") + "</li></ul>";
+      hub.send("show-dialog", {ltitle: "application.designers-not-approved",
+      size: "medium",
+      component: "yes-no-dialog",
+      componentParams: {text: text, yesFn: sendParties, lyesTitle: "continue", lnoTitle: "cancel"}});
+    } else {
+      sendParties();
+    }
   };
 
   self.approveExtension = function() {
@@ -540,37 +566,43 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.cancelText = ko.observable("");
 
+  function cancelApplicationAjax(command) {
+    return function() {
+      ajax
+        .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
+        .success(function() {
+          self.cancelText("");
+          if (command === "cancel-application") {
+            // regular user, can't undo cancellation so redirect to applications view
+            pageutil.openPage("applications");
+          } else { // authority, can undo so don't redirect, just reload application to canceled state
+            self.lightReload();
+          }
+        })
+        .onError("error.command-illegal-state", self.lightReload)
+        .fuse(self.stateChanged)
+        .processing(self.processing)
+        .call();
+      return false;
+    };
+  }
+
   self.cancelApplication = function() {
     if (!self.stateChanged()) {
       var command = lupapisteApp.models.applicationAuthModel.ok( "cancel-application-authority")
             ? "cancel-application-authority"
             : "cancel-application";
       hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
-      LUPAPISTE.ModalDialog.setDialogContent(
-        $("#dialog-cancel-application"),
-        loc("areyousure"),
-        loc("areyousure.cancel-application"),
-        {title: loc("yes"),
-         fn: function() {
-          ajax
-            .command(command, {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
-            .success(function() {
-              self.cancelText("");
-              if (command === "cancel-application") {
-                // regular user, can't undo cancellation so redirect to applications view
-                pageutil.openPage("applications");
-              } else { // authority, can undo so don't redirect, just reload application to canceled state
-                self.lightReload();
-              }
-            })
-            .onError("error.command-illegal-state", self.lightReload)
-            .fuse(self.stateChanged)
-            .processing(self.processing)
-            .call();
-          return false;}},
-        {title: loc("no")}
-      );
-      LUPAPISTE.ModalDialog.open("#dialog-cancel-application");
+      hub.send("show-dialog", {ltitle: "application.cancelApplication",
+                               size: "medium",
+                               component: "textarea-dialog",
+                               componentParams: {text: loc("areyousure.cancel-application"),
+                                                 yesFn: cancelApplicationAjax(command),
+                                                 lyesTitle: "yes",
+                                                 lnoTitle: "no",
+                                                 textarea: {llabel: "application.canceled.reason",
+                                                            rows: 10,
+                                                            observable: self.cancelText}}});
     }
   };
 
@@ -721,6 +753,11 @@ LUPAPISTE.ApplicationModel = function() {
     hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"nextTab"});
   };
 
+  // called from application actions
+  self.goToApplicationApproval = function() {
+    self.targetTab({tab:"requiredFieldSummary",id:"applicationTabs"});
+  };
+
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
     AccordionState.set( fieldInfo.document.id, true );
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
@@ -762,6 +799,37 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+
+  function returnToDraftAjax() {
+    ajax.command("return-to-draft", {id: self.id(), lang: loc.getCurrentLanguage(), text: self.returnToDraftText()})
+      .success(function() {
+        self.returnToDraftText("");
+        self.reload();
+      })
+      .error(function() { self.reload(); })
+      .fuse(self.stateChanged)
+      .processing(self.processing)
+      .call();
+    return false;
+  }
+
+  self.returnToDraftText = ko.observable("");
+  self.returnToDraft = function() {
+    if (!self.stateChanged()) {
+      hub.send("track-click", {category:"Application", label:"", event:"returnApplicationToDraft"});
+      hub.send("show-dialog", {ltitle: "application.returnToDraft.title",
+                               size: "large",
+                               component: "textarea-dialog",
+                               componentParams: {text: loc("application.returnToDraft.areyousure"),
+                                                 yesFn: returnToDraftAjax,
+                                                 lyesTitle: "application.returnToDraft.areyousure.confirmation",
+                                                 lnoTitle: "cancel",
+                                                 textarea: {llabel: "application.returnToDraft.reason",
+                                                            rows: 10,
+                                                            observable: self.returnToDraftText}}});
+    }
+  };
+
   self.showAcceptInvitationDialog = function() {
     if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
@@ -788,10 +856,8 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.externalApi = {
-    enabled: ko.pureComputed(function() {
-      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.applicationAuthModel.ok("external-api-enabled");
-    }),
+    enabled: ko.pureComputed(function() { return lupapisteApp.models.rootVMO.externalApi.enabled(); }),
+    ok: function(fnName) { return lupapisteApp.models.rootVMO.externalApi.ok(fnName); },
     showOnMap: function(model) {
       var permit = externalApiTools.toExternalPermit(model._js);
       hub.send("external-api::show-on-map", permit);

@@ -19,11 +19,11 @@ Section operations not visible
   Element should not be visible  jquery=label[for=section-kiinteistonmuodostus]
 
 Enable section
-  Toggle section  
+  Toggle section
   Checkbox wrapper selected  verdict-section-enabled
 
 Selection survives reload
-  Reload page
+  Reload page and kill dev-box
   Wait Until  Checkbox wrapper selected  verdict-section-enabled
 
 Operations can now be selected
@@ -31,7 +31,7 @@ Operations can now be selected
   Checkbox wrapper selected  section-kiinteistonmuodostus
 
 Operation selection survives reload
-  Reload page
+  Reload page and kill dev-box
   Wait Until  Checkbox wrapper selected  section-kiinteistonmuodostus
 
 Disable section
@@ -40,7 +40,7 @@ Disable section
 Operations no longer visible
   Go to page  operations
   Element should not be visible  jquery=label[for=section-kiinteistonmuodostus]
-  
+
 
 
 *** Keywords ***

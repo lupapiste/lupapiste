@@ -14,9 +14,7 @@
   (lupapalvelu.i18n/localize lang :municipality id))
 
 (defn active-municipalities-from-organizations [organizations]
-  (for [[muni-id scopes]
-        (group-by :municipality (flatten (map (partial :scope) organizations)))
-        ]
+  (for [[muni-id scopes] (group-by :municipality (flatten (map :scope organizations)))]
     {:id muni-id
      :nameFi (municipality-name "fi" muni-id) :nameSv (municipality-name "sv" muni-id)
      :applications (->> scopes (filter :new-application-enabled) (map :permitType))

@@ -26,12 +26,15 @@ Sonja creates assignment for Ronja about paasuunnittelija
 
 Sonja creates another assignment for herself
   Create assignment  Sonja Sibbo  parties  paasuunnittelija  Muista tarkistaa!  2
+  Go to page  applications
+  Count of open assignments is  1
   Logout
 
 Ronja logs in, sees two assignments in document
   Set Suite Variable  ${doctype}  paasuunnittelija
   Set Suite Variable  ${docPath}  section[@class='accordion' and @data-doc-type='paasuunnittelija']
   Ronja logs in
+  Count of open assignments is  1
   Open application  ${appname}  ${propertyid}
   Open tab  parties
   Wait until  Element should be visible  xpath=//${docPath}//accordion-assignments
@@ -53,6 +56,8 @@ Ronja can also complete Sonja's assignment
 No assignments visible in paasuunnittelija doc nor parties tab
   Wait until  Xpath Should Match X Times  //${docPath}//div[@data-test-id='accordion-assignment']  0
   Wait until  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  0
+  Go to page  applications
+  Count of open assignments is  0
   Logout
 
 No assignments for Sonja either
@@ -60,4 +65,6 @@ No assignments for Sonja either
   Open application  ${appname}  ${propertyid}
   Open tab  parties
   Wait until  Xpath Should Match X Times  //div[@data-test-id='accordion-assignment']  0
-
+  Go to page  applications
+  Count of open assignments is  0
+  Logout

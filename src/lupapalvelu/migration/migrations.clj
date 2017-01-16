@@ -29,7 +29,9 @@
             [lupapalvelu.tasks :refer [task-doc-validation]]
             [sade.env :as env]
             [sade.excel-reader :as er]
-            [sade.coordinate :as coord]))
+            [sade.coordinate :as coord]
+            [lupapalvelu.drawing :as draw])
+  (:import [org.joda.time DateTime]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -2256,7 +2258,7 @@
                            {:processMetadata.sailytysaika.arkistointi "toistaiseksi"
                             :processMetadata.sailytysaika.laskentaperuste {$exists false}}
                            {$set {:processMetadata.sailytysaika.laskentaperuste "rakennuksen_purkamisp\u00e4iv\u00e4"}}))
-  (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi "toistaiseksi"
+  (update-applications-array :attachments set-missing-metadata-laskentaperuste {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi            "toistaiseksi"
                                                                                                           :metadata.sailytysaika.laskentaperuste {$exists false}}}}))
 
 (defmigration paasuunnittelija-is-removable
@@ -2511,6 +2513,198 @@
       (let [applications (mongo/select collection {:location-wgs84 {$exists false}})]
         (count (map #(mongo/update-by-id collection (:id %) (convert-coordinates %)) applications))))))
 
+(defn coerce-time-string [time-string]
+  (if (ss/not-blank? time-string)
+    (->> (re-seq #"\d+" time-string)
+         ((fn [[h m s d]] [(or h "00") (or m "00") s d]))
+         (remove nil?)
+         (interleave ["" ":" ":" "."])
+         (apply str))
+    time-string))
+
+(defn coerce-kesto-row-time-strings [row]
+  (merge row
+         (->> (select-keys row [:arkiAlkuAika :arkiLoppuAika :lauantaiAlkuAika :lauantaiLoppuAika :sunnuntaiAlkuAika :sunnuntaiLoppuAika])
+              (util/map-values #(update % :value coerce-time-string)))))
+
+(defn coerce-ymp-ilm-kesto-time-strings [doc]
+  (if (= (get-in doc [:schema-info :name]) "ymp-ilm-kesto")
+    (update-in doc [:data :kesto] (partial util/map-values coerce-kesto-row-time-strings))
+    doc))
+
+(defmigration coerce-time-string-in-ymp-ilm-kesto-docs
+  (update-applications-array :documents
+                             coerce-ymp-ilm-kesto-time-strings
+                             {:documents.schema-info.name "ymp-ilm-kesto"}))
+
+(def ddMMyyyy-formatter (clj-time.format/formatter "dd.MM.yyyy"))
+
+(defn- date-string-to-ms [date]
+  (clj-time.coerce/to-long (clj-time.format/parse ddMMyyyy-formatter date)))
+
+(defn- valid-date-string [date]
+  (try
+    (instance? DateTime (clj-time.format/parse ddMMyyyy-formatter date))
+    (catch Exception e
+      false)))
+
+(defn- add-start-timestamp [document]
+  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
+           (valid-date-string (get-in document [:data :tyoaika-alkaa-pvm :value]))
+           (nil? (get-in document [:data :tyoaika-alkaa-ms :value])))
+      (assoc-in document [:data :tyoaika-alkaa-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-alkaa-pvm :value])))
+    document))
+
+(defn- add-end-timestamp [document]
+  (if (and (= "tyoaika" (get-in document [:schema-info :name]))
+           (valid-date-string (get-in document [:data :tyoaika-paattyy-pvm :value]))
+           (nil? (get-in document [:data :tyoaika-paattyy-ms :value])))
+      (assoc-in document [:data :tyoaika-paattyy-ms :value] (date-string-to-ms (get-in document [:data :tyoaika-paattyy-pvm :value])))
+    document))
+
+(defmigration add-ms-timestamp-for-work-started-and-ended
+  {:apply-when (pos? (mongo/count :applications
+                                  {:documents
+                                  {$elemMatch {$and
+                                               [{$and [{:schema-info.name "tyoaika"},
+                                                     {:data.tyoaika-alkaa-pvm.modified {$exists true, $gt 0}},
+                                                     {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
+                                                     {:data.tyoaika-alkaa-ms.value {$exists false}}]}
+                                               {$and [{:schema-info.name "tyoaika"},
+                                                      {:data.tyoaika-paattyy-pvm.modified {$exists true, $gt 0}},
+                                                      {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                                      {:data.tyoaika-paattyy-ms.value {$exists false}}]}]}}}))}
+
+  (update-applications-array :documents
+                             add-start-timestamp
+                             {:documents
+                              {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                                 {:data.tyoaika-alkaa-pvm.modified {$exists true, $gt 0}},
+                                                 {:data.tyoaika-alkaa-pvm.value {$exists true, $ne ""}},
+                                                 {:data.tyoaika-alkaa-ms.value {$exists false}}]}}})
+  (update-applications-array :documents
+                           add-end-timestamp
+                           {:documents
+                            {$elemMatch {$and [{:schema-info.name "tyoaika"},
+                                               {:data.tyoaika-paattyy-pvm.modified {$exists true, $gt 0}},
+                                               {:data.tyoaika-paattyy-pvm.value {$exists true, $ne ""}},
+                                               {:data.tyoaika-paattyy-ms.value {$exists false}}]}}}))
+
+(defn- build-approvals
+  "Approvals is original-file-id - approval map, where approval includes state
+  and approved information.Explicit approved/rejected flag is no
+  longer used. The flag is determined by the version state. In
+  migration, we create approval for the latestVersion and remove old
+  state and approved."
+  [{:keys [state approved latestVersion] :as attachment}]
+  (merge (dissoc attachment :state :approved)
+         (when-let [filekey (some-> latestVersion :originalFileId keyword)]
+           {:approvals {filekey (assoc (select-keys approved [:timestamp :user])
+                                      :state state)}})))
+
+(defmigration version-specific-attachment-state
+  {:apply-when (pos? (mongo/count :applications {:attachments.state {$exists true}}))}
+  (update-applications-array :attachments
+                             build-approvals
+                             {:attachments.0 {$exists true}}))
+
+(def al-retention-ruling "AL/17413/07.01.01.03.01/2016")
+
+(defn change-retention-to-permanent [{:keys [metadata] :as attachment}]
+  (if (and (#{"toistaiseksi" "m\u00e4\u00e4r\u00e4ajan"} (get-in metadata [:sailytysaika :arkistointi]))
+           (not= "arkistoitu" (:tila metadata)))
+    (assoc-in attachment [:metadata :sailytysaika] {:arkistointi "ikuisesti"
+                                                    :perustelu al-retention-ruling})
+    attachment))
+
+(def in-non-perm-retention {$in ["toistaiseksi" "m\u00e4\u00e4r\u00e4ajan"]})
+
+(defmigration change-retention-to-permanent-for-archived-R-docs
+  {:apply-when (pos? (mongo/count :applications {:organization {"$regex" ".*-R"}
+                                                 $or [{:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                       :metadata.tila {$ne "arkistoitu"}}
+                                                      {:processMetadata.sailytysaika.arkistointi in-non-perm-retention
+                                                       :processMetadata.tila {$ne "arkistoitu"}}
+                                                      {:attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                                                 :metadata.tila {$ne "arkistoitu"}}}}]}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (mongo/update-by-query collection
+                           {:organization {"$regex" ".*-R"}
+                            :metadata.sailytysaika.arkistointi in-non-perm-retention
+                            :metadata.tila {$ne "arkistoitu"}}
+                           {$set {:metadata.sailytysaika.arkistointi "ikuisesti"
+                                  :metadata.sailytysaika.perustelu al-retention-ruling}})
+    (mongo/update-by-query collection
+                           {:organization {"$regex" ".*-R"}
+                            :processMetadata.sailytysaika.arkistointi in-non-perm-retention
+                            :processMetadata.tila {$ne "arkistoitu"}}
+                           {$set {:processMetadata.sailytysaika.arkistointi "ikuisesti"
+                                  :processMetadata.sailytysaika.perustelu al-retention-ruling}}))
+  (update-applications-array :attachments
+                             change-retention-to-permanent
+                             {:organization {"$regex" ".*-R"}
+                              :attachments {$elemMatch {:metadata.sailytysaika.arkistointi in-non-perm-retention
+                                                        :metadata.tila {$ne "arkistoitu"}}}}))
+
+(def archival-completed-query
+  {:archived.completed nil
+   :processMetadata.tila :arkistoitu
+   :metadata.tila :arkistoitu
+   :attachments {$not {$elemMatch {:versions {$gt []}
+                                   :metadata.sailytysaika.arkistointi {$exists true
+                                                                       $ne :ei}
+                                   :metadata.tila {$ne :arkistoitu}}}}
+   :state {$in [:closed :extinct :foremanVerdictGiven :acknowledged]}})
+
+(defmigration mark-applications-with-attachments-missing-metadata-but-otherwise-archived-as-archived
+  {:apply-when (pos? (mongo/count :applications archival-completed-query))}
+  (mongo/update-by-query :applications
+                         archival-completed-query
+                         {$set {:archived.completed (System/currentTimeMillis)}}))
+
+(defn- add-wgs84-coordinates [drawing]
+  (assoc drawing :geometry-wgs84 (draw/wgs84-geometry drawing)))
+
+(defmigration add-wgs84-coordinates-for-drawings
+  {:apply-when (pos? (mongo/count :applications
+                                  {:drawings
+                                   {$elemMatch {$and
+                                                [{:geometry {$exists true, $ne ""}},
+                                                 {:geometry-wgs84 {$exists false}}]}}}))}
+  (update-applications-array :drawings
+                             add-wgs84-coordinates
+                             {:drawings
+                              {$elemMatch {$and
+                                           [{:geometry {$exists true, $ne ""}},
+                                            {:geometry-wgs84 {$exists false}}]}}}))
+
+(defn- change-attachment-type [attachment]
+  (if (= (get-in attachment [:type :type-id]) "lupaehto")
+    (assoc-in attachment [:type :type-id] "muu")
+    attachment))
+
+(defmigration change-attachment-type-lupaehto-to-muu
+  {:apply-when (pos? (mongo/count :applications {:permitType "YA"
+                                  :attachments {$elemMatch {:type.type-id "lupaehto"}}}))}
+  (update-applications-array :attachments
+                             change-attachment-type
+                             {:permitType "YA"
+                              :attachments {$elemMatch {:type.type-id "lupaehto"}}}))
+
+(defn- set-attachment-groupType-and-op-nil [attachment]
+  (assoc attachment
+         :groupType nil
+         :op nil))
+
+(let [attachments-with-groupType-or-op-match
+      {$and [{:permitType "YA"}
+             {$or [{:attachments {$elemMatch {:groupType {$ne nil}}}}
+                   {:attachments {$elemMatch {:op {$ne nil}}}}]}]}]
+  (defmigration remove-groupType-and-op-from-YA-applications
+    {:apply-when (pos? (mongo/count :applications attachments-with-groupType-or-op-match))}
+    (update-applications-array :attachments
+                               set-attachment-groupType-and-op-nil
+                               attachments-with-groupType-or-op-match)))
 ;;
 ;; ****** NOTE! ******
 ;;  1) When you are writing a new migration that goes through subcollections

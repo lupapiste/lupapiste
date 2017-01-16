@@ -17,7 +17,7 @@ LUPAPISTE.OrganizationModel = function () {
       self.commandName(params.commandName);
       self.command = params.command;
       self.links.removeAll();
-      self.links(_.map(loc.supported, function(lang) {
+      self.links(_.map(params.langs, function(lang) {
         return {lang: lang,
                 name: ko.observable(util.getIn(params, ["source", "name", lang], "")),
                 url:  ko.observable(util.getIn(params, ["source", "url",  lang], ""))};
@@ -37,6 +37,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.editLinkModel = new EditLinkModel();
 
   self.organizationId = ko.observable();
+  self.langs = ko.observableArray();
   self.links = ko.observableArray();
   self.operationsAttachments = ko.observableArray();
   self.attachmentTypes = {};
@@ -44,6 +45,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.allOperations = [];
   self.appRequiredFieldsFillingObligatory = ko.observable(false);
   self.assignmentsEnabled = ko.observable(false);
+  self.extendedConstructionWasteReportEnabled = ko.observable(false);
   self.validateVerdictGivenDate = ko.observable(true);
   self.tosFunctions = ko.observableArray();
   self.tosFunctionVisible = ko.observable(false);
@@ -72,6 +74,16 @@ LUPAPISTE.OrganizationModel = function () {
     var assignmentsEnabled = self.assignmentsEnabled();
     if (self.initialized) {
       ajax.command("set-organization-assignments", {enabled: assignmentsEnabled})
+        .success(util.showSavedIndicator)
+        .error(util.showSavedIndicator)
+        .call();
+    }
+  });
+
+  ko.computed(function() {
+    var extendedConstructionWasteReportEnabled = self.extendedConstructionWasteReportEnabled();
+    if (self.initialized) {
+      ajax.command("set-organization-extended-construction-waste-report", {enabled: extendedConstructionWasteReportEnabled})
         .success(util.showSavedIndicator)
         .error(util.showSavedIndicator)
         .call();
@@ -189,6 +201,8 @@ LUPAPISTE.OrganizationModel = function () {
 
     self.assignmentsEnabled(organization["assignments-enabled"] || false);
 
+    self.extendedConstructionWasteReportEnabled(organization["extended-construction-waste-report-enabled"] || false);
+
     self.validateVerdictGivenDate(organization["validate-verdict-given-date"] === true);
 
     self.permanentArchiveEnabled(organization["permanent-archive-enabled"] || false);
@@ -200,6 +214,8 @@ LUPAPISTE.OrganizationModel = function () {
     //
     var operationsAttachmentsPerPermitType = organization.operationsAttachments || {};
     var localizedOperationsAttachmentsPerPermitType = [];
+
+    self.langs(_.keys(organization.name));
     self.links(organization.links || []);
 
     var operationsTosFunctions = organization["operations-tos-functions"] || {};
@@ -321,6 +337,7 @@ LUPAPISTE.OrganizationModel = function () {
     var index = indexFn();
     self.editLinkModel.init({
       source: this,
+      langs: self.langs(),
       commandName: "edit",
       command: function(links) {
         ajax
@@ -339,6 +356,7 @@ LUPAPISTE.OrganizationModel = function () {
   self.addLink = function() {
     self.editLinkModel.init({
       commandName: "add",
+      langs: self.langs(),
       command: function(links) {
         ajax
           .command("add-organization-link", linksForCommand(links))

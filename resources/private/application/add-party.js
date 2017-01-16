@@ -12,7 +12,18 @@ LUPAPISTE.AddPartyModel = function() {
       ajax.query("party-document-names", {id: self.applicationId})
         .success(function(d) {
           self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));
-          LUPAPISTE.ModalDialog.open("#dialog-add-party");
+          hub.send("show-dialog", {ltitle: "addParty.heading",
+                                   size: "medium",
+                                   id: "dialog-add-party",
+                                   component: "yes-no-select-dialog",
+                                   componentParams: {yesFn: self.addParty,
+                                                     lyesTitle: "add",
+                                                     lnoTitle: "cancel",
+                                                     yesEnabled: self.addPartyEnabled,
+                                                     options: self.partyDocumentNames(),
+                                                     optionsText: function(item) { return loc(["schemas", item]); },
+                                                     optionsValue: function(item) { return item; },
+                                                     value: self.documentName}});
         })
       .call();
     } else {
@@ -21,9 +32,9 @@ LUPAPISTE.AddPartyModel = function() {
     return false;
   };
 
-  self.addPartyEnabled = function() {
+  self.addPartyEnabled = ko.pureComputed(function() {
     return self.documentName();
-  };
+  });
 
   self.addParty = function () {
     ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})

@@ -237,9 +237,7 @@ Mikko is unable to edit Kayttoonottotarkastus (LPK-494)
   Page Should Contain Element  xpath=//section[@id="task"]//select
   ${selectCount} =  Get Matching Xpath Count  //section[@id="task"]//select
   Xpath Should Match X Times  //section[@id="task"]//select[@disabled]  ${selectCount}
-
-  No such test id  review-done
-  No such test id  delete-task
+  Review disabled for applicant
 
 Mikko can add attachments though
   Scroll and click test id  add-targetted-attachment
@@ -288,7 +286,7 @@ Deleting R verdict does not delete its done reviews
 
 Attachments have been updated
   Open tab  attachments
-  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.katselmuksen_tai_tarkastuksen_poytakirja']").length === 3
+  Javascript?  $("tr[data-test-type='katselmukset_ja_tarkastukset.aloituskokouksen_poytakirja']").length === 3
   Javascript?  $("tr[data-test-type='muut.muu']").length === 1
   Has review attachment  muut.muu  /robot.*pdf/
   [Teardown]  Logout
@@ -298,6 +296,7 @@ Attachments have been updated
 # This would require a well-formed application with all the required fields.
 
 No errors so far
+  [Tags]  non-roboto-proof
   There are no frontend errors
 
 *** Keywords ***

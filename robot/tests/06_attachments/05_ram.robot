@@ -4,6 +4,7 @@ Documentation  Rakentamisen aikaiset muutokset (RAM)
 Suite Teardown  Logout
 Resource       ../../common_resource.robot
 Resource       attachment_resource.robot
+Resource       ../common_keywords/approve_helpers.robot
 Variables      variables.py
 
 *** Variables ***
@@ -22,7 +23,7 @@ Mikko creates application
 
 Mikko adds png attachment without comment
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  ${type}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment file  tr[data-test-type='${type}']  ${PNG_TESTFILE_PATH}
   Application state should be  submitted
 
 Mikko opens attachment details
@@ -40,11 +41,12 @@ Sonja logs in and gives verdict
   Submit empty verdict
 
 Sonja opens the attachment tab and unselects post verdict filter
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Unselect post verdict filter
 
 There are no RAM filters
   No such test id  ram-filter-label
-  
+
 Sonja opens attachment details
   Open attachment details  ${type}
   No such test id  ram-links-table
@@ -53,30 +55,30 @@ Sonja cannot add RAM because the attachment has not been approved
   No such test id  add-ram-attachment
 
 Sonja approves the attachment
-  Wait Until  Click button  id=test-attachment-approve
+  Click button  id=test-attachment-approve
   Element should be visible by test id  add-ram-attachment
 
 Sonja adds new RAM attachment
   Click by test id  add-ram-attachment
-  Element should be visible by test id  ram-links-table
+  # Attachment page for new ram-attachment opens...
   Element should be visible by test id  ram-prefix
+  Element should be visible by test id  ram-links-table
   Delete allowed
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
 
 Sonja adds file to RAM
   Add attachment version  ${PNG_TESTFILE_PATH}
-  Delete allowed  False
-  Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  -
-
-Sonja can now approve the attachment
-  Wait Until  Click button  id=test-attachment-approve
-  Delete disallowed  True
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
+
+Attachment get automatically approved since it is uploaded by authority
+  Wait until  Element should be visible  xpath=//i[@data-test-id='0-0-1-approved']
+  Delete disallowed  True
 
 Sonja clicks RAM link and opens old attachment details
   Follow ram link  0
+  # Attachment page changes to old attachment
+  Wait until  Element should not be visible by test id  ram-prefix
   Element should be visible by test id  ram-links-table
-  No such test id  ram-prefix
   Delete disallowed
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Element should not be visible  jquery=td[data-test-id=ram-link-type-0] a
@@ -89,12 +91,17 @@ Sonja returns to attachments and sees RAM filter
   #Scroll and click test id  ram-filter-label
   Javascript?  $("tr[data-test-type]:visible").length === 1
   Wait test id visible  ram-indicator
-  [Teardown]  Logout
+  Logout
 
 Mikko logs in and unselects post verdict filter
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  # RAM and postverdict filters are selected by default
+  Wait until  Checkbox wrapper selected by test id  postVerdict-filter-checkbox
+  Wait until  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Unselect post verdict filter
+  # Now only RAM attachments are visible
 
 RAM indicator is visible for RAM attachment
   Wait until  Element should be visible  jquery=div#application-attachments-tab tr[data-test-type='${type}'] span[data-test-id=ram-indicator]:visible
@@ -102,9 +109,9 @@ RAM indicator is visible for RAM attachment
 Mikko opens RAM attachment and sees RAM links but cannot delete the attachment
   # Only RAM is visible
   Open attachment details  ${type}  0
+  Element should be visible by test id  ram-prefix
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Sonja Sibbo  Sonja Sibbo
-  Element should be visible by test id  ram-prefix
   Delete disallowed  False
   Element should be visible by test id  add-ram-attachment
 
@@ -116,37 +123,46 @@ Mikko adds new file version and thus resetting approval state
 
 Mikko follows RAM link and cannot delete the base attachment either
   Follow ram link  0
+  # Attachment page changes to to old attachment
   Element should be visible by test id  ram-links-table
   No such test id  ram-prefix
   No such test id  add-ram-attachment
   Delete disallowed  True
-  [Teardown]  Logout
+  Logout
 
 Sonja logs in and goes to attachments tab
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Unselect post verdict filter
+  # Now only RAM attachments are visible
 
-Sonja rejects attachment but could not delete base attachment
+Sonja rejects base attachment but can not delete it
   Open attachment details  ${type}  0
   Follow ram link  0
   No such test id  ram-prefix
   Delete disallowed
-  Wait Until  Click button  id=test-attachment-reject
+  Reject attachment with note  test-attachment-reject  details-reject  Rejected!
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Delete disallowed
 
-Sonja approves RAM (again)
+Sonja opens and approves RAM (again)
   Follow ram link  1
+  Element should be visible by test id  ram-prefix
   Wait Until  Click button  id=test-attachment-approve
   Delete disallowed  True
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
-  [Teardown]  Logout
+  Logout
 
 Mikko logs in and goes to attachment tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Unselect post verdict filter
+
+RAM filter enabled and one attachment row is visible
+  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Wait until  Total attachments row count is  1
 
 Mikko opens RAM
   Open attachment details  ${type}  0
@@ -154,6 +170,7 @@ Mikko opens RAM
 
 Mikko adds new RAM attachment and uploads file
   Click by test id  add-ram-attachment
+  # New attachment page opens
   Element should be visible by test id  ram-link-type-2
   Add attachment version  ${PNG_TESTFILE_PATH}
   Delete allowed  False
@@ -169,25 +186,35 @@ RAM links table has been updated after delete
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  Sonja Sibbo
   Element should not be visible  jquery=td[data-test-id=ram-link-file-2] a
-  [Teardown]  Logout
+  Logout
 
 Sonja goes to attachments tab
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Unselect post verdict filter
+
+RAM filter enabled and two attachment rows are visible
+  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Wait until  Total attachments row count is  2
 
 Sonja rejects the first RAM but cannot delete it
   Open attachment details  ${type}  0
   Element should be visible by test id  ram-prefix
-  Wait Until  Click button  id=test-attachment-reject
+  Reject attachment with note  test-attachment-reject  details-reject  Rejected too!
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Delete disallowed
-  [Teardown]  Logout
+  Logout
 
 Mikko goes to attachments tab
   Mikko logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter
+  Open tab  attachments
+  Unselect post verdict filter
+
+Two RAM attachment rows are visible
+  Checkbox wrapper selected by test id  ram-filter-checkbox
+  Wait until  Total attachments row count is  2
 
 Mikko deletes RAM
   Open attachment details  ${type}  0
@@ -196,25 +223,35 @@ Mikko deletes RAM
   Element should be visible by test id  delete-attachment
   Click by test id  delete-attachment
   Confirm yes no dialog
+
+Only one attachment is visible now
+  Wait until  Tab should be visible  attachments
+  Wait until  Total attachments row count is  1
   Open attachment details  ${type}  0
   Check link row  0  Alkuperäinen  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   Check link row  1  RAM-liite  ${PNG_TESTFILE_NAME}  Mikko Intonen  -
   No such test id  ram-link-type-2
-  [Teardown]  Logout
 
 Sonja logs in to test filters
+  Logout
   Sonja logs in
   Open application  ${appname}  753-416-25-30
-  Open attachments tab and unselect post verdict filter 
+  Open tab  attachments
+
+Unselects filters
+  Unselect post verdict filter
   Scroll and click test id  ram-filter-label
+  Checkbox wrapper not selected by test id  postVerdict-filter-checkbox
+  Checkbox wrapper not selected by test id  ram-filter-checkbox
+  Wait until  Total attachments row count is  6
 
 Add shelter file and approve it
   Add attachment file  tr[data-test-type='${shelter}']  ${PNG_TESTFILE_PATH}
+  Attachment is  approved
   Return to application
-  Approve row  tr[data-test-type='${shelter}']
 
-Remove Pohjapiirustus
-  Remove row  tr[data-test-type='${type}']
+Two pohjapiirrustus rows exist
+  Xpath Should Match X Times  //tr[@data-test-type='${type}']  2
 
 Approve first Pohjapiirustus
   Approve row  tr[data-test-type='${type}']:first
@@ -238,16 +275,17 @@ Sonja approves RAM
   Rollup approved  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja rejects shelter
-  Reject row  tr[data-test-type='${shelter}']  
+  Reject row  tr[data-test-type='${shelter}']
   Rollup approved  Pääpiirustukset
   Rollup rejected  Muut suunnitelmat
   Rollup rejected  Asuinkerrostalon tai rivitalon rakentaminen
 
 Sonja adds CV. It does not support RAMs
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  osapuolet.cv
+  Upload attachment  ${PNG_TESTFILE_PATH}  CV  CV  Osapuolet
+  Open attachment details  osapuolet.cv
   Wait Until  Click button  id=test-attachment-approve
   Wait Until  Element should be disabled  test-attachment-approve
-  No such test id  add-ram-attachment    
+  No such test id  add-ram-attachment
   [Teardown]  Logout
 
 *** Keywords ***

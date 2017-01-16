@@ -19,7 +19,7 @@ Mikko goes to empty attachments tab
 
 Mikko sees all "not needed" checkboxes as enabled and not selected
   [Tags]  attachments
-  Wait until  Element Text Should Be  jquery=div#application-attachments-tab rollup[data-test-level=accordion-level-0]:first span.rollup-status__text  YLEISET HANKKEEN LIITTEET
+  Wait until  Attachment group should be visible  0  HAKEMUKSEN LIITTEET
   Wait until  Xpath Should Match X Times  //div[@id='application-attachments-tab']//label[@data-test-id='not-needed-label']  4
   Not needed should not be selected  hakija.valtakirja
   Not needed should not be selected  paapiirustus.asemapiirros
@@ -53,14 +53,7 @@ Dropdown options for attachment actions should look correct for Mikko
 
 Mikko adds png attachment without comment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  #Wait Until  Element should be visible  xpath=//table[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
-
-Mikko returns to application
-  [Tags]  attachments
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  First  Asuinkerrostalon tai rivitalon rakentaminen
 
 Download all buttons are now visible
   Wait test id visible  download-all
@@ -77,9 +70,10 @@ Download all buttons are gone again
 
 Mikko adds png attachment without comment again
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Second  Asuinkerrostalon tai rivitalon rakentaminen
+
+Mikko opens attachment details
+  Open attachment details  muut.muu
 
 Mikko deletes attachment version
   [Tags]  attachments
@@ -91,19 +85,15 @@ Mikko deletes also the attachment template
   Wait Until  Delete attachment  muut.muu
   Wait Until  Element should not be visible  xpath=//div[@class='attachments-table']//a[contains(., '${PNG_TESTFILE_NAME}')]
 
-Mikko adds again png attachment with comment
+Mikko adds png attachment one more time
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  Poistetun liitteen kommentti  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Wait until  List selection should be  jquery=attachment-details select[data-test-id=attachment-operation-select]  Asuinkerrostalon tai rivitalon rakentaminen
-  Application state should be  draft
-  Return to application
-  Wait Until  Comment count is  1
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Third  Asuinkerrostalon tai rivitalon rakentaminen
 
 Download all buttons are again visible
   Wait test id visible  download-all
   Wait test id visible  download-all-attachments-button
 
-Mikko opens attachment details
+Mikko opens attachment details again
   [Tags]  attachments
   Open attachment details  muut.muu
 
@@ -128,7 +118,7 @@ Mikko checks Not needed for the attachment
 
 Not needed should be checked after reload with correct filters
   [Tags]  attachments
-  Reload Page
+  Reload page and kill dev-box
   Wait Until  Not needed should be visible  hakija.valtakirja
   Not needed should not be visible  paapiirustus.asemapiirros
   Scroll to  div.filter-wrapper:last-child label.filter-label
@@ -149,38 +139,38 @@ Mikko does not see Reject nor Approve buttons
 
 Not needed not visible as attachment contains file
   [Tags]  attachments
-  Wait until  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Remove version, not needed selectable
   [Tags]  attachments
   Delete attachment version  1.0
-  Wait until  Element should be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Wait until  Element should be visible  xpath=//section[@id='attachment']//button[@id='add-new-attachment-version']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
+  Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
+  Wait until  Element should be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
 
 Checking not needed in attachment page affects attachment listing
   [Tags]  attachments
-  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
-  Wait until  Element should not be visible  xpath=//section[@id='attachment']//button[@data-test-id='add-new-attachment-version']
+  Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed-input']
+  Wait until  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='upload-button-label']
   Return to application
   Wait until  Not needed should be visible  muut.muu
   Not needed should be selected  muut.muu
 
 Upload is not possible for notNeeded attachment
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Element should not be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Set attachment back to needed
   [Tags]  attachments
   Click not needed  muut.muu
   Wait until  Not needed should not be selected  muut.muu
-  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//a[@data-test-id='add-attachment-file']
+  Wait until  Element should be visible  xpath=//div[@id='application-attachments-tab']//tr[@data-test-type='muut.muu']//label[@data-test-id='add-attachment-file-label']
 
 Upload new version for muut.muu (attachment page opens)
   [Tags]  attachments
   Add attachment file  tr[data-test-type='muut.muu']  ${PNG_TESTFILE_PATH}
   # Not needed not visible when file is present
-  Element should not be visible  xpath=//section[@id='attachment']//input[@data-test-id='is-not-needed']
+  Element should not be visible  xpath=//section[@id='attachment']//label[@data-test-id='is-not-needed-label']
 
 Mikko deletes attachment
   [Tags]  attachments
@@ -189,16 +179,15 @@ Mikko deletes attachment
   Wait Until Page Contains  ${propertyId}
   Wait Until  Page Should Not Contain  jquery=tr[data-test-type='muut.muu'] a[data-test-id='open-attachment']
 
-Comment is present after delete
-  [Tags]  attachments
-  Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
-  Close side panel  conversation
+# Comment is present after delete
+#   [Tags]  attachments
+#   Open side panel  conversation
+#   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class, 'is-comment')]//span[@class='deleted']  1
+#   Close side panel  conversation
 
-Mikko adds png attachment with comment
+Mikko adds png attachment one more time again
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${PNG_TESTFILE_DESCRIPTION}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  ${PNG_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   [Tags]  attachments
@@ -224,6 +213,7 @@ Change attachment type
   Select from list  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
+  Positive indicator should be visible
   Wait until  Element should be visible  jquery=a[data-test-id=back-to-application-from-attachment]
   Scroll to test id  back-to-application-from-attachment
   Click element  jquery=[data-test-id=back-to-application-from-attachment]
@@ -236,7 +226,8 @@ Signature icon is not visible
 
 Mikko adds another attachment and signs it as single attachment
   [Tags]  attachments
-  Add attachment  application  ${PDF_TESTFILE_PATH}  ${EMPTY}  type=hakija.valtakirja  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PDF_TESTFILE_PATH}  Valtakirja  Valtakirja  Asuinkerrostalon tai rivitalon rakentaminen
+  Open attachment details  hakija.valtakirja
   Click enabled by test id  signLatestAttachmentVersion
   Wait Until   Element should be visible  signSingleAttachmentPassword
   Input text by test id  signSingleAttachmentPassword  mikko123
@@ -254,7 +245,7 @@ One signature is visible in attachment page
 Signature icon is visible in attachments tab, and only one
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  1
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[contains(@class,'attachments-table')]//tr//td//i[@data-test-icon='signed-icon']  1
 
 Mikko signs all attachments
   [Tags]  attachments
@@ -264,7 +255,7 @@ Signature icon is visible
   [Tags]  attachments
   Wait Until  Attachment indicator icon should be visible  signed  hakija.valtakirja
   Wait Until  Attachment indicator icon should be visible  signed  rakennuspaikka.ote_alueen_peruskartasta
-  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[@class='attachments-table']//tr//td//i[@data-test-icon='signed-icon']  2
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//table[contains(@class,'attachments-table')]//tr//td//i[@data-test-icon='signed-icon']  2
 
 Signature is visible
   [Tags]  attachments
@@ -313,7 +304,7 @@ Sonja adds new attachment template
 
 Sonja sees that new attachment template is visible in attachments list
   [Tags]  attachments
-  Wait Until Element Is Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element Should Be Visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
   Logout
 
 Mikko logs back in and browses to the Attachments tab
@@ -337,11 +328,11 @@ Sonja logs back in and browses to the Attachments tab
 Sonja deletes the newly created attachment template
   [Tags]  attachments
   Wait Until  Delete attachment  paapiirustus.muu_paapiirustus
-  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] a[data-test-id=add-attachment-file]
+  Wait Until  Element should not be visible  jquery=tr[data-test-type='paapiirustus.muu_paapiirustus'] label[data-test-id=add-attachment-file-label]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
-  Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
+  Wait Until  Attachment indicator icon should be visible  state  rakennuspaikka.ote_alueen_peruskartasta
 
 Sonja opens attachment details
   [Tags]  attachments
@@ -398,7 +389,7 @@ Sign attachments button should not be visible
 
 Sonja adds an attachment for Mikko to sign (LPK-517)
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Fourth  Asuinkerrostalon tai rivitalon rakentaminen
 
 Create new application
   [Tags]  attachments
@@ -408,10 +399,9 @@ Create new application
   Create application the fast way  ${appname2}  ${propertyId2}  kerrostalo-rivitalo
   Open tab  attachments
 
-Authority adds png attachment without comment
+Authority adds png attachment
   [Tags]  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen
-  Return to application
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Fifth  Asuinkerrostalon tai rivitalon rakentaminen
 
 Signature icon is not visible to authority
   [Tags]  attachments
@@ -438,6 +428,9 @@ Mikko signs everything blindly
   Sign all attachments  mikko123
   Wait Until  Attachment indicator icon should be visible  signed  muut.muu
 
+No frontend errors
+  [Tags]  non-roboto-proof
+  There are no frontend errors
 
 
 *** Keywords ***

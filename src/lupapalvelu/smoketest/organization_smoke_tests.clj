@@ -3,7 +3,8 @@
             [lupapiste.mongocheck.core :refer [mongocheck]]
             [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [monger.operators :refer :all]))
 
 (def organization-keys [])
 

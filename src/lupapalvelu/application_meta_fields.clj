@@ -9,6 +9,7 @@
             [lupapalvelu.states :as states]
             [lupapalvelu.state-machine :as sm]
             [lupapalvelu.user :as usr]
+            [lupapalvelu.attachment :as att]
             [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -109,13 +110,13 @@
       (count (filter (fn [verdict] (> (or (:timestamp verdict) 0) last-seen)) (:verdicts app))))
     0))
 
-(defn- state-base-filter [required-state {:keys [state versions]}]
-  (and (= state required-state) (seq versions)))
+(defn- state-base-filter [required-state attachment]
+  (util/=as-kw required-state (att/attachment-state attachment)))
 
 (defn- count-attachments-requiring-action [user {:keys [infoRequest attachments _attachment_indicator_reset] :as application}]
   (if-not infoRequest
-    (let [requires-user-action (partial state-base-filter "requires_user_action")
-          requires-authority-action (partial state-base-filter "requires_authority_action")
+    (let [requires-user-action (partial state-base-filter :requires_user_action)
+          requires-authority-action (partial state-base-filter :requires_authority_action)
           attachment-indicator-reset (or _attachment_indicator_reset 0)]
       (count
         (case (keyword (:role user))
@@ -156,6 +157,10 @@
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
+(defn- archived? [_ app]
+  (and (some? (get-in app [:archived :completed]))
+       (> (get-in app [:archived :completed]) 1)))
+
 (def indicator-meta-fields [{:field :documentModificationsPerDoc :fn count-document-modifications-per-doc}
                             {:field :documentModifications :fn count-document-modifications}
                             {:field :unseenComments :fn count-unseen-comments}
@@ -163,6 +168,7 @@
                             {:field :unseenVerdicts :fn count-unseen-verdicts}
                             {:field :unseenAuthorityNotice :fn unseen-notice?}
                             {:field :attachmentsRequiringAction :fn count-attachments-requiring-action}
+                            {:field :fullyArchived :fn archived?}
                             {:field :indicators :fn indicator-sum}])
 
 (def meta-fields (conj indicator-meta-fields

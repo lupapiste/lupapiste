@@ -29,3 +29,116 @@
   }
   display: inline-block;
 }
+
+// ----------------------------
+// Upload and related
+// ----------------------------
+
+.upload-progress {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  i {
+    color: white;
+    background-color: $positive;
+  }
+}
+
+@mixin progress-bar( $color ) {
+  border: {
+    color: $color;
+    style: solid;
+    width: 1px;
+    top-right-radius: 20px;
+    bottom-right-radius: 20px;
+  }
+  box-sizing: border-box;
+}
+
+
+.upload-progress__bar {
+  @include progress-bar( $primary );
+  width: 50%;
+}
+
+.upload-progress__percentage {
+  @include progress-bar( $primary );
+  display: inline-block;
+  color: white;
+  text-align: right;
+  background-color: $primary;
+  padding-right: 10px;
+  span {
+    font-size: 20px;
+  }
+}
+
+.upload-progress__bar.upload-progress--finished {
+  border-color: $positive;
+  > .upload-progress__percentage {
+    border-color: $positive;
+    background-color: $positive;
+    i {
+      padding-left: 6px;
+      float: left;
+      margin: 0;
+    }
+  }
+}
+
+.batch-required:after {
+  content: "*";
+  color: $negative;
+}
+
+label.batch-required {
+  display: block;
+}
+
+.batch-buttons {
+  margin-top: $marginL;
+  margin-bottom: $marginL;
+  button {
+    margin-right: $marginM;
+  }
+}
+
+.batch-bad-files {
+  .like-btn {
+    color: $negative;
+    span {
+      font-size: 20px;
+    }
+  }
+  ul {
+    margin-top: $marginS;
+    margin-bottom: $marginL;
+    font-size: 16px;
+    li {
+      list-style-type: none;
+    }
+  }
+}
+
+.batch-bind-failed {
+  .like-btn {
+    color: $negative;
+    span {
+      font-size: 20px;
+    }
+  }
+}
+
+.batch-password {
+  i {
+    vertical-align: middle;
+  }
+  i.lupicon-check {
+    color: $positive;
+  }
+  i.lupicon-warning {
+    color: $negative;
+  }
+  i.lupicon-flag {
+    color: $primary;
+  }
+}

@@ -2,6 +2,7 @@
   (:require [monger.operators :refer :all]
             [sade.core :refer [fail ok]]
             [sade.strings :as ss]
+            [lupapalvelu.authorization-messages] ; notification definitions
             [lupapalvelu.user :as usr]  ;; usr works better with code completion.
             [lupapalvelu.organization :as org]
             [lupapalvelu.authorization :as auth]

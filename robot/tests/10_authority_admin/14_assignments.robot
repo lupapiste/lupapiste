@@ -24,7 +24,7 @@ Authority admin goes to the application page
 Sees assignments are enabled
   Checkbox should be selected  assignments-enabled
 
-Disables assignments for orgainzation
+Disables assignments for organization
   Unselect checkbox  assignments-enabled
   Wait until  Positive indicator should be visible
   Checkbox should not be selected  assignments-enabled

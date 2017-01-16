@@ -9,12 +9,17 @@ LUPAPISTE.AttachmentsService = function() {
   ko.options.deferUpdates = true;
   self.APPROVED = "ok";
   self.REJECTED = "requires_user_action";
+  self.REQUIRES_AUTHORITY_ACTION = "requires_authority_action";
+  self.JOB_RUNNING = "running";
+  self.JOB_PENDING = "pending";
+  self.JOB_WORKING = "working";
+  self.JOB_DONE = "done";
+  self.JOB_ERROR = "error";
+  self.JOB_TIMEOUT = "timeout";
   self.serviceName = "attachmentsService";
 
   self.attachments = ko.observableArray([]);
   self.authModels = ko.observable({});
-
-  self.groupTypes = ko.observableArray([]);
 
   self.tagGroups = ko.observableArray([]);
   var tagGroupSets = {};
@@ -30,7 +35,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( "application-model-updated", function() {
     self.queryAll();
-    self.authModel.refresh({id: self.applicationId()});
+    self.groupTypes([]);
   });
 
   hub.subscribe( "contextService::leave", function() {
@@ -44,6 +49,7 @@ LUPAPISTE.AttachmentsService = function() {
     disposeItems(tagGroupSets);
     disposeItems(filterSets);
     self.attachments([]);
+    self.attachmentTypes([]);
     filterSets = {};
     self.tagGroups([]);
     tagGroupSets = {};
@@ -63,6 +69,9 @@ LUPAPISTE.AttachmentsService = function() {
         })
         .onError("error.unauthorized", notify.ajaxError)
         .call();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -78,6 +87,7 @@ LUPAPISTE.AttachmentsService = function() {
 
   // Refresh all authModels at once.
   function refreshAllAuthModels() {
+    self.authModel.refresh({id: self.applicationId()});
     authorization.refreshModelsForCategory(self.authModels(), self.applicationId(), "attachments");
   }
 
@@ -147,10 +157,6 @@ LUPAPISTE.AttachmentsService = function() {
     _.forEach(filterSets, function(filterSet) {
       filterSet.setFilters(data);
     });
-  };
-
-  self.setGroupTypes = function(data) {
-    self.groupTypes(data);
   };
 
   self.queryAttachments = function() {
@@ -228,9 +234,30 @@ LUPAPISTE.AttachmentsService = function() {
   };
 
   self.queryGroupTypes = function() {
-    queryData("attachment-groups", "groups", self.setGroupTypes);
+    if (!queryData("attachment-groups", "groups", self.groupTypes)) {
+      hub.subscribe("application-model-updated", function() {
+        self.groupTypes([]);
+      }, true);
+    }
   };
 
+  self.groupTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryGroupTypes}});
+
+  hub.subscribe("op-description-changed", _.partial(self.groupTypes, []));
+
+  self.queryAttachmentTypes = function() {
+    if (!queryData("attachment-types", "attachmentTypes", self.attachmentTypes)) {
+      hub.subscribe("application-model-updated", function() {
+        self.attachmentTypes([]);
+      }, true);
+    }
+  };
+
+  self.attachmentTypes = ko.observableArray().extend({autoFetch: {fetchFn: self.queryAttachmentTypes}});
+
+  self.attachmentTypeGroups = ko.pureComputed(function() {
+    return _(self.attachmentTypes()).map("type-group").uniq().value();
+  });
 
   function sendHubNotification(eventType, commandName, params, response) {
     hub.send(self.serviceName + "::" + eventType, _.merge({commandName: commandName,
@@ -254,6 +281,115 @@ LUPAPISTE.AttachmentsService = function() {
       .processing(self.processing)
       .call();
     return false;
+  };
+
+  self.pollJobStatusFinished = function(status) {
+    return !_.includes([self.JOB_RUNNING, self.JOB_PENDING, self.JOB_WORKING], ko.unwrap(status));
+  };
+
+  self.contentsData = function( attachmentType ) {
+    var metadata = attachmentType.metadata || {};
+    var list  = _.map( metadata.contents,
+                       function( id ) {
+                         return loc( "attachments.contents." + id);
+                       });
+    return {
+      defaultValue: _.size( list ) <= 1
+        ? _.first( list ) || attachmentType.title
+        : "",
+      list: list
+    };
+  };
+
+  var retryTimeouts = [7*1000, 7*1000, 7*1000, 7*1000,
+                       7*1000, 7*1000, 7*1000, 7*1000,
+                       10*1000, 10*1000]; // total 76 secs
+
+  function pollTimeout(statuses) {
+    warn("Timeout from bind-attachment(s), fileIds: " + _.join(_.keys(statuses), ","));
+    _.forEach(statuses, function(status) {
+      status(self.JOB_TIMEOUT);
+    });
+  }
+
+  function pollBindJob(statuses, attachments, previousJob, timeouts , response) {
+    var timeout = _.head(timeouts);
+    if (response.result === "update") {
+      var job = response.job;
+      _.forEach( _.values(job.value), function(fileData) {
+        if ( statuses[fileData.fileId] ) {
+          statuses[fileData.fileId](fileData.status);
+        }
+      });
+      if ( job.status === self.JOB_RUNNING ) {
+        var jobData = {jobId: job.id,
+                       version: job.version,
+                       timeout: timeout};
+        ajax.query("bind-attachments-job", jobData)
+          .success(_.partial(pollBindJob, statuses, attachments, jobData, _.clone(retryTimeouts)))
+          .call();
+      } else { // self.JOB_DONE
+        _.forEach(statuses, function(status) {
+          if (status === self.JOB_RUNNING) {
+            status(self.JOB_TIMEOUT);
+          }
+        });
+        self.authModel.refresh({id: self.applicationId()});
+        if ( attachments.length === 1 && attachments[0].attachmentId ) {
+          self.queryOne(attachments[0].attachmentId, {triggerCommand: "upload-attachment"});
+          self.queryTagGroupsAndFilters();
+        } else {
+          self.queryAll();
+        }
+      }
+    } else { // timeout
+      if (timeout) { // timeouts left, retry and decrease amount of retries
+        var timeoutedJob = {jobId: previousJob.jobId,
+                            version: previousJob.version,
+                            timeout: timeout};
+        _.delay(function() {
+          ajax.query( "bind-attachments-job", timeoutedJob)
+          .success(_.partial(pollBindJob, statuses, attachments, timeoutedJob, _.tail(timeouts)))
+          .call();
+        }, 1000);
+
+      } else {
+        pollTimeout(statuses);
+      }
+    }
+
+  }
+
+  function startBindPolling(statuses, attachments, response) {
+    var jobData = { jobId: response.job.id, version: response.job.version};
+    ajax.query( "bind-attachments-job", jobData)
+      .success( _.partial(pollBindJob, statuses, attachments, jobData, _.clone(retryTimeouts)) )
+      .call();
+  }
+
+  self.bindAttachments = function(attachments, password) {
+    var jobStatuses = _(attachments).map(function(attachment) { return [attachment.fileId, ko.observable(self.JOB_RUNNING)]; }).fromPairs().value();
+    ajax.command( "bind-attachments",
+                  _.merge( { id: self.applicationId(),
+                             filedatas: attachments },
+                           _.some(attachments, "sign")  ? {password: password} : {} ))
+      .processing( self.processing )
+      .success( _.partial(startBindPolling, jobStatuses, attachments) )
+      .call();
+
+    return jobStatuses;
+  };
+
+  self.bindAttachment = function(attachmentId, fileId) {
+    var jobStatuses = _.set({}, fileId, ko.observable(self.JOB_RUNNING));
+    ajax.command( "bind-attachment", { id: self.applicationId(),
+                                       attachmentId: attachmentId,
+                                       fileId: fileId })
+      .processing( self.processing )
+      .success( _.partial(startBindPolling, jobStatuses, [{attachmentId: attachmentId}]) )
+      .call();
+
+    return jobStatuses[fileId];
   };
 
   hub.subscribe("upload-done", function(data) {
@@ -303,12 +439,33 @@ LUPAPISTE.AttachmentsService = function() {
   self.approveAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "approve-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( null );
   };
 
   self.rejectAttachment = function(attachmentId, hubParams) {
     var attachment = self.getAttachment(attachmentId);
     self.updateAttachment(attachmentId, "reject-attachment", {"fileId": util.getIn(attachment, ["latestVersion", "fileId"])}, hubParams);
+    self.rejectAttachmentNoteEditorState( attachmentId );
   };
+
+  self.rejectAttachmentNote = function(attachmentId, note, hubParams) {
+    var attachment = self.getAttachment(attachmentId);
+    self.updateAttachment(attachmentId,
+                          "reject-attachment-note",
+                          {fileId: util.getIn(attachment, ["latestVersion", "fileId"]),
+                           note: note || ""},
+                          hubParams);
+    self.rejectAttachmentNoteEditorState( null );
+  };
+
+  hub.subscribe( "attachmentsService::update", function( event ) {
+    if( event.commandName === "reject-attachment-note" ) {
+      self.queryOne( event.attachmentId );
+    }
+  });
+
+  // Used by reject-note component.
+  self.rejectAttachmentNoteEditorState = ko.observable();
 
   self.setNotNeeded = function(attachmentId, flag, hubParams) {
     _.forEach(filterSets, function(filterSet) { filterSet.forceVisibility(attachmentId); });
@@ -341,8 +498,8 @@ LUPAPISTE.AttachmentsService = function() {
     self.updateAttachment(attachmentId, "set-attachment-type", {attachmentType: type}, hubParams);
   };
 
-  self.createAttachmentTemplates = function(types, hubParams) {
-    var params =  {id: self.applicationId(), attachmentTypes: types};
+  self.createAttachmentTemplates = function(types, group, hubParams) {
+    var params =  {id: self.applicationId(), attachmentTypes: types, group: group};
     ajax.command("create-attachments", params)
       .success(function(res) {
         self.queryAll();
@@ -381,16 +538,49 @@ LUPAPISTE.AttachmentsService = function() {
 
   hub.subscribe( self.serviceName + "::downloadAllAttachments", downloadAllAttachments );
 
+
+
+
+  // If fileId is not given, the approval for the latestVersion is returned.
+  // The fileId can be either fileId or originalFileId.
+  self.attachmentApproval = function ( attachment, fileId ) {
+    if( fileId ) {
+      var version = _.find( util.getIn(attachment, ["versions"] ),
+                            function( v ) {
+                              return v.fileId === fileId
+                                || v.originalFileId === fileId;
+                            });
+      fileId = _.get( version, "originalFileId");
+    } else {
+      fileId = util.getIn( attachment, ["latestVersion", "originalFileId"]);
+    }
+    return fileId && util.getIn( attachment, ["approvals", fileId]);
+  };
+
+  function attachmentState( attachment ) {
+    return _.get( self.attachmentApproval( attachment), "state");
+  }
+
   //helpers for checking relevant attachment states
   self.isApproved = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.APPROVED;
+    return attachmentState(attachment ) === self.APPROVED;
   };
-  self.isRejected = function(attachment) {
-    return util.getIn(attachment, ["state"]) === self.REJECTED
+
+  self.isRejected = function(attachment ) {
+    return attachmentState(attachment) === self.REJECTED
       && !self.isNotNeeded( attachment );
   };
   self.isNotNeeded = function(attachment) {
     return util.getIn(attachment, ["notNeeded"]) === true;
+  };
+  self.requiresAuthorityAction = function(attachment) {
+    return attachmentState(attachment) === self.REQUIRES_AUTHORITY_ACTION;
+  };
+
+  // True if the attachment is needed but does not have file yet.
+  self.isMissingFile = function( attachment ) {
+    return !self.isNotNeeded( attachment )
+      && _.isEmpty( util.getIn( attachment, ["versions"]) );
   };
 
   //

@@ -57,26 +57,33 @@
   (count-unseen-verdicts {:role "authority"} {:verdicts [{:timestamp 1}]}) => 0
   (count-unseen-verdicts {:id "user1" :role "applicant"} {:verdicts [{:timestamp 1}] :_verdicts-seen-by {:user1 1}}) => 0)
 
+(defn- mock-attachments [state & [created user]]
+  (let [v (merge {:originalFileId "fileid"}
+                 (when created
+                   {:created created})
+                 (when user
+                   {:user user}))]
+    [{:versions [v] :latestVersion v :approvals {:fileid {:state state}}}]))
+
 (facts "count-attachments-requiring-action"
   (count-attachments-requiring-action nil nil) => 0
   (count-attachments-requiring-action {} {}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action"}]}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions []}]}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 1
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "applicant"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1}, :versions [{:version {}}]}]}) => 1
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_authority_action", :latestVersion {:created 1 :user usr/batchrun-user-data}, :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 1, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 1
-  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 2, :attachments [{:state "requires_authority_action", :latestVersion {:created 2}, :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authority"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_authority_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "requires_user_action" :versions [{:version {}}]}]}) => 0
-  (count-attachments-requiring-action {:role "admin"} {:attachments [{:state "ok" :versions [{:version {}}]}]}) => 0)
+  (count-attachments-requiring-action {:role "applicant"} {:attachments []}) => 0
+  (count-attachments-requiring-action {:role "applicant"} {:attachments (mock-attachments "requires_user_action")}) => 1
+  (count-attachments-requiring-action {:role "applicant"} {:attachments (mock-attachments :requires_authority_action)}) => 0
+  (count-attachments-requiring-action {:role "applicant"} {:attachments (mock-attachments :ok)}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:attachments (mock-attachments :requires_authority_action 1)}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:attachments (mock-attachments :requires_authority_action 1 usr/batchrun-user-data)}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 1, :attachments (mock-attachments :requires_authority_action 2)}) => 1
+  (count-attachments-requiring-action {:role "authority"} {:_attachment_indicator_reset 2, :attachments (mock-attachments :requires_authority_action 2)}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:attachments (mock-attachments "requires_user_action")}) => 0
+  (count-attachments-requiring-action {:role "authority"} {:attachments (mock-attachments "ok")}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments (mock-attachments :requires_authority_action)}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments (mock-attachments "requires_user_action")}) => 0
+  (count-attachments-requiring-action {:role "authorityAdmin"} {:attachments (mock-attachments "ok")}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments (mock-attachments :requires_authority_action)}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments (mock-attachments :requires_user_action)}) => 0
+  (count-attachments-requiring-action {:role "admin"} {:attachments (mock-attachments "ok")}) => 0)
 
 (facts "indicator-sum"
   (indicator-sum nil nil) => 0

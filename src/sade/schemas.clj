@@ -132,6 +132,10 @@
   "A schema for timestamp"
   (sc/pred (every-pred integer?) "Timestamp (long)"))
 
+(defschema TimeString
+  "A schema for timestring hh:mm:ss.d"
+  (sc/constrained sc/Str (partial re-matches util/time-pattern) "Time string hh:mm:ss.d"))
+
 (defschema Zipcode
   "A schema for Finnish zipcode"
   (sc/pred validators/finnish-zip? "Finnish zipcode"))
@@ -193,9 +197,9 @@
                   (str "Hex-string, minimum length of " min-len)))
 
 (defdynamicschema min-max-valued-integer-string [min max]
-  (sc/constrained IntString (every-pred #(if min (<= min (util/->int %)) true) #(if max (>= (util/->int %)) true))
+  (sc/constrained IntString (every-pred #(if min (<= min (util/->int %)) true) #(if max (>= max (util/->int %)) true))
                   (format "Min max valued integer string with values [%d-%d]" min max)))
 
 (defdynamicschema min-max-valued-decimal-string [min max]
-  (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= (util/->double %)) true))
+  (sc/constrained DecimalString (every-pred #(if min (<= min (util/->double %)) true) #(if max (>= max (util/->double %)) true))
                   (format "Min max valued decimal string with values [%d-%d]" min max)))

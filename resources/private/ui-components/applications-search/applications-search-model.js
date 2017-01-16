@@ -22,10 +22,8 @@ LUPAPISTE.ApplicationsSearchModel = function() {
   });
 
   self.externalApi = {
-    enabled: ko.pureComputed(function() {
-      return lupapisteApp.models.rootVMO.externalApiEnabled() &&
-             lupapisteApp.models.globalAuthModel.ok("external-api-enabled");
-    }),
+    enabled: ko.pureComputed(function() { return lupapisteApp.models.rootVMO.externalApi.enabled(); }),
+    ok: function(fnName) { return lupapisteApp.models.rootVMO.externalApi.ok(fnName); },
     showPermitsOnMap: function() {
       var data = _.map(self.dataProvider.results(), externalApiTools.toExternalPermit);
       hub.send("external-api::filtered-permits", data);
@@ -59,14 +57,21 @@ LUPAPISTE.ApplicationsSearchModel = function() {
     }));
   }
   if (self.authorizationModel.ok("assignments-search")) {
+    var dataProviderForAssignments = new LUPAPISTE.AssignmentsDataProvider({
+                                       sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
+                                       searchResultType: "created",
+                                       currentLimit:     self.currentLimit
+                                     });
+    var label = ko.pureComputed(function() {
+      var count = dataProviderForAssignments.assignmentsCount();
+      return loc("application.assignment.search.label")
+        + (count ? " (" + count + ")" : "");
+    });
+
     self.searchModels.push(new LUPAPISTE.SearchSectionModel({
       type:             "assignments",
-      lLabel:           "application.assignment.search.label",
-      dataProvider:     new LUPAPISTE.AssignmentsDataProvider({
-        sort: util.getIn(lupapisteApp.services.applicationFiltersService, ["selected", "sort"]),
-        searchResultType: "created",
-        currentLimit:     self.currentLimit
-      }),
+      label:            label,
+      dataProvider:     dataProviderForAssignments,
       externalApi:      null,
       resultsTextKey:   "application.assignment.search.results",
       limits:           self.limits,

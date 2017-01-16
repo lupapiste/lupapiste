@@ -19,16 +19,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
 
   self.selectedTab = self.dataProvider.searchResultType;
 
-  self.offset = 0;
-  self.onPageLoad = hub.onPageLoad(pageutil.getPage(), function() {
-    // Offset is not supported in IE8
-    if (self.offset) {
-      window.scrollTo(0, self.offset);
-    }
-  });
-
   self.openApplication = function(model, event, target) {
-    self.offset = window.pageYOffset;
     pageutil.openApplicationPage(model, target);
   };
 
@@ -40,7 +31,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
   });
 
   self.columns = [
-    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "4" : "3",
+    util.createSortableColumn("first",   "applications.indicators", {colspan: lupapisteApp.models.currentUser.isAuthority() ? "5" : "4",
                                                                      sortable: false,
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("second",  "applications.type",       {sortField: "type",
@@ -51,7 +42,7 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("fifth",   "applications.applicant",  {sortField: "applicant",
                                                                      currentSort: self.dataProvider.sort}),
-    util.createSortableColumn("sixth",   "applications.sent",       {sortField: "submitted",
+    util.createSortableColumn("sixth",   "applications.submitted",  {sortField: "submitted",
                                                                      currentSort: self.dataProvider.sort}),
     util.createSortableColumn("seventh", "applications.updated",    {sortField: "modified",
                                                                      currentSort: self.dataProvider.sort}),
@@ -60,4 +51,15 @@ LUPAPISTE.ApplicationsSearchResultsModel = function(params) {
     util.createSortableColumn("ninth",   "applications.authority",  {sortField: "handler",
                                                                      currentSort: self.dataProvider.sort})
   ];
+
+  // Scroll support.
+  hub.send( "scrollService::setName", {name: "search-results"});
+  hub.send( "scrollService::follow", {hashRe: /\/applications$/} );
+
+
+  // Scroll position support
+  self.scrollPop = _.debounce( function()  {
+    _.defer( hub.send,  "scrollService::pop", {name: "search-results"});
+  }, 100 );
+
 };

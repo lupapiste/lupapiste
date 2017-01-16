@@ -37,11 +37,12 @@ Mikko edits operation B description
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Open tab  attachments
-  Add attachment  application  ${PNG_TESTFILE_PATH}  ${EMPTY}  operation=Asuinkerrostalon tai rivitalon rakentaminen - Talo A
+  Upload attachment  ${PNG_TESTFILE_PATH}  Muu liite  Muu liite  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
 
 Mikko opens attachment details
   [Tags]  attachments
+  Open attachment details  muut.muu
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Title Should Be  ${appname} - Lupapiste
 
@@ -60,17 +61,11 @@ Mikko can change related operation
   Wait until  Positive indicator icon should be visible
   Wait until  Positive indicator icon should not be visible
 
-Mikko can change size
-  Element should be visible  xpath=//select[@data-test-id='attachment-size-select']
-  Select From List  xpath=//select[@data-test-id='attachment-size-select']  B0
-  Sleep  1
-  Negative indicator icon should not be visible
-
-Mikko can change scale
-  Element should be visible  xpath=//select[@data-test-id='attachment-scale-select']
-  Select From List  xpath=//select[@data-test-id='attachment-scale-select']  1:200
-  Sleep  1
-  Negative indicator icon should not be visible
+Mikko can change drawing number
+  Element should be visible  xpath=//input[@data-test-id='attachment-drawing-number']
+  Input text by test id  attachment-drawing-number  piir1.0
+  Wait until  Positive indicator icon should be visible
+  Wait until  Positive indicator icon should not be visible
 
 Mikko can change contents
   Element should be visible  xpath=//input[@data-test-id='attachment-contents-input']
@@ -84,7 +79,7 @@ Mikko sees that contents metadata is visible in attachments list
   Wait Until  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
 
 Mikko sees that attachments are grouped by operations
-  Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  4
+  Wait Until  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"]  3
 
 Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
   Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//rollup[@data-test-level="accordion-level-0"])[last()]//span[@class="rollup-status__text"]  MUUN RAKENNUKSEN RAKENTAMINEN - TALO B
@@ -93,9 +88,8 @@ Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
   Assert file latest version  ${PNG_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
-  Page should contain  B0
+  Textfield value should be  xpath=//input[@data-test-id='attachment-drawing-number']  piir1.0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
-  Page should contain  1:200
   Go Back
   Tab should be visible  attachments
 
@@ -121,4 +115,5 @@ Cancel editing
   Logout
 
 No frontend errors
+  [Tags]  non-roboto-proof
   There are no frontend errors

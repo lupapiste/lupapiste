@@ -5,7 +5,7 @@ Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Library         Screenshot
 Resource        ../../common_resource.robot
-Resource        ./27_common.robot
+Resource        ./julkipano_common.robot
 
 *** Test Cases ***
 
@@ -69,7 +69,7 @@ Bulletins should be filterable by state
   Wait Until  Bulletin list should have rows  10
   Bulletin button should have bulletins left to fetch  3
 
-  Reload Page
+  Reload page
   Autocomplete option list should contain by test id  states-filter-component  Kaikki ilmoitustilat  Päätös annettu
 
   Select From Autocomplete By Test Id  states-filter-component  Päätös annettu

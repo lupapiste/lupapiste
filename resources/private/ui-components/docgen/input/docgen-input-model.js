@@ -59,12 +59,13 @@ LUPAPISTE.DocgenInputModel = function(params) {
   function defaultInputClasses() {
     var typeDefaults = {select: "form-input combobox",
                         string: "form-input",
+                        time: "form-input",
                         text: "form-input textarea",
                         "inline-string": "form-input inline",
                         "localized-string": "form-string",
                         "check-string": "check-string",
                         "paragraph" : "form-paragraph",
-                        "date": "form-input",
+                        "date": "form-input dateinput",
                         "checkbox-wrapper": "form-input"};
     return _.get( typeDefaults, (self.schema.inputType || self.schema.type), "");
   }

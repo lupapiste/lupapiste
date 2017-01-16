@@ -58,7 +58,7 @@ Authority not see base application on foreman search
 
 Authority sees foreman applications on foreman search
   ${foremanAppId4} =  Get From List  ${foremanApps}  4
-  Wait until element is visible  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId4}']
+  Wait Until  Element Should Be Visible  xpath=//table[@id='applications-list']//tr[@data-id='${foremanAppId4}']
 
 History is empty due to foreman apps' state
   Open foreman application  4

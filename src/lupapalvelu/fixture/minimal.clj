@@ -270,6 +270,18 @@
     :private {:password "$2a$10$d2Ut/qSvKylOGhYm/7jXB..1ZC7/x39q5e/PFdtjHLqV1XW9wr3oO"
               :apikey "XDnPTeDDpPqU5yoYQEERgZ0p4H6dff1RIdYgyDCk"}}
 
+
+   {:id "sipoo-r-backend"
+    :username "sipoo-r-backend"
+    :email "sipoo-r-backend@sipoo.fi"
+    :firstName "Sipoo"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :language "fi"
+    :role "rest-api"
+    :private {:password "$2a$10$VFcksPILCd9ykyl.1FIhwO/tEYby9SsqZL7GsIAdpJ1XGvAG2KskG"} ;sipoo
+    :orgAuthz {:753-R #{:authority}}}
+
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
@@ -446,7 +458,7 @@
     :city "Loppi"
     :private {:password "$2a$10$MX9RWSqjBocwxg1ikSp/POV8lXd6lKA4yDymRIg7.GsXdRigZxmjK"}}
 
-   ;; Helsinki - rakennnustarkastaja@hel.fi / helsinki
+   ;; Helsinki - rakennustarkastaja@hel.fi / helsinki
    {:id "5770f6ffd358719a09397a45"
     :email "rakennustarkastaja@hel.fi"
     :enabled true
@@ -458,6 +470,19 @@
     :username "rakennustarkastaja@hel.fi"
     :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
               :apikey "a0ac77ecd2e6c2ea6e73f860"}}
+
+   ;; Helsinki Admin - Helsinki R paakayttaja:  helsinki / helsinki
+   {:id "50ac77ecc2e6c2ea6e73f665"
+    :email "admin@hel.fi"
+    :enabled true
+    :role "authorityAdmin"
+    :orgAuthz {:091-R #{:authorityAdmin}}
+    :firstName "Heikki"
+    :language "fi"
+    :lastName "Helsinki"
+    :username "helsinki"
+    :private {:password "$2a$10$/bi569g4ijAitS82ES9MO.TDqGZrNlBrBPC1rE6N8v7uqTJbiHTNW"
+              :apikey "50ac788ec2e6c2ea6e73f665"}}
 
    ;; Hakijat
 
@@ -857,7 +882,7 @@
                                (link {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                                      "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030")]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "YI" "YL"} (name (:permit-type v)))) operations/operations))
-                       :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "109.204.231.126"]
+                       :allowedAutologinIPs ["0:0:0:0:0:0:0:1" "127.0.0.1" "172.17.144.220" "109.204.231.126"]
                        :permanent-archive-enabled false
                        :krysp {:R {:url local-krysp, :ftpUser "dev_porvoo", :version "2.1.6"}}}
 
@@ -995,7 +1020,8 @@
                                                                       [:paapiirustus :pohjapiirustus]]}
                        :permanent-archive-enabled true
                        :permanent-archive-in-use-since 1451613600000
-                       :use-attachment-links-integration true}
+                       :use-attachment-links-integration true
+                       :operations-tos-functions {:masto-tms "10 03 00 01"}}
 
                       ;;
                       ;; Ymparisto organisaatiot
@@ -1092,6 +1118,7 @@
 (deffixture "minimal" {}
   (mongo/clear!)
   (mongo/insert-batch :ssoKeys [{:_id "12342424c26b7342d92a4321" :ip "127.0.0.1" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
+                                {:_id "12342424c26b7342d92a4322" :ip "172.17.144.220" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}
                                 {:_id "12342424c26b7342d92a9876" :ip "109.204.231.126" :key "ozckCE8EESo+wMKWklGevQ==" :crypto-iv "V0HaDa6lpWKj+W0uMKyHBw=="}])
   (mongo/insert-batch :users users)
   (mongo/insert-batch :companies companies)

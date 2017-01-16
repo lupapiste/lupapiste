@@ -95,6 +95,13 @@ LUPAPISTE.BulletinCommentBoxModel = function(params) {
     });
   });
 
+  self.addEventListener("fileuploadService", "badFile", function(event) {
+    hub.send("indicator", {
+      style: "negative",
+      message: event.message
+    });
+  });
+
   self.addEventListener("bulletinService", "commentProcessed", function(event) {
     if (event.status === "success") {
       self.basicCommentFields.comment("");

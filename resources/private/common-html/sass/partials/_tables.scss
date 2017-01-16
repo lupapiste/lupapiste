@@ -11,7 +11,7 @@ $tr-color-even: $gray246;
     }
     &:hover:nth-child(even) {
       background: $tr-color-even;
-    }    
+    }
   }
 }
 
@@ -307,14 +307,46 @@ table.company-users-table {
   }
 }
 
+table.table-even-odd {
+  @include no-row-hover;
+  tr.even-row,
+  tr.even-row:hover {
+    background-color: $tr-color-even;
+  }
+  tr.odd-row,
+  tr.odd-row:hover {
+    background-color: white;
+  }
+}
+
 div.attachments-table-container {
   padding: {
   top: 1em;
   right: .6em;
   left: .5em;
-}
+  }
   table.attachments-table {
-    @include no-row-hover;
+        tr.row--rejected {
+      border-bottom: none;
+      td {
+        padding-bottom: 0;
+
+      }
+    }
+    tr.reject-note-row {
+      border-top: none;
+      padding: 0;
+      > td {
+        padding: {
+          top: 0;
+          left: 4px;
+          right: 0;
+          bottom: 4px;
+        }
+        min-height: 0;
+        height: auto;
+      }
+    }
     margin-bottom: 1em;
     .checkbox-wrapper {
       border: none;
@@ -326,7 +358,7 @@ div.attachments-table-container {
     }
     td {
       vertical-align: top;
-    }    
+    }
     .attachments-table--widest {
       width: 80%;
     }
@@ -340,6 +372,10 @@ div.attachments-table-container {
     magint-right: 1px;
   }
 }
+
+
+
+
 
 table.suti-admin-table {
   margin-top: $marginM;
@@ -386,9 +422,151 @@ th.full-width-column {
   width: 100%;
 }
 
-.form-table.form-table--waste {
+@for $i from 1 through 10 {
+  th.column--#{$i}0 {width: 10% * $i; }
+}
+
+
+.form-table--waste {
   @include no-row-hover;
+  table {
+    width: 100%;
+  }
   .form-input {
     height: initial;
+  }
+  th {
+    white-space: nowrap;
+    @media (max-width: 890px ) {
+      white-space: initial;
+    }
+  }
+  td.action-column {
+    text-align: center;
+    i {
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+  }
+  tfoot {
+    height: initial;
+    font-size: 16px;
+    tr {
+      border: none;
+    }
+    .footer-sum--total {
+      text-indent: 10px;
+      font-weight: bold;
+    }
+    .footer-sum--result {
+      color: $gray119;
+      white-space: nowrap;
+    }
+    .footer-sum--error {
+      color: $red-dark;
+    }
+    .td-left {
+      text-indent: 10px;
+    }
+    .td-center {
+      text-align: center;
+    }
+  }
+}
+
+.form-table--waste.waste-report-table {
+  th {
+    white-space: initial;
+  }
+}
+
+select.waste-unit-select {
+  font-size: 16px;
+  width: 5em;
+}
+
+.batch-container {
+  margin-bottom: 10px;
+}
+
+.attachment-batch-table {
+  @include no-row-hover;
+  td {
+    word-break: break-all;
+  }
+  .td-center {
+    text-align: center;
+    .checkbox-wrapper {
+      border: none;
+    }
+  }
+  input {
+    vertical-align: middle;
+  }
+  i.icon-spin.lupicon-refresh {
+    color: $gray153;
+  }
+  .batch-autocomplete {
+    display: inherit;
+    attachment-type-autocomplete {
+      $width: 20em;
+      min-width: $width;
+      max-width: $width;
+      display: inline-block;
+      vertical-align: middle;
+      .autocomplete-selection-wrapper {
+        display: table;
+        .autocomplete-selection {
+          padding-left: 6px;
+          display: table-cell;
+          vertical-align: middle;
+          min-height: $btn-height;
+          height: $btn-height;
+        }
+      }
+      span.caption {
+        white-space: normal;
+        line-height: normal;
+        padding-left: 0;
+      }
+    }
+    attachment-type-autocomplete.no-events {
+      .autocomplete-selection-wrapper {
+        background-color: $gray246;
+        i.tag-chevron, span.selection-text {
+          color: $gray187;
+        }
+      }
+    }
+  }
+  .batch-drawing {
+    max-width: 4em;
+  }
+  tfoot {
+    > tr {
+      border: none;
+      > td {
+        padding: 0;
+        a.link-btn {
+          white-space: normal;
+          text-align: center;
+        }
+      }
+    }
+  }
+  .fill-pin {
+    position: relative;
+    display: inline-block;
+    icon-button.fill-down {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      button {
+        max-height: 100%;
+        height: 100%;
+      }
+    }
   }
 }

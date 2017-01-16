@@ -57,7 +57,7 @@
 
   var authorities = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
-  var hasConstructionTimeDocs = ko.observable();
+  var hasEditableDocs = ko.observable();
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -166,6 +166,8 @@
     var app = _.merge(LUPAPISTE.EmptyApplicationModel(), {});
 
     // Plain data
+    isInitializing = true;
+    authorizationModel.setData({});
     applicationModel._js = app;
     // Update observables
     var mappingOptions = {ignore: ["documents", "buildings", "verdicts", "transfers", "options"]};
@@ -208,6 +210,10 @@
           .call();
       }
     });
+  }
+
+  function documentIsEditable(doc) {
+    return _(doc.allowedActions).map(function(v,k) { return v.ok && k; }).includes("update-doc");
   }
 
   function showApplication(applicationDetails, lightLoad) {
@@ -256,40 +262,38 @@
       }
 
       // Documents
-      var constructionTimeDocs = _.filter(app.documents, "schema-info.construction-time");
-      var nonConstructionTimeDocs = _.reject(app.documents, "schema-info.construction-time");
-      var nonpartyDocs = _.reject(nonConstructionTimeDocs, util.isPartyDoc);
-      var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
-      var partyDocs = _.filter(nonConstructionTimeDocs, util.isPartyDoc);
-      var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
+      var partyDocs = _(app.documents).filter(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
+      var nonpartyDocs = _(app.documents).reject(util.isPartyDoc).sortBy(util.getDocumentOrder).value();
+      var editableDocs = _.filter(nonpartyDocs, documentIsEditable);
+      var uneditableDocs = _.reject(nonpartyDocs, documentIsEditable);
 
-      var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
-      var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
+      var editableDocErrors = _.map(editableDocs, function(doc) { return doc.validationErrors; });
+      var partyDocErrors = _.map(partyDocs, function(doc) { return doc.validationErrors; });
 
-      hasConstructionTimeDocs(!!constructionTimeDocs.length);
+      hasEditableDocs(!_.isEmpty(editableDocs));
 
       if (lupapisteApp.services.accordionService) {
         lupapisteApp.services.accordionService.setDocuments(app.documents);
         lupapisteApp.services.accordionService.authorities = authorities;
       }
 
-      applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
+      applicationModel.updateMissingApplicationInfo(editableDocErrors.concat(partyDocErrors));
       if (!lightLoad) {
         var devMode = LUPAPISTE.config.mode === "dev";
         var isAuthority = lupapisteApp.models.currentUser.isAuthority();
 
         // Parties are always visible
         docgen.displayDocuments("partiesDocgen",
-            app,
-            sortedPartyDocs,
-            {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                app,
+                                partyDocs,
+                                {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
 
         // info tab is visible in pre-verdict and verdict given states
         if (!applicationModel.inPostVerdictState()) {
           docgen.displayDocuments("applicationDocgen",
-              app,
-              applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs,
-              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
+                                  app,
+                                  applicationModel.summaryAvailable() ? [] : nonpartyDocs,
+                                  {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationDocgen");
         }
@@ -298,20 +302,19 @@
         if (applicationModel.summaryAvailable()) {
           docgen.displayDocuments("applicationAndPartiesDocgen",
               app,
-              applicationModel.summaryAvailable() ? sortedNonpartyDocs : [],
-              {dataTestSpecifiers: false, accordionCollapsed: isAuthority});
+              applicationModel.summaryAvailable() ? uneditableDocs : [],
+              {dataTestSpecifiers: devMode, accordionCollapsed: isAuthority});
         } else {
           docgen.clear("applicationAndPartiesDocgen");
         }
 
         // show or clear construction time documents
-        if (hasConstructionTimeDocs()) {
+        if (applicationModel.inPostVerdictState() && hasEditableDocs()) {
           docgen.displayDocuments("constructionTimeDocgen",
-              app,
-              constructionTimeDocs,
-              {dataTestSpecifiers: devMode,
-               accordionCollapsed: isAuthority,
-               updateCommand: "update-construction-time-doc"});
+                                  app,
+                                  editableDocs,
+                                  {dataTestSpecifiers: devMode,
+                                   accordionCollapsed: isAuthority});
         } else {
           docgen.clear("constructionTimeDocgen");
         }
@@ -324,6 +327,7 @@
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
       }
+
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
@@ -512,6 +516,7 @@
     self.propertyId = ko.observable();
     self.name = ko.observable();
     self.email = ko.observable();
+    self.error = ko.observable();
 
     self.ok = ko.computed(function() {
       return util.isValidEmailAddress(self.email());
@@ -523,7 +528,8 @@
         .neighborId(neighbor.id())
         .propertyId(neighbor.propertyId())
         .name(neighbor.owner.name())
-        .email(neighbor.owner.email());
+        .email(neighbor.owner.email())
+        .error( "");
       LUPAPISTE.ModalDialog.open("#dialog-send-neighbor-email");
     };
 
@@ -534,8 +540,18 @@
       ajax
         .command("neighbor-send-invite", _.zipObject(paramNames, _.map(paramNames, paramValue)))
         .pending(pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.sending")))
-        .complete(LUPAPISTE.ModalDialog.close)
-        .success(_.partial(repository.load, self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading"))))
+        .success( function() {
+          LUPAPISTE.ModalDialog.close();
+          repository.load( self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading")));
+        })
+        .error( function( res ) {
+          if( res.text === "error.neighbor-marked-done" ) {
+            LUPAPISTE.ModalDialog.close();
+            repository.load(self.id(), pageutil.makePendingAjaxWait(loc("neighbors.sendEmail.reloading")));
+          } else {
+            self.error( res.text );
+          }
+        })
         .call();
       return false;
     };
@@ -581,7 +597,7 @@
       // observables
       application: applicationModel,
       authorities: authorities,
-      hasConstructionTimeDocs: hasConstructionTimeDocs,
+      hasEditableDocs: hasEditableDocs,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,

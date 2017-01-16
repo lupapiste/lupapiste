@@ -111,6 +111,14 @@
                  :model-fn neighbor-invite-model})
 (notifications/defemail :neighbor email-conf)
 
+(defn neighbor-marked-done? [{{neighbor-id :neighborId} :data {:keys [neighbors]} :application}]
+  (when (->> neighbors
+             (some #(when (= (:id %) neighbor-id) %))
+             :status
+             (map :state)
+             (some (partial re-find #"done|response-given-")))
+    (fail :error.neighbor-marked-done)))
+
 (defcommand neighbor-send-invite
   {:parameters [id neighborId email]
    :input-validators [(partial action/non-blank-parameters [:email :neighborId])
@@ -118,7 +126,8 @@
    :notified true
    :user-roles #{:applicant :authority}
    :states states/all-application-states-but-draft-or-terminal
-   :pre-checks [(fn [{user :user {:keys [options]} :application}]
+   :pre-checks [neighbor-marked-done?
+                (fn [{user :user {:keys [options]} :application}]
                   (when (and (:municipalityHearsNeighbors options) (not (user/authority? user)))
                     (fail :error.unauthorized)))]}
   [{:keys [user created] :as command}]

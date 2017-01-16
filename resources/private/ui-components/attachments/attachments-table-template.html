@@ -1,7 +1,7 @@
 <script type="text/x-jquery-tmpl" class="ko-template"
         id="attachments-table-template">
   <div class="attachments-table-container">
-    <table class="attachments-table">
+    <table class="attachments-table table-even-odd">
       <thead>
         <tr>
           <th data-bind="ltext:'application.attachmentState'"></th>
@@ -20,8 +20,11 @@
       </thead>
       <tbody data-bind="foreach: attachments">
         <tr data-bind="attr: {'data-test-type': util.getIn($data, ['type','type-group']) + '.' + util.getIn($data, ['type','type-id']),
-                              'data-test-state': $data.state,
-                              'attachment-id': $data.id}">
+                       'data-test-state': $parent.testState( $data ),
+                       'attachment-id': $data.id},
+                       css: {'even-row': util.isEven( $index() ),
+                       'odd-row': util.isOdd( $index() ),
+                       'row--rejected':  $parent.isRejected( $data )}">
           <td>
             <state-icons params="attachment: $data"></state-icons>
           </td>
@@ -48,14 +51,10 @@
             <br>
             <span data-bind="html: loc(['attachmentType', util.getIn($data, ['type','type-group']), util.getIn($data, ['type','type-id']), 'info'])"></span>
           </td>
-          <td data-bind="if: !$parent.isNotNeeded( $data )">
-            <a class="link-btn link-btn--link"
-               data-bind="click: $parent.addFile"
-               data-test-id="add-attachment-file">
-              <i class="lupicon-circle-plus"></i>
-              <span data-bind="ltext: 'attachment.addFile'"
-                    data-test-id="add-file-link"></span>
-            </a>
+          <td data-bind="if: !$parent.isNotNeeded( $data ) && $data.authModel.ok('bind-attachment')">
+            <attachment-upload params="id: $data.id,
+                                       ltext: 'attachment.addFile',
+                                       template: 'attachment-upload-link-template'"></attachment-upload>
           </td>
           <td data-bind="if: $data.authModel.ok('set-attachment-not-needed')">
             <div class="checkbox-wrapper">
@@ -86,7 +85,6 @@
             <button class="btn-icon-only"
                     data-bind="enable: $data.authModel.ok('reject-attachment'),
                                css: { negative: $parent.isRejected( $data ),
-                                      'no-events': $parent.isRejected( $data ),
                                       reject: !$parent.isRejected( $data ) },
                                click: $parent.reject,
                                clickBubble: false">
@@ -104,6 +102,19 @@
             </button>
           </td>
         </tr>
+        <!-- ko if: $parent.isRejected( $data ) -->
+        <tr class="reject-note-row"
+            data-bind="css: {'even-row': util.isEven( $index() ),
+                       'odd-row': util.isOdd( $index() )}">
+          <td colspan="7"
+              data-bind="component: {name: 'reject-note',
+                         params: {attachmentId: id,
+                         storeState: true,
+                         noteCss: 'table-reject-note',
+                         editorCss: 'table-reject-note-editor',
+                         prefix: util.getIn($data, ['type','type-group']) + '-' + util.getIn($data, ['type','type-id'])}}"></td>
+        </tr>
+        <!-- /ko -->
         <!-- ko if: $component.authModel.ok("assignments-for-application") && !util.isEmpty($component.assignments()[$data.id]) -->
         <tr class="attachment-assignment-row" data-bind="testId: 'attachment-assignments-' + $data.id">
           <td colspan="7">
@@ -112,7 +123,6 @@
                                            authorities: $component.authorities"></accordion-assignments>
           </td>
         </tr>
-        <tr class="hidden-row"><td colspan="7"></td></tr>
         <!-- /ko -->
       </tbody>
     </table>

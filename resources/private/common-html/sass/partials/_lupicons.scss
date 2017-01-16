@@ -62,339 +62,359 @@ $lupicon-size: 22px;
   }
 }
 
+// The rest is lupicon style definitions that are copied as is from lupicon style.css
+
+.lupicon-arrow-down:before {
+  content: "\e91e";
+}
+.lupicon-arrow-left:before {
+  content: "\e91f";
+}
+.lupicon-arrow-right:before {
+  content: "\e920";
+}
+.lupicon-arrow-up:before {
+  content: "\e921";
+}
+.lupicon-copy:before {
+  content: "\e922";
+}
+.lupicon-flag:before {
+  content: "\e923";
+}
 .lupicon-arrows-left-right:before {
-    content: "\e91a";
+  content: "\e91a";
 }
 .lupicon-arrows-up-down:before {
-    content: "\e91b";
+  content: "\e91b";
 }
 .lupicon-redo:before {
-    content: "\e91c";
+  content: "\e91c";
 }
 .lupicon-undo:before {
-    content: "\e91d";
+  content: "\e91d";
 }
 .lupicon-checkbox-partial:before {
-    content: "\e90c";
+  content: "\e90c";
 }
 .lupicon-excavator:before {
-    content: "\e90d";
+  content: "\e90d";
 }
 .lupicon-hammer:before {
-    content: "\e90e";
+  content: "\e90e";
 }
 .lupicon-helmet:before {
-    content: "\e90f";
+  content: "\e90f";
 }
 .lupicon-laptop:before {
-    content: "\e910";
+  content: "\e910";
 }
 .lupicon-phone:before {
-    content: "\e911";
+  content: "\e911";
 }
 .lupicon-stamp:before {
-    content: "\e912";
+  content: "\e912";
 }
 .lupicon-tree:before {
-    content: "\e913";
+  content: "\e913";
 }
 .lupicon-building:before {
-    content: "\e914";
+  content: "\e914";
 }
 .lupicon-house:before {
-    content: "\e915";
+  content: "\e915";
 }
 .lupicon-persons:before {
-    content: "\e916";
+  content: "\e916";
 }
 .lupicon-plus:before {
-    content: "\e917";
+  content: "\e917";
 }
 .lupicon-quote:before {
-    content: "\e918";
+  content: "\e918";
 }
 .lupicon-world:before {
-    content: "\e919";
+  content: "\e919";
 }
 .lupicon-building-plus:before {
-    content: "\e90b";
+  content: "\e90b";
 }
 .lupicon-bookmark:before {
-    content: "\e905";
+  content: "\e905";
 }
 .lupicon-facebook:before {
-    content: "\e906";
+  content: "\e906";
 }
 .lupicon-google-plus:before {
-    content: "\e907";
+  content: "\e907";
 }
 .lupicon-instagram:before {
-    content: "\e908";
+  content: "\e908";
 }
 .lupicon-twitter:before {
-    content: "\e909";
+  content: "\e909";
 }
 .lupicon-youtube:before {
-    content: "\e90a";
+  content: "\e90a";
 }
 .lupicon-add-circle:before {
-    content: "\e903";
+  content: "\e903";
 }
 .lupicon-location-plus:before {
-    content: "\e904";
+  content: "\e904";
 }
 .lupicon-lock:before {
-    content: "\e900";
+  content: "\e900";
 }
 .lupicon-megaphone:before {
-    content: "\e901";
+  content: "\e901";
 }
 .lupicon-presentation:before {
-    content: "\e902";
+  content: "\e902";
 }
 .lupicon-external-link:before {
-    content: "\e651";
+  content: "\e651";
 }
 .lupicon-document-list:before {
-    content: "\e64f";
+  content: "\e64f";
 }
 .lupicon-document:before {
-    content: "\e650";
+  content: "\e650";
 }
 .lupicon-circle-dash:before {
-    content: "\e64c";
+  content: "\e64c";
 }
 .lupicon-tree-path:before {
-    content: "\e64d";
+  content: "\e64d";
 }
 .lupicon-user-plus:before {
-    content: "\e64e";
+  content: "\e64e";
 }
 .lupicon-paperclip:before {
-    content: "\e649";
+  content: "\e649";
 }
 .lupicon-rotate-left:before {
-    content: "\e64a";
+  content: "\e64a";
 }
 .lupicon-rotate-right:before {
-    content: "\e64b";
+  content: "\e64b";
 }
 .lupicon-add-area:before {
-    content: "\e63f";
+  content: "\e63f";
 }
 .lupicon-add-path:before {
-    content: "\e640";
+  content: "\e640";
 }
 .lupicon-add-point:before {
-    content: "\e641";
+  content: "\e641";
 }
 .lupicon-arrows:before {
-    content: "\e642";
+  content: "\e642";
 }
 .lupicon-file-check:before {
-    content: "\e643";
+  content: "\e643";
 }
 .lupicon-layers:before {
-    content: "\e644";
+  content: "\e644";
 }
 .lupicon-measure-area:before {
-    content: "\e645";
+  content: "\e645";
 }
 .lupicon-measure:before {
-    content: "\e646";
+  content: "\e646";
 }
 .lupicon-star:before {
-    content: "\e647";
+  content: "\e647";
 }
 .lupicon-zoom-in-area:before {
-    content: "\e648";
+  content: "\e648";
 }
 .lupicon-archives:before {
-    content: "\e600";
+  content: "\e600";
 }
 .lupicon-calendar:before {
-    content: "\e601";
+  content: "\e601";
 }
 .lupicon-check:before {
-    content: "\e602";
+  content: "\e602";
 }
 .lupicon-checkbox-off:before {
-    content: "\e603";
+  content: "\e603";
 }
 .lupicon-checkbox-on:before {
-    content: "\e604";
+  content: "\e604";
 }
 .lupicon-chevron-bottom:before {
-    content: "\e605";
+  content: "\e605";
 }
 .lupicon-chevron-down:before {
-    content: "\e606";
+  content: "\e606";
 }
 .lupicon-chevron-end:before {
-    content: "\e607";
+  content: "\e607";
 }
 .lupicon-chevron-left:before {
-    content: "\e608";
+  content: "\e608";
 }
 .lupicon-chevron-right:before {
-    content: "\e609";
+  content: "\e609";
 }
 .lupicon-chevron-small-down:before {
-    content: "\e60a";
+  content: "\e60a";
 }
 .lupicon-chevron-small-left:before {
-    content: "\e60b";
+  content: "\e60b";
 }
 .lupicon-chevron-small-right:before {
-    content: "\e60c";
+  content: "\e60c";
 }
 .lupicon-chevron-small-up:before {
-    content: "\e60d";
+  content: "\e60d";
 }
 .lupicon-chevron-start:before {
-    content: "\e60e";
+  content: "\e60e";
 }
 .lupicon-chevron-top:before {
-    content: "\e60f";
+  content: "\e60f";
 }
 .lupicon-chevron-up:before {
-    content: "\e610";
+  content: "\e610";
 }
 .lupicon-circle-arrow-down:before {
-    content: "\e611";
+  content: "\e611";
 }
 .lupicon-circle-arrow-left:before {
-    content: "\e612";
+  content: "\e612";
 }
 .lupicon-circle-arrow-right:before {
-    content: "\e613";
+  content: "\e613";
 }
 .lupicon-circle-arrow-up:before {
-    content: "\e614";
+  content: "\e614";
 }
 .lupicon-circle-attention:before {
-    content: "\e615";
+  content: "\e615";
 }
 .lupicon-circle-check:before {
-    content: "\e616";
+  content: "\e616";
 }
 .lupicon-circle-info:before {
-    content: "\e617";
+  content: "\e617";
 }
 .lupicon-circle-minus:before {
-    content: "\e618";
+  content: "\e618";
 }
 .lupicon-circle-pen:before {
-    content: "\e619";
+  content: "\e619";
 }
 .lupicon-circle-plus:before {
-    content: "\e61a";
+  content: "\e61a";
 }
 .lupicon-circle-question:before {
-    content: "\e61b";
+  content: "\e61b";
 }
 .lupicon-circle-remove:before {
-    content: "\e61c";
+  content: "\e61c";
 }
 .lupicon-circle-section-sign:before {
-    content: "\e61d";
+  content: "\e61d";
 }
 .lupicon-circle-stamp:before {
-    content: "\e61e";
+  content: "\e61e";
 }
 .lupicon-circle-star:before {
-    content: "\e61f";
+  content: "\e61f";
 }
 .lupicon-circle:before {
-    content: "\e620";
+  content: "\e620";
 }
 .lupicon-clock:before {
-    content: "\e621";
+  content: "\e621";
 }
 .lupicon-collapse:before {
-    content: "\e622";
+  content: "\e622";
 }
 .lupicon-comment:before {
-    content: "\e623";
+  content: "\e623";
 }
 .lupicon-conversation:before {
-    content: "\e624";
+  content: "\e624";
 }
 .lupicon-documents:before {
-    content: "\e625";
+  content: "\e625";
 }
 .lupicon-download:before {
-    content: "\e626";
+  content: "\e626";
 }
 .lupicon-envelope:before {
-    content: "\e627";
+  content: "\e627";
 }
 .lupicon-expand:before {
-    content: "\e628";
+  content: "\e628";
 }
 .lupicon-eye:before {
-    content: "\e629";
+  content: "\e629";
 }
 .lupicon-file:before {
-    content: "\e62a";
+  content: "\e62a";
 }
 .lupicon-folder:before {
-    content: "\e62b";
+  content: "\e62b";
 }
 .lupicon-lightbulb:before {
-    content: "\e62c";
+  content: "\e62c";
 }
 .lupicon-list:before {
-    content: "\e62d";
+  content: "\e62d";
 }
 .lupicon-location:before {
-    content: "\e62e";
+  content: "\e62e";
 }
 .lupicon-log-in:before {
-    content: "\e62f";
+  content: "\e62f";
 }
 .lupicon-log-out:before {
-    content: "\e630";
+  content: "\e630";
 }
 .lupicon-menu:before {
-    content: "\e631";
+  content: "\e631";
 }
 .lupicon-pen:before {
-    content: "\e632";
+  content: "\e632";
 }
 .lupicon-print:before {
-    content: "\e633";
+  content: "\e633";
 }
 .lupicon-radio-off:before {
-    content: "\e634";
+  content: "\e634";
 }
 .lupicon-radio-on:before {
-    content: "\e635";
+  content: "\e635";
 }
 .lupicon-refresh:before {
-    content: "\e636";
+  content: "\e636";
 }
 .lupicon-remove:before {
-    content: "\e637";
+  content: "\e637";
 }
 .lupicon-save:before {
-    content: "\e638";
+  content: "\e638";
 }
 .lupicon-search:before {
-    content: "\e639";
+  content: "\e639";
 }
 .lupicon-upload:before {
-    content: "\e63a";
+  content: "\e63a";
 }
 .lupicon-user:before {
-    content: "\e63b";
+  content: "\e63b";
 }
 .lupicon-warning:before {
-    content: "\e63c";
+  content: "\e63c";
 }
 .lupicon-zoom-in:before {
-    content: "\e63d";
+  content: "\e63d";
 }
 .lupicon-zoom-out:before {
-    content: "\e63e";
+  content: "\e63e";
 }

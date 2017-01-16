@@ -47,6 +47,10 @@
 
 ;; Custom static schema generators
 
+(defn maybe [generator] (gen/one-of [(gen/elements [nil]) generator]))
+
+(defn format-map [fmt generator] (gen/fmap (partial format fmt) generator))
+
 (register-generator ssc/Nat gen/nat)
 
 (def int-string (gen/fmap str gen/int))
@@ -60,6 +64,14 @@
 (def decimal-string  (gen/fmap (partial s/join ".") (gen/tuple gen/large-integer gen/pos-int)))
 
 (register-generator ssc/DecimalString decimal-string)
+
+(def time-string (gen/fmap (fn->> (take-while identity) (interleave [""  ":" ":" "."]) (apply str))
+                           (gen/tuple (gen/large-integer* {:min 0 :max 24})                              ; h / hh
+                                      (format-map "%02d" (gen/large-integer* {:min 0 :max 59}))          ; mm
+                                      (maybe (format-map "%02d" (gen/large-integer* {:min 0 :max 59})))  ; ss / nil
+                                      (maybe (gen/large-integer* {:min 0 :max 9})))))                    ; d / nil
+
+(register-generator ssc/TimeString time-string)
 
 (def single-hex (gen/elements (concat (map str (range 10)) (map (comp str char) (range (int \a) (inc (int \f)))))))
 
@@ -113,8 +125,8 @@
 
 (register-generator ssc/Rakennustunnus rakennustunnus)
 
-(def maaraalatunnus (gen/fmap (partial format "%04d") ; (partial format "M%04d")
-                              (gen/fmap #(+ 1 (rem % 9999)) gen/pos-int)))
+(def maaraalatunnus (format-map "%04d"   ; "M%04d"
+                                (gen/fmap #(+ 1 (rem % 9999)) gen/pos-int)))
 
 (register-generator ssc/Maaraalatunnus maaraalatunnus)
 
@@ -142,12 +154,14 @@
 (register-generator ssc/FinnishOVTid finnish-ovt)
 
 (def ddMMyy-formatter (ctf/formatter "ddMMyy"))
-(def hetu (gen/fmap (fn [[day n]] (let [date (->> (* 86400000 day) ; day in milliseconds
+(def hetu (gen/fmap (fn [[day n]] (let [day-ts (* 86400000 day) ; day in milliseconds
+                                        date (->> day-ts
                                                   (ctc/from-long)
                                                   (ctf/unparse ddMMyy-formatter))
                                         end  (format "9%02d" n)
-                                        checksum  (sv/hetu-checksum (str date \- end))]
-                                    (str date \- end checksum)))
+                                        delim     (if (>= day-ts 946684800000) \A \-)
+                                        checksum  (sv/hetu-checksum (str date delim end))]
+                                    (str date delim end checksum)))
                     (gen/tuple (gen/fmap #(mod % 36524) gen/large-integer)
                                (gen/fmap #(mod % 100) gen/int))))
 

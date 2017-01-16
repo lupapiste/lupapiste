@@ -61,8 +61,14 @@ LUPAPISTE.DocgenHuoneistotTableModel = function(params) {
     }
   }
 
+  function afterSave(result) {
+    if (result.results) {
+      self.docModel.showValidationResults(result.results);
+    }
+  }
+
   function save(model, path) {
-    self.service.updateDoc(self.documentId, [[path, model()]], indicator);
+    self.service.updateDoc(self.documentId, [[path, model()]], indicator, afterSave);
   }
 
   function cellInfo(doc, model, path) {

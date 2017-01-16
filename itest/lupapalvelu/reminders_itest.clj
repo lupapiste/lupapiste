@@ -248,8 +248,8 @@
                                  :removable false,
                                  :type "group",
                                  :name "tyoaika"},
-                   :data {:tyoaika-alkaa-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 1)), :modified 1443177749608},
-                          :tyoaika-paattyy-pvm {:value (util/to-local-date (util/get-timestamp-from-now :day 6)), :modified 1443177751909}}}]}))
+                   :data {:tyoaika-alkaa-ms {:value (util/get-timestamp-from-now :day 1), :modified 1443177749608},
+                          :tyoaika-paattyy-ms {:value (util/get-timestamp-from-now :day 6), :modified 1443177751909}}}]}))
 
 ;;
 ;; Helper functions
@@ -567,7 +567,7 @@
           (let [app (mongo/by-id :applications (:id ya-reminder-application))
                 tyoaika-paattyy (->> ya-reminder-application :documents
                                   (filter #(= "tyoaika" (-> % :schema-info :name)))
-                                  first :data :tyoaika-paattyy-pvm :value)]
+                                  first :data :tyoaika-paattyy-ms :value)]
 
             (:work-time-expiring-reminder-sent app) => number?
 
@@ -575,7 +575,7 @@
               "pena@example.com"
               "Lupapiste: Latokuja 3 - Yleisten alueiden lupasi p\u00e4\u00e4ttymisajankohta l\u00e4hestyy"
               ["Hakemukselle on merkitty luvan p\u00e4\u00e4ttymisajankohdaksi"
-               tyoaika-paattyy
+               (util/to-local-date tyoaika-paattyy)
                (:address app)])))))
 
     (fact "the \"ya-work-time-is-expiring\" timestamp already exists -> no reminder is sent"

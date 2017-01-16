@@ -3,7 +3,9 @@
   <div>
     <h2 data-bind="ltext: 'application.attachments'"
         class="attachments-title" />
-    <button class="ghost right bottom-marginM" data-bind="click: $data.toggleAll">
+    <button class="ghost right bottom-marginM"
+            data-bind="click: $data.toggleAll"
+            data-test-id="toggle-all-accordions">
       <i class="lupicon-menu"></i>
       <span data-bind="ltext: 'accordions.toggle-all'"></span>
     </button>

@@ -4,7 +4,7 @@ Documentation   Admin edits authority admin users
 Suite Setup     Apply minimal fixture now
 Suite Teardown  Logout
 Resource        ../../common_resource.robot
-Resource        ./27_common.robot
+Resource        ./julkipano_common.robot
 
 *** Test Cases ***
 

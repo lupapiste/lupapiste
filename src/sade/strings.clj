@@ -68,7 +68,7 @@
 
 (defn remove-leading-zeros [^String s] (when s (.replaceFirst s "^0+(?!$)", "")))
 
-(defn starts-with [^String s ^String prefix]
+(defn starts-with ^Boolean [^String s ^String prefix]
   (when (and s prefix)
     (.startsWith s prefix)))
 
