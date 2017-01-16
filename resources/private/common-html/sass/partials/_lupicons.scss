@@ -64,6 +64,12 @@ $lupicon-size: 22px;
 
 // The rest is lupicon style definitions that are copied as is from lupicon style.css
 
+.lupicon-document-plus:before {
+  content: "\e924";
+}
+.lupicon-lock-open:before {
+  content: "\e925";
+}
 .lupicon-arrow-down:before {
   content: "\e91e";
 }
